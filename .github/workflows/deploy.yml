@@ -1,4 +1,4 @@
-name: Deploy CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
@@ -7,13 +7,47 @@ on:
       - main
 
 jobs:
-  deploy:
+  # ==========================================
+  # JOB 1: CONTINUOUS INTEGRATION (Pengecekan)
+  # ==========================================
+  ci:
+    name: CI - Build & Lint Check
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Deploy to Server via rsync
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Code
+        run: npm run lint
+        continue-on-error: true # Biarkan lanjut jika hanya ada peringatan kecil/style
+
+      - name: Dry-Run Build Test
+        run: npm run build
+        env:
+          # Memberikan dummy environment jika Next.js butuh ENV saat proses build
+          DATABASE_URL: "postgresql://dummy:password@localhost:5432/masdika?schema=public"
+
+  # ==========================================
+  # JOB 2: CONTINUOUS DEPLOYMENT (Pengiriman)
+  # ==========================================
+  cd:
+    name: CD - Deploy to VPS
+    needs: ci # SYARAT UTAMA: Job 'ci' harus Sukses/Hijau baru 'cd' bisa jalan
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Sync Files to Server via rsync
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -23,7 +57,7 @@ jobs:
           REMOTE_USER: ${{ secrets.SERVER_USER }}
           REMOTE_PORT: ${{ secrets.SSH_PORT }}
           TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
-          EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /apps/web/public/uploads/, /apps/web/storage/"
+          EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /elasticsearch_data/, /apps/web/public/uploads/, /apps/web/storage/"
 
       - name: Restart Docker Compose
         uses: appleboy/ssh-action@v1.0.3
@@ -34,12 +68,4 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
-            # Build and restart containers (if docker-compose is used)
-            if [ -f "docker-compose.yml" ]; then
-              docker compose up -d --build
-            elif [ -f "package.json" ]; then
-              npm install
-              npm run build
-              # PM2 restart or equivalent
-              pm2 restart all || true
-            fi
+            docker compose up -d --build
