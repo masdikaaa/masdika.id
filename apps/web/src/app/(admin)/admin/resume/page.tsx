@@ -192,8 +192,9 @@ export default function AdminResumePage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className={cn("flex gap-2 sm:gap-4 overflow-x-auto border-b pb-4 scrollbar-hide", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      {/* Tabs & Actions */}
+      <div className={cn("flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
         <button
           onClick={() => setActiveTab('experience')}
           className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap shadow-inner", activeTab === "experience" ? (isDark ? "bg-cyan-500 text-slate-900 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "bg-white text-cyan-700 border border-slate-200 shadow-sm") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
@@ -212,6 +213,24 @@ export default function AdminResumePage() {
         >
           <Award className="w-4 h-4 shrink-0" /> Certifications
         </button>
+        </div>
+        <div className="shrink-0 w-full sm:w-auto flex justify-end">
+          {activeTab === 'experience' && (
+            <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className={cn("font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <Plus className="w-4 h-4" /> Add Experience
+            </button>
+          )}
+          {activeTab === 'education' && (
+            <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className={cn("font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <Plus className="w-4 h-4" /> Add Education
+            </button>
+          )}
+          {activeTab === 'certification' && (
+            <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className={cn("font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <Plus className="w-4 h-4" /> Add Certification
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -224,11 +243,7 @@ export default function AdminResumePage() {
           {/* EXPERIENCE TAB */}
           {activeTab === 'experience' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <div className="flex justify-end mb-6">
-                <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className={cn(" font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
-                  <Plus className="w-4 h-4" /> Add Experience
-                </button>
-              </div>
+
 
               {showExpForm && (
                 <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("glass-card border rounded-2xl p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden", isDark ? "border-cyan-500/30" : "bg-white border-slate-200")} onSubmit={saveExperience}>
@@ -281,11 +296,7 @@ export default function AdminResumePage() {
           {/* EDUCATION TAB */}
           {activeTab === 'education' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <div className="flex justify-end mb-6">
-                <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className={cn(" font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
-                  <Plus className="w-4 h-4" /> Add Education
-                </button>
-              </div>
+
 
               {showEduForm && (
                 <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("glass-card border rounded-2xl p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden", isDark ? "border-cyan-500/30" : "bg-white border-slate-200")} onSubmit={saveEducation}>
@@ -338,11 +349,7 @@ export default function AdminResumePage() {
           {/* CERTIFICATION TAB */}
           {activeTab === 'certification' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <div className="flex justify-end mb-6">
-                <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className={cn(" font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
-                  <Plus className="w-4 h-4" /> Add Certification
-                </button>
-              </div>
+
 
               {showCertForm && (
                 <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("glass-card border rounded-2xl p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden", isDark ? "border-cyan-500/30" : "bg-white border-slate-200")} onSubmit={saveCertification}>
