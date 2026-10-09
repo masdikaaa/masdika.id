@@ -32,14 +32,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Domain not found or you don't have permission" }, { status: 403 });
     }
 
-    // Check if user has any active tunnels to prevent breaking routes
-    const userTunnels = await prisma.cloudflareTunnel.count({
-      where: { userId: Number(user.id) }
-    });
-
-    if (userTunnels > 0) {
-      return NextResponse.json({ error: "You must delete all tunnels before you can remove a domain to prevent route breakage." }, { status: 400 });
-    }
 
     const cfToken = process.env.CLOUDFLARE_API_TOKEN;
 
