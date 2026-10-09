@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.git
+.next
+#.env
+#.env.*
+.vercel
+Dockerfile
+docker-compose.yml
+.dockerignore
+mysql_data
+masdika.sql
+public/uploads
+storage/secure-media
+*.log

@@ -1,0 +1,112 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { encryptDeterministic, hashPassword } from '@/lib/encryption';
+import { createSessionToken } from '@/lib/session';
+import crypto from 'crypto';
+import { getClientIp } from '@/lib/get-ip';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const code = searchParams.get('code');
+  const error = searchParams.get('error');
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.url;
+
+  const ip = getClientIp(req);
+  if (!(await checkRateLimit('GOOGLE_CALLBACK', ip, 15, 900))) {
+    return NextResponse.redirect(new URL('/login?error=RateLimited', baseUrl));
+  }
+
+  if (error || !code) {
+    return NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', baseUrl));
+  }
+
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`;
+
+  if (!clientId || !clientSecret) {
+    return NextResponse.redirect(new URL('/login?error=ConfigurationError', baseUrl));
+  }
+
+  try {
+    // 1. Exchange code for access token
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenRes.ok) {
+      console.error('Google token error:', tokenData);
+      return NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', baseUrl));
+    }
+
+    // 2. Fetch user profile
+    const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+
+    const profileData = await profileRes.json();
+    if (!profileRes.ok || !profileData.email) {
+      console.error('Google profile error:', profileData);
+      return NextResponse.redirect(new URL('/login?error=GoogleProfileFailed', baseUrl));
+    }
+
+    const { email, name, picture } = profileData;
+    const encryptedEmail = encryptDeterministic(email.toLowerCase().trim());
+
+    // 3. Find or create user
+    let user = await prisma.user.findUnique({
+      where: { email: encryptedEmail },
+    });
+
+    if (!user) {
+      // Create new user with a strong dummy password (they cannot login via email/pwd unless they reset it)
+      const dummyPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = hashPassword(dummyPassword);
+
+      user = await prisma.user.create({
+        data: {
+          email: encryptedEmail,
+          password: hashedPassword,
+          name: name || 'Google User',
+          image: picture || null,
+          role: 'USER',
+          balance: 0,
+        },
+      });
+    }
+
+    if (user.isSuspended) {
+      return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(user.suspendReason || 'Account suspended')}`, baseUrl));
+    }
+
+    // 4. Generate session token
+    // Set rememberMe to true for Google logins by default
+    const { token, maxAge } = createSessionToken(user.id, user.role, true);
+
+    const redirectUrl = new URL(user.role === 'ADMIN' ? '/admin' : '/dashboard', baseUrl);
+    const response = NextResponse.redirect(redirectUrl);
+
+    response.cookies.set('admin_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge,
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Google callback error:', error);
+    return NextResponse.redirect(new URL('/login?error=InternalError', baseUrl));
+  }
+}

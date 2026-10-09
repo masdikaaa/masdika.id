@@ -1,0 +1,280 @@
+"use client";
+import { cn } from "@/lib/utils";
+
+import { useState, useEffect } from "react";
+import { X, Server, Save, RefreshCw } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+
+interface ImportVpsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVpsModalProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    userId: "",
+    node: "p-net",
+    vmid: "",
+    hostname: "",
+    osTemplate: "ubuntu-22.04",
+    cpuCores: 2,
+    ramGb: 4,
+    diskGb: 50,
+    diskType: "SSD",
+    networkGbps: 1,
+    ipAddress: "",
+    billingCycle: "PAYG"
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch users", e);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = {
+        ...formData,
+        userId: Number(formData.userId),
+        vmid: Number(formData.vmid),
+        cpuCores: Number(formData.cpuCores),
+        ramGb: Number(formData.ramGb),
+        diskGb: Number(formData.diskGb),
+        networkGbps: Number(formData.networkGbps)
+      };
+
+      const res = await fetch("/api/admin/vps/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        onSuccess();
+        onClose();
+      } else {
+        alert(data.error || "Gagal mengimport VPS");
+      }
+    } catch (error: any) {
+      alert("Terjadi kesalahan sistem saat menghubungi server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className="flex items-center gap-3">
+            <div className={cn("w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
+              <Server className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Import Existing VPS</h2>
+              <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Assign an existing Proxmox VM to a client.</p>
+            </div>
+          </div>
+          <button onClick={onClose} className={cn("p-2 hover:bg-white/5 rounded-xl transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto">
+          <form id="import-vps-form" onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Select User (Client)</label>
+                {loadingUsers ? (
+                  <div className={cn("h-[48px] animate-pulse rounded-xl", isDark ? "bg-[#1e293b]" : "bg-slate-100")} />
+                ) : (
+                  <select
+                    required
+                    value={formData.userId}
+                    onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                    className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                  >
+                    <option value="">-- Choose User --</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Hostname</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.hostname}
+                  onChange={(e) => setFormData({ ...formData, hostname: e.target.value })}
+                  placeholder="server.example.com"
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                />
+              </div>
+
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Proxmox Node</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.node}
+                  onChange={(e) => setFormData({ ...formData, node: e.target.value })}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                />
+              </div>
+
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Proxmox VMID</label>
+                <input
+                  type="number"
+                  required
+                  value={formData.vmid}
+                  onChange={(e) => setFormData({ ...formData, vmid: e.target.value })}
+                  placeholder="e.g. 104"
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                />
+              </div>
+
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>OS Template</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.osTemplate}
+                  onChange={(e) => setFormData({ ...formData, osTemplate: e.target.value })}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                />
+              </div>
+
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>IP Address (Optional)</label>
+                <input
+                  type="text"
+                  value={formData.ipAddress}
+                  onChange={(e) => setFormData({ ...formData, ipAddress: e.target.value })}
+                  placeholder="e.g. 103.x.x.x"
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                />
+              </div>
+
+              <div>
+                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Billing Cycle</label>
+                <select
+                  required
+                  value={formData.billingCycle}
+                  onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value })}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                >
+                  <option value="PAYG">Pay As You Go (Hourly)</option>
+                  <option value="MONTHLY">Monthly (Fixed)</option>
+                  <option value="ANNUALLY">Annually (Fixed)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className={cn("border-t pt-5 mt-5", isDark ? "border-white/10" : "border-slate-200")}>
+              <h3 className={cn("text-sm font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Hardware Specs</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <label className={cn("block text-xs font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>CPU Cores</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={formData.cpuCores}
+                    onChange={(e) => setFormData({ ...formData, cpuCores: Number(e.target.value) })}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  />
+                </div>
+                <div>
+                  <label className={cn("block text-xs font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>RAM (GB)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={formData.ramGb}
+                    onChange={(e) => setFormData({ ...formData, ramGb: Number(e.target.value) })}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  />
+                </div>
+                <div>
+                  <label className={cn("block text-xs font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Disk (GB)</label>
+                  <input
+                    type="number"
+                    min="10"
+                    required
+                    value={formData.diskGb}
+                    onChange={(e) => setFormData({ ...formData, diskGb: Number(e.target.value) })}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  />
+                </div>
+                <div>
+                  <label className={cn("block text-xs font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Disk Type</label>
+                  <select
+                    value={formData.diskType}
+                    onChange={(e) => setFormData({ ...formData, diskType: e.target.value })}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  >
+                    <option value="SSD">SSD SATA</option>
+                    <option value="HDD">HDD</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div className={cn("p-6 border-t shrink-0 flex justify-end gap-3 rounded-b-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+          >
+            Cancel
+          </button>
+          <button
+            form="import-vps-form"
+            type="submit"
+            disabled={loading}
+            className={cn("flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-cyan-500/25 disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+          >
+            {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+            {loading ? "Importing..." : "Import VPS"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

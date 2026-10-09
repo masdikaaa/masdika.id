@@ -1,0 +1,58 @@
+[
+  {
+    "id": "45bac4cd-80aa-4576-8f06-a41ff9dabe79",
+    "features": [
+      "serialized_headers",
+      "support_datagram_v2",
+      "support_quic_eof",
+      "management_logs",
+      "allow_remote_config"
+    ],
+    "version": "2026.10.0",
+    "arch": "linux_amd64",
+    "conns": [
+      {
+        "colo_name": "sin11",
+        "uuid": "be855ced-5704-4a27-a7c4-6a892bdefc1c",
+        "id": "be855ced-5704-4a27-a7c4-6a892bdefc1c",
+        "is_pending_reconnect": false,
+        "origin_ip": "45.198.149.134",
+        "opened_at": "2026-10-08T09:10:32.216239Z",
+        "client_id": "45bac4cd-80aa-4576-8f06-a41ff9dabe79",
+        "client_version": "2026.10.0"
+      },
+      {
+        "colo_name": "cgk07",
+        "uuid": "4492ab9f-d848-4956-88b6-450632241333",
+        "id": "4492ab9f-d848-4956-88b6-450632241333",
+        "is_pending_reconnect": false,
+        "origin_ip": "45.198.149.134",
+        "opened_at": "2026-10-08T09:10:32.614572Z",
+        "client_id": "45bac4cd-80aa-4576-8f06-a41ff9dabe79",
+        "client_version": "2026.10.0"
+      },
+      {
+        "colo_name": "cgk01",
+        "uuid": "6de35008-fc60-43c2-8b8e-757d4bce8de1",
+        "id": "6de35008-fc60-43c2-8b8e-757d4bce8de1",
+        "is_pending_reconnect": false,
+        "origin_ip": "45.198.149.134",
+        "opened_at": "2026-10-08T09:10:33.949816Z",
+        "client_id": "45bac4cd-80aa-4576-8f06-a41ff9dabe79",
+        "client_version": "2026.10.0"
+      },
+      {
+        "colo_name": "sin12",
+        "uuid": "2b4c5ec6-2183-40fb-9e75-603943147ff7",
+        "id": "2b4c5ec6-2183-40fb-9e75-603943147ff7",
+        "is_pending_reconnect": false,
+        "origin_ip": "45.198.149.134",
+        "opened_at": "2026-10-08T09:10:35.007582Z",
+        "client_id": "45bac4cd-80aa-4576-8f06-a41ff9dabe79",
+        "client_version": "2026.10.0"
+      }
+    ],
+    "run_at": "2026-10-08T09:10:32.216239Z",
+    "ha_status": null
+  }
+]

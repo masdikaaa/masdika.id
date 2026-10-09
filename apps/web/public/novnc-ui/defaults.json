@@ -1,0 +1,8 @@
+{
+  "resize": "remote",
+  "shared": true,
+  "view_only": false,
+  "reconnect": false,
+  "reconnect_delay": 5000,
+  "logging": "warn"
+}

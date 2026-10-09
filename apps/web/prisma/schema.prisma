@@ -1,0 +1,1044 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 Int                   @id @default(autoincrement())
+  email              String                @unique
+  password           String
+  name               String
+  image              String?
+  role               String                @default("USER")
+  twoFactorEnabled   Boolean               @default(false)
+  twoFactorSecret    String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  lastActive         DateTime?
+  isSuspended        Boolean               @default(false)
+  suspendReason      String?
+  balance            Int                   @default(0)
+  affiliateBalance   Int                   @default(0)
+  referralCode       String?               @unique
+  referredById       Int?
+  address1           String?
+  address2           String?
+  city               String?
+  companyName        String?
+  country            String?
+  phone              String?
+  postalCode         String?
+  state              String?
+  isReseller         Boolean               @default(false)
+  affiliateEarnings  AffiliateEarning[]
+  apiKeys            ApiKey[]
+  posts              BlogPost[]
+  cloudflareDomains  CloudflareDomain[]
+  cloudflareTunnels  CloudflareTunnel[]
+  customServices     CustomService[]
+  invoices           Invoice[]
+  kubernetesClusters KubernetesCluster[]
+  promoClaims        PromoClaim[]
+  reservedIps        ReservedIp[]
+  resetTokens        ResetToken[]
+  secureFiles        SecureMedia[]
+  shortLinks         ShortLink[]
+  subscriptions      Subscription[]
+  supportTickets     SupportTicket[]
+  ticketMessages     TicketMessage[]
+  referredBy         User?                 @relation("Referrals", fields: [referredById], references: [id])
+  referrals          User[]                @relation("Referrals")
+  otps               UserVerificationOtp[]
+  voucherUsages      VoucherUsage[]
+  vpcNetworks        VpcNetwork[]
+  vpsServices        VpsService[]
+  withdrawalRequests WithdrawalRequest[]
+
+  @@index([createdAt])
+}
+
+model Project {
+  id                Int             @id @default(autoincrement())
+  slug              String          @unique
+  title             String
+  description       String
+  image             String?
+  techStack         String
+  content           String
+  client            String?
+  timeline          String?
+  role              String?
+  challenge         String?
+  solution          String?
+  testimonial       String?
+  testimonialAuthor String?
+  keyResults        String?
+  projectUrl        String?
+  status            String          @default("COMPLETED")
+  categoryId        Int
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  category          ProjectCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([status])
+}
+
+model ProjectCategory {
+  id       Int       @id @default(autoincrement())
+  name     String
+  projects Project[]
+}
+
+model BlogPost {
+  id         Int            @id @default(autoincrement())
+  title      String
+  slug       String         @unique
+  excerpt    String
+  content    String
+  image      String?
+  published  Boolean        @default(false)
+  readTime   Int            @default(5)
+  categoryId Int
+  authorId   Int?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  author     User?          @relation(fields: [authorId], references: [id])
+  category   BlogCategory   @relation(fields: [categoryId], references: [id])
+  tags       PostTag[]
+  reactions  BlogReaction[]
+  comments   Comment[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([published])
+  @@index([createdAt])
+}
+
+model BlogCategory {
+  id    Int        @id @default(autoincrement())
+  name  String
+  slug  String?    @unique
+  posts BlogPost[]
+}
+
+model Tag {
+  id    Int       @id @default(autoincrement())
+  name  String
+  slug  String?   @unique
+  posts PostTag[]
+}
+
+model PostTag {
+  postId Int
+  tagId  Int
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("BlogPostTag")
+}
+
+model Message {
+  id              Int       @id @default(autoincrement())
+  name            String
+  email           String
+  subject         String
+  content         String
+  isRead          Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  isVerified      Boolean   @default(false)
+  otpExpiresAt    DateTime?
+  verificationOtp String?
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
+model Comment {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String
+  content           String
+  isAdmin           Boolean   @default(false)
+  isVerified        Boolean   @default(false)
+  verificationToken String?
+  ipAddress         String?
+  blogPostId        Int
+  parentId          Int?
+  createdAt         DateTime  @default(now())
+  blogPost          BlogPost  @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  parent            Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
+  replies           Comment[] @relation("CommentToComment")
+
+  @@index([blogPostId])
+  @@index([parentId])
+}
+
+model Subscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Experience {
+  id        Int      @id @default(autoincrement())
+  year      String
+  role      String
+  company   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Education {
+  id        Int      @id @default(autoincrement())
+  year      String
+  degree    String
+  school    String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Certification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  org       String
+  date      String
+  icon      String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlockedUser {
+  id        Int      @id @default(autoincrement())
+  type      String
+  value     String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChatSession {
+  id              Int           @id @default(autoincrement())
+  sessionId       String        @unique
+  name            String
+  email           String
+  phone           String
+  ipAddress       String
+  isVerified      Boolean       @default(false)
+  verificationOtp String?
+  otpExpiresAt    DateTime?
+  status          String        @default("ACTIVE")
+  endedBy         String?
+  endedAt         DateTime?
+  lastActiveAt    DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  messages        ChatMessage[]
+
+  @@index([ipAddress])
+  @@index([status])
+  @@index([lastActiveAt])
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id                 Int         @id @default(autoincrement())
+  sessionId          Int
+  role               String
+  content            String
+  isInjectionAttempt Boolean     @default(false)
+  injectionPattern   String?
+  isOutputBlocked    Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  isAdmin            Boolean     @default(false)
+  session            ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model PageView {
+  id        Int      @id @default(autoincrement())
+  ipHash    String   @unique
+  createdAt DateTime @default(now())
+}
+
+model BlogReaction {
+  id         Int      @id @default(autoincrement())
+  blogPostId Int
+  ipHash     String
+  createdAt  DateTime @default(now())
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@unique([blogPostId, ipHash])
+}
+
+model CommunityGroup {
+  id          Int      @id @default(autoincrement())
+  name        String
+  link        String   @unique
+  image       String?
+  isPublished Boolean  @default(false)
+  submitterIp String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SecureMedia {
+  id           Int       @id @default(autoincrement())
+  filename     String    @unique
+  originalName String
+  mimeType     String
+  size         Int
+  folderPath   String    @default("/")
+  isFolder     Boolean   @default(false)
+  isPinned     Boolean   @default(false)
+  token        String    @unique
+  expiresAt    DateTime?
+  userId       Int?
+  createdAt    DateTime  @default(now())
+  user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Opportunity {
+  id          Int       @id @default(autoincrement())
+  type        String
+  title       String
+  slug        String?   @unique
+  description String
+  image       String?
+  link        String?
+  date        DateTime?
+  status      String    @default("PUBLISHED")
+  isNew       Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String
+  text      String
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image     String?
+}
+
+model ResetToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Series {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  title       String
+  description String
+  image       String?
+  level       String    @default("Beginner")
+  tags        String?
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  episodes    Episode[]
+}
+
+model Episode {
+  id        Int      @id @default(autoincrement())
+  slug      String
+  title     String
+  excerpt   String?
+  content   String
+  image     String?
+  videoUrl  String?
+  order     Int      @default(0)
+  published Boolean  @default(false)
+  seriesId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([seriesId, slug])
+}
+
+model LoginLog {
+  id           Int      @id @default(autoincrement())
+  ipAddress    String
+  emailAttempt String
+  success      Boolean  @default(false)
+  isBanned     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model ApiProject {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  description String
+  icon        String?
+  endpoint    String
+  method      String   @default("GET")
+  category    String
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  apiKeys     ApiKey[]
+}
+
+model ApiKey {
+  id         Int         @id @default(autoincrement())
+  name       String?
+  key        String      @unique
+  userId     Int
+  projectId  Int?
+  service    String?
+  usageCount Int         @default(0)
+  status     String      @default("ACTIVE")
+  createdAt  DateTime    @default(now())
+  lastUsed   DateTime?
+  project    ApiProject? @relation(fields: [projectId], references: [id])
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+}
+
+model UserVerificationOtp {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  code      String
+  type      String   @default("CHANGE_PASSWORD")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RegistrationOtp {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  password     String
+  code         String
+  attempts     Int      @default(0)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  referralCode String?
+  address1     String?
+  address2     String?
+  city         String?
+  companyName  String?
+  country      String?
+  phone        String?
+  postalCode   String?
+  state        String?
+}
+
+model ShortLink {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  url       String
+  clicks    Int      @default(0)
+  status    String   @default("ACTIVE")
+  userId    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Plan {
+  id            Int            @id @default(autoincrement())
+  name          String
+  service       String
+  description   String?
+  price         Int
+  hourlyPrice   Int            @default(0)
+  limits        String
+  isPopular     Boolean        @default(false)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                Int         @id @default(autoincrement())
+  userId            Int
+  planId            Int
+  status            String      @default("ACTIVE")
+  suspendReason     String?
+  cycle             String
+  expiresAt         DateTime
+  usageCount        Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  autoRenew         Boolean     @default(true)
+  terminationDate   DateTime?
+  lockedHourlyPrice Int         @default(0)
+  lockedPrice       Int         @default(0)
+  invoices          Invoice[]
+  plan              Plan        @relation(fields: [planId], references: [id])
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vpsService        VpsService?
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+}
+
+model Invoice {
+  id              Int            @id @default(autoincrement())
+  invoiceNumber   String         @unique
+  userId          Int
+  subscriptionId  Int?
+  vpsServiceId    Int?
+  amount          Int
+  status          String         @default("PENDING")
+  paymentMethod   String?
+  merchantOrderId String         @unique
+  reference       String?
+  paymentUrl      String?
+  vaNumber        String?
+  qrString        String?
+  paidAt          DateTime?
+  type            String         @default("SUBSCRIPTION")
+  details         String?
+  isReadByUser    Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  customServiceId Int?
+  subtotal        Int            @default(0)
+  taxAmount       Int            @default(0)
+  taxRate         Int            @default(0)
+  customService   CustomService? @relation(fields: [customServiceId], references: [id])
+  subscription    Subscription?  @relation(fields: [subscriptionId], references: [id])
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vpsService      VpsService?    @relation(fields: [vpsServiceId], references: [id])
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([vpsServiceId])
+  @@index([customServiceId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentMethod {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  type      String
+  image     String?
+  fee       Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Voucher {
+  id              Int            @id @default(autoincrement())
+  code            String         @unique
+  discountPercent Int
+  maxUses         Int            @default(0)
+  currentUses     Int            @default(0)
+  validUntil      DateTime?
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  description     String?
+  usages          VoucherUsage[]
+}
+
+model VoucherUsage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  voucherId Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucher   Voucher  @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, voucherId])
+}
+
+model SupportTicket {
+  id            Int             @id @default(autoincrement())
+  ticketId      String          @unique
+  userId        Int
+  subject       String
+  service       String?
+  priority      String          @default("NORMAL")
+  status        String          @default("OPEN")
+  isReadByAdmin Boolean         @default(false)
+  isReadByUser  Boolean         @default(true)
+  mergedIntoId  Int?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  mergedInto    SupportTicket?  @relation("TicketMerge", fields: [mergedIntoId], references: [id])
+  mergedFrom    SupportTicket[] @relation("TicketMerge")
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      TicketMessage[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model TicketMessage {
+  id          Int                @id @default(autoincrement())
+  ticketId    Int
+  userId      Int
+  message     String
+  isSystem    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  attachments TicketAttachment[]
+  ticket      SupportTicket      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([userId])
+}
+
+model TicketAttachment {
+  id           Int           @id @default(autoincrement())
+  messageId    Int
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  createdAt    DateTime      @default(now())
+  message      TicketMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+}
+
+model ProxmoxServer {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  host                String
+  tokenId             String
+  tokenSecret         String
+  backupStorage       String?
+  addonDiskStorages   String?
+  mainDiskStorage     String?
+  networkBridge       String?  @default("vmbr0")
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  primaryDns          String?  @default("8.8.8.8")
+  secondaryDns        String?  @default("1.1.1.1")
+  mainDiskStorageSsd  String?
+  publicNetworkBridge String?  @default("vmbr1")
+  password            String?
+  username            String?
+}
+
+model IpPool {
+  id          Int               @id @default(autoincrement())
+  network     String
+  gateway     String
+  startIp     String?
+  endIp       String?
+  version     Int               @default(4)
+  type        String            @default("PUBLIC")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  reservedIps ReservedIp[]
+  assignedIps VpsIpAssignment[]
+}
+
+model VpsTemplate {
+  id        Int      @id @default(autoincrement())
+  vmid      Int      @unique
+  name      String
+  osType    String
+  image     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VpsPricing {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique
+  name         String
+  pricePerHour Int
+  unit         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VpsService {
+  id                  Int                @id @default(autoincrement())
+  userId              Int
+  subscriptionId      Int?               @unique
+  vmid                Int?               @unique
+  hostname            String
+  osTemplate          String
+  rootPassword        String
+  sshKey              String?
+  cpuCores            Int
+  ramGb               Int
+  diskGb              Int
+  backupGb            Int                @default(0)
+  backupSchedule      String             @default("NONE")
+  lastBackupRun       DateTime?
+  status              String             @default("PENDING")
+  suspendReason       String?
+  hourlyRate          Int                @default(0)
+  accumulatedCost     Int                @default(0)
+  expiresAt           DateTime?
+  node                String             @default("proxmox")
+  networkBridge       String             @default("vmbr0")
+  storageId           String             @default("local-lvm")
+  kubernetesClusterId Int?
+  kubernetesRole      String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  autoRenew           Boolean            @default(true)
+  username            String             @default("root")
+  vpcId               Int?
+  vpcIp               String?
+  diskType            String             @default("HDD")
+  terminationDate     DateTime?
+  isReseller          Boolean            @default(false)
+  stoppedRate         Int                @default(0)
+  invoices            Invoice[]
+  reservedIps         ReservedIp[]
+  alertRules          VpsAlertRule[]
+  assignedIps         VpsIpAssignment[]
+  schedule            VpsSchedule?
+  kubernetesCluster   KubernetesCluster? @relation(fields: [kubernetesClusterId], references: [id])
+  subscription        Subscription?      @relation(fields: [subscriptionId], references: [id])
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vpc                 VpcNetwork?        @relation(fields: [vpcId], references: [id])
+
+  @@index([userId])
+  @@index([kubernetesClusterId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model VpsIpAssignment {
+  id         Int        @id @default(autoincrement())
+  vpsId      Int
+  ipPoolId   Int
+  ipAddress  String
+  isPrimary  Boolean    @default(true)
+  assignedAt DateTime   @default(now())
+  publicIp   String?
+  ipPool     IpPool     @relation(fields: [ipPoolId], references: [id])
+  vps        VpsService @relation(fields: [vpsId], references: [id], onDelete: Cascade)
+
+  @@unique([ipPoolId, ipAddress])
+}
+
+model ReservedIp {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  ipPoolId        Int
+  ipAddress       String
+  hourlyRate      Int         @default(0)
+  accumulatedCost Int         @default(0)
+  expiresAt       DateTime?
+  isAttached      Boolean     @default(false)
+  vpsId           Int?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  autoRenew       Boolean     @default(true)
+  terminationDate DateTime?
+  publicIp        String?
+  ipPool          IpPool      @relation(fields: [ipPoolId], references: [id])
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vps             VpsService? @relation(fields: [vpsId], references: [id])
+
+  @@unique([ipPoolId, ipAddress])
+}
+
+model VpsPlan {
+  id                Int      @id @default(autoincrement())
+  name              String
+  cpuCores          Int
+  ramGb             Int
+  diskGb            Int
+  monthlyPrice      Float
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  order             Int      @default(0)
+  diskType          String   @default("HDD")
+  annuallyPrice     Float    @default(0)
+  quarterlyPrice    Float    @default(0)
+  semiAnnuallyPrice Float    @default(0)
+  isReseller        Boolean  @default(false)
+}
+
+model KubernetesCluster {
+  id         Int          @id @default(autoincrement())
+  name       String
+  userId     Int
+  version    String       @default("Vanilla K8s v1.31")
+  endpoint   String?
+  kubeconfig String?
+  nodeToken  String?
+  status     String       @default("PENDING")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  installLog String?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes      VpsService[]
+
+  @@index([userId])
+}
+
+model Promo {
+  id            Int          @id @default(autoincrement())
+  title         String
+  description   String
+  image         String?
+  link          String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  currentClaims Int          @default(0)
+  isReward      Boolean      @default(false)
+  maxClaims     Int          @default(0)
+  rewardAmount  Int          @default(0)
+  validUntil    DateTime?
+  claims        PromoClaim[]
+}
+
+model PromoClaim {
+  id        Int      @id @default(autoincrement())
+  promoId   Int
+  userId    Int
+  amount    Int
+  createdAt DateTime @default(now())
+  promo     Promo    @relation(fields: [promoId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promoId, userId])
+}
+
+model CustomService {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  name            String
+  description     String?
+  price           Int
+  billingCycle    String    @default("MONTHLY")
+  status          String    @default("PENDING")
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  autoRenew       Boolean   @default(true)
+  terminationDate DateTime?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices        Invoice[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model VpcRouter {
+  id            Int          @id @default(autoincrement())
+  name          String
+  host          String
+  apiPort       Int          @default(8728)
+  useSsl        Boolean      @default(false)
+  username      String
+  password      String
+  proxmoxBridge String       @default("vmbr2")
+  interfaceName String       @default("ether3")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  wanInterface  String       @default("ether1")
+  networks      VpcNetwork[]
+}
+
+model VpcNetwork {
+  id           Int          @id @default(autoincrement())
+  name         String
+  description  String?
+  cidr         String
+  gateway      String
+  vlanId       Int
+  userId       Int
+  routerId     Int
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  status       String       @default("PROVISIONING")
+  isNatEnabled Boolean      @default(false)
+  lastUsedAt   DateTime     @default(now())
+  router       VpcRouter    @relation(fields: [routerId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  peeringsA    VpcPeering[] @relation("VpcPeeringA")
+  peeringsB    VpcPeering[] @relation("VpcPeeringB")
+  vpsServices  VpsService[]
+
+  @@unique([routerId, vlanId])
+  @@index([userId])
+}
+
+model VpcPeering {
+  id          Int        @id @default(autoincrement())
+  vpcAId      Int
+  vpcBId      Int
+  status      String     @default("ACTIVE")
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  vpcA        VpcNetwork @relation("VpcPeeringA", fields: [vpcAId], references: [id], onDelete: Cascade)
+  vpcB        VpcNetwork @relation("VpcPeeringB", fields: [vpcBId], references: [id], onDelete: Cascade)
+
+  @@unique([vpcAId, vpcBId])
+}
+
+model VpsAlertRule {
+  id              Int        @id @default(autoincrement())
+  vpsId           Int
+  metric          String
+  threshold       Int
+  notifyEmails    String
+  isEnabled       Boolean    @default(true)
+  lastTriggeredAt DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  vps             VpsService @relation(fields: [vpsId], references: [id], onDelete: Cascade)
+
+  @@unique([vpsId, metric])
+}
+
+model AffiliateEarning {
+  id          Int      @id @default(autoincrement())
+  referrerId  Int
+  referredId  Int      @unique
+  amount      Int
+  description String?
+  createdAt   DateTime @default(now())
+  referrer    User     @relation(fields: [referrerId], references: [id])
+
+  @@index([referrerId])
+}
+
+model WithdrawalRequest {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  amount        Int
+  status        String   @default("PENDING")
+  bankName      String
+  accountNumber String
+  accountName   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+model BackgroundJob {
+  id        Int      @id @default(autoincrement())
+  type      String
+  payload   String
+  status    String   @default("PENDING")
+  error     String?
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  type      String   @default("INFO")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  actionUrl String?
+  imageUrl  String?
+}
+
+model Banner {
+  id        Int      @id @default(autoincrement())
+  title     String
+  imageUrl  String
+  actionUrl String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CloudflareTunnel {
+  id         Int      @id @default(autoincrement())
+  cfTunnelId String   @unique
+  name       String
+  userId     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CloudflareDomain {
+  id          Int      @id @default(autoincrement())
+  cfZoneId    String   @unique
+  domain      String   @unique
+  nameServers String
+  status      String   @default("pending")
+  userId      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VpsSchedule {
+  id        Int        @id @default(autoincrement())
+  vpsId     Int        @unique
+  enabled   Boolean    @default(false)
+  timezone  String     @default("Asia/Jakarta")
+  monday    Boolean    @default(true)
+  tuesday   Boolean    @default(true)
+  wednesday Boolean    @default(true)
+  thursday  Boolean    @default(true)
+  friday    Boolean    @default(true)
+  saturday  Boolean    @default(false)
+  sunday    Boolean    @default(false)
+  startTime String     @default("08:00")
+  stopTime  String     @default("17:00")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  vps       VpsService @relation(fields: [vpsId], references: [id], onDelete: Cascade)
+}

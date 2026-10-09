@@ -1,0 +1,206 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth-middleware";
+import { prisma } from "@/lib/prisma";
+import { ProxmoxClient } from "@/lib/proxmox";
+import { createDuitkuTransaction } from "@/lib/duitku";
+import { decryptDeterministic } from "@/lib/encryption";
+
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const authResult = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
+    if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    const user = authResult.user!;
+
+    const { id } = await params;
+    const vpsId = parseInt(id);
+    const body = await req.json();
+    const { cpuCores, ramGb, diskGb, backupGb, addIpv4Count = 0, addIpv6Count = 0, paymentMethodCode } = body;
+
+    const safeAddIpv4 = Math.max(0, Math.floor(Number(addIpv4Count)));
+    const safeAddIpv6 = Math.max(0, Math.floor(Number(addIpv6Count)));
+
+    const vps = await prisma.vpsService.findFirst({
+      where: { id: vpsId, userId: user.id },
+    });
+
+    if (!vps) {
+      console.log(`[VPS Upgrade] 404 Error: vpsId=${vpsId}, userId=${user.id}`);
+      return NextResponse.json({ error: "VPS not found" }, { status: 404 });
+    }
+    if (!vps.vmid) return NextResponse.json({ error: "VPS not provisioned yet" }, { status: 400 });
+
+    // Security: Block upgrades on suspended/terminated VPS
+    if (vps.status === 'SUSPENDED' || vps.status === 'TERMINATED') {
+      return NextResponse.json({ error: "VPS is suspended or terminated. Upgrade is not allowed." }, { status: 403 });
+    }
+
+    // Security: Validate and sanitize resource inputs
+    const safeCpu = Math.min(Math.max(Math.floor(Number(cpuCores) || vps.cpuCores), 1), 32);
+    const safeRam = Math.min(Math.max(Math.floor(Number(ramGb) || vps.ramGb), 1), 128);
+    const safeDisk = Math.min(Math.max(Math.floor(Number(diskGb) || vps.diskGb), 10), 2000);
+    const safeBackup = Math.min(Math.max(Math.floor(Number(backupGb) || vps.backupGb || 0), 0), 2000);
+
+    if (safeCpu < vps.cpuCores || safeRam < vps.ramGb || safeDisk < vps.diskGb || safeBackup < (vps.backupGb || 0)) {
+      return NextResponse.json({ error: "Downgrading specifications is not allowed" }, { status: 400 });
+    }
+
+    // Calculate new pricing FIRST
+    const pricingItems = await prisma.vpsPricing.findMany();
+    const pricing: Record<string, number> = {};
+    pricingItems.forEach(item => {
+      pricing[item.key] = item.pricePerHour;
+    });
+
+    let additionalHourlyRate = 0;
+    let additionalStorageRate = 0;
+    if (safeCpu > vps.cpuCores) {
+      additionalHourlyRate += (safeCpu - vps.cpuCores) * (pricing.vcpu || 0);
+    }
+    if (safeRam > vps.ramGb) {
+      additionalHourlyRate += (safeRam - vps.ramGb) * (pricing.ram || 0);
+    }
+    if (safeDisk > vps.diskGb) {
+      const currentDiskPrice = vps.diskType === "SSD" ? (pricing.diskSsd || pricing.disk || 0) : (pricing.disk || 0);
+      additionalHourlyRate += (safeDisk - vps.diskGb) * currentDiskPrice;
+      additionalStorageRate += (safeDisk - vps.diskGb) * currentDiskPrice;
+    }
+    if (safeBackup > (vps.backupGb || 0)) {
+      additionalHourlyRate += (safeBackup - (vps.backupGb || 0)) * (pricing.backup || 0);
+      additionalStorageRate += (safeBackup - (vps.backupGb || 0)) * (pricing.backup || 0);
+    }
+    if (safeAddIpv4 > 0) {
+      additionalHourlyRate += safeAddIpv4 * (pricing.ipv4 || 0);
+      additionalStorageRate += safeAddIpv4 * (pricing.ipv4 || 0);
+    }
+    if (safeAddIpv6 > 0) {
+      additionalHourlyRate += safeAddIpv6 * (pricing.ipv6 || 0);
+      additionalStorageRate += safeAddIpv6 * (pricing.ipv6 || 0);
+    }
+
+    const newHourlyRate = vps.hourlyRate + additionalHourlyRate;
+    const newStoppedRate = (vps.stoppedRate || 0) + additionalStorageRate;
+    
+    // Security: Prevent abuse by requiring 1 month equivalent balance of the new rate
+    const requiredBalance = newHourlyRate * 730;
+    if (user.balance < requiredBalance) {
+      return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} (1 month estimation) is required to upgrade to this specification to prevent abuse. Please top up first.` }, { status: 400 });
+    }
+
+    // Lock the VPS state before modifying
+    const lockResult = await prisma.vpsService.updateMany({
+      where: { id: vpsId, status: vps.status },
+      data: { status: 'PROVISIONING' }
+    });
+    if (lockResult.count === 0) {
+      return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
+    }
+
+    const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+    if (!server) return NextResponse.json({ error: "No active Proxmox server configured" }, { status: 500 });
+
+    const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+
+    try {
+      // Upgrade CPU and RAM if changed
+      if (safeCpu > vps.cpuCores || safeRam > vps.ramGb) {
+        await proxmox.configVm(vps.node, vps.vmid, {
+          cores: safeCpu,
+          memory: safeRam * 1024,
+        });
+      }
+
+    // Upgrade Disk if changed
+    if (safeDisk > vps.diskGb) {
+      const addedGb = safeDisk - vps.diskGb;
+      
+      const config = await proxmox.getVmConfig(vps.node, vps.vmid);
+      
+      let mainDisk = "scsi0";
+      if (config.virtio0 && config.virtio0.includes(vps.storageId)) mainDisk = "virtio0";
+      else if (config.sata0 && config.sata0.includes(vps.storageId)) mainDisk = "sata0";
+      else if (config.scsi0) mainDisk = "scsi0";
+
+      await proxmox.resizeVmDisk(vps.node, vps.vmid, mainDisk, `+${addedGb}G`);
+    }
+
+    // Network Upgrades (Add IPs) for PAYG and Balance-paid Fixed upgrades
+    let networkConfigUpdate: any = {};
+    if (safeAddIpv4 > 0 || safeAddIpv6 > 0) {
+      const { VpsProvisioningService } = await import('@/lib/vps-provisioning');
+      const vmConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
+      
+      const getNextAvailableNetIndex = () => {
+          for (let i = 0; i < 10; i++) {
+              if (i === 1) continue; // Reserved strictly for VPC
+              if (vmConfig[`net${i}`] === undefined && networkConfigUpdate[`net${i}`] === undefined) {
+                  return i;
+              }
+          }
+          return 10; // Fallback
+      };
+
+      const provisionIps = async (count: number, ipVersion: number) => {
+          if (!count) return;
+          const pool = await prisma.ipPool.findFirst({ where: { version: ipVersion, type: 'PUBLIC' } });
+          if (!pool) return;
+
+          for (let i = 0; i < count; i++) {
+            try {
+                const ipAddress = await VpsProvisioningService.allocateIp(pool.id);
+                await prisma.vpsIpAssignment.create({
+                  data: { vpsId: vps.id, ipPoolId: pool.id, ipAddress: ipAddress, isPrimary: false }
+                });
+
+                const cidrSuffix = pool.network.split('/')[1] || (ipVersion === 4 ? '24' : '64');
+                const ipKey = ipVersion === 4 ? 'ip' : 'ip6';
+                const gwKey = ipVersion === 4 ? 'gw' : 'gw6';
+                
+                const nextNetIndex = getNextAvailableNetIndex();
+                const bridgeToUse = pool.type === 'PUBLIC' && server.publicNetworkBridge ? server.publicNetworkBridge : vps.networkBridge;
+                networkConfigUpdate[`net${nextNetIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1`;
+                networkConfigUpdate[`ipconfig${nextNetIndex}`] = `${ipKey}=${ipAddress}/${cidrSuffix},${gwKey}=${pool.gateway}`;
+            } catch (e) {
+                console.error(`Failed to provision IP version ${ipVersion} for VPS ${vps.id}`, e);
+            }
+          }
+      };
+
+      await provisionIps(safeAddIpv4, 4);
+      await provisionIps(safeAddIpv6, 6);
+      
+      if (Object.keys(networkConfigUpdate).length > 0) {
+          await proxmox.configVm(vps.node, vps.vmid, networkConfigUpdate);
+      }
+    }
+    } catch (proxmoxErr: any) {
+
+      
+      // Unlock VPS state on failure
+      await prisma.vpsService.update({
+        where: { id: vpsId },
+        data: { status: vps.status }
+      });
+      throw new Error(proxmoxErr.message || "Failed to upgrade VPS in Proxmox");
+    }
+
+    // Update Database and unlock VPS state
+    const updatedVps = await prisma.vpsService.update({
+      where: { id: vps.id },
+      data: {
+        cpuCores: safeCpu,
+        ramGb: safeRam,
+        diskGb: safeDisk,
+        backupGb: safeBackup,
+        hourlyRate: newHourlyRate,
+        stoppedRate: newStoppedRate,
+        status: vps.status, // Restore original status
+      }
+    });
+
+    return NextResponse.json({ message: "Specifications upgraded successfully", vps: updatedVps });
+
+  } catch (error: any) {
+    console.error("Upgrade API Error:", error);
+    return NextResponse.json({ error: error.message || "Failed to upgrade VPS specifications" }, { status: 500 });
+  }
+}

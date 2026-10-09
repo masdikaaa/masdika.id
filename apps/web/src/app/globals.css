@@ -1,0 +1,1689 @@
+@import "tailwindcss";
+
+/* ===== Theme Variables ===== */
+:root {
+  --background: #011627;
+  --foreground: #ededed;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #00d2ff;
+  --accent-purple: #a855f7;
+  /* Semantic tokens */
+  --surface: #050B14;
+  --surface-secondary: #0b1120;
+  --surface-elevated: rgba(255, 255, 255, 0.02);
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(6, 182, 212, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(6, 182, 212, 0.2);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --navbar-bg: rgba(5, 11, 20, 0.95);
+  --navbar-bg-solid: #050B14;
+  --scrollbar-track: rgba(1, 22, 39, 0.5);
+  --scrollbar-thumb: rgba(34, 211, 238, 0.2);
+  --scrollbar-thumb-hover: rgba(34, 211, 238, 0.5);
+  --selection-bg: rgba(6, 182, 212, 0.3);
+  --footer-bg: #011627;
+  --premium-bg: #050B14;
+  --vignette-color: #050B14;
+  --glow-color: rgba(6, 182, 212, 0.2);
+  --input-bg: rgba(0, 0, 0, 0.4);
+  --newsletter-bg: #0b1120;
+}
+
+html.light {
+  --background: #f8fafb;
+  --foreground: #1a2332;
+  --surface: #ffffff;
+  --surface-secondary: #f1f5f9;
+  --surface-elevated: rgba(0, 0, 0, 0.02);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-primary: rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(6, 182, 212, 0.15);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(6, 182, 212, 0.15);
+  --card-shadow: rgba(0, 0, 0, 0.06);
+  --navbar-bg: rgba(255, 255, 255, 0.95);
+  --navbar-bg-solid: #ffffff;
+  --scrollbar-track: rgba(241, 245, 249, 0.8);
+  --scrollbar-thumb: rgba(6, 182, 212, 0.25);
+  --scrollbar-thumb-hover: rgba(6, 182, 212, 0.45);
+  --selection-bg: rgba(6, 182, 212, 0.2);
+  --footer-bg: #0f172a;
+  --premium-bg: #f8fafb;
+  --vignette-color: #f8fafb;
+  --glow-color: rgba(6, 182, 212, 0.08);
+  --input-bg: rgba(241, 245, 249, 0.8);
+  --newsletter-bg: #f1f5f9;
+}
+
+html.dark {
+  --background: #011627;
+  --foreground: #ededed;
+  --surface: #050B14;
+  --surface-secondary: #0b1120;
+  --surface-elevated: rgba(255, 255, 255, 0.02);
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(6, 182, 212, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(6, 182, 212, 0.2);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --navbar-bg: rgba(5, 11, 20, 0.95);
+  --navbar-bg-solid: #050B14;
+  --scrollbar-track: rgba(1, 22, 39, 0.5);
+  --scrollbar-thumb: rgba(34, 211, 238, 0.2);
+  --scrollbar-thumb-hover: rgba(34, 211, 238, 0.5);
+  --selection-bg: rgba(6, 182, 212, 0.3);
+  --footer-bg: #011627;
+  --premium-bg: #050B14;
+  --vignette-color: #050B14;
+  --glow-color: rgba(6, 182, 212, 0.2);
+  --input-bg: rgba(0, 0, 0, 0.4);
+  --newsletter-bg: #0b1120;
+}
+
+@plugin "@tailwindcss/typography";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --animate-ring: ring 0.5s ease-in-out;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 40s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-reverse {
+    from {
+      transform: translateX(-50%);
+    }
+
+    to {
+      transform: translateX(0);
+    }
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-resizer,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-white/[0.02] backdrop-blur-md border border-cyan-500/10;
+    box-shadow: 0 4px 30px rgba(0, 210, 255, 0.1);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-sm border border-cyan-500/20 rounded-xl hover:border-cyan-500/40 transition-all duration-300;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500;
+  }
+
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.15);
+  }
+
+  html.light .text-outline {
+    -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-outline-cyan {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(0, 210, 255, 0.5);
+  }
+
+  /* Form styling */
+  input:focus,
+  textarea:focus {
+    outline: none;
+  }
+
+  /* Hide native browser password reveal icon */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+
+  /* Fix Chrome autofill background in dark mode */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: var(--text-primary) !important;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  @keyframes marquee-half {
+    0% {
+      transform: translateX(0%);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee-half {
+    animation: marquee-half 25s linear infinite;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes float-reverse {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(15px);
+    }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-float-reverse {
+    animation: float-reverse 5s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 4.5s ease-in-out infinite 1s;
+  }
+
+  .animate-float-reverse-delayed {
+    animation: float-reverse 6s ease-in-out infinite 0.5s;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ring {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  10% {
+    transform: rotate(18deg);
+  }
+
+  20% {
+    transform: rotate(-16deg);
+  }
+
+  30% {
+    transform: rotate(14deg);
+  }
+
+  40% {
+    transform: rotate(-12deg);
+  }
+
+  50% {
+    transform: rotate(10deg);
+  }
+
+  60% {
+    transform: rotate(-8deg);
+  }
+
+  70% {
+    transform: rotate(6deg);
+  }
+
+  80% {
+    transform: rotate(-4deg);
+  }
+
+  90% {
+    transform: rotate(2deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 15s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite ease-in-out;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Slim always-visible scrollbar for API Hub code tabs */
+.api-tabs-scroll::-webkit-scrollbar {
+  height: 6px;
+  display: block !important;
+}
+
+.api-tabs-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+}
+
+.api-tabs-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+.api-tabs-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.mdx-custom-theme {
+  --mdxeditor-toolbar-bg: rgba(0, 0, 0, 0.6);
+  --mdxeditor-toolbar-iconBg: transparent;
+  --mdxeditor-toolbar-iconColor: #a1a1aa;
+  --mdxeditor-toolbar-iconActiveBg: rgba(34, 211, 238, 0.1);
+  --mdxeditor-toolbar-iconActiveColor: #22d3ee;
+  --mdxeditor-popup-bg: #0d1117;
+  --mdxeditor-popup-textColor: #e4e4e7;
+}
+
+.mdx-custom-theme .mdxeditor-toolbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+
+/* MDXEditor Restored Styles */
+.mdx-custom-theme [role='textbox'] {
+  color: #fff;
+}
+
+.mdx-custom-theme,
+.dark {
+  --mdxeditor-toolbar-bg: #0d1117 !important;
+  --mdxeditor-toolbar-iconBg: transparent !important;
+  --mdxeditor-toolbar-iconColor: #a1a1aa !important;
+  --mdxeditor-toolbar-iconActiveBg: rgba(34, 211, 238, 0.1) !important;
+  --mdxeditor-toolbar-iconActiveColor: #22d3ee !important;
+  --mdxeditor-popup-bg: #0d1117 !important;
+  --mdxeditor-popup-textColor: #e4e4e7 !important;
+}
+
+.dark .mdxeditor-toolbar [role="combobox"],
+.dark .mdxeditor-toolbar [role="combobox"] * {
+  color: #e4e4e7 !important;
+}
+
+/* Sticky Layout for both Light and Dark Modes */
+.mdxeditor-toolbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
+  padding: 0.5rem 1rem !important;
+  backdrop-filter: blur(8px) !important;
+  border-top-left-radius: 0.75rem !important;
+  border-top-right-radius: 0.75rem !important;
+}
+
+/* Light Mode Colors */
+html.light .mdxeditor-toolbar {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Dark Mode Colors */
+.dark .mdxeditor-toolbar {
+  background-color: rgba(13, 17, 23, 0.95) !important;
+  color: #fff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Mobile MDXEditor toolbar scrolling */
+@media (max-width: 768px) {
+  .mdxeditor-toolbar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .mdxeditor-toolbar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .mdxeditor-toolbar * {
+    flex-wrap: nowrap !important;
+  }
+}
+
+/* Desktop MDXEditor toolbar wrapping */
+@media (min-width: 769px) {
+  .mdxeditor-toolbar {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+  }
+
+  .mdxeditor-toolbar * {
+    flex-wrap: wrap !important;
+  }
+}
+
+.dark .mdxeditor-toolbar button,
+.dark .mdxeditor-toolbar [role="combobox"] {
+  background-color: transparent !important;
+  color: #a1a1aa !important;
+}
+
+.dark .mdxeditor-toolbar button:hover,
+.dark .mdxeditor-toolbar [role="combobox"]:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mdxeditor-toolbar svg {
+  fill: currentColor;
+}
+
+.dark .mdxeditor-toolbar select {
+  background-color: #0d1117 !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix Native Checkbox Alignment without overstyling */
+.prose-invert ul:has(input[type="checkbox"]),
+.prose-invert li:has(input[type="checkbox"]) {
+  list-style-type: none !important;
+  padding-left: 0 !important;
+}
+
+.prose-invert li:has(input[type="checkbox"]) {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem;
+}
+
+.prose-invert li:has(input[type="checkbox"]) input[type="checkbox"] {
+  margin-top: 0.45rem !important;
+  cursor: pointer;
+}
+
+.prose-invert li:has(input[type="checkbox"])>div,
+.prose-invert li:has(input[type="checkbox"])>p {
+  margin: 0 !important;
+}
+
+/* Inline Code Fix for both Editor and Frontend */
+.prose-invert code {
+  background-color: rgba(34, 211, 238, 0.1) !important;
+  color: #22d3ee !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 0.375rem !important;
+  font-weight: 600 !important;
+}
+
+.prose-invert code::before,
+.prose-invert code::after {
+  content: none !important;
+}
+
+.prose-invert pre code {
+  background-color: transparent !important;
+  color: #fde047 !important;
+  /* Yellow text for code blocks */
+  padding: 0 !important;
+  font-weight: inherit !important;
+}
+
+/* Elegant Table Styling */
+.prose-invert table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  background: rgba(1, 22, 39, 0.4) !important;
+  border: 1px solid rgba(34, 211, 238, 0.2) !important;
+}
+
+.prose-invert thead {
+  background-color: rgba(34, 211, 238, 0.1) !important;
+}
+
+.prose-invert thead th {
+  padding: 1rem 1.5rem !important;
+  text-align: left !important;
+  font-weight: 600 !important;
+  color: #22d3ee !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.3) !important;
+}
+
+.prose-invert tbody td {
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  vertical-align: middle !important;
+}
+
+.prose-invert tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.prose-invert tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Fix dropdowns going behind content */
+[data-radix-popper-content-wrapper],
+.mdxeditor-popup-container,
+[data-radix-dialog-overlay],
+[data-radix-dialog-content] {
+  z-index: 99999 !important;
+}
+
+
+/* Fix CodeMirror Dark Theme in MDXEditor */
+.mdx-custom-theme .cm-editor,
+.mdx-custom-theme .cm-scroller {
+  background-color: #0d1117 !important;
+  color: #fde047 !important;
+  /* Yellow text for editor code blocks */
+}
+
+.mdx-custom-theme .cm-gutters {
+  background-color: #0d1117 !important;
+  color: #8b949e !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.mdx-custom-theme .cm-activeLine,
+.mdx-custom-theme .cm-activeLineGutter {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Removed dark background on [data-lexical-decorator] to prevent black boxes under images */
+
+.mdx-custom-theme [data-lexical-decorator] select,
+.mdx-custom-theme [data-lexical-decorator] button {
+  background-color: #0d1117 !important;
+  color: #c9d1d9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.mdx-custom-theme [data-lexical-decorator] button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Hide the ugly checklist button */
+button[title="Check List"],
+button[aria-label="Check List"],
+.mdxeditor-toolbar button[title="Task list"],
+.mdxeditor-toolbar button[title="Check list"] {
+  display: none !important;
+}
+
+/* MDX Editor Typography Fixes */
+.prose-invert {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.prose-invert h1 {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  color: #fff !important;
+}
+
+.prose-invert h2 {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  color: #fff !important;
+}
+
+.prose-invert h3 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+  color: #fff !important;
+}
+
+.prose-invert p {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.75 !important;
+  color: #a1a1aa !important;
+}
+
+.prose-invert ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+  color: #a1a1aa !important;
+}
+
+.prose-invert ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+  color: #a1a1aa !important;
+}
+
+.prose-invert li {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.prose-invert strong {
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+.prose-invert a {
+  color: #22d3ee !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+  word-break: break-word !important;
+}
+
+.prose-invert :not(pre)>code {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Fix WordPress Emojis pasted into editor becoming giant */
+.prose-invert img[src*="s.w.org/images/core/emoji"],
+.mdx-custom-theme img[src*="s.w.org/images/core/emoji"],
+img.emoji,
+img.wp-smiley {
+  display: inline !important;
+  border: none !important;
+  box-shadow: none !important;
+  height: 1.2em !important;
+  width: 1.2em !important;
+  margin: 0 0.07em !important;
+  vertical-align: -0.1em !important;
+  background: none !important;
+  padding: 0 !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Hide MDXEditor Image UI (Trash/Gear) and fix wrapper for Emojis */
+[data-lexical-decorator]:has(img[src*="s.w.org/images/core/emoji"]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: none !important;
+  width: auto !important;
+  height: auto !important;
+  vertical-align: baseline !important;
+}
+
+[data-lexical-decorator]:has(img[src*="s.w.org/images/core/emoji"])>div {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-lexical-decorator]:has(img[src*="s.w.org/images/core/emoji"]) button,
+[data-lexical-decorator]:has(img[src*="s.w.org/images/core/emoji"]) img~div {
+  display: none !important;
+}
+
+/* Custom Highlight (Mark) styling for Admin Editor and Frontend */
+mark,
+.prose mark,
+.mdx-custom-theme mark {
+  background-color: rgba(6, 182, 212, 0.2) !important;
+  /* Cyan-500/20 */
+  color: #22d3ee !important;
+  /* Cyan-400 */
+  padding: 0.125em 0.25em !important;
+  border-radius: 0.25em !important;
+  font-weight: 600 !important;
+}
+
+
+
+
+/* MDX Editor Portal Dropdown Dark Mode Fix */
+.dark [data-radix-popper-content-wrapper] [role="listbox"],
+.dark [data-radix-popper-content-wrapper] [role="menu"],
+.dark [data-radix-popper-content-wrapper] [role="dialog"],
+.dark .mdxeditor-popup-container {
+  background-color: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark [data-radix-popper-content-wrapper] [role="option"],
+.dark [data-radix-popper-content-wrapper] [role="menuitem"],
+.dark .mdxeditor-popup-container button {
+  color: #e2e8f0 !important;
+}
+
+.dark [data-radix-popper-content-wrapper] [role="option"]:hover,
+.dark [data-radix-popper-content-wrapper] [role="option"][data-highlighted],
+.dark [data-radix-popper-content-wrapper] [role="menuitem"]:hover,
+.dark [data-radix-popper-content-wrapper] [role="menuitem"][data-highlighted],
+.dark .mdxeditor-popup-container button:hover {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+  color: #22d3ee !important;
+}
+
+/* Premium Markdown Table Styling */
+.prose table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 1.5rem !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  margin: 2rem 0 !important;
+}
+
+.prose-invert table,
+.mdx-custom-theme table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: none !important;
+  border-radius: 1.5rem !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, rgba(11, 17, 32, 0.95), rgba(7, 11, 20, 0.95)) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  margin: 2rem 0 !important;
+}
+
+.prose-invert thead,
+.mdx-custom-theme thead {
+  /* Removed background here, moved to th to prevent clipping gaps */
+}
+
+.prose thead th {
+  background-color: #f8fafb !important;
+  padding: 1.25rem 1.5rem !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.875rem !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+  text-align: left !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.prose-invert thead th,
+.mdx-custom-theme thead th {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+  padding: 1.25rem 1.5rem !important;
+  color: #22d3ee !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.875rem !important;
+  border-bottom: 2px solid rgba(34, 211, 238, 0.3) !important;
+  text-align: left !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.prose thead th:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.prose-invert thead th:not(:last-child),
+.mdx-custom-theme thead th:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Removed explicit corner radius from th to rely on table's overflow: hidden */
+
+.prose tbody tr,
+.prose-invert tbody tr,
+.mdx-custom-theme tbody tr {
+  transition: all 0.3s ease !important;
+}
+
+.prose tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.prose-invert tbody tr:hover,
+.mdx-custom-theme tbody tr:hover {
+  background-color: rgba(34, 211, 238, 0.05) !important;
+}
+
+.prose tbody td {
+  padding: 1rem 1.5rem !important;
+  color: #475569 !important;
+  font-weight: 500 !important;
+}
+
+.prose-invert tbody td,
+.mdx-custom-theme tbody td {
+  padding: 1rem 1.5rem !important;
+  color: #d4d4d8 !important;
+  font-weight: 500 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.prose-invert tbody td:not(:last-child),
+.mdx-custom-theme tbody td:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.prose-invert tbody tr:last-child td,
+.mdx-custom-theme tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Removed explicit corner radius from td to rely on table's overflow: hidden */
+
+/* Fix Admonitions Background in MDXEditor Dark Mode */
+.mdx-custom-theme [contenteditable="true"] [data-lexical-decorator="true"]:has([contenteditable="true"]),
+.mdx-custom-theme [contenteditable="true"] [data-lexical-decorator="true"]:has([contenteditable="true"]) div {
+  background-color: transparent !important;
+}
+
+.mdx-custom-theme [contenteditable="true"] [data-lexical-decorator="true"]:has([contenteditable="true"]) {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.5rem !important;
+  margin: 1rem 0 !important;
+}
+
+.mdx-custom-theme [contenteditable="true"] [data-lexical-decorator="true"]:has([contenteditable="true"]) * {
+  color: #e2e8f0 !important;
+}
+
+
+
+@layer base {
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer !important;
+  }
+
+  button:disabled {
+    cursor: not-allowed !important;
+  }
+}
+
+/* Fix Quill Tooltip Cut Off & Theme */
+.ql-snow .ql-tooltip {
+  /* Remove hardcoded left:0 to allow dynamic positioning */
+  z-index: 50 !important;
+}
+
+/* Tooltip overrides for link editor */
+.quill-dark-theme .ql-tooltip {
+  background-color: #0a1f33 !important;
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
+  border-radius: 8px !important;
+  color: #ededed !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  padding: 8px 12px !important;
+}
+
+.quill-dark-theme .ql-tooltip input[type=text] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px !important;
+  color: white !important;
+  padding: 4px 8px !important;
+  outline: none !important;
+}
+
+.quill-dark-theme .ql-tooltip input[type=text]:focus {
+  border-color: #06b6d4 !important;
+}
+
+.quill-dark-theme .ql-tooltip a.ql-action::after {
+  color: #06b6d4 !important;
+  font-weight: 600 !important;
+}
+
+.quill-dark-theme .ql-tooltip a.ql-remove::before {
+  color: #ef4444 !important;
+}
+
+/* ===== Light Mode Overrides ===== */
+/* These target hardcoded dark backgrounds and swap them for light equivalents */
+
+/* Glass Utilities Light Mode */
+html.light .glass {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
+}
+
+html.light .glass-card {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+  box-shadow: 0 8px 32px var(--card-shadow);
+}
+
+/* Navbar Light Mode - override the bg-[#050B14] hardcodes */
+html.light nav.fixed {
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+/* Mega menu bg override */
+html.light [class*="bg-[#050B14]"] {
+  background-color: var(--navbar-bg-solid) !important;
+}
+
+/* Override Tailwind's white/X opacity classes for text in light mode */
+html.light .text-white {
+  color: var(--text-primary) !important;
+}
+
+html.light .text-white\/80 {
+  color: color-mix(in srgb, var(--text-primary) 80%, transparent) !important;
+}
+
+html.light .text-white\/70 {
+  color: color-mix(in srgb, var(--text-primary) 70%, transparent) !important;
+}
+
+html.light .text-white\/60 {
+  color: color-mix(in srgb, var(--text-primary) 60%, transparent) !important;
+}
+
+html.light .text-white\/50 {
+  color: color-mix(in srgb, var(--text-primary) 50%, transparent) !important;
+}
+
+html.light .text-white\/40 {
+  color: color-mix(in srgb, var(--text-primary) 40%, transparent) !important;
+}
+
+/* Override zinc text for light mode */
+html.light .text-zinc-400 {
+  color: var(--text-secondary) !important;
+}
+
+html.light .text-zinc-500 {
+  color: var(--text-muted) !important;
+}
+
+html.light .text-zinc-300 {
+  color: var(--text-secondary) !important;
+}
+
+/* Override border-white/X opacity classes */
+html.light .border-white\/5 {
+  border-color: var(--border-subtle) !important;
+}
+
+html.light .border-white\/10 {
+  border-color: var(--border-primary) !important;
+}
+
+/* Override bg-white/X opacity for containers */
+html.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .bg-white\/\[0\.02\] {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+html.light .bg-white\/\[0\.03\] {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Override bg-black/X for light mode */
+html.light .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .bg-black\/40 {
+  background-color: var(--input-bg) !important;
+}
+
+/* Hover states */
+html.light .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .hover\:border-white\/10:hover {
+  border-color: var(--border-primary) !important;
+}
+
+html.light .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+
+/* Selection color */
+html.light ::selection {
+  background: var(--selection-bg);
+}
+
+html.dark ::selection {
+  background: var(--selection-bg);
+}
+
+/* Smooth transition for theme switching on key elements */
+nav.fixed,
+footer,
+.glass,
+.glass-card {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* API tabs scroll in light mode */
+html.light .api-tabs-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+html.light .api-tabs-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html.light .api-tabs-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Hardcoded Background Color Overrides for Light Mode ===== */
+/* Override common dark backgrounds used across the codebase */
+/* Only for public-facing pages - dashboard/admin/auth keep dark */
+
+html.light .bg-\[\#011627\] {
+  background-color: var(--background) !important;
+}
+
+html.light .bg-\[\#050B14\] {
+  background-color: var(--surface) !important;
+}
+
+html.light .bg-\[\#0b1120\] {
+  background-color: var(--surface-secondary) !important;
+}
+
+html.light .bg-\[\#0a1f33\] {
+  background-color: var(--surface-secondary) !important;
+}
+
+html.light .bg-\[\#0f172a\] {
+  background-color: var(--surface-secondary) !important;
+}
+
+html.light .bg-\[\#0d1117\] {
+  background-color: var(--surface-secondary) !important;
+}
+
+/* Opacity variants */
+html.light .bg-\[\#050B14\]\/95 {
+  background-color: color-mix(in srgb, var(--surface) 95%, transparent) !important;
+}
+
+html.light .bg-\[\#011627\]\/95 {
+  background-color: color-mix(in srgb, var(--background) 95%, transparent) !important;
+}
+
+/* Text Gradient Overrides for Light Mode Visibility */
+html.light .bg-clip-text.from-cyan-400.to-cyan-200,
+html.light .bg-clip-text.from-cyan-400.to-cyan-400 {
+  background-image: linear-gradient(to right, #0891b2, #06b6d4) !important; /* cyan-600 to cyan-500 */
+}
+
+html.light .bg-clip-text.bg-gradient-to-br.from-cyan-400.to-cyan-200 {
+  background-image: linear-gradient(to bottom right, #0891b2, #06b6d4) !important; 
+}
+
+html.light .bg-clip-text.from-cyan-400.via-cyan-300.to-cyan-100 {
+  background-image: linear-gradient(to right, #0891b2, #06b6d4, #0891b2) !important;
+}
+
+html.light .bg-clip-text.from-cyan-300.via-cyan-400.to-cyan-500 {
+  background-image: linear-gradient(to right, #06b6d4, #0891b2, #0e7490) !important;
+}
+
+html.light .bg-clip-text.from-cyan-400.via-cyan-500.to-cyan-400,
+html.light .bg-clip-text.from-cyan-400.via-cyan-400.to-cyan-400 {
+  background-image: linear-gradient(to right, #0891b2, #06b6d4, #0891b2) !important;
+}
+
+html.light .bg-clip-text.from-white.via-cyan-100.to-cyan-400 {
+  background-image: linear-gradient(to bottom right, #0f172a, #0891b2, #06b6d4) !important;
+}
+
+html.light .bg-clip-text.from-white.to-cyan-300 {
+  background-image: linear-gradient(to bottom, #0f172a, #0891b2) !important;
+}
+
+html.light .bg-clip-text.from-white.to-cyan-200 {
+  background-image: linear-gradient(to bottom right, #0f172a, #06b6d4) !important;
+}
+
+/* Text overrides for specific gray shades */
+html.light .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+html.light .text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+
+html.light .text-gray-500 {
+  color: var(--text-muted) !important;
+}
+
+html.light .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+html.light .text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+/* Override bg-gradient on dark containers for light mode */
+html.light .from-\[\#011627\] {
+  --tw-gradient-from: var(--background) !important;
+}
+
+html.light .to-\[\#011627\] {
+  --tw-gradient-to: var(--background) !important;
+}
+
+html.light .from-\[\#050B14\] {
+  --tw-gradient-from: var(--surface) !important;
+}
+
+html.light .to-\[\#050B14\] {
+  --tw-gradient-to: var(--surface) !important;
+}
+
+/* Border overrides for dark hex borders */
+html.light .border-\[\#1e293b\] {
+  border-color: var(--border-primary) !important;
+}
+
+html.light .border-\[\#0f172a\] {
+  border-color: var(--border-primary) !important;
+}
+
+/* Specific shadow overrides for light mode */
+html.light .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+
+/* Keep dashboard/admin/auth pages dark */
+html.light [class*="DashboardLayout"] .bg-\[\#011627\],
+html.light [class*="AdminLayout"] .bg-\[\#011627\] {
+  background-color: #011627 !important;
+}
+
+/* ===== Comprehensive Tailwind Dark Color Overrides for Light Mode ===== */
+
+/* --- Slate 900 Backgrounds (floating badges, cards) --- */
+html.light .bg-slate-900\/80 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.light .bg-slate-900\/95 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+html.light .bg-slate-900\/60 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+html.light .bg-slate-900\/40 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html.light .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+/* --- Cyan 950 Backgrounds (cards, about section, banners) --- */
+html.light .bg-cyan-950\/30 {
+  background-color: rgba(236, 254, 255, 0.5) !important;
+}
+
+html.light .bg-cyan-950\/40 {
+  background-color: rgba(236, 254, 255, 0.6) !important;
+}
+
+html.light .bg-cyan-950\/50 {
+  background-color: rgba(236, 254, 255, 0.5) !important;
+}
+
+html.light .bg-cyan-950\/60 {
+  background-color: rgba(236, 254, 255, 0.7) !important;
+}
+
+html.light .bg-cyan-950\/70 {
+  background-color: rgba(236, 254, 255, 0.7) !important;
+}
+
+html.light .bg-cyan-950 {
+  background-color: #ecfeff !important;
+}
+
+/* --- Cyan 900 Backgrounds (hover states) --- */
+html.light .bg-cyan-900\/40 {
+  background-color: rgba(207, 250, 254, 0.5) !important;
+}
+
+html.light .hover\:bg-cyan-900\/40:hover {
+  background-color: rgba(207, 250, 254, 0.5) !important;
+}
+
+/* --- Gradient From/To overrides for light mode --- */
+html.light .from-slate-900\/95 {
+  --tw-gradient-from: rgba(255, 255, 255, 0.95) !important;
+}
+
+html.light .via-cyan-950\/30 {
+  --tw-gradient-via: rgba(236, 254, 255, 0.3) !important;
+}
+
+html.light .via-cyan-950\/20 {
+  --tw-gradient-via: rgba(236, 254, 255, 0.2) !important;
+}
+
+html.light .to-slate-900\/95 {
+  --tw-gradient-to: rgba(255, 255, 255, 0.95) !important;
+}
+
+html.light .from-cyan-950\/40 {
+  --tw-gradient-from: rgba(236, 254, 255, 0.5) !important;
+}
+
+html.light .to-slate-900\/40 {
+  --tw-gradient-to: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.light .from-cyan-950\/50 {
+  --tw-gradient-from: rgba(236, 254, 255, 0.4) !important;
+}
+
+html.light .via-slate-900\/50 {
+  --tw-gradient-via: rgba(255, 255, 255, 0.5) !important;
+}
+
+html.light .to-cyan-950\/50 {
+  --tw-gradient-to: rgba(236, 254, 255, 0.4) !important;
+}
+
+/* Section overlay gradients */
+html.light .from-\[\#050B14\] {
+  --tw-gradient-from: var(--surface) !important;
+}
+
+html.light .via-\[\#09152a\]\/50 {
+  --tw-gradient-via: rgba(241, 245, 249, 0.5) !important;
+}
+
+html.light .to-\[\#050B14\] {
+  --tw-gradient-to: var(--surface) !important;
+}
+
+/* --- Additional hex color backgrounds --- */
+html.light .bg-\[\#0b1120\]\/80 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.light .bg-\[\#0f1926\] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .group-hover\:bg-\[\#0f1926\]:hover,
+html.light .group:hover .group-hover\:bg-\[\#0f1926\] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .bg-\[\#09152a\]\/30 {
+  background-color: rgba(241, 245, 249, 0.5) !important;
+}
+
+/* --- Border overrides for cyan/teal borders --- */
+html.light .border-cyan-500\/10 {
+  border-color: rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light .border-cyan-500\/20 {
+  border-color: rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light .border-teal-500\/20 {
+  border-color: rgba(20, 184, 166, 0.2) !important;
+}
+
+html.light .hover\:border-cyan-500\/30:hover {
+  border-color: rgba(6, 182, 212, 0.35) !important;
+}
+
+html.light .hover\:border-cyan-400\/50:hover {
+  border-color: rgba(34, 211, 238, 0.5) !important;
+}
+
+html.light .hover\:border-cyan-400\/60:hover {
+  border-color: rgba(34, 211, 238, 0.5) !important;
+}
+
+/* --- Cyan/teal semi-transparent bg overrides --- */
+html.light .bg-cyan-500\/15 {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light .bg-cyan-500\/20 {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light .bg-cyan-500\/10 {
+  background-color: rgba(6, 182, 212, 0.08) !important;
+}
+
+html.light .bg-teal-500\/20 {
+  background-color: rgba(20, 184, 166, 0.1) !important;
+}
+
+/* --- Transparent/via-transparent gradient fix --- */
+html.light .via-transparent {
+  --tw-gradient-via: transparent !important;
+}
+
+html.light .from-transparent {
+  --tw-gradient-from: transparent !important;
+}
+
+html.light .to-transparent {
+  --tw-gradient-to: transparent !important;
+}
+
+/* --- Shadow overrides for cards --- */
+html.light .shadow-\[0_8px_30px_rgba\(6\,182\,212\,0\.15\)\] {
+  box-shadow: 0 8px 30px rgba(6, 182, 212, 0.08) !important;
+}
+
+html.light .shadow-\[0_4px_30px_rgba\(0\,0\,0\,0\.4\)\] {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .shadow-\[0_0_15px_rgba\(6\,182\,212\,0\.15\)\] {
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.08) !important;
+}
+
+html.light .shadow-\[0_0_15px_rgba\(34\,211\,238\,0\.15\)\] {
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.08) !important;
+}
+
+/* --- Product card hover glow for light mode --- */
+html.light .hover\:shadow-\[0_0_40px_rgba\(6\,182\,212\,0\.25\)\]:hover {
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.1) !important;
+}
+
+/* --- Working Process step number badge --- */
+html.light .bg-\[\#050B14\] {
+  background-color: var(--surface) !important;
+}
+
+/* --- Marquee banner text in light mode --- */
+html.light .text-zinc-300 {
+  color: var(--text-secondary) !important;
+}
+
+/* --- Backdrop blur adjustments --- */
+html.light .backdrop-blur-md {
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+}
+
+html.light .backdrop-blur-xl {
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+}
+
+/* --- Specific component style fixes --- */
+
+/* Product card in light mode */
+html.light .border-2.border-cyan-500\/20 {
+  border-color: rgba(6, 182, 212, 0.15) !important;
+}
+
+/* Corner glows in light mode - more subtle */
+html.light .from-cyan-500\/15 {
+  --tw-gradient-from: rgba(6, 182, 212, 0.06) !important;
+}
+
+html.light .from-cyan-500\/10 {
+  --tw-gradient-from: rgba(6, 182, 212, 0.05) !important;
+}
+
+html.light .group-hover\:from-cyan-500\/20:hover,
+html.light .group:hover .group-hover\:from-cyan-500\/20 {
+  --tw-gradient-from: rgba(6, 182, 212, 0.1) !important;
+}
+
+/* ===== Ensure footer preserves dark in light mode ===== */
+html.light footer,
+html.light footer * {
+  --tw-gradient-from: initial;
+  --tw-gradient-to: initial;
+  --tw-gradient-via: initial;
+}
+
+html.light footer .bg-slate-900\/80,
+html.light footer .bg-cyan-950\/30,
+html.light footer .bg-cyan-950\/60 {
+  background-color: revert !important;
+}
+
+html.light footer .text-zinc-300 {
+  color: #d4d4d8 !important;
+}
+
+/* ===== Light Mode Table Styling ===== */
+html.light .prose table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 1.5rem !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  margin: 2rem 0 !important;
+}
+
+html.light .prose thead th {
+  background-color: rgba(6, 182, 212, 0.05) !important;
+  padding: 1.25rem 1.5rem !important;
+  color: #0891b2 !important; /* cyan-600 */
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.875rem !important;
+  border-bottom: 2px solid rgba(6, 182, 212, 0.2) !important;
+  text-align: left !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+html.light .prose thead th:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .prose tbody tr {
+  transition: all 0.3s ease !important;
+}
+
+html.light .prose tbody tr:hover {
+  background-color: rgba(6, 182, 212, 0.03) !important;
+}
+
+html.light .prose tbody td {
+  padding: 1rem 1.5rem !important;
+  color: #334155 !important; /* slate-700 */
+  font-weight: 500 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+html.light .prose tbody td:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .prose tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* --- FIX FOR MDXEDITOR TABLES --- */
+.mdxeditor table {
+  width: auto !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  border: 1px solid rgba(156, 163, 175, 0.2) !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 1rem 0 !important;
+}
+
+.mdxeditor thead th,
+.mdxeditor tbody td {
+  padding: 0.5rem 0.75rem !important;
+  background: transparent !important;
+  border: 1px solid rgba(156, 163, 175, 0.2) !important;
+  color: inherit !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 0.875rem !important;
+  text-align: left !important;
+}
+
+.mdxeditor tbody tr:hover td {
+  background-color: transparent !important;
+}
+
+/* Custom Range Sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  outline: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(#06b6d4, #06b6d4);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+}
+
+html.light input[type="range"] {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background-image: linear-gradient(#0891b2, #0891b2);
+}
+
+/* Chrome, Safari, Edge, Opera */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #06b6d4; /* cyan-500 */
+  cursor: pointer;
+  border: 2px solid #083344; /* cyan-950 */
+  box-shadow: 0 0 4px rgba(6, 182, 212, 0.5);
+  transition: all 0.2s ease;
+}
+
+html.light input[type="range"]::-webkit-slider-thumb {
+  background: #0891b2; /* cyan-600 */
+  border: 2px solid #ffffff;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #06b6d4;
+  cursor: pointer;
+  border: 2px solid #083344;
+  box-shadow: 0 0 4px rgba(6, 182, 212, 0.5);
+  transition: all 0.2s ease;
+}
+
+html.light input[type="range"]::-moz-range-thumb {
+  background: #0891b2;
+  border: 2px solid #ffffff;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Firefox track fill (WebKit needs inline style or JS) */
+input[type="range"]::-moz-range-progress {
+  background: #06b6d4;
+  height: 6px;
+  border-radius: 999px;
+}
+
+html.light input[type="range"]::-moz-range-progress {
+  background: #0891b2;
+}

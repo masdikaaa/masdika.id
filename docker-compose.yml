@@ -1,0 +1,344 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: masdika_db
+    restart: always
+    shm_size: 1gb
+    command: >
+      postgres -c max_connections=300 -c shared_buffers=512MB -c effective_cache_size=1536MB -c maintenance_work_mem=128MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200 -c work_mem=4MB -c min_wal_size=1GB -c max_wal_size=4GB
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD: ${DB_ROOT_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-masdika}
+      POSTGRES_USER: ${DB_USER:-masdika}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql
+      - ./masdika.sql:/docker-entrypoint-initdb.d/masdika.sql:ro
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-masdika} -d ${DB_NAME:-masdika}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: masdika_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - USE_REDIS=true
+      - TZ=Asia/Jakarta
+      - ELASTIC_URL=http://elasticsearch:9200
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-masdika_secret}
+      - APM_SERVER_URL=http://apm-server:8200
+    volumes:
+      - ./apps/web/public/uploads:/app/apps/web/public/uploads
+      - ./apps/web/storage/secure-media:/app/apps/web/storage/secure-media
+      - ./apps/web/storage/tickets:/app/apps/web/storage/tickets
+      - ./apps/web/storage/db-backups:/app/apps/web/storage/db-backups
+      - ./prometheus_data:/app/prometheus_data
+      - ./grafana_data:/app/grafana_data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: masdika_worker
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - USE_REDIS=true
+      - TZ=Asia/Jakarta
+      - ELASTIC_URL=http://elasticsearch:9200
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-masdika_secret}
+      - APM_SERVER_URL=http://apm-server:8200
+    volumes:
+      - ./apps/web/public/uploads:/app/apps/web/public/uploads
+      - ./apps/web/storage/secure-media:/app/apps/web/storage/secure-media
+      - ./apps/web/storage/tickets:/app/apps/web/storage/tickets
+      - ./apps/web/storage/db-backups:/app/apps/web/storage/db-backups
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+    command: [ "sh", "-c", "cd /app/apps/web && exec node worker.js" ]
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: masdika_redis
+    restart: always
+    command: >
+      sh -c '
+        if [ -n "$$REDIS_PASSWORD" ]; then
+          redis-server --requirepass "$$REDIS_PASSWORD" --bind 0.0.0.0
+        else
+          redis-server --bind 0.0.0.0
+        fi
+      '
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    # Do NOT expose Redis port publicly — only accessible inside Docker network
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: masdika_nginx
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1/api/health || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: masdika_elasticsearch
+    restart: always
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s -u elastic:${ELASTIC_PASSWORD} http://localhost:9200 >/dev/null || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  elasticsearch-setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: masdika_elasticsearch_setup
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - internal
+    command: >
+      bash -c '
+        echo "Waiting for Elasticsearch availability...";
+        echo "Setting kibana_system password";
+        curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" http://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}"
+        echo "All done!";
+      '
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: masdika_kibana
+    restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      elasticsearch-setup:
+        condition: service_completed_successfully
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - SERVER_PUBLICBASEURL="http://192.168.79.4:5601"
+    ports:
+      - "5601:5601"
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:8.15.0
+    container_name: masdika_apm
+    restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    ports:
+      - "8200:8200"
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E setup.kibana.host=kibana:5601
+        -E setup.template.settings.index.number_of_replicas=0
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana:5601
+        -E apm-server.kibana.username=kibana_system
+        -E apm-server.kibana.password=${KIBANA_PASSWORD}
+        -E output.elasticsearch.hosts=["http://elasticsearch:9200"]
+        -E output.elasticsearch.username=elastic
+        -E output.elasticsearch.password=${ELASTIC_PASSWORD}
+    networks:
+      - internal
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: masdika_logstash
+    restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - xpack.monitoring.elasticsearch.hosts=http://elasticsearch:9200
+      - xpack.monitoring.elasticsearch.username=elastic
+      - xpack.monitoring.elasticsearch.password=${ELASTIC_PASSWORD}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - LS_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s http://127.0.0.1:9600 >/dev/null || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: masdika_prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1:9090/-/healthy || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: masdika_grafana
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=${SMTP_HOST}:${SMTP_PORT:-465}
+      - GF_SMTP_USER=${SMTP_USER}
+      - GF_SMTP_PASSWORD=${SMTP_PASS}
+      - GF_SMTP_SKIP_VERIFY=true
+      - GF_SMTP_FROM_ADDRESS=${SMTP_FROM_EMAIL:-$SMTP_USER}
+      - GF_SMTP_FROM_NAME=${SMTP_FROM_NAME:-Masdika Alert Manager}
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./grafana_data:/var/lib/grafana
+    networks:
+      - internal
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/api/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: masdika_node_exporter
+    restart: always
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1:9100/ || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  elasticsearch_data:
