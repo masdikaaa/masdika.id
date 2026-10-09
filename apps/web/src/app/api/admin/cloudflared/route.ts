@@ -67,7 +67,7 @@ export async function GET(req: Request) {
       if (cfTunnel && cfTunnel.connections) {
         const uniqueConnectors = new Set();
         for (const conn of cfTunnel.connections) {
-          const clientId = conn.id || conn.client_id;
+          const clientId = conn.client_id;
           if (clientId) uniqueConnectors.add(clientId);
         }
         connectors = uniqueConnectors.size;
