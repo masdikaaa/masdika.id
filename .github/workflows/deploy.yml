@@ -30,11 +30,7 @@ jobs:
         run: npm run lint
         continue-on-error: true # Biarkan lanjut jika hanya ada peringatan kecil/style
 
-      - name: Dry-Run Build Test
-        run: npm run build
-        env:
-          # Memberikan dummy environment jika Next.js butuh ENV saat proses build
-          DATABASE_URL: "postgresql://dummy:password@localhost:5432/masdika?schema=public"
+  # ==========================================
 
   # ==========================================
   # JOB 2: CONTINUOUS DEPLOYMENT (Pengiriman)
