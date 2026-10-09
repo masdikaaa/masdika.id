@@ -40,19 +40,10 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
   if (opportunities.length === 0) {
     const EmptyIcon = emptyType === 'JOBS' ? Briefcase : emptyType === 'EVENT' ? CalendarDays : Inbox;
     return (
-      <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm", isDark ? "bg-cyan-950/30 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-        <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border relative", isDark ? "bg-gradient-to-br from-cyan-500/10 via-cyan-500/10 to-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-300")}>
-          <svg width="0" height="0" className="absolute">
-            <linearGradient id="icon-gradient-opps" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#22d3ee" offset="0%" />
-              <stop stopColor="#06b6d4" offset="50%" />
-              <stop stopColor="#0891b2" offset="100%" />
-            </linearGradient>
-          </svg>
-          <EmptyIcon className="w-10 h-10" style={{ stroke: isDark ? "url(#icon-gradient-opps)" : "#0284c7" }} />
-        </div>
+      <div className={cn("text-center py-20 px-6 sm:px-10 mx-4 sm:mx-0 rounded-3xl border", isDark ? "bg-cyan-950/30 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+        <EmptyIcon className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-cyan-400/40" : "text-cyan-600/40")} />
         <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No items found</h3>
-        <p className={cn("max-w-sm mx-auto", isDark ? "text-white/50" : "text-slate-500")}>There are currently no items published in this category.</p>
+        <p className={isDark ? "text-white/40" : "text-slate-500"}>There are currently no items published in this category.</p>
       </div>
     );
   }
