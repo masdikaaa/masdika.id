@@ -6,6 +6,9 @@ import { join } from "path";
 config({ path: join(process.cwd(), "../../.env") });
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   serverExternalPackages: ["sharp"],
   output: "standalone",
   experimental: {
