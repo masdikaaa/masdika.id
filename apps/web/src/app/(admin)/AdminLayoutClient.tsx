@@ -191,7 +191,8 @@ export default function AdminLayout({
       <aside
         aria-label="Admin navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 glass border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 lg:relative lg:inset-0 flex flex-col h-full",
+          "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 lg:translate-x-0 lg:relative lg:inset-0 flex flex-col h-full border-r",
+          isDark ? "glass border-white/5" : "bg-white border-slate-200 shadow-sm",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
