@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Server, Globe, Download, Activity, CheckCircle2, ChevronRight, Play, Terminal, Code2, UploadCloud, Link2, FlaskConical } from "lucide-react";
+import { Server, Globe, Download, Activity, CheckCircle2, ChevronRight, Play, Terminal, Code2, UploadCloud, Link2, FlaskConical, Copy, Check } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
 import { FadeIn } from "@/components/animations/FadeIn";
@@ -17,6 +17,14 @@ export default function LookingGlassPage() {
   const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
+
+  const [copiedIp, setCopiedIp] = useState<string | null>(null);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIp(text);
+    setTimeout(() => setCopiedIp(null), 2000);
+  };
 
   const [clientIp, setClientIp] = useState("Loading...");
 
@@ -124,21 +132,31 @@ export default function LookingGlassPage() {
                   <Server className="w-4 h-4" /> Server Info
                 </h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
+                  <div className="flex items-center justify-between gap-2">
                     <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Location:</span>
-                    <span className={cn("text-right", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>Sidoarjo</span>
+                    <span className={cn("text-right truncate", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>Sidoarjo</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
+                  <div className="flex items-center justify-between gap-2">
                     <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>ASN:</span>
                     <a href="https://bgp.he.net/AS63859" target="_blank" rel="noopener noreferrer" className={cn("text-right transition-colors border-b border-dashed", isDark ? "text-zinc-300 border-zinc-600 hover:text-cyan-400 hover:border-cyan-400" : "text-slate-700 border-slate-300 hover:text-cyan-600 hover:border-cyan-600 font-medium")}>AS63859</a>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
+                  <div className="flex items-center justify-between gap-2 group">
                     <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Test IPv4:</span>
-                    <span className={cn("text-right", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>45.198.149.134</span>
+                    <div className="flex items-center gap-2">
+                      <span className={cn("text-right font-mono text-sm", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>45.198.149.134</span>
+                      <button onClick={() => handleCopy("45.198.149.134")} className={cn("p-1.5 rounded-md opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all shrink-0", isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-black/5 text-slate-400")} title="Copy IP">
+                        {copiedIp === "45.198.149.134" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
+                  <div className="flex items-center justify-between gap-2 group">
                     <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Test IPv6:</span>
-                    <span className={cn("text-right font-mono text-xs sm:text-sm break-all", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>2402:8780:1600::237:8000:e4</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={cn("text-right font-mono text-xs sm:text-sm truncate", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>2402:8780:1600::237:8000:e4</span>
+                      <button onClick={() => handleCopy("2402:8780:1600::237:8000:e4")} className={cn("p-1.5 rounded-md opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all shrink-0", isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-black/5 text-slate-400")} title="Copy IPv6">
+                        {copiedIp === "2402:8780:1600::237:8000:e4" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -146,7 +164,14 @@ export default function LookingGlassPage() {
               {/* Your IP Address */}
               <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col items-center justify-center text-center", isDark ? "bg-[#0b1120] border-white/5 shadow-xl" : "bg-white border-black/5 shadow-sm hover:shadow-md transition-shadow")}>
                 <p className={cn("text-sm font-bold mb-2 tracking-widest uppercase", isDark ? "text-zinc-500" : "text-slate-500")}>Your IP Address</p>
-                <p className={cn("text-lg sm:text-xl font-mono font-bold break-all", isDark ? "text-cyan-400" : "text-cyan-600")}>{clientIp}</p>
+                <div className="flex items-center justify-center gap-2 group w-full min-w-0">
+                  <p className={cn("text-lg sm:text-xl font-mono font-bold truncate", isDark ? "text-cyan-400" : "text-cyan-600")}>{clientIp}</p>
+                  {clientIp !== "Loading..." && clientIp !== "Unknown" && (
+                    <button onClick={() => handleCopy(clientIp)} className={cn("p-1.5 rounded-md opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all shrink-0", isDark ? "hover:bg-white/10 text-cyan-400" : "hover:bg-black/5 text-cyan-600")} title="Copy Your IP">
+                      {copiedIp === clientIp ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
               </div>
                 
               {/* Test Files */}
