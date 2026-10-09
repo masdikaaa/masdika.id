@@ -13,9 +13,8 @@ masdika.sql
 public/uploads
 storage/secure-media
 *.log
- \\
-postgres_data\\
-redis_data\\
-grafana_data\\
-prometheus_data\\
+postgres_data
+redis_data
+grafana_data
+prometheus_data
 elasticsearch_data
