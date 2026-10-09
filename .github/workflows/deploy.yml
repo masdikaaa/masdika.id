@@ -23,7 +23,7 @@ jobs:
           REMOTE_USER: ${{ secrets.SERVER_USER }}
           REMOTE_PORT: ${{ secrets.SSH_PORT }}
           TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
-          EXCLUDE: "/.git/, /.env, /node_modules/"
+          EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /apps/web/public/uploads/, /apps/web/storage/"
 
       - name: Restart Docker Compose
         uses: appleboy/ssh-action@master
