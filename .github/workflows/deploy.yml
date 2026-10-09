@@ -65,3 +65,4 @@ jobs:
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
             docker compose up -d --build
             docker builder prune -f
+            docker restart masdika_nginx
