@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Sync Files to Server via rsync
         uses: easingthemes/ssh-deploy@main
@@ -64,3 +64,4 @@ jobs:
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
             docker compose up -d --build
+            docker builder prune -f
