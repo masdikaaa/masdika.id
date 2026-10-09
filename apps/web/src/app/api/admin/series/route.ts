@@ -37,14 +37,18 @@ export async function GET(req: Request) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)));
     const skip = (page - 1) * limit;
 
+    const search = searchParams.get('search') || '';
+    const where = search ? { title: { contains: search } } : {};
+
     const [series, total] = await Promise.all([
       prisma.series.findMany({
+        where,
         skip,
         take: limit,
         include: { episodes: { select: { id: true, published: true } } },
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.series.count()
+      prisma.series.count({ where })
     ]);
 
     return NextResponse.json({
