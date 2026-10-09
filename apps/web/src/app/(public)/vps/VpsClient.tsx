@@ -181,7 +181,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Physical Cores</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
-                  <div className={cn("text-3xl sm:text-5xl font-black mb-1 sm:mb-2", isDark ? "text-white" : "text-slate-900")}>80</div>
+                  <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Threads</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
