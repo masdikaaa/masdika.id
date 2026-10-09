@@ -286,14 +286,14 @@ export default function AdminCloudflaredPage() {
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
                   {loading ? (
-                    <tr><td colSpan={4} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    <tr><td colSpan={5} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
                       <div className="flex flex-col items-center justify-center gap-3">
                         <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
                         <p>Loading tunnels...</p>
                       </div>
                     </td></tr>
                   ) : filteredTunnels.length === 0 ? (
-                    <tr><td colSpan={4} className="p-16 text-center">
+                    <tr><td colSpan={5} className="p-16 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-4", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                           <Server className={cn("w-10 h-10 opacity-50", isDark ? "text-cyan-400" : "text-cyan-700")} />
