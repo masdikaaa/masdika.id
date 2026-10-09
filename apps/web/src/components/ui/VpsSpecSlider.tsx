@@ -348,7 +348,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
 
             <div className={cn("pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
               <div className="flex items-baseline flex-wrap gap-1 sm:gap-2 mb-2">
-                <span className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-cyan-500 to-cyan-300 bg-clip-text text-transparent drop-shadow-sm break-all sm:break-normal max-w-full">
+                <span className={cn("text-3xl sm:text-4xl font-black bg-gradient-to-r bg-clip-text text-transparent drop-shadow-sm break-all sm:break-normal max-w-full", isDark ? "from-cyan-500 to-cyan-300" : "from-cyan-600 to-cyan-400")}>
                   {formatRupiah(calculateMonthlyPrice())}
                 </span>
                 <span className={cn("text-sm font-bold tracking-widest uppercase", isDark ? "text-zinc-500" : "text-slate-400")}>/MO</span>
