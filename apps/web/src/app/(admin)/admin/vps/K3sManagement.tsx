@@ -8,16 +8,6 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 export default function K3sManagement() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [clusters, setClusters] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [selectedClusters, setSelectedClusters] = useState<number[]>([]);
-  const [showDeleteModal, setShowDeleteModal] = useState<number[]>([]);
-
-  useEffect(() => {
-    fetchClusters();
-  }, []);
-
   const fetchClusters = async () => {
     setLoading(true);
     try {
@@ -33,6 +23,17 @@ export default function K3sManagement() {
       setLoading(false);
     }
   };
+
+  const [clusters, setClusters] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [selectedClusters, setSelectedClusters] = useState<number[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState<number[]>([]);
+
+  useEffect(() => {
+    fetchClusters();
+  }, []);
+
 
   const handleBulkDelete = async () => {
     setDeletingId(showDeleteModal[0]);

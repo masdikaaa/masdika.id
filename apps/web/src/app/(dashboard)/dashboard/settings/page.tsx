@@ -107,10 +107,6 @@ export default function SettingsPage() {
   const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
   const [disable2FACode, setDisable2FACode] = useState('');
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
   const fetchProfile = async () => {
     try {
       const res = await fetch('/api/dashboard/settings/profile');
@@ -133,6 +129,10 @@ export default function SettingsPage() {
       console.error('Failed to load profile', error);
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

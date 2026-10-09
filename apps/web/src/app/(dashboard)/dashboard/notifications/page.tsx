@@ -41,10 +41,6 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
   const fetchNotifications = async () => {
     try {
       const res = await fetch("/api/user/notifications?all=true");
@@ -58,6 +54,12 @@ export default function NotificationsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+
 
   const markAllAsRead = async () => {
     try {

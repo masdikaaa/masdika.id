@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { getClientIp } from '@/lib/get-ip';
 import { prisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
@@ -74,7 +75,6 @@ export async function POST(req: Request) {
 
     const sessionId = uuidv4();
     // Generate 6-digit OTP
-    const crypto = require('crypto');
     const otp = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes expiry

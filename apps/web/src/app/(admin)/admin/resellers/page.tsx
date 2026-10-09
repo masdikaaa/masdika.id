@@ -11,13 +11,6 @@ import { motion } from "framer-motion";
 export default function AdminResellersPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [resellers, setResellers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchResellers();
-  }, []);
-
   const fetchResellers = async () => {
     try {
       const res = await fetch("/api/admin/resellers");
@@ -31,6 +24,14 @@ export default function AdminResellersPage() {
       setLoading(false);
     }
   };
+
+  const [resellers, setResellers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchResellers();
+  }, []);
+
 
   if (loading) return (
     <div className="min-h-[60vh] w-full flex items-center justify-center">

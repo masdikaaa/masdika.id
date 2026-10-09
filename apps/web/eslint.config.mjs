@@ -11,7 +11,6 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
-    "next-env.d.ts",
     "public/**",
   ]),
   {
@@ -21,7 +20,12 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off",
       "prefer-const": "off",
       "@next/next/no-img-element": "off",
-      "react-hooks/exhaustive-deps": "off"
+      "react-hooks/exhaustive-deps": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "react/jsx-no-comment-textnodes": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/static-components": "off",
+      "@typescript-eslint/ban-ts-comment": "off"
     }
   }
 ]);

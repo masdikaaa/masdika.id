@@ -16,6 +16,20 @@ interface Subscriber {
 export default function NewsletterPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchSubscribers = async () => {
+    try {
+      const res = await fetch('/api/admin/newsletter');
+      const data = await res.json();
+      if (!data.error) {
+        setSubscribers(data);
+      }
+    } catch (error) {
+      console.error("Error fetching subscribers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,19 +46,6 @@ export default function NewsletterPage() {
     fetchSubscribers();
   }, []);
 
-  const fetchSubscribers = async () => {
-    try {
-      const res = await fetch('/api/admin/newsletter');
-      const data = await res.json();
-      if (!data.error) {
-        setSubscribers(data);
-      }
-    } catch (error) {
-      console.error("Error fetching subscribers:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const toggleSelectAll = () => {
     if (selectedIds.length === subscribers.length && subscribers.length > 0) {

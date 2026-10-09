@@ -254,10 +254,6 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [nodes, setNodes] = useState<any[]>([]);
   const [selectedNode, setSelectedNode] = useState<string>("");
 
-  useEffect(() => {
-    fetchOrderData();
-  }, []);
-
   const fetchOrderData = async () => {
     try {
       const clusterQuery = isAddWorkerNode ? `&cluster_id=${clusterId}` : "";
@@ -336,6 +332,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
       setLoading(false);
     }
   };
+
+
+
+
+
+  useEffect(() => {
+    fetchOrderData();
+  }, []);
 
   const calculateHourlyPrice = () => {
     let total = 0;

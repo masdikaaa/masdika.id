@@ -46,6 +46,8 @@ const API_CONFIG: Record<string, any> = {
 export default function ApiLabPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+
   const [keys, setKeys] = useState<any[]>([]);
   const [loadingKeys, setLoadingKeys] = useState(true);
   const [activeService, setActiveService] = useState<string | null>(null);
@@ -65,16 +67,22 @@ export default function ApiLabPage() {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(4);
 
-  useEffect(() => {
-    fetchKeys();
-    
-    const handleResize = () => {
-      setItemsPerPage(window.innerWidth < 768 ? 2 : 4);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const handleSelectService = (service: string, keyToUse: string = "") => {
+    setActiveService(service);
+    const config = API_CONFIG[service];
+    if (config) {
+      setMethod(config.methods[0]);
+      setApiKey(keyToUse || keys.find((k: any) => k.service === service)?.key || "");
+      if (config.bodyTemplate) {
+        setRequestBody(config.bodyTemplate);
+      } else {
+        setRequestBody("");
+      }
+      setUploadFile(null);
+      setCdnToken("");
+      setResponse(null);
+    }
+  };
 
   const fetchKeys = async () => {
     try {
@@ -96,26 +104,23 @@ export default function ApiLabPage() {
     }
   };
 
+  useEffect(() => {
+    fetchKeys();
+    
+    const handleResize = () => {
+      setItemsPerPage(window.innerWidth < 768 ? 2 : 4);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
   const uniqueServices = Array.from(new Set(keys.map(k => k.service))).filter(s => !!API_CONFIG[s as string]);
   const totalPages = Math.ceil(uniqueServices.length / itemsPerPage);
   const paginatedServices = uniqueServices.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  const handleSelectService = (service: string, keyToUse: string = "") => {
-    setActiveService(service);
-    const config = API_CONFIG[service];
-    if (config) {
-      setMethod(config.methods[0]);
-      setApiKey(keyToUse || keys.find(k => k.service === service)?.key || "");
-      if (config.bodyTemplate) {
-        setRequestBody(config.bodyTemplate);
-      } else {
-        setRequestBody("");
-      }
-      setUploadFile(null);
-      setCdnToken("");
-      setResponse(null);
-    }
-  };
+
 
   const handleSend = async () => {
     if (!apiKey) {

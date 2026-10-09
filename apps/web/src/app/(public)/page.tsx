@@ -422,9 +422,9 @@ export default function HomePage() {
             {[...Array(10)].map((_, i) => (
               <div key={i} className={cn("flex items-center font-black text-xl lg:text-2xl tracking-[0.2em] px-8", isDark ? "text-zinc-300" : "text-slate-800")}>
                 <span className={cn("mr-3", isDark ? "text-cyan-400" : "text-cyan-600")}>★</span> CLOUD ARCHITECTURE
-                <span className={cn("mx-8", isDark ? "text-cyan-500/40" : "text-cyan-600/40")}>//</span> DEVOPS
-                <span className={cn("mx-8", isDark ? "text-cyan-500/40" : "text-cyan-600/40")}>//</span> SYSADMIN
-                <span className={cn("mx-8", isDark ? "text-cyan-500/40" : "text-cyan-600/40")}>//</span> KUBERNETES
+                <span className={cn("mx-8", isDark ? "text-cyan-500/40" : "text-cyan-600/40")}>{"//"}</span> DEVOPS
+                <span className={cn("mx-8", isDark ? "text-cyan-500/40" : "text-cyan-600/40")}>{"//"}</span> SYSADMIN
+                <span className={cn("mx-8", isDark ? "text-cyan-500/40" : "text-cyan-600/40")}>{"//"}</span> KUBERNETES
               </div>
             ))}
           </div>

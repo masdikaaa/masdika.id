@@ -9,14 +9,6 @@ import { cn } from "@/lib/utils";
 export default function AdminPaymentSettingsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    fetchPaymentMethods();
-  }, []);
-
   const fetchPaymentMethods = async () => {
     try {
       const res = await fetch("/api/admin/payment-methods");
@@ -30,6 +22,15 @@ export default function AdminPaymentSettingsPage() {
       setLoading(false);
     }
   };
+
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchPaymentMethods();
+  }, []);
+
 
   const handleToggle = async (id: number) => {
     const pm = paymentMethods.find(p => p.id === id);

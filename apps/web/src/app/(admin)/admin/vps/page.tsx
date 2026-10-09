@@ -48,6 +48,118 @@ const getOsIconUrl = (name: string, isDark: boolean = false) => {
 export default function VpsManagementPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchReservedIps = async () => {
+    try {
+      setLoadingReservedIps(true);
+      const res = await fetch("/api/admin/vps/reserved-ips");
+      if (res.ok) {
+        const data = await res.json();
+        setReservedIps(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch reserved IPs:", error);
+    } finally {
+      setLoadingReservedIps(false);
+    }
+  };
+
+  const fetchSettings = async () => {
+    setLoadingSettings(true);
+    try {
+      const res = await fetch("/api/admin/vps/settings");
+      const data = await res.json();
+      if (!data.error) {
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingSettings(false);
+      setInitialLoad(false);
+    }
+  };
+
+  const fetchStorages = async () => {
+    setSyncingStorages(true);
+    try {
+      const res = await fetch("/api/admin/vps/proxmox-sync");
+      const data = await res.json();
+      if (!data.error && data.storages) {
+        setAvailableStorages(data.storages);
+        toast.success("Storages synced successfully");
+      } else {
+        toast.error(data.error || "Failed to sync storages");
+      }
+    } catch (error) {
+      toast.error("Failed to connect to Proxmox");
+    } finally {
+      setSyncingStorages(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    setLoadingTemplates(true);
+    try {
+      const res = await fetch("/api/admin/vps/templates");
+      const data = await res.json();
+      if (!data.error) {
+        setTemplates(data);
+        if (data.length > 0) {
+          const firstFamily = data[0].name.split('-')[0];
+          setSelectedAdminOsFamily(firstFamily);
+          setSelectedAdminTemplate(data[0].id);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingTemplates(false);
+      setInitialLoad(false);
+    }
+  };
+
+  const fetchPools = async () => {
+    setLoadingPools(true);
+    try {
+      const res = await fetch("/api/admin/vps/ippools");
+      const data = await res.json();
+      if (!data.error) setPools(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingPools(false);
+      setInitialLoad(false);
+    }
+  };
+
+  const fetchPricing = async () => {
+    setLoadingPricing(true);
+    try {
+      const res = await fetch("/api/admin/vps/pricing");
+      const data = await res.json();
+      if (!data.error) setPricing(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingPricing(false);
+      setInitialLoad(false);
+    }
+  };
+
+  const fetchPlans = async () => {
+    setLoadingPlans(true);
+    try {
+      const res = await fetch("/api/admin/vps/plans");
+      const data = await res.json();
+      if (Array.isArray(data)) setPlans(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingPlans(false);
+      setInitialLoad(false);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState("settings");
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -196,20 +308,6 @@ export default function VpsManagementPage() {
     }
   };
 
-  const fetchReservedIps = async () => {
-    try {
-      setLoadingReservedIps(true);
-      const res = await fetch("/api/admin/vps/reserved-ips");
-      if (res.ok) {
-        const data = await res.json();
-        setReservedIps(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch reserved IPs:", error);
-    } finally {
-      setLoadingReservedIps(false);
-    }
-  };
 
   const handleSaveReservedIp = async (id: number, publicIp: string) => {
     try {
@@ -345,39 +443,7 @@ export default function VpsManagementPage() {
     return () => clearTimeout(handler);
   }, [activeTab, searchQuery]);
 
-  const fetchSettings = async () => {
-    setLoadingSettings(true);
-    try {
-      const res = await fetch("/api/admin/vps/settings");
-      const data = await res.json();
-      if (!data.error) {
-        setSettings(data);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingSettings(false);
-      setInitialLoad(false);
-    }
-  };
 
-  const fetchStorages = async () => {
-    setSyncingStorages(true);
-    try {
-      const res = await fetch("/api/admin/vps/proxmox-sync");
-      const data = await res.json();
-      if (!data.error && data.storages) {
-        setAvailableStorages(data.storages);
-        toast.success("Storages synced successfully");
-      } else {
-        toast.error(data.error || "Failed to sync storages");
-      }
-    } catch (error) {
-      toast.error("Failed to connect to Proxmox");
-    } finally {
-      setSyncingStorages(false);
-    }
-  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -402,26 +468,6 @@ export default function VpsManagementPage() {
     }
   };
 
-  const fetchTemplates = async () => {
-    setLoadingTemplates(true);
-    try {
-      const res = await fetch("/api/admin/vps/templates");
-      const data = await res.json();
-      if (!data.error) {
-        setTemplates(data);
-        if (data.length > 0) {
-          const firstFamily = data[0].name.split('-')[0];
-          setSelectedAdminOsFamily(firstFamily);
-          setSelectedAdminTemplate(data[0].id);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingTemplates(false);
-      setInitialLoad(false);
-    }
-  };
 
   const syncTemplates = async () => {
     setSyncingTemplates(true);
@@ -441,19 +487,6 @@ export default function VpsManagementPage() {
     }
   };
 
-  const fetchPools = async () => {
-    setLoadingPools(true);
-    try {
-      const res = await fetch("/api/admin/vps/ippools");
-      const data = await res.json();
-      if (!data.error) setPools(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingPools(false);
-      setInitialLoad(false);
-    }
-  };
 
   const handleAddPool = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -524,19 +557,6 @@ export default function VpsManagementPage() {
     }
   };
 
-  const fetchPricing = async () => {
-    setLoadingPricing(true);
-    try {
-      const res = await fetch("/api/admin/vps/pricing");
-      const data = await res.json();
-      if (!data.error) setPricing(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingPricing(false);
-      setInitialLoad(false);
-    }
-  };
 
   const handleSavePricing = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -559,19 +579,6 @@ export default function VpsManagementPage() {
     }
   };
 
-  const fetchPlans = async () => {
-    setLoadingPlans(true);
-    try {
-      const res = await fetch("/api/admin/vps/plans");
-      const data = await res.json();
-      if (Array.isArray(data)) setPlans(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingPlans(false);
-      setInitialLoad(false);
-    }
-  };
 
   const handleSavePlan = async (e: React.FormEvent) => {
     e.preventDefault();

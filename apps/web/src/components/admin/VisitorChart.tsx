@@ -74,21 +74,6 @@ export function VisitorChart() {
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const p = payload[0].payload;
-      return (
-        <div className={cn("backdrop-blur-md border p-4 rounded-xl shadow-2xl", isDark ? "bg-[#0f172a]/90 border-cyan-500/20" : "bg-white/90 border-slate-200")}>
-          <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>{formatXAxis(label)}</p>
-          <p className={cn("font-bold text-lg flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            {formatCompact(payload[0].value)} <span className="text-zinc-500 text-xs font-normal">Visitors</span>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   const currentTotal = data.reduce((sum, item) => sum + item.visitors, 0);
 
   return (
@@ -167,7 +152,19 @@ export function VisitorChart() {
                 tickMargin={12}
                 tickFormatter={(value) => formatCompact(value)}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={({ active, payload, label }: any) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className={cn("backdrop-blur-md border p-4 rounded-xl shadow-2xl", isDark ? "bg-[#0f172a]/90 border-cyan-500/20" : "bg-white/90 border-slate-200")}>
+                      <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>{formatXAxis(label)}</p>
+                      <p className={cn("font-bold text-lg flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        {formatCompact(payload[0].value)} <span className="text-zinc-500 text-xs font-normal">Visitors</span>
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              }} />
               <Area
                 type="monotone"
                 dataKey="visitors"

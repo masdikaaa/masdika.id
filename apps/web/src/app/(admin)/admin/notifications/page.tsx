@@ -35,15 +35,6 @@ function formatRelativeTime(dateString: string) {
 export default function AdminNotificationsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
   const fetchNotifications = async () => {
     try {
       const res = await fetch("/api/admin/notifications?all=true");
@@ -57,6 +48,16 @@ export default function AdminNotificationsPage() {
       setLoading(false);
     }
   };
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
 
   const markAllAsRead = async () => {
     try {

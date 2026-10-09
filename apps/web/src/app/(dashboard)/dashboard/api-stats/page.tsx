@@ -15,13 +15,6 @@ const COLORS = ["#06b6d4", "#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"];
 export default function ApiStatsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const fetchStats = async () => {
     try {
       const res = await fetch("/api/dashboard/stats");
@@ -35,6 +28,14 @@ export default function ApiStatsPage() {
       setLoading(false);
     }
   };
+
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },

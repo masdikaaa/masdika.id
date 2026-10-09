@@ -25,10 +25,6 @@ export default function ReserveNewIpPage() {
   const [isReserving, setIsReserving] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setFetchingIps(true);
     try {
@@ -57,6 +53,10 @@ export default function ReserveNewIpPage() {
       setFetchingIps(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleReserve = async () => {
     if (!selectedIp) return toast.error("Please select an IP address.");

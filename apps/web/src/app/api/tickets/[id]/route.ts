@@ -59,7 +59,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         where: { id: ticket.id },
         data: { isReadByAdmin: true }
       });
-      // @ts-ignore
       ticket.isReadByAdmin = true;
     }
 
@@ -68,7 +67,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         where: { id: ticket.id },
         data: { isReadByUser: true }
       });
-      // @ts-ignore
       ticket.isReadByUser = true;
     }
 

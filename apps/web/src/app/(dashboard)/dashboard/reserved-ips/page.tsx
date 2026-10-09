@@ -68,10 +68,6 @@ export default function ReservedIpsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       const [ipsRes, pricingRes] = await Promise.all([
@@ -95,6 +91,10 @@ export default function ReservedIpsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleOpenAttachModal = async (ip: any) => {
     setIpToAttach(ip);

@@ -16,12 +16,6 @@ export default function K3sListPage() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    fetchClusters();
-    const interval = setInterval(fetchClusters, 10000); // refresh every 10s
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchClusters = async () => {
     try {
       const res = await fetch("/api/user/k3s", { cache: 'no-store' });
@@ -35,6 +29,14 @@ export default function K3sListPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchClusters();
+    const interval = setInterval(fetchClusters, 10000); // refresh every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+
 
   if (loading) {
     return (

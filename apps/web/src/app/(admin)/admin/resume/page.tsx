@@ -11,6 +11,27 @@ import { toast } from "sonner";
 export default function AdminResumePage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [expRes, eduRes, certRes] = await Promise.all([
+        fetch('/api/admin/resume/experience'),
+        fetch('/api/admin/resume/education'),
+        fetch('/api/admin/resume/certification')
+      ]);
+      const expData = await expRes.json();
+      const eduData = await eduRes.json();
+      const certData = await certRes.json();
+      if (!expData.error) setExperiences(expData);
+      if (!eduData.error) setEducations(eduData);
+      if (!certData.error) setCertifications(certData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState<'experience' | 'education' | 'certification'>('experience');
   
   // Data States
@@ -39,26 +60,6 @@ export default function AdminResumePage() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [expRes, eduRes, certRes] = await Promise.all([
-        fetch('/api/admin/resume/experience'),
-        fetch('/api/admin/resume/education'),
-        fetch('/api/admin/resume/certification')
-      ]);
-      const expData = await expRes.json();
-      const eduData = await eduRes.json();
-      const certData = await certRes.json();
-      if (!expData.error) setExperiences(expData);
-      if (!eduData.error) setEducations(eduData);
-      if (!certData.error) setCertifications(certData);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const saveExperience = async (e: React.FormEvent) => {
     e.preventDefault();

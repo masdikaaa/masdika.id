@@ -189,8 +189,11 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
   };
 
   useEffect(() => {
-    setActiveMenu(null);
-    setIsOpen(false);
+    const t = setTimeout(() => {
+      setActiveMenu(null);
+      setIsOpen(false);
+    }, 0);
+    return () => clearTimeout(t);
   }, [pathname]);
 
   useEffect(() => {

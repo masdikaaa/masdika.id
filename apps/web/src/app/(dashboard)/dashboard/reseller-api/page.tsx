@@ -24,12 +24,6 @@ export default function ResellerApiPage() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchInstances, 10000); // 10s refresh for instances
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchInstances = async () => {
     try {
       const res = await fetch("/api/user/vps?isReseller=true");
@@ -57,6 +51,14 @@ export default function ResellerApiPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchInstances, 10000); // 10s refresh for instances
+    return () => clearInterval(interval);
+  }, []);
+
+
 
   const handleGenerateKey = async () => {
     if (balance < 66430) {

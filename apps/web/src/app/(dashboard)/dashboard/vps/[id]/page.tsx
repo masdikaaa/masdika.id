@@ -288,11 +288,134 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     }
   }, [editingRule]);
 
+  const fetchVpsDetails = async () => {
+    try {
+      const res = await fetch(`/api/user/vps/${id}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (res.ok) {
+        setVps(data.vps);
+        setStatus(data.liveStatus);
+        if (data.allowedAddonStorages) {
+          setAllowedAddonStorages(data.allowedAddonStorages);
+          if (!addonStorage && data.allowedAddonStorages.length > 0) {
+            setAddonStorage(data.allowedAddonStorages[0]);
+          }
+        }
+
+        if (data.addonDisks) {
+          setAddonDisks(data.addonDisks);
+        }
+
+        if (data.maxSpecs) {
+          setMaxSpecs(data.maxSpecs);
+        }
+
+        if (data.hasIpv4Pool !== undefined) setHasIpv4Pool(data.hasIpv4Pool);
+        if (data.hasIpv6Pool !== undefined) setHasIpv6Pool(data.hasIpv6Pool);
+        if (data.pricing) setPricing(data.pricing);
+
+        // Init upgrade sliders (using functional update to avoid stale closures in setInterval)
+        setUpgradeCores(prev => prev === 0 ? data.vps.cpuCores : prev);
+        setUpgradeRam(prev => prev === 0 ? data.vps.ramGb : prev);
+        setUpgradeDisk(prev => prev === 0 ? data.vps.diskGb : prev);
+        setUpgradeBackup(prev => prev === 0 ? (data.vps.backupGb || 0) : prev);
+        if (data.vps.backupSchedule) {
+          setBackupSchedule(data.vps.backupSchedule);
+        }
+      } else {
+        toast.error(data.error || "Failed to load VPS");
+        router.push("/dashboard/vps");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMetrics = async (showLoading = false) => {
+    try {
+      if (showLoading && metrics.length === 0) setMetricsLoading(true);
+      const res = await fetch(`/api/user/vps/${id}/metrics`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        
+        let processedData = Array.isArray(data) ? data : (data.data || []);
+        
+        // Extract timestamp array and actual data arrays
+        if (!Array.isArray(processedData) && processedData.time) {
+           const times = processedData.time;
+           processedData = times.map((t: any, idx: number) => ({
+             time: t * 1000,
+             cpu: processedData.cpu?.[idx] || 0,
+             mem: processedData.mem?.[idx] || 0,
+             netin: processedData.netin?.[idx] || 0,
+             netout: processedData.netout?.[idx] || 0,
+             diskread: processedData.diskread?.[idx] || 0,
+             diskwrite: processedData.diskwrite?.[idx] || 0,
+           }));
+        }
+        
+        setMetrics(processedData);
+      }
+    } catch (error) {
+      console.error("Failed to load metrics", error);
+    } finally {
+      if (showLoading) setMetricsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchVpsDetails();
     const interval = setInterval(fetchVpsDetails, 5000); // 5s refresh
     return () => clearInterval(interval);
   }, [id]);
+
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch(`/api/user/vps/${id}/tasks?limit=500`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setTasks(data);
+      }
+    } catch (error) {
+      console.error("Failed to load tasks", error);
+    }
+  };
+
+  const fetchBackups = async (showLoading = false) => {
+    try {
+      if (showLoading && backups.length === 0) setBackupsLoading(true);
+      const res = await fetch(`/api/user/vps/${id}/backups`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setBackups(data.backups || []);
+        setBackupQuota(data.quotaGb || 0);
+        setBackupUsed(data.usedBytes || 0);
+      }
+    } catch (error) {
+      console.error("Failed to load backups", error);
+    } finally {
+      if (showLoading) setBackupsLoading(false);
+    }
+  };
+
+  const fetchSnapshots = async (showLoading = false) => {
+    try {
+      if (showLoading && snapshots.length === 0) setSnapshotsLoading(true);
+      const res = await fetch(`/api/user/vps/${id}/snapshots`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        const snapshotsArray = Array.isArray(data) ? data : (data.data || []);
+        const actualSnaps = snapshotsArray.filter((s: any) => s.name && s.name !== 'current');
+        setSnapshots(actualSnaps);
+      }
+    } catch (error) {
+      console.error("Failed to load snapshots", error);
+    } finally {
+      if (showLoading) setSnapshotsLoading(false);
+    }
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -382,129 +505,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     }
   }, [taskLog]);
 
-  const fetchVpsDetails = async () => {
-    try {
-      const res = await fetch(`/api/user/vps/${id}`, { cache: 'no-store' });
-      const data = await res.json();
-      if (res.ok) {
-        setVps(data.vps);
-        setStatus(data.liveStatus);
-        if (data.allowedAddonStorages) {
-          setAllowedAddonStorages(data.allowedAddonStorages);
-          if (!addonStorage && data.allowedAddonStorages.length > 0) {
-            setAddonStorage(data.allowedAddonStorages[0]);
-          }
-        }
 
-        if (data.addonDisks) {
-          setAddonDisks(data.addonDisks);
-        }
 
-        if (data.maxSpecs) {
-          setMaxSpecs(data.maxSpecs);
-        }
 
-        if (data.hasIpv4Pool !== undefined) setHasIpv4Pool(data.hasIpv4Pool);
-        if (data.hasIpv6Pool !== undefined) setHasIpv6Pool(data.hasIpv6Pool);
-        if (data.pricing) setPricing(data.pricing);
-
-        // Init upgrade sliders (using functional update to avoid stale closures in setInterval)
-        setUpgradeCores(prev => prev === 0 ? data.vps.cpuCores : prev);
-        setUpgradeRam(prev => prev === 0 ? data.vps.ramGb : prev);
-        setUpgradeDisk(prev => prev === 0 ? data.vps.diskGb : prev);
-        setUpgradeBackup(prev => prev === 0 ? (data.vps.backupGb || 0) : prev);
-        if (data.vps.backupSchedule) {
-          setBackupSchedule(data.vps.backupSchedule);
-        }
-      } else {
-        toast.error(data.error || "Failed to load VPS");
-        router.push("/dashboard/vps");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMetrics = async (showLoading = false) => {
-    try {
-      if (showLoading && metrics.length === 0) setMetricsLoading(true);
-      const res = await fetch(`/api/user/vps/${id}/metrics`, { cache: 'no-store' });
-      if (res.ok) {
-        const json = await res.json();
-        
-        let processedData = [];
-        if (Array.isArray(json.data)) {
-           // Proxmox RRD returns time in seconds, and cpu as a ratio (0-1)
-           // If values are null/undefined (like for newly created VMs), map to 0
-           processedData = json.data.map((point: any) => ({
-             ...point,
-             time: point.time * 1000,
-             cpu: point.cpu ? parseFloat((point.cpu * 100).toFixed(2)) : 0,
-             netIn: point.netin || 0,
-             netOut: point.netout || 0,
-             mem: point.mem || 0,
-             diskread: point.diskread || 0,
-             diskwrite: point.diskwrite || 0
-           }));
-        }
-        
-        setMetrics(processedData);
-      }
-    } catch (error) {
-      console.error("Failed to load metrics", error);
-    } finally {
-      if (showLoading) setMetricsLoading(false);
-    }
-  };
-
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch(`/api/user/vps/${id}/tasks?limit=500`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setTasks(data);
-      }
-    } catch (error) {
-      console.error("Failed to load tasks", error);
-    }
-  };
-
-  const fetchBackups = async (showLoading = false) => {
-    try {
-      if (showLoading && backups.length === 0) setBackupsLoading(true);
-      const res = await fetch(`/api/user/vps/${id}/backups`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setBackups(data.backups || []);
-        setBackupQuota(data.quotaGb || 0);
-        setBackupUsed(data.usedBytes || 0);
-      }
-    } catch (error) {
-      console.error("Failed to load backups", error);
-    } finally {
-      if (showLoading) setBackupsLoading(false);
-    }
-  };
-
-  const fetchSnapshots = async (showLoading = false) => {
-    try {
-      if (showLoading && snapshots.length === 0) setSnapshotsLoading(true);
-      const res = await fetch(`/api/user/vps/${id}/snapshots`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        // data is already the array because route.ts returns proxmox data directly
-        const snapshotsArray = Array.isArray(data) ? data : (data.data || []);
-        const actualSnaps = snapshotsArray.filter((s: any) => s.name && s.name !== 'current');
-        setSnapshots(actualSnaps);
-      }
-    } catch (error) {
-      console.error("Failed to load snapshots", error);
-    } finally {
-      if (showLoading) setSnapshotsLoading(false);
-    }
-  };
 
   const takeSnapshot = async () => {
     if (!snapshotName) {
@@ -659,6 +662,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     }
   };
 
+  const [nowTime, setNowTime] = useState(0);
+  useEffect(() => { setNowTime(Date.now()); }, []);
+
   const { upgradeCostNow, newMonthlyPrice, newHourlyPrice, hasUpgrades, remainingHours } = useMemo(() => {
     if (!vps) return { upgradeCostNow: 0, newMonthlyPrice: 0, newHourlyPrice: 0, hasUpgrades: false, remainingHours: 1 };
 
@@ -676,9 +682,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     additionalHourlyRate += addIpv4Count * (pricing.ipv4 || 0);
     additionalHourlyRate += addIpv6Count * (pricing.ipv6 || 0);
 
-    const nowTime = Date.now();
-    const expiresAtTime = vps.expiresAt ? new Date(vps.expiresAt).getTime() : nowTime + (30 * 24 * 60 * 60 * 1000);
-    const rHours = Math.max(1, Math.ceil((expiresAtTime - nowTime) / (1000 * 60 * 60)));
+    const currentTime = nowTime || 1700000000000;
+    const expiresAtTime = vps.expiresAt ? new Date(vps.expiresAt).getTime() : currentTime + (30 * 24 * 60 * 60 * 1000);
+    const rHours = Math.max(1, Math.ceil((expiresAtTime - currentTime) / (1000 * 60 * 60)));
 
     return {
       upgradeCostNow: additionalHourlyRate * rHours,

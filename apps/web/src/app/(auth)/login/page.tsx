@@ -25,7 +25,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const formLoadTimeRef = useRef(Date.now());
+  const formLoadTimeRef = useRef(0);
+  useEffect(() => { formLoadTimeRef.current = Date.now(); }, []);
 
   useEffect(() => {
     const pending = sessionStorage.getItem('pending2FA');
@@ -198,7 +199,7 @@ export default function LoginPage() {
                     </div>
                     <span className={cn("text-xs select-none", isDark ? "text-zinc-400" : "text-slate-500")}>Remember me</span>
                   </label>
-                  <a href="/forgot-password" className={cn("text-xs transition-colors", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-500")}>Forgot password?</a>
+                  <Link href="/forgot-password" className={cn("text-xs transition-colors", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-500")}>Forgot password?</Link>
                 </div>
               </div>
 
@@ -210,6 +211,7 @@ export default function LoginPage() {
               </div>
 
               {/* Google */}
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a
                 href="/api/auth/google/login"
                 className={cn(

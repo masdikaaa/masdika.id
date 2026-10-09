@@ -180,39 +180,6 @@ export default function VpcDashboardPage() {
   const [selectedPeerings, setSelectedPeerings] = useState<number[]>([]);
   const [selectedAttachedVms, setSelectedAttachedVms] = useState<number[]>([]);
 
-  useEffect(() => {
-    fetchVpcs();
-  }, []);
-
-  useEffect(() => {
-    setSelectedAttachedVms([]);
-  }, [showManageVmsModal]);
-
-  // Auto-refresh every 3s while any VPC is still pending — silent (no loading flicker)
-  useEffect(() => {
-    const hasPending = vpcs.some(v => ["PROVISIONING", "TERMINATING"].includes(v.status));
-    if (!hasPending) return;
-    const timer = setInterval(silentFetchVpcs, 3000);
-    return () => clearInterval(timer);
-  }, [vpcs]);
-
-  // Auto-refresh every 3s while any Peering is still pending
-  useEffect(() => {
-    const hasPending = peerings.some(p => ["PENDING", "TERMINATING"].includes(p.status));
-    if (!hasPending) return;
-    const timer = setInterval(silentFetchPeerings, 3000);
-    return () => clearInterval(timer);
-  }, [peerings]);
-
-  useEffect(() => {
-    if (activeTab === "peering" && peerings.length === 0) {
-      // Actually we don't have a GET /api/dashboard/vpc/peering route yet.
-      // Let me just fetch VPCs again if needed, or I should create that route.
-      // Wait, let me create the GET route for peering first.
-      fetchPeerings();
-    }
-  }, [activeTab]);
-
   const fetchVpcs = async () => {
     setLoadingVpcs(true);
     try {
@@ -228,7 +195,16 @@ export default function VpcDashboardPage() {
     }
   };
 
-  // Silent fetch — updates data without triggering loading state (no flicker)
+  useEffect(() => {
+    fetchVpcs();
+  }, []);
+
+  useEffect(() => {
+    setSelectedAttachedVms([]);
+  }, [showManageVmsModal]);
+
+
+
   const silentFetchVpcs = async () => {
     try {
       const res = await fetch("/api/dashboard/vpc");
@@ -267,6 +243,33 @@ export default function VpcDashboardPage() {
       // Silent
     }
   };
+
+  // Auto-refresh every 3s while any VPC is still pending — silent (no loading flicker)
+  useEffect(() => {
+    const hasPending = vpcs.some(v => ["PROVISIONING", "TERMINATING"].includes(v.status));
+    if (!hasPending) return;
+    const timer = setInterval(silentFetchVpcs, 3000);
+    return () => clearInterval(timer);
+  }, [vpcs]);
+
+  // Auto-refresh every 3s while any Peering is still pending
+  useEffect(() => {
+    const hasPending = peerings.some(p => ["PENDING", "TERMINATING"].includes(p.status));
+    if (!hasPending) return;
+    const timer = setInterval(silentFetchPeerings, 3000);
+    return () => clearInterval(timer);
+  }, [peerings]);
+
+  useEffect(() => {
+    if (activeTab === "peering" && peerings.length === 0) {
+      // Actually we don't have a GET /api/dashboard/vpc/peering route yet.
+      // Let me just fetch VPCs again if needed, or I should create that route.
+      // Wait, let me create the GET route for peering first.
+      fetchPeerings();
+    }
+  }, [activeTab]);
+
+
 
   const handleCreateVpc = async () => {
     if (!vpcForm.name || !vpcForm.cidr) {

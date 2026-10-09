@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import React, { useState, useEffect, useRef, use } from "react";
 import {
   Download, FileImage, FileVideo, FileAudio, FileText,
   File, Presentation, AlertTriangle, Clock, CheckCircle2, Loader2, Link2, ArrowLeft,
@@ -337,7 +337,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
   );
 
   const type     = getPreviewType(media.mimeType, media.originalName);
-  const FileIcon = getFileIcon(media.mimeType, media.originalName);
+  const fileIconComponent = getFileIcon(media.mimeType, media.originalName);
 
   // How tall is the chrome above the preview area?
   // header = 56px (h-14), expiry banner = 36px (only when present)
@@ -366,7 +366,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           </Link>
           <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center shrink-0">
-            <FileIcon className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+            {React.createElement(fileIconComponent, { className: "w-5 h-5 text-cyan-400", "aria-hidden": "true" })}
           </div>
           <div className="min-w-0">
             <p className={cn("font-semibold text-base leading-tight truncate max-w-[160px] sm:max-w-xs md:max-w-md lg:max-w-lg", isDark ? "text-white" : "text-slate-900")}>

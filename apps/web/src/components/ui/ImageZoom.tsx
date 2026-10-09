@@ -20,7 +20,10 @@ export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoom
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const t = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   // Prevent body scroll when lightbox is open

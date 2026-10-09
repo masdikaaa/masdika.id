@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Gift, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,10 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
   const [loading, setLoading] = useState(false);
   const [claimed, setClaimed] = useState(isClaimed);
 
-  const isExpired = validUntil ? new Date(validUntil).getTime() < Date.now() : false;
+  const [nowTime, setNowTime] = useState(0);
+  useEffect(() => { setNowTime(Date.now()); }, []);
+
+  const isExpired = validUntil ? new Date(validUntil).getTime() < (nowTime || 1700000000000) : false;
 
   const handleClaim = async () => {
     if (claimed || isFullyClaimed || isExpired || loading) return;

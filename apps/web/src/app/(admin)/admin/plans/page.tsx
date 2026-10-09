@@ -29,6 +29,21 @@ const getDefaultLimitFields = (service: string) => {
 export default function AdminPlansPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchPlans = async () => {
+    try {
+      const res = await fetch("/api/admin/plans");
+      const data = await res.json();
+      if (data.success) {
+        setPlans(data.data);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch plans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,20 +72,6 @@ export default function AdminPlansPage() {
   useEffect(() => {
     fetchPlans();
   }, []);
-  const fetchPlans = async () => {
-    try {
-      const res = await fetch("/api/admin/plans");
-      const data = await res.json();
-      if (data.success) {
-        setPlans(data.data);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch plans");
-    } finally {
-      setLoading(false);
-    }
-  };
   const openAddModal = () => {
     setEditingPlan(null);
     setLimitFields(getDefaultLimitFields("OBJECT_STORAGE"));

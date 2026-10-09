@@ -24,10 +24,6 @@ export default function MyServicesPage() {
   const [terminateLoading, setTerminateLoading] = useState(false);
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    fetchServices();
-  }, []);
-
   const fetchServices = async () => {
     try {
       const [billingRes, vpsRes, k3sRes, plansRes] = await Promise.all([
@@ -62,6 +58,10 @@ export default function MyServicesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   const handleTerminate = async () => {
     if (!terminateModal) return;

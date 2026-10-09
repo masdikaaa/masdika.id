@@ -11,6 +11,28 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 export default function AdminVouchersPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchPromos = async () => {
+    try {
+      const res = await fetch('/api/admin/promos');
+      const data = await res.json();
+      if (data.success) {
+        setPromos(data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchVouchers = async () => {
+    try {
+      const res = await fetch("/api/admin/vouchers");
+      const data = await res.json();
+      if (data.success) setVouchers(data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState<"vouchers" | "promos">("vouchers");
   const [vouchers, setVouchers] = useState<any[]>([]);
   const [deletingVoucherId, setDeletingVoucherId] = useState<number | null>(null);
@@ -58,27 +80,7 @@ export default function AdminVouchersPage() {
     setLoading(false);
   }, []);
 
-  const fetchPromos = async () => {
-    try {
-      const res = await fetch('/api/admin/promos');
-      const data = await res.json();
-      if (data.success) {
-        setPromos(data.data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
-  const fetchVouchers = async () => {
-    try {
-      const res = await fetch("/api/admin/vouchers");
-      const data = await res.json();
-      if (data.success) setVouchers(data.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
 
   const handleToggleVoucher = async (id: number, currentStatus: boolean) => {

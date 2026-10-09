@@ -64,12 +64,15 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
   const currentMaxRam = maxSpecs.ram || 64;
 
   useEffect(() => {
-    if (disk > currentMaxDisk) {
-      setDisk(currentMaxDisk);
-    }
-    if (backup > currentMaxBackup) {
-      setBackup(currentMaxBackup);
-    }
+    const t = setTimeout(() => {
+      if (disk > currentMaxDisk) {
+        setDisk(currentMaxDisk);
+      }
+      if (backup > currentMaxBackup) {
+        setBackup(currentMaxBackup);
+      }
+    }, 0);
+    return () => clearTimeout(t);
   }, [diskType, maxSpecs, disk, backup, currentMaxDisk, currentMaxBackup]);
 
   const calculateHourlyPrice = () => {

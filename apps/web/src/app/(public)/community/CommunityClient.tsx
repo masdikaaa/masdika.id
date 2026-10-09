@@ -40,18 +40,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: any[
   const [link, setLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Icon for input field based on typed link
-  function InputPlatformIcon({ link }: { link: string }) {
-    const p = getPlatform(link);
-    if (p === 'whatsapp') return <WhatsAppIcon className={cn("h-5 w-5", isDark ? "text-cyan-400" : "text-cyan-600")} />;
-    if (p === 'telegram') return <TelegramIcon className={cn("h-5 w-5", isDark ? "text-cyan-400" : "text-cyan-600")} />;
-    return (
-      <svg className={cn("h-5 w-5", isDark ? "text-white/40" : "text-slate-400")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
-    );
-  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,7 +234,17 @@ export default function CommunityClient({ initialGroups }: { initialGroups: any[
               <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <InputPlatformIcon link={link} />
+                    {(() => {
+                      const p = getPlatform(link);
+                      if (p === 'whatsapp') return <WhatsAppIcon className={cn("h-5 w-5", isDark ? "text-cyan-400" : "text-cyan-600")} />;
+                      if (p === 'telegram') return <TelegramIcon className={cn("h-5 w-5", isDark ? "text-cyan-400" : "text-cyan-600")} />;
+                      return (
+                        <svg className={cn("h-5 w-5", isDark ? "text-white/40" : "text-slate-400")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                      );
+                    })()}
                   </div>
                   <input
                     type="url"

@@ -16,29 +16,6 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
   const isNew = resolvedParams.id === 'new';
   const router = useRouter();
 
-  const [loading, setLoading] = useState(!isNew);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
-  const [removingImage, setRemovingImage] = useState(false);
-  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
-  
-  const [formData, setFormData] = useState({
-    title: "",
-    type: "EVENT",
-    description: "",
-    image: "",
-    link: "",
-    status: "PUBLISHED",
-    isNew: false
-  });
-
-  useEffect(() => {
-    if (!isNew) {
-      fetchOpportunity();
-    }
-  }, [isNew]);
-
   const fetchOpportunity = async () => {
     try {
       const res = await fetch(`/api/admin/opportunities/${resolvedParams.id}`);
@@ -64,6 +41,30 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
       setLoading(false);
     }
   };
+
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [removingImage, setRemovingImage] = useState(false);
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
+  
+  const [formData, setFormData] = useState({
+    title: "",
+    type: "EVENT",
+    description: "",
+    image: "",
+    link: "",
+    status: "PUBLISHED",
+    isNew: false
+  });
+
+  useEffect(() => {
+    if (!isNew) {
+      fetchOpportunity();
+    }
+  }, [isNew]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));

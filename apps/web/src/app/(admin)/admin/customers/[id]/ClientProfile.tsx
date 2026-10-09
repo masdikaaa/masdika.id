@@ -54,6 +54,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 const PaginatedTable = ({ data, columns, renderRow, emptyMessage, itemsPerPage = 5 }: any) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
   const [page, setPage] = useState(1);
   if (!data || data.length === 0) {
     return <div className={cn("p-8 text-center text-sm", isDark ? "text-zinc-500" : "text-slate-500")}>{emptyMessage}</div>;
@@ -118,6 +119,23 @@ export default function ClientProfile({ userId }: { userId: string }) {
   // Edit Service Modal
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
+
+  const fetchUserData = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.data);
+      } else {
+        toast.error("Failed to load user profile");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateCustomService = async (e: any) => {
     e.preventDefault();
@@ -268,22 +286,6 @@ export default function ClientProfile({ userId }: { userId: string }) {
     fetchUserData();
   }, [userId]);
 
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.data);
-      } else {
-        toast.error("Failed to load user profile");
-      }
-    } catch (err) {
-      toast.error("An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
 

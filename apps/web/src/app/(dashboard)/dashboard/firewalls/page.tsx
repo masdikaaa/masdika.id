@@ -38,19 +38,6 @@ export default function FirewallsDashboardPage() {
   const [ruleSource, setRuleSource] = useState("");
   const [ruleComment, setRuleComment] = useState("");
 
-  useEffect(() => {
-    fetchVpsList();
-  }, []);
-
-  useEffect(() => {
-    setSelectedRules([]);
-    if (selectedVpsId) {
-      fetchFirewallRules(selectedVpsId);
-    } else {
-      setFirewallRules([]);
-    }
-  }, [selectedVpsId]);
-
   const fetchVpsList = async () => {
     try {
       const res = await fetch("/api/user/vps");
@@ -87,6 +74,21 @@ export default function FirewallsDashboardPage() {
       setFirewallLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchVpsList();
+  }, []);
+
+  useEffect(() => {
+    setSelectedRules([]);
+    if (selectedVpsId) {
+      fetchFirewallRules(selectedVpsId);
+    } else {
+      setFirewallRules([]);
+    }
+  }, [selectedVpsId]);
+
+
 
   useEffect(() => {
     if (editingRule) {

@@ -28,6 +28,36 @@ type ChatMessage = {
 export default function AdminLiveChat() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch('/api/admin/live-chat/status');
+      if (res.ok) {
+        const data = await res.json();
+        setStatus(data.status);
+      }
+    } catch (e) {}
+  };
+
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch('/api/admin/live-chat/sessions');
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data.sessions);
+      }
+    } catch (e) {}
+  };
+
+  const fetchMessages = async (id: number) => {
+    try {
+      const res = await fetch(`/api/admin/live-chat/messages?sessionId=${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data.messages);
+      }
+    } catch (e) {}
+  };
+
   const [status, setStatus] = useState<'ONLINE' | 'OFFLINE'>('OFFLINE');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
@@ -63,15 +93,6 @@ export default function AdminLiveChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const fetchStatus = async () => {
-    try {
-      const res = await fetch('/api/admin/live-chat/status');
-      if (res.ok) {
-        const data = await res.json();
-        setStatus(data.status);
-      }
-    } catch (e) {}
-  };
 
   const toggleStatus = async () => {
     const newStatus = status === 'ONLINE' ? 'OFFLINE' : 'ONLINE';
@@ -90,25 +111,7 @@ export default function AdminLiveChat() {
     }
   };
 
-  const fetchSessions = async () => {
-    try {
-      const res = await fetch('/api/admin/live-chat/sessions');
-      if (res.ok) {
-        const data = await res.json();
-        setSessions(data.sessions);
-      }
-    } catch (e) {}
-  };
 
-  const fetchMessages = async (id: number) => {
-    try {
-      const res = await fetch(`/api/admin/live-chat/messages?sessionId=${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.messages);
-      }
-    } catch (e) {}
-  };
 
   const handleSend = async () => {
     if (!replyText.trim() || !selectedSessionId) return;

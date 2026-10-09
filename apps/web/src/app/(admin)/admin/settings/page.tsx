@@ -42,7 +42,8 @@ export default function SettingsPage() {
   const [showDeleteFaviconModal, setShowDeleteFaviconModal] = useState(false);
   const [showDeleteProfileModal, setShowDeleteProfileModal] = useState(false);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
-  const [faviconKey, setFaviconKey] = useState(Date.now()); // to force refresh image
+  const [faviconKey, setFaviconKey] = useState(0); // to force refresh image
+  useEffect(() => { setFaviconKey(Date.now()); }, []);
   
   const [formData, setFormData] = useState({
     name: "",

@@ -14,6 +14,21 @@ interface ImportVpsModalProps {
 export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVpsModalProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch users", e);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -39,20 +54,6 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
     }
   }, [isOpen]);
 
-  const fetchUsers = async () => {
-    try {
-      setLoadingUsers(true);
-      const res = await fetch("/api/admin/users");
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data);
-      }
-    } catch (e) {
-      console.error("Failed to fetch users", e);
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

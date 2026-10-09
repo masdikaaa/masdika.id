@@ -50,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         'Authorization': `PVEAPIToken=${server.tokenId}=${server.tokenSecret}`,
         'Cookie': `PVEAuthCookie=` // Optional, but sometimes extjs endpoints complain if totally missing
       },
-      // @ts-ignore
+      // @ts-expect-error
       agent: new (require('https').Agent)({ rejectUnauthorized: false })
     });
 

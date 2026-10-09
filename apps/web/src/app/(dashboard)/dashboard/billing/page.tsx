@@ -27,6 +27,27 @@ const getServiceIcon = (service: string) => {
 };
 
 export default function CustomerBillingPage() {
+  const fetchBilling = async () => {
+    try {
+      const res = await fetch("/api/user/billing");
+      if (res.ok) {
+        const json = await res.json();
+        setData({
+          subscriptions: json.data.subscriptions || [],
+          invoices: json.data.invoices || [],
+          vpsServices: json.data.vpsServices || [],
+          customServices: json.data.customServices || [],
+          reservedIps: json.data.reservedIps || [],
+          balance: json.data.balance || 0
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [data, setData] = useState<{subscriptions: any[], invoices: any[], vpsServices: any[], customServices: any[], reservedIps: any[], balance: number}>({ subscriptions: [], invoices: [], vpsServices: [], customServices: [], reservedIps: [], balance: 0 });
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
@@ -77,26 +98,6 @@ export default function CustomerBillingPage() {
 
 
 
-  const fetchBilling = async () => {
-    try {
-      const res = await fetch("/api/user/billing");
-      if (res.ok) {
-        const json = await res.json();
-        setData({
-          subscriptions: json.data.subscriptions || [],
-          invoices: json.data.invoices || [],
-          vpsServices: json.data.vpsServices || [],
-          customServices: json.data.customServices || [],
-          reservedIps: json.data.reservedIps || [],
-          balance: json.data.balance || 0
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
   const handleToggleAutoRenew = async (serviceId: number | string, serviceType: string, currentStatus: boolean) => {

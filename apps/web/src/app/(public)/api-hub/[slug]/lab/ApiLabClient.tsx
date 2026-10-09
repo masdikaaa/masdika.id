@@ -51,10 +51,6 @@ export default function ApiLabClient({ project }: { project: any }) {
   const endpointDisplay = `https://${useWww ? 'www.' : ''}masdika.id${projectEndpointPath}`;
   const endpointFetch = projectEndpointPath;
 
-  useEffect(() => {
-    fetchUserApiKey();
-  }, [project.id]);
-
   const fetchUserApiKey = async () => {
     try {
       const res = await fetch("/api/dashboard/keys");
@@ -91,6 +87,12 @@ export default function ApiLabClient({ project }: { project: any }) {
       console.error("Failed to fetch API key automatically", err);
     }
   };
+
+  useEffect(() => {
+    fetchUserApiKey();
+  }, [project.id]);
+
+
 
   const generateKey = () => {
     window.location.href = '/dashboard/api-keys';

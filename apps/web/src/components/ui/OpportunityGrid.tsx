@@ -31,7 +31,10 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
 
   // Reset visible count when search changes
   useEffect(() => {
-    setVisibleCount(6);
+    const t = setTimeout(() => {
+      setVisibleCount(6);
+    }, 0);
+    return () => clearTimeout(t);
   }, [searchQuery]);
 
   if (opportunities.length === 0) {

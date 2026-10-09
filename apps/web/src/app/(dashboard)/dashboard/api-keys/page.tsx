@@ -25,28 +25,6 @@ interface ApiKey {
 export default function DashboardApiKeys() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [keys, setKeys] = useState<ApiKey[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [newKeyName, setNewKeyName] = useState("");
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  const [services, setServices] = useState<string[]>([]);
-  const [selectedService, setSelectedService] = useState<string>("");
-  const [keyToDelete, setKeyToDelete] = useState<number | null>(null);
-
-  const [selectedKeys, setSelectedKeys] = useState<number[]>([]);
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
-
-  useEffect(() => {
-    fetchKeys();
-    fetchServices();
-  }, []);
-
   const fetchServices = async () => {
     try {
       const res = await fetch("/api/user/billing");
@@ -82,6 +60,30 @@ export default function DashboardApiKeys() {
       setLoading(false);
     }
   };
+
+  const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  const [services, setServices] = useState<string[]>([]);
+  const [selectedService, setSelectedService] = useState<string>("");
+  const [keyToDelete, setKeyToDelete] = useState<number | null>(null);
+
+  const [selectedKeys, setSelectedKeys] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+
+  useEffect(() => {
+    fetchKeys();
+    fetchServices();
+  }, []);
+
+
 
   const generateKey = async () => {
     setGenerating(true);

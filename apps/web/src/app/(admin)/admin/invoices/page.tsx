@@ -26,6 +26,20 @@ import { cn } from "@/lib/utils";
 export default function AdminInvoicesPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchInvoices = async () => {
+    try {
+      const res = await fetch("/api/admin/invoices");
+      if (res.ok) {
+        const data = await res.json();
+        setInvoices(data.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -57,19 +71,6 @@ export default function AdminInvoicesPage() {
     fetchInvoices();
   }, []);
 
-  const fetchInvoices = async () => {
-    try {
-      const res = await fetch("/api/admin/invoices");
-      if (res.ok) {
-        const data = await res.json();
-        setInvoices(data.data || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleValidateInvoice = async (id: number) => {
     const toastId = toast.loading("Validating payment...");

@@ -171,7 +171,7 @@ export function AIChat() {
   }, []);
 
   // Sync / Polling mechanism for Admin messages
-  const lastSyncTimeRef = useRef<number>(Date.now());
+  const lastSyncTimeRef = useRef<number>(0);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -264,7 +264,7 @@ export function AIChat() {
     id: 'greeting-initial',
     role: 'model',
     content: "Hello! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, Managed Kubernetes (K3s), Web Hosting**, or even ask me about my **Portfolio and Work Experience**!",
-    timestamp: Date.now()
+    timestamp: 0
   };
 
   // Load session and messages from localStorage on mount
@@ -307,6 +307,10 @@ export function AIChat() {
   }, []);
 
   // Save to localStorage whenever messages change
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
+
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify({
@@ -324,9 +328,7 @@ export function AIChat() {
     }
   }, [isOpen]);
 
-  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
-    messagesEndRef.current?.scrollIntoView({ behavior });
-  };
+
 
   // ─── Registration handler ────────────────────────────────────────────
   const handleRegister = async () => {

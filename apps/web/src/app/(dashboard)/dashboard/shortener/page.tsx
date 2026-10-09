@@ -28,10 +28,6 @@ export default function DashboardShortenerPage() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchLinks();
-  }, []);
-
   const fetchLinks = async () => {
     try {
       const res = await fetch("/api/shortener");
@@ -50,6 +46,10 @@ export default function DashboardShortenerPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchLinks();
+  }, []);
 
   const openDeleteModal = (id: number) => {
     setLinkToDelete(id);

@@ -13,6 +13,20 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 export default function AdminCustomersPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -59,19 +73,6 @@ export default function AdminCustomersPage() {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch("/api/admin/users");
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data.data || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDeleteUserConfirm = async () => {
     if (!deleteUserId) return;

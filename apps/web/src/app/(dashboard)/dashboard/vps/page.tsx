@@ -40,13 +40,6 @@ export default function MyVpsPage() {
   const [searchFilter, setSearchFilter] = useState("");
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchVps();
-    // Poll every 5s to update live status
-    const interval = setInterval(fetchVps, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchVps = async () => {
     try {
       const res = await fetch("/api/user/vps", { cache: 'no-store' });
@@ -60,6 +53,15 @@ export default function MyVpsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchVps();
+    // Poll every 5s to update live status
+    const interval = setInterval(fetchVps, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+
 
   const handleAction = async (vpsId: number, action: string) => {
     setConfirmModal(null);
@@ -231,18 +233,7 @@ export default function MyVpsPage() {
   const totalPages = Math.max(1, Math.ceil(filteredList.length / itemsPerPage));
   const paginatedList = filteredList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const PaginationControls = () => {
-    if (totalPages <= 1) return null;
-    return (
-      <div className="py-2">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      </div>
-    );
-  };
+
 
   return (
     <div className="w-full space-y-6">
@@ -297,14 +288,22 @@ export default function MyVpsPage() {
           </div>
           <h3 className={cn("text-xl font-bold  mb-2", isDark ? "text-white" : "text-slate-900")}>No VPS Found</h3>
           <p className={cn(" max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any active VPS instances yet. Deploy your first virtual private server to get started.</p>
-          <a href="/dashboard/checkout?service=vps" className={cn("font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}>
+          <Link href="/dashboard/checkout?service=vps" className={cn("font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}>
             Deploy New VPS
-          </a>
+          </Link>
         </div>
       ) : (
         <div className={cn("border rounded-2xl shadow-sm overflow-hidden flex flex-col", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
           <div className={cn("border-b", isDark ? "border-white/5" : "border-slate-100", "px-6 py-2   bg-black/20 flex flex-wrap items-center justify-between min-h-[56px] gap-4")}>
-            <PaginationControls />
+            {totalPages > 1 && (
+              <div className="py-2">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
             {selectedVps.length > 0 && (() => {
               const selectedVpsData = vpsList.filter(v => selectedVps.includes(v.id));
               const canStart = selectedVpsData.some(v => v.liveStatus?.status !== "running");
@@ -558,7 +557,15 @@ export default function MyVpsPage() {
           </div>
 
           <div className={cn("px-6 py-2 border-t", isDark ? "border-white/5 bg-black/20" : "border-slate-100 bg-slate-50")}>
-            <PaginationControls />
+            {totalPages > 1 && (
+              <div className="py-2">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

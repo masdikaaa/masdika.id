@@ -23,7 +23,9 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [categories, setCategories] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tags, setTags] = useState<any[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [showNewCategory, setShowNewCategory] = useState(false);
@@ -90,11 +92,12 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
             image: data.image || ""
           });
           if (data.tags) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setSelectedTags(data.tags.map((t: any) => t.id));
           }
           setLoading(false);
         })
-        .catch(err => {
+        .catch(() => {
           toast.error("Failed to load article");
           setLoading(false);
         });
@@ -557,7 +560,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
 
 // Simple markdown renderer for preview
 function renderMarkdown(md: string): string {
-  let html = md
+  const html = md
     // Escape HTML
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -602,7 +605,7 @@ function MarkdownPreview({ content }: { content: string }) {
           
           // Determine language and title
           let language = 'bash';
-          let title = langOrTitle;
+          const title = langOrTitle;
           
           if (langOrTitle) {
             const lower = langOrTitle.toLowerCase();

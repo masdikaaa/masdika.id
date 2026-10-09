@@ -69,7 +69,8 @@ export default function RegisterPage() {
   const [resendCountdown, setResendCountdown] = useState(0);
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const formLoadTimeRef = useRef(Date.now());
+  const formLoadTimeRef = useRef(0);
+  useEffect(() => { formLoadTimeRef.current = Date.now(); }, []);
 
   // Billing Info
   const [companyName, setCompanyName] = useState("");
@@ -530,6 +531,7 @@ export default function RegisterPage() {
                   <div className={dividerClass} /><span className={dividerTextClass}>Or continue with</span><div className={dividerClass} />
                 </div>
 
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a
                   href="/api/auth/google/login"
                   className={cn("w-full flex items-center justify-center gap-3 py-3.5 mb-4 rounded-xl border transition-colors", isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-slate-200 bg-white hover:bg-slate-50 shadow-sm")}

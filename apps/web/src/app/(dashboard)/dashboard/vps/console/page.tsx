@@ -12,8 +12,9 @@ function ConsoleContent() {
 
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<"loading" | "connected" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "connected" | "error" | "disconnected">("loading");
   const [errorMsg, setErrorMsg] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
   const rfbRef = useRef<any>(null);
 
   const vmid = searchParams.get("vmid");
@@ -24,6 +25,55 @@ function ConsoleContent() {
   const port = searchParams.get("port") || "5900";
   const tokenId = searchParams.get("tokenId") || "";
   const tokenSecret = searchParams.get("tokenSecret") || "";
+
+  const loadAndConnect = async () => {
+    try {
+      setStatus("loading");
+      if (!containerRef.current) return;
+
+      // Load noVNC from public folder (browser-only ES module, bypass bundler)
+      // @ts-expect-error
+      const { default: RFB } = await import(/* webpackIgnore: true */ "/novnc/core/rfb.js");
+
+      // Connect to our Next.js custom server VNC proxy (avoids CORS and port issues)
+      const wsProto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${wsProto}//${window.location.host}/api/ws/vnc?` + new URLSearchParams({
+        proxmoxHost, node: node!, vmid: vmid!, port, ticket, tokenId, tokenSecret
+      }).toString();
+
+      const rfb = new RFB(containerRef.current, wsUrl, {
+        // Pass the API token so Proxmox WS endpoint can authenticate us
+        wsProtocols: [],
+        credentials: { password: ticket },
+        shared: true
+      });
+
+      rfb.addEventListener("connect",  () => {
+        setStatus("connected");
+        setRetryCount(0);
+      });
+      rfb.addEventListener("disconnect", (e: any) => {
+        setStatus("disconnected");
+        if (e.detail?.clean === false) {
+          setErrorMsg("Connection dropped unexpectedly.");
+        }
+      });
+      rfb.addEventListener("securityfailure", () => {
+        setStatus("error");
+        setErrorMsg("VNC Security / Authentication Failure");
+      });
+
+      // Scale to fit
+      rfb.scaleViewport = true;
+      rfb.resizeSession = true;
+
+      rfbRef.current = rfb;
+    } catch (e: any) {
+      console.error(e);
+      setStatus("error");
+      setErrorMsg(e.message || "Failed to initialize noVNC");
+    }
+  };
 
   useEffect(() => {
     if (!ticket || !proxmoxHost || !vmid) {
@@ -39,51 +89,7 @@ function ConsoleContent() {
     };
   }, []);
 
-  const loadAndConnect = async () => {
-    try {
-      setStatus("loading");
-      if (!containerRef.current) return;
 
-      // Load noVNC from public folder (browser-only ES module, bypass bundler)
-      // @ts-ignore
-      const { default: RFB } = await import(/* webpackIgnore: true */ "/novnc/core/rfb.js");
-
-      // Connect to our Next.js custom server VNC proxy (avoids CORS and port issues)
-      const wsProto = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${wsProto}//${window.location.host}/api/ws/vnc?` + new URLSearchParams({
-        proxmoxHost, node: node!, vmid: vmid!, port, ticket, tokenId, tokenSecret
-      }).toString();
-
-      const rfb = new RFB(containerRef.current, wsUrl, {
-        // Pass the API token so Proxmox WS endpoint can authenticate us
-        wsProtocols: [],
-        credentials: { password: ticket },
-      });
-
-
-
-      rfb.addEventListener("connect", () => {
-        console.log("VNC Connected!");
-        setStatus("connected");
-      });
-
-      rfb.addEventListener("disconnect", (e: any) => {
-        console.log("Disconnect:", e.detail);
-        if (!e.detail.clean) {
-          setStatus("error");
-          setErrorMsg("VNC connection lost. Session may have expired. Click Reconnect.");
-        }
-      });
-
-      rfb.scaleViewport = true;
-      rfb.resizeSession = true;
-      rfbRef.current = rfb;
-    } catch (e: any) {
-      console.error("VNC connection error:", e);
-      setStatus("error");
-      setErrorMsg(e.message || "Failed to establish VNC connection.");
-    }
-  };
 
   const reconnect = () => {
     if (rfbRef.current) {

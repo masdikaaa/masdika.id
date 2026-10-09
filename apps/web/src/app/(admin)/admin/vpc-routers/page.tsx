@@ -23,6 +23,21 @@ type VpcRouter = {
 export default function VpcRoutersPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchRouters = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/vpc-routers");
+      if (res.ok) {
+        const data = await res.json();
+        setRouters(data);
+      }
+    } catch (e) {
+      toast.error("Failed to fetch VPC Routers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [routers, setRouters] = useState<VpcRouter[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -48,20 +63,6 @@ export default function VpcRoutersPage() {
     fetchRouters();
   }, []);
 
-  const fetchRouters = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/vpc-routers");
-      if (res.ok) {
-        const data = await res.json();
-        setRouters(data);
-      }
-    } catch (e) {
-      toast.error("Failed to fetch VPC Routers");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     if (!formData.name || !formData.host || !formData.username || (!formData.password && !showEditModal)) {

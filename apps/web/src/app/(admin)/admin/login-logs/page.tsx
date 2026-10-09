@@ -20,6 +20,23 @@ type LoginLog = {
 export default function LoginLogsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/login-logs');
+      if (res.ok) {
+        const data = await res.json();
+        setLogs(data);
+      } else {
+        toast.error('Failed to load login logs');
+      }
+    } catch {
+      toast.error('Something went wrong while fetching logs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [logs, setLogs] = useState<LoginLog[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -43,22 +60,6 @@ export default function LoginLogsPage() {
     fetchLogs();
   }, []);
 
-  const fetchLogs = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/login-logs');
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data);
-      } else {
-        toast.error('Failed to load login logs');
-      }
-    } catch {
-      toast.error('Something went wrong while fetching logs');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async () => {
     if (!deleteId) return;

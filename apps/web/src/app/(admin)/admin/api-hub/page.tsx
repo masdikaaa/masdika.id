@@ -11,6 +11,20 @@ import { Pagination } from "@/components/ui/Pagination";
 export default function AdminApiHubPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const fetchKeys = async () => {
+    try {
+      const res = await fetch("/api/admin/api-hub");
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -29,19 +43,6 @@ export default function AdminApiHubPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchKeys = async () => {
-    try {
-      const res = await fetch("/api/admin/api-hub");
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async () => {
     if (!deleteId) return;

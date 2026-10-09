@@ -654,9 +654,9 @@ export default function UserCDNLibrary() {
                 <h4 className="text-lg font-bold text-red-400">Service Suspended</h4>
                 <p className={cn("text-sm mt-1", isDark ? "text-zinc-300" : "text-slate-500")}>Your File CDN service is suspended. Please resolve any pending invoices to restore full access. You cannot upload, modify, or share files.</p>
               </div>
-              <a href="/dashboard/billing" className={cn("bg-red-500 hover:bg-red-600 font-bold py-2.5 px-6 rounded-xl transition-colors whitespace-nowrap shrink-0 shadow-md", isDark ? "text-white" : "text-slate-900")}>
+              <Link href="/dashboard/billing" className={cn("bg-red-500 hover:bg-red-600 font-bold py-2.5 px-6 rounded-xl transition-colors whitespace-nowrap shrink-0 shadow-md", isDark ? "text-white" : "text-slate-900")}>
                 View Billing
-              </a>
+              </Link>
             </motion.div>
           )}
       <AnimatePresence>

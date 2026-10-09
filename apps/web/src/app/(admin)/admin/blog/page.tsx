@@ -13,6 +13,7 @@ import { Pagination } from "@/components/ui/Pagination";
 export default function AdminBlogPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

@@ -85,6 +85,73 @@ export default function K3sDetailPage() {
   const [selectedNodes, setSelectedNodes] = useState<number[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
 
+  const fetchMetrics = async (showLoading = false, force = false) => {
+    try {
+      if (showLoading) setLoadingMetrics(true);
+      const url = force ? `/api/user/k3s/${params.id}/metrics?force=true` : `/api/user/k3s/${params.id}/metrics`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setMetrics(data);
+      }
+    } catch (e) {
+      console.error("Failed to load metrics", e);
+    } finally {
+      setLoadingMetrics(false);
+    }
+  };
+
+  const fetchHistoryMetrics = async (showLoading = true) => {
+    try {
+      if (showLoading) setLoadingHistory(true);
+      const res = await fetch(`/api/user/k3s/${params.id}/metrics/history`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setHistoryMetrics(data);
+      }
+    } catch (e) {
+      console.error("Failed to load history metrics", e);
+    } finally {
+      if (showLoading) setLoadingHistory(false);
+    }
+  };
+
+  const fetchCluster = async (isBackground = false) => {
+    try {
+      const res = await fetch(`/api/user/k3s/${params.id}`, { cache: 'no-store' });
+      const data = await res.json();
+
+      if (res.ok) {
+        setCluster(data);
+        if (data.pricing) setPricing(data.pricing);
+        if (data.status === 'RUNNING' || data.kubeconfig) {
+          let forceMetrics = false;
+          if (data.nodes) {
+            const currentRunning = data.nodes.filter((n: any) => n.status === 'RUNNING').length;
+            if (runningNodesCountRef.current !== -1 && currentRunning > runningNodesCountRef.current) {
+              forceMetrics = true;
+            }
+            runningNodesCountRef.current = currentRunning;
+          }
+          
+          if (!isBackground || forceMetrics) {
+            fetchMetrics(!metrics, forceMetrics);
+          }
+          if (isBackground && activeTabRef.current === 'monitoring') {
+            fetchHistoryMetrics(false);
+          }
+        }
+      } else {
+        toast.error(data.error || "Failed to load cluster");
+        router.push("/dashboard/k3s");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      if (!isBackground) setLoading(false);
+    }
+  };
+
   const handleBulkNodeAction = async (action: 'start' | 'shutdown' | 'reboot') => {
     setBulkLoading(true);
     let successCount = 0;
@@ -298,72 +365,7 @@ export default function K3sDetailPage() {
     }
   }, [activeTab, cluster]);
 
-  const fetchHistoryMetrics = async (showLoading = true) => {
-    try {
-      if (showLoading) setLoadingHistory(true);
-      const res = await fetch(`/api/user/k3s/${params.id}/metrics/history`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setHistoryMetrics(data);
-      }
-    } catch (e) {
-      console.error("Failed to load history metrics", e);
-    } finally {
-      if (showLoading) setLoadingHistory(false);
-    }
-  };
 
-  const fetchCluster = async (isBackground = false) => {
-    try {
-      const res = await fetch(`/api/user/k3s/${params.id}`, { cache: 'no-store' });
-      const data = await res.json();
-
-      if (res.ok) {
-        setCluster(data);
-        if (data.pricing) setPricing(data.pricing);
-        if (data.status === 'RUNNING' || data.kubeconfig) {
-          let forceMetrics = false;
-          if (data.nodes) {
-            const currentRunning = data.nodes.filter((n: any) => n.status === 'RUNNING').length;
-            if (runningNodesCountRef.current !== -1 && currentRunning > runningNodesCountRef.current) {
-              forceMetrics = true;
-            }
-            runningNodesCountRef.current = currentRunning;
-          }
-          
-          if (!isBackground || forceMetrics) {
-            fetchMetrics(!metrics, forceMetrics);
-          }
-          if (isBackground && activeTabRef.current === 'monitoring') {
-            fetchHistoryMetrics(false);
-          }
-        }
-      } else {
-        toast.error(data.error || "Failed to load cluster");
-        router.push("/dashboard/k3s");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      if (!isBackground) setLoading(false);
-    }
-  };
-
-  const fetchMetrics = async (showLoading = false, force = false) => {
-    try {
-      if (showLoading) setLoadingMetrics(true);
-      const url = force ? `/api/user/k3s/${params.id}/metrics?force=true` : `/api/user/k3s/${params.id}/metrics`;
-      const res = await fetch(url, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setMetrics(data);
-      }
-    } catch (e) {
-      console.error("Failed to load metrics", e);
-    } finally {
-      setLoadingMetrics(false);
-    }
-  };
 
   const handleDownloadKubeconfig = () => {
     if (!cluster?.kubeconfig) {

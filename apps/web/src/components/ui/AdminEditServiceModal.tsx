@@ -18,18 +18,21 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
   useEffect(() => {
     if (service && service.rawData) {
       const raw = service.rawData;
-      setFormData({
-        hostname: raw.hostname || '',
-        username: raw.username || '',
-        password: '', // Empty by default so we don't send anything unless changed
-        cpuCores: raw.cpuCores || '',
-        ramGb: raw.ramGb || '',
-        diskGb: raw.diskGb || '',
-        node: raw.node || '',
-        status: raw.status || '',
-        expiresAt: raw.expiresAt ? new Date(raw.expiresAt).toISOString().slice(0, 10) : '',
-        terminationDate: raw.terminationDate ? new Date(raw.terminationDate).toISOString().slice(0, 10) : '',
-      });
+      const t = setTimeout(() => {
+        setFormData({
+          hostname: raw.hostname || '',
+          username: raw.username || '',
+          password: '', // Empty by default so we don't send anything unless changed
+          cpuCores: raw.cpuCores || '',
+          ramGb: raw.ramGb || '',
+          diskGb: raw.diskGb || '',
+          node: raw.node || '',
+          status: raw.status || '',
+          expiresAt: raw.expiresAt ? new Date(raw.expiresAt).toISOString().slice(0, 10) : '',
+          terminationDate: raw.terminationDate ? new Date(raw.terminationDate).toISOString().slice(0, 10) : '',
+        });
+      }, 0);
+      return () => clearTimeout(t);
     }
   }, [service]);
 

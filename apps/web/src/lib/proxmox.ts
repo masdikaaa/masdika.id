@@ -37,7 +37,7 @@ export class ProxmoxClient {
 
     const options: RequestInit = {
       method,
-      // @ts-ignore - Next.js/Node fetch supports agent
+      // @ts-expect-error - Next.js/Node fetch supports agent
       agent: this.httpsAgent,
     };
 

@@ -192,6 +192,26 @@ export default function CloudflaredPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   // Tabs
+  const fetchDomains = async () => {
+    setDomainsLoading(true);
+    try {
+      const res = await fetch("/api/tunnels/domains");
+      const data = await res.json();
+      if (res.ok) setDomains(data.domains || []);
+    } catch { /* ignore */ }
+    finally { setDomainsLoading(false); }
+  };
+
+  const fetchTunnels = async () => {
+    setTunnelsLoading(true);
+    try {
+      const res = await fetch("/api/tunnels/list");
+      const data = await res.json();
+      if (res.ok) setTunnels(data.tunnels || []);
+    } catch { /* ignore */ }
+    finally { setTunnelsLoading(false); }
+  };
+
   const [activeTab, setActiveTab] = useState<ActiveTab>("domains");
 
   // Domain state
@@ -250,15 +270,6 @@ export default function CloudflaredPage() {
   }, []);
 
   // ==================== DOMAIN FUNCTIONS ====================
-  const fetchDomains = async () => {
-    setDomainsLoading(true);
-    try {
-      const res = await fetch("/api/tunnels/domains");
-      const data = await res.json();
-      if (res.ok) setDomains(data.domains || []);
-    } catch { /* ignore */ }
-    finally { setDomainsLoading(false); }
-  };
 
   const handleAddDomain = async () => {
     if (!newDomainName.trim()) {
@@ -332,15 +343,6 @@ export default function CloudflaredPage() {
   };
 
   // ==================== TUNNEL FUNCTIONS ====================
-  const fetchTunnels = async () => {
-    setTunnelsLoading(true);
-    try {
-      const res = await fetch("/api/tunnels/list");
-      const data = await res.json();
-      if (res.ok) setTunnels(data.tunnels || []);
-    } catch { /* ignore */ }
-    finally { setTunnelsLoading(false); }
-  };
 
   const handleDeleteTunnel = async () => {
     if (!deleteTunnelModal) return;
