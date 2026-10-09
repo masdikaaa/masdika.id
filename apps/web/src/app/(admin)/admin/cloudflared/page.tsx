@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Globe, Trash2, Search, RefreshCw, Server, CheckCircle, Shield } from "lucide-react";
+import { Globe, Trash2, Search, RefreshCw, Server, CheckCircle, Shield, Network } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -306,13 +306,17 @@ export default function AdminCloudflaredPage() {
                     paginatedTunnels.map((t) => (
                       <tr key={t.id} className="hover:bg-white/[0.01] transition-colors group">
                         <td className="p-4 whitespace-nowrap">
-                          <div className={cn("font-semibold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                            <Shield className="w-4 h-4 text-emerald-500" />
-                            {t.name}
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 shrink-0 bg-cyan-500/10 rounded-xl flex items-center justify-center">
+                              <Network className="w-5 h-5 text-cyan-400" />
+                            </div>
+                            <div>
+                              <span className={cn("font-bold block", isDark ? "text-white" : "text-slate-900")}>{t.name}</span>
+                              <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                Created {new Date(t.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
-                          <p className={cn("text-xs ml-6", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            Created {new Date(t.createdAt).toLocaleDateString()}
-                          </p>
                         </td>
                         <td className="p-4 whitespace-nowrap">
                           {t.user ? (

@@ -65,7 +65,12 @@ export async function GET(req: Request) {
       const cfTunnel = cfTunnelsData.find((cf: any) => cf.id === t.cfTunnelId);
       let connectors = 0;
       if (cfTunnel && cfTunnel.connections) {
-        connectors = cfTunnel.connections.length;
+        const uniqueConnectors = new Set();
+        for (const conn of cfTunnel.connections) {
+          const clientId = conn.id || conn.client_id;
+          if (clientId) uniqueConnectors.add(clientId);
+        }
+        connectors = uniqueConnectors.size;
       }
       return {
         ...t,
