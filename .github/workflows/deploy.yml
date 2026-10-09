@@ -36,7 +36,7 @@ jobs:
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
             # Build and restart containers (if docker-compose is used)
             if [ -f "docker-compose.yml" ]; then
-              docker-compose up -d --build
+              docker compose up -d --build
             elif [ -f "package.json" ]; then
               npm install
               npm run build
