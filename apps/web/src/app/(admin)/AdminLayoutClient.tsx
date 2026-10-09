@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Menu, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Database, Receipt, CreditCard, Server, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -60,11 +60,12 @@ export default function AdminLayout({
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
   const pathname = usePathname();
-  const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileData, setProfileData] = useState<{ name: string, image: string | null }>({ name: initialName || "Admin", image: initialImage || null });
   const [showNotifications, setShowNotifications] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [notifications, setNotifications] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -194,6 +195,7 @@ export default function AdminLayout({
       >
         <div className={cn("h-16 flex items-center px-6 border-b shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
@@ -294,7 +296,7 @@ export default function AdminLayout({
                       ))
                     ) : (
                       <div className="p-4 text-center text-sm text-zinc-500">
-                        No results found for "{searchQuery}"
+                        No results found for &quot;{searchQuery}&quot;
                       </div>
                     )}
                   </div>
@@ -368,7 +370,7 @@ export default function AdminLayout({
                                         });
                                         setNotifications(prev => prev.filter(n => n.id !== notif.id));
                                         setUnreadCount(prev => Math.max(0, prev - 1));
-                                      } catch (err) { }
+                                      } catch { }
                                     }
                                   }}
                                   className="w-4 h-4 rounded-full bg-cyan-500/20 hover:bg-cyan-500 flex items-center justify-center transition-colors group/mark"
@@ -401,6 +403,7 @@ export default function AdminLayout({
               </div>
               <div className={cn("w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-bold overflow-hidden border", isDark ? "text-white border-white/10" : "text-slate-900 border-slate-200")}>
                 {profileData.image ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img referrerPolicy="no-referrer" src={profileData.image} alt={`${profileData.name} profile picture`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <span aria-hidden="true">{profileData.name.charAt(0).toUpperCase()}</span>

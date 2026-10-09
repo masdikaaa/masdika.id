@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Landmark, Check, X, Search, Clock, RefreshCw } from "lucide-react";
+import { Check, X, Clock, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 export default function AdminAffiliatePage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -29,7 +30,7 @@ export default function AdminAffiliatePage() {
       } else {
         toast.error(json.error || "Failed to load data");
       }
-    } catch (error) {
+    } catch {
       toast.error("Network error occurred");
     } finally {
       setLoading(false);
@@ -57,7 +58,7 @@ export default function AdminAffiliatePage() {
       } else {
         toast.error(json.error || "Failed to process action");
       }
-    } catch (error) {
+    } catch {
       toast.error("Network error occurred");
     } finally {
       setProcessingId(null);

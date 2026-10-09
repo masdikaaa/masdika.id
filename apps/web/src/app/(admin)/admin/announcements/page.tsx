@@ -21,7 +21,9 @@ const defaultFormData = {
 export default function AdminAnnouncementsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -39,6 +41,7 @@ export default function AdminAnnouncementsPage() {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const [isLegacyHtml, setIsLegacyHtml] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [structuredData, setStructuredData] = useState<any>({});
 
   const [showModal, setShowModal] = useState(false);
@@ -265,6 +268,7 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openModal = (announcement?: any) => {
     if (announcement) {
       setEditingId(announcement.id);
