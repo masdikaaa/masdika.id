@@ -10,10 +10,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
   const isDark = theme === "dark";
 
   return (
-    <div className="pt-24 md:pt-32 pb-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 overflow-hidden">
-      {/* Background Glows */}
-      <div className={cn("absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none -mr-40 -mt-20", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
-      <div className={cn("absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none -ml-40 -mb-20", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
+    <div className="pt-24 md:pt-32 pb-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-screen">
 
       <AnimatedSection className="text-center max-w-4xl mx-auto mb-16 pt-10 relative z-10">
         <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}>
