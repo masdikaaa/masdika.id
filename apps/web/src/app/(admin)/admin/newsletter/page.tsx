@@ -125,7 +125,7 @@ export default function NewsletterPage() {
     <div className="space-y-6 w-full">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Newsletter</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Newsletter</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your newsletter subscribers</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -156,8 +156,7 @@ export default function NewsletterPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className={cn("glass p-6 rounded-2xl border relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
-          <div className={cn("absolute top-0 right-0 w-32 h-32 blur-[50px] rounded-full transition-colors", isDark ? "bg-cyan-500/10 group-hover:bg-cyan-500/20" : "bg-slate-200/50 group-hover:bg-slate-300/50")} />
+        <div className={cn("p-6 rounded-2xl border group", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200")}>
           <div className="flex items-center gap-4 relative z-10">
             <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", isDark ? "bg-white/5 border border-white/10 text-cyan-400" : "bg-slate-100 border border-slate-200 text-slate-600")}>
               <Users className="w-6 h-6" />
@@ -170,7 +169,7 @@ export default function NewsletterPage() {
         </div>
       </div>
 
-      <div className={cn("glass rounded-2xl border overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200")}>
         <div className={cn("p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-center", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
           <div className="relative w-full sm:w-96">
             <Search className={cn("w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-400" : "text-slate-500")} />
