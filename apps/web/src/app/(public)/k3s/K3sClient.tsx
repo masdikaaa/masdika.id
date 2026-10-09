@@ -111,36 +111,22 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
           </FadeIn>
 
           <FadeIn direction="up" delay={0.4}>
-            {/* Trust badges */}
-            <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 backdrop-blur-sm border rounded-2xl p-6 md:p-8 mt-16 max-w-5xl mx-auto shadow-2xl", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-lg")}>
-              <div className={cn("flex items-center gap-3 lg:pr-6 lg:border-r", isDark ? "border-white/10" : "border-slate-200")}>
-                <Cloud className={cn("w-7 h-7 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <div className="flex flex-col text-left">
-                  <span className={cn(" font-bold text-sm leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>98.99% SLA</span>
-                  <span className={cn(" text-[10px] uppercase tracking-wider font-bold".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Uptime Guarantee</span>
+                        {/* Trust badges */}
+            <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto")}>
+              {[
+                { icon: Cloud, title: "98.99% SLA", sub: "Uptime Guarantee" },
+                { icon: ShieldCheck, title: "Enterprise Security", sub: "Anti-DDoS Protected" },
+                { icon: CheckCircle2, title: "Proven Reliability", sub: "Trusted by Developers" },
+                { icon: Activity, title: "24/7 Support", sub: "Expert Assistance" },
+              ].map((b, i) => (
+                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm")}>
+                  <b.icon className={cn("w-6 h-6 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                  <div className="text-left">
+                    <span className={cn("font-bold text-sm leading-tight block", isDark ? "text-white" : "text-slate-900")}>{b.title}</span>
+                    <span className={cn("text-[10px] uppercase tracking-wider font-bold", isDark ? "text-zinc-500" : "text-slate-500")}>{b.sub}</span>
+                  </div>
                 </div>
-              </div>
-              <div className={cn("flex items-center gap-3 sm:pl-6 lg:px-6 lg:border-r", isDark ? "border-white/10" : "border-slate-200")}>
-                <ShieldCheck className={cn("w-7 h-7 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <div className="flex flex-col text-left">
-                  <span className={cn(" font-bold text-sm leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>Enterprise Security</span>
-                  <span className={cn(" text-[10px] uppercase tracking-wider font-bold".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Anti-DDoS Protected</span>
-                </div>
-              </div>
-              <div className={cn("flex items-center gap-3 lg:px-6 lg:border-r", isDark ? "border-white/10" : "border-slate-200")}>
-                <CheckCircle2 className={cn("w-7 h-7 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <div className="flex flex-col text-left">
-                  <span className={cn(" font-bold text-sm leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>Proven Reliability</span>
-                  <span className={cn(" text-[10px] uppercase tracking-wider font-bold".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Trusted by Developers</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 sm:pl-6 lg:pl-6">
-                <Activity className={cn("w-7 h-7 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <div className="flex flex-col text-left">
-                  <span className={cn(" font-bold text-sm leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>24/7 Support</span>
-                  <span className={cn(" text-[10px] uppercase tracking-wider font-bold".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Expert Assistance</span>
-                </div>
-              </div>
+              ))}
             </div>
           </FadeIn>
         </section>

@@ -97,8 +97,8 @@ const EndpointSection = ({ isDark, id, title, icon: Icon, method, endpoint, desc
           {parameters && (
             <div>
               <h3 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3", isDark ? "text-zinc-600" : "text-slate-400")}>Parameters</h3>
-              <div className={cn("rounded-lg border overflow-hidden", isDark ? "border-white/[0.06]" : "border-slate-200")}>
-                <table className="w-full text-sm text-left">
+              <div className={cn("rounded-lg border overflow-x-auto", isDark ? "border-white/[0.06]" : "border-slate-200")}>
+                <table className="w-full min-w-[500px] text-sm text-left">
                   <thead className={cn("text-[10px] uppercase tracking-wider border-b", isDark ? "bg-white/[0.02] border-white/[0.06] text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-400")}>
                     <tr>
                       <th className="px-4 py-2.5 font-bold">Parameter</th>
