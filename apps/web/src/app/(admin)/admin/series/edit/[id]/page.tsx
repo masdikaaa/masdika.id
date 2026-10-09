@@ -215,11 +215,11 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
 
         <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
           <label className="flex items-center gap-3 cursor-pointer group">
-            <div className={`w-12 h-7 rounded-full transition-colors border shadow-inner ${form.published ? 'bg-cyan-500 border-cyan-400' : isDark ? "bg-white/5 border-white/10" : "bg-slate-200 border-slate-300"} relative`}
+            <div className={cn("relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", form.published ? "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)]" : isDark ? "bg-white/10 hover:bg-white/20" : "bg-slate-300 hover:bg-slate-400")}
               onClick={() => setForm(f => ({ ...f, published: !f.published }))}>
-              <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${form.published ? 'left-6' : 'left-1'}`} />
+              <span className={cn("pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out", form.published ? "translate-x-5" : "translate-x-0")} />
             </div>
-            <span className={cn("text-sm font-bold group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{form.published ? 'Published' : 'Draft'}</span>
+            <span className={cn("text-sm font-bold transition-colors", form.published ? "text-cyan-500" : isDark ? "text-white" : "text-slate-900")}>{form.published ? 'Published' : 'Draft'}</span>
           </label>
           <button onClick={handleSaveSeries} disabled={saving}
             className={cn("flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto font-bold rounded-xl disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
