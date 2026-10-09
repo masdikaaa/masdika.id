@@ -701,17 +701,28 @@ export default function CloudflaredPage() {
                   <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Connectors</h2>
                   <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Review established connections between Cloudflare's network and your infrastructure.</p>
                 </div>
-                <button
-                  onClick={() => {
-                    if (canAddConnector) setShowAddConnector(true);
-                    else toast.error(`Connector limit reached. You can only run ${userVpsCount} connector(s) with your ${userVpsCount} active VPS.`);
-                  }}
-                  className={cn("px-4 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap shrink-0 flex items-center gap-2",
-                    canAddConnector ? "bg-[#00B4D8] hover:bg-[#00cceb] text-white shadow-[0_0_15px_rgba(0,180,216,0.4)]" : "bg-white/5 text-zinc-500 border border-white/5 cursor-not-allowed")}
-                  title={!canAddConnector ? `Limit reached: ${userVpsCount} VPS = ${userVpsCount} connector(s)` : ""}
-                >
-                  Add a connector
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={fetchTunnels}
+                    disabled={tunnelsLoading}
+                    className={cn("p-2 rounded-xl border transition-all disabled:opacity-50",
+                      isDark ? "border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white bg-black/20" : "border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-slate-700 bg-white")}
+                    title="Refresh connectors"
+                  >
+                    <RefreshCw className={cn("w-4 h-4", tunnelsLoading && "animate-spin")} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (canAddConnector) setShowAddConnector(true);
+                      else toast.error(`Connector limit reached. You can only run ${userVpsCount} connector(s) with your ${userVpsCount} active VPS.`);
+                    }}
+                    className={cn("px-4 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap shrink-0 flex items-center gap-2",
+                      canAddConnector ? "bg-[#00B4D8] hover:bg-[#00cceb] text-white shadow-[0_0_15px_rgba(0,180,216,0.4)]" : "bg-white/5 text-zinc-500 border border-white/5 cursor-not-allowed")}
+                    title={!canAddConnector ? `Limit reached: ${userVpsCount} VPS = ${userVpsCount} connector(s)` : ""}
+                  >
+                    Add a connector
+                  </button>
+                </div>
               </div>
 
               {groupedConnectors.length === 0 ? (
