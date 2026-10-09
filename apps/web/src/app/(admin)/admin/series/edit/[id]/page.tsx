@@ -197,7 +197,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
 
         <div className="space-y-3">
           <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><ImageIcon className="w-4 h-4" /> Cover Image</label>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input type="text" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
               placeholder="https://... or select from media library"
               className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
@@ -213,7 +213,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           )}
         </div>
 
-        <div className={cn("flex items-center justify-between pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
           <label className="flex items-center gap-3 cursor-pointer group">
             <div className={`w-12 h-7 rounded-full transition-colors border shadow-inner ${form.published ? 'bg-cyan-500 border-cyan-400' : isDark ? "bg-white/5 border-white/10" : "bg-slate-200 border-slate-300"} relative`}
               onClick={() => setForm(f => ({ ...f, published: !f.published }))}>
@@ -222,7 +222,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
             <span className={cn("text-sm font-bold group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{form.published ? 'Published' : 'Draft'}</span>
           </label>
           <button onClick={handleSaveSeries} disabled={saving}
-            className={cn("flex items-center gap-2 px-8 py-4  font-bold rounded-xl disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+            className={cn("flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto font-bold rounded-xl disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             <Save className="w-5 h-5" /> {saving ? 'Saving...' : 'Save Series'}
           </button>
         </div>
