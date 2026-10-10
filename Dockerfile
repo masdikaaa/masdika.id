@@ -87,6 +87,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY="0x4AAAAAABn5hezv1vvdPF97"
 
 RUN apk add --no-cache openssl vips dcron wget su-exec postgresql-client mariadb-client mongodb-tools docker-cli iputils mtr traceroute bind-tools
 
