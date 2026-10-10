@@ -216,7 +216,7 @@ export default function ResellerApiClient() {
       </div>
 
       {/* ══════════ Hero ══════════ */}
-      <section className="relative w-full pt-10 pb-16 md:pb-24 px-4 sm:px-6 z-10">
+      <section className="relative w-full pt-10 pb-24 md:pb-32 px-4 sm:px-6 z-10">
         <div className="max-w-5xl mx-auto text-center">
           <FadeIn direction="up">
             <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
