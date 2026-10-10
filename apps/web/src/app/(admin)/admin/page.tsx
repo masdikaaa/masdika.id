@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                      <div key={msg.id} className={cn("flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer group shadow-inner hover:shadow-lg", isDark ? "bg-[#0A0B1A]/40 hover:bg-[#0A0B1A] border-white/5" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
                        <div className="flex items-center gap-4 truncate">
                          {msg.name === "System Notification" ? (
-                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center border shadow-inner shrink-0", isDark ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-amber-50 text-amber-600 border-amber-200")}>
+                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center border shadow-inner shrink-0 transition-transform group-hover:scale-105", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/25 shadow-[0_0_12px_rgba(6,182,212,0.15)]" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                               {msg.subject?.toLowerCase().includes("top up") || msg.subject?.toLowerCase().includes("payment") ? <Wallet className="w-5 h-5" /> : msg.subject?.toLowerCase().includes("user") ? <UserPlus className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
                             </div>
                          ) : (
