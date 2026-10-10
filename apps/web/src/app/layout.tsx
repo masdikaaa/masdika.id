@@ -49,8 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      template: "%s | Masdika Cloud",
-      default: "Masdika Cloud | Cloud & DevOps Engineer",
+      template: "%s",
+      default: "Masdika | Cloud & DevOps Engineer",
     },
     description,
     openGraph: {
