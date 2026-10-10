@@ -82,6 +82,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:v1.0.0
+          build-args: |
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache,mode=max
 
