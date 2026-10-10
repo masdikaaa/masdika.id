@@ -226,19 +226,21 @@ export default function LoginPage() {
 
               {/* Turnstile */}
               <div className="pt-2 w-full flex justify-center">
-                <Turnstile
-                  siteKey="0x4AAAAAABn5hezv1vvdPF97"
-                  onSuccess={(token) => setTurnstileToken(token)}
-                  options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
-                  className="w-full"
-                  style={{ width: '100%' }}
-                />
+                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
+                    className="w-full"
+                    style={{ width: '100%' }}
+                  />
+                )}
               </div>
 
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading || (!turnstileToken && !show2FA)}
+                disabled={loading || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken && !show2FA)}
                 className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-6 py-4 font-bold tracking-wide transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-6 shadow-sm hover:shadow-[0_0_20px_rgba(8,145,178,0.3)]"
               >
                   {loading ? "Processing..." : (show2FA ? "Verify & Login" : "Sign In")}

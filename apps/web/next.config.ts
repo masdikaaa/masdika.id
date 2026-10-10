@@ -1,9 +1,15 @@
 import type { NextConfig } from "next";
 import { config } from "dotenv";
 import { join } from "path";
+import { existsSync } from "fs";
 
 // Load .env from the root of the monorepo for build-time operations
-config({ path: join(process.cwd(), "../../.env") });
+const envPath = existsSync(join(process.cwd(), ".env"))
+  ? join(process.cwd(), ".env")
+  : existsSync(join(process.cwd(), "../../.env"))
+    ? join(process.cwd(), "../../.env")
+    : join(__dirname, "../../.env");
+config({ path: envPath });
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp"],

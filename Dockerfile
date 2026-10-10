@@ -42,9 +42,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm --workspace=@masdika/web run postinstall --if-present
 
 # Build Next.js
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
-    GROQ_API_KEY="dummy" \
-    npm run build
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
+ENV GROQ_API_KEY="dummy"
+RUN npm run build
 
 # Bundle custom server for WebSocket/VNC support in standalone mode.
 # next, ws, cookie are marked --external so they must exist in node_modules at runtime.

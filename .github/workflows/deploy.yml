@@ -118,6 +118,6 @@ jobs:
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
             docker compose pull app worker
-            docker compose up -d
+            docker compose up -d --force-recreate app worker
             docker image prune -f
             docker restart masdika_nginx
