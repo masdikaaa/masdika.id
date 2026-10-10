@@ -12,10 +12,9 @@ COPY apps/web/package.json ./apps/web/
 COPY apps/web/prisma ./apps/web/prisma
 COPY apps/web/prisma.config.ts ./apps/web/
 
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
-
 # Install fresh dependencies
-RUN npm install --legacy-peer-deps
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
+    npm install --legacy-peer-deps
 
 # Reinstall sharp specifically for Alpine/musl so the native binary is correct
 # This MUST happen in deps so runner can simply copy node_modules without any npm run
@@ -41,10 +40,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Generate Prisma Client
 RUN npm --workspace=@masdika/web run postinstall --if-present
 
-# Build Next.js
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
-ENV GROQ_API_KEY="dummy"
-RUN npm run build
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
+    GROQ_API_KEY="dummy" \
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY="${NEXT_PUBLIC_TURNSTILE_SITE_KEY}" \
+    npm run build
 
 # Bundle custom server for WebSocket/VNC support in standalone mode.
 # next, ws, cookie are marked --external so they must exist in node_modules at runtime.

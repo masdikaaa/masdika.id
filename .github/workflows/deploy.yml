@@ -82,6 +82,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:v1.0.0
+          build-args: |
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache,mode=max
 
@@ -108,7 +110,7 @@ jobs:
           TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
           EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /elasticsearch_data/, /apps/web/public/uploads/, /apps/web/storage/"
 
-      - name: Restart Docker Compose
+      - name: Pull Image & Restart Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -117,6 +119,9 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
-            docker compose up -d --build
-            docker builder prune -f
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker compose pull app worker
+            docker compose up -d --force-recreate app worker
+            docker compose up -d
+            docker image prune -f
             docker compose restart nginx || true
