@@ -108,7 +108,7 @@ jobs:
           TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
           EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /elasticsearch_data/, /apps/web/public/uploads/, /apps/web/storage/"
 
-      - name: Pull Image & Restart Docker Compose
+      - name: Restart Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -117,7 +117,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
-            docker compose pull app worker
-            docker compose up -d --force-recreate app worker
-            docker image prune -f
-            docker restart masdika_nginx
+            docker compose up -d --build
+            docker builder prune -f
+            docker compose restart nginx || true
