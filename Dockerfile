@@ -41,11 +41,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Generate Prisma Client
 RUN npm --workspace=@masdika/web run postinstall --if-present
 
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
 # Build Next.js
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
     GROQ_API_KEY="dummy" \
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY="${NEXT_PUBLIC_TURNSTILE_SITE_KEY}" \
     npm run build
 
 # Bundle custom server for WebSocket/VNC support in standalone mode.
@@ -88,9 +86,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
-ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY="${NEXT_PUBLIC_TURNSTILE_SITE_KEY}"
 
 RUN apk add --no-cache openssl vips dcron wget su-exec postgresql-client mariadb-client mongodb-tools docker-cli iputils mtr traceroute bind-tools
 
