@@ -15,11 +15,13 @@ COPY apps/web/prisma.config.ts ./apps/web/
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
 
 # Install fresh dependencies
-RUN npm install --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --legacy-peer-deps
 
 # Reinstall sharp specifically for Alpine/musl so the native binary is correct
 # This MUST happen in deps so runner can simply copy node_modules without any npm run
-RUN rm -rf node_modules/@img node_modules/sharp && \
+RUN --mount=type=cache,target=/root/.npm \
+    rm -rf node_modules/@img node_modules/sharp && \
     npm install --os=linux --libc=musl --cpu=x64 sharp --legacy-peer-deps
 
 # ─── Stage 2: Build the Next.js app ───────────────────────────────────────────
@@ -42,7 +44,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm --workspace=@masdika/web run postinstall --if-present
 
 # Build Next.js
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
+RUN --mount=type=cache,target=/app/apps/web/.next/cache \
+    DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
     GROQ_API_KEY="dummy" \
     npm run build
 

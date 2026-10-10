@@ -82,8 +82,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:v1.0.0
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ==========================================
   # JOB 4: CONTINUOUS DEPLOYMENT
