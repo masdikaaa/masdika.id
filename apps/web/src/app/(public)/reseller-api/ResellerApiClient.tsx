@@ -85,9 +85,9 @@ const EndpointSection = ({ isDark, id, title, icon: Icon, method, endpoint, desc
             <div className={cn("flex items-center gap-2 px-4 py-2.5 rounded-lg border font-mono text-sm overflow-x-auto", isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
               <span className={cn("font-black text-xs",
                 method === "GET" ? "text-blue-400" :
-                method === "POST" ? "text-emerald-400" :
-                method === "DELETE" ? "text-red-400" :
-                "text-amber-400"
+                  method === "POST" ? "text-emerald-400" :
+                    method === "DELETE" ? "text-red-400" :
+                      "text-amber-400"
               )}>{method}</span>
               <span className={isDark ? "text-zinc-300" : "text-slate-600"}>https://www.masdika.id{endpoint}</span>
             </div>
@@ -125,13 +125,13 @@ const EndpointSection = ({ isDark, id, title, icon: Icon, method, endpoint, desc
         <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l space-y-6", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200")}>
           {payload !== undefined && (
             <CodeBlock isDark={isDark} title="Request" raw={curlCommand}>
-              <span className={isDark ? "text-pink-400" : "text-pink-600"}>curl</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;https://www.masdika.id{endpoint}&quot;</span> \<br/>
-              <span className={isDark ? "text-pink-400" : "text-pink-600"}>  -H</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;Authorization: Bearer masdika_YOUR_SECRET_KEY&quot;</span> \<br/>
+              <span className={isDark ? "text-pink-400" : "text-pink-600"}>curl</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;https://www.masdika.id{endpoint}&quot;</span> \<br />
+              <span className={isDark ? "text-pink-400" : "text-pink-600"}>  -H</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;Authorization: Bearer masdika_YOUR_SECRET_KEY&quot;</span> \<br />
               <span className={isDark ? "text-pink-400" : "text-pink-600"}>  -X</span> <span className={isDark ? "text-cyan-400" : "text-cyan-600"}>{method}</span>
               {payload && (
                 <>
                   {` \\\n`}
-                  <span className={isDark ? "text-pink-400" : "text-pink-600"}>  -H</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;Content-Type: application/json&quot;</span> \<br/>
+                  <span className={isDark ? "text-pink-400" : "text-pink-600"}>  -H</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;Content-Type: application/json&quot;</span> \<br />
                   <span className={isDark ? "text-pink-400" : "text-pink-600"}>  -d</span> <span className={isDark ? "text-emerald-400" : "text-emerald-600"}>&#39;{payload}&#39;</span>
                 </>
               )}
@@ -216,7 +216,7 @@ export default function ResellerApiClient() {
       </div>
 
       {/* ══════════ Hero ══════════ */}
-      <section className="relative w-full pt-10 pb-20 px-4 sm:px-6 z-10">
+      <section className="relative w-full pt-10 pb-8 px-4 sm:px-6 z-10">
         <div className="max-w-5xl mx-auto text-center">
           <FadeIn direction="up">
             <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
@@ -496,38 +496,40 @@ export default function ResellerApiClient() {
               description="Create a top-up request to add funds to your reseller balance. This endpoint returns a payment URL (Duitku) that you or your automated systems can use to complete the payment."
               parameters={[
                 { name: "amount", type: "Integer", description: "Required. The top-up amount (Minimum: 50,000)." },
-                { name: "paymentMethodCode", type: "String", description: (
-                  <div className="flex flex-col gap-2">
-                    <span>Required. Code of the payment method to use. Available codes:</span>
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {[
-                        { code: "SQ", name: "Nusapay QRIS" },
-                        { code: "SA", name: "Shopee Pay Apps" },
-                        { code: "OV", name: "OVO" },
-                        { code: "DA", name: "DANA" },
-                        { code: "LA", name: "LinkAja" },
-                        { code: "M2", name: "Mandiri VA" },
-                        { code: "I1", name: "BNI VA" },
-                        { code: "B1", name: "CIMB Niaga VA" },
-                        { code: "BR", name: "BRIVA" },
-                        { code: "BV", name: "BSI VA" },
-                        { code: "VA", name: "Maybank VA" },
-                        { code: "BT", name: "Permata Bank VA" },
-                        { code: "NC", name: "Bank Neo Commerce/BNC" },
-                        { code: "AG", name: "Bank Artha Graha" },
-                        { code: "DM", name: "Danamon VA" },
-                        { code: "S1", name: "Bank Sahabat Sampoerna" },
-                        { code: "A1", name: "ATM Bersama" },
-                        { code: "FT", name: "Pegadaian/ALFA/Pos" }
-                      ].map(pm => (
-                        <span key={pm.code} className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]", isDark ? "bg-white/[0.04] text-zinc-400" : "bg-slate-100 text-slate-500")}>
-                          <code className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{pm.code}</code>
-                          {pm.name}
-                        </span>
-                      ))}
+                {
+                  name: "paymentMethodCode", type: "String", description: (
+                    <div className="flex flex-col gap-2">
+                      <span>Required. Code of the payment method to use. Available codes:</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {[
+                          { code: "SQ", name: "Nusapay QRIS" },
+                          { code: "SA", name: "Shopee Pay Apps" },
+                          { code: "OV", name: "OVO" },
+                          { code: "DA", name: "DANA" },
+                          { code: "LA", name: "LinkAja" },
+                          { code: "M2", name: "Mandiri VA" },
+                          { code: "I1", name: "BNI VA" },
+                          { code: "B1", name: "CIMB Niaga VA" },
+                          { code: "BR", name: "BRIVA" },
+                          { code: "BV", name: "BSI VA" },
+                          { code: "VA", name: "Maybank VA" },
+                          { code: "BT", name: "Permata Bank VA" },
+                          { code: "NC", name: "Bank Neo Commerce/BNC" },
+                          { code: "AG", name: "Bank Artha Graha" },
+                          { code: "DM", name: "Danamon VA" },
+                          { code: "S1", name: "Bank Sahabat Sampoerna" },
+                          { code: "A1", name: "ATM Bersama" },
+                          { code: "FT", name: "Pegadaian/ALFA/Pos" }
+                        ].map(pm => (
+                          <span key={pm.code} className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]", isDark ? "bg-white/[0.04] text-zinc-400" : "bg-slate-100 text-slate-500")}>
+                            <code className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{pm.code}</code>
+                            {pm.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) }
+                  )
+                }
               ]}
               payload={`{\n  "amount": 100000,\n  "paymentMethodCode": "SQ"\n}`}
               response={`{\n  "success": true,\n  "data": {\n    "invoiceNumber": "TOPUP-1710000000000-123",\n    "amount": 101000,\n    "paymentUrl": "https://sandbox.duitku.com/webapi/...",\n    "reference": "D12345678",\n    "paymentMethod": "QRIS",\n    "expiresAt": "2024-03-10T12:00:00Z"\n  }\n}`}

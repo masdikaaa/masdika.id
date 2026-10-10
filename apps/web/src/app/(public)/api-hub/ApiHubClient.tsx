@@ -83,7 +83,7 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
       <div className="max-w-[1400px] mx-auto relative z-10">
 
         {/* Hero Section */}
-        <section className="pt-10 pb-20 px-6 max-w-5xl mx-auto text-center">
+        <section className="pt-10 pb-8 px-6 max-w-5xl mx-auto text-center">
           <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}>
             Public API Directory
           </span>
@@ -321,8 +321,8 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
                     <Link
                       href={`/dashboard/checkout?service=${plan.service.toLowerCase()}&plan=${plan.id}`}
                       className={`block w-full text-center py-4 rounded-xl font-bold transition-all group flex justify-center items-center gap-2 ${isPopular
-                          ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
-                          : 'bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20'
+                        ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                        : 'bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20'
                         }`}
                     >
                       <Rocket className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
@@ -360,7 +360,7 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
                   <div className={cn("backdrop-blur-md border  p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
-                    
+
                     {/* Animated Step Circle */}
                     <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
                       <OrbitalRings />
@@ -376,7 +376,7 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
           </div>
         </section>
 
-        <ProvisioningSection 
+        <ProvisioningSection
           title="Instant API Deployment"
           description="Deploy and manage your APIs globally in seconds. Enjoy built-in edge caching and scalable infrastructure instantly."
           buttonText="Start Using API Hub"

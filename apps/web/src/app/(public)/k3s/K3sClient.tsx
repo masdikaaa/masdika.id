@@ -67,7 +67,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
 
       <main className="relative z-10 max-w-[1400px] mx-auto">
         {/* Hero Section */}
-        <section className="pt-10 pb-24 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
+        <section className="pt-10 pb-8 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
           <FadeIn direction="up">
             <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
               CONTAINER ORCHESTRATION
@@ -111,7 +111,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
           </FadeIn>
 
           <FadeIn direction="up" delay={0.4}>
-                        {/* Trust badges */}
+            {/* Trust badges */}
             <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto")}>
               {[
                 { icon: Cloud, title: "98.99% SLA", sub: "Uptime Guarantee" },
@@ -170,23 +170,23 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
               <div className="grid grid-cols-2 gap-3 sm:gap-6">
                 <div className={cn("backdrop-blur-md border  p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">40</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Physical Cores</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Physical Cores</div>
                 </div>
                 <div className={cn("backdrop-blur-md border  p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Threads</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Threads</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <HardDrive className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>SSD / HDD</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>SSD / HDD</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <MapPin className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Sidoarjo</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Sidoarjo</div>
                 </div>
                 <div className={cn("col-span-2 backdrop-blur-md border p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-gradient-to-br from-cyan-950/40 to-[#0b1120]/80 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                   <div className="flex items-center gap-4">
@@ -315,7 +315,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
                   <div className={cn("backdrop-blur-md border  p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
-                    
+
                     {/* Animated Step Circle */}
                     <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
                       <OrbitalRings />
@@ -331,7 +331,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
           </div>
         </section>
 
-        <ProvisioningSection 
+        <ProvisioningSection
           subtitle="READY TO START?"
           title="One click, production-ready clusters."
           description="We handle the heavy lifting of Kubernetes provisioning. Define your node pools, pay as you go, and access your Kubeconfig in seconds."

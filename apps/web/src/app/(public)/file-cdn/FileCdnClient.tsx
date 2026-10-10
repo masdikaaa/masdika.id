@@ -82,7 +82,7 @@ export default function FileCdnClient({ isEnabled = true }: { isEnabled?: boolea
 
       <main className="relative z-10 max-w-[1400px] mx-auto">
         {/* Hero Section */}
-        <section className="pt-10 pb-20 px-6 max-w-5xl mx-auto text-center">
+        <section className="pt-10 pb-8 px-6 max-w-5xl mx-auto text-center">
           <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}>
             Secure File CDN
           </span>
@@ -249,8 +249,8 @@ export default function FileCdnClient({ isEnabled = true }: { isEnabled?: boolea
                           href={`/dashboard/checkout?service=CDN&plan=${plan.id}`}
                           className={cn(
                             "block w-full mt-auto text-center py-4 rounded-xl font-bold transition-all group flex justify-center items-center gap-2",
-                            isPopular 
-                              ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]" 
+                            isPopular
+                              ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]"
                               : (isDark ? "bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-600 border border-cyan-200")
                           )}
                         >
@@ -295,7 +295,7 @@ export default function FileCdnClient({ isEnabled = true }: { isEnabled?: boolea
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
                   <div className={cn("backdrop-blur-md border  p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
-                    
+
                     {/* Animated Step Circle */}
                     <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
                       <OrbitalRings />
@@ -311,7 +311,7 @@ export default function FileCdnClient({ isEnabled = true }: { isEnabled?: boolea
           </div>
         </section>
 
-        <ProvisioningSection 
+        <ProvisioningSection
           title="Instant File Distribution"
           description="Upload files and instantly get a shareable, secure download link. Powered by our global edge network for lightning-fast delivery."
           buttonText="Start Sharing Files"

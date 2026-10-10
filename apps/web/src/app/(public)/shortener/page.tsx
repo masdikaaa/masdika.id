@@ -90,7 +90,7 @@ export default function ShortenerPage() {
 
       <main className="relative z-10 max-w-[1400px] mx-auto">
         {/* Hero Section */}
-        <section className="pt-10 pb-20 px-6 max-w-5xl mx-auto text-center">
+        <section className="pt-10 pb-8 px-6 max-w-5xl mx-auto text-center">
           <FadeIn direction="up">
             <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}>
               Premium URL Shortener

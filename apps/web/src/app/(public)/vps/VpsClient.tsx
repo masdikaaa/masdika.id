@@ -75,7 +75,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
 
       <main className="relative z-10 max-w-[1400px] mx-auto">
         {/* Hero Section */}
-        <section className="pt-10 pb-24 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
+        <section className="pt-10 pb-8 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
           <FadeIn direction="up">
             <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
               MASDIKA KVM CLOUD VPS
@@ -119,7 +119,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </FadeIn>
 
           <FadeIn direction="up" delay={0.4}>
-                        {/* Trust badges */}
+            {/* Trust badges */}
             <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto")}>
               {[
                 { icon: Cloud, title: "98.99% SLA", sub: "Uptime Guarantee" },
@@ -178,23 +178,23 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               <div className="grid grid-cols-2 gap-3 sm:gap-6">
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">40</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Physical Cores</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Physical Cores</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Threads</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Threads</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <HardDrive className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>SSD / HDD</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>SSD / HDD</div>
                 </div>
                 <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <MapPin className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{color: isDark ? '#71717a' : '#64748b'}}>Sidoarjo</div>
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Sidoarjo</div>
                 </div>
                 <div className={cn("col-span-2 backdrop-blur-md border p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-gradient-to-br from-cyan-950/40 to-[#0b1120]/80 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                   <div className="flex items-center gap-4">
@@ -413,7 +413,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        <ProvisioningSection 
+        <ProvisioningSection
           subtitle="READY TO START?"
           title="One click, instant server deployment."
           description="Our panel handles complex provisioning in the background. Simply select your specifications, pay strictly for what you use, and connect via SSH instantly."
