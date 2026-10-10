@@ -25,13 +25,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string>("");
   const formLoadTimeRef = useRef(0);
   
-  useEffect(() => { 
-    formLoadTimeRef.current = Date.now(); 
-    fetch('/api/config/turnstile').then(r => r.json()).then(data => setTurnstileSiteKey(data.siteKey || ""));
-  }, []);
+  useEffect(() => { formLoadTimeRef.current = Date.now(); }, []);
 
   useEffect(() => {
     const pending = sessionStorage.getItem('pending2FA');
@@ -230,17 +226,13 @@ export default function LoginPage() {
 
               {/* Turnstile */}
               <div className="pt-2 w-full flex justify-center">
-                {turnstileSiteKey ? (
-                  <Turnstile
-                    siteKey={turnstileSiteKey}
-                    onSuccess={(token) => setTurnstileToken(token)}
-                    options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
-                    className="w-full"
-                    style={{ width: '100%' }}
-                  />
-                ) : (
-                  <div className="w-full h-[65px] bg-white/5 animate-pulse rounded-lg" />
-                )}
+                <Turnstile
+                  siteKey="0x4AAAAAABn5hezv1vvdPF97"
+                  onSuccess={(token) => setTurnstileToken(token)}
+                  options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
+                  className="w-full"
+                  style={{ width: '100%' }}
+                />
               </div>
 
               {/* Submit */}

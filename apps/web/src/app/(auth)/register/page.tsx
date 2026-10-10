@@ -69,12 +69,8 @@ export default function RegisterPage() {
   const [resendCountdown, setResendCountdown] = useState(0);
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string>("");
   const formLoadTimeRef = useRef(0);
-  useEffect(() => { 
-    formLoadTimeRef.current = Date.now(); 
-    fetch('/api/config/turnstile').then(r => r.json()).then(data => setTurnstileSiteKey(data.siteKey || ""));
-  }, []);
+  useEffect(() => { formLoadTimeRef.current = Date.now(); }, []);
 
   // Billing Info
   const [companyName, setCompanyName] = useState("");
@@ -545,17 +541,13 @@ export default function RegisterPage() {
                 </a>
 
                 <div className="flex justify-center my-4 w-full">
-                  {turnstileSiteKey ? (
-                    <Turnstile
-                      siteKey={turnstileSiteKey}
-                      onSuccess={(token) => setTurnstileToken(token)}
-                      options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
-                      className="w-full"
-                      style={{ width: '100%' }}
-                    />
-                  ) : (
-                    <div className="w-full h-[65px] bg-white/5 animate-pulse rounded-lg" />
-                  )}
+                  <Turnstile
+                    siteKey="0x4AAAAAABn5hezv1vvdPF97"
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
+                    className="w-full"
+                    style={{ width: '100%' }}
+                  />
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-6 py-4 font-bold tracking-wide transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-6 shadow-sm hover:shadow-[0_0_20px_rgba(8,145,178,0.3)] flex items-center justify-center gap-2">
