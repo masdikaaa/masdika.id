@@ -216,7 +216,7 @@ export default function ResellerApiClient() {
       </div>
 
       {/* ══════════ Hero ══════════ */}
-      <section className="relative w-full pt-10 pb-16 md:pb-24 px-4 sm:px-6 z-10">
+      <section className="relative w-full pt-10 pb-8 px-4 sm:px-6 z-10">
         <div className="max-w-5xl mx-auto text-center">
           <FadeIn direction="up">
             <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
@@ -275,7 +275,7 @@ export default function ResellerApiClient() {
       </section>
 
       {/* ══════════ Documentation ══════════ */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-20" id="documentation">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 lg:pt-16 pb-12 md:pb-20" id="documentation">
         <div className={cn("flex w-full border rounded-2xl overflow-hidden", isDark ? "border-white/[0.06] bg-[#080d18]/80 backdrop-blur-xl" : "border-slate-200 bg-white shadow-xl")}>
 
           {/* Sidebar */}
