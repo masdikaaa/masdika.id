@@ -69,8 +69,12 @@ export default function RegisterPage() {
   const [resendCountdown, setResendCountdown] = useState(0);
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string>("");
   const formLoadTimeRef = useRef(0);
-  useEffect(() => { formLoadTimeRef.current = Date.now(); }, []);
+  useEffect(() => { 
+    formLoadTimeRef.current = Date.now(); 
+    fetch('/api/config/turnstile').then(r => r.json()).then(data => setTurnstileSiteKey(data.siteKey || ""));
+  }, []);
 
   // Billing Info
   const [companyName, setCompanyName] = useState("");
@@ -541,14 +545,16 @@ export default function RegisterPage() {
                 </a>
 
                 <div className="flex justify-center my-4 w-full">
-                  {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                  {turnstileSiteKey ? (
                     <Turnstile
-                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                      siteKey={turnstileSiteKey}
                       onSuccess={(token) => setTurnstileToken(token)}
                       options={{ theme: isDark ? 'dark' : 'light', size: 'flexible' }}
                       className="w-full"
                       style={{ width: '100%' }}
                     />
+                  ) : (
+                    <div className="w-full h-[65px] bg-white/5 animate-pulse rounded-lg" />
                   )}
                 </div>
 
