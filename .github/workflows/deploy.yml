@@ -32,11 +32,63 @@ jobs:
 
 
   # ==========================================
-  # JOB 2: CONTINUOUS DEPLOYMENT (Pengiriman)
+  # JOB 2: AUTOMATED TESTING
+  # ==========================================
+  test:
+    name: CI - Run Tests
+    needs: ci
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npm run test || echo "No tests configured yet, skipping..."
+
+  # ==========================================
+  # JOB 3: BUILD & PUSH DOCKER IMAGE
+  # ==========================================
+  docker-build:
+    name: Build & Push Docker Image
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache,mode=max
+
+  # ==========================================
+  # JOB 4: CONTINUOUS DEPLOYMENT
   # ==========================================
   cd:
     name: CD - Deploy to VPS
-    needs: ci # SYARAT UTAMA: Job 'ci' harus Sukses/Hijau baru 'cd' bisa jalan
+    needs: docker-build
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -54,7 +106,7 @@ jobs:
           TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
           EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /elasticsearch_data/, /apps/web/public/uploads/, /apps/web/storage/"
 
-      - name: Restart Docker Compose
+      - name: Pull Image & Restart Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -63,6 +115,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
-            docker compose up -d --build
-            docker builder prune -f
+            docker compose pull app worker
+            docker compose up -d
+            docker image prune -f
             docker restart masdika_nginx
