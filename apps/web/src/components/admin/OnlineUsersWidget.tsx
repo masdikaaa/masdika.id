@@ -5,6 +5,12 @@ import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { Users, Wifi, ChevronLeft, ChevronRight } from "lucide-react";
 
+function getRelativeTime(dateString: string) {
+  const diffInSeconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
+  if (diffInSeconds < 60) return "Just now";
+  return `${Math.floor(diffInSeconds / 60)}m ago`;
+}
+
 export function OnlineUsersWidget() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -77,7 +83,7 @@ export function OnlineUsersWidget() {
                   <div className="flex items-center gap-2">
                     <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
                     <span className={cn("text-[9px] px-1.5 rounded-full border", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
-                      {new Date(user.lastActive).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      {getRelativeTime(user.lastActive)}
                     </span>
                   </div>
                 </div>
