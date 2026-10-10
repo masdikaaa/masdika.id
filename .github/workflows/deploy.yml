@@ -8,10 +8,10 @@ on:
 
 jobs:
   # ==========================================
-  # JOB 1: CONTINUOUS INTEGRATION (Pengecekan)
+  # JOB 1: CONTINUOUS INTEGRATION (Code Quality & Lint)
   # ==========================================
   ci:
-    name: CI - Build & Lint Check
+    name: CI - Code Quality & Lint
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -28,38 +28,16 @@ jobs:
 
       - name: Lint Code
         run: npm run lint
-        continue-on-error: true 
 
-
-  # ==========================================
-  # JOB 2: AUTOMATED TESTING
-  # ==========================================
-  test:
-    name: CI - Run Tests
-    needs: ci
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '24'
-          cache: 'npm'
-          
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Unit Tests
+      - name: Run Tests (if configured)
         run: npm run test || echo "No tests configured yet, skipping..."
 
   # ==========================================
-  # JOB 3: BUILD & PUSH DOCKER IMAGE
+  # JOB 2: BUILD & PUSH DOCKER IMAGE
   # ==========================================
   docker-build:
     name: Build & Push Docker Image
-    needs: test
+    needs: ci
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -82,13 +60,14 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:v1.0.0
+            ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ==========================================
-  # JOB 4: CONTINUOUS DEPLOYMENT
+  # JOB 3: CONTINUOUS DEPLOYMENT
   # ==========================================
   cd:
     name: CD - Deploy to VPS
@@ -110,7 +89,7 @@ jobs:
           TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
           EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /elasticsearch_data/, /apps/web/public/uploads/, /apps/web/storage/"
 
-      - name: Pull Image & Restart Docker Compose
+      - name: Pull Image & Graceful Reload
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -125,4 +104,5 @@ jobs:
             docker compose up -d
             docker image prune -f
             docker builder prune -f
-            docker compose restart nginx || true
+            docker compose exec -T nginx nginx -s reload || docker compose restart nginx || true
+            docker logout || true
