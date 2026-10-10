@@ -4,3 +4,5 @@ type %USERPROFILE%\.ssh\andika_rsa | .\gh_cli\bin\gh.exe secret set SSH_PRIVATE_
 .\gh_cli\bin\gh.exe secret set SERVER_IP -b"45.198.149.134" --repo masdikaaa/masdika.id
 .\gh_cli\bin\gh.exe secret set SSH_PORT -b"34789" --repo masdikaaa/masdika.id
 .\gh_cli\bin\gh.exe secret set SERVER_USER -b"andika" --repo masdikaaa/masdika.id
+.\gh_cli\bin\gh.exe secret set DOCKERHUB_USERNAME -b"andikaferdialvianto" --repo masdikaaa/masdika.id
+.\gh_cli\bin\gh.exe secret set DOCKERHUB_TOKEN -b"dckr_pat_rGRBGkrVHDFMDo48448yIQqgJ7M" --repo masdikaaa/masdika.id
