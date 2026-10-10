@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Users, FileText, FolderGit2, ArrowUpRight, Activity, PieChart, ExternalLink, MessageSquare, Plus , LayoutDashboard } from "lucide-react";
+import { Users, FileText, FolderGit2, ArrowUpRight, Activity, PieChart, ExternalLink, MessageSquare, Plus , LayoutDashboard, Wallet, Bell, UserPlus } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -245,9 +245,15 @@ export default function AdminDashboard() {
                    return (
                      <div key={msg.id} className={cn("flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer group shadow-inner hover:shadow-lg", isDark ? "bg-[#0A0B1A]/40 hover:bg-[#0A0B1A] border-white/5" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
                        <div className="flex items-center gap-4 truncate">
-                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-inner shrink-0 ${colorClass}`}>
-                           {msg.name?.substring(0, 2).toUpperCase() || 'AN'}
-                         </div>
+                         {msg.name === "System Notification" ? (
+                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center border shadow-inner shrink-0", isDark ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-amber-50 text-amber-600 border-amber-200")}>
+                              {msg.subject?.toLowerCase().includes("top up") || msg.subject?.toLowerCase().includes("payment") ? <Wallet className="w-5 h-5" /> : msg.subject?.toLowerCase().includes("user") ? <UserPlus className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+                            </div>
+                         ) : (
+                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-inner shrink-0 ${colorClass}`}>
+                             {msg.name?.substring(0, 2).toUpperCase() || 'AN'}
+                           </div>
+                         )}
                          <div className="truncate pr-4">
                            <div className={cn("text-sm font-bold transition-colors truncate", isDark ? "text-zinc-200 group-hover:text-white" : "text-slate-800 group-hover:text-slate-900")}>{msg.name}</div>
                            <div className="text-[11px] text-zinc-500 truncate mt-0.5">{msg.subject || 'No Subject'}</div>

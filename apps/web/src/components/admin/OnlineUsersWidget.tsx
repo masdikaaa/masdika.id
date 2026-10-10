@@ -74,7 +74,12 @@ export function OnlineUsersWidget() {
                 </div>
                 <div className="flex flex-col truncate">
                   <span className={cn("text-sm font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>{user.name}</span>
-                  <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
+                    <span className={cn("text-[9px] px-1.5 rounded-full border", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                      {new Date(user.lastActive).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
