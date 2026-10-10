@@ -42,10 +42,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm --workspace=@masdika/web run postinstall --if-present
 
 # Build Next.js
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
     GROQ_API_KEY="dummy" \
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY="${NEXT_PUBLIC_TURNSTILE_SITE_KEY}" \
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY="0x4AAAAAABn5hezv1vvdPF97" \
     npm run build
 
 # Bundle custom server for WebSocket/VNC support in standalone mode.
