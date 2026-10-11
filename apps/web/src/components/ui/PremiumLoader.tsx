@@ -15,18 +15,19 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
         ? "relative py-20 min-h-[300px]"
         : cn("fixed inset-0 z-[100]", isDark ? "bg-[#050B14]" : "bg-[#f8fafb]")
     )}>
-      {/* Background Glows */}
+      {/* Background Glow — pure radial gradient (no CSS blur filter).
+          Large `blur()` filters get clipped to their bounding box on many
+          mobile GPUs, which produced a visible square edge. */}
       {!inline && (
-        <>
-          <div className={cn(
-            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full pointer-events-none blur-[100px] md:blur-[120px]",
-            isDark ? "bg-cyan-500/20" : "hidden"
-          )} />
-          <div className={cn(
-            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] md:w-[300px] h-[200px] md:h-[300px] rounded-full pointer-events-none blur-[80px] md:blur-[100px]",
-            isDark ? "bg-cyan-500/20" : "hidden"
-          )} />
-        </>
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: isDark
+              ? "radial-gradient(circle 340px at 50% 50%, rgba(34,211,238,0.18) 0%, rgba(34,211,238,0.09) 30%, rgba(34,211,238,0.03) 60%, rgba(34,211,238,0) 100%)"
+              : "radial-gradient(circle 300px at 50% 50%, rgba(6,182,212,0.10) 0%, rgba(6,182,212,0.04) 45%, rgba(6,182,212,0) 100%)",
+          }}
+        />
       )}
       
       {/* Main Loader Container */}
@@ -62,7 +63,7 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
               scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
             }}
             className={cn(
-              "absolute inset-6 md:inset-8 rounded-full border-2 border-transparent backdrop-blur-sm",
+              "absolute inset-6 md:inset-8 rounded-full border-2 border-transparent",
               isDark
                 ? "border-t-cyan-300/80 border-b-cyan-300/40 bg-gradient-to-br from-cyan-400/20 to-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                 : "border-t-cyan-400 border-b-cyan-300 bg-gradient-to-br from-cyan-100/60 to-cyan-200/40"
