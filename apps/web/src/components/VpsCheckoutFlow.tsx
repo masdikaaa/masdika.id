@@ -22,7 +22,7 @@ const getOsIcon = (name: string, isDark: boolean = false) => {
   if (lowerName.includes('alma')) return <img referrerPolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg" alt="AlmaLinux" className="w-5 h-5" loading="lazy" decoding="async" />;
   if (lowerName.includes('rocky')) return <SiRockylinux className="w-5 h-5 text-[#10B981]" />;
   if (lowerName.includes('centos')) return <SiCentos className="w-5 h-5 text-[#262577]" />;
-  if (lowerName.includes('alpine')) return <SiAlpinelinux className="w-5 h-5 text-[#0D597F]" />;
+  if (lowerName.includes('alpine')) return <img referrerPolicy="no-referrer" src="https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg" alt="Alpine Linux" className="w-5 h-5" loading="lazy" decoding="async" />;
   if (lowerName.includes('fedora')) return <SiFedora className="w-5 h-5 text-[#51A2DA]" />;
   if (lowerName.includes('freebsd')) return <img referrerPolicy="no-referrer" src="https://cdn.simpleicons.org/freebsd/AB2B28" alt="FreeBSD" className="w-5 h-5" loading="lazy" decoding="async" />;
   if (lowerName.includes('mikrotik') || lowerName.includes('chr')) {

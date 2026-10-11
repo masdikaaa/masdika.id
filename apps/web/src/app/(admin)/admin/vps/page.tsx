@@ -36,7 +36,7 @@ const getOsIconUrl = (name: string, isDark: boolean = false) => {
   if (lowerName.includes('almalinux')) return 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg';
   if (lowerName.includes('rocky')) return 'https://cdn.simpleicons.org/rockylinux/10B981';
   if (lowerName.includes('windows')) return 'https://cdn.simpleicons.org/windows/3b82f6';
-  if (lowerName.includes('alpine')) return 'https://cdn.simpleicons.org/alpinelinux/3b82f6';
+  if (lowerName.includes('alpine')) return 'https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg';
   if (lowerName.includes('fedora')) return 'https://cdn.simpleicons.org/fedora/3b82f6';
   if (lowerName.includes('freebsd')) return 'https://cdn.simpleicons.org/freebsd/AB2B28';
   if (lowerName.includes('mikrotik') || lowerName.includes('chr')) {

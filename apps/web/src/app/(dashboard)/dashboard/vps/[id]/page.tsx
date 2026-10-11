@@ -21,9 +21,11 @@ const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
   if (os.includes("ubuntu")) return "https://cdn.simpleicons.org/ubuntu/E95420";
   if (os.includes("debian")) return "https://cdn.simpleicons.org/debian/A81D33";
   if (os.includes("centos")) return "https://cdn.simpleicons.org/centos/262577";
-  if (os.includes("almalinux")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
+  if (os.includes("almalinux") || os.includes("alma")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
   if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
-  if (os.includes("alpine")) return "https://cdn.simpleicons.org/alpinelinux/0D597F";
+  if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
+  if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
+  if (os.includes("windows")) return "https://cdn.simpleicons.org/windows/3b82f6";
   if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
   if (os.includes("mikrotik") || os.includes("chr")) {
     return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";
@@ -178,7 +180,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       else if (name.includes('centos')) family = 'CentOS';
       else if (name.includes('debian')) family = 'Debian';
       else if (name.includes('rocky')) family = 'Rocky Linux';
-      else if (name.includes('almalinux')) family = 'AlmaLinux';
+      else if (name.includes('almalinux') || name.includes('alma')) family = 'AlmaLinux';
+      else if (name.includes('alpine')) family = 'Alpine Linux';
+      else if (name.includes('fedora')) family = 'Fedora';
       else if (name.includes('windows')) family = 'Windows';
       else if (name.includes('freebsd')) family = 'FreeBSD';
       else if (name.includes('mikrotik') || name.includes('chr')) family = 'MikroTik';
@@ -2414,7 +2418,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                   backgroundColor: family === 'Ubuntu' ? '#E95420' :
                                     family === 'CentOS' ? '#932279' :
                                       family === 'Debian' ? '#A80030' :
-                                        family === 'Rocky Linux' ? '#10B981' : '#475569',
+                                        family === 'Rocky Linux' ? '#10B981' :
+                                          family.toLowerCase().includes('alpine') ? '#0D597F' :
+                                            family.toLowerCase().includes('alma') ? '#141E34' :
+                                              family.toLowerCase().includes('freebsd') ? '#AB2B28' : '#475569',
                                   color: 'white'
                                 }}>
                                   {family.charAt(0)}
