@@ -45,12 +45,6 @@ export async function GET(
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // Rate limit: 60 req/IP/min
-    const ip = getClientIp(req);
-    if (!(await checkRateLimit("MEDIA_DL", ip, 60, 60))) {
-      return new NextResponse("Too Many Requests", { status: 429 });
-    }
-
     const media = await prisma.secureMedia.findUnique({ where: { token } });
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
@@ -86,11 +80,20 @@ export async function GET(
     const inlineRequested = req.nextUrl.searchParams.get("inline") === "true";
     const canInline = inlineRequested && INLINE_ALLOWED_MIME.has(media.mimeType);
 
+    // Rate limit: 300 req/IP/min for inline streaming chunks, 60 req/IP/min for full downloads
+    const ip = getClientIp(req);
+    const rateLimitKey = inlineRequested ? "MEDIA_STREAM" : "MEDIA_DL";
+    const rateLimitMax = inlineRequested ? 300 : 60;
+    if (!(await checkRateLimit(rateLimitKey, ip, rateLimitMax, 60))) {
+      return new NextResponse("Too Many Requests", { status: 429 });
+    }
+
     const securityHeaders: Record<string, string> = {
       "Content-Type": media.mimeType,
       "Content-Disposition": contentDispositionFilename(media.originalName, canInline),
       "X-Content-Type-Options": "nosniff",
-      "Cache-Control": "private, no-store",
+      "Cache-Control": canInline ? "private, max-age=3600" : "private, no-store",
+      "Accept-Ranges": "bytes",
       // Allow same-origin fetch from PDF.js web worker
       "Access-Control-Allow-Origin": (() => {
         const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || "https://masdika.id";
@@ -101,7 +104,6 @@ export async function GET(
     };
 
     // Read entire file into buffer and decrypt in-memory.
-    // More reliable than pipe+stream in Next.js edge runtime.
     const encryptedBuf = fs.readFileSync(filePath);
     const encryptionKeyHex = process.env.MEDIA_ENCRYPTION_KEY;
 
@@ -116,7 +118,54 @@ export async function GET(
       outputBuf = encryptedBuf;
     }
 
-    return new NextResponse(new Uint8Array(outputBuf), { headers: securityHeaders });
+    const totalSize = outputBuf.length;
+    const rangeHeader = req.headers.get("range");
+
+    // Handle HTTP Range Requests (Essential for video/audio seeking and skipping)
+    if (rangeHeader && rangeHeader.startsWith("bytes=")) {
+      const parts = rangeHeader.replace(/bytes=/, "").split("-");
+      const startStr = parts[0];
+      const endStr = parts[1];
+
+      let start = startStr ? parseInt(startStr, 10) : NaN;
+      let end = endStr ? parseInt(endStr, 10) : totalSize - 1;
+
+      if (isNaN(start)) {
+        // e.g. bytes=-500 means the last 500 bytes
+        start = totalSize - parseInt(endStr, 10);
+        end = totalSize - 1;
+      }
+
+      if (start >= totalSize || start < 0) {
+        return new NextResponse(null, {
+          status: 416,
+          headers: {
+            "Content-Range": `bytes */${totalSize}`,
+          },
+        });
+      }
+
+      end = Math.min(end, totalSize - 1);
+      const chunkSize = end - start + 1;
+      const chunk = outputBuf.subarray(start, end + 1);
+
+      return new NextResponse(new Uint8Array(chunk), {
+        status: 206,
+        headers: {
+          ...securityHeaders,
+          "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+          "Content-Length": String(chunkSize),
+        },
+      });
+    }
+
+    return new NextResponse(new Uint8Array(outputBuf), {
+      status: 200,
+      headers: {
+        ...securityHeaders,
+        "Content-Length": String(totalSize),
+      },
+    });
   } catch (error) {
     console.error("Download media error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });

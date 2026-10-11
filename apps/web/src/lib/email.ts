@@ -10,17 +10,30 @@ let transporterInstance: nodemailer.Transporter | null = null;
 // Create a transporter config based on .env
 const getTransporter = () => {
   if (!transporterInstance) {
+    const port = parseInt(process.env.SMTP_PORT || '465', 10);
     transporterInstance = nodemailer.createTransport({
-      pool: true, // Use connection pooling to prevent overload during concurrent checkouts
-      maxConnections: 5, // Maximum 5 simultaneous connections to SMTP
-      maxMessages: 100, // Send up to 100 messages per connection
+      pool: true, // Use persistent connection pooling for rapid email dispatch
+      maxConnections: 10, // Maximum simultaneous connections to SMTP
+      maxMessages: Infinity, // Keep pooled connections alive indefinitely
+      connectionTimeout: 5000, // 5s connection timeout
+      greetingTimeout: 5000, // 5s greeting timeout
+      socketTimeout: 10000, // 10s socket timeout
       host: process.env.SMTP_HOST || '',
-      port: parseInt(process.env.SMTP_PORT || '465'),
-      secure: process.env.SMTP_PORT === '465', 
+      port,
+      secure: port === 465, // True for 465, false for 587
       auth: {
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || '',
       },
+      tls: {
+        rejectUnauthorized: false, // Prevents certificate chain stalls
+        minVersion: 'TLSv1.2',
+      },
+    });
+
+    // Background verify connection pool to warm up sockets
+    transporterInstance.verify().catch((err) => {
+      console.warn('SMTP connection pool warm-up warning:', err?.message || err);
     });
   }
   return transporterInstance;
@@ -1437,3 +1450,136 @@ export const sendCloudflareCleanupEmail = async (email: string, userName: string
     html: getBaseHtml(content),
   });
 };
+
+export const sendMediaCommentOtpEmail = async (email: string, otpCode: string, fileName?: string) => {
+  const content = `
+    <div style="text-align: center; margin-bottom: 25px;">
+      <h2 style="color: #06b6d4; font-size: 24px; margin-bottom: 8px;">Media Comment Verification</h2>
+      <p style="color: #94a3b8; font-size: 14px; margin: 0;">Use the following One-Time Password (OTP) to verify and publish your comment on: <strong>${fileName || 'Masdika CDN Media'}</strong>.</p>
+    </div>
+    
+    <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; padding: 25px; text-align: center; margin: 25px 0;">
+      <p style="color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">VERIFICATION OTP CODE</p>
+      <div style="font-size: 38px; font-weight: 800; letter-spacing: 8px; color: #06b6d4; font-family: monospace; text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);">
+        ${otpCode}
+      </div>
+      <p style="color: #f59e0b; font-size: 12px; margin-top: 12px; margin-bottom: 0;">⏱️ This code is valid for 5 minutes. Do not share it with anyone.</p>
+    </div>
+
+    <p style="color: #64748b; font-size: 13px; text-align: center; margin-top: 20px;">
+      If you did not request this verification, you can safely ignore this email.
+    </p>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: email,
+    subject: `[${otpCode}] Media Comment OTP Verification - Masdika`,
+    html: getBaseHtml(content),
+  });
+};
+
+export const sendAdminMediaNotificationEmail = async ({
+  type,
+  fileName,
+  mediaToken,
+  authorName,
+  authorEmail,
+  rating,
+  content: commentContent,
+}: {
+  type: "comment" | "rating";
+  fileName: string;
+  mediaToken: string;
+  authorName?: string;
+  authorEmail?: string;
+  rating?: number | null;
+  content?: string;
+}) => {
+  if (!process.env.SMTP_HOST) {
+    console.warn("SMTP_HOST is not set. Admin media review notification email skipped.");
+    return;
+  }
+
+  const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+  if (!adminUser || !adminUser.email) return;
+
+  const adminEmail = decryptDeterministic(adminUser.email);
+  const adminName = adminUser.name ? decryptDeterministic(adminUser.name) : 'Admin';
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+  const reviewsAdminUrl = `${baseUrl}/admin/media-reviews`;
+  const mediaUrl = `${baseUrl}/media/${mediaToken}`;
+
+  const isComment = type === "comment";
+  const starsBadge = rating ? `${rating}.0 / 5.0 ★` : null;
+
+  const content = `
+    <div style="margin-bottom: 25px;">
+      <h2 style="color: #06b6d4; font-size: 22px; margin-bottom: 6px;">
+        ${isComment ? "💬 New Verified Media Comment" : "⭐ New Star Rating Received"}
+      </h2>
+      <p style="color: #94a3b8; font-size: 14px; margin: 0;">
+        Hello <strong>${adminName}</strong>, a new ${isComment ? "comment" : "rating"} was just submitted for your CDN media.
+      </p>
+    </div>
+
+    <div style="background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.25); border-left: 4px solid #06b6d4; border-radius: 12px; padding: 20px; margin: 20px 0;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #e2e8f0;">
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8; width: 120px;"><strong>Media File:</strong></td>
+          <td style="padding: 6px 0; font-weight: 600; color: #ffffff;">${fileName}</td>
+        </tr>
+        ${authorName ? `
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;"><strong>Author:</strong></td>
+          <td style="padding: 6px 0; color: #ffffff;">${authorName}</td>
+        </tr>` : ''}
+        ${authorEmail ? `
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;"><strong>Email:</strong></td>
+          <td style="padding: 6px 0; color: #38bdf8;">${authorEmail}</td>
+        </tr>` : ''}
+        ${starsBadge ? `
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;"><strong>Rating:</strong></td>
+          <td style="padding: 6px 0; color: #fbbf24; font-weight: bold;">${starsBadge}</td>
+        </tr>` : ''}
+        ${commentContent ? `
+        <tr>
+          <td style="padding: 10px 0 4px 0; color: #94a3b8; vertical-align: top;"><strong>Comment:</strong></td>
+          <td style="padding: 10px 0 4px 0; color: #f1f5f9; line-height: 1.6; white-space: pre-wrap;">"${commentContent}"</td>
+        </tr>` : ''}
+      </table>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${reviewsAdminUrl}" style="background-color: #06b6d4; color: #011627; padding: 12px 26px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; margin-right: 10px;">
+        Open Media Reviews Admin
+      </a>
+      <a href="${mediaUrl}" style="background-color: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 12px 22px; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; display: inline-block;">
+        View Public Media
+      </a>
+    </div>
+
+    <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 25px;">
+      You can inspect, moderate, or remove reviews anytime from your admin dashboard.
+    </p>
+  `;
+
+  const subject = isComment
+    ? `💬 [New Comment] "${fileName}" by ${authorName || 'User'}`
+    : `⭐ [New Rating ${rating || 5}★] "${fileName}"`;
+
+  try {
+    await getTransporter().sendMail({
+      from: `"${FROM_NAME} Alerts" <${FROM_EMAIL}>`,
+      to: adminEmail,
+      subject,
+      html: getBaseHtml(content),
+    });
+  } catch (error) {
+    console.error("Error sending admin media notification email:", error);
+  }
+};
+

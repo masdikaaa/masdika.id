@@ -65,6 +65,7 @@
     "swr": "^2.4.2",
     "tailwind-merge": "^3.6.0",
     "uuid": "^14.0.0",
+    "video.js": "^8.24.1",
     "ws": "^8.21.0"
   },
   "devDependencies": {
@@ -77,6 +78,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "@types/video.js": "^7.3.58",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
     "eslint": "^9",

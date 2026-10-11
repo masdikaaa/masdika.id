@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon, Globe } from "lucide-react";
+import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon, Globe, Star } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
@@ -25,6 +25,7 @@ const SIDEBAR_LINKS = [
   { name: "Chat History", href: "/admin/chat-history", icon: Bot, color: "text-rose-400", group: "Engagement & Community" },
   { name: "Newsletter", href: "/admin/newsletter", icon: Mail, color: "text-orange-400", group: "Engagement & Community" },
   { name: "Community", href: "/admin/community", icon: Users, color: "text-fuchsia-400", group: "Engagement & Community" },
+  { name: "Media Reviews", href: "/admin/media-reviews", icon: Star, color: "text-cyan-400", group: "Engagement & Community" },
 
   { name: "Proxmox VPS", href: "/admin/vps", icon: Terminal, color: "text-cyan-500", group: "Cloud Services" },
   { name: "VPC Routers", href: "/admin/vpc-routers", icon: Network, color: "text-cyan-500", group: "Cloud Services" },

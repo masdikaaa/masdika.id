@@ -309,7 +309,68 @@ model SecureMedia {
   createdAt    DateTime  @default(now())
   user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  ratings      MediaRating[]
+  comments     MediaComment[]
+
   @@index([userId])
+}
+
+model MediaRating {
+  id        Int         @id @default(autoincrement())
+  mediaId   Int
+  media     SecureMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  rating    Int         // 1 - 5
+  ipAddress String?
+  userEmail String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([mediaId])
+  @@index([mediaId, ipAddress])
+  @@index([mediaId, userEmail])
+}
+
+model MediaComment {
+  id         Int                    @id @default(autoincrement())
+  mediaId    Int
+  media      SecureMedia            @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  name       String
+  email      String
+  content    String
+  rating     Int?                   // 1 - 5
+  ipAddress  String?
+  isVerified Boolean                @default(true)
+  reactions  MediaCommentReaction[]
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@index([mediaId])
+  @@index([mediaId, ipAddress])
+  @@index([mediaId, email])
+  @@index([email])
+}
+
+model MediaCommentReaction {
+  id        Int          @id @default(autoincrement())
+  commentId Int
+  comment   MediaComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  emoji     String
+  ipHash    String
+  createdAt DateTime     @default(now())
+
+  @@unique([commentId, emoji, ipHash])
+  @@index([commentId])
+}
+
+model MediaOtp {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, code])
 }
 
 model Opportunity {

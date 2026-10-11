@@ -1,13 +1,30 @@
 "use client";
 
 import React, { useState, useEffect, useRef, use } from "react";
+import dynamic from "next/dynamic";
 import {
   Download, FileImage, FileVideo, FileAudio, FileText,
   File, Presentation, AlertTriangle, Clock, CheckCircle2, Loader2, Link2, ArrowLeft,
+  Sun, Moon,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { MediaEngagement } from "@/components/media/MediaEngagement";
+
+// Dynamically import Video.js player to prevent SSR window issues
+const VideoPlayer = dynamic(
+  () => import("@/components/media/VideoPlayer").then((mod) => mod.VideoPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-video rounded-2xl bg-[#03040b] border border-white/10 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
+      </div>
+    ),
+  }
+);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,17 +42,16 @@ type PreviewType = "image" | "video" | "audio" | "pdf" | "text" | "office" | "no
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getPreviewType(mimeType: string, originalName: string): PreviewType {
-  if (mimeType.startsWith("image/")) return "image";
   if (mimeType.startsWith("video/")) return "video";
+  if (mimeType.startsWith("image/")) return "image";
   if (mimeType.startsWith("audio/")) return "audio";
-  // PDF, text, office — no browser preview, show download card
   return "none";
 }
 
 function getFileIcon(mimeType: string, originalName: string) {
   switch (getPreviewType(mimeType, originalName)) {
-    case "image":  return FileImage;
     case "video":  return FileVideo;
+    case "image":  return FileImage;
     case "audio":  return FileAudio;
     case "pdf":
     case "text":   return FileText;
@@ -73,7 +89,6 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
 
   const reset = () => { setScale(1); setOffset({ x: 0, y: 0 }); };
 
-  // Scroll-wheel zoom — zoom toward cursor position
   const onWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const rect = containerRef.current!.getBoundingClientRect();
@@ -89,7 +104,6 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
     }));
   };
 
-  // Mouse drag
   const onMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setDragging(true);
@@ -104,7 +118,6 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
   };
   const stopDrag = () => { setDragging(false); dragStart.current = null; };
 
-  // Touch: pinch-to-zoom + one-finger pan
   const onTouchStart = (e: React.TouchEvent) => { lastTouches.current = e.touches; };
   const onTouchMove  = (e: React.TouchEvent) => {
     e.preventDefault();
@@ -123,13 +136,13 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col select-none">
-      {/* Zoom controls — floating top-right */}
-      <div className={cn("absolute top-3 right-3 z-20 flex items-center gap-0.5 backdrop-blur-md rounded-xl overflow-hidden border shadow-lg", isDark ? "bg-black/70 border-white/10" : "bg-white/90 border-slate-200")}>
+    <div className={cn("relative w-full h-[65vh] rounded-2xl overflow-hidden flex flex-col select-none transition-all", isDark ? "border border-white/10 bg-[#03040b]" : "border border-slate-200 bg-slate-100/80 shadow-md")}>
+      {/* Zoom controls */}
+      <div className={cn("absolute top-3 right-3 z-20 flex items-center gap-0.5 backdrop-blur-md rounded-xl overflow-hidden border shadow-lg", isDark ? "bg-black/70 border-white/10" : "bg-white/95 border-slate-200 shadow-sm")}>
         <button
           onClick={() => setScale((s) => clamp(s / 1.3))}
           aria-label="Zoom out"
-          className={cn("px-3 py-2 text-base font-bold transition-colors hover:text-cyan-400", isDark ? "text-white hover:bg-white/10" : "text-slate-700 hover:bg-slate-100")}
+          className={cn("px-3 py-2 text-base font-bold transition-colors hover:text-cyan-500", isDark ? "text-white hover:bg-white/10" : "text-slate-800 hover:bg-slate-100")}
         >−</button>
         <span className={cn("text-xs w-14 text-center tabular-nums font-mono", isDark ? "text-zinc-300" : "text-slate-600")}>
           {Math.round(scale * 100)}%
@@ -137,13 +150,13 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
         <button
           onClick={() => setScale((s) => clamp(s * 1.3))}
           aria-label="Zoom in"
-          className={cn("px-3 py-2 text-base font-bold transition-colors hover:text-cyan-400", isDark ? "text-white hover:bg-white/10" : "text-slate-700 hover:bg-slate-100")}
+          className={cn("px-3 py-2 text-base font-bold transition-colors hover:text-cyan-500", isDark ? "text-white hover:bg-white/10" : "text-slate-800 hover:bg-slate-100")}
         >+</button>
         <div className={cn("w-px h-5", isDark ? "bg-white/10" : "bg-slate-200")} />
         <button
           onClick={reset}
           aria-label="Reset zoom"
-          className={cn("text-xs px-3 py-2 transition-colors font-medium hover:text-cyan-400", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100")}
+          className={cn("text-xs px-3 py-2 transition-colors font-medium hover:text-cyan-500", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
         >Reset</button>
       </div>
 
@@ -161,7 +174,9 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
         onTouchMove={onTouchMove}
         onTouchEnd={() => { lastTouches.current = null; }}
       >
-        <img referrerPolicy="no-referrer"           src={src}
+        <img
+          referrerPolicy="no-referrer"
+          src={src}
           alt={alt}
           draggable={false}
           style={{
@@ -173,11 +188,13 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
             userSelect: "none",
             pointerEvents: "none",
           }}
-        loading="lazy" decoding="async" />
+          loading="lazy"
+          decoding="async"
+        />
       </div>
 
       {/* Hint bar */}
-      <div className={cn("shrink-0 flex items-center justify-center gap-4 py-2.5 text-xs border-t", isDark ? "text-zinc-500 bg-black/30 border-white/5" : "text-slate-500 bg-slate-50 border-slate-200")}>
+      <div className={cn("shrink-0 flex items-center justify-center gap-4 py-2 text-xs border-t transition-colors", isDark ? "text-zinc-500 bg-black/40 border-white/5" : "text-slate-500 bg-white/90 border-slate-200")}>
         <span>Scroll to zoom</span>
         <span className={cn("w-px h-3", isDark ? "bg-zinc-700" : "bg-slate-300")} />
         <span>Drag to pan</span>
@@ -187,8 +204,6 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
     </div>
   );
 }
-
-// ─── Text preview ─────────────────────────────────────────────────────────────
 
 // ─── Download button with progress ───────────────────────────────────────────
 
@@ -209,7 +224,6 @@ function DownloadButton({
       aria-label={label}
       className={cn("cursor-pointer relative inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-80 disabled:cursor-not-allowed rounded-xl font-bold text-sm transition-colors overflow-hidden min-w-[160px]", isDark ? "text-[#011627]" : "text-white")}
     >
-      {/* Progress fill background */}
       {downloading && progress > 0 && (
         <span
           className="absolute inset-0 bg-cyan-300/40 transition-all duration-200"
@@ -233,7 +247,7 @@ function DownloadButton({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function PublicMediaPage({ params }: { params: Promise<{ token: string }> }) {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const { token } = use(params);
 
@@ -265,7 +279,6 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
       const res = await fetch(downloadUrl);
       if (!res.ok) throw new Error();
 
-      // Track progress via ReadableStream if Content-Length is available
       const contentLength = res.headers.get("Content-Length");
       const total = contentLength ? parseInt(contentLength, 10) : 0;
 
@@ -304,19 +317,20 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
+    toast.success("Link copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (status === "loading") return (
-    <div className={cn("h-screen flex items-center justify-center", isDark ? "bg-[#011627]" : "bg-slate-50")}>
+    <div className={cn("min-h-screen flex items-center justify-center", isDark ? "bg-[#011627]" : "bg-slate-50")}>
       <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
     </div>
   );
 
   // ── Expired ──────────────────────────────────────────────────────────────────
   if (status === "expired") return (
-    <div className={cn("h-screen flex items-center justify-center p-6", isDark ? "bg-[#011627]" : "bg-slate-50")}>
+    <div className={cn("min-h-screen flex items-center justify-center p-6", isDark ? "bg-[#011627]" : "bg-slate-50")}>
       <div className="text-center max-w-sm">
         <Clock className="w-16 h-16 text-orange-400 mx-auto mb-4" />
         <h1 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Link Expired</h1>
@@ -327,7 +341,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
 
   // ── Not found / error ────────────────────────────────────────────────────────
   if (status !== "ok" || !media) return (
-    <div className={cn("h-screen flex items-center justify-center p-6", isDark ? "bg-[#011627]" : "bg-slate-50")}>
+    <div className={cn("min-h-screen flex items-center justify-center p-6", isDark ? "bg-[#011627]" : "bg-slate-50")}>
       <div className="text-center max-w-sm">
         <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
         <h1 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>File Not Found</h1>
@@ -336,212 +350,216 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
     </div>
   );
 
-  const type     = getPreviewType(media.mimeType, media.originalName);
+  const type = getPreviewType(media.mimeType, media.originalName);
   const fileIconComponent = getFileIcon(media.mimeType, media.originalName);
-
-  // How tall is the chrome above the preview area?
-  // header = 56px (h-14), expiry banner = 36px (only when present)
-  const hasExpiry   = !!media.expiresAt;
-  const footerH     = 48;  // h-12
-  const headerH     = 64;  // h-16
-  const expiryH     = hasExpiry ? 36 : 0;
-  const previewH    = `calc(100vh - ${headerH + expiryH + footerH}px)`;
+  const hasExpiry = !!media.expiresAt;
 
   return (
-    // h-screen + overflow-hidden so nothing overflows and forces a scrollbar
-    <div className={cn("h-screen flex flex-col overflow-hidden", isDark ? "bg-[#011627]" : "bg-white")}>
-
-      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
+    <div className={cn("min-h-screen flex flex-col selection:bg-cyan-500/30 transition-colors duration-300", isDark ? "bg-[#050714] text-white" : "bg-[#f8fafc] text-slate-900")}>
+      {/* ── Top bar (Fixed on scroll) ────────────────────────────────────────── */}
       <header
-        className={cn("h-16 shrink-0 flex items-center justify-between px-4 sm:px-6 backdrop-blur-md border-b", isDark ? "bg-[#020f1a]/90 border-white/5" : "bg-white/90 border-slate-200")}
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 h-16 shrink-0 flex items-center justify-between px-3 sm:px-8 backdrop-blur-xl border-b transition-colors duration-300",
+          isDark
+            ? "bg-[#070918]/90 border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.5)]"
+            : "bg-white/90 border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+        )}
       >
         {/* File info */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2">
           <Link
             href="/"
             aria-label="Back to Masdika"
             title="Back to Masdika"
-            className={cn("cursor-pointer shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center transition-all", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-500 hover:text-slate-900")}
+            className={cn("cursor-pointer shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center transition-all", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-zinc-400 hover:text-white" : "border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900")}
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           </Link>
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center shrink-0">
-            {React.createElement(fileIconComponent, { className: "w-5 h-5 text-cyan-400", "aria-hidden": "true" })}
+
+          <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all", isDark ? "bg-cyan-500/15 border-cyan-500/25 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200 shadow-xs")}>
+            {React.createElement(fileIconComponent, { className: "w-4 h-4 sm:w-5 sm:h-5 text-cyan-500", "aria-hidden": "true" })}
           </div>
-          <div className="min-w-0">
-            <p className={cn("font-semibold text-base leading-tight truncate max-w-[160px] sm:max-w-xs md:max-w-md lg:max-w-lg", isDark ? "text-white" : "text-slate-900")}>
+
+          <div className="min-w-0 flex-1">
+            <h1 className={cn("font-semibold text-xs sm:text-base leading-tight truncate", isDark ? "text-white" : "text-slate-900")}>
               {media.originalName}
-            </p>
-            <p className={cn("text-xs leading-tight mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-              {formatBytes(media.size)}&nbsp;·&nbsp;
-              {media.mimeType.split("/")[1]?.toUpperCase() ?? media.mimeType}
+            </h1>
+            <p className={cn("text-[11px] sm:text-xs leading-tight mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+              {formatBytes(media.size)} · {media.mimeType.split("/")[1]?.toUpperCase() ?? media.mimeType}
             </p>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0 ml-3">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className={cn(
+              "cursor-pointer w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all duration-300 border",
+              isDark
+                ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20"
+                : "bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200 shadow-xs"
+            )}
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           <button
             onClick={copyLink}
             aria-label="Copy share link"
-            className={`cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg text-sm
-                        font-semibold transition-all border
-                        ${copied
-                          ? (isDark ? "bg-green-500/20 text-green-400 border-green-500/20" : "bg-green-50 text-green-600 border-green-200")
-                          : (isDark ? "bg-white/5 text-zinc-300 border-white/10 hover:bg-white/10 hover:text-white" : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900")}`}
+            title={copied ? "Copied!" : "Copy Link"}
+            className={cn(
+              "cursor-pointer shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all border",
+              copied
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                : isDark
+                  ? "bg-white/5 text-zinc-300 border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-xs"
+            )}
           >
-            {copied
-              ? <><CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" /><span className="hidden sm:inline">Copied</span></>
-              : <><Link2 className="w-4 h-4 shrink-0" aria-hidden="true" /><span className="hidden sm:inline">Copy Link</span></>
-            }
+            {copied ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+            ) : (
+              <Link2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+            )}
           </button>
 
           <button
             onClick={handleDownload}
             disabled={downloading}
             aria-label={`Download ${media.originalName}`}
-            className={cn("cursor-pointer relative flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-80 disabled:cursor-not-allowed rounded-lg text-sm font-bold transition-colors overflow-hidden", isDark ? "text-[#011627]" : "text-white")}
+            title={
+              downloading
+                ? dlProgress > 0 ? `Downloading ${dlProgress}%` : "Preparing download…"
+                : `Download ${media.originalName}`
+            }
+            className={cn(
+              "cursor-pointer relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all overflow-hidden",
+              "bg-cyan-500 hover:bg-cyan-400 active:scale-95 disabled:opacity-80 text-[#011627] shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] border border-cyan-400/50"
+            )}
           >
-            {/* Progress fill */}
             {downloading && dlProgress > 0 && (
               <span
                 className="absolute inset-0 bg-cyan-300/40 transition-all duration-200"
                 style={{ width: `${dlProgress}%` }}
               />
             )}
-            <span className="relative flex items-center gap-2">
-              {downloading
-                ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                : <Download className="w-4 h-4" aria-hidden="true" />
-              }
-              <span className="hidden sm:inline">
-                {downloading
-                  ? dlProgress > 0 ? `${dlProgress}%` : "Preparing…"
-                  : "Download"
-                }
-              </span>
+            <span className="relative flex items-center justify-center">
+              {downloading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[#011627]" aria-hidden="true" />
+              ) : (
+                <Download className="w-4 h-4 text-[#011627]" aria-hidden="true" />
+              )}
             </span>
           </button>
         </div>
       </header>
 
+      {/* Spacer for fixed top navbar */}
+      <div className="h-16 shrink-0" aria-hidden="true" />
+
       {/* ── Expiry banner ─────────────────────────────────────────────────────── */}
       {hasExpiry && (
-        <div className="shrink-0 bg-orange-500/10 border-b border-orange-500/20
-                        px-4 py-2 flex items-center gap-2 text-xs text-orange-300">
+        <div className={cn("shrink-0 border-b px-4 py-2.5 flex items-center justify-center gap-2 text-xs transition-colors", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
           <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-          Expires on {formatExpiry(media.expiresAt!)}
+          <span>This link will expire on <strong>{formatExpiry(media.expiresAt!)}</strong></span>
         </div>
       )}
 
-      {/* ── Preview ───────────────────────────────────────────────────────────── */}
-      <main
-        className="shrink-0 overflow-hidden"
-        style={{ height: previewH }}
-      >
-        {/* IMAGE */}
-        {type === "image" && (
-          <div className={cn("w-full h-full", isDark ? "bg-zinc-950" : "bg-slate-100")}>
-            <ImageViewer src={inlineUrl} alt={media.originalName} />
+      {/* ── Media Player Showcase ────────────────────────────────────────────── */}
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+        {/* VIDEO (Video.js Player with Cyberpunk Theme) */}
+        {type === "video" && (
+          <div className="w-full">
+            <VideoPlayer
+              src={inlineUrl}
+              mimeType={media.mimeType}
+              title={media.originalName}
+            />
           </div>
         )}
 
-        {/* VIDEO */}
-        {type === "video" && (
-          <div className={cn("w-full h-full flex items-center justify-center p-2 sm:p-4", isDark ? "bg-black" : "bg-slate-100")}>
-            <video
-              controls
-              controlsList="nodownload"
-              className="max-w-full max-h-full rounded-lg"
-              onContextMenu={(e) => e.preventDefault()}
-            >
-              <source src={inlineUrl} type={media.mimeType} />
-              Your browser does not support video playback.
-            </video>
+        {/* IMAGE */}
+        {type === "image" && (
+          <div className="w-full">
+            <ImageViewer src={inlineUrl} alt={media.originalName} />
           </div>
         )}
 
         {/* AUDIO */}
         {type === "audio" && (
-          <div className={cn("w-full h-full flex flex-col items-center justify-center gap-5 p-6", isDark ? "bg-black/20" : "bg-slate-50")}>
-            <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-              <FileAudio className="w-14 h-14 sm:w-20 sm:h-20 text-cyan-400/60" aria-hidden="true" />
+          <div className={cn("w-full rounded-2xl border p-8 sm:p-12 flex flex-col items-center justify-center gap-6 shadow-xl transition-all", isDark ? "bg-gradient-to-b from-[#0c0f24] to-[#070914] border-white/10" : "bg-white border-slate-200")}>
+            <div className={cn("w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.2)]" : "bg-cyan-50 border-cyan-200 shadow-sm")}>
+              <FileAudio className="w-12 h-12 text-cyan-500" aria-hidden="true" />
             </div>
-            <p className={cn("font-semibold text-sm sm:text-base text-center px-4 max-w-sm truncate", isDark ? "text-white" : "text-slate-900")}>
-              {media.originalName}
-            </p>
-            <audio controls controlsList="nodownload" className="w-full max-w-sm sm:max-w-lg">
+            <div className="text-center max-w-md">
+              <p className={cn("font-semibold text-base sm:text-lg truncate", isDark ? "text-white" : "text-slate-900")}>
+                {media.originalName}
+              </p>
+              <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                {formatBytes(media.size)} · Audio Player
+              </p>
+            </div>
+            <audio controls controlsList="nodownload" className="w-full max-w-lg mt-2">
               <source src={inlineUrl} type={media.mimeType} />
               Your browser does not support audio playback.
             </audio>
           </div>
         )}
 
-        {/* PDF — no preview, download only */}
-        {type === "pdf" && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-5 p-8 text-center">
-            <div className={cn("w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border flex items-center justify-center", isDark ? "bg-zinc-800/50 border-white/5" : "bg-white shadow-sm border-slate-200")}>
-              <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-zinc-500" aria-hidden="true" />
+        {/* DOCUMENT / OTHER FALLBACKS */}
+        {type !== "video" && type !== "image" && type !== "audio" && (
+          <div className={cn("w-full rounded-2xl border p-10 flex flex-col items-center justify-center gap-5 text-center shadow-lg transition-all", isDark ? "bg-[#0c0f24] border-white/10" : "bg-white border-slate-200")}>
+            <div className={cn("w-20 h-20 rounded-2xl border flex items-center justify-center transition-all", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+              <FileText className="w-10 h-10" aria-hidden="true" />
             </div>
-            <div className="max-w-xs">
-              <p className={cn("font-semibold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>PDF File</p>
-              <p className={cn("text-sm mb-5", isDark ? "text-zinc-400" : "text-slate-500")}>Download to open in your PDF viewer.</p>
-              <DownloadButton onClick={handleDownload} downloading={downloading} progress={dlProgress} label="Download PDF" />
-            </div>
-          </div>
-        )}
-
-        {/* TEXT / CODE — no preview */}
-        {type === "text" && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-5 p-8 text-center">
-            <div className={cn("w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border flex items-center justify-center", isDark ? "bg-zinc-800/50 border-white/5" : "bg-white shadow-sm border-slate-200")}>
-              <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-zinc-500" aria-hidden="true" />
-            </div>
-            <div className="max-w-xs">
-              <p className={cn("font-semibold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>Text File</p>
-              <p className={cn("text-sm mb-5", isDark ? "text-zinc-400" : "text-slate-500")}>Download to open in your text editor.</p>
-              <DownloadButton onClick={handleDownload} downloading={downloading} progress={dlProgress} />
-            </div>
-          </div>
-        )}
-
-        {/* OFFICE — no preview */}
-        {type === "office" && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-5 p-8 text-center">
-            <div className={cn("w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border flex items-center justify-center", isDark ? "bg-zinc-800/50 border-white/5" : "bg-white shadow-sm border-slate-200")}>
-              <Presentation className="w-10 h-10 sm:w-12 sm:h-12 text-zinc-500" aria-hidden="true" />
-            </div>
-            <div className="max-w-xs">
-              <p className={cn("font-semibold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>Office Document</p>
-              <p className={cn("text-sm mb-5", isDark ? "text-zinc-400" : "text-slate-500")}>Download to open in your office app.</p>
-              <DownloadButton onClick={handleDownload} downloading={downloading} progress={dlProgress} />
-            </div>
-          </div>
-        )}
-
-        {/* NO PREVIEW */}
-        {type === "none" && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-5 p-8 text-center">
-            <div className={cn("w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border flex items-center justify-center", isDark ? "bg-zinc-800/50 border-white/5" : "bg-white shadow-sm border-slate-200")}>
-              <File className="w-10 h-10 sm:w-12 sm:h-12 text-zinc-500" aria-hidden="true" />
-            </div>
-            <div className="max-w-xs">
-              <p className={cn("font-semibold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>No preview available</p>
-              <p className={cn("text-sm mb-5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                This file type cannot be previewed in the browser.
+            <div className="max-w-sm">
+              <p className={cn("font-bold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>{media.originalName}</p>
+              <p className={cn("text-xs mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
+                {formatBytes(media.size)} · Direct browser preview is not supported for this file type.
               </p>
-              <DownloadButton onClick={handleDownload} downloading={downloading} progress={dlProgress} />
+              <DownloadButton
+                onClick={handleDownload}
+                downloading={downloading}
+                progress={dlProgress}
+                label="Download Document"
+              />
             </div>
-            <p className={cn("text-xs", isDark ? "text-zinc-600" : "text-slate-400")}>{formatBytes(media.size)} · {media.mimeType}</p>
           </div>
         )}
+
+        {/* ── ANIMATED SCROLL DOWN INDICATOR ───────────────────────────────── */}
+        <div className="flex justify-center pt-5 pb-2">
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById("engagement-section");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
+            className={cn("group flex items-center gap-2.5 px-4 py-2 rounded-full border transition-all cursor-pointer shadow-sm", isDark ? "bg-white/5 hover:bg-cyan-500/10 border-white/10 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.25)]" : "bg-white hover:bg-cyan-50 border-slate-200 hover:border-cyan-300 text-slate-600 hover:text-cyan-700 hover:shadow-sm")}
+          >
+            <span className="font-semibold text-xs tracking-wide">
+              Scroll down for reviews & discussion
+            </span>
+            <span className="animate-bounce inline-block text-cyan-500 font-extrabold text-xs">
+              ↓
+            </span>
+          </button>
+        </div>
+
+        {/* ── RATINGS & DISCUSSIONS (EMAIL OTP PROTECTED) ─────────────────────── */}
+        <MediaEngagement token={token} fileName={media.originalName} />
       </main>
 
       {/* ── Footer ────────────────────────────────────────────────────────────── */}
-      <footer
-        className={cn("h-12 shrink-0 flex items-center justify-center border-t text-xs backdrop-blur-md", isDark ? "border-white/5 text-zinc-500 bg-[#020f1a]/90" : "border-slate-200 text-slate-500 bg-white/90")}
-      >
-        Powered by&nbsp;<span className="text-cyan-600 font-semibold">PT Masdika Teknologi Indonesia</span>
+      <footer className={cn("mt-auto border-t py-6 text-center text-xs backdrop-blur-md transition-colors", isDark ? "border-white/5 bg-[#040612]/90 text-zinc-500" : "border-slate-200 bg-white/90 text-slate-500")}>
+        Powered by{" "}
+        <span className="text-cyan-500 font-semibold">
+          PT Masdika Teknologi Indonesia
+        </span>
       </footer>
     </div>
   );

@@ -64,6 +64,8 @@ mongo_shared_data/
 public/uploads/
 storage/secure-media/
 apps/web/public/uploads/
+apps/web/storage/secure-media/
+**/storage/secure-media/
 
 # temporary and scratch files
 scratch/
