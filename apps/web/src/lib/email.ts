@@ -1553,14 +1553,22 @@ export const sendAdminMediaNotificationEmail = async ({
       </table>
     </div>
 
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="${reviewsAdminUrl}" style="background-color: #06b6d4; color: #011627; padding: 12px 26px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; margin-right: 10px;">
-        Open Media Reviews Admin
-      </a>
-      <a href="${mediaUrl}" style="background-color: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 12px 22px; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; display: inline-block;">
-        View Public Media
-      </a>
-    </div>
+    <table border="0" cellspacing="0" cellpadding="0" align="center" style="margin: 32px auto 20px auto; width: 100%; max-width: 320px;">
+      <tr>
+        <td align="center" style="padding-bottom: 14px;">
+          <a href="${reviewsAdminUrl}" target="_blank" style="background-color: #06b6d4; color: #020817; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; display: block; text-align: center; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);">
+            Open Media Reviews Admin
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <a href="${mediaUrl}" target="_blank" style="background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 50px; font-weight: 500; font-size: 14px; display: block; text-align: center;">
+            View Public Media
+          </a>
+        </td>
+      </tr>
+    </table>
 
     <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 25px;">
       You can inspect, moderate, or remove reviews anytime from your admin dashboard.
