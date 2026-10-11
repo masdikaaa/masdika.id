@@ -110,6 +110,8 @@ export async function POST(req: NextRequest) {
       const folderPathBase64 = req.headers.get("x-upload-folder-path") || "Lw==";
       const folderPath = decodeURIComponent(Buffer.from(folderPathBase64, "base64").toString());
       const expiresIn = req.headers.get("x-upload-expires-in") || "permanent";
+      const isPublicHeader = req.headers.get("x-upload-is-public");
+      const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
 
       // SECURITY: Get actual file size instead of trusting client header to prevent quota bypass
       const fileStats = await stat(tempPath).catch(() => null);
@@ -184,6 +186,7 @@ export async function POST(req: NextRequest) {
           size: fileSize,
           folderPath,
           isFolder: false,
+          isPublic,
           token: shareToken,
           expiresAt,
         },
@@ -197,6 +200,8 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File;
     const expiresIn = (formData.get("expiresIn") as string) || "permanent";
     const folderPath = (formData.get("folderPath") as string) || "/";
+    const isPublicField = formData.get("isPublic");
+    const isPublic = isPublicField === null ? true : isPublicField === "true";
 
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
@@ -264,6 +269,7 @@ export async function POST(req: NextRequest) {
         size: buffer.length,
         folderPath,
         isFolder: false,
+        isPublic,
         token: shareToken,
         expiresAt,
       },

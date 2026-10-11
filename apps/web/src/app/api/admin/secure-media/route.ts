@@ -146,6 +146,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, media: updated });
     }
 
+    if (action === 'toggleVisibility') {
+      const { id, isPublic } = body;
+      const target = await prisma.secureMedia.findUnique({ where: { id: parseInt(id) } });
+      if (!target) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+      
+      const nextPublic = typeof isPublic === 'boolean' ? isPublic : !target.isPublic;
+      const updated = await prisma.secureMedia.update({
+        where: { id: parseInt(id) },
+        data: { isPublic: nextPublic }
+      });
+      return NextResponse.json({ success: true, media: updated });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
     console.error("Action error:", error);

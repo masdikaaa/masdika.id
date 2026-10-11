@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClientIp } from "@/lib/get-ip";
+import { getClientIp, getIpVariants } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendAdminMediaNotificationEmail } from "@/lib/email";
@@ -26,7 +26,9 @@ export async function GET(
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
     const ip = getClientIp(req);
+    const ipVariants = getIpVariants(ip);
     const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
+    const emailParam = req.nextUrl.searchParams.get("email");
 
     const rawComments = await prisma.mediaComment.findMany({
       where: { mediaId: media.id },
@@ -107,7 +109,13 @@ export async function GET(
     });
 
     const existingComment = await prisma.mediaComment.findFirst({
-      where: { mediaId: media.id, ipAddress: ip },
+      where: {
+        mediaId: media.id,
+        OR: [
+          { ipAddress: { in: ipVariants } },
+          ...(emailParam ? [{ email: emailParam.toLowerCase().trim() }] : []),
+        ],
+      },
       select: { id: true },
     });
 
@@ -133,6 +141,7 @@ export async function POST(
     }
 
     const ip = getClientIp(req);
+    const ipVariants = getIpVariants(ip);
     const allowed = await checkRateLimit("MEDIA_COMMENT", ip, 20, 3600);
     if (!allowed) {
       return NextResponse.json(
@@ -167,7 +176,7 @@ export async function POST(
       where: {
         mediaId: media.id,
         OR: [
-          { ipAddress: ip },
+          { ipAddress: { in: ipVariants } },
           { email },
         ],
       },
@@ -223,6 +232,34 @@ export async function POST(
       data: { used: true },
     });
 
+    // Strict 1 rating rule: Check if rating already exists by email or IP variants
+    let finalRating: number | null = null;
+    const existingRating = await prisma.mediaRating.findFirst({
+      where: {
+        mediaId: media.id,
+        OR: [
+          { ipAddress: { in: ipVariants } },
+          { userEmail: email },
+        ],
+      },
+    });
+
+    if (existingRating) {
+      // User has already rated once — keep their existing rating, never duplicate
+      finalRating = existingRating.rating;
+    } else if (ratingVal && ratingVal >= 1 && ratingVal <= 5) {
+      // Record their 1 allowed rating
+      await prisma.mediaRating.create({
+        data: {
+          mediaId: media.id,
+          rating: ratingVal,
+          userEmail: email,
+          ipAddress: ip,
+        },
+      });
+      finalRating = ratingVal;
+    }
+
     // Create verified comment
     const comment = await prisma.mediaComment.create({
       data: {
@@ -230,7 +267,7 @@ export async function POST(
         name: cleanName,
         email,
         content: cleanContent,
-        rating: ratingVal && ratingVal >= 1 && ratingVal <= 5 ? ratingVal : null,
+        rating: finalRating,
         ipAddress: ip,
         isVerified: true,
       },
@@ -244,32 +281,6 @@ export async function POST(
       },
     });
 
-    // If rating is attached, record or update in MediaRating as well
-    if (ratingVal && ratingVal >= 1 && ratingVal <= 5) {
-      const existingRating = await prisma.mediaRating.findFirst({
-        where: {
-          mediaId: media.id,
-          OR: [{ userEmail: email }, { ipAddress: ip }],
-        },
-      });
-
-      if (existingRating) {
-        await prisma.mediaRating.update({
-          where: { id: existingRating.id },
-          data: { rating: ratingVal, userEmail: email, ipAddress: ip },
-        });
-      } else {
-        await prisma.mediaRating.create({
-          data: {
-            mediaId: media.id,
-            rating: ratingVal,
-            userEmail: email,
-            ipAddress: ip,
-          },
-        });
-      }
-    }
-
     // Send email notification to admin asynchronously
     sendAdminMediaNotificationEmail({
       type: "comment",
@@ -277,7 +288,7 @@ export async function POST(
       mediaToken: media.token,
       authorName: cleanName,
       authorEmail: email,
-      rating: ratingVal,
+      rating: finalRating || undefined,
       content: content,
     }).catch((err) => console.error("Admin comment notification error:", err));
 

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminBlogPage() {
   const { theme } = useTheme();
@@ -195,10 +196,7 @@ export default function AdminBlogPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-zinc-500 text-sm">Loading articles...</p>
-                    </div>
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : filteredArticles.length === 0 ? (

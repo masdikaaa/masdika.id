@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClientIp } from "@/lib/get-ip";
+import { getClientIp, getIpVariants } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendAdminMediaNotificationEmail } from "@/lib/email";
@@ -23,6 +23,7 @@ export async function GET(
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
     const ip = getClientIp(req);
+    const ipVariants = getIpVariants(ip);
     const emailParam = req.nextUrl.searchParams.get("email");
 
     const ratings = await prisma.mediaRating.findMany({
@@ -43,8 +44,26 @@ export async function GET(
       }
       if (emailParam && r.userEmail && r.userEmail.toLowerCase() === emailParam.toLowerCase()) {
         userRating = r.rating;
-      } else if (!userRating && r.ipAddress === ip) {
+      } else if (!userRating && r.ipAddress && ipVariants.includes(r.ipAddress)) {
         userRating = r.rating;
+      }
+    }
+
+    // Cross-check: If user hasn't rated directly but gave a rating inside a comment
+    if (!userRating) {
+      const commentWithRating = await prisma.mediaComment.findFirst({
+        where: {
+          mediaId: media.id,
+          rating: { not: null },
+          OR: [
+            { ipAddress: { in: ipVariants } },
+            ...(emailParam ? [{ email: emailParam.toLowerCase() }] : []),
+          ],
+        },
+        select: { rating: true },
+      });
+      if (commentWithRating?.rating) {
+        userRating = commentWithRating.rating;
       }
     }
 
@@ -74,6 +93,7 @@ export async function POST(
     }
 
     const ip = getClientIp(req);
+    const ipVariants = getIpVariants(ip);
     const allowed = await checkRateLimit("MEDIA_RATE", ip, 30, 60);
     if (!allowed) {
       return new NextResponse("Too Many Requests", { status: 429 });
@@ -93,20 +113,30 @@ export async function POST(
       return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
     }
 
-    // Check if rating already exists by email or IP
-    let existingRating = null;
-    if (email) {
-      existingRating = await prisma.mediaRating.findFirst({
-        where: { mediaId: media.id, userEmail: email },
-      });
-    }
-    if (!existingRating) {
-      existingRating = await prisma.mediaRating.findFirst({
-        where: { mediaId: media.id, ipAddress: ip },
-      });
-    }
+    // Strict Anti-Abuse: Check if rating already exists by email or IP variants
+    const existingRating = await prisma.mediaRating.findFirst({
+      where: {
+        mediaId: media.id,
+        OR: [
+          { ipAddress: { in: ipVariants } },
+          ...(email ? [{ userEmail: email }] : []),
+        ],
+      },
+    });
 
-    if (existingRating) {
+    // Also check if already rated via verified comment
+    const existingCommentRating = await prisma.mediaComment.findFirst({
+      where: {
+        mediaId: media.id,
+        rating: { not: null },
+        OR: [
+          { ipAddress: { in: ipVariants } },
+          ...(email ? [{ email }] : []),
+        ],
+      },
+    });
+
+    if (existingRating || existingCommentRating) {
       return NextResponse.json(
         { error: "You have already submitted a rating for this media. Each user/IP is limited to 1 rating." },
         { status: 409 }

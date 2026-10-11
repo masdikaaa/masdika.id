@@ -212,13 +212,21 @@ export async function generateMetadata({
   try {
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { originalName: true, mimeType: true, size: true, expiresAt: true },
+      select: { originalName: true, mimeType: true, size: true, expiresAt: true, isPublic: true },
     });
 
     if (!media || (media.expiresAt && media.expiresAt < new Date())) {
       return {
         title: "Link Expired",
         description: "This secure file link has expired or is no longer available.",
+        robots: { index: false, follow: false },
+      };
+    }
+
+    if (!media.isPublic) {
+      return {
+        title: "Private File - Masdika Secure Media",
+        description: "This secure file is private and restricted.",
         robots: { index: false, follow: false },
       };
     }

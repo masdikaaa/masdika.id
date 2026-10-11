@@ -6,6 +6,7 @@ import { Plus, Server, Edit, Trash2, RefreshCw, Loader2, Network, X, CheckCircle
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 type VpcRouter = {
   id: number;
@@ -188,9 +189,8 @@ export default function VpcRoutersPage() {
             <tbody className="divide-y divide-white/10 text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className={cn("px-6 py-12 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    Loading routers...
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : routers.length === 0 ? (

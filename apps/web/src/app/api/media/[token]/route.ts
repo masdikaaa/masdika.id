@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import * as crypto from "crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { verifySessionToken } from "@/lib/session";
 
 const INLINE_ALLOWED_MIME = new Set([
   "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
@@ -47,6 +48,28 @@ export async function GET(
 
     const media = await prisma.secureMedia.findUnique({ where: { token } });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+
+    // Privacy guard: If file is private, only owner or admin can stream/download
+    if (!media.isPublic) {
+      let isAuthorized = false;
+      const sessionToken = req.cookies.get("admin_session")?.value;
+      if (sessionToken) {
+        const userId = verifySessionToken(sessionToken);
+        if (userId) {
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, role: true }
+          });
+          if (user && (user.role === "ADMIN" || user.id === media.userId)) {
+            isAuthorized = true;
+          }
+        }
+      }
+
+      if (!isAuthorized) {
+        return new NextResponse("Forbidden: This file is private", { status: 403 });
+      }
+    }
 
     if (media.userId) {
       const { getSubscriptionInfo } = await import('@/lib/subscription');

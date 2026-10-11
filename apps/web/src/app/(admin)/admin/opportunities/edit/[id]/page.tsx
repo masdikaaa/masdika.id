@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function EditOpportunityPage({ params }: { params: Promise<{ id: string }> }) {
   const { theme } = useTheme();
@@ -150,12 +151,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
     }
   };
 
-    if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 text-zinc-500">
-      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-sm font-medium">Loading...</p>
-    </div>
-  );
+  if (loading) return <AdminLoader />;
 
   return (
     <div className="w-full">

@@ -1,5 +1,5 @@
 import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
-export default function AdminLoading() {
+export default function Loading() {
   return <PremiumLoader />;
 }

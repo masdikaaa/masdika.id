@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminVouchersPage() {
   const { theme } = useTheme();
@@ -418,10 +419,7 @@ export default function AdminVouchersPage() {
       </div>
 
       {loading ? (
-        <div className={cn("py-20 flex flex-col items-center justify-center gap-3", isDark ? "text-zinc-500" : "text-slate-500")}>
-          <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-medium">Loading...</p>
-        </div>
+        <AdminLoader className="min-h-[300px] py-16" />
       ) : activeTab === "vouchers" ? (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">

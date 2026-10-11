@@ -1,5 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
@@ -113,12 +114,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
     }
   };
 
-    if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 text-zinc-500">
-      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-sm font-medium">Loading...</p>
-    </div>
-  );
+  if (loading) return <AdminLoader />;
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 w-full">

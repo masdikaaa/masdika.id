@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle } from "lucide-react";
+import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle, Lock, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -126,7 +126,7 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
 }
 
 // ─── Preview Modal ────────────────────────────────────────────────────────────
-function PreviewModal({ item, onClose }: { item: any; onClose: () => void }) {
+function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClose: () => void; onToggleVisibility?: (item: any) => void }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const mediaUrl = `/api/media/${item.token}?inline=true`;
@@ -147,9 +147,27 @@ function PreviewModal({ item, onClose }: { item: any; onClose: () => void }) {
             <span className={cn("font-semibold truncate", isDark ? "text-white" : "text-slate-900")}>{item.originalName}</span>
             <span className={cn("text-[10px] uppercase tracking-wider font-bold bg-white/5 px-2 py-0.5 rounded shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>{item.mimeType}</span>
           </div>
-          <button onClick={onClose} className={cn("hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 shrink-0 ml-3", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0 ml-3">
+            {item.isPublic !== undefined && (
+              <button
+                type="button"
+                onClick={() => onToggleVisibility?.(item)}
+                title={item.isPublic === false ? "Private file (Click to make Public)" : "Public file (Click to make Private)"}
+                className={cn(
+                  "text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-all cursor-pointer",
+                  item.isPublic === false
+                    ? "text-amber-400 bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20"
+                    : "text-cyan-400 bg-cyan-500/10 border-cyan-500/30 hover:bg-cyan-500/20"
+                )}
+              >
+                {item.isPublic === false ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                {item.isPublic === false ? "Private" : "Public"}
+              </button>
+            )}
+            <button onClick={onClose} className={cn("hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
         <div className="flex-1 overflow-auto flex items-center justify-center bg-black/40 min-h-0 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
@@ -231,6 +249,7 @@ export default function UserCDNLibrary() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [expiresIn, setExpiresIn] = useState("permanent");
+  const [isPublicUpload, setIsPublicUpload] = useState(true);
   const [copiedToken, setCopiedToken] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -384,6 +403,26 @@ export default function UserCDNLibrary() {
     window.history.pushState(null, "", `?${params.toString()}`);
   };
 
+  const handleToggleVisibility = async (item: any) => {
+    try {
+      const nextStatus = item.isPublic === false ? true : false;
+      const res = await fetch("/api/user/cdn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggleVisibility", id: item.id, isPublic: nextStatus })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(nextStatus ? "File is now Public" : "File is now Private");
+      setMedia(prev => prev.map(m => m.id === item.id ? { ...m, isPublic: nextStatus } : m));
+      if (previewItem && previewItem.id === item.id) {
+        setPreviewItem((prev: any) => ({ ...prev, isPublic: nextStatus }));
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to toggle visibility");
+    }
+  };
+
   const getBreadcrumbs = () => {
     const parts = currentFolder.split('/').filter(Boolean);
     const crumbs = [{ name: 'Home', path: '/' }];
@@ -486,6 +525,7 @@ export default function UserCDNLibrary() {
         xhr.setRequestHeader("x-upload-file-size", file.size.toString());
         xhr.setRequestHeader("x-upload-folder-path", btoa(encodeURIComponent(currentFolder)));
         xhr.setRequestHeader("x-upload-expires-in", expiresIn);
+        xhr.setRequestHeader("x-upload-is-public", isPublicUpload ? "true" : "false");
 
         xhr.send(file);
       });
@@ -789,13 +829,30 @@ export default function UserCDNLibrary() {
                     <h3 className={cn("font-bold text-sm mb-1 truncate relative z-10", isDark ? "text-white" : "text-slate-900")} title={item.originalName}>{item.originalName}</h3>
                     {!item.isFolder ? (
                       <div className="flex items-end justify-between mt-auto pt-4 relative z-10">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-1">
                           <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{formatBytes(item.size)}</span>
-                          {item.expiresAt ? (
-                            <span className="text-[10px] font-bold tracking-wider text-orange-400 uppercase mt-1 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded w-fit">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
-                          ) : (
-                            <span className="text-[10px] font-bold tracking-wider text-green-400 uppercase mt-1 bg-green-500/10 border border-green-500/20 px-1.5 py-0.5 rounded w-fit">Permanent</span>
-                          )}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                            {item.expiresAt ? (
+                              <span className="text-[10px] font-bold tracking-wider text-orange-400 uppercase bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded w-fit">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
+                            ) : (
+                              <span className="text-[10px] font-bold tracking-wider text-green-400 uppercase bg-green-500/10 border border-green-500/20 px-1.5 py-0.5 rounded w-fit">Permanent</span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleToggleVisibility(item); }}
+                              disabled={isSuspended}
+                              title={item.isPublic === false ? "Private (Click to make Public)" : "Public (Click to make Private)"}
+                              className={cn(
+                                "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50",
+                                item.isPublic === false
+                                  ? "text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40"
+                                  : "text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 hover:border-cyan-500/40"
+                              )}
+                            >
+                              {item.isPublic === false ? <Lock className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+                              {item.isPublic === false ? "Private" : "Public"}
+                            </button>
+                          </div>
                         </div>
                         <div className="flex gap-1.5">
                           {getPreviewType(item.mimeType, item.originalName) !== "none" && (
@@ -856,10 +913,29 @@ export default function UserCDNLibrary() {
                             <td className="px-6 py-4">
                               {item.isFolder ? (
                                 <span className="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg tracking-wider uppercase">{item.itemCount || 0} items</span>
-                              ) : item.expiresAt ? (
-                                <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-lg tracking-wider uppercase">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
                               ) : (
-                                <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-lg tracking-wider uppercase">Permanent</span>
+                                <div className="flex items-center gap-1.5">
+                                  {item.expiresAt ? (
+                                    <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-lg tracking-wider uppercase">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
+                                  ) : (
+                                    <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-lg tracking-wider uppercase">Permanent</span>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); handleToggleVisibility(item); }}
+                                    disabled={isSuspended}
+                                    title={item.isPublic === false ? "Private (Click to make Public)" : "Public (Click to make Private)"}
+                                    className={cn(
+                                      "text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50",
+                                      item.isPublic === false
+                                        ? "text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20"
+                                        : "text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20"
+                                    )}
+                                  >
+                                    {item.isPublic === false ? <Lock className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
+                                    {item.isPublic === false ? "Private" : "Public"}
+                                  </button>
+                                </div>
                               )}
                             </td>
                             <td className="px-6 py-4 text-right">
@@ -868,6 +944,9 @@ export default function UserCDNLibrary() {
                                 <button onClick={(e) => { e.stopPropagation(); setShowMoveModal(item); setMoveDest(currentFolder); }} disabled={isSuspended} className={cn("p-2 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50", isDark ? "text-zinc-400" : "text-slate-500")}><MoveRight className="w-4 h-4" /></button>
                                 {!item.isFolder && (
                                   <>
+                                    <button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(item); }} disabled={isSuspended} className={cn("p-2 rounded-lg transition-colors disabled:opacity-50", item.isPublic === false ? "text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20" : "text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20")} title={item.isPublic === false ? "Make Public" : "Make Private"}>
+                                      {item.isPublic === false ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                                    </button>
                                     <button onClick={(e) => { e.stopPropagation(); copyLink(item.token); }} disabled={isSuspended} className="p-2 text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-lg transition-colors disabled:opacity-50"><LinkIcon className="w-4 h-4" /></button>
                                     {getPreviewType(item.mimeType, item.originalName) !== "none" && (
                                       <button onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }} disabled={isSuspended} className="p-2 text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-lg transition-colors disabled:opacity-50"><Eye className="w-4 h-4" /></button>
@@ -955,7 +1034,7 @@ export default function UserCDNLibrary() {
       <ConfirmModal isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDeleteConfirm} title="Delete Item?" description="This item will be permanently deleted. Folders must be empty to be deleted." confirmText="Delete" isLoading={isDeleting} variant="danger" />
       <ConfirmModal isOpen={showDeleteAllModal} onClose={() => setShowDeleteAllModal(false)} onConfirm={handleBulkDelete} title={`Delete ${selectedIds.length} item(s)?`} description="Selected items will be permanently deleted. This action cannot be undone." confirmText="Delete Selected" isLoading={isDeletingAll} variant="danger" />
 
-      {previewItem && <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />}
+      {previewItem && <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} onToggleVisibility={handleToggleVisibility} />}
 
       <AnimatePresence>
         {showUploadModal && selectedFiles.length > 0 && (
@@ -982,6 +1061,43 @@ export default function UserCDNLibrary() {
                 ))}
               </div>
   
+              <div className="mb-5 space-y-2 relative z-10">
+                <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Visibility</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsPublicUpload(true)}
+                    disabled={uploading}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-3 px-3 rounded-2xl border text-xs font-bold transition-all",
+                      isPublicUpload
+                        ? "bg-cyan-500/15 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                        : isDark ? "bg-[#0b1120] border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    Public
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsPublicUpload(false)}
+                    disabled={uploading}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-3 px-3 rounded-2xl border text-xs font-bold transition-all",
+                      !isPublicUpload
+                        ? "bg-amber-500/15 border-amber-500 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                        : isDark ? "bg-[#0b1120] border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    Private
+                  </button>
+                </div>
+                <p className="text-[11px] text-zinc-500">
+                  {isPublicUpload ? "Public: Anyone with the link can access and view this file." : "Private: Only you and authorized administrators can access this file."}
+                </p>
+              </div>
+
               <div className="mb-8 relative z-10">
                 <label className={cn("block text-xs font-bold uppercase tracking-widest mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Expiry Option</label>
                 <select value={expiresIn} onChange={(e) => setExpiresIn(e.target.value)} className={cn("w-full rounded-2xl p-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-inner transition-all appearance-none cursor-pointer border", isDark ? "bg-[#0b1120] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}>

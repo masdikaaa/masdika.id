@@ -303,6 +303,7 @@ model SecureMedia {
   folderPath   String    @default("/")
   isFolder     Boolean   @default(false)
   isPinned     Boolean   @default(false)
+  isPublic     Boolean   @default(true)
   token        String    @unique
   expiresAt    DateTime?
   userId       Int?

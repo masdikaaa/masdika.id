@@ -7,6 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminApiHubPage() {
   const { theme } = useTheme();
@@ -124,11 +125,8 @@ export default function AdminApiHubPage() {
             <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
               {loading && users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-sm">Loading data...</p>
-                    </div>
+                  <td colSpan={5} className="p-8 text-center">
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : users.length === 0 ? (

@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
     const fileSize = parseInt(req.headers.get("x-upload-file-size") || "0", 10);
     const folderPathBase64 = req.headers.get("x-upload-folder-path") || "Lw==";
     const folderPath = decodeURIComponent(Buffer.from(folderPathBase64, "base64").toString());
+    const isPublicHeader = req.headers.get("x-upload-is-public");
+    const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
 
     if (fileSize > MAX_SIZE) {
       await unlink(tempPath).catch(() => {});
@@ -170,6 +172,7 @@ export async function POST(req: NextRequest) {
         size: fileSize,
         folderPath,
         isFolder: false,
+        isPublic,
         token: shareToken,
         userId: userId,
       },

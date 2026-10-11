@@ -7,6 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { motion, Reorder } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { toast } from "sonner";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminResumePage() {
   const { theme } = useTheme();
@@ -234,10 +235,7 @@ export default function AdminResumePage() {
       </div>
 
       {loading ? (
-        <div className="py-12 flex flex-col items-center justify-center gap-3 text-zinc-500">
-          <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-medium">Loading data...</p>
-        </div>
+        <AdminLoader className="min-h-[250px] py-12" />
       ) : (
         <div className="mt-6">
           {/* EXPERIENCE TAB */}

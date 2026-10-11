@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, LayoutList, Server, Zap, Link as LinkIcon, Databas
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 interface Plan {
   id: number;
   name: string;
@@ -318,11 +319,8 @@ export default function AdminPlansPage() {
             <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className={cn("px-6 py-12 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    <div className="inline-flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-                      Loading plans...
-                    </div>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : plans.length === 0 ? (

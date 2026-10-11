@@ -1,5 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 import { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Search, ExternalLink, CheckCircle, Check , LayoutDashboard } from "lucide-react";
@@ -182,10 +183,7 @@ export default function AdminPortfolioPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-zinc-500 text-sm">Loading projects...</p>
-                    </div>
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : filteredProjects.length === 0 ? (

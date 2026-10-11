@@ -7,6 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Pagination } from '@/components/ui/Pagination';
+import { AdminLoader } from '@/components/admin/AdminLoader';
 
 type LoginLog = {
   id: number;
@@ -214,9 +215,7 @@ export default function LoginLogsPage() {
       {/* Main Content */}
       <div className={cn("border rounded-2xl shadow-xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         {loading ? (
-          <div className="flex items-center justify-center p-12">
-            <div className={cn("w-8 h-8 border-4 rounded-full animate-spin", isDark ? "border-cyan-500/20 border-t-cyan-500" : "border-cyan-200 border-t-cyan-600")} />
-          </div>
+          <AdminLoader className="min-h-[250px] p-12" />
         ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center">
             <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>

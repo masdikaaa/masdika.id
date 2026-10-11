@@ -13,6 +13,7 @@ import { mutate as globalMutate } from 'swr';
 import DOMPurify from 'isomorphic-dompurify';
 import 'react-quill-new/dist/quill.snow.css';
 import { toast } from 'sonner';
+import { AdminLoader } from '@/components/admin/AdminLoader';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
@@ -213,14 +214,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
     }
   };
 
-  if (isLoading) return (
-    <div className="flex h-[60vh] items-center justify-center">
-      <div className="relative">
-        <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full" />
-        <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin relative z-10" />
-      </div>
-    </div>
-  );
+  if (isLoading) return <AdminLoader />;
   if (error || !ticket) return <div className={cn("p-8 text-center font-semibold bg-red-500/10 rounded-xl border border-red-500/20 max-w-md mx-auto mt-10", isDark ? "text-red-400" : "text-red-700")}>Failed to load ticket details.</div>;
 
   const isClosed = ticket.status === 'CLOSED' || ticket.status === 'MERGED';

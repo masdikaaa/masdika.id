@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect, useRef } from "react";
-import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Pin , RefreshCw } from "lucide-react";
+import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Pin , RefreshCw, Lock, Globe } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -124,8 +124,7 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-// ─── Preview Modal ────────────────────────────────────────────────────────────
-function PreviewModal({ item, onClose }: { item: any; onClose: () => void }) {
+function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClose: () => void; onToggleVisibility?: (item: any) => void }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const mediaUrl = `/api/media/${item.token}?inline=true`;
@@ -147,9 +146,27 @@ function PreviewModal({ item, onClose }: { item: any; onClose: () => void }) {
               <span className={cn("font-semibold truncate", isDark ? "text-white" : "text-slate-900")}>{item.originalName}</span>
               <span className="text-xs text-zinc-500 shrink-0">{item.mimeType}</span>
             </div>
-            <button onClick={onClose} className={cn("hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 shrink-0 ml-3", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0 ml-3">
+              {item.isPublic !== undefined && (
+                <button
+                  type="button"
+                  onClick={() => onToggleVisibility?.(item)}
+                  title={item.isPublic === false ? "Private file (Click to make Public)" : "Public file (Click to make Private)"}
+                  className={cn(
+                    "text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-all cursor-pointer",
+                    item.isPublic === false
+                      ? "text-amber-400 bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20"
+                      : "text-cyan-400 bg-cyan-500/10 border-cyan-500/30 hover:bg-cyan-500/20"
+                  )}
+                >
+                  {item.isPublic === false ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                  {item.isPublic === false ? "Private" : "Public"}
+                </button>
+              )}
+              <button onClick={onClose} className={cn("hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         <div className={cn("flex-1 overflow-auto flex items-center justify-center min-h-0", isDark ? "bg-black/40" : "bg-slate-50")}>
           {type === "image" && <ImageViewer src={mediaUrl} alt={item.originalName} />}
@@ -219,6 +236,7 @@ export default function AdminMediaLibrary() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [expiresIn, setExpiresIn] = useState("permanent");
+  const [isPublicUpload, setIsPublicUpload] = useState(true);
   const [copiedToken, setCopiedToken] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -373,6 +391,26 @@ export default function AdminMediaLibrary() {
     }
   };
 
+  const handleToggleVisibility = async (item: any) => {
+    try {
+      const nextStatus = item.isPublic === false ? true : false;
+      const res = await fetch("/api/admin/secure-media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggleVisibility", id: item.id, isPublic: nextStatus })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(nextStatus ? "File is now Public" : "File is now Private");
+      setMedia(prev => prev.map(m => m.id === item.id ? { ...m, isPublic: nextStatus } : m));
+      if (previewItem && previewItem.id === item.id) {
+        setPreviewItem((prev: any) => ({ ...prev, isPublic: nextStatus }));
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to toggle visibility");
+    }
+  };
+
   const getBreadcrumbs = () => {
     const parts = currentFolder.split('/').filter(Boolean);
     const crumbs = [{ name: 'Home', path: '/' }];
@@ -456,6 +494,7 @@ export default function AdminMediaLibrary() {
         xhr.setRequestHeader("x-upload-file-size", file.size.toString());
         xhr.setRequestHeader("x-upload-folder-path", btoa(encodeURIComponent(currentFolder)));
         xhr.setRequestHeader("x-upload-expires-in", expiresIn);
+        xhr.setRequestHeader("x-upload-is-public", isPublicUpload ? "true" : "false");
 
         xhr.send(file);
       });
@@ -677,13 +716,29 @@ export default function AdminMediaLibrary() {
                   <h3 className={cn("font-bold text-sm mb-1 truncate", isDark ? "text-white" : "text-slate-900")} title={item.originalName}>{item.originalName}</h3>
                   {!item.isFolder ? (
                     <div className="flex items-end justify-between mt-auto pt-2">
-                      <div className="flex flex-col">
+                      <div className="flex flex-col gap-1">
                         <span className="text-xs font-medium text-zinc-500">{formatBytes(item.size)}</span>
-                        {item.expiresAt ? (
-                          <span className="text-[10px] font-bold tracking-wider uppercase text-orange-400 mt-1 bg-orange-400/10 px-1.5 py-0.5 rounded border border-orange-400/20 w-fit">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
-                        ) : (
-                          <span className="text-[10px] font-bold tracking-wider uppercase text-green-400 mt-1 bg-green-400/10 px-1.5 py-0.5 rounded border border-green-400/20 w-fit">Permanent</span>
-                        )}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                          {item.expiresAt ? (
+                            <span className="text-[10px] font-bold tracking-wider uppercase text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded border border-orange-400/20 w-fit">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
+                          ) : (
+                            <span className="text-[10px] font-bold tracking-wider uppercase text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded border border-green-400/20 w-fit">Permanent</span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleToggleVisibility(item); }}
+                            title={item.isPublic === false ? "Private (Click to make Public)" : "Public (Click to make Private)"}
+                            className={cn(
+                              "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer",
+                              item.isPublic === false
+                                ? "text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40"
+                                : "text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 hover:border-cyan-500/40"
+                            )}
+                          >
+                            {item.isPublic === false ? <Lock className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+                            {item.isPublic === false ? "Private" : "Public"}
+                          </button>
+                        </div>
                       </div>
                       <div className="flex gap-1 pb-1">
                         {getPreviewType(item.mimeType, item.originalName) !== "none" && (
@@ -742,10 +797,28 @@ export default function AdminMediaLibrary() {
                           <td className="px-5 py-4 whitespace-nowrap">
                             {item.isFolder ? (
                               <span className={cn("text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>{item.itemCount || 0} items</span>
-                            ) : item.expiresAt ? (
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 bg-orange-400/10 px-2 py-1 rounded border border-orange-400/20">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
                             ) : (
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-green-400 bg-green-400/10 px-2 py-1 rounded border border-green-400/20">Permanent</span>
+                              <div className="flex items-center gap-1.5">
+                                {item.expiresAt ? (
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 bg-orange-400/10 px-2 py-1 rounded border border-orange-400/20">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
+                                ) : (
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-green-400 bg-green-400/10 px-2 py-1 rounded border border-green-400/20">Permanent</span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); handleToggleVisibility(item); }}
+                                  title={item.isPublic === false ? "Private (Click to make Public)" : "Public (Click to make Private)"}
+                                  className={cn(
+                                    "text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded border flex items-center gap-1 transition-all cursor-pointer",
+                                    item.isPublic === false
+                                      ? "text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20"
+                                      : "text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20"
+                                  )}
+                                >
+                                  {item.isPublic === false ? <Lock className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
+                                  {item.isPublic === false ? "Private" : "Public"}
+                                </button>
+                              </div>
                             )}
                           </td>
                           <td className="px-5 py-4 text-right whitespace-nowrap">
@@ -757,6 +830,9 @@ export default function AdminMediaLibrary() {
                               <button onClick={(e) => { e.stopPropagation(); setShowMoveModal(item); setMoveDest(currentFolder); }} className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}><MoveRight className="w-4 h-4" /></button>
                               {!item.isFolder && (
                                 <>
+                                  <button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(item); }} className={cn("p-1.5 rounded-lg hover:bg-white/10 transition-colors", item.isPublic === false ? "text-amber-400 hover:text-amber-300" : "text-cyan-400 hover:text-cyan-300")} title={item.isPublic === false ? "Make Public" : "Make Private"}>
+                                    {item.isPublic === false ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                                  </button>
                                   <button onClick={() => copyLink(item.token)} className={cn("p-1.5 rounded-lg hover:bg-cyan-500/10 hover:text-cyan-300", isDark ? "text-cyan-400" : "text-cyan-700")}><LinkIcon className="w-4 h-4" /></button>
                                   {getPreviewType(item.mimeType, item.originalName) !== "none" && (
                                     <button onClick={() => setPreviewItem(item)} className={cn("p-1.5 rounded-lg hover:bg-cyan-500/10 hover:text-cyan-300", isDark ? "text-cyan-400" : "text-cyan-700")}><Eye className="w-4 h-4" /></button>
@@ -831,7 +907,7 @@ export default function AdminMediaLibrary() {
       <ConfirmModal isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDeleteConfirm} title="Delete File/Folder?" description="This will be permanently deleted. Folders must be empty to be deleted." confirmText="Delete" isLoading={isDeleting} variant="danger" />
       <ConfirmModal isOpen={showDeleteAllModal} onClose={() => setShowDeleteAllModal(false)} onConfirm={handleBulkDelete} title={`Delete ${selectedIds.length} item(s)?`} description="Selected items will be permanently deleted. This action cannot be undone." confirmText="Delete Selected" isLoading={isDeletingAll} variant="danger" />
 
-      {previewItem && <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />}
+      {previewItem && <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} onToggleVisibility={handleToggleVisibility} />}
 
       <AnimatePresence>
       {showUploadModal && selectedFiles.length > 0 && (
@@ -850,6 +926,43 @@ export default function AdminMediaLibrary() {
                   <div className="text-xs font-bold text-zinc-500 shrink-0 px-2 py-1 rounded">{formatBytes(file.size)}</div>
                 </div>
               ))}
+            </div>
+
+            <div className="mb-5 space-y-2">
+              <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Visibility</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPublicUpload(true)}
+                  disabled={uploading}
+                  className={cn(
+                    "flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-bold transition-all",
+                    isPublicUpload
+                      ? "bg-cyan-500/15 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                      : isDark ? "bg-[#0A0B1A] border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Public
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPublicUpload(false)}
+                  disabled={uploading}
+                  className={cn(
+                    "flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-bold transition-all",
+                    !isPublicUpload
+                      ? "bg-amber-500/15 border-amber-500 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                      : isDark ? "bg-[#0A0B1A] border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  Private
+                </button>
+              </div>
+              <p className="text-[11px] text-zinc-500">
+                {isPublicUpload ? "Public: Anyone with the link can access and view this file." : "Private: Only authorized administrators can access this file."}
+              </p>
             </div>
 
             <div className="mb-8 space-y-3">

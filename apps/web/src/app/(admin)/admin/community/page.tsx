@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { FaWhatsapp, FaTelegram } from "react-icons/fa";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 const GroupIcon = ({ link = "" }: { link?: string }) => {
   const { theme } = useTheme();
@@ -235,12 +236,7 @@ export default function AdminCommunityPage() {
     }
   };
 
-  if (loading) return (
-    <div className={cn("flex flex-col items-center justify-center p-20 gap-3", isDark ? "text-zinc-500" : "text-slate-500")}>
-      <div className={cn("w-6 h-6 border-2 border-t-transparent rounded-full animate-spin", isDark ? "border-cyan-500" : "border-slate-400")}></div>
-      <p className="text-sm font-medium">Loading...</p>
-    </div>
-  );
+  if (loading) return <AdminLoader />;
 
   return (
     <div className="space-y-8 relative z-10 w-full p-6 sm:p-0">

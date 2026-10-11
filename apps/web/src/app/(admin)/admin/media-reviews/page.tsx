@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 interface MediaItem {
   id: number;
@@ -180,11 +181,7 @@ export default function AdminMediaReviewsPage() {
   };
 
   if (loading && comments.length === 0 && ratings.length === 0) {
-    return (
-      <div className="min-h-[60vh] w-full flex items-center justify-center">
-        <div className={cn("w-10 h-10 border-4 border-t-transparent rounded-full animate-spin", isDark ? "border-cyan-500" : "border-cyan-600")} />
-      </div>
-    );
+    return <AdminLoader />;
   }
 
   return (
@@ -334,37 +331,57 @@ export default function AdminMediaReviewsPage() {
       )}>
         {/* Tab switch */}
         <div className={cn(
-          "flex items-center gap-1 p-1 rounded-xl border",
+          "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 w-full sm:w-auto",
           isDark ? "bg-black/40 border-white/5" : "bg-slate-100 border-slate-200"
         )}>
           <button
             onClick={() => setActiveTab("comments")}
             className={cn(
-              "px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2",
+              "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
               activeTab === "comments"
                 ? "bg-cyan-500 text-white shadow-xs font-bold"
                 : isDark
-                  ? "text-zinc-400 hover:text-white"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Comments ({comments.length})</span>
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            <span>Comments</span>
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+              activeTab === "comments"
+                ? "bg-white/20 text-white"
+                : isDark
+                  ? "bg-white/10 text-zinc-300"
+                  : "bg-slate-200 text-slate-700"
+            )}>
+              {comments.length}
+            </span>
           </button>
 
           <button
             onClick={() => setActiveTab("ratings")}
             className={cn(
-              "px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2",
+              "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
               activeTab === "ratings"
                 ? "bg-cyan-500 text-white shadow-xs font-bold"
                 : isDark
-                  ? "text-zinc-400 hover:text-white"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
-            <Star className="w-3.5 h-3.5" />
-            <span>Direct Ratings ({ratings.length})</span>
+            <Star className="w-3.5 h-3.5 shrink-0" />
+            <span>Direct Ratings</span>
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+              activeTab === "ratings"
+                ? "bg-white/20 text-white"
+                : isDark
+                  ? "bg-white/10 text-zinc-300"
+                  : "bg-slate-200 text-slate-700"
+            )}>
+              {ratings.length}
+            </span>
           </button>
         </div>
 
@@ -412,10 +429,7 @@ export default function AdminMediaReviewsPage() {
       {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
       <div className="w-full">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
-            <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Loading reviews and feedback...</span>
-          </div>
+          <AdminLoader className="min-h-[300px] py-16" />
         ) : activeTab === "comments" ? (
           /* COMMENTS TAB */
           filteredComments.length === 0 ? (
@@ -437,121 +451,123 @@ export default function AdminMediaReviewsPage() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "rounded-2xl border p-5 transition-all shadow-xs",
+                    "rounded-2xl border p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
                       ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30"
                       : "bg-white border-slate-200 hover:border-cyan-500/40"
                   )}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    {/* Left: Author & Content */}
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      {/* Profile Avatar (Google / Gravatar / Initials - identical to Customers page) */}
-                      <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/10" : "border-slate-200")}>
-                        <img
-                          referrerPolicy="no-referrer"
-                          src={comment.avatar ? `${comment.avatar}${comment.avatar.includes('?') ? '&' : '?'}v=4` : `/api/avatar?email=${encodeURIComponent(comment.email)}&name=${encodeURIComponent(comment.name)}&v=4`}
-                          alt={comment.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = "flex";
-                          }}
-                        />
-                        <div
-                          style={{ display: "none" }}
-                          className="w-full h-full bg-[#137333] items-center justify-center text-white font-medium text-sm"
-                        >
-                          {comment.name.charAt(0).toUpperCase()}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                            {comment.name}
-                          </span>
-                          <span className={cn("text-xs flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                            <Mail className={cn("w-3 h-3", isDark ? "text-zinc-500" : "text-slate-400")} /> {comment.email}
-                          </span>
-                          {comment.isVerified && (
-                            <span className={cn(
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border",
-                              isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
-                            )}>
-                              <ShieldCheck className="w-3 h-3" /> OTP Verified
-                            </span>
-                          )}
-                          {comment.rating && (
-                            <span className={cn(
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border",
-                              isDark ? "bg-amber-400/10 text-amber-400 border-amber-400/20" : "bg-amber-50 text-amber-700 border-amber-200"
-                            )}>
-                              <Star className="w-3 h-3 fill-amber-400" /> {comment.rating}.0
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Comment text */}
-                        <p className={cn(
-                          "text-sm leading-relaxed whitespace-pre-wrap p-3 rounded-xl border",
-                          isDark ? "text-zinc-300 bg-black/30 border-white/5" : "text-slate-700 bg-slate-50 border-slate-100"
-                        )}>
-                          {comment.content}
-                        </p>
-
-                        {/* Associated Media File */}
-                        <div className={cn("flex items-center gap-3 pt-1 text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          <div className={cn("flex items-center gap-1.5 truncate font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>
-                            <File className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                            <span className="truncate">{comment.media?.originalName || "Deleted Media"}</span>
-                          </div>
-                          <span>·</span>
-                          <span className={isDark ? "text-zinc-500" : "text-slate-400"}>{formatDate(comment.createdAt)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right Actions */}
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
-                      {comment.media?.token && (
-                        <Link
-                          href={`/media/${comment.media.token}`}
-                          target="_blank"
-                          className={cn(
-                            "p-2 rounded-xl border transition-colors",
-                            isDark
-                              ? "border-white/10 bg-white/5 hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
-                              : "border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
-                          )}
-                          title="Open Public Media Page"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Link>
-                      )}
-
-                      <button
-                        onClick={() =>
-                          setDeleteTarget({
-                            type: "comment",
-                            id: comment.id,
-                            title: `Comment by "${comment.name}"`,
-                          })
-                        }
-                        className={cn(
-                          "p-2 rounded-xl border transition-colors cursor-pointer",
-                          isDark
-                            ? "border-white/10 bg-white/5 hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
-                            : "border-slate-200 bg-slate-50 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
-                        )}
-                        title="Delete Comment"
+                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                    {/* Profile Avatar (Google / Gravatar / Initials - identical to Customers page) */}
+                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/10" : "border-slate-200")}>
+                      <img
+                        referrerPolicy="no-referrer"
+                        src={comment.avatar ? `${comment.avatar}${comment.avatar.includes('?') ? '&' : '?'}v=4` : `/api/avatar?email=${encodeURIComponent(comment.email)}&name=${encodeURIComponent(comment.name)}&v=4`}
+                        alt={comment.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = "flex";
+                        }}
+                      />
+                      <div
+                        style={{ display: "none" }}
+                        className="w-full h-full bg-[#137333] items-center justify-center text-white font-medium text-sm"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        {comment.name.charAt(0).toUpperCase()}
+                      </div>
                     </div>
+
+                    <div className="space-y-2 min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                          {comment.name}
+                        </span>
+                        <span className={cn("text-xs flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          <Mail className={cn("w-3 h-3 shrink-0", isDark ? "text-zinc-500" : "text-slate-400")} /> {comment.email}
+                        </span>
+                        {comment.isVerified && (
+                          <span className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0",
+                            isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                          )}>
+                            <ShieldCheck className="w-3 h-3" /> OTP Verified
+                          </span>
+                        )}
+                        {comment.rating && (
+                          <span className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border shrink-0",
+                            isDark ? "bg-amber-400/10 text-amber-400 border-amber-400/20" : "bg-amber-50 text-amber-700 border-amber-200"
+                          )}>
+                            <Star className="w-3 h-3 fill-amber-400" /> {comment.rating}.0
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Comment text */}
+                      <p className={cn(
+                        "text-sm leading-relaxed whitespace-pre-wrap p-3 rounded-xl border",
+                        isDark ? "text-zinc-300 bg-black/30 border-white/5" : "text-slate-700 bg-slate-50 border-slate-100"
+                      )}>
+                        {comment.content}
+                      </p>
+
+                      {/* Associated Media File & Date */}
+                      <div className={cn("flex flex-wrap items-center gap-2.5 text-xs pt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs max-w-full font-medium truncate",
+                          isDark ? "bg-white/5 border-white/5 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700"
+                        )}>
+                          <FileVideo className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                          <span className="truncate max-w-[200px] sm:max-w-xs md:max-w-md">{comment.media?.originalName || "Deleted Media"}</span>
+                        </div>
+                        <span className={cn("text-[11px] flex items-center gap-1 shrink-0", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(comment.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Actions */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto justify-end">
+                    {comment.media?.token && (
+                      <Link
+                        href={`/media/${comment.media.token}`}
+                        target="_blank"
+                        className={cn(
+                          "p-2 rounded-xl border transition-colors inline-flex items-center justify-center",
+                          isDark
+                            ? "border-white/10 bg-white/5 hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
+                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
+                        )}
+                        title="Open Public Media Page"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={() =>
+                        setDeleteTarget({
+                          type: "comment",
+                          id: comment.id,
+                          title: `Comment by "${comment.name}"`,
+                        })
+                      }
+                      className={cn(
+                        "p-2 rounded-xl border transition-colors cursor-pointer inline-flex items-center justify-center",
+                        isDark
+                          ? "border-white/10 bg-white/5 hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
+                          : "border-slate-200 bg-slate-50 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
+                      )}
+                      title="Delete Comment"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -573,18 +589,20 @@ export default function AdminMediaReviewsPage() {
           ) : (
             <div className="space-y-3 w-full">
               {filteredRatings.map((rating) => (
-                <div
+                <motion.div
                   key={rating.id}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "rounded-2xl border p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full",
+                    "rounded-2xl border p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
                       ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30"
                       : "bg-white border-slate-200 hover:border-cyan-500/40"
                   )}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    {/* Rating Profile Avatar (identical to Customers page) */}
-                    <div className={cn("w-9 h-9 rounded-full overflow-hidden border shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
+                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                    {/* Rating Profile Avatar */}
+                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/10" : "border-slate-200")}>
                       <img
                         referrerPolicy="no-referrer"
                         src={rating.avatar ? `${rating.avatar}${rating.avatar.includes('?') ? '&' : '?'}v=4` : (rating.userEmail ? `/api/avatar?email=${encodeURIComponent(rating.userEmail)}&name=User&v=4` : `/api/avatar?name=Guest&v=4`)}
@@ -600,49 +618,65 @@ export default function AdminMediaReviewsPage() {
                       />
                       <div
                         style={{ display: "none" }}
-                        className="w-full h-full bg-[#137333] items-center justify-center text-white font-medium text-xs"
+                        className="w-full h-full bg-[#137333] items-center justify-center text-white font-medium text-sm"
                       >
                         {(rating.userEmail || "G").charAt(0).toUpperCase()}
                       </div>
                     </div>
 
-                    <div className="min-w-0 space-y-1 flex-1">
+                    <div className="min-w-0 space-y-2 flex-1">
+                      {/* Rating score, type badge, and user identifier */}
                       <div className="flex flex-wrap items-center gap-2">
                         <div className={cn(
-                          "flex items-center gap-1 px-2.5 py-0.5 rounded-lg border font-bold text-xs",
+                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border font-bold text-xs shrink-0",
                           isDark ? "bg-amber-400/10 border-amber-400/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700"
                         )}>
                           <Star className="w-3.5 h-3.5 fill-amber-400" />
                           <span>{rating.rating}.0 Stars</span>
                         </div>
-                        <span className={cn("text-xs font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>
-                          {rating.userEmail || rating.ipAddress || "Anonymous Guest"}
+
+                        <span className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold shrink-0",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                        )}>
+                          <ShieldCheck className="w-3 h-3" /> Direct Rating
                         </span>
-                        {rating.userEmail && (
-                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                            <ShieldCheck className="w-3 h-3" /> Direct Rating
-                          </span>
-                        )}
+
+                        <span className={cn(
+                          "text-xs font-semibold flex items-center gap-1.5 truncate max-w-full sm:max-w-md",
+                          isDark ? "text-zinc-200" : "text-slate-800"
+                        )}>
+                          <Mail className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-zinc-500" : "text-slate-400")} />
+                          <span className="truncate">{rating.userEmail || rating.ipAddress || "Anonymous Guest"}</span>
+                        </span>
                       </div>
 
-                      <p className={cn("text-xs truncate flex items-center gap-1.5 pt-0.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                        <File className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                        <span className="truncate font-medium">{rating.media?.originalName || "Deleted Media"}</span>
-                      </p>
+                      {/* File and timestamp */}
+                      <div className={cn("flex flex-wrap items-center gap-2.5 text-xs pt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs max-w-full font-medium truncate",
+                          isDark ? "bg-white/5 border-white/5 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700"
+                        )}>
+                          <FileVideo className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                          <span className="truncate max-w-[200px] sm:max-w-xs md:max-w-md">{rating.media?.originalName || "Deleted Media"}</span>
+                        </div>
 
-                      <span className={cn("text-[11px] block", isDark ? "text-zinc-500" : "text-slate-400")}>
-                        {formatDate(rating.createdAt)}
-                      </span>
+                        <span className={cn("text-[11px] flex items-center gap-1 shrink-0", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(rating.createdAt)}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto justify-end">
                     {rating.media?.token && (
                       <Link
                         href={`/media/${rating.media.token}`}
                         target="_blank"
                         className={cn(
-                          "p-2 rounded-xl border transition-colors",
+                          "p-2 rounded-xl border transition-colors inline-flex items-center justify-center",
                           isDark
                             ? "border-white/10 bg-white/5 hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
                             : "border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
@@ -662,7 +696,7 @@ export default function AdminMediaReviewsPage() {
                         })
                       }
                       className={cn(
-                        "p-2 rounded-xl border transition-colors cursor-pointer",
+                        "p-2 rounded-xl border transition-colors cursor-pointer inline-flex items-center justify-center",
                         isDark
                           ? "border-white/10 bg-white/5 hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
                           : "border-slate-200 bg-slate-50 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
@@ -672,7 +706,7 @@ export default function AdminMediaReviewsPage() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )

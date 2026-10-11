@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
 import { motion } from "framer-motion";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 const defaultFormData = {
   title: "",
@@ -494,10 +495,7 @@ export default function AdminAnnouncementsPage() {
               {loading ? (
                 <tr>
                   <td colSpan={activeTab === 'berita' ? 6 : 5} className="px-6 py-12">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-600")}>Loading...</p>
-                    </div>
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : paginatedAnnouncements.length === 0 ? (

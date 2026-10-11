@@ -5,13 +5,14 @@ import dynamic from "next/dynamic";
 import {
   Download, FileImage, FileVideo, FileAudio, FileText,
   File, Presentation, AlertTriangle, Clock, CheckCircle2, Loader2, Link2, ArrowLeft,
-  Sun, Moon,
+  Sun, Moon, Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { MediaEngagement } from "@/components/media/MediaEngagement";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 // Dynamically import Video.js player to prevent SSR window issues
 const VideoPlayer = dynamic(
@@ -35,6 +36,7 @@ interface MediaInfo {
   size: number;
   expiresAt: string | null;
   token: string;
+  isPublic?: boolean;
 }
 
 type PreviewType = "image" | "video" | "audio" | "pdf" | "text" | "office" | "none";
@@ -252,7 +254,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
   const { token } = use(params);
 
   const [media, setMedia]     = useState<MediaInfo | null>(null);
-  const [status, setStatus]   = useState<"loading" | "ok" | "expired" | "notfound" | "error">("loading");
+  const [status, setStatus]   = useState<"loading" | "ok" | "expired" | "notfound" | "private" | "error">("loading");
   const [downloading, setDownloading] = useState(false);
   const [dlProgress, setDlProgress]   = useState(0);
   const [copied, setCopied]   = useState(false);
@@ -263,7 +265,8 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
   useEffect(() => {
     fetch(`/api/media/${token}/info`)
       .then((r) => {
-        if (r.status === 410) { setStatus("expired"); return null; }
+        if (r.status === 403) { setStatus("private");  return null; }
+        if (r.status === 410) { setStatus("expired");  return null; }
         if (r.status === 404) { setStatus("notfound"); return null; }
         if (!r.ok)            { setStatus("error");    return null; }
         return r.json();
@@ -322,9 +325,42 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
   };
 
   // ── Loading ──────────────────────────────────────────────────────────────────
-  if (status === "loading") return (
-    <div className={cn("min-h-screen flex items-center justify-center", isDark ? "bg-[#011627]" : "bg-slate-50")}>
-      <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
+  if (status === "loading") return <PremiumLoader />;
+
+  // ── Private ──────────────────────────────────────────────────────────────────
+  if (status === "private") return (
+    <div className={cn("min-h-screen flex items-center justify-center p-6 relative overflow-hidden", isDark ? "bg-[#011627]" : "bg-slate-50")}>
+      {/* Background ambient cyber glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className={cn("text-center max-w-md w-full mx-auto p-8 md:p-10 rounded-3xl border backdrop-blur-xl shadow-2xl transition-all relative z-10", isDark ? "bg-[#0A0E1A]/90 border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.12)]" : "bg-white border-slate-200 shadow-xl")}>
+        <div className={cn(
+          "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border transition-all",
+          isDark
+            ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.25)]"
+            : "bg-cyan-50 border-cyan-200 text-cyan-600 shadow-sm"
+        )}>
+          <Lock className="w-8 h-8" />
+        </div>
+        <h1 className={cn("text-2xl font-extrabold mb-2.5 tracking-tight", isDark ? "text-white" : "text-slate-900")}>This File is Private</h1>
+        <p className={cn("text-sm mb-7 leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+          This file is marked as <strong>Private</strong>. Only the file owner or authorized administrators can access and download this content.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            href="/login"
+            className="px-6 py-3 rounded-xl text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all shadow-[0_0_20px_rgba(6,182,212,0.35)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] inline-flex items-center justify-center gap-2"
+          >
+            Sign In to Access
+          </Link>
+          <Link
+            href="/"
+            className={cn("px-6 py-3 rounded-xl text-sm font-semibold border transition-all inline-flex items-center justify-center", isDark ? "border-white/10 text-zinc-300 hover:text-white hover:bg-white/5 hover:border-white/20" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+          >
+            Back to Home
+          </Link>
+        </div>
+      </div>
     </div>
   );
 

@@ -5,6 +5,7 @@ import { CreditCard, Save, Building2, Wallet, Store, QrCode, Loader2 } from "luc
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminPaymentSettingsPage() {
   const { theme } = useTheme();
@@ -194,10 +195,7 @@ export default function AdminPaymentSettingsPage() {
 
       <div className={cn("border rounded-2xl shadow-xl overflow-hidden p-6", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         {loading ? (
-          <div className={cn("py-20 flex flex-col items-center justify-center gap-3", isDark ? "text-zinc-500" : "text-slate-500")}>
-            <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm font-medium">Loading...</p>
-          </div>
+          <AdminLoader className="min-h-[300px] py-20" />
         ) : (
           <>
             {renderGroup("Virtual Accounts", "VIRTUAL_ACCOUNT")}

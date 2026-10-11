@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Link as LinkIcon, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server , DollarSign } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 const getServiceIcon = (service: string, isDark: boolean) => {
   if (!service) return <Database className={cn("w-4 h-4", isDark ? "text-indigo-400" : "text-slate-700")} />;
@@ -374,10 +375,7 @@ export default function AdminInvoicesPage() {
               {loading ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center">
-                    <div className={cn("inline-flex items-center justify-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                      Loading invoices...
-                    </div>
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : filteredInvoices.length === 0 ? (

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { MessageSquare, ChevronRight, User, Trash2, X, CheckCircle, Search, ChevronLeft , Loader2, Plus, AlertCircle, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
+import { AdminLoader } from '@/components/admin/AdminLoader';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -234,10 +235,8 @@ export default function AdminTicketsClient() {
 
       <div className={cn("glass-card border rounded-[32px] overflow-hidden shadow-2xl relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         {isLoading ? (
-<div className="flex items-center justify-center py-20">
-      <Loader2 className={cn("w-8 h-8 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
-    </div>
-) : error ? (
+          <AdminLoader className="min-h-[250px] py-20" />
+        ) : error ? (
           <div className={cn("p-8 text-center", isDark ? "text-red-400" : "text-red-700")}>Failed to load tickets.</div>
         ) : tickets?.length === 0 ? (
           <div className="p-16 text-center relative overflow-hidden group">

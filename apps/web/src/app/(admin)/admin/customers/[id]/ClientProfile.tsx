@@ -11,6 +11,7 @@ import { formatRupiah } from '@/lib/billing';
 import { Pagination } from '@/components/ui/Pagination';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { AdminEditServiceModal } from '@/components/ui/AdminEditServiceModal';
+import { AdminLoader } from '@/components/admin/AdminLoader';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const { theme } = useTheme();
@@ -388,12 +389,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className={cn("text-sm", isDark ? "text-zinc-500" : "text-slate-500")}>Loading customer profile...</p>
-      </div>
-    );
+    return <AdminLoader />;
   }
 
   if (!user) {

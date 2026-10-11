@@ -88,14 +88,52 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
 
   // Load ratings and comments (sorted newest first)
   useEffect(() => {
-    fetch(`/api/media/${token}/rating`)
+    let savedEmail = "";
+    try {
+      savedEmail = localStorage.getItem("media_user_email") || "";
+      const savedName = localStorage.getItem("media_user_name") || "";
+      if (savedEmail && !authorEmail) setAuthorEmail(savedEmail);
+      if (savedName && !authorName) setAuthorName(savedName);
+
+      const localRated = localStorage.getItem(`media_rated_${token}`);
+      if (localRated) {
+        const parsed = Number(localRated);
+        if (parsed >= 1 && parsed <= 5) {
+          setRatingData((prev) => ({
+            ...prev,
+            userRating: prev.userRating ?? parsed,
+          }));
+        }
+      }
+
+      const localCommented = localStorage.getItem(`media_commented_${token}`);
+      if (localCommented === "true") {
+        setHasCommented(true);
+      }
+    } catch {
+      // ignore
+    }
+
+    const emailQuery = savedEmail ? `?email=${encodeURIComponent(savedEmail)}` : "";
+
+    fetch(`/api/media/${token}/rating${emailQuery}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) setRatingData(data);
+        if (data) {
+          setRatingData((prev) => ({
+            ...data,
+            userRating: data.userRating ?? prev.userRating,
+          }));
+          if (data.userRating) {
+            try {
+              localStorage.setItem(`media_rated_${token}`, String(data.userRating));
+            } catch {}
+          }
+        }
       })
       .catch(() => { });
 
-    fetch(`/api/media/${token}/comments`)
+    fetch(`/api/media/${token}/comments${emailQuery}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.comments) {
@@ -106,6 +144,9 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
         }
         if (data?.hasCommented) {
           setHasCommented(true);
+          try {
+            localStorage.setItem(`media_commented_${token}`, "true");
+          } catch {}
         }
         setLoadingComments(false);
       })
@@ -198,10 +239,11 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
     if (submittingRating || ratingData.userRating !== null) return;
     setSubmittingRating(true);
     try {
+      const emailToSend = authorEmail ? authorEmail.trim().toLowerCase() : undefined;
       const res = await fetch(`/api/media/${token}/rating`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: val, email: authorEmail || undefined }),
+        body: JSON.stringify({ rating: val, email: emailToSend }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -211,10 +253,16 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
             ...prev,
             userRating: prev.userRating || val,
           }));
+          try {
+            localStorage.setItem(`media_rated_${token}`, String(val));
+          } catch {}
         }
         return;
       }
       if (data.success) {
+        try {
+          localStorage.setItem(`media_rated_${token}`, String(data.userRating || val));
+        } catch {}
         setRatingData((prev) => ({
           ...prev,
           userRating: data.userRating,
@@ -318,6 +366,9 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
     setOtpError(null);
 
     try {
+      // If user has already rated, do not pass another rating
+      const ratingToSend = ratingData.userRating !== null ? undefined : commentRating;
+
       const res = await fetch(`/api/media/${token}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -325,7 +376,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
           name: authorName,
           email: authorEmail,
           content: commentText,
-          rating: commentRating,
+          rating: ratingToSend,
           otp: fullOtp.trim(),
         }),
       });
@@ -348,6 +399,15 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
       setCommentText("");
       setOtpDigits(["", "", "", "", "", ""]);
 
+      try {
+        localStorage.setItem(`media_commented_${token}`, "true");
+        localStorage.setItem("media_user_email", authorEmail);
+        localStorage.setItem("media_user_name", authorName);
+        if (data.comment?.rating) {
+          localStorage.setItem(`media_rated_${token}`, String(data.comment.rating));
+        }
+      } catch {}
+
       // Smooth scroll to comments feed so new comment is immediately visible at top
       setTimeout(() => {
         const feedEl = document.getElementById("comments-feed");
@@ -356,16 +416,21 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
         }
       }, 150);
 
-      // Update rating data if rated
-      if (commentRating) {
+      // Update rating data if user had not rated yet and rating was created
+      if (ratingData.userRating === null && data.comment?.rating) {
+        const assignedRating = data.comment.rating;
         setRatingData((prev) => {
           const newTotal = prev.totalRatings + 1;
-          const newSum = prev.averageRating * prev.totalRatings + commentRating;
+          const newSum = prev.averageRating * prev.totalRatings + assignedRating;
           return {
             ...prev,
-            userRating: commentRating,
+            userRating: assignedRating,
             totalRatings: newTotal,
             averageRating: parseFloat((newSum / newTotal).toFixed(1)),
+            ratingCounts: {
+              ...prev.ratingCounts,
+              [assignedRating]: (prev.ratingCounts[assignedRating] || 0) + 1,
+            },
           };
         });
       }
@@ -494,7 +559,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
           {/* Interactive Star Picker */}
           <div className={cn("flex flex-col items-center lg:items-end w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0", isDark ? "border-white/5" : "border-slate-100")}>
             <span className={cn("text-xs mb-2 font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-              {ratingData.userRating ? "Your rating (recorded, 1 per person):" : "Click to rate:"}
+              {ratingData.userRating !== null ? "Your rating (recorded • 1 rating per person):" : "Click to rate:"}
             </span>
             <div className="flex items-center justify-center gap-2 sm:gap-2.5">
               {[1, 2, 3, 4, 5].map((star) => {
@@ -509,11 +574,11 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                     onMouseLeave={() => !isAlreadyRated && setHoverRating(0)}
                     disabled={submittingRating || isAlreadyRated}
                     aria-label={`Rate ${star} Stars`}
-                    title={isAlreadyRated ? "You have already submitted a rating (limit: 1 per person)" : `Rate ${star} Stars`}
+                    title={isAlreadyRated ? `You have already submitted a rating of ${ratingData.userRating} stars (limit: 1 per person/IP)` : `Rate ${star} Stars`}
                     className={cn(
                       "p-1 rounded-lg transition-transform focus:outline-none",
                       isAlreadyRated
-                        ? "cursor-default opacity-90"
+                        ? "cursor-not-allowed opacity-90"
                         : "hover:scale-125 focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
                     )}
                   >
@@ -529,6 +594,13 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                 );
               })}
             </div>
+
+            {ratingData.userRating !== null && (
+              <div className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold mt-2 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>Rating saved ({ratingData.userRating}★) • 1 rating per user/IP</span>
+              </div>
+            )}
 
             {ratingSuccess && (
               <motion.div
@@ -627,34 +699,50 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                 </div>
               </div>
 
-              {/* Optional Rating in Comment */}
-              <div>
-                <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
-                  Include Star Rating (Optional)
-                </label>
-                <div className="flex items-center gap-1.5">
-                  {[1, 2, 3, 4, 5].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setCommentRating(val)}
-                      className="p-1 rounded transition-transform hover:scale-110 cursor-pointer"
-                    >
-                      <Star
-                        className={cn(
-                          "w-5 h-5",
-                          commentRating >= val
-                            ? "fill-amber-400 text-amber-400"
-                            : isDark ? "text-zinc-600" : "text-slate-300"
-                        )}
-                      />
-                    </button>
-                  ))}
-                  <span className={cn("text-xs ml-2 font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    {commentRating} Stars
-                  </span>
+              {/* Optional Rating in Comment or Already Rated indicator */}
+              {ratingData.userRating !== null ? (
+                <div className={cn("p-3 rounded-xl border text-xs flex items-center justify-between", isDark ? "bg-cyan-500/5 border-cyan-500/20" : "bg-cyan-50/60 border-cyan-200")}>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0" />
+                    <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>
+                      Your star rating is already recorded:
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 font-bold text-amber-400">
+                    <span>{ratingData.userRating}.0</span>
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    Include Star Rating (Optional &bull; 1 rating per person)
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    {[1, 2, 3, 4, 5].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setCommentRating(val)}
+                        className="p-1 rounded transition-transform hover:scale-110 cursor-pointer"
+                        title={`Rate ${val} Stars`}
+                      >
+                        <Star
+                          className={cn(
+                            "w-5 h-5",
+                            commentRating >= val
+                              ? "fill-amber-400 text-amber-400"
+                              : isDark ? "text-zinc-600" : "text-slate-300"
+                          )}
+                        />
+                      </button>
+                    ))}
+                    <span className={cn("text-xs ml-2 font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      {commentRating}.0 Stars
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>

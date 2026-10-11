@@ -7,6 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { motion, AnimatePresence } from "framer-motion";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminTestimonialsPage() {
   const { theme } = useTheme();
@@ -282,11 +283,8 @@ export default function AdminTestimonialsPage() {
             <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-zinc-500">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-sm">Loading testimonials...</p>
-                    </div>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : filteredTestimonials.length === 0 ? (

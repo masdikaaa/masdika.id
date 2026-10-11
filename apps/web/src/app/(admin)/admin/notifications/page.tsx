@@ -8,6 +8,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Pagination } from "@/components/ui/Pagination";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -83,12 +84,7 @@ export default function AdminNotificationsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-zinc-500">
-        <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm font-medium">Loading...</p>
-      </div>
-    );
+    return <AdminLoader />;
   }
 
   const unreadCount = notifications.filter(n => !n.isRead).length;

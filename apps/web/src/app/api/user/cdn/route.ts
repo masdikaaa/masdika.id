@@ -188,6 +188,29 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (action === 'toggleVisibility') {
+      const { id, isPublic } = body;
+      
+      const existing = await prisma.secureMedia.findFirst({
+        where: { id: parseInt(id), userId }
+      });
+      if (!existing) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+      
+      const nextPublic = typeof isPublic === 'boolean' ? isPublic : !existing.isPublic;
+      const updated = await prisma.secureMedia.update({
+        where: { id: parseInt(id) },
+        data: { isPublic: nextPublic }
+      });
+      
+      return NextResponse.json({ 
+        success: true, 
+        media: {
+          ...updated,
+          size: updated.size.toString()
+        }
+      });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
     console.error("Action error:", error);

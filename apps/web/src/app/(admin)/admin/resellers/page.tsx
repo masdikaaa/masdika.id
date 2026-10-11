@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
 import { useTheme } from "@/components/ThemeProvider";
 import { motion } from "framer-motion";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminResellersPage() {
   const { theme } = useTheme();
@@ -32,12 +33,7 @@ export default function AdminResellersPage() {
     fetchResellers();
   }, []);
 
-
-  if (loading) return (
-    <div className="min-h-[60vh] w-full flex items-center justify-center">
-      <div className={cn("w-10 h-10 border-4 border-t-transparent rounded-full animate-spin", isDark ? "border-cyan-500" : "border-cyan-600")} />
-    </div>
-  );
+  if (loading) return <AdminLoader />;
 
   return (
     <div className="space-y-6 md:space-y-8 pb-10 w-full relative z-10">

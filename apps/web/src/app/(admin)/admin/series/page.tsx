@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { motion } from "framer-motion";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminSeriesPage() {
   const { theme } = useTheme();
@@ -189,10 +190,7 @@ export default function AdminSeriesPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-zinc-500 text-sm">Loading series...</p>
-                    </div>
+                    <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
               ) : series.length === 0 ? (

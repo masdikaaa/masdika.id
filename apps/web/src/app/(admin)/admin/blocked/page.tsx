@@ -6,6 +6,7 @@ import { ShieldBan, Trash2, CheckCircle, Check , RefreshCw } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminBlockedUsersPage() {
   const { theme } = useTheme();
@@ -91,11 +92,7 @@ export default function AdminBlockedUsersPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className={cn("w-10 h-10 border-4 rounded-full animate-spin", isDark ? "border-cyan-500/20 border-t-cyan-500" : "border-cyan-200 border-t-cyan-600")} />
-      </div>
-    );
+    return <AdminLoader />;
   }
 
   return (

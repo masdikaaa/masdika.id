@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClientIp } from "@/lib/get-ip";
+import { getClientIp, getIpVariants } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendMediaCommentOtpEmail } from "@/lib/email";
@@ -18,6 +18,7 @@ export async function POST(
     }
 
     const ip = getClientIp(req);
+    const ipVariants = getIpVariants(ip);
     // Anti-abuse: max 5 OTP requests per IP per 10 minutes
     const allowed = await checkRateLimit("MEDIA_OTP", ip, 5, 600);
     if (!allowed) {
@@ -54,7 +55,7 @@ export async function POST(
       where: {
         mediaId: media.id,
         OR: [
-          { ipAddress: ip },
+          { ipAddress: { in: ipVariants } },
           { email },
         ],
       },

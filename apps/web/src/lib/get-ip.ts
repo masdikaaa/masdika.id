@@ -30,3 +30,29 @@ export function getClientIp(req: Request): string {
 
   return 'unknown';
 }
+
+/**
+ * getIpVariants - returns possible representations of an IP
+ * (e.g., IPv4 mapped IPv6 ::ffff:127.0.0.1, 127.0.0.1, ::1)
+ * to prevent duplicate rating/comment bypassing via IP representation mismatch.
+ */
+export function getIpVariants(ip: string): string[] {
+  const set = new Set<string>();
+  if (!ip || ip === 'unknown') return ['unknown'];
+  const clean = ip.trim();
+  set.add(clean);
+
+  if (clean.startsWith('::ffff:')) {
+    set.add(clean.replace('::ffff:', ''));
+  } else if (!clean.includes(':')) {
+    set.add(`::ffff:${clean}`);
+  }
+
+  if (clean === '127.0.0.1' || clean === '::1' || clean === '::ffff:127.0.0.1') {
+    set.add('127.0.0.1');
+    set.add('::1');
+    set.add('::ffff:127.0.0.1');
+  }
+
+  return Array.from(set);
+}

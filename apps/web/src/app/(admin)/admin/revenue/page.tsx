@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
 const RevenueChart = dynamic(() => import("@/components/admin/RevenueChart").then(mod => mod.RevenueChart), { ssr: false });
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminRevenuePage() {
   const { theme } = useTheme();
@@ -196,7 +197,7 @@ export default function AdminRevenuePage() {
         <div className="overflow-x-auto relative min-h-[200px]">
           {loading && (
             <div className="absolute inset-0 bg-[#11162C]/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
-               <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+               <AdminLoader className="min-h-0" size="sm" />
             </div>
           )}
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
