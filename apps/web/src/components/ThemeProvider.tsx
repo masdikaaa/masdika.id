@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { flushSync } from "react-dom";
 
 type Theme = "light" | "dark";
@@ -9,6 +9,19 @@ interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
+}
+
+function applyThemeToDom(theme: Theme) {
+  const root = document.documentElement;
+  root.classList.toggle("dark", theme === "dark");
+  root.classList.toggle("light", theme === "light");
+}
+
+function persistTheme(theme: Theme) {
+  try {
+    localStorage.setItem("masdika-theme", theme);
+  } catch {}
+  document.cookie = `masdika-theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -29,43 +42,56 @@ export function ThemeProvider({ children, initialTheme = "dark" }: { children: R
 
   useEffect(() => {
     if (!mounted) return;
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    } else {
-      root.classList.add("light");
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("masdika-theme", theme);
-    document.cookie = `masdika-theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+    applyThemeToDom(theme);
+    persistTheme(theme);
   }, [theme, mounted]);
 
-  const toggleTheme = useCallback(() => {
-    if (!document.startViewTransition) {
-      setThemeState((prev) => (prev === "dark" ? "light" : "dark"));
+  const themeRef = useRef<Theme>(theme);
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
+
+  const switchTheme = useCallback((next: Theme) => {
+    if (next === themeRef.current) return;
+    themeRef.current = next;
+
+    const root = document.documentElement;
+    // Disable every CSS transition/animation-driven colour change while the
+    // theme flips, so the browser only has to animate a single crossfade.
+    root.classList.add("theme-switching");
+
+    const commit = () => {
+      // Apply the class synchronously so the "new" snapshot is the new theme.
+      applyThemeToDom(next);
+      flushSync(() => setThemeState(next));
+      persistTheme(next);
+    };
+
+    const done = () => {
+      // Wait two frames so no transition runs after the class is removed.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => root.classList.remove("theme-switching"))
+      );
+    };
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!document.startViewTransition || reduceMotion) {
+      commit();
+      done();
       return;
     }
-    
-    document.startViewTransition(() => {
-      flushSync(() => {
-        setThemeState((prev) => (prev === "dark" ? "light" : "dark"));
-      });
-    });
+
+    const transition = document.startViewTransition(commit);
+    transition.finished.then(done, done);
   }, []);
+
+  const toggleTheme = useCallback(() => {
+    switchTheme(themeRef.current === "dark" ? "light" : "dark");
+  }, [switchTheme]);
 
   const setTheme = useCallback((t: Theme) => {
-    if (!document.startViewTransition) {
-      setThemeState(t);
-      return;
-    }
-
-    document.startViewTransition(() => {
-      flushSync(() => {
-        setThemeState(t);
-      });
-    });
-  }, []);
+    switchTheme(t);
+  }, [switchTheme]);
 
   // Prevent flash by rendering nothing until mounted
   // Actually, we should still render children to avoid layout shift
