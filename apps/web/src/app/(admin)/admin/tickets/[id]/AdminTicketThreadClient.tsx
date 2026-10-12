@@ -222,29 +222,31 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
   return (
     <div className="space-y-6 pb-40 md:pb-48">
       {/* Header Card */}
-      <div className={cn("bg-[#0a1f33]/60 backdrop-blur-sm border p-5 md:p-6 rounded-3xl shadow-2xl relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("bg-[#0a1f33]/60 backdrop-blur-sm border p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className={cn("absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover: transition-colors duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
         
-        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-          <div className="flex items-start md:items-center gap-4">
-            <Link href="/admin/tickets" className={cn("p-2.5 hover:bg-white/10 border rounded-xl transition-all hover:-translate-x-1 shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
-              <ArrowLeft className={cn("w-5 h-5", isDark ? "text-zinc-300" : "text-slate-600")} />
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-5">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+            <Link href="/admin/tickets" className={cn("p-2 sm:p-2.5 hover:bg-white/10 border rounded-xl transition-all hover:-translate-x-1 shrink-0 mt-0.5", isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-600")}>
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
-            <div className="min-w-0">
-              <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                <span className="break-words">#{ticket.ticketId} - {ticket.subject}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <h1 className={cn("text-lg sm:text-xl md:text-2xl font-black tracking-tight break-words", isDark ? "text-white" : "text-slate-900")}>
+                  #{ticket.ticketId} - {ticket.subject}
+                </h1>
                 <StatusBadge status={ticket.status} />
-              </h1>
-              <div className={cn("text-sm mt-2 flex flex-wrap items-center gap-x-3 gap-y-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className={cn("flex items-center gap-1.5 bg-[#011627] px-2.5 py-1 rounded-lg border text-xs font-medium shadow-inner", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
-                  User: <Link href={`/admin/customers/${ticket.userId}`} className={cn("hover:underline", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.user.name}</Link>
+              </div>
+              <div className={cn("text-xs sm:text-sm flex flex-wrap items-center gap-1.5 sm:gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium shadow-inner", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
+                  User: <Link href={`/admin/customers/${ticket.userId}`} className={cn("hover:underline font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.user.name}</Link>
                 </span>
                 {ticket.service && (
-                  <span className={cn("flex items-center gap-1.5 bg-[#011627] px-2.5 py-1 rounded-lg border text-xs font-medium shadow-inner", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
-                    Service: <span className={cn("", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.service.replace('_', ' ')}</span>
+                  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium shadow-inner", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
+                    Service: <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.service.replace('_', ' ')}</span>
                   </span>
                 )}
-                <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-bold uppercase tracking-widest ${
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] sm:text-[11px] font-bold uppercase tracking-wider ${
                   ticket.priority === 'CRITICAL' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 
                   ticket.priority === 'HIGH' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 
                   'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
@@ -255,42 +257,42 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0">
+          <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto pt-3 xl:pt-0 border-t xl:border-t-0 border-white/5">
             {!isClosed && (
               <>
                 <button
                   onClick={() => setShowMergeModal(true)}
-                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/30 shadow-sm", isDark ? "text-purple-400" : "text-purple-700")}
+                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/30 shadow-sm whitespace-nowrap", isDark ? "text-purple-400" : "text-purple-700")}
                 >
-                  <GitMerge className="w-4 h-4 shrink-0" /> Merge
+                  <GitMerge className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Merge
                 </button>
                 <button
                   onClick={() => handleAction('close')}
                   disabled={isSubmitting}
-                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-zinc-500/10 hover:bg-zinc-500/20 border border-zinc-500/20 hover:border-zinc-500/30 shadow-sm", isDark ? "text-zinc-300" : "text-slate-600")}
+                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 bg-zinc-500/10 hover:bg-zinc-500/20 border border-zinc-500/20 hover:border-zinc-500/30 shadow-sm whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}
                 >
-                  <Lock className="w-4 h-4 shrink-0" /> Close
+                  <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Close
                 </button>
               </>
             )}
             <button
               onClick={() => setShowDeleteModal(true)}
-              className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 shadow-sm", isDark ? "text-red-400" : "text-red-700")}
+              className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 shadow-sm whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}
             >
-              <Trash2 className="w-4 h-4 shrink-0" /> Delete
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Delete
             </button>
           </div>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="space-y-6 md:space-y-8 mt-8">
+      <div className="space-y-5 md:space-y-6 mt-6 sm:mt-8">
         {ticket.status === 'MERGED' && ticket.mergedInto && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-5 rounded-2xl flex items-center gap-4 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.1)]", isDark ? "bg-purple-500/10 border-purple-500/20" : "bg-purple-50 border-purple-200")}>
-            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.1)]", isDark ? "bg-purple-500/10 border-purple-500/20" : "bg-purple-50 border-purple-200")}>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
               <ShieldAlert className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-700")} />
             </div>
-            <p className="text-sm">This ticket has been merged into <Link href={`/admin/tickets/${ticket.mergedInto.ticketId.toLowerCase()}`} className={cn("font-bold hover:underline", isDark ? "text-purple-400" : "text-purple-700")}>#{ticket.mergedInto.ticketId}</Link>. All further communication will happen there.</p>
+            <p className="text-xs sm:text-sm">This ticket has been merged into <Link href={`/admin/tickets/${ticket.mergedInto.ticketId.toLowerCase()}`} className={cn("font-bold hover:underline", isDark ? "text-purple-400" : "text-purple-700")}>#{ticket.mergedInto.ticketId}</Link>. All further communication will happen there.</p>
           </motion.div>
         )}
 
@@ -300,8 +302,8 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
 
           if (isSystem) {
             return (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={msg.id} className="flex justify-center my-6">
-                <span className={cn("bg-white/5 border text-xs px-5 py-2 rounded-full font-medium shadow-sm flex items-center gap-2", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={msg.id} className="flex justify-center my-4 sm:my-6">
+                <span className={cn("bg-white/5 border text-xs px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-medium shadow-sm flex items-center gap-2", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
                   <CheckCircle2 className={cn("w-3.5 h-3.5", isDark ? "text-cyan-500" : "text-cyan-700")} /> {msg.message}
                 </span>
               </motion.div>
@@ -314,33 +316,35 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               animate={{ opacity: 1, y: 0 }} 
               transition={{ delay: Math.min(idx * 0.05, 0.5) }}
               key={msg.id} 
-              className={`flex gap-3 md:gap-4 ${isAdmin ? 'flex-row-reverse' : 'flex-row'}`}
+              className={`flex gap-2.5 sm:gap-3 md:gap-4 ${isAdmin ? 'flex-row-reverse' : 'flex-row'}`}
             >
-              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 ${isAdmin ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'border-indigo-500/30'}`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 ${isAdmin ? 'border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.25)]' : 'border-indigo-500/30'}`}>
                 <img referrerPolicy="no-referrer" 
                   src={msg.user?.image || `/api/avatar?email=${encodeURIComponent(msg.user?.email || 'admin@masdika.id')}&name=${encodeURIComponent(msg.user?.name || 'User')}`} 
                   alt={msg.user?.name} 
                   className="w-full h-full object-cover" 
                 loading="lazy" decoding="async" />
               </div>
-              <div className={`max-w-[85%] md:max-w-[75%] flex flex-col ${isAdmin ? 'items-end' : 'items-start'}`}>
-                <div className="flex items-center gap-2 mb-1.5 px-1">
-                  {isAdmin && <span className="bg-cyan-500 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Staff</span>}
-                  <span className="font-bold text-sm text-zinc-200">{msg.user.name}</span>
-                  <span className="text-[11px] text-zinc-500 font-medium">{new Date(msg.createdAt).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
+              <div className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] flex flex-col min-w-0 ${isAdmin ? 'items-end' : 'items-start'}`}>
+                <div className={`flex items-center gap-1.5 sm:gap-2 mb-1 px-1 flex-wrap ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                  {isAdmin && <span className="bg-cyan-500 text-slate-900 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Staff</span>}
+                  <span className="font-semibold text-xs sm:text-sm text-zinc-200">{msg.user.name}</span>
+                  <span className="text-[10px] sm:text-[11px] text-zinc-500 font-medium">{new Date(msg.createdAt).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
                 </div>
                 
-                <div className={`p-4 md:p-5 rounded-3xl shadow-2xl relative group ${
+                <div className={`px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-3xl shadow-xl relative group max-w-full min-w-0 ${
                   isAdmin 
-                    ? 'bg-gradient-to-br from-cyan-600 to-cyan-600 text-white rounded-tr-sm border border-cyan-400/20 text-left'
-                    : 'bg-[#1e293b]/80 backdrop-blur-md border border-white/5 text-zinc-200 rounded-tl-sm text-left' 
+                    ? 'bg-gradient-to-br from-cyan-600 to-cyan-500 text-white rounded-tr-sm border border-cyan-400/20 text-left'
+                    : 'bg-[#1e293b]/90 backdrop-blur-md border border-white/5 text-zinc-200 rounded-tl-sm text-left' 
                 }`}>
-                  {msg.message && renderMessageWithLinks(msg.message)}
+                  <div className="text-sm leading-relaxed break-words quill-message-content">
+                    {msg.message && renderMessageWithLinks(msg.message)}
+                  </div>
                   
                   {msg.attachments?.length > 0 && (
-                    <div className={`mt-4 pt-4 border-t ${isAdmin ? isDark ? "border-white/20" : "border-slate-300" : isDark ? "border-white/10" : "border-slate-200"} space-y-3`}>
-                      <p className={`text-[10px] font-bold uppercase tracking-widest ${isAdmin ? 'text-cyan-200' : 'text-zinc-500'}`}>Attachments</p>
-                      <div className="flex flex-wrap gap-2">
+                    <div className={`mt-3 pt-3 sm:mt-4 sm:pt-4 border-t ${isAdmin ? isDark ? "border-white/20" : "border-slate-300" : isDark ? "border-white/10" : "border-slate-200"} space-y-2`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-wider ${isAdmin ? 'text-cyan-100' : 'text-zinc-400'}`}>Attachments ({msg.attachments.length})</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full min-w-0">
                         {msg.attachments.map((att: any) => {
                           const isImage = att.mimeType.startsWith('image/');
                           return isImage ? (
@@ -348,16 +352,16 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                                 key={att.id}
                                 type="button"
                                 onClick={(e) => { e.preventDefault(); setLightboxImage(`/api/tickets/attachments/${att.filename}`); setZoomLevel(1); }}
-                                className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                                className={`flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-medium transition-all w-full min-w-0 ${
                                   isAdmin 
-                                    ? 'bg-black/20 hover:bg-black/30 border border-white/10'
-                                    : 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10' 
+                                    ? 'bg-black/20 hover:bg-black/30 border border-white/10 text-white'
+                                    : 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-200' 
                                 } hover:-translate-y-0.5 shadow-sm text-left`}
                               >
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? 'bg-white/20 text-white' : 'bg-cyan-500/20 text-cyan-400'}`}>
                                   <ImageIcon className="w-4 h-4" />
                                 </div>
-                                <span className="truncate max-w-[120px] md:max-w-[200px]">{att.originalName}</span>
+                                <span className="truncate min-w-0 flex-1">{att.originalName}</span>
                               </button>
                             ) : (
                               <a 
@@ -365,16 +369,16 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                                 href={`/api/tickets/attachments/${att.filename}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                                className={`flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 ${
                                   isAdmin 
-                                    ? 'bg-black/20 hover:bg-black/30 border border-white/10'
-                                    : 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10' 
+                                    ? 'bg-black/20 hover:bg-black/30 border border-white/10 text-white'
+                                    : 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-200' 
                                 } hover:-translate-y-0.5 shadow-sm`}
                               >
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? 'bg-white/20 text-white' : 'bg-cyan-500/20 text-cyan-400'}`}>
                                   <FileText className="w-4 h-4" />
                                 </div>
-                                <span className="truncate max-w-[120px] md:max-w-[200px]">{att.originalName}</span>
+                                <span className="truncate min-w-0 flex-1">{att.originalName}</span>
                               </a>
                             );
                         })}
@@ -391,11 +395,11 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
 
       {/* Floating Sticky Input Area */}
       {!isClosed && (
-        <div className="fixed bottom-0 left-0 right-0 lg:left-64 z-40 bg-gradient-to-t from-[#011627] via-[#011627]/90 to-transparent pt-12 pb-4 md:pb-6 px-4 md:px-6 pointer-events-none">
+        <div className="fixed bottom-0 left-0 right-0 lg:left-64 z-40 bg-gradient-to-t from-[#011627] via-[#011627]/90 to-transparent pt-8 sm:pt-12 pb-3 sm:pb-4 md:pb-6 px-3 sm:px-4 md:px-6 pointer-events-none">
           <div className="max-w-5xl mx-auto pointer-events-auto">
             <form 
               onSubmit={(e) => { e.preventDefault(); handleAction('reply'); }} 
-              className={`w-full relative bg-[#0a1f33]/90 backdrop-blur-sm border rounded-3xl transition-all duration-300 shadow-[0_0_40px_rgba(0,0,0,0.5)] ${
+              className={`w-full relative bg-[#0a1f33]/90 backdrop-blur-sm border rounded-2xl sm:rounded-3xl transition-all duration-300 shadow-[0_0_40px_rgba(0,0,0,0.5)] ${
                 isDragging ? 'border-cyan-500 ring-4 ring-cyan-500/20' : 'border-white/10 focus-within:border-cyan-500/50 focus-within:ring-2 focus-within:ring-cyan-500/10'
               }`}
               onDragOver={handleDragOver}
@@ -403,8 +407,8 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               onDrop={handleDrop}
             >
               {isDragging && (
-                <div className="absolute inset-0 z-50 bg-cyan-900/60 rounded-3xl flex items-center justify-center backdrop-blur-sm border-2 border-dashed border-cyan-400">
-                  <p className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}><Paperclip className="w-6 h-6" /> Drop files to attach here</p>
+                <div className="absolute inset-0 z-50 bg-cyan-900/60 rounded-2xl sm:rounded-3xl flex items-center justify-center backdrop-blur-sm border-2 border-dashed border-cyan-400">
+                  <p className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}><Paperclip className="w-5 h-5 sm:w-6 sm:h-6" /> Drop files to attach here</p>
                 </div>
               )}
               
@@ -414,26 +418,26 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                     border: none;
                     border-bottom: 1px solid rgba(255,255,255,0.1);
                     background: rgba(255,255,255,0.02);
-                    border-top-left-radius: 1.5rem;
-                    border-top-right-radius: 1.5rem;
-                    padding: 8px 16px;
+                    border-top-left-radius: 1rem;
+                    border-top-right-radius: 1rem;
+                    padding: 6px 12px;
                   }
                   .quill-dark-theme .ql-container {
                     border: none;
-                    font-size: 15px;
+                    font-size: 14px;
                     color: white;
-                    min-height: 80px;
-                    max-height: 200px;
+                    min-height: 70px;
+                    max-height: 180px;
                     overflow-y: auto;
                   }
                   .quill-dark-theme .ql-editor {
-                    padding: 16px 24px;
+                    padding: 12px 16px;
                   }
                   .quill-dark-theme .ql-editor.ql-blank::before {
                     color: #71717a; /* zinc-500 */
                     font-style: normal;
-                    left: 24px;
-                    right: 24px;
+                    left: 16px;
+                    right: 16px;
                   }
                   .quill-dark-theme .ql-stroke {
                     stroke: #a1a1aa; /* zinc-400 */
@@ -534,9 +538,9 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 />
                 
                 {attachments.length > 0 && (
-                  <div className="px-6 pb-2 flex flex-wrap gap-2">
+                  <div className="px-4 sm:px-6 pb-2 flex flex-wrap gap-2">
                     {attachments.map((file, i) => (
-                      <div key={i} className={cn("border px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs text-cyan-300 font-medium", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                      <div key={i} className={cn("border px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg flex items-center gap-2 text-xs text-cyan-300 font-medium", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                         <Paperclip className="w-3.5 h-3.5" />
                         <span className="truncate max-w-[120px]">{file.name}</span>
                         <button type="button" onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} className={cn("hover:text-cyan-300 ml-1 hover:bg-cyan-500/20 rounded p-0.5 transition-colors", isDark ? "text-cyan-500" : "text-cyan-700")}>
@@ -547,7 +551,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   </div>
                 )}
                 
-                <div className="px-3 pb-3 pt-1 flex justify-between items-center bg-white/[0.01] rounded-b-3xl mt-1">
+                <div className="px-3 pb-2.5 pt-1 flex justify-between items-center bg-white/[0.01] rounded-b-2xl sm:rounded-b-3xl mt-1">
                   <input
                     type="file"
                     multiple
@@ -558,7 +562,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={cn("hover:text-cyan-400 hover:bg-cyan-500/10 p-2.5 rounded-xl transition-all flex items-center gap-2 text-xs font-semibold ml-2", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("hover:text-cyan-400 hover:bg-cyan-500/10 p-2 sm:p-2.5 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 text-xs font-semibold ml-1 sm:ml-2", isDark ? "text-zinc-400" : "text-slate-500")}
                   >
                     <Paperclip className="w-4 h-4" />
                     <span className="hidden sm:inline">Attach Files</span>
@@ -567,7 +571,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   <button
                     type="submit"
                     disabled={isSubmitting || ((!message || message === '<p><br></p>') && attachments.length === 0)}
-                    className={cn("transition-all shadow-md hover:shadow-lg hover:from-cyan-400 hover:to-cyan-400 disabled:opacity-50 disabled:from-zinc-700 disabled:to-zinc-800 px-7 py-3 rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl disabled:shadow-none flex items-center justify-center gap-2 shrink-0 group mr-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-cyan-600/20")}
+                    className={cn("transition-all px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-cyan-600/20")}
                   >
                     <span className="hidden sm:inline">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <Send className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'}`} />

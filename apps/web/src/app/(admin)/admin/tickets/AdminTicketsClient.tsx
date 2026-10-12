@@ -527,14 +527,14 @@ export default function AdminTicketsClient() {
                     type="button"
                     onClick={closeModal}
                     disabled={isSubmitting}
-                    className={cn("w-full sm:w-auto px-6 py-3 text-sm font-bold hover:text-white hover:bg-white/10 rounded-xl transition-colors disabled:opacity-50", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("w-full sm:w-auto px-4 py-2.5 text-sm font-medium hover:text-white hover:bg-white/10 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={cn("w-full sm:w-auto px-8 py-3 text-sm font-bold rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
+                    className={cn("w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
                   >
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     Submit Ticket

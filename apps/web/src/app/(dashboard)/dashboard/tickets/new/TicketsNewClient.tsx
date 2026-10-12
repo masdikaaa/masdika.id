@@ -296,17 +296,23 @@ export default function TicketsNewClient() {
           )}
         </div>
 
-        <div className={cn("flex justify-end gap-4 pt-6 border-t relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
+        <div className={cn("flex items-center justify-end gap-3 pt-6 border-t relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
           <Link
             href="/dashboard/tickets"
-            className={cn("px-6 py-3.5 text-sm font-bold rounded-2xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-slate-800/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
+            className={cn(
+              "px-4 py-2.5 text-sm font-medium rounded-xl transition-colors whitespace-nowrap",
+              isDark ? "text-zinc-400 hover:text-white hover:bg-slate-800/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+            )}
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className={cn("px-8 py-3.5 text-sm font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm hover:shadow" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+            className={cn(
+              "px-5 py-2.5 text-sm font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap shadow-sm",
+              isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm hover:shadow" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md"
+            )}
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Submit Ticket
