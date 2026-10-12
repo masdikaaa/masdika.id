@@ -654,7 +654,7 @@ export default function VpcDashboardPage() {
       <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
         <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <VpcIcon className="w-3 h-3" /> Secure Networking
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -671,7 +671,7 @@ export default function VpcDashboardPage() {
             className={cn(
               "flex-1 py-4 text-sm font-bold transition-colors border-b-2",
               activeTab === "vpcs"
-                ? isDark ? "text-cyan-400 border-cyan-400 bg-cyan-400/5" : "text-cyan-700 border-cyan-500 bg-cyan-50"
+                ? isDark ? "text-cyan-400 border-cyan-400 bg-cyan-400/5" : "text-cyan-700 border-cyan-600 bg-white"
                 : isDark ? "text-zinc-400 border-transparent hover:text-white hover:bg-white/5" : "text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-100"
             )}
           >
@@ -682,7 +682,7 @@ export default function VpcDashboardPage() {
             className={cn(
               "flex-1 py-4 text-sm font-bold transition-colors border-b-2",
               activeTab === "peering"
-                ? isDark ? "text-cyan-400 border-cyan-400 bg-cyan-400/5" : "text-cyan-700 border-cyan-500 bg-cyan-50"
+                ? isDark ? "text-cyan-400 border-cyan-400 bg-cyan-400/5" : "text-cyan-700 border-cyan-600 bg-white"
                 : isDark ? "text-zinc-400 border-transparent hover:text-white hover:bg-white/5" : "text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-100"
             )}
           >
@@ -692,11 +692,11 @@ export default function VpcDashboardPage() {
 
         {activeTab === "vpcs" && (
           <div className="p-6">
-            <div className={cn("rounded-xl p-4 mb-6 flex items-start gap-3 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("rounded-xl p-4 mb-6 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
               <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-              <div className={cn("text-sm", isDark ? "text-cyan-200" : "text-cyan-700")}>
-                <p className={cn("font-medium mb-1", isDark ? "text-cyan-500" : "text-cyan-800")}>About Virtual Private Cloud</p>
-                <p>A VPC is a secure, isolated private cloud hosted within the public cloud. It allows you to launch resources in a virtual network that you define.</p>
+              <div className="text-sm">
+                <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>About Virtual Private Cloud</p>
+                <p className={cn(isDark ? "text-slate-300" : "text-slate-600")}>A VPC is a secure, isolated private cloud hosted within the public cloud. It allows you to launch resources in a virtual network that you define.</p>
               </div>
             </div>
 
@@ -820,7 +820,7 @@ export default function VpcDashboardPage() {
                               onClick={() => handleToggleNat(vpc.id, !vpc.isNatEnabled)}
                               className={cn(
                                 "inline-flex items-center justify-center gap-1.5 w-fit text-[11px] uppercase font-bold px-2.5 py-1 rounded border shadow-sm transition-colors disabled:opacity-50",
-                                vpc.isNatEnabled ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100") : (isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10" : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200")
+                                vpc.isNatEnabled ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-slate-100 text-cyan-700 border-slate-200 hover:bg-slate-200") : (isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10" : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200")
                               )}
                             >
                               {vpc.isNatEnabled ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
@@ -835,7 +835,7 @@ export default function VpcDashboardPage() {
                               navigator.clipboard.writeText(vpc.cidr);
                               toast.success("CIDR copied to clipboard");
                             }}
-                            className={cn("group/cidr flex items-center gap-2 px-2 py-1 -ml-2 rounded transition-colors", isDark ? "hover:bg-cyan-950/30" : "hover:bg-cyan-50")}
+                            className={cn("group/cidr flex items-center gap-2 px-2 py-1 -ml-2 rounded transition-colors", isDark ? "hover:bg-cyan-950/30" : "hover:bg-slate-100")}
                           >
                             <span className={cn("font-mono text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>{vpc.cidr}</span>
                             <Copy className={cn("w-3 h-3 opacity-0 group-hover/cidr:opacity-100 transition-all", isDark ? "text-zinc-500 group-hover/cidr:text-cyan-400" : "text-slate-500 group-hover/cidr:text-cyan-700")} />
@@ -888,7 +888,7 @@ export default function VpcDashboardPage() {
                             <div className="flex items-center justify-start gap-2 w-28">
                               <button
                                 onClick={() => handleOpenAttachModal(vpc.id)}
-                                className={cn("p-2 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10" : "text-slate-500 hover:text-cyan-700 hover:bg-cyan-50")}
+                                className={cn("p-2 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
                                 title="Attach VM"
                               >
                                 <Plug className="w-4 h-4" />
@@ -931,11 +931,11 @@ export default function VpcDashboardPage() {
 
         {activeTab === "peering" && (
           <div className="p-6">
-            <div className={cn("rounded-xl p-4 mb-6 flex items-start gap-3 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("rounded-xl p-4 mb-6 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
               <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-              <div className={cn("text-sm", isDark ? "text-cyan-200" : "text-cyan-800")}>
-                <p className={cn("font-medium mb-1", isDark ? "text-cyan-500" : "text-cyan-700")}>About VPC Peering</p>
-                <p>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
+              <div className="text-sm">
+                <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>About VPC Peering</p>
+                <p className={cn(isDark ? "text-slate-300" : "text-slate-600")}>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
               </div>
             </div>
 
@@ -1243,10 +1243,10 @@ export default function VpcDashboardPage() {
                 <p className={cn("text-xs", isDark ? "text-amber-200" : "text-amber-800")}>VPC CIDR ranges must not overlap. The system will auto-configure Mikrotik routing tables.</p>
               </div>
 
-              <div className={cn("border rounded-lg p-3 mt-3 flex items-start gap-2", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+              <div className={cn("border rounded-lg p-3 mt-3 flex items-start gap-2", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
                 <ShieldAlert className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <p className={cn("text-xs", isDark ? "text-cyan-200" : "text-cyan-800")}>
-                  <strong className={cn(isDark ? "text-cyan-100" : "text-cyan-900")}>Security Note:</strong> After peering is created, you must manually add a Firewall Rule to your VMs (via Global Firewall Management) to allow inbound traffic from the peered VPC's CIDR block.
+                <p className={cn("text-xs", isDark ? "text-slate-300" : "text-slate-600")}>
+                  <strong className={cn(isDark ? "text-white" : "text-slate-900")}>Security Note:</strong> After peering is created, you must manually add a Firewall Rule to your VMs (via Global Firewall Management) to allow inbound traffic from the peered VPC's CIDR block.
                 </p>
               </div>
 

@@ -296,8 +296,8 @@ export default function DashboardLayoutClient({
             <div className="flex items-center gap-2 sm:gap-4 relative">
 
               {/* Balance Display (Top-up button) */}
-              <Link href="/dashboard/billing" className={cn("flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl transition-colors mr-1 sm:mr-2 border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 shadow-sm")}>
-                <Wallet className="w-4 h-4" />
+              <Link href="/dashboard/billing" className={cn("flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl transition-colors mr-1 sm:mr-2 border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-white text-slate-800 border-slate-200 hover:border-cyan-500/50 hover:bg-slate-50 shadow-sm")}>
+                <Wallet className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 <span className="text-xs sm:text-sm font-bold whitespace-nowrap">{formatRupiah(userBalance || 0)}</span>
               </Link>
 

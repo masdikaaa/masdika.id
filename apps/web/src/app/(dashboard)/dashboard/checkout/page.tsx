@@ -18,7 +18,72 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Suspense } from "react";
 import VpsCheckoutFlow from "@/components/VpsCheckoutFlow";
-import { Select } from "@/components/ui/Select";
+
+function Pager({
+  page,
+  pageSize,
+  total,
+  onChange,
+  isDark,
+  label = "items",
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  onChange: (page: number) => void;
+  isDark: boolean;
+  label?: string;
+}) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (totalPages <= 1) return null;
+  const from = (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, total);
+
+  const navBtn = cn(
+    "w-9 h-9 rounded-lg border flex items-center justify-center transition-colors disabled:opacity-40 disabled:pointer-events-none",
+    isDark
+      ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white hover:border-slate-700"
+      : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-300"
+  );
+
+  return (
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
+      <div className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+        Showing <span className={cn("font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>{from}–{to}</span> of{" "}
+        <span className={cn("font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>{total}</span> {label}
+      </div>
+      <div className="flex items-center gap-1.5">
+        <button type="button" aria-label="Previous page" onClick={() => onChange(page - 1)} disabled={page === 1} className={navBtn}>
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+          const active = p === page;
+          return (
+            <button
+              type="button"
+              key={p}
+              onClick={() => onChange(p)}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "min-w-9 h-9 px-3 rounded-lg border text-sm font-bold transition-colors",
+                active
+                  ? "bg-cyan-600 border-cyan-600 text-white"
+                  : isDark
+                    ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white hover:border-slate-700"
+                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+              )}
+            >
+              {p}
+            </button>
+          );
+        })}
+        <button type="button" aria-label="Next page" onClick={() => onChange(page + 1)} disabled={page === totalPages} className={navBtn}>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const CATEGORIES = [
   { id: "COMPUTE", name: "Compute & VPS", icon: Server },
@@ -276,7 +341,7 @@ function CheckoutContent() {
   }
 
   return (
-    <motion.div className="space-y-6 md:space-y-8 pb-20" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div className="space-y-6 md:space-y-8 pb-20 w-full max-w-full min-w-0" variants={containerVariants} initial="hidden" animate="visible">
 
       <motion.div variants={itemVariants}>
         <Link
@@ -289,39 +354,118 @@ function CheckoutContent() {
       </motion.div>
 
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-4 sm:p-6 md:p-8 group shadow-md w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <ShoppingCart className="w-3 h-3" /> Secure Checkout
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            Order Service
+            Order <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Service</span>
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Select your desired premium tier and finalize your order.</p>
         </div>
       </motion.div>
 
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8 w-full max-w-full min-w-0">
         {/* Step 1: Select Service (Moved outside to be full width) */}
         {action !== "add_node" && (
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-[60] border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+          <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[60] border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex items-center gap-3 mb-6 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30">1</div>
-              <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Select Service</h2>
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30 shrink-0">1</div>
+              <div className="min-w-0 flex-1">
+                <h2 className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Select Service</h2>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Choose a product category and select the service you wish to configure.</p>
+              </div>
             </div>
 
-            {/* Category Dropdown */}
-            <div className="mb-8 relative z-50">
-              <Select
-                value={selectedCategory}
-                onChange={(val) => {
-                  setSelectedCategory(val);
-                  setServicePage(1);
-                }}
-                options={CATEGORIES.map(cat => ({ value: cat.id, label: cat.name }))}
-                className={cn("w-full rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 shadow-inner text-white" : "bg-slate-50 border-slate-200")}
-              />
+            {/* Sub-header 1: Category Selection */}
+            <div className="flex items-center justify-between gap-2.5 mb-3.5 relative z-10">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <h3 className={cn("text-sm sm:text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                  1. Choose Category
+                </h3>
+              </div>
+              <span className={cn("text-[10px] sm:text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                {CATEGORIES.length} Categories
+              </span>
             </div>
+
+            {/* Category Grid (Responsive: vertical stack on mobile to prevent any text truncation, horizontal row on desktop) */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-6 relative z-10">
+              {CATEGORIES.map(cat => {
+                const CatIcon = cat.icon;
+                const active = selectedCategory === cat.id;
+                const count = SERVICES.filter(s => s.category === cat.id).length;
+                return (
+                  <button
+                    type="button"
+                    key={cat.id}
+                    id={`checkout-category-${cat.id.toLowerCase()}`}
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      setServicePage(1);
+                    }}
+                    className={cn(
+                      "p-3 sm:p-3.5 lg:p-4 rounded-2xl border text-left transition-all flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 relative group cursor-pointer",
+                      active
+                        ? isDark
+                          ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30"
+                          : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20"
+                        : isDark
+                          ? "bg-[#060b14] border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white"
+                          : "bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:text-slate-900 shadow-sm"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
+                      active
+                        ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
+                        : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-900"
+                    )}>
+                      <CatIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                    </div>
+                    <div className="min-w-0 flex-1 w-full sm:w-auto sm:pr-4">
+                      <div className={cn("text-xs sm:text-sm font-bold leading-snug break-words", active ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}>
+                        {cat.name}
+                      </div>
+                      <div className={cn("text-[10px] sm:text-xs font-medium mt-0.5", active ? (isDark ? "text-cyan-400/70" : "text-cyan-700/70") : (isDark ? "text-zinc-500" : "text-slate-500"))}>
+                        {count} {count === 1 ? "Service" : "Services"}
+                      </div>
+                    </div>
+                    {/* Active check indicator */}
+                    <div className={cn(
+                      "absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-all",
+                      active
+                        ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                        : isDark ? "border-slate-800 bg-slate-900/40" : "border-slate-200 bg-slate-50"
+                    )}>
+                      {active && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Divider between Category and Services */}
+            <div className={cn("my-6 border-t", isDark ? "border-slate-800" : "border-slate-100")} />
+
+            {/* Sub-header 2: Available Services for Selected Category */}
+            {(() => {
+              const currentCat = CATEGORIES.find(c => c.id === selectedCategory);
+              const categoryServices = SERVICES.filter(s => s.category === selectedCategory);
+              return (
+                <div className="flex items-center justify-between gap-2.5 mb-3.5 relative z-10">
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+                    <h3 className={cn("text-sm sm:text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      2. Available Services - <span className={isDark ? "text-cyan-400" : "text-cyan-600"}>{currentCat?.name || "Category"}</span>
+                    </h3>
+                  </div>
+                  <span className={cn("text-[10px] sm:text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                    {categoryServices.length} {categoryServices.length === 1 ? "Service" : "Services"}
+                  </span>
+                </div>
+              );
+            })()}
 
             {/* Service Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
@@ -334,38 +478,50 @@ function CheckoutContent() {
                     return (
                       <motion.button
                         layout
-                        initial={{ opacity: 0, scale: 0.95 }}
+                        initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.99 }}
                         key={srv.id}
                         onClick={() => {
                           setSelectedService(srv.id);
                           setTierPage(1);
                         }}
                         className={cn(
-                          "relative p-5 rounded-2xl border text-left transition-all overflow-hidden group shadow-inner h-full min-h-[112px] flex items-center",
+                          "relative p-4 sm:p-5 rounded-2xl border text-left transition-all overflow-hidden group shadow-sm h-full min-h-[96px] sm:min-h-[104px] flex items-center cursor-pointer",
                           isSelected
                             ? isDark
-                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-sm"
-                              : "bg-cyan-50 border-cyan-300 text-cyan-700 shadow-sm"
+                              ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30"
+                              : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20"
                             : isDark
-                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-slate-800/20"
-                              : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
+                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]"
+                              : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md"
                         )}
                       >
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-3.5 sm:gap-4 pr-8 min-w-0 flex-1 w-full">
                           <div className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors shadow-inner",
-                            isSelected ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-300") : (isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-cyan-50 group-hover:text-cyan-600")
+                            "w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
+                            isSelected
+                              ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
+                              : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-600 group-hover:bg-slate-200 group-hover:text-slate-900"
                           )}>
                             <Icon className="w-5 h-5" />
                           </div>
-                          <div>
-                            <div className={cn("font-bold mb-1", isSelected ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>{srv.name}</div>
-                            <div className={cn("text-xs font-medium leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>{srv.desc}</div>
+                          <div className="min-w-0 flex-1">
+                            <div className={cn("font-bold text-sm sm:text-base mb-1", isSelected ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}>{srv.name}</div>
+                            <div className={cn("text-xs font-medium leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>{srv.desc}</div>
                           </div>
+                        </div>
+
+                        {/* Radio selection check */}
+                        <div className={cn(
+                          "absolute top-3.5 right-3.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all",
+                          isSelected
+                            ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                            : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
+                        )}>
+                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                         </div>
                       </motion.button>
                     );
@@ -374,40 +530,27 @@ function CheckoutContent() {
             </div>
 
             {/* Pagination Controls */}
-            {SERVICES.filter(s => s.category === selectedCategory).length > 4 && (
-              <div className="flex justify-center gap-2 mt-6 relative z-10">
-                <button
-                  onClick={() => setServicePage(p => Math.max(1, p - 1))}
-                  disabled={servicePage === 1}
-                  className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
-                >
-                  Previous
-                </button>
-                <div className={cn("px-4 py-2 border rounded-xl font-bold text-sm", isDark ? "bg-slate-800/50 border-slate-700 text-white" : "bg-slate-100 border-slate-200 text-slate-900")}>
-                  {servicePage} / {Math.ceil(SERVICES.filter(s => s.category === selectedCategory).length / 4)}
-                </div>
-                <button
-                  onClick={() => setServicePage(p => Math.min(Math.ceil(SERVICES.filter(s => s.category === selectedCategory).length / 4), p + 1))}
-                  disabled={servicePage === Math.ceil(SERVICES.filter(s => s.category === selectedCategory).length / 4)}
-                  className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
-                >
-                  Next
-                </button>
-              </div>
-            )}
+            <Pager
+              page={servicePage}
+              pageSize={4}
+              total={SERVICES.filter(s => s.category === selectedCategory).length}
+              onChange={setServicePage}
+              isDark={isDark}
+              label="services"
+            />
           </motion.section>
         )}
 
         {selectedService === "VPS" || selectedService === "KUBERNETES" ? (
           <VpsCheckoutFlow serviceType={selectedService} />
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full max-w-full min-w-0">
             {/* Left Column - Generic Steps */}
-            <div className="xl:col-span-2 space-y-6 md:space-y-8">
+            <div className="xl:col-span-2 space-y-6 md:space-y-8 w-full max-w-full min-w-0">
               {/* Step 2: Choose Plan */}
-              <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+              <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md overflow-hidden relative border w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
                 <div className="flex items-center gap-3 mb-6 relative z-10">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30">2</div>
+                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30 shrink-0">2</div>
                   <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Choose Tier</h2>
                 </div>
 
@@ -421,47 +564,75 @@ function CheckoutContent() {
 
                     return (
                       <motion.div
-                        whileHover={!isDisabled ? { y: -5 } : {}}
+                        whileHover={!isDisabled ? { y: -4 } : {}}
                         key={plan.id}
                         onClick={() => !isDisabled && setSelectedPlanId(plan.id)}
                         className={cn(
-                          "relative flex flex-col p-6 rounded-3xl border transition-all shadow-inner",
-                          isDisabled ? "opacity-50 cursor-not-allowed bg-black/40 border-slate-800 grayscale" : "cursor-pointer",
+                          "relative flex flex-col p-5 sm:p-6 rounded-2xl border transition-all shadow-sm cursor-pointer",
+                          isDisabled && "opacity-50 cursor-not-allowed bg-black/40 border-slate-800 grayscale",
                           isSelected
                             ? isDark
-                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-sm"
-                              : "bg-cyan-50 border-cyan-300 text-cyan-700 shadow-sm"
-                            : (!isDisabled && (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-slate-800/20" : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"))
+                              ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30"
+                              : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20"
+                            : (!isDisabled && (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md"))
                         )}
                       >
-                        {isSelected && (
-                          <div className={cn("absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-xl shadow-sm border", isDark ? "bg-cyan-600 text-white border-cyan-500" : "bg-cyan-600 text-white border-cyan-700")}>
-                            Selected
+                        {/* Header: Name + Radio check */}
+                        <div className="flex items-center justify-between gap-2 mb-4">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <h3 className={cn("text-base sm:text-lg font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                              {plan.name}
+                            </h3>
+                            {isDowngrade && (
+                              <span className={cn("text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border shrink-0", isDark ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                                Current
+                              </span>
+                            )}
                           </div>
-                        )}
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                            isSelected
+                              ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                              : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
+                          )}>
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                        </div>
 
-                        <h3 className={cn("text-lg font-bold mb-2 flex items-center justify-between", isDark ? "text-white" : "text-slate-900")}>
-                          {plan.name}
-                          {isDowngrade && <span className={cn("text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-lg flex-shrink-0 border", isDark ? "bg-slate-800 text-zinc-400 border-slate-700" : "bg-slate-100 text-slate-500 border-slate-200")}>Current</span>}
-                        </h3>
-
-                        <div className={cn("text-3xl font-black mb-6 tracking-tight flex flex-col items-start gap-1", isDark ? "text-white" : "text-slate-900")}>
-                          <div>
-                            {isCustom ? "Custom" : formatRupiah(plan.hourlyPrice || 0)}
-                            {!isCustom && <span className={cn("text-xs font-bold ml-1", isDark ? "text-zinc-500" : "text-slate-500")}>/ hr</span>}
+                        {/* Pricing */}
+                        <div className={cn("mb-5 pb-5 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
+                          <div className="flex items-baseline gap-1">
+                            <span className={cn("text-2xl sm:text-3xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                              {isCustom ? "Custom" : formatRupiah(plan.hourlyPrice || 0)}
+                            </span>
+                            {!isCustom && (
+                              <span className={cn("text-xs font-semibold", isDark ? "text-slate-400" : "text-slate-500")}>
+                                / hr
+                              </span>
+                            )}
                           </div>
                           {!isCustom && (plan.hourlyPrice || 0) > 0 && (
-                            <div className={cn("text-sm font-bold", isDark ? "text-zinc-500" : "text-slate-500")}>
-                              ≈ {formatRupiah((plan.hourlyPrice || 0) * 24 * 30)} <span className="text-xs">/ mo</span>
+                            <div className={cn("text-xs font-medium mt-1", isDark ? "text-slate-400" : "text-slate-500")}>
+                              ≈ <span className="font-semibold">{formatRupiah((plan.hourlyPrice || 0) * 24 * 30)}</span> / mo
                             </div>
                           )}
                         </div>
 
-                        <ul className="space-y-3 text-xs flex-1">
+                        {/* Feature list */}
+                        <ul className="space-y-2.5 text-xs flex-1">
                           {getPlanFeatures(plan).map((feature: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-3">
-                              <Check className="w-4 h-4 text-cyan-400 shrink-0" />
-                              <span className={cn("font-medium leading-snug", isDark ? "text-zinc-400" : "text-slate-600")}>{feature}</span>
+                            <li key={idx} className="flex items-start gap-2.5">
+                              <div className={cn(
+                                "w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                                isSelected
+                                  ? isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-slate-100 text-cyan-700 border border-slate-200"
+                                  : isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
+                              )}>
+                                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                              </div>
+                              <span className={cn("font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-600")}>
+                                {feature}
+                              </span>
                             </li>
                           ))}
                         </ul>
@@ -469,62 +640,53 @@ function CheckoutContent() {
                     );
                   })}
                   {currentServicePlans.length === 0 && (
-                    <div className={cn("col-span-full py-12 text-center font-medium rounded-3xl border", isDark ? "text-zinc-500 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>
+                    <div className={cn("col-span-full py-12 text-center font-medium rounded-2xl border shadow-sm", isDark ? "text-zinc-500 bg-[#060b14] border-slate-800" : "text-slate-500 bg-white border-slate-200/90")}>
                       No active plans available for this service right now.
                     </div>
                   )}
                 </div>
 
                 {/* Tier Pagination Controls */}
-                {currentServicePlans.length > 6 && (
-                  <div className="flex justify-center gap-2 mt-6 relative z-10">
-                    <button
-                      onClick={() => setTierPage(p => Math.max(1, p - 1))}
-                      disabled={tierPage === 1}
-                      className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
-                    >
-                      Previous
-                    </button>
-                    <div className={cn("px-4 py-2 border rounded-xl font-bold text-sm", isDark ? "bg-slate-800/50 border-slate-700 text-white" : "bg-slate-100 border-slate-200 text-slate-900")}>
-                      {tierPage} / {Math.ceil(currentServicePlans.length / 6)}
-                    </div>
-                    <button
-                      onClick={() => setTierPage(p => Math.min(Math.ceil(currentServicePlans.length / 6), p + 1))}
-                      disabled={tierPage === Math.ceil(currentServicePlans.length / 6)}
-                      className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
+                <Pager
+                  page={tierPage}
+                  pageSize={6}
+                  total={currentServicePlans.length}
+                  onChange={setTierPage}
+                  isDark={isDark}
+                  label="tiers"
+                />
               </motion.section>
 
               {/* Step 3 & 4: Cycle & Payment */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
 
                 {/* Payment Method */}
-                <motion.section variants={itemVariants} className={cn("h-fit border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+                <motion.section variants={itemVariants} className={cn("h-fit border rounded-3xl p-4 sm:p-6 md:p-8 shadow-md overflow-hidden relative w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3 mb-6 relative z-10">
-                    <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30">3</div>
+                    <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30 shrink-0">3</div>
                     <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Payment Method</h2>
                   </div>
 
                   <div className="space-y-6 relative z-10">
                     <div className="flex flex-col gap-2">
                       <div className={cn(
-                        "flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-inner",
-                        balance < total ? "opacity-50 border-red-500/30 bg-red-500/5" : isDark ? "bg-[#060b14] border-cyan-500/30 shadow-sm" : "bg-cyan-50/50 border-cyan-200 shadow-sm"
+                        "flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-sm",
+                        balance < total
+                          ? "opacity-60 border-red-500/30 bg-red-500/5"
+                          : isDark
+                            ? "bg-[#060b14] border-slate-800"
+                            : "bg-white border-slate-200"
                       )}>
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-inner">
-                          <Wallet className="w-6 h-6 text-cyan-600" />
+                        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
+                          <Wallet className="w-6 h-6" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-base font-bold text-cyan-400">Account Balance</div>
-                          <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <div className={cn("text-xs font-bold tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Available: {formatRupiah(balance)}</div>
+                          <div className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Account Balance</div>
+                          <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                            <div className={cn("text-xs font-semibold", isDark ? "text-slate-400" : "text-slate-500")}>Available: {formatRupiah(balance)}</div>
                           </div>
                           {balance < total && (
-                            <div className="text-xs text-red-400 font-bold mt-2 bg-red-500/10 px-3 py-1 rounded-lg w-fit flex items-center gap-2">
+                            <div className="text-xs text-red-500 font-bold mt-2 bg-red-500/10 px-3 py-1 rounded-lg w-fit flex items-center gap-2 border border-red-500/20">
                               <X className="w-3 h-3" /> Insufficient Balance
                             </div>
                           )}
@@ -538,18 +700,18 @@ function CheckoutContent() {
             </div>
 
             {/* Right Column - Order Summary */}
-            <motion.div variants={itemVariants} className="xl:col-span-1">
-              <div className={cn("sticky top-6 border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+            <motion.div variants={itemVariants} className="xl:col-span-1 w-full max-w-full min-w-0">
+              <div className={cn("sticky top-6 border rounded-3xl p-4 sm:p-6 md:p-8 shadow-md overflow-hidden w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
                 <h2 className={cn("text-xl font-bold mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-100")}>
                   <BadgeCheck className="w-5 h-5 text-cyan-400" /> Order Summary
                 </h2>
 
                 <div className="space-y-4 mb-8 relative z-10">
-                  <div className={cn("flex justify-between items-center p-4 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800 shadow-inner" : "bg-slate-50 border-slate-200")}>
+                  <div className={cn("flex justify-between items-center p-4 rounded-2xl border shadow-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90")}>
                     <div className="flex flex-col gap-1">
                       <div className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>{selectedPlan?.name || 'No Plan'}</div>
                       {(selectedPlan?.hourlyPrice || 0) > 0 && (
-                        <div className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        <div className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-slate-500" : "text-slate-500")}>
                           ≈ {formatRupiah((selectedPlan?.hourlyPrice || 0) * 24 * 30)} / MO
                         </div>
                       )}
@@ -558,7 +720,7 @@ function CheckoutContent() {
                   </div>
 
                   <div className="flex justify-between items-center text-xs px-2">
-                    <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Billing Cycle</div>
+                    <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-slate-500" : "text-slate-500")}>Billing Cycle</div>
                     <div className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/50 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>Hourly</div>
                   </div>
 
@@ -573,30 +735,40 @@ function CheckoutContent() {
                   )}
 
                   <div className={cn("border-t pt-4 flex justify-between items-center text-xs px-2", isDark ? "border-slate-800" : "border-slate-100")}>
-                    <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Subtotal</div>
+                    <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-slate-500" : "text-slate-500")}>Subtotal</div>
                     <div className={cn("font-black", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(finalSubtotal)}</div>
                   </div>
 
                   <div className="flex justify-between items-center text-xs px-2 pb-2">
-                    <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Payment Fee</div>
+                    <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-slate-500" : "text-slate-500")}>Payment Fee</div>
                     <div className={cn("font-black", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(fee)}</div>
                   </div>
                 </div>
 
-                <div className={cn("rounded-3xl p-6 mb-6 border relative overflow-hidden z-10 group", isDark ? "bg-[#060b14] border-slate-800 shadow-inner" : "bg-slate-50 border-slate-200")}>
-                  <div className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Payment</div>
-                  <div className={cn("text-3xl font-black tracking-tight leading-tight break-all", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(total)}</div>
+                <div className={cn("rounded-2xl p-5 mb-5 border relative overflow-hidden z-10 shadow-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90")}>
+                  <div className={cn("text-[10px] font-black uppercase tracking-widest mb-1.5", isDark ? "text-slate-400" : "text-slate-500")}>Total Payment</div>
+                  <div className={cn("text-3xl font-black tracking-tight leading-tight break-all", isDark ? "text-cyan-400" : "text-cyan-600")}>{formatRupiah(total)}</div>
                 </div>
 
                 {/* Legal Checkbox */}
-                <div className={cn("mb-6 relative z-10 border-t pt-6", isDark ? "border-slate-800" : "border-slate-100")}>
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center justify-center shrink-0">
-                      <input type="checkbox" checked={isTermsAccepted} onChange={e => setIsTermsAccepted(e.target.checked)} className={cn("w-5 h-5 rounded border cursor-pointer appearance-none checked:bg-cyan-600 checked:border-cyan-600 transition-all", isDark ? "border-slate-700 bg-[#060b14] text-cyan-500" : "border-slate-300 bg-white text-cyan-600")} />
-                      <ShieldCheck className={cn("absolute w-3.5 h-3.5 text-white pointer-events-none transition-opacity", isTermsAccepted ? "opacity-100" : "opacity-0")} />
+                <div className={cn("mb-5 relative z-10 border-t pt-5", isDark ? "border-slate-800" : "border-slate-100")}>
+                  <label className="flex items-start gap-3 cursor-pointer group select-none">
+                    <div className="relative flex items-center justify-center shrink-0 mt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={isTermsAccepted}
+                        onChange={e => setIsTermsAccepted(e.target.checked)}
+                        className={cn(
+                          "w-4 h-4 rounded-md border cursor-pointer appearance-none transition-all",
+                          isTermsAccepted
+                            ? "bg-cyan-600 border-cyan-600"
+                            : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"
+                        )}
+                      />
+                      <ShieldCheck className={cn("absolute w-3 h-3 text-white pointer-events-none transition-opacity", isTermsAccepted ? "opacity-100" : "opacity-0")} />
                     </div>
-                    <span className={cn("text-xs leading-relaxed transition-colors", isDark ? "text-zinc-400 group-hover:text-zinc-300" : "text-slate-500 group-hover:text-slate-700")}>
-                      I have read and agree to the <a href="/terms" target="_blank" className="text-cyan-400 hover:underline">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-cyan-400 hover:underline">Privacy Policy</a>.
+                    <span className={cn("text-xs leading-relaxed transition-colors", isDark ? "text-slate-400 group-hover:text-slate-300" : "text-slate-500 group-hover:text-slate-700")}>
+                      I have read and agree to the <a href="/terms" target="_blank" className="text-cyan-600 dark:text-cyan-400 font-medium hover:underline">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-cyan-600 dark:text-cyan-400 font-medium hover:underline">Privacy Policy</a>.
                     </span>
                   </label>
                 </div>
@@ -604,13 +776,20 @@ function CheckoutContent() {
                 <button
                   onClick={handleCheckout}
                   disabled={isProcessing || !selectedPlanId || !selectedPaymentMethod || !isTermsAccepted}
-                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10 shadow-sm"
+                  className={cn(
+                    "w-full py-3 px-5 rounded-xl text-sm font-bold flex items-center justify-center gap-2.5 transition-all relative z-10",
+                    !isProcessing && selectedPlanId && selectedPaymentMethod && isTermsAccepted
+                      ? "bg-cyan-600 hover:bg-cyan-700 active:scale-[0.99] text-white shadow-sm cursor-pointer"
+                      : isDark
+                        ? "bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed"
+                        : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed shadow-none"
+                  )}
                 >
-                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
+                  {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                   {isProcessing ? "Processing..." : "Complete Secure Payment"}
                 </button>
 
-                <div className={cn("mt-6 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest relative z-10", isDark ? "text-zinc-500" : "text-slate-500")}>
+                <div className={cn("mt-5 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest relative z-10", isDark ? "text-zinc-500" : "text-slate-500")}>
                   <ShieldCheck className="w-4 h-4 text-cyan-500" />
                   256-bit Encrypted Checkout
                 </div>

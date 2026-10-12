@@ -225,7 +225,7 @@ export default function ResellerApiDocsPage() {
                         className={cn(
                           "flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium transition-all",
                           activeId === item.id
-                            ? (isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-50 text-cyan-700")
+                            ? (isDark ? "bg-cyan-500/10 text-cyan-400 font-bold" : "bg-slate-100 text-cyan-700 font-bold")
                             : (isDark ? "text-zinc-500 hover:text-zinc-300 hover:bg-slate-800/40" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50")
                         )}
                       >
@@ -248,7 +248,7 @@ export default function ResellerApiDocsPage() {
         <section id="introduction" className={cn("scroll-mt-24 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
           <div className="grid grid-cols-1 xl:grid-cols-2">
             <div className={cn("p-6 md:p-8 lg:p-10", isDark ? "bg-[#0A0B1A]" : "bg-white")}>
-              <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-6 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-6 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
                 <BookOpen className="w-3.5 h-3.5" /> API Documentation v1.0
               </div>
               <h1 className={cn("text-3xl md:text-5xl font-extrabold mb-6 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -258,7 +258,7 @@ export default function ResellerApiDocsPage() {
                 <p>Welcome to the Masdika Reseller API! You can use our API to provision and manage cloud infrastructure such as Virtual Machines programmatically.</p>
                 <p>All endpoints are RESTful, consume and produce JSON, and require secure authentication via an API key.</p>
               </div>
-              <div className={cn("mt-6 p-4 rounded-xl border flex gap-3", isDark ? "bg-cyan-500/5 border-cyan-500/10" : "bg-cyan-50 border-cyan-200")}>
+              <div className={cn("mt-6 p-4 rounded-xl border flex gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
                 <ShieldCheck className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 <div className="text-sm">
                   <strong className={cn("block mb-0.5", isDark ? "text-white" : "text-slate-900")}>White-Label Guarantee</strong>
@@ -284,7 +284,7 @@ export default function ResellerApiDocsPage() {
               </h2>
               <div className={cn("space-y-3 text-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 <p>
-                  Masdika API uses token-based authentication. You must include your API key in the <code className={cn("font-mono font-bold px-1.5 py-0.5 rounded text-[12px]", isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-50 text-cyan-600")}>Authorization</code> header for every request.
+                  Masdika API uses token-based authentication. You must include your API key in the <code className={cn("font-mono font-bold px-1.5 py-0.5 rounded text-[12px] border", isDark ? "bg-black/30 border-slate-800 text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-800")}>Authorization</code> header for every request.
                 </p>
                 <p>
                   You can generate a new API token at the Reseller API Dashboard. Keep your token secure, as it carries full privileges to provision servers and deduct from your master balance.
@@ -495,7 +495,7 @@ export default function ResellerApiDocsPage() {
                   <><strong className={isDark ? "text-emerald-400" : "text-emerald-600"}>Your profit</strong> = Customer payment − Masdika wholesale cost. You set your own markup freely.</>,
                 ].map((text, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className={cn("flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black mt-0.5", isDark ? "bg-cyan-500/15 text-cyan-400" : "bg-cyan-50 text-cyan-600")}>{i + 1}</span>
+                    <span className={cn("flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black mt-0.5 border", isDark ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>{i + 1}</span>
                     <p>{text}</p>
                   </div>
                 ))}

@@ -157,20 +157,20 @@ export default function NotificationsPage() {
               <div key={notif.id}>
                 <Link
                   href={notif.link || "#"}
-                  className={cn("block p-5 sm:p-6 transition-all group", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50", !notif.isRead ? (isDark ? "bg-cyan-500/5" : "bg-cyan-50/50") : "")}
+                  className={cn("block p-5 sm:p-6 transition-all group", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50/80")}
                 >
                   <div className="flex gap-4 sm:gap-6">
                     <div className="shrink-0 mt-1">
                       {notif.type === 'TICKET' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? (isDark ? 'bg-slate-800 text-zinc-400' : 'bg-slate-100 text-slate-500') : 'bg-cyan-500/20 text-cyan-400 shadow-sm'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-slate-800 border-transparent text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : (isDark ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-slate-100 text-cyan-700 border-slate-200 shadow-sm')}`}>
                           <MessageSquare className="w-5 h-5" />
                         </div>
                       ) : notif.type === 'INVOICE' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? (isDark ? 'bg-slate-800 text-zinc-400' : 'bg-slate-100 text-slate-500') : 'bg-cyan-500/20 text-cyan-400 shadow-sm'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-slate-800 border-transparent text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : (isDark ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-slate-100 text-cyan-700 border-slate-200 shadow-sm')}`}>
                           <Receipt className="w-5 h-5" />
                         </div>
                       ) : (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? (isDark ? 'bg-slate-800 text-zinc-400' : 'bg-slate-100 text-slate-500') : 'bg-cyan-500/20 text-cyan-400 shadow-sm'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-slate-800 border-transparent text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : (isDark ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-slate-100 text-cyan-700 border-slate-200 shadow-sm')}`}>
                           <AlertCircle className="w-5 h-5" />
                         </div>
                       )}
@@ -189,8 +189,8 @@ export default function NotificationsPage() {
                       </p>
                       
                       {!notif.isRead && (
-                        <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-400 text-xs font-bold border border-cyan-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                        <div className={cn("mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-800 border-slate-200")}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
                           Unread
                         </div>
                       )}

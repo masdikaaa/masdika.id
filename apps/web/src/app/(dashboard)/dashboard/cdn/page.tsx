@@ -719,17 +719,17 @@ export default function UserCDNLibrary() {
         <div className="w-full sm:w-auto flex-1 max-w-md">
           <div className="relative">
             <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-500" : "text-slate-500")} />
-            <input type="text" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={cn("w-full border rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
+            <input type="text" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={cn("w-full border rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
           </div>
         </div>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          <div className={cn("flex border rounded-2xl p-1 shadow-inner shrink-0 hidden sm:flex", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-            <button onClick={() => setViewMode("grid")} className={cn("p-2 rounded-xl transition-all", viewMode === "grid" ? (isDark ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "bg-cyan-100 text-cyan-700 shadow-sm") : (isDark ? "text-zinc-500 hover:text-white" : "text-slate-500 hover:text-slate-900"))}><LayoutGrid className="w-4 h-4" /></button>
-            <button onClick={() => setViewMode("list")} className={cn("p-2 rounded-xl transition-all", viewMode === "list" ? (isDark ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "bg-cyan-100 text-cyan-700 shadow-sm") : (isDark ? "text-zinc-500 hover:text-white" : "text-slate-500 hover:text-slate-900"))}><ListIcon className="w-4 h-4" /></button>
+          <div className={cn("flex border rounded-2xl p-1 shadow-sm shrink-0 hidden sm:flex", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+            <button onClick={() => setViewMode("grid")} className={cn("p-2 rounded-xl transition-all", viewMode === "grid" ? (isDark ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "bg-slate-100 text-cyan-700 shadow-sm") : (isDark ? "text-zinc-500 hover:text-white" : "text-slate-500 hover:text-slate-900"))}><LayoutGrid className="w-4 h-4" /></button>
+            <button onClick={() => setViewMode("list")} className={cn("p-2 rounded-xl transition-all", viewMode === "list" ? (isDark ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "bg-slate-100 text-cyan-700 shadow-sm") : (isDark ? "text-zinc-500 hover:text-white" : "text-slate-500 hover:text-slate-900"))}><ListIcon className="w-4 h-4" /></button>
           </div>
 
-          <button onClick={() => setShowCreateFolder(true)} disabled={isSuspended} className={cn("border px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-inner flex-1 sm:flex-none disabled:opacity-50", isDark ? "bg-[#060b14] border-slate-800 hover:bg-slate-800/40 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
+          <button onClick={() => setShowCreateFolder(true)} disabled={isSuspended} className={cn("border px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-sm flex-1 sm:flex-none disabled:opacity-50", isDark ? "bg-[#060b14] border-slate-800 hover:bg-slate-800/40 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
             <FolderPlus className="w-4 h-4" /> New Folder
           </button>
 
@@ -762,7 +762,7 @@ export default function UserCDNLibrary() {
       </AnimatePresence>
 
       {/* Breadcrumbs */}
-      <motion.div variants={itemVariants} className={cn("flex items-center gap-2 p-4 rounded-2xl border overflow-x-auto whitespace-nowrap shadow-inner", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("flex items-center gap-2 p-4 rounded-2xl border overflow-x-auto whitespace-nowrap shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         {getBreadcrumbs().map((crumb, idx) => (
           <div key={crumb.path} className="flex items-center gap-2">
             {idx > 0 && <ChevronRight className={cn("w-4 h-4", isDark ? "text-zinc-500" : "text-slate-500")} />}
@@ -806,7 +806,7 @@ export default function UserCDNLibrary() {
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={item.id} 
                        onClick={(e) => { if(e.ctrlKey || e.shiftKey) toggleSelect(item.id); }}
                        onDoubleClick={() => item.isFolder && navigateTo(`${currentFolder === '/' ? '' : currentFolder}/${item.originalName}`)}
-                       className={cn(" border rounded-2xl p-5 flex flex-col transition-all group cursor-pointer relative overflow-hidden", isSelected ? (isDark ? "border-cyan-500 bg-cyan-500/5 shadow-sm" : "border-cyan-500 bg-cyan-50 shadow-sm") : (isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-cyan-500/40 hover:bg-slate-50 shadow-sm"))}>
+                       className={cn(" border rounded-2xl p-5 flex flex-col transition-all group cursor-pointer relative overflow-hidden", isSelected ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") : (isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-md shadow-sm"))}>
                     
                       
                     <div className="flex items-start justify-between mb-4 relative z-10">
@@ -814,7 +814,7 @@ export default function UserCDNLibrary() {
                         <button onClick={(e) => { e.stopPropagation(); toggleSelect(item.id); }} className={cn("w-5 h-5 border rounded-md flex items-center justify-center shrink-0 cursor-pointer transition-colors", isSelected ? "bg-cyan-500 border-cyan-500 text-white" : (isDark ? "border-zinc-500 group-hover:border-zinc-400 bg-zinc-900" : "border-slate-300 group-hover:border-slate-400 bg-white"))}>
                           {isSelected && <CheckCircle className={cn("w-3.5 h-3.5", isDark ? "text-zinc-900" : "text-white")} />}
                         </button>
-                        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center border shadow-inner", item.isFolder ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700") : (isDark ? "bg-zinc-900 border-white/5 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-600"))}>
+                        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm", item.isFolder ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700") : (isDark ? "bg-zinc-900 border-white/5 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-600"))}>
                           <FileIcon className="w-6 h-6" />
                         </div>
                       </div>
@@ -894,7 +894,7 @@ export default function UserCDNLibrary() {
                         const FileIcon = getFileIcon(item.mimeType, item.originalName, item.isFolder);
                         const isSelected = selectedIds.includes(item.id);
                         return (
-                          <tr key={item.id} onClick={(e) => { if(e.ctrlKey || e.shiftKey) toggleSelect(item.id); }} className={cn("transition-colors cursor-pointer group", isSelected ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : (isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50"))} onDoubleClick={() => item.isFolder && navigateTo(`${currentFolder === '/' ? '' : currentFolder}/${item.originalName}`)}>
+                          <tr key={item.id} onClick={(e) => { if(e.ctrlKey || e.shiftKey) toggleSelect(item.id); }} className={cn("transition-colors cursor-pointer group", isSelected ? (isDark ? "bg-slate-800/60" : "bg-slate-100/70") : (isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50"))} onDoubleClick={() => item.isFolder && navigateTo(`${currentFolder === '/' ? '' : currentFolder}/${item.originalName}`)}>
                             <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                               <button onClick={(e) => { e.stopPropagation(); toggleSelect(item.id); }} className={cn("w-5 h-5 border rounded-md flex items-center justify-center cursor-pointer transition-colors mx-auto", isSelected ? "bg-cyan-500 border-cyan-500 text-white" : (isDark ? "border-zinc-500 group-hover:border-zinc-400 bg-zinc-900" : "border-slate-300 group-hover:border-slate-400 bg-white"))}>
                                 {isSelected && <CheckCircle className={cn("w-3.5 h-3.5", isDark ? "text-zinc-900" : "text-white")} />}
@@ -902,7 +902,7 @@ export default function UserCDNLibrary() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-4">
-                                <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center border shadow-inner shrink-0", item.isFolder ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700") : (isDark ? "bg-zinc-900 border-white/5 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-600"))}>
+                                <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center border shadow-sm shrink-0", item.isFolder ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700") : (isDark ? "bg-zinc-900 border-white/5 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-600"))}>
                                   <FileIcon className="w-5 h-5" />
                                 </div>
                                 <span className={cn("font-bold truncate max-w-[300px] md:max-w-md transition-colors", isDark ? "text-white group-hover:text-cyan-300" : "text-slate-900 group-hover:text-cyan-600")}>{item.originalName}</span>
@@ -985,7 +985,7 @@ export default function UserCDNLibrary() {
                             <h3 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <FolderPlus className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} /> Create Folder
               </h3>
-              <input autoFocus type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Enter folder name" className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
+              <input autoFocus type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Enter folder name" className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
               <div className="flex justify-end gap-3 relative z-10">
                 <button onClick={() => setShowCreateFolder(false)} className={cn("px-5 py-3 rounded-xl transition-colors font-medium border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
                 <button onClick={handleCreateFolder} className={cn("px-6 py-3 text-white font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>Create</button>
@@ -1002,7 +1002,7 @@ export default function UserCDNLibrary() {
               <h3 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Edit2 className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} /> Rename
               </h3>
-              <input autoFocus type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
+              <input autoFocus type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
               <div className="flex justify-end gap-3 relative z-10">
                 <button onClick={() => setShowRenameModal(null)} className={cn("px-5 py-3 rounded-xl transition-colors font-medium border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
                 <button onClick={handleRename} className={cn("px-6 py-3 text-white font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>Rename</button>
@@ -1019,7 +1019,7 @@ export default function UserCDNLibrary() {
               <h3 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <MoveRight className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} /> Move Items
               </h3>
-              <input autoFocus type="text" value={moveDest} onChange={e => setMoveDest(e.target.value)} placeholder="Destination Path (e.g. /images)" className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
+              <input autoFocus type="text" value={moveDest} onChange={e => setMoveDest(e.target.value)} placeholder="Destination Path (e.g. /images)" className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
               <div className="flex justify-end gap-3 relative z-10">
                 <button onClick={() => setShowMoveModal(null)} className={cn("px-5 py-3 rounded-xl transition-colors font-medium border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
                 <button onClick={handleMove} className={cn("px-6 py-3 text-white font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>Move</button>
@@ -1097,7 +1097,7 @@ export default function UserCDNLibrary() {
 
               <div className="mb-8 relative z-10">
                 <label className={cn("block text-xs font-bold uppercase tracking-widest mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Expiry Option</label>
-                <select value={expiresIn} onChange={(e) => setExpiresIn(e.target.value)} className={cn("w-full rounded-2xl p-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-inner transition-all appearance-none cursor-pointer border", isDark ? "bg-[#0b1120] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}>
+                <select value={expiresIn} onChange={(e) => setExpiresIn(e.target.value)} className={cn("w-full rounded-2xl p-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-sm transition-all appearance-none cursor-pointer border", isDark ? "bg-[#0b1120] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}>
                   <option value="permanent">Permanent (Never expires)</option>
                   <option value="1h">1 Hour</option>
                   <option value="1d">1 Day</option>
@@ -1112,7 +1112,7 @@ export default function UserCDNLibrary() {
                     <span className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Uploading...</span>
                     <span className={cn("text-sm font-black", isDark ? "text-cyan-400" : "text-cyan-600")}>{uploadProgress}%</span>
                   </div>
-                  <div className={cn("w-full rounded-full h-2 shadow-inner overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-100 border-slate-200")}>
+                  <div className={cn("w-full rounded-full h-2 shadow-sm overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-100 border-slate-200")}>
                     <div className={cn("h-2 rounded-full transition-all duration-300 relative overflow-hidden", isDark ? "bg-cyan-400" : "bg-cyan-600")} style={{ width: `${uploadProgress}%` }}>
                       <div className="absolute inset-0 bg-white/20 animate-pulse" />
                     </div>

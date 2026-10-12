@@ -109,20 +109,20 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
             </div>
           ) : (
             <>
-              <div className={cn("p-4 border rounded-xl flex items-start sm:items-center gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+              <div className={cn("p-4 border rounded-xl flex items-start sm:items-center gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
                 <AlertTriangle className={cn("w-5 h-5 shrink-0 mt-0.5 sm:mt-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <p className={cn("text-sm font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>Alert checks are performed every 5 minutes by the monitoring agent.</p>
+                <p className={cn("text-sm font-medium", isDark ? "text-slate-300" : "text-slate-700")}>Alert checks are performed every 5 minutes by the monitoring agent.</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {alertRules.map((rule, index) => (
-                  <div key={rule.metric} className={cn("border rounded-2xl p-6 relative overflow-hidden transition-all flex flex-col h-full", isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400")}>
+                  <div key={rule.metric} className={cn("border rounded-2xl p-6 relative overflow-hidden transition-all flex flex-col h-full", isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/30" : "bg-white border-slate-200/90 shadow-sm hover:border-cyan-400")}>
 
                     <div className="relative z-10 flex-1 flex flex-col">
                       {/* Toggle & Title */}
                       <div className={cn("flex items-center justify-between mb-6 pb-6 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
                         <div className="flex items-center gap-3">
-                          <div className={cn("p-2.5 rounded-xl", rule.isEnabled ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-50 text-cyan-600") : (isDark ? "bg-white/5 text-zinc-500" : "bg-slate-100 text-slate-400"))}>
+                          <div className={cn("p-2.5 rounded-xl border", rule.isEnabled ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-200") : (isDark ? "bg-white/5 text-zinc-500 border-white/5" : "bg-slate-50 text-slate-400 border-slate-200"))}>
                             {rule.metric === "CPU" && <Cpu className="w-5 h-5" />}
                             {rule.metric === "RAM" && <MemoryStick className="w-5 h-5" />}
                             {rule.metric === "DISK" && <HardDrive className="w-5 h-5" />}
@@ -152,7 +152,7 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Alert Threshold (%)</label>
-                            <span className={cn("font-bold px-2 py-0.5 rounded text-sm border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border-cyan-200")}>{rule.threshold}%</span>
+                            <span className={cn("font-bold px-2 py-0.5 rounded text-sm border", isDark ? "text-cyan-400 bg-cyan-950/40 border-cyan-800/40" : "text-cyan-700 bg-slate-50 border-slate-200")}>{rule.threshold}%</span>
                           </div>
                           <input
                             type="range"

@@ -245,7 +245,7 @@ export default function MyVpsPage() {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
+            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
               <Server className="w-3 h-3" /> Cloud Infrastructure
             </div>
             <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900", " ")}>
@@ -508,7 +508,7 @@ export default function MyVpsPage() {
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "start", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
-                              className={cn("border", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200", "flex items-center gap-1.5 p-2   rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn("border shadow-sm", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-white hover:bg-slate-50 text-cyan-700 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
                               title="Start"
                             >
                               <Play className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Start</span>
@@ -516,7 +516,7 @@ export default function MyVpsPage() {
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "shutdown", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn("border", isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200", "flex items-center gap-1.5 p-2   rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn("border shadow-sm", isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-white hover:bg-slate-50 text-amber-700 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
                               title="Shutdown"
                             >
                               <Power className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Shutdown</span>
@@ -524,7 +524,7 @@ export default function MyVpsPage() {
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "stop", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn("border", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200", "flex items-center gap-1.5 p-2   rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn("border shadow-sm", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-white hover:bg-slate-50 text-red-600 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
                               title="Stop"
                             >
                               <Square className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Stop</span>
@@ -532,7 +532,7 @@ export default function MyVpsPage() {
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "reboot", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn("border", isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200", "flex items-center gap-1.5 p-2   rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn("border shadow-sm", isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-white hover:bg-slate-50 text-blue-700 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
                               title="Restart"
                             >
                               <RotateCcw className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Restart</span>

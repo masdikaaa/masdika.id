@@ -199,7 +199,7 @@ export default function DashboardOverview() {
                       {getBeritaExcerpt(berita.content)}
                     </p>
                     <div className="flex justify-between items-center mt-2">
-                      <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-slate-400 group-hover:border-cyan-500/30 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
+                      <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-slate-400 group-hover:border-cyan-500/30 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-900 group-hover:border-slate-300")}>
                         {berita.type === "MAINTENANCE" ? "Maintenance" : berita.type === "WARNING" ? "Warning" : "Info"}
                       </span>
                       <span className={cn("text-[10px] font-medium", isDark ? "text-slate-500" : "text-slate-500")}>
@@ -226,7 +226,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/vps" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Active VPS</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <Terminal className="w-5 h-5" />
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/k3s" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Managed K3s</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <SiKubernetes className="w-5 h-5" />
               </div>
             </div>
@@ -252,7 +252,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/reserved-ips" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Reserved IPs</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <Network className="w-5 h-5" />
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/cdn" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>File CDN</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <UploadCloud className="w-5 h-5" />
               </div>
             </div>
@@ -295,7 +295,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/vpc" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>VPC Networks</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <VpcIcon className="w-5 h-5" />
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/billing" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Account Balance</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <Wallet className="w-5 h-5" />
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function DashboardOverview() {
           <Link href="/dashboard/billing" className="block p-6 h-full w-full">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Unpaid Invoices</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                 <Receipt className="w-5 h-5" />
               </div>
             </div>
@@ -357,7 +357,7 @@ export default function DashboardOverview() {
             {vpsList.slice((vpsPage - 1) * 3, vpsPage * 3).map((vps) => (
               <div key={vps.id} className={cn("group flex flex-col md:flex-row items-center justify-between p-4 rounded-xl border transition-all duration-300", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300")}>
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                     <Terminal className="w-5 h-5" />
                   </div>
                   <div>
@@ -411,7 +411,7 @@ export default function DashboardOverview() {
             {k3sList.slice((k3sPage - 1) * 3, k3sPage * 3).map((cluster) => (
               <div key={cluster.id} className={cn("group flex flex-col md:flex-row items-center justify-between p-4 rounded-xl border transition-all duration-300", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300")}>
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
                     <SiKubernetes className="w-5 h-5" />
                   </div>
                   <div>

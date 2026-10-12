@@ -169,9 +169,9 @@ const ConnectorInstructions = ({ isDark,
         <h4 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Refresh token</h4>
         <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>You may need to generate a new token for security reasons.</p>
         
-        <div className={cn("rounded-xl p-4 flex items-start gap-3 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+        <div className={cn("rounded-xl p-4 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
           <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-          <p className={cn("text-sm font-medium leading-relaxed", isDark ? "text-cyan-200" : "text-cyan-800")}>
+          <p className={cn("text-sm font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-700")}>
             This action will invalidate the previous token. Note that this will prevent new connections made with the old token, but it won&apos;t close existing connections.
           </p>
         </div>
@@ -874,7 +874,7 @@ export default function CloudflaredPage() {
             <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Add your domains, create tunnels, and securely expose your local services to the internet.</p>
           </div>
           <button onClick={() => { fetchDomains(); fetchTunnels(); }}
-            className={cn("p-2.5 md:p-3  rounded-2xl border transition-colors shrink-0 self-start", isDark ? "bg-[#011627]/80 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/10" : "bg-white text-cyan-600 border-cyan-200 hover:bg-cyan-50 shadow-sm")}
+            className={cn("p-2.5 md:p-3  rounded-2xl border transition-colors shrink-0 self-start", isDark ? "bg-[#011627]/80 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/10" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-sm")}
             title="Refresh">
             <RefreshCw className={cn("w-4 h-4", (domainsLoading || tunnelsLoading) && "animate-spin")} />
           </button>
@@ -904,34 +904,34 @@ export default function CloudflaredPage() {
         <div className="space-y-4 animate-in fade-in duration-300">
           {/* NS Info for Newly Added Domain */}
           {newlyAddedDomain && (
-            <div className={cn("rounded-xl p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 relative border", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-sm" : "bg-cyan-50 border-cyan-200 shadow-sm")}>
+            <div className={cn("rounded-xl p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 relative border", isDark ? "bg-[#0b162c] border-cyan-500/30 shadow-sm" : "bg-white border-slate-200/90 shadow-sm")}>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-white border-cyan-200")}>
+                  <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-slate-100 border-slate-200")}>
                     <Info className={cn("w-5 h-5", isDark ? "text-cyan-500" : "text-cyan-600")} />
                   </div>
                   <div>
-                    <h3 className={cn("text-[15px] font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-800")}>Domain Added: {newlyAddedDomain.domain}</h3>
-                    <p className={cn("text-[13px]", isDark ? "text-cyan-200/70" : "text-cyan-600")}>Update your nameservers at your domain registrar to activate.</p>
+                    <h3 className={cn("text-[15px] font-bold mb-0.5", isDark ? "text-white" : "text-slate-900")}>Domain Added: {newlyAddedDomain.domain}</h3>
+                    <p className={cn("text-[13px]", isDark ? "text-zinc-400" : "text-slate-500")}>Update your nameservers at your domain registrar to activate.</p>
                   </div>
                 </div>
-                <button onClick={() => setNewlyAddedDomain(null)} className={cn("transition-colors p-1", isDark ? "text-cyan-500 hover:text-cyan-400" : "text-cyan-600 hover:text-cyan-700")}>
+                <button onClick={() => setNewlyAddedDomain(null)} className={cn("transition-colors p-1", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-600")}>
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
               <div className="space-y-3">
-                <h4 className={cn("text-[13px] font-bold", isDark ? "text-cyan-400" : "text-cyan-800")}>Point your domain&apos;s nameservers to:</h4>
+                <h4 className={cn("text-[13px] font-bold", isDark ? "text-cyan-400" : "text-slate-800")}>Point your domain&apos;s nameservers to:</h4>
                 <div className="space-y-2">
                   {newlyAddedDomain.nameServers.map((ns, i) => (
-                    <div key={i} className={cn("flex items-center justify-between border rounded-lg px-4 py-3 font-mono text-[13px]", isDark ? "bg-black/40 border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
+                    <div key={i} className={cn("flex items-center justify-between border rounded-lg px-4 py-3 font-mono text-[13px]", isDark ? "bg-black/40 border-cyan-500/20" : "bg-slate-50 border-slate-200")}>
                       <span className={cn(isDark ? "text-cyan-400" : "text-cyan-700 font-semibold")}>{ns}</span>
-                      <button onClick={() => copyToClipboard(ns)} className={cn("p-1.5 rounded-md transition-colors border", isDark ? "border-cyan-500/20 hover:bg-cyan-500/10 text-cyan-500 hover:text-cyan-400" : "border-cyan-200 hover:bg-cyan-50 text-cyan-600 hover:text-cyan-700")}>
+                      <button onClick={() => copyToClipboard(ns)} className={cn("p-1.5 rounded-md transition-colors border", isDark ? "border-cyan-500/20 hover:bg-cyan-500/10 text-cyan-500 hover:text-cyan-400" : "border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900")}>
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                 </div>
-                <p className={cn("text-[11px] pt-2", isDark ? "text-cyan-200/50" : "text-cyan-600/70")}>It may take up to 24 hours for nameserver changes to propagate. Status will change to &quot;Active&quot; once complete.</p>
+                <p className={cn("text-[11px] pt-2", isDark ? "text-zinc-500" : "text-slate-500")}>It may take up to 24 hours for nameserver changes to propagate. Status will change to &quot;Active&quot; once complete.</p>
               </div>
             </div>
           )}
@@ -1046,7 +1046,7 @@ export default function CloudflaredPage() {
                           <div className="flex items-center justify-end gap-2">
                             {d.status !== "active" && d.status !== "healthy" && (
                               <button onClick={() => handleCheckNameserver(d)} disabled={checkingDomainId === d.id}
-                                className={cn("p-2 rounded-lg transition-colors border shadow-sm", isDark ? "bg-white/5 hover:bg-blue-500/10 border-transparent hover:border-blue-500/20 text-zinc-400 hover:text-blue-400" : "bg-white hover:bg-blue-50 border-slate-200 hover:border-blue-200 text-slate-500 hover:text-blue-600")} title="Check Nameserver">
+                                className={cn("p-2 rounded-lg transition-colors border shadow-sm", isDark ? "bg-white/5 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-800")} title="Check Nameserver">
                                 <RefreshCw className={cn("w-4 h-4", checkingDomainId === d.id && "animate-spin")} />
                               </button>
                             )}
@@ -1082,11 +1082,11 @@ export default function CloudflaredPage() {
         <div className="space-y-4 animate-in fade-in duration-300">
           {/* No domains warning */}
           {domains.length === 0 && !domainsLoading && (
-            <div className={cn("rounded-xl p-4 flex items-start gap-3 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("rounded-xl p-4 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
               <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-              <div className={cn("text-sm", isDark ? "text-cyan-200" : "text-cyan-800")}>
-                <p className={cn("font-medium mb-1", isDark ? "text-cyan-500" : "text-cyan-700")}>Note: Add a domain first.</p>
-                <p>You need at least one domain before creating tunnels. <button onClick={() => setActiveTab("domains")} className={cn("underline transition-colors", isDark ? "hover:text-cyan-100" : "hover:text-cyan-900")}>Go to Domains tab</button></p>
+              <div className={cn("text-sm", isDark ? "text-slate-300" : "text-slate-700")}>
+                <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>Note: Add a domain first.</p>
+                <p>You need at least one domain before creating tunnels. <button onClick={() => setActiveTab("domains")} className={cn("underline transition-colors font-medium", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700")}>Go to Domains tab</button></p>
               </div>
             </div>
           )}
@@ -1199,7 +1199,7 @@ export default function CloudflaredPage() {
                             <td className="py-4 pl-4 pr-6 align-middle text-right">
                               <div className="flex items-center justify-end gap-2">
                                 <button onClick={() => handleEditTunnel(t)} disabled={editingTunnelId !== null}
-                                  className={cn("p-2 rounded-lg transition-colors border shadow-sm", isDark ? "bg-white/5 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white hover:bg-cyan-50 border-slate-200 hover:border-cyan-200 text-slate-500 hover:text-cyan-600")} title="Edit / Manage">
+                                  className={cn("p-2 rounded-lg transition-colors border shadow-sm", isDark ? "bg-white/5 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-800")} title="Edit / Manage">
                                   {editingTunnelId === t.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
                                 </button>
                                 <button onClick={() => setDeleteTunnelModal(t)}
@@ -1240,11 +1240,11 @@ export default function CloudflaredPage() {
                     <div key={step} className="flex items-center gap-2 sm:gap-4">
                       {i > 0 && <ArrowRight className={cn("w-4 h-4 hidden sm:block", isDark ? "text-zinc-600" : "text-slate-400")} />}
                       <button onClick={() => isClickable && setCurrentStep(step)} disabled={isDisabled}
-                        className={cn("flex items-center gap-2 px-4 py-2 rounded-lg transition-all",
-                          currentStep === step ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm") : (isDark ? "text-zinc-500" : "text-slate-500"),
+                        className={cn("flex items-center gap-2 px-4 py-2 rounded-xl transition-all shadow-sm",
+                          currentStep === step ? (isDark ? "bg-[#0b162c] text-cyan-400 border border-cyan-500 ring-1 ring-cyan-500/30 font-bold" : "bg-white text-cyan-900 border border-cyan-600 ring-2 ring-cyan-600/20 font-bold") : (isDark ? "text-zinc-500 border border-transparent" : "text-slate-500 border border-transparent"),
                           isClickable && (isDark ? "cursor-pointer hover:text-zinc-300 hover:bg-white/5" : "cursor-pointer hover:text-slate-800 hover:bg-slate-100"))}>
                         <span className={cn("w-6 h-6 rounded-full flex items-center justify-center border text-xs",
-                          currentStep === step ? (isDark ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400" : "bg-cyan-100 border-cyan-300 text-cyan-700") : (isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200 text-slate-500"))}>{step}</span>
+                          currentStep === step ? (isDark ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400" : "bg-cyan-600 text-white border-transparent") : (isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200 text-slate-500"))}>{step}</span>
                         {label}
                       </button>
                     </div>

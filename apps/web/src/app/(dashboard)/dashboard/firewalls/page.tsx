@@ -226,10 +226,10 @@ export default function FirewallsDashboardPage() {
 
       <motion.div variants={itemVariants} className={cn("rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         <div className="p-6">
-          <div className={cn("border rounded-xl p-4 mb-6 flex items-start gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+          <div className={cn("border rounded-xl p-4 mb-6 flex items-start gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
             <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-            <div className={cn("text-sm", isDark ? "text-cyan-200" : "text-cyan-800")}>
-              <p className={cn("font-medium mb-1", isDark ? "text-cyan-500" : "text-cyan-700")}>Global Firewall Management</p>
+            <div className={cn("text-sm", isDark ? "text-slate-300" : "text-slate-700")}>
+              <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>Global Firewall Management</p>
               <p>Select a VPS instance below to manage its security group rules. Changes take effect immediately without requiring a restart.</p>
             </div>
           </div>
@@ -374,7 +374,7 @@ export default function FirewallsDashboardPage() {
                                 setEditingRule({ ...rule, pos: rule.pos || absoluteIndex });
                                 setShowFirewallModal(true);
                               }}
-                              className={cn("p-1.5 rounded-lg transition-colors border shadow-sm", isDark ? "bg-white/5 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white hover:bg-cyan-50 border-slate-200 hover:border-cyan-200 text-slate-500 hover:text-cyan-600")}
+                              className={cn("p-1.5 rounded-lg transition-colors border shadow-sm", isDark ? "bg-white/5 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-800")}
                               title="Edit Rule"
                             >
                               <Settings2 className="w-4 h-4" />

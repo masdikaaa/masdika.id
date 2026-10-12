@@ -20,7 +20,7 @@ const OtpInput = ({ value, onChange, isDanger = false }: { value: string; onChan
   const isDark = theme === 'dark';
   const activeColor = isDanger 
     ? (isDark ? 'border-rose-500 text-white bg-rose-500/10' : 'border-rose-500 text-slate-900 bg-rose-50') 
-    : (isDark ? 'border-cyan-500 text-white bg-cyan-500/10' : 'border-cyan-600 text-slate-900 bg-cyan-50');
+    : (isDark ? 'border-cyan-500 text-white bg-cyan-500/10' : 'border-cyan-600 text-slate-900 bg-white ring-2 ring-cyan-600/20');
   const focusColor = isDanger 
     ? 'border-2 border-rose-500 text-transparent' 
     : (isDark ? 'border-2 border-cyan-500 text-transparent' : 'border-2 border-cyan-600 text-transparent');
@@ -389,7 +389,7 @@ export default function SettingsPage() {
       <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
         <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <Settings className="w-3 h-3" /> Account Management
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -415,7 +415,7 @@ export default function SettingsPage() {
                       : (isDark ? 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50')
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-cyan-100 border-cyan-200 text-cyan-700') : (isDark ? 'bg-slate-800/60 border-slate-700/60 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-white border-slate-300 text-cyan-700 shadow-sm') : (isDark ? 'bg-slate-800/60 border-slate-700/60 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
                     <tab.icon className="w-4 h-4" />
                   </div>
                   <div className="hidden md:block">
@@ -638,7 +638,7 @@ export default function SettingsPage() {
                 <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   
                   <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <Lock className="w-6 h-6" />
                     </div>
                     <div>
@@ -722,7 +722,7 @@ export default function SettingsPage() {
                 <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   
                   <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <ShieldCheck className="w-6 h-6" />
                     </div>
                     <div>
@@ -731,7 +731,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className={`relative z-10 rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50 border-emerald-200') : (isDark ? 'bg-[#060b14] border-slate-800' : 'bg-slate-50 border-slate-200')}`}>
+                  <div className={`relative z-10 rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 ${twoFactorEnabled ? (isDark ? 'bg-[#060b14] border-emerald-500/30' : 'bg-white border-emerald-500/30 shadow-sm') : (isDark ? 'bg-[#060b14] border-slate-800' : 'bg-white border-slate-200/90 shadow-sm')}`}>
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border-emerald-200') : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
                         <Smartphone className="w-5 h-5" />
@@ -776,7 +776,7 @@ export default function SettingsPage() {
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
               <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                   <KeyRound className="w-8 h-8" />
                 </div>
                 <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Verify Password Change</h3>
@@ -804,7 +804,7 @@ export default function SettingsPage() {
               <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                   <Mail className="w-8 h-8" />
                 </div>
                 <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Change Email Address</h3>
@@ -849,7 +849,7 @@ export default function SettingsPage() {
               <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                   <ShieldCheck className="w-8 h-8" />
                 </div>
                 <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Setup 2FA</h3>

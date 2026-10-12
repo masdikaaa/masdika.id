@@ -49,7 +49,7 @@ export function Select({
   }, []);
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className={cn("relative w-full", isOpen ? "z-50" : "z-auto")} ref={dropdownRef}>
       <button
         type="button"
         disabled={disabled}
@@ -84,12 +84,12 @@ export function Select({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               "absolute z-50 w-full mt-2 rounded-xl shadow-2xl overflow-hidden border",
-              isDark ? "bg-cyan-950 border-cyan-500/30" : "bg-white border-slate-200"
+              isDark ? "bg-[#0b1322] border-slate-700/80 shadow-2xl" : "bg-white border-slate-200/90 shadow-xl"
             )}
           >
             <div className="max-h-60 overflow-y-auto p-1.5 custom-scrollbar space-y-0.5">
               {options.length === 0 ? (
-                <div className={cn("p-3 text-sm text-center", isDark ? "text-cyan-200/50" : "text-slate-500")}>No options found</div>
+                <div className={cn("p-3 text-sm text-center", isDark ? "text-zinc-500" : "text-slate-500")}>No options found</div>
               ) : (
                 options.map((opt) => (
                   <button
@@ -105,14 +105,14 @@ export function Select({
                     className={cn(
                       "w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg text-left transition-all",
                       opt.disabled 
-                        ? (isDark ? "opacity-50 cursor-not-allowed text-cyan-200/50" : "opacity-50 cursor-not-allowed text-slate-400")
+                        ? (isDark ? "opacity-50 cursor-not-allowed text-zinc-600" : "opacity-50 cursor-not-allowed text-slate-400")
                         : (value === opt.value
                             ? (isDark 
-                                ? "bg-cyan-800/80 text-cyan-50 font-bold shadow-inner border border-cyan-600/30"
-                                : "bg-cyan-50 text-cyan-700 font-bold border border-cyan-200")
+                                ? "bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30"
+                                : "bg-cyan-500/10 text-cyan-700 font-bold border border-cyan-500/20")
                             : (isDark
-                                ? "text-cyan-100 hover:bg-cyan-900 hover:text-white"
-                                : "text-slate-700 hover:bg-slate-50 hover:text-cyan-600")
+                                ? "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                : "text-slate-700 hover:bg-slate-50 hover:text-slate-900")
                           )
                     )}
                   >

@@ -150,7 +150,7 @@ export default function ResellerApiPage() {
           
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
                 <Code2 className="w-3 h-3" /> Reseller & B2B
               </div>
               <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -252,7 +252,7 @@ export default function ResellerApiPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={cn("px-2 py-1 text-[10px] font-bold rounded flex items-center gap-1.5 w-fit", isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border border-cyan-100")}>
+                          <span className={cn("px-2 py-1 text-[10px] font-bold rounded flex items-center gap-1.5 w-fit border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-700 border-slate-200")}>
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> API INSTANCE
                           </span>
                         </td>

@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Upload, AlertCircle, Lock, Loader2, ArrowLeft, Cloud, Link as LinkIcon, Radio, CloudRain, RefreshCw } from "lucide-react";
+import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Check, Upload, AlertCircle, Lock, Loader2, ArrowLeft, Cloud, Link as LinkIcon, Radio, CloudRain, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -237,7 +237,7 @@ export default function ApiLabPage() {
       <div className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-black/5 shadow-sm")}>
         
         <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
             <Activity className="w-3 h-3" /> API Testing Facility
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -268,19 +268,28 @@ export default function ApiLabPage() {
                   key={serviceStr}
                   onClick={() => handleSelectService(serviceStr, keys.find(k => k.service === serviceStr)?.key)}
                   className={cn(
-                    "text-left p-5 rounded-2xl border transition-all shadow-sm",
+                    "text-left p-5 rounded-2xl border transition-all shadow-sm relative cursor-pointer",
                     isActive
-                      ? (isDark ? "bg-cyan-500/10 border-cyan-500/50 shadow-sm" : "bg-cyan-50 border-cyan-300 shadow-sm")
-                      : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-white border-slate-200 hover:border-cyan-400")
+                      ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20")
+                      : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md")
                   )}
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-2 pr-6">
                     <div className="flex items-center gap-2.5">
-                      {conf?.icon && <conf.icon className={`w-4 h-4 ${isActive ? "text-cyan-500" : "text-cyan-500"}`} />}
-                      <h3 className={cn("font-bold text-sm", isActive ? "text-cyan-500" : (isDark ? "text-white" : "text-slate-900"))}>
+                      {conf?.icon && <conf.icon className={`w-4 h-4 ${isActive ? "text-cyan-500" : "text-cyan-600"}`} />}
+                      <h3 className={cn("font-bold text-sm", isActive ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}>
                         {conf?.title || serviceStr}
                       </h3>
                     </div>
+                  </div>
+                  {/* Radio check */}
+                  <div className={cn(
+                    "absolute top-4 right-4 w-5 h-5 rounded-full border flex items-center justify-center transition-all",
+                    isActive
+                      ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                      : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
+                  )}>
+                    {isActive && <Check className="w-3 h-3 stroke-[3]" />}
                   </div>
                   <p className={cn("text-xs line-clamp-2 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                     {conf?.desc}
@@ -307,7 +316,12 @@ export default function ApiLabPage() {
                 {currentConfig.methods.includes("POST") && (
                   <div
                     onClick={() => setMethod("POST")}
-                    className={cn("p-4 rounded-xl cursor-pointer transition-colors border font-medium text-sm", method === "POST" ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600") : (isDark ? "border-transparent hover:bg-white/5 text-zinc-400" : "border-transparent hover:bg-slate-50 text-slate-600"))}
+                    className={cn(
+                      "p-4 rounded-xl cursor-pointer transition-all border font-medium text-sm shadow-sm",
+                      method === "POST"
+                        ? (isDark ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30 font-bold" : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20 font-bold")
+                        : (isDark ? "bg-[#060b14] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white" : "bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:text-slate-900")
+                    )}
                   >
                     <span className="font-bold">POST</span> Using POST Method
                   </div>
@@ -315,7 +329,12 @@ export default function ApiLabPage() {
                 {currentConfig.methods.includes("GET") && (
                   <div
                     onClick={() => setMethod("GET")}
-                    className={cn("p-4 rounded-xl cursor-pointer transition-colors border font-medium text-sm", method === "GET" ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600") : (isDark ? "border-transparent hover:bg-white/5 text-zinc-400" : "border-transparent hover:bg-slate-50 text-slate-600"))}
+                    className={cn(
+                      "p-4 rounded-xl cursor-pointer transition-all border font-medium text-sm shadow-sm",
+                      method === "GET"
+                        ? (isDark ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30 font-bold" : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20 font-bold")
+                        : (isDark ? "bg-[#060b14] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white" : "bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:text-slate-900")
+                    )}
                   >
                     <span className="font-bold">GET</span> Using Query Parameter
                   </div>
@@ -400,7 +419,7 @@ export default function ApiLabPage() {
                             onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                             className="hidden"
                           />
-                            <div className={cn("relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center gap-4 text-center", uploadFile ? (isDark ? "border-cyan-500/50 bg-cyan-500/5" : "border-cyan-500/50 bg-cyan-50") : (isDark ? "border-slate-800 bg-[#060b14] group-hover:border-slate-700" : "border-slate-300 bg-slate-50 group-hover:border-cyan-400 group-hover:bg-cyan-50/50"))}>
+                            <div className={cn("relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center gap-4 text-center", uploadFile ? (isDark ? "border-cyan-500/50 bg-[#0b162c] ring-1 ring-cyan-500/30" : "border-cyan-600 bg-white shadow-sm ring-2 ring-cyan-600/20") : (isDark ? "border-slate-800 bg-[#060b14] group-hover:border-slate-700" : "border-slate-300 bg-white group-hover:border-slate-400 group-hover:shadow-sm"))}>
                             {uploadFile ? (
                               <>
                                 <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
@@ -416,8 +435,8 @@ export default function ApiLabPage() {
                               </>
                             ) : (
                               <>
-                                <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-300", isDark ? "bg-white/5 border-white/10 group-hover:border-cyan-500/20 group-hover:bg-cyan-500/5" : "bg-white border-slate-200 group-hover:border-cyan-300 group-hover:bg-cyan-50")}>
-                                  <Upload className={cn("w-7 h-7 transition-colors duration-300", isDark ? "text-zinc-500 group-hover:text-cyan-400/70" : "text-slate-400 group-hover:text-cyan-600")} />
+                                <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-300", isDark ? "bg-white/5 border-white/10 group-hover:border-cyan-500/20 group-hover:bg-cyan-500/5" : "bg-white border-slate-200 group-hover:border-slate-300 group-hover:bg-slate-50")}>
+                                  <Upload className={cn("w-7 h-7 transition-colors duration-300", isDark ? "text-zinc-500 group-hover:text-cyan-400/70" : "text-slate-400 group-hover:text-slate-600")} />
                                 </div>
                                 <div>
                                   <p className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-900")}>Drop your file here</p>

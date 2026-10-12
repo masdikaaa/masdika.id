@@ -86,11 +86,11 @@ export default function K3sListPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {clusters.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((cluster) => (
             <Link key={cluster.id} href={`/dashboard/k3s/${cluster.id}`}>
-              <div className={cn("border relative rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 group overflow-hidden shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:border-slate-300")}>
+              <div className={cn("border relative rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 group overflow-hidden shadow-sm hover:shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200/90 hover:border-slate-300")}>
                 
                 <div className="relative z-10 flex justify-between items-start mb-6">
                   <div className="flex items-center gap-4">
-                    <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center", isDark ? "border-slate-800 bg-[#060b14]" : "border-cyan-200 bg-cyan-50")}>
+                    <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-100 shadow-sm")}>
                       <img referrerPolicy="no-referrer" src="https://cdn.simpleicons.org/kubernetes/06b6d4" alt="Kubernetes" className="w-8 h-8" loading="lazy" decoding="async" />
                     </div>
                     <div>
@@ -100,8 +100,8 @@ export default function K3sListPage() {
                       </div>
                     </div>
                   </div>
-                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-colors border", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 group-hover:bg-cyan-50 group-hover:border-cyan-200")}>
-                    <ChevronRight className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-400 group-hover:text-cyan-400" : "text-slate-500 group-hover:text-cyan-600")} />
+                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-colors border", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 group-hover:bg-slate-100 group-hover:border-slate-300")}>
+                    <ChevronRight className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-400 group-hover:text-cyan-400" : "text-slate-500 group-hover:text-slate-900")} />
                   </div>
                 </div>
 

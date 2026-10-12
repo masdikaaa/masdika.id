@@ -183,7 +183,7 @@ export default function DashboardShortenerPage() {
         
         
         <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <LinkIcon className="w-3 h-3" /> Link Management
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -236,7 +236,7 @@ export default function DashboardShortenerPage() {
                 <div className="overflow-x-auto relative z-10">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b", isDark ? "border-white/5 bg-cyan-500/5" : "border-slate-200 bg-cyan-50")}>
+              <tr className={cn("border-b", isDark ? "border-white/5 bg-black/20" : "border-slate-200 bg-slate-50/70")}>
                 <th className="p-3 sm:p-5 w-10 sm:w-12 text-center rounded-tl-3xl">
                   <button 
                     onClick={toggleSelectAll} 
@@ -276,18 +276,18 @@ export default function DashboardShortenerPage() {
                   const shortUrl = `${window.location.origin}/${link.code}`;
                   const isSelected = selectedIds.includes(link.id);
                   return (
-                    <tr key={link.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50", isSelected ? (isDark ? "bg-cyan-500/5" : "bg-cyan-50") : "")}>
+                    <tr key={link.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50/80", isSelected ? (isDark ? "bg-cyan-950/20" : "bg-slate-50") : "")}>
                       <td className="p-3 sm:p-5 text-center">
                         <button 
                           onClick={() => toggleSelect(link.id)} 
-                          className={`w-5 h-5 border rounded flex items-center justify-center cursor-pointer transition-colors mx-auto ${isSelected ? 'bg-cyan-500 border-cyan-500' : 'border-zinc-500 hover:border-zinc-400'}`}
+                          className={cn("w-5 h-5 border rounded flex items-center justify-center cursor-pointer transition-colors mx-auto", isSelected ? "bg-cyan-600 border-cyan-600" : (isDark ? "border-zinc-700 hover:border-zinc-500 bg-[#060b14]" : "border-slate-300 hover:border-slate-400 bg-white"))}
                         >
-                          {isSelected && <CheckCircle className="w-3.5 h-3.5 text-[#011627]" />}
+                          {isSelected && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                         </button>
                       </td>
                       <td className="p-3 sm:p-5">
                         <div className="flex flex-col lg:flex-row lg:items-center gap-2 sm:gap-3">
-                          <span className="font-bold text-cyan-400 text-sm md:text-base tracking-wide bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20 w-fit">
+                          <span className={cn("font-bold text-sm md:text-base tracking-wide px-3 py-1.5 rounded-lg border w-fit", isDark ? "text-cyan-400 bg-cyan-950/40 border-cyan-800/40" : "text-cyan-700 bg-slate-100 border-slate-200")}>
                             {link.code}
                           </span>
                           <div className="flex items-center gap-1.5">
@@ -471,7 +471,7 @@ export default function DashboardShortenerPage() {
                     placeholder="https://example.com/very-long-url"
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
-                    className={cn("w-full rounded-2xl px-5 py-4 text-sm transition-all focus:outline-none focus:ring-2 shadow-inner", isDark ? "bg-[#060b14] border border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 shadow-sm")}
+                    className={cn("w-full rounded-2xl px-5 py-4 text-sm transition-all focus:outline-none focus:ring-2 shadow-sm", isDark ? "bg-[#060b14] border border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 shadow-sm")}
                   />
                 </div>
 

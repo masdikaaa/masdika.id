@@ -153,7 +153,7 @@ export default function AffiliatePage() {
             />
             <button
               onClick={copyToClipboard}
-              className={cn("px-6 py-3 w-full sm:w-auto border rounded-xl font-medium transition-colors flex items-center justify-center gap-2", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}
+              className={cn("px-6 py-3 w-full sm:w-auto border rounded-xl font-bold transition-all flex items-center justify-center gap-2", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white border-transparent shadow-sm")}
             >
               {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
               {copied ? "Copied" : "Copy"}
@@ -174,7 +174,7 @@ export default function AffiliatePage() {
         >
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-4">
-              <div className={cn("p-3 rounded-2xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border-cyan-200")}>
+              <div className={cn("p-3 rounded-2xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-700 border-slate-200")}>
                 <Landmark className="w-6 h-6" />
               </div>
               <h3 className={cn("text-sm font-bold uppercase tracking-widest", isDark ? "text-zinc-300" : "text-slate-500")}>Affiliate Balance</h3>
@@ -205,7 +205,7 @@ export default function AffiliatePage() {
         >
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-4">
-              <div className={cn("p-3 rounded-2xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border-cyan-200")}>
+              <div className={cn("p-3 rounded-2xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-700 border-slate-200")}>
                 <Gift className="w-6 h-6" />
               </div>
               <h3 className={cn("text-sm font-bold uppercase tracking-widest", isDark ? "text-zinc-300" : "text-slate-500")}>Total Earned</h3>
@@ -223,7 +223,7 @@ export default function AffiliatePage() {
         >
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-4">
-              <div className={cn("p-3 rounded-2xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border-cyan-200")}>
+              <div className={cn("p-3 rounded-2xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-700 border-slate-200")}>
                 <Users className="w-6 h-6" />
               </div>
               <h3 className={cn("text-sm font-bold uppercase tracking-widest", isDark ? "text-zinc-300" : "text-slate-500")}>Total Referrals</h3>

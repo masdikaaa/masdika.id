@@ -1291,14 +1291,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   <div className={cn(
                     "px-2.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 shrink-0",
                     vps.status === 'TERMINATED' ? "bg-red-500/20 text-red-400" :
-                      vps.status === 'SUSPENDED' ? "bg-orange-500/20 text-orange-400" : (isRunning ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-50 text-cyan-700") : "bg-zinc-500/20 text-zinc-400")
+                      vps.status === 'SUSPENDED' ? "bg-orange-500/20 text-orange-400" : (isRunning ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-slate-100 text-cyan-700 border border-slate-200") : "bg-zinc-500/20 text-zinc-400")
                   )}>
                     <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", vps.status === 'TERMINATED' ? "bg-red-400" : vps.status === 'SUSPENDED' ? "bg-orange-400" : (isRunning ? "bg-cyan-400" : "bg-zinc-400"))}></div>
                     {vps.status === 'TERMINATED' ? "Terminated" : vps.status === 'SUSPENDED' ? "Suspended" : (isRunning ? "Online" : "Offline")}
                   </div>
                 </div>
                 <p className={cn("text-sm  mt-2 flex flex-wrap items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  <span className={cn("font-mono text-xs px-2 py-0.5 rounded whitespace-nowrap", isDark ? "bg-black/30 text-cyan-300" : "bg-cyan-50 text-cyan-700")}>ID: {vps.id}</span>
+                  <span className={cn("font-mono text-xs px-2 py-0.5 rounded border whitespace-nowrap", isDark ? "bg-black/30 border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-slate-700")}>ID: {vps.id}</span>
                   <span>•</span>
                   <span className="whitespace-nowrap">{vps.osTemplate}</span>
                   <span>•</span>
@@ -1337,8 +1337,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("stop")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm",
-                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20" : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
+                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20" : "bg-white hover:bg-slate-50 text-rose-700 border-slate-200"
                 )}
                 title="Force Stop"
               >
@@ -1346,8 +1346,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("reboot")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm",
-                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20" : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
+                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20" : "bg-white hover:bg-slate-50 text-sky-700 border-slate-200"
                 )}
                 title="Restart"
               >
@@ -1383,7 +1383,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
                   activeTab === tab.id
-                    ? (isDark ? "bg-cyan-500/15 text-cyan-300 font-semibold border border-cyan-500/30 shadow-sm" : "bg-cyan-50 text-cyan-700 font-semibold border border-cyan-200 shadow-sm")
+                    ? (isDark ? "bg-cyan-500/15 text-cyan-300 font-semibold border border-cyan-500/30 shadow-sm" : "bg-white text-cyan-900 font-semibold border border-cyan-600 shadow-sm ring-1 ring-cyan-600/20")
                     : (isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent")
                 )}
               >
@@ -2212,7 +2212,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 <p className={cn("text-xs  mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>New Hourly Rate</p>
                                 <p className={cn("text-lg font-bold ", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(newHourlyPrice)} <span className={cn("text-sm font-normal ", isDark ? "text-zinc-500" : "text-slate-400")}>/ hr</span></p>
                               </div>
-                              <div className={cn("p-4 rounded-xl border shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                              <div className={cn("p-4 rounded-xl border shadow-sm", isDark ? "bg-[#0b162c] border-cyan-500/30" : "bg-white border-cyan-600/30 shadow-sm")}>
                                 <p className={cn("text-xs mb-1 font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Estimated Monthly Cost</p>
                                 <p className={cn("text-xl font-bold ", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(newHourlyPrice * 730)} <span className={cn("text-sm font-normal ", isDark ? "text-zinc-500" : "text-slate-400")}>/ mo (~730h)</span></p>
                               </div>
@@ -2224,9 +2224,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <div className="flex flex-col items-end gap-4 w-full mt-6">
                       <div className={cn(
                         "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-sm",
-                        balance < upgradeCostNow ? "opacity-50 border-red-500/30 bg-red-500/5" : "bg-cyan-500/10 border-cyan-500/50"
+                        balance < upgradeCostNow ? "opacity-50 border-red-500/30 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-600/40 shadow-sm"
                       )}>
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-inner">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-sm">
                           <Wallet className="w-6 h-6 text-cyan-600" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -2379,7 +2379,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                 {/* Sidebar Reinstall Menu */}
                 <div className={cn("w-full lg:w-64 shrink-0 border rounded-2xl p-2 h-fit flex flex-col gap-1", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <button className={cn("w-full text-left px-4 py-3 text-sm font-medium rounded-xl transition-all", isDark ? "bg-white/10 text-white shadow-lg shadow-black/20" : "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm")}>
+                  <button className={cn("w-full text-left px-4 py-3 text-sm font-semibold rounded-xl transition-all", isDark ? "bg-[#060b14] text-cyan-400 border border-slate-700 shadow-sm" : "bg-white text-cyan-800 border border-cyan-500/40 shadow-sm ring-1 ring-cyan-500/15")}>
                     Reinstall OS
                   </button>
                 </div>
@@ -2388,8 +2388,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <div className="flex-1 space-y-6">
 
                   {/* OS Selection Grid */}
-                  <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                    <h3 className={cn(" font-medium mb-4", isDark ? "text-white" : "text-slate-900")}>Select OS:</h3>
+                  <div className={cn("border rounded-2xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                    <h3 className={cn("font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Select OS:</h3>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                       {Object.entries(osGroups).map(([family, versions]: [string, any]) => {
@@ -2398,10 +2398,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           <div
                             key={family}
                             className={cn(
-                              "relative rounded-xl border p-4 flex flex-col items-center gap-3 transition-all cursor-pointer",
+                              "relative rounded-2xl border p-4 flex flex-col items-center gap-3 transition-all cursor-pointer shadow-sm",
                               isActive 
-                                ? (isDark ? "bg-cyan-500/10 border-cyan-500 shadow-sm" : "bg-cyan-50 border-cyan-400 shadow-sm") 
-                                : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-slate-800/40" : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100")
+                                ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") 
+                                : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md")
                             )}
                             onClick={() => {
                               setActiveOsFamily(family);
@@ -2545,9 +2545,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   {backupQuota === 0 && (
-                    <div className={cn("mt-4 p-3 rounded-xl flex items-start gap-3 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                      <ShieldAlert className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                      <p className={cn("text-sm", isDark ? "text-cyan-200" : "text-cyan-800")}>
+                    <div className={cn("mt-4 p-3 rounded-xl flex items-start gap-3 border", isDark ? "bg-amber-500/10 border-amber-500/20" : "bg-amber-50 border-amber-200")}>
+                      <ShieldAlert className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-amber-400" : "text-amber-600")} />
+                      <p className={cn("text-sm", isDark ? "text-amber-200" : "text-amber-800")}>
                         You have not purchased the Backup Addon. Upgrade your plan or purchase backup storage to enable offsite backups.
                       </p>
                     </div>
@@ -2557,7 +2557,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <button
                       onClick={handleCreateBackup}
                       disabled={backupQuota === 0 || isBackingUp || vps.status === 'SUSPENDED' || (backupUsed >= backupQuota * 1024 * 1024 * 1024)}
-                      className={cn(isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-50 text-cyan-700", "flex items-center gap-2 px-6 py-2.5 bg-cyan-500/10 hover:  border border-cyan-500/30 rounded-xl transition-all disabled:opacity-50 font-bold")}
+                      className={cn(isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm", "flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 font-bold")}
                     >
                       <Archive className="w-4 h-4" />
                       {isBackingUp ? "Creating Backup..." : "Create Backup Now"}

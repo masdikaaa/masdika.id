@@ -27,7 +27,7 @@ function StatusBadge({ status }: { status: string }) {
   return <span className={cn("bg-zinc-500/10 border border-zinc-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Closed</span>;
 }
 
-const inputClass = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner';
+const inputClass = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
 const labelClass = 'block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2';
 
 export default function TicketsClient() {
@@ -186,7 +186,7 @@ export default function TicketsClient() {
                       </div>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-all", isDark ? "bg-slate-800/60 group-hover:bg-cyan-500/20 group-hover:text-cyan-400" : "bg-slate-100 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
+                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-all", isDark ? "bg-slate-800/60 group-hover:bg-cyan-500/20 group-hover:text-cyan-400" : "bg-slate-100 group-hover:bg-cyan-500/10 group-hover:text-cyan-700")}>
                         <ChevronRight className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-500 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")} />
                       </div>
                     </td>

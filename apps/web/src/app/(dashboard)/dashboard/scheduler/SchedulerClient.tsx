@@ -80,7 +80,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
       <div className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-5 sm:p-6 md:p-8 shadow-md group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
         <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-3 sm:mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-3 sm:mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <Clock className="w-3 h-3" /> Cost Optimizer
           </div>
           <h1 className={cn("text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1.5 sm:mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -90,9 +90,9 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
         </div>
       </div>
 
-      <div className={cn("border rounded-xl p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+      <div className={cn("border rounded-xl p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90 text-slate-700")}>
         <Info className={cn("w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-        <p className={cn("text-xs sm:text-sm font-medium leading-relaxed", isDark ? "text-cyan-200" : "text-cyan-800")}>
+        <p className={cn("text-xs sm:text-sm font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-600")}>
           The Auto Scheduler automatically starts and stops your VPS according to your set schedule. You will not be charged for CPU and RAM while your VPS is stopped. Storage costs still apply.
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                   {/* Header: VPS Info + Status + Toggle */}
                   <div className={cn("flex items-center justify-between gap-3 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-slate-100 border-slate-200")}>
                         <Server className={cn("w-5 h-5 sm:w-6 sm:h-6", isDark ? "text-cyan-500" : "text-cyan-600")} />
                       </div>
                       <div className="min-w-0">
@@ -205,8 +205,10 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                             key={day.key}
                             onClick={() => updateSchedule(vps.id, day.key, !sched[day.key as keyof typeof sched])}
                             className={cn(
-                              "py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all border text-center",
-                              sched[day.key as keyof typeof sched] ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-[#060b14] text-zinc-500 border-slate-800 hover:border-slate-700" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50")
+                              "py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all border text-center shadow-sm cursor-pointer",
+                              sched[day.key as keyof typeof sched] 
+                                ? (isDark ? "bg-[#0b162c] text-cyan-400 border-cyan-500 shadow-md ring-1 ring-cyan-500/30 font-bold" : "bg-white text-cyan-900 border-cyan-600 shadow-md ring-2 ring-cyan-600/20 font-bold") 
+                                : (isDark ? "bg-[#060b14] text-slate-400 border-slate-800 hover:border-slate-700" : "bg-white text-slate-600 border-slate-200/90 hover:border-slate-300 shadow-sm")
                             )}
                           >
                             {day.label}

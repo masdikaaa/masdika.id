@@ -21,7 +21,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
     <div className="space-y-6">
       <div className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <Ticket className="w-3 h-3" /> Special Offers
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -34,7 +34,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
       {promos.length === 0 ? (
         <div className={cn("border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="py-20 text-center relative z-10">
-            <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-slate-100 border-slate-200")}>
               <Ticket className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
             </div>
             <h2 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Promos Available</h2>
@@ -68,7 +68,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
                         validUntil={promo.validUntil}
                       />
                     ) : promo.link ? (
-                      <a href={promo.link} target="_blank" rel="noopener noreferrer" className={cn("w-full font-bold py-3 rounded-xl transition-all text-center border block", isDark ? "bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-black border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}>
+                      <a href={promo.link} target="_blank" rel="noopener noreferrer" className={cn("w-full font-bold py-3 rounded-xl transition-all text-center block text-white shadow-sm", isDark ? "bg-cyan-600 hover:bg-cyan-500" : "bg-cyan-600 hover:bg-cyan-700")}>
                         Learn More
                       </a>
                     ) : (

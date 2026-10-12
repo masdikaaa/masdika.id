@@ -136,19 +136,19 @@ export default function MyServicesPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ACTIVE":
-        return <span className={cn("border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}><CheckCircle2 className="w-3.5 h-3.5" /> Active</span>;
+        return <span className={cn("border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}><CheckCircle2 className="w-3.5 h-3.5" /> Active</span>;
       case "SUSPENDED":
-        return <span className={cn("border", isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-700 border-red-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}><AlertTriangle className="w-3.5 h-3.5" /> Suspended</span>;
+        return <span className={cn("border", isDark ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}><AlertTriangle className="w-3.5 h-3.5" /> Suspended</span>;
       case "TERMINATED":
-        return <span className={cn("border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" : "bg-slate-100 text-slate-700 border-slate-300", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}><XCircle className="w-3.5 h-3.5" /> Terminated</span>;
+        return <span className={cn("border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-700 border-slate-300", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}><XCircle className="w-3.5 h-3.5" /> Terminated</span>;
       case "PENDING":
-        return <span className={cn("border", isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}><Clock className="w-3.5 h-3.5" /> Pending</span>;
+        return <span className={cn("border", isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}><Clock className="w-3.5 h-3.5" /> Pending</span>;
       case "UPGRADED":
-        return <span className={cn("border", isDark ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-blue-50 text-blue-700 border-blue-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}><ArrowUpCircle className="w-3.5 h-3.5" /> Upgraded</span>;
+        return <span className={cn("border", isDark ? "bg-blue-500/10 text-blue-400 border-blue-500/30" : "bg-slate-100 text-slate-700 border-slate-200", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}><ArrowUpCircle className="w-3.5 h-3.5" /> Upgraded</span>;
       case "CANCELLED":
-        return <span className={cn("border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" : "bg-slate-100 text-slate-700 border-slate-300", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}><XCircle className="w-3.5 h-3.5" /> Cancelled</span>;
+        return <span className={cn("border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-700 border-slate-300", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}><XCircle className="w-3.5 h-3.5" /> Cancelled</span>;
       default:
-        return <span className={cn("border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" : "bg-slate-100 text-slate-700 border-slate-300", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest   shadow-inner")}>{status}</span>;
+        return <span className={cn("border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-700 border-slate-300", "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider")}>{status}</span>;
     }
   };
 
@@ -230,7 +230,7 @@ export default function MyServicesPage() {
                     <div className="flex justify-between items-start mb-8 relative z-10">
                       <div className="flex gap-4 items-center">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-inner",
+                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-sm",
                           colorClass
                         )}>
                           {getServiceIcon(vps.kubernetesClusterId ? 'K3S' : 'VPS')}
@@ -274,7 +274,7 @@ export default function MyServicesPage() {
                       </div>
 
                       {vps.status === 'SUSPENDED' && (
-                        <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-inner">
+                        <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-sm">
                           <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
                             <div>
@@ -296,7 +296,7 @@ export default function MyServicesPage() {
                           Manage Instance
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-sm font-bold flex items-center justify-center shadow-inner cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-sm font-bold flex items-center justify-center shadow-sm cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -321,7 +321,7 @@ export default function MyServicesPage() {
                     <div className="flex justify-between items-start mb-8 relative z-10">
                       <div className="flex gap-4 items-center">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-inner",
+                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-sm",
                           colorClass
                         )}>
                           {getServiceIcon('K3S')}
@@ -373,7 +373,7 @@ export default function MyServicesPage() {
                           Manage Cluster
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-sm font-bold flex items-center justify-center shadow-inner cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-sm font-bold flex items-center justify-center shadow-sm cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -398,7 +398,7 @@ export default function MyServicesPage() {
                     <div className="flex justify-between items-start mb-8 relative z-10">
                       <div className="flex gap-4 items-center">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-inner",
+                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-sm",
                           colorClass
                         )}>
                           {getServiceIcon(sub.plan.service)}
@@ -438,7 +438,7 @@ export default function MyServicesPage() {
                       </div>
 
                       {sub.status === 'SUSPENDED' && (
-                        <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-inner">
+                        <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-sm">
                           <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
                             <div>
@@ -456,7 +456,7 @@ export default function MyServicesPage() {
                         <>
                           <button
                             onClick={() => setTerminateModal({ id: sub.id, name: sub.plan.name, service: sub.plan.service })}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-3 rounded-2xl flex items-center justify-center transition-all shadow-inner shrink-0"
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-3 rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0"
                             title="Terminate Service"
                           >
                             <XCircle className="w-4 h-4" />
@@ -465,7 +465,7 @@ export default function MyServicesPage() {
                           {sub.status === 'ACTIVE' && hasHigherPlan(sub) && (
                             <Link
                               href={`/dashboard/checkout?upgradeId=${sub.id}`}
-                              className={cn("flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-inner", isDark ? "text-white" : "text-slate-900")}
+                              className={cn("flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm", isDark ? "text-white" : "text-slate-900")}
                             >
                               <ArrowUpCircle className="w-4 h-4" /> Upgrade
                             </Link>
@@ -482,7 +482,7 @@ export default function MyServicesPage() {
                           </Link>
                         </>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-xs font-bold flex items-center justify-center shadow-inner cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-xs font-bold flex items-center justify-center shadow-sm cursor-not-allowed">
                           Terminated
                         </div>
                       )}

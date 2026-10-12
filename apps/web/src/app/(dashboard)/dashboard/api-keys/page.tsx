@@ -206,7 +206,7 @@ export default function DashboardApiKeys() {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
               <KeyRound className="w-3 h-3" /> Security & Access
             </div>
             <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -352,8 +352,8 @@ export default function DashboardApiKeys() {
                   className={cn(
                     " border rounded-3xl p-5 md:p-6 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group relative overflow-hidden",
                     selectedKeys.includes(key.id) 
-                      ? (isDark ? "border-cyan-500/50 shadow-sm bg-cyan-500/5" : "border-cyan-400 shadow-sm bg-cyan-50")
-                      : (isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-black/5 hover:border-cyan-300 shadow-sm")
+                      ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20")
+                      : (isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200/90 hover:border-slate-300 shadow-sm")
                   )}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:to-cyan-500/[0.03] transition-colors pointer-events-none" />
@@ -386,7 +386,7 @@ export default function DashboardApiKeys() {
                       </label>
                       <span className={cn("font-bold text-lg truncate max-w-[200px] md:max-w-xs", isDark ? "text-white" : "text-slate-900")}>{key.name || "Default Key"}</span>
                       {key.service ? (
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-sm" : "bg-cyan-50 border border-cyan-200 text-cyan-600")}>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-sm" : "bg-slate-100 border border-slate-200 text-cyan-700")}>
                           {key.service.split('_').join(' ')}
                         </span>
                       ) : (
@@ -401,14 +401,14 @@ export default function DashboardApiKeys() {
                       )}
                     </div>
                     
-                    <div className={cn("flex items-center gap-3 p-2 rounded-xl border w-full sm:w-fit shadow-inner", isDark ? "bg-[#011627] border-white/5" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("flex items-center gap-3 p-2 rounded-xl border w-full sm:w-fit shadow-sm", isDark ? "bg-[#011627] border-white/5" : "bg-slate-50 border-slate-200")}>
                       <code className={cn("text-xs sm:text-sm font-mono select-all tracking-widest px-3 break-all overflow-hidden line-clamp-1", isDark ? "text-cyan-300" : "text-cyan-700")}>
                         {key.key}
                       </code>
                       <button 
                         onClick={() => copyToClipboard(key.key)}
                         disabled={key.isSuspended}
-                        className={cn("p-2 rounded-lg transition-colors shrink-0 disabled:opacity-50", isDark ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white border border-slate-200 hover:bg-cyan-50 text-slate-500 hover:text-cyan-600")}
+                        className={cn("p-2 rounded-lg transition-colors shrink-0 disabled:opacity-50", isDark ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white border border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-900")}
                         title={key.isSuspended ? "Key is suspended" : "Copy Key"}
                       >
                         {copiedKey === key.key ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}

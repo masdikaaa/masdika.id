@@ -193,15 +193,15 @@ export default function CustomerBillingPage() {
             {loading ? (
               <div className="flex justify-center items-center h-full"><Loader2 className="w-8 h-8 text-cyan-500 animate-spin" /></div>
             ) : totalActive === 0 ? (
-              <div className={cn("flex flex-col items-center justify-center h-full py-8 text-center rounded-2xl border shadow-inner", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("flex flex-col items-center justify-center h-full py-8 text-center rounded-2xl border shadow-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90")}>
                 <Layers className={cn("w-12 h-12 mb-4", isDark ? "text-zinc-600" : "text-slate-900")} />
                 <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any active services.</p>
               </div>
             ) : (
-              <div className={cn("flex flex-col h-full rounded-2xl border shadow-inner overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-100/50")}>
+              <div className={cn("flex flex-col h-full rounded-2xl border shadow-sm overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90")}>
+                <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50/60")}>
                   <span className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Active Services</span>
-                  <span className={cn("text-xs font-bold px-2 py-1 rounded-full border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border-cyan-200")}>{totalActive} Total</span>
+                  <span className={cn("text-xs font-bold px-2 py-1 rounded-full border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-800 bg-cyan-500/10 border-cyan-500/20")}>{totalActive} Total</span>
                 </div>
                 <div className="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar p-2">
                   {unifiedServices.slice((servicesPage - 1) * servicesPerPage, servicesPage * servicesPerPage).map((item) => {
@@ -381,7 +381,7 @@ export default function CustomerBillingPage() {
              <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                <Wallet className="w-5 h-5 text-cyan-400" /> Account Balance
              </h2>
-             <div className={cn("p-6 rounded-2xl mb-6 shadow-inner relative overflow-hidden transition-colors border", isDark ? "bg-[#060b14] border-slate-800 group-hover:border-slate-700" : "bg-cyan-50 border-cyan-200 group-hover:border-cyan-300")}>
+             <div className={cn("p-6 rounded-2xl mb-6 relative overflow-hidden transition-colors border shadow-sm", isDark ? "bg-[#060b14] border-slate-800 group-hover:border-slate-700" : "bg-white border-slate-200/90 group-hover:border-slate-300")}>
                <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none select-none">
                  <Wallet className="w-24 h-24 -mb-6 -mr-6" />
                </div>
@@ -477,7 +477,7 @@ export default function CustomerBillingPage() {
                   <tr key={invoice.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50")}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors", isDark ? "bg-slate-800/50 group-hover:bg-cyan-500/10 group-hover:text-cyan-400" : "bg-slate-100 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors border", isDark ? "bg-slate-800/50 border-slate-700/50 group-hover:bg-cyan-500/10 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 group-hover:bg-slate-200 group-hover:text-slate-900")}>
                           <Receipt className="w-4 h-4" />
                         </div>
                         <span className={cn("font-mono text-xs px-2 py-1 rounded-md border", isDark ? "bg-[#060b14] text-white border-slate-800" : "bg-slate-100 text-slate-900 border-slate-200")}>{invoice.invoiceNumber || invoice.merchantOrderId}</span>

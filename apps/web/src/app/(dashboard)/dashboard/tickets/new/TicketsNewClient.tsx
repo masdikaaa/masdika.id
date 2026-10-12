@@ -17,7 +17,7 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 const getInputClass = (isDark: boolean) => cn(
   'w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 transition-all',
-  isDark ? 'bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20'
+  isDark ? 'bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20' : 'bg-white border-slate-200/90 text-slate-800 placeholder-slate-400 focus:border-cyan-600 focus:ring-cyan-600/20 shadow-sm'
 );
 
 const getLabelClass = (isDark: boolean) => cn(
@@ -126,7 +126,7 @@ export default function TicketsNewClient() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0 flex items-start gap-4">
           <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
+            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
               <HeadphonesIcon className="w-3 h-3" /> Customer Support
             </div>
             <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -174,7 +174,7 @@ export default function TicketsNewClient() {
               onChange={(val: string) => setFormData({ ...formData, service: val })}
               placeholder="-- Select a Service --"
               options={userServices.length > 0 ? userServices.map(s => ({ value: s.value, label: s.value })) : [{ value: '', label: 'No Available Services', disabled: true }]}
-              className="py-3.5 px-5 rounded-2xl shadow-inner w-full"
+              className="py-3.5 px-5 rounded-2xl shadow-sm w-full"
             />
           </div>
           <div>
@@ -189,7 +189,7 @@ export default function TicketsNewClient() {
                 { value: 'HIGH', label: 'High' },
                 { value: 'CRITICAL', label: 'Critical' }
               ]}
-              className="py-3.5 px-5 rounded-2xl shadow-inner w-full"
+              className="py-3.5 px-5 rounded-2xl shadow-sm w-full"
             />
           </div>
         </div>
@@ -255,7 +255,7 @@ export default function TicketsNewClient() {
             .quill-light-theme button:hover .ql-fill { fill: #0ea5e9; }
           `}</style>
           <label className={getLabelClass(isDark)}>Message</label>
-          <div className={cn("border rounded-2xl overflow-hidden shadow-inner", isDark ? "bg-[#0b1120] border-white/10" : "bg-slate-50 border-slate-200")}>
+          <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200")}>
             <ReactQuill
               theme="snow"
               bounds={isDark ? ".quill-dark-theme" : ".quill-light-theme"}
@@ -273,7 +273,7 @@ export default function TicketsNewClient() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className={cn("flex items-center gap-2 px-5 py-4 border border-dashed rounded-2xl text-sm transition-all w-full justify-center shadow-inner", isDark ? "bg-[#0b1120] border-white/20 hover:border-sky-500/50 text-zinc-400 hover:text-sky-400" : "bg-slate-50 border-slate-300 hover:border-sky-500/50 text-slate-500 hover:text-sky-600")}
+            className={cn("flex items-center gap-2 px-5 py-4 border border-dashed rounded-2xl text-sm transition-all w-full justify-center shadow-sm", isDark ? "bg-[#0b1120] border-white/20 hover:border-sky-500/50 text-zinc-400 hover:text-sky-400" : "bg-white border-slate-300 hover:border-sky-500/50 text-slate-500 hover:text-sky-600")}
           >
             <Paperclip className="w-5 h-5" />
             Click to attach files
