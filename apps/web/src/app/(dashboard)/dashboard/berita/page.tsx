@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -14,7 +15,7 @@ export default function BeritaListPage() {
   const isDark = theme === 'dark';
   const [beritaList, setBeritaList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const itemsPerPage = 3;
 
   useEffect(() => {
@@ -78,8 +79,8 @@ export default function BeritaListPage() {
         </Link>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl shadow-xl overflow-hidden", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className={cn("p-6 border-b", isDark ? "border-white/5 bg-white/[0.02]" : "border-slate-100 bg-slate-50")}>
+      <motion.div variants={itemVariants} className={cn("border rounded-3xl shadow-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 border-b", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-100 bg-slate-50")}>
           <h1 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Newspaper className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} />
             Latest Announcements
@@ -97,7 +98,7 @@ export default function BeritaListPage() {
               <Link 
                 href={`/dashboard/berita/${berita.id}`} 
                 key={berita.id}
-                className={cn("p-6 border-b transition-colors block group", isDark ? "border-white/5 hover:bg-white/[0.04]" : "border-slate-100 hover:bg-slate-50")}
+                className={cn("p-6 border-b transition-colors block group", isDark ? "border-slate-800/60 hover:bg-slate-800/40" : "border-slate-100 hover:bg-slate-50")}
               >
                 <h2 className={cn("text-lg font-bold transition-colors mb-2", isDark ? "text-cyan-400 group-hover:text-cyan-300" : "text-cyan-600 group-hover:text-cyan-700")}>
                   {berita.title}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { Server, Loader2, Database, ChevronRight, ChevronLeft, HardDrive, Cpu, Wallet, Network, Receipt, Globe, RefreshCw, Terminal, UploadCloud, Layers, Box, Cloud, Newspaper } from "lucide-react";
@@ -44,9 +45,9 @@ export default function DashboardOverview() {
   const [beritaList, setBeritaList] = useState<any[]>([]);
   const [bannersList, setBannersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [vpsPage, setVpsPage] = useState(1);
-  const [k3sPage, setK3sPage] = useState(1);
-  const [beritaPage, setBeritaPage] = useState(1);
+  const [vpsPage, setVpsPage] = useUrlNumber("vpsPage", 1);
+  const [k3sPage, setK3sPage] = useUrlNumber("k3sPage", 1);
+  const [beritaPage, setBeritaPage] = useUrlNumber("beritaPage", 1);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   useEffect(() => {
@@ -137,7 +138,7 @@ export default function DashboardOverview() {
       <div className={cn("grid gap-6", activeBanners.length > 0 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1")}>
         {/* Promo Banner */}
         {activeBanners.length > 0 && (
-          <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl shadow-sm group aspect-[2/1] w-full border bg-[#0f172a]", isDark ? "border-white/5" : "border-slate-200")}>
+          <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl shadow-sm group aspect-[2/1] w-full border bg-[#0b1322]", isDark ? "border-slate-800" : "border-slate-200")}>
             {activeBanners.map((banner, idx) => (
               <Link 
                 key={banner.id} 
@@ -174,8 +175,8 @@ export default function DashboardOverview() {
         )}
 
         {/* Berita Widget */}
-        <motion.div variants={itemVariants} className={cn("rounded-3xl flex flex-col w-full border backdrop-blur-sm transition-colors", activeBanners.length > 0 ? "lg:aspect-[2/1] min-h-[350px] lg:min-h-0" : "min-h-[250px]", isDark ? "bg-white/[0.02] border-white/5 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
-          <div className={cn("p-5 border-b flex justify-between items-center shrink-0", isDark ? "border-white/5" : "border-slate-100")}>
+        <motion.div variants={itemVariants} className={cn("rounded-3xl flex flex-col w-full border transition-colors", activeBanners.length > 0 ? "lg:aspect-[2/1] min-h-[350px] lg:min-h-0" : "min-h-[250px]", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("p-5 border-b flex justify-between items-center shrink-0", isDark ? "border-slate-800" : "border-slate-100")}>
             <h3 className={cn("text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Newspaper className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
               Announcements
@@ -186,22 +187,22 @@ export default function DashboardOverview() {
           </div>
           <div className="p-5 flex flex-col gap-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
             {newsList.length === 0 ? (
-              <div className={cn("text-sm text-center py-8", isDark ? "text-zinc-500" : "text-slate-500")}>No announcements yet.</div>
+              <div className={cn("text-sm text-center py-8", isDark ? "text-slate-400" : "text-slate-500")}>No announcements yet.</div>
             ) : (
               newsList.slice((beritaPage - 1) * 3, beritaPage * 3).map((berita) => (
-                <div key={berita.id} className={cn("group border-b pb-4 last:border-0 last:pb-0", isDark ? "border-white/5" : "border-slate-100")}>
+                <div key={berita.id} className={cn("group border-b pb-4 last:border-0 last:pb-0", isDark ? "border-slate-800" : "border-slate-100")}>
                   <Link href={`/dashboard/berita/${berita.id}`} className="block">
                     <h4 className={cn("text-sm font-bold transition-colors mb-1.5 line-clamp-1", isDark ? "text-cyan-400 group-hover:text-cyan-300" : "text-cyan-600 group-hover:text-cyan-700")}>
                       {berita.title}
                     </h4>
-                    <p className={cn("text-xs line-clamp-2 mb-2.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <p className={cn("text-xs line-clamp-2 mb-2.5 leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
                       {getBeritaExcerpt(berita.content)}
                     </p>
                     <div className="flex justify-between items-center mt-2">
-                      <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors", isDark ? "bg-white/5 text-zinc-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-400" : "bg-slate-100 text-slate-500 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
+                      <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-slate-400 group-hover:border-cyan-500/30 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
                         {berita.type === "MAINTENANCE" ? "Maintenance" : berita.type === "WARNING" ? "Warning" : "Info"}
                       </span>
-                      <span className={cn("text-[10px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      <span className={cn("text-[10px] font-medium", isDark ? "text-slate-500" : "text-slate-500")}>
                         {new Date(berita.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
@@ -212,7 +213,7 @@ export default function DashboardOverview() {
           </div>
           
           {newsList.length > 3 && (
-            <div className={cn("p-4 border-t shrink-0", isDark ? "border-white/5 bg-black/20" : "border-slate-100 bg-slate-50/50 rounded-b-3xl")}>
+            <div className={cn("p-4 border-t shrink-0", isDark ? "border-slate-800 bg-black/20" : "border-slate-100 bg-slate-50/50 rounded-b-3xl")}>
               <Pagination currentPage={beritaPage} totalPages={Math.ceil(newsList.length / 3)} onPageChange={setBeritaPage} />
             </div>
           )}
@@ -221,58 +222,51 @@ export default function DashboardOverview() {
 
       {/* Stats Grid - Bento Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/vps" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Active VPS</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <Terminal className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Active VPS</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <Terminal className="w-5 h-5" />
               </div>
             </div>
             <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{totalVps}</p>
-            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-zinc-500" : "text-slate-400")}>Currently deployed virtual servers</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Currently deployed virtual servers</p>
           </Link>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/k3s" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Managed K3s</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <SiKubernetes className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Managed K3s</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <SiKubernetes className="w-5 h-5" />
               </div>
             </div>
             <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{totalK3s}</p>
-            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-zinc-500" : "text-slate-400")}>Active Kubernetes clusters</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Active Kubernetes clusters</p>
           </Link>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/reserved-ips" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Reserved IPs</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Reserved IPs</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <Network className="w-5 h-5" />
               </div>
             </div>
             <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{totalIps}</p>
-            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-zinc-500" : "text-slate-400")}>Reserved static IPs (IPv4 / IPv6)</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Reserved static IPs (IPv4 / IPv6)</p>
           </Link>
         </motion.div>
 
-
-
-
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/cdn" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>File CDN</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <UploadCloud className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>File CDN</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <UploadCloud className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-4 relative z-10">
@@ -281,15 +275,15 @@ export default function DashboardOverview() {
                   <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     {cdnUsage ? (cdnUsage.usedBytes / (1024 * 1024 * 1024)).toFixed(2) : "0.00"}
                   </span>
-                  <span className={cn("text-xs font-semibold mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>GB used</span>
+                  <span className={cn("text-xs font-semibold mb-1", isDark ? "text-slate-400" : "text-slate-500")}>GB used</span>
                 </div>
-                <div className={cn("text-xs mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                <div className={cn("text-xs mb-1", isDark ? "text-slate-400" : "text-slate-400")}>
                   of {cdnUsage && cdnUsage.limitGB > 0 ? cdnUsage.limitGB + " GB" : "0 GB"}
                 </div>
               </div>
-              <div className={cn("w-full rounded-full h-1.5 overflow-hidden", isDark ? "bg-white/5" : "bg-slate-100")}>
+              <div className={cn("w-full rounded-full h-1.5 overflow-hidden", isDark ? "bg-slate-800" : "bg-slate-100")}>
                 <div 
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 h-1.5 rounded-full" 
+                  className="bg-cyan-500 h-1.5 rounded-full" 
                   style={{ width: cdnUsage?.limitBytes > 0 ? `${Math.min(100, ((cdnUsage?.usedBytes || 0) / cdnUsage.limitBytes) * 100)}%` : '0%' }}
                 />
               </div>
@@ -297,45 +291,42 @@ export default function DashboardOverview() {
           </Link>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/vpc" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>VPC Networks</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <VpcIcon className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>VPC Networks</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <VpcIcon className="w-5 h-5" />
               </div>
             </div>
             <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{totalVpc}</p>
-            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-zinc-500" : "text-slate-400")}>Active Virtual Private Clouds</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Active Virtual Private Clouds</p>
           </Link>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/billing" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Account Balance</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <Wallet className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Account Balance</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <Wallet className="w-5 h-5" />
               </div>
             </div>
             <p className={cn("text-3xl font-black tracking-tight truncate relative z-10", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(billingData.balance || 0)}</p>
-            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-zinc-500" : "text-slate-400")}>Available credits for deployment</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Available credits for deployment</p>
           </Link>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer", isDark ? "bg-white/[0.02] border-white/5 shadow-sm hover:border-cyan-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200 shadow-sm hover:border-cyan-300 hover:shadow-md")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
           <Link href="/dashboard/billing" className="block p-6 h-full w-full">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
             <div className="flex items-center justify-between mb-6 relative z-10">
-              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Unpaid Invoices</h3>
-              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-200")}>
-                <Receipt className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Unpaid Invoices</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                <Receipt className="w-5 h-5" />
               </div>
             </div>
             <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{unpaidInvoices}</p>
-            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-zinc-500" : "text-slate-400")}>Invoices pending payment</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Invoices pending payment</p>
           </Link>
         </motion.div>
       </div>
@@ -344,21 +335,19 @@ export default function DashboardOverview() {
       {vpsList.length > 0 && (
         <motion.div
           variants={itemVariants}
-          className={cn("backdrop-blur-md border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-white/[0.02]/40 border-white/5" : "bg-white/70 border-slate-200")}
+          className={cn("border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
         >
-          <div className={cn("absolute inset-0 pointer-events-none", isDark ? "bg-gradient-to-b from-white/[0.02] to-transparent" : "bg-gradient-to-b from-slate-50 to-transparent")} />
-
-          <div className={cn("p-6 md:p-8 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "border-white/5" : "border-slate-100")}>
+          <div className={cn("p-6 md:p-8 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
             <div>
               <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Cloud className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 Active Cloud VPS
               </h2>
-              <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Your virtual private servers and their current status.</p>
+              <p className={cn("text-sm mt-1", isDark ? "text-slate-400" : "text-slate-500")}>Your virtual private servers and their current status.</p>
             </div>
             <Link
               href="/dashboard/vps"
-              className={cn("group flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm transition-all", isDark ? "bg-white/5 hover:bg-white/10 border-white/5 text-zinc-300 hover:text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900")}
+              className={cn("group flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm transition-all", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200 hover:text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900")}
             >
               Manage VPS <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
@@ -366,21 +355,21 @@ export default function DashboardOverview() {
 
           <div className="p-6 md:p-8 grid gap-4 relative z-10">
             {vpsList.slice((vpsPage - 1) * 3, vpsPage * 3).map((vps) => (
-              <div key={vps.id} className={cn("group flex flex-col md:flex-row items-center justify-between p-4 rounded-xl border transition-all duration-300", isDark ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-cyan-500/30" : "bg-white border-slate-200 hover:bg-slate-50 hover:border-cyan-300 hover:shadow-sm")}>
+              <div key={vps.id} className={cn("group flex flex-col md:flex-row items-center justify-between p-4 rounded-xl border transition-all duration-300", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300")}>
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/20 flex items-center justify-center shrink-0">
-                    <Terminal className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                    <Terminal className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{vps.hostname}</h3>
-                    <p className={cn("text-xs font-mono tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>{vps.assignedIps?.[0]?.publicIp || vps.assignedIps?.[0]?.ipAddress || (vps.status === 'PENDING' ? "Provisioning IP" : "No IP")}</p>
+                    <p className={cn("text-xs font-mono tracking-wider", isDark ? "text-slate-400" : "text-slate-500")}>{vps.assignedIps?.[0]?.publicIp || vps.assignedIps?.[0]?.ipAddress || (vps.status === 'PENDING' ? "Provisioning IP" : "No IP")}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 justify-between md:justify-end">
-                  <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider", vps.liveStatus?.status === "running" ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-zinc-500/20 text-zinc-400 border border-zinc-500/30")}>
+                  <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border", vps.liveStatus?.status === "running" ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200") : (isDark ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-200"))}>
                     {vps.liveStatus?.status || "STOPPED"}
                   </span>
-                  <Link href={`/dashboard/vps/${vps.id}`} className={cn("px-4 py-2 rounded-lg border text-sm font-medium transition-all", isDark ? "bg-white/5 hover:bg-white/10 border-white/5 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900")}>
+                  <Link href={`/dashboard/vps/${vps.id}`} className={cn("px-4 py-2 rounded-lg border text-sm font-medium transition-all", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200 hover:text-white" : "bg-white hover:bg-slate-100 border-slate-200 text-slate-900")}>
                     Console
                   </Link>
                 </div>
@@ -388,8 +377,8 @@ export default function DashboardOverview() {
             ))}
 
             {vpsList.length > 3 && (
-              <div className={cn("mt-2 pt-6 border-t", isDark ? "border-white/5" : "border-slate-100")}>
-                <Pagination currentPage={vpsPage} totalPages={Math.ceil(vpsList.length / 3)} onPageChange={setVpsPage} />
+              <div className={cn("mt-2 pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
+                <Pagination currentPage={vpsPage} totalPages={Math.ceil(vpsList.length / 3)} onPageChange={setBeritaPage} />
               </div>
             )}
           </div>
@@ -400,21 +389,19 @@ export default function DashboardOverview() {
       {k3sList.length > 0 && (
         <motion.div
           variants={itemVariants}
-          className={cn("bg-white/[0.02]/40 backdrop-blur-md border rounded-3xl overflow-hidden shadow-md relative", isDark ? "border-white/5" : "border-slate-200")}
+          className={cn("border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-
-          <div className={cn("p-6 md:p-8 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "border-white/5" : "border-slate-100")}>
+          <div className={cn("p-6 md:p-8 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
             <div>
               <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Server className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 Managed Kubernetes
               </h2>
-              <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Your K3s clusters and their deployment status.</p>
+              <p className={cn("text-sm mt-1", isDark ? "text-slate-400" : "text-slate-500")}>Your K3s clusters and their deployment status.</p>
             </div>
             <Link
               href="/dashboard/k3s"
-              className={cn("group flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm transition-all", isDark ? "bg-white/5 hover:bg-white/10 border-white/5 text-zinc-300 hover:text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900")}
+              className={cn("group flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm transition-all", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200 hover:text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900")}
             >
               Manage Clusters <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
@@ -422,21 +409,21 @@ export default function DashboardOverview() {
 
           <div className="p-6 md:p-8 grid gap-4 relative z-10">
             {k3sList.slice((k3sPage - 1) * 3, k3sPage * 3).map((cluster) => (
-              <div key={cluster.id} className={cn("group flex flex-col md:flex-row items-center justify-between p-4 rounded-xl border transition-all duration-300", isDark ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-cyan-500/30" : "bg-white border-slate-200 hover:bg-slate-50 hover:border-cyan-300 hover:shadow-sm")}>
+              <div key={cluster.id} className={cn("group flex flex-col md:flex-row items-center justify-between p-4 rounded-xl border transition-all duration-300", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300")}>
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-500/20 border border-cyan-500/20 flex items-center justify-center shrink-0">
-                    <SiKubernetes className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                    <SiKubernetes className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{cluster.name}</h3>
-                    <p className={cn("text-xs font-mono tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>{cluster.version} • {cluster.nodeCount} nodes</p>
+                    <p className={cn("text-xs font-mono tracking-wider", isDark ? "text-slate-400" : "text-slate-500")}>{cluster.version} • {cluster.nodeCount} nodes</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 justify-between md:justify-end">
-                  <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider", (cluster.status === "ACTIVE" || cluster.status === "RUNNING") ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-amber-500/20 text-amber-400 border border-amber-500/30")}>
+                  <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border", (cluster.status === "ACTIVE" || cluster.status === "RUNNING") ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200") : (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200"))}>
                     {cluster.status}
                   </span>
-                  <Link href={`/dashboard/k3s/${cluster.id}`} className={cn("px-4 py-2 rounded-lg border text-sm font-medium transition-all", isDark ? "bg-white/5 hover:bg-white/10 border-white/5 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900")}>
+                  <Link href={`/dashboard/k3s/${cluster.id}`} className={cn("px-4 py-2 rounded-lg border text-sm font-medium transition-all", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200 hover:text-white" : "bg-white hover:bg-slate-100 border-slate-200 text-slate-900")}>
                     Manage
                   </Link>
                 </div>
@@ -444,7 +431,7 @@ export default function DashboardOverview() {
             ))}
 
             {k3sList.length > 3 && (
-              <div className={cn("mt-2 pt-6 border-t", isDark ? "border-white/5" : "border-slate-100")}>
+              <div className={cn("mt-2 pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
                 <Pagination currentPage={k3sPage} totalPages={Math.ceil(k3sList.length / 3)} onPageChange={setK3sPage} />
               </div>
             )}

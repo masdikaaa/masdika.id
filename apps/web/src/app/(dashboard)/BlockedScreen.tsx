@@ -57,17 +57,6 @@ export default function BlockedScreen({
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] w-full items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-      {/* Background Animated Orbs */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-          rotate: [0, 90, 0]
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${colors.glow} rounded-full blur-[100px] pointer-events-none`}
-      />
-
       <motion.div 
         initial="hidden"
         animate="visible"
@@ -75,7 +64,7 @@ export default function BlockedScreen({
         className="w-full max-w-xl relative z-10"
       >
         <motion.div 
-          className={`relative bg-[#0a0f1c]/80 backdrop-blur-xl border ${colors.border} shadow-2xl ${colors.shadow} rounded-3xl p-8 sm:p-12 text-center overflow-hidden`}
+          className={`relative bg-[#0b1322] border ${colors.border} shadow-2xl rounded-3xl p-8 sm:p-12 text-center overflow-hidden`}
         >
           {/* Top animated gradient line */}
           <motion.div 
@@ -88,11 +77,6 @@ export default function BlockedScreen({
           {/* Icon */}
           <motion.div variants={itemVariants} className="flex justify-center mb-8">
             <div className="relative">
-              <motion.div 
-                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className={`absolute inset-0 ${colors.badgeBg} rounded-full blur-2xl`}
-              />
               <div className={`w-20 h-20 bg-gradient-to-br ${colors.iconBg} rounded-2xl flex items-center justify-center relative z-10 border ${colors.border} rotate-3 shadow-xl`}>
                 <div className="-rotate-3">
                   {isSuspended ? (

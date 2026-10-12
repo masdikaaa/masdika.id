@@ -1,4 +1,5 @@
 "use client";
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -32,7 +33,7 @@ export default function AdminApiHubPage() {
   const [deleting, setDeleting] = useState(false);
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(users.length / itemsPerPage);
   const paginatedUsers = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

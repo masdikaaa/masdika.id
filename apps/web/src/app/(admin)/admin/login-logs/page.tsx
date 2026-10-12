@@ -1,4 +1,5 @@
 'use client';
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
@@ -52,7 +53,7 @@ export default function LoginLogsPage() {
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(logs.length / itemsPerPage);
   const paginatedLogs = logs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

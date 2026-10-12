@@ -1,4 +1,5 @@
 "use client";
+import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -32,7 +33,7 @@ export default function NewsletterPage() {
 
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useUrlString<string>("searchTerm", "");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   
   // Modal states

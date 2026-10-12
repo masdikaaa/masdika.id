@@ -1,4 +1,5 @@
 "use client";
+import { useUpdateEffect, useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect, useRef } from "react";
@@ -247,14 +248,14 @@ export default function AdminMediaLibrary() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [previewItem, setPreviewItem] = useState<any | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
+  const [viewMode, setViewMode] = useUrlString<"grid" | "list">("viewMode", "grid", ["grid", "list"] as const);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const ITEMS_PER_PAGE = 20;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Folder state
-  const [currentFolder, setCurrentFolder] = useState("/");
+  const [currentFolder, setCurrentFolder] = useUrlString<string>("currentFolder", "/");
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [showRenameModal, setShowRenameModal] = useState<any | null>(null);
@@ -287,6 +288,9 @@ export default function AdminMediaLibrary() {
 
   useEffect(() => {
     fetchMedia();
+  }, [currentFolder]);
+  
+  useUpdateEffect(() => {
     setCurrentPage(1);
   }, [currentFolder]);
 

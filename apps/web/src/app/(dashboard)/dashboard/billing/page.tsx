@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Link as LinkIcon, Code2, Server, Box, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -57,12 +58,12 @@ export default function CustomerBillingPage() {
 
   
   // Pagination State
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const itemsPerPage = 10;
-  const [servicesPage, setServicesPage] = useState(1);
+  const [servicesPage, setServicesPage] = useUrlNumber("servicesPage", 1);
   const servicesPerPage = 4;
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
+  const [selectedDate, setSelectedDate] = useUrlString<string>("selectedDate", "");
 
   const filteredInvoices = data.invoices.filter((inv) => {
     const invDate = new Date(inv.createdAt);
@@ -158,9 +159,7 @@ export default function CustomerBillingPage() {
   return (
     <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        
-        
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-md group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
             <CreditCard className="w-3 h-3" /> Secure Billing
@@ -174,7 +173,7 @@ export default function CustomerBillingPage() {
         <div className="relative z-10 shrink-0">
           <Link 
             href="/dashboard/checkout"
-            className={cn("w-full md:w-auto px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
+            className="w-full md:w-auto px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
           >
             <Plus className="w-5 h-5" />
             Order New Service
@@ -183,8 +182,7 @@ export default function CustomerBillingPage() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl shadow-md overflow-hidden p-6 md:p-8 flex flex-col relative group border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-          <div className={cn("absolute inset-0 pointer-events-none", isDark ? "bg-gradient-to-r from-white/[0.02] to-transparent" : "")} />
+        <motion.div variants={itemVariants} className={cn("rounded-3xl shadow-md overflow-hidden p-6 md:p-8 flex flex-col relative group border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
           <h2 className={cn("text-lg font-bold mb-2 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Layers className="w-5 h-5 text-cyan-400" /> Services Summary
           </h2>
@@ -195,13 +193,13 @@ export default function CustomerBillingPage() {
             {loading ? (
               <div className="flex justify-center items-center h-full"><Loader2 className="w-8 h-8 text-cyan-500 animate-spin" /></div>
             ) : totalActive === 0 ? (
-              <div className={cn("flex flex-col items-center justify-center h-full py-8 text-center rounded-2xl border shadow-inner", isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("flex flex-col items-center justify-center h-full py-8 text-center rounded-2xl border shadow-inner", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <Layers className={cn("w-12 h-12 mb-4", isDark ? "text-zinc-600" : "text-slate-900")} />
                 <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any active services.</p>
               </div>
             ) : (
-              <div className={cn("flex flex-col h-full rounded-2xl border shadow-inner overflow-hidden", isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-200")}>
-                <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-white/5 bg-black/20" : "border-slate-200 bg-slate-100/50")}>
+              <div className={cn("flex flex-col h-full rounded-2xl border shadow-inner overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-100/50")}>
                   <span className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Active Services</span>
                   <span className={cn("text-xs font-bold px-2 py-1 rounded-full border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border-cyan-200")}>{totalActive} Total</span>
                 </div>
@@ -213,7 +211,7 @@ export default function CustomerBillingPage() {
                     if (type === 'SUBSCRIPTION') {
                       const s = item.data;
                       return (
-                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
                           <div className="flex items-center gap-3 overflow-hidden">
                             <div className="shrink-0">{getServiceIcon(s.plan?.service)}</div>
                             <div className="min-w-0">
@@ -233,7 +231,7 @@ export default function CustomerBillingPage() {
                             >
                               <div className={cn(
                                 "absolute w-3.5 h-3.5 rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
-                                s.autoRenew ? "translate-x-2 bg-cyan-400 shadow-[0_0_5px_rgba(6,182,212,0.5)]" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
+                                s.autoRenew ? "translate-x-2 bg-cyan-400" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
                               )}>
                                 {toggling === `SUBSCRIPTION-${s.id}` && <Loader2 className={cn("w-2.5 h-2.5 animate-spin", isDark ? "text-zinc-900" : "text-slate-900")} />}
                               </div>
@@ -247,7 +245,7 @@ export default function CustomerBillingPage() {
                     } else if (type === 'VPS') {
                       const v = item.data;
                       return (
-                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
                           <div className="flex items-center gap-3 overflow-hidden">
                             <Server className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
@@ -267,7 +265,7 @@ export default function CustomerBillingPage() {
                             >
                               <div className={cn(
                                 "absolute w-3.5 h-3.5 rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
-                                v.autoRenew ? "translate-x-2 bg-cyan-400 shadow-[0_0_5px_rgba(6,182,212,0.5)]" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
+                                v.autoRenew ? "translate-x-2 bg-cyan-400" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
                               )}>
                                 {toggling === `VPS-${v.id}` && <Loader2 className={cn("w-2.5 h-2.5 animate-spin", isDark ? "text-zinc-900" : "text-slate-900")} />}
                               </div>
@@ -281,7 +279,7 @@ export default function CustomerBillingPage() {
                     } else if (type === 'CUSTOM_SERVICE') {
                       const c = item.data;
                       return (
-                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
                           <div className="flex items-center gap-3 overflow-hidden">
                             <Box className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
@@ -301,7 +299,7 @@ export default function CustomerBillingPage() {
                             >
                               <div className={cn(
                                 "absolute w-3.5 h-3.5 rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
-                                c.autoRenew ? "translate-x-2 bg-cyan-400 shadow-[0_0_5px_rgba(6,182,212,0.5)]" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
+                                c.autoRenew ? "translate-x-2 bg-cyan-400" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
                               )}>
                                 {toggling === `CUSTOM_SERVICE-${c.id}` && <Loader2 className={cn("w-2.5 h-2.5 animate-spin", isDark ? "text-zinc-900" : "text-slate-900")} />}
                               </div>
@@ -315,7 +313,7 @@ export default function CustomerBillingPage() {
                     } else if (type === 'RESERVED_IP') {
                       const ip = item.data;
                       return (
-                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
                           <div className="flex items-center gap-3 overflow-hidden">
                             <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
@@ -335,7 +333,7 @@ export default function CustomerBillingPage() {
                             >
                               <div className={cn(
                                 "absolute w-3.5 h-3.5 rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
-                                ip.autoRenew ? "translate-x-2 bg-cyan-400 shadow-[0_0_5px_rgba(6,182,212,0.5)]" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
+                                ip.autoRenew ? "translate-x-2 bg-cyan-400" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
                               )}>
                                 {toggling === `RESERVED_IP-${ip.id}` && <Loader2 className={cn("w-2.5 h-2.5 animate-spin", isDark ? "text-zinc-900" : "text-slate-900")} />}
                               </div>
@@ -351,7 +349,7 @@ export default function CustomerBillingPage() {
                   })}
                 </div>
                 {totalActive > servicesPerPage && (
-                  <div className={cn("p-3 border-t flex justify-between items-center", isDark ? "border-white/5 bg-black/10" : "border-slate-200 bg-slate-100/50")}>
+                  <div className={cn("p-3 border-t flex justify-between items-center", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-100/50")}>
                     <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Showing {(servicesPage - 1) * servicesPerPage + 1} to {Math.min(servicesPage * servicesPerPage, totalActive)} of {totalActive}
                     </span>
@@ -378,13 +376,12 @@ export default function CustomerBillingPage() {
           </div>
         </motion.div>
         
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl shadow-md overflow-hidden p-6 md:p-8 flex flex-col justify-between relative group border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+        <motion.div variants={itemVariants} className={cn("rounded-3xl shadow-md overflow-hidden p-6 md:p-8 flex flex-col justify-between relative group border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
            <div className="relative z-10">
              <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                <Wallet className="w-5 h-5 text-cyan-400" /> Account Balance
              </h2>
-             <div className={cn("p-6 rounded-2xl mb-6 shadow-inner relative overflow-hidden transition-colors border", isDark ? "bg-white/[0.02] border-cyan-500/20 group-hover:border-cyan-500/40" : "bg-cyan-50 border-cyan-200 group-hover:border-cyan-300")}>
+             <div className={cn("p-6 rounded-2xl mb-6 shadow-inner relative overflow-hidden transition-colors border", isDark ? "bg-[#060b14] border-slate-800 group-hover:border-slate-700" : "bg-cyan-50 border-cyan-200 group-hover:border-cyan-300")}>
                <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none select-none">
                  <Wallet className="w-24 h-24 -mb-6 -mr-6" />
                </div>
@@ -400,7 +397,7 @@ export default function CustomerBillingPage() {
            
            <Link
              href="/dashboard/topup"
-             className={cn("w-full px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-white", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+             className={cn("w-full px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-white shadow-sm", isDark ? "bg-cyan-600 hover:bg-cyan-500" : "bg-cyan-600 hover:bg-cyan-700")}
            >
              <Plus className="w-5 h-5" />
              Top Up Balance
@@ -408,10 +405,8 @@ export default function CustomerBillingPage() {
         </motion.div>
       </div>
 
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl shadow-md overflow-hidden relative border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        
-        <div className={cn("p-6 md:p-8 border-b relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4", isDark ? "border-white/5" : "border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("rounded-3xl shadow-md overflow-hidden relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 md:p-8 border-b relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4", isDark ? "border-slate-800" : "border-slate-200")}>
           <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Receipt className="w-5 h-5 text-cyan-400" /> Billing History
           </h2>
@@ -423,7 +418,7 @@ export default function CustomerBillingPage() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => { setSelectedDate(e.target.value); setPage(1); }}
-                className={cn("rounded-xl pl-10 pr-3 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-0 border", isDark ? "bg-black/40 border-white/10 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                className={cn("rounded-xl pl-10 pr-3 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-0 border", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 title="Filter by date (Day/Month/Year)"
               />
             </div>
@@ -436,7 +431,7 @@ export default function CustomerBillingPage() {
                 placeholder="Search invoice, status, date..."
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
 
@@ -459,7 +454,7 @@ export default function CustomerBillingPage() {
 
         <div className="overflow-x-auto relative z-10">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-600")}>
-            <thead className={cn("text-xs uppercase tracking-widest font-bold", isDark ? "bg-black/40 text-zinc-400" : "bg-slate-50 text-slate-500 border-b border-slate-200")}>
+            <thead className={cn("text-xs uppercase tracking-widest font-bold", isDark ? "bg-[#060b14] text-zinc-400" : "bg-slate-50 text-slate-500 border-b border-slate-200")}>
               <tr>
                 <th className="px-6 py-5 whitespace-nowrap">Invoice Number</th>
                 <th className="px-6 py-5 whitespace-nowrap">Description</th>
@@ -469,7 +464,7 @@ export default function CustomerBillingPage() {
                 <th className="px-6 py-5"></th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800" : "divide-slate-200")}>
               {filteredInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center">
@@ -479,13 +474,13 @@ export default function CustomerBillingPage() {
                 </tr>
               ) : (
                 filteredInvoices.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((invoice) => (
-                  <tr key={invoice.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50")}>
+                  <tr key={invoice.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50")}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors", isDark ? "bg-white/5 group-hover:bg-cyan-500/10 group-hover:text-cyan-400" : "bg-slate-100 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors", isDark ? "bg-slate-800/50 group-hover:bg-cyan-500/10 group-hover:text-cyan-400" : "bg-slate-100 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
                           <Receipt className="w-4 h-4" />
                         </div>
-                        <span className={cn("font-mono text-xs px-2 py-1 rounded-md border", isDark ? "bg-[#011627] text-white border-white/5" : "bg-slate-100 text-slate-900 border-slate-200")}>{invoice.invoiceNumber || invoice.merchantOrderId}</span>
+                        <span className={cn("font-mono text-xs px-2 py-1 rounded-md border", isDark ? "bg-[#060b14] text-white border-slate-800" : "bg-slate-100 text-slate-900 border-slate-200")}>{invoice.invoiceNumber || invoice.merchantOrderId}</span>
                       </div>
                     </td>
                     <td className={cn("px-6 py-4 whitespace-nowrap font-medium", isDark ? "text-white" : "text-slate-900")}>
@@ -589,7 +584,7 @@ export default function CustomerBillingPage() {
                             href={invoice.paymentUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500 hover:text-white transition-all whitespace-nowrap"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500 hover:text-white transition-all whitespace-nowrap shadow-sm"
                           >
                             Pay TopUp <ExternalLink className="w-3 h-3" />
                           </a>
@@ -603,7 +598,7 @@ export default function CustomerBillingPage() {
                       <Link
                         href={`/invoice/${invoice.invoiceNumber || invoice.merchantOrderId}`}
                         target="_blank"
-                        className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-xs font-bold border whitespace-nowrap", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm")}
+                        className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-xs font-bold border whitespace-nowrap shadow-sm", isDark ? "bg-slate-800/50 hover:bg-slate-800 text-white border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                       >
                         <Printer className="w-3.5 h-3.5" />
                         Print / View
@@ -617,7 +612,7 @@ export default function CustomerBillingPage() {
         </div>
 
         {Math.ceil(filteredInvoices.length / itemsPerPage) > 1 && (
-          <div className={cn("p-6 border-t relative z-10", isDark ? "border-white/5 bg-black/20" : "border-slate-200 bg-slate-50")}>
+          <div className={cn("p-6 border-t relative z-10", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
             <Pagination
               currentPage={page}
               totalPages={Math.ceil(filteredInvoices.length / itemsPerPage)}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Upload, AlertCircle, Lock, Loader2, ArrowLeft, Cloud, Link as LinkIcon, Radio, CloudRain, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -64,7 +65,7 @@ export default function ApiLabPage() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const [itemsPerPage, setItemsPerPage] = useState(4);
 
   const handleSelectService = (service: string, keyToUse: string = "") => {
@@ -233,7 +234,7 @@ export default function ApiLabPage() {
         <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
       </Link>
       
-      <div className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-black/5 shadow-sm")}>
+      <div className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-black/5 shadow-sm")}>
         
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
@@ -247,7 +248,7 @@ export default function ApiLabPage() {
       </div>
 
       {uniqueServices.length === 0 ? (
-        <div className={cn("border rounded-3xl p-12 text-center", isDark ? "bg-white/[0.02]/50 border-white/5" : "bg-slate-50 border-black/5")}>
+        <div className={cn("border rounded-3xl p-12 text-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-black/5")}>
           <AlertCircle className="w-12 h-12 text-yellow-500/50 mx-auto mb-4" />
           <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No APIs Found</h3>
           <p className={cn("mb-6", isDark ? "text-zinc-400" : "text-slate-600")}>You haven't generated any API keys for your ordered services yet.</p>
@@ -269,8 +270,8 @@ export default function ApiLabPage() {
                   className={cn(
                     "text-left p-5 rounded-2xl border transition-all shadow-sm",
                     isActive
-                      ? (isDark ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "bg-cyan-50 border-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.15)]")
-                      : (isDark ? "bg-white/[0.02]/40 border-white/5 hover:bg-white/[0.02] hover:border-white/10" : "bg-white border-slate-200 hover:border-cyan-400")
+                      ? (isDark ? "bg-cyan-500/10 border-cyan-500/50 shadow-sm" : "bg-cyan-50 border-cyan-300 shadow-sm")
+                      : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-white border-slate-200 hover:border-cyan-400")
                   )}
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -325,7 +326,7 @@ export default function ApiLabPage() {
               <div className="flex-1 space-y-6 min-w-0 w-full">
                 
                 {/* API Key Banner */}
-                <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 shadow-[0_0_15px_rgba(34,211,238,0.05)]">
+                <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 shadow-sm">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 text-cyan-300">
                       <Key className="w-5 h-5 shrink-0" />
@@ -370,7 +371,7 @@ export default function ApiLabPage() {
                     <button
                       onClick={handleSend}
                       disabled={loading || !apiKey}
-                      className={cn("shrink-0 px-8 py-3 lg:py-0 h-full min-h-[52px] rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+                      className={cn("shrink-0 px-8 py-3 lg:py-0 h-full min-h-[52px] rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
                     >
                       {loading ? (
                         <>
@@ -399,7 +400,7 @@ export default function ApiLabPage() {
                             onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                             className="hidden"
                           />
-                            <div className={cn("relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center gap-4 text-center", uploadFile ? (isDark ? "border-cyan-500/50 bg-cyan-500/5" : "border-cyan-500/50 bg-cyan-50") : (isDark ? "border-white/10 bg-white/[0.02] group-hover:border-cyan-500/30 group-hover:bg-cyan-500/[0.03]" : "border-slate-300 bg-slate-50 group-hover:border-cyan-400 group-hover:bg-cyan-50/50"))}>
+                            <div className={cn("relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center gap-4 text-center", uploadFile ? (isDark ? "border-cyan-500/50 bg-cyan-500/5" : "border-cyan-500/50 bg-cyan-50") : (isDark ? "border-slate-800 bg-[#060b14] group-hover:border-slate-700" : "border-slate-300 bg-slate-50 group-hover:border-cyan-400 group-hover:bg-cyan-50/50"))}>
                             {uploadFile ? (
                               <>
                                 <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
@@ -504,7 +505,7 @@ export default function ApiLabPage() {
 
                   <div className={cn("relative min-h-[250px] max-h-[500px] flex flex-col w-full", isDark ? "bg-black/20" : "bg-slate-50")}>
                     {loading ? (
-                      <div className={cn("absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-10", isDark ? "bg-[#0d1117]/80" : "bg-white/80")}>
+                      <div className={cn("absolute inset-0 flex flex-col items-center justify-center  z-10", isDark ? "bg-[#0d1117]/80" : "bg-white/80")}>
                         <div className="relative">
                           <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
                           <div className="absolute inset-0 flex items-center justify-center">

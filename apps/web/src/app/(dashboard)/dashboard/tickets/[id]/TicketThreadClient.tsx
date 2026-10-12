@@ -25,11 +25,11 @@ function StatusBadge({ status }: { status: string }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  if (status === 'OPEN') return <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(16,185,129,0.2)]">OPEN</span>;
-  if (status === 'ANSWERED') return <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(6,182,212,0.2)]">ANSWERED</span>;
-  if (status === 'CUSTOMER_REPLY') return <span className="bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(249,115,22,0.2)]">CUSTOMER REPLY</span>;
-  if (status === 'MERGED') return <span className="bg-cyan-500/20 text-purple-300 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(168,85,247,0.2)]">MERGED</span>;
-  return <span className={cn("bg-zinc-500/20 border border-zinc-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(113,113,122,0.2)]", isDark ? "text-zinc-300" : "text-slate-500")}>CLOSED</span>;
+  if (status === 'OPEN') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">OPEN</span>;
+  if (status === 'ANSWERED') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">ANSWERED</span>;
+  if (status === 'CUSTOMER_REPLY') return <span className="bg-orange-500/10 text-orange-400 border border-orange-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">CUSTOMER REPLY</span>;
+  if (status === 'MERGED') return <span className="bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">MERGED</span>;
+  return <span className={cn("bg-zinc-500/10 border border-zinc-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm", isDark ? "text-zinc-300" : "text-slate-600")}>CLOSED</span>;
 }
 
 function linkifyHtml(html: string) {
@@ -187,13 +187,11 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
   return (
     <div className="space-y-6 pb-40 md:pb-48">
       {/* Header Card */}
-      <div className={cn("backdrop-blur-sm border p-5 md:p-6 rounded-3xl shadow-md relative overflow-hidden group", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:bg-cyan-500/10 transition-colors duration-700" />
-        
+      <div className={cn("border p-5 md:p-6 rounded-3xl shadow-md relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="flex items-start md:items-center gap-4">
-            <Link href="/dashboard/tickets" className={cn("p-2.5 bg-white/5 hover:bg-white/10 border rounded-xl transition-all hover:-translate-x-1 shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
-              <ArrowLeft className={cn("w-5 h-5", isDark ? "text-zinc-300" : "text-slate-500")} />
+            <Link href="/dashboard/tickets" className={cn("p-2.5 border rounded-xl transition-all hover:-translate-x-1 shrink-0", isDark ? "bg-slate-800/60 border-slate-700/80 text-zinc-300 hover:bg-slate-800" : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200")}>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="min-w-0">
               <h1 className={cn("text-xl md:text-2xl font-black flex flex-wrap items-center gap-3 leading-tight tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -202,8 +200,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               </h1>
               <div className={cn("text-sm mt-2 flex flex-wrap items-center gap-x-3 gap-y-2", isDark ? "text-zinc-400" : "text-slate-500")}>
                 {ticket.service && (
-                  <span className={cn("flex items-center gap-1.5 bg-[#011627] px-2.5 py-1 rounded-lg border text-xs font-medium shadow-inner", isDark ? "border-white/5 text-zinc-300" : "border-slate-200 text-slate-500")}>
-                    Service: <span className="text-cyan-400">{ticket.service.replace('_', ' ')}</span>
+                  <span className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
+                    Service: <span className="text-cyan-400 font-semibold">{ticket.service.replace('_', ' ')}</span>
                   </span>
                 )}
                 <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-bold uppercase tracking-widest ${
@@ -233,8 +231,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               }}
               className={`w-full md:w-auto px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center justify-center gap-2 ${
                 isClosed 
-                  ? 'bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)]' 
-                  : 'bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/30 text-zinc-300 hover:text-red-400'
+                  ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm' 
+                  : isDark ? 'bg-slate-800 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/30 text-zinc-300 hover:text-red-400 shadow-sm' : 'bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-700 hover:text-red-600 shadow-sm'
               }`}
             >
               {isClosed ? 'Reopen Ticket' : 'Close Ticket'}
@@ -246,7 +244,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
       {/* Messages Area */}
       <div className="space-y-6 md:space-y-8 mt-8">
         {ticket.status === 'MERGED' && ticket.mergedInto && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-cyan-500/10 border border-cyan-500/20 p-5 rounded-2xl flex items-center gap-4 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-5 rounded-2xl flex items-center gap-4 shadow-sm", isDark ? "bg-[#0b1322] border-purple-500/30 text-purple-200" : "bg-purple-50 border-purple-200 text-purple-900")}>
             <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
               <ShieldAlert className="w-5 h-5 text-cyan-400" />
             </div>
@@ -276,7 +274,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               key={msg.id} 
               className={`flex gap-3 md:gap-4 ${isAdmin ? 'flex-row' : 'flex-row-reverse'}`}
             >
-              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 ${isAdmin ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'border-cyan-500/30'} bg-white/5`}>
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 ${isAdmin ? 'border-cyan-500/50' : 'border-slate-700'} ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
                 <img referrerPolicy="no-referrer" 
                   src={msg.user?.image || `/api/avatar?email=${encodeURIComponent(msg.user?.email || 'admin@masdika.id')}&name=${encodeURIComponent(msg.user?.name || 'User')}`} 
                   alt={msg.user?.name} 
@@ -285,15 +283,15 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               </div>
               <div className={`max-w-[85%] md:max-w-[75%] flex flex-col ${isAdmin ? 'items-start' : 'items-end'}`}>
                 <div className="flex items-center gap-2 mb-1.5 px-1">
-                  {isAdmin && <span className="bg-cyan-500 text-[#011627] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Staff</span>}
+                  {isAdmin && <span className="bg-cyan-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Staff</span>}
                   <span className={cn("font-bold text-sm", isDark ? "text-zinc-200" : "text-slate-900")}>{msg.user.name}</span>
                   <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>{new Date(msg.createdAt).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
                 </div>
                 
                 <div className={`p-4 md:p-5 rounded-3xl shadow-md relative group ${
                   isAdmin 
-                    ? 'bg-white/[0.02] backdrop-blur-md border border-white/5 text-zinc-200 rounded-tl-sm' 
-                    : 'bg-cyan-600 text-white rounded-tr-sm border border-cyan-400/20'
+                    ? isDark ? 'bg-[#060b14] border border-slate-800 text-zinc-200 rounded-tl-sm' : 'bg-slate-100 border border-slate-200 text-slate-800 rounded-tl-sm'
+                    : 'bg-cyan-600 text-white rounded-tr-sm border border-cyan-500/30'
                 }`}>
                 {msg.message && renderMessageWithLinks(msg.message)}
                   
@@ -351,19 +349,20 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
 
       {/* Floating Sticky Input Area */}
       {!isClosed && (
-        <div className="fixed bottom-0 left-0 right-0 md:left-64 z-40 bg-gradient-to-t from-[#011627] via-[#011627]/90 to-transparent pt-12 pb-4 md:pb-6 px-4 md:px-6 pointer-events-none">
+        <div className={cn("fixed bottom-0 left-0 right-0 md:left-64 z-40 pt-12 pb-4 md:pb-6 px-4 md:px-6 pointer-events-none", isDark ? "bg-gradient-to-t from-[#050a12] via-[#050a12]/90 to-transparent" : "bg-gradient-to-t from-slate-100 via-slate-100/90 to-transparent")}>
           <div className="max-w-5xl mx-auto pointer-events-auto">
             <form 
               onSubmit={handleReply} 
-              className={`w-full relative bg-white/[0.02]/90 backdrop-blur-sm border rounded-3xl transition-all duration-300 shadow-[0_0_40px_rgba(0,0,0,0.5)] ${
-                isDragging ? 'border-cyan-500 ring-4 ring-cyan-500/20' : 'border-white/10 focus-within:border-cyan-500/50 focus-within:ring-2 focus-within:ring-cyan-500/10'
-              }`}
+              className={cn("w-full relative border rounded-3xl transition-all duration-300 shadow-xl", 
+                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200",
+                isDragging ? "border-cyan-500 ring-4 ring-cyan-500/20" : "focus-within:border-cyan-500/50 focus-within:ring-2 focus-within:ring-cyan-500/10"
+              )}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
               {isDragging && (
-                <div className="absolute inset-0 z-50 bg-cyan-900/60 rounded-3xl flex items-center justify-center backdrop-blur-sm border-2 border-dashed border-cyan-400">
+                <div className="absolute inset-0 z-50 bg-cyan-950/80 rounded-3xl flex items-center justify-center border-2 border-dashed border-cyan-400">
                   <p className="text-cyan-400 font-bold flex items-center gap-2 text-lg"><Paperclip className="w-6 h-6" /> Drop files to attach here</p>
                 </div>
               )}
@@ -507,7 +506,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   </div>
                 )}
                 
-                <div className="px-3 pb-3 pt-1 flex justify-between items-center bg-white/[0.01] rounded-b-3xl mt-1">
+                <div className={cn("px-3 pb-3 pt-1 flex justify-between items-center rounded-b-3xl mt-1", isDark ? "bg-[#060b14]" : "bg-slate-50")}>
                   <input
                     type="file"
                     multiple
@@ -527,7 +526,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   <button
                     type="submit"
                     disabled={isSubmitting || ((!message || message === '<p><br></p>') && attachments.length === 0)}
-                    className="bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:from-zinc-700 disabled:to-zinc-800 text-white px-7 py-3 rounded-2xl font-bold transition-all shadow-lg hover:shadow-sm disabled:shadow-none flex items-center justify-center gap-2 shrink-0 group mr-2"
+                    className="bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:from-zinc-700 disabled:to-zinc-800 text-white px-7 py-3 rounded-2xl font-bold transition-all shadow-md hover:shadow-sm disabled:shadow-none flex items-center justify-center gap-2 shrink-0 group mr-2"
                   >
                     <span className="hidden sm:inline">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <Send className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'}`} />
@@ -545,7 +544,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col"
+            className="fixed inset-0 z-[100] bg-black/90 flex flex-col"
           >
             <div className="p-4 flex justify-between items-center bg-black/50">
               <div className="flex gap-2">

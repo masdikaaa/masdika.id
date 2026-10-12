@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Server, Activity, ChevronLeft, Download, Terminal, HardDrive, Cpu, Settings, ExternalLink, Shield, ShieldCheck, Box, AlertTriangle, Trash2, RefreshCw, CreditCard, CheckCircle, Play, Power, RotateCcw, Calculator, Square } from "lucide-react";
@@ -27,7 +28,7 @@ export default function K3sDetailPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMetrics, setLoadingMetrics] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useUrlTab<string>("overview");
   const activeTabRef = useRef(activeTab);
   const runningNodesCountRef = useRef<number>(-1);
   const isSuspended = cluster?.nodes?.some((n: any) => n.status === 'SUSPENDED') || false;
@@ -576,12 +577,12 @@ export default function K3sDetailPage() {
     <>
       <AnimatePresence>
         {confirmModal.isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className={cn("border rounded-3xl p-6 max-w-md w-full shadow-md relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}
+              className={cn("border rounded-3xl p-6 max-w-md w-full shadow-md relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
             >
               <h3 className={cn(
                 "text-xl font-bold mb-3 flex items-center gap-2",
@@ -609,7 +610,7 @@ export default function K3sDetailPage() {
                     "px-5 py-2.5 text-white font-bold rounded-xl shadow-lg transition-all",
                     confirmModal.actionType === "danger" ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-red-500/20" :
                       confirmModal.actionType === "warning" ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 shadow-orange-500/20" :
-                        "bg-cyan-600 hover:bg-cyan-700 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]"
+                        "bg-cyan-600 hover:bg-cyan-700 shadow-sm"
                   )}
                 >
                   Confirm
@@ -620,12 +621,12 @@ export default function K3sDetailPage() {
         )}
 
         {isGuideModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className={cn("border rounded-3xl p-6 max-w-2xl w-full shadow-md relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}
+              className={cn("border rounded-3xl p-6 max-w-2xl w-full shadow-md relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
@@ -662,7 +663,7 @@ export default function K3sDetailPage() {
                 <p>2. If you don&apos;t have <code>kubectl</code> installed yet, you can <a href="https://kubernetes.io/docs/tasks/tools/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline font-bold">download it here</a>.</p>
                 <p>3. Follow the OS specific instructions below to use it with <code>kubectl</code>:</p>
 
-                <div className={cn("border p-4 rounded-xl font-mono text-xs overflow-x-auto", isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-white border-slate-200 text-slate-500")}>
+                <div className={cn("border p-4 rounded-xl font-mono text-xs overflow-x-auto", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
                   {guideOs === "windows" && (
                     <div className="space-y-3">
                       <p># 1. Place the downloaded file in your user directory</p>
@@ -718,7 +719,7 @@ export default function K3sDetailPage() {
 
           if (isPendingPayment) {
             return (
-              <div className={cn("flex flex-col items-center justify-center py-24 border rounded-3xl shadow-md relative overflow-hidden mt-8", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+              <div className={cn("flex flex-col items-center justify-center py-24 border rounded-3xl shadow-md relative overflow-hidden mt-8", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-cyan-500/10"></div>
                 <div className="relative z-10 flex flex-col items-center text-center px-4">
                   <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 border border-blue-500/30">
@@ -741,7 +742,7 @@ export default function K3sDetailPage() {
 
           if (isDeploying) {
             return (
-              <div className={cn("w-full border rounded-3xl shadow-md relative overflow-hidden mt-8 p-6 md:p-10", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+              <div className={cn("w-full border rounded-3xl shadow-md relative overflow-hidden mt-8 p-6 md:p-10", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-blue-500/3 to-transparent pointer-events-none"></div>
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="w-20 h-20 mb-6 relative">
@@ -798,7 +799,7 @@ export default function K3sDetailPage() {
                       <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse ml-auto" />
                       <span className={cn("text-[10px]", isDark ? "text-zinc-500" : "text-slate-500")}>LIVE</span>
                     </div>
-                    <div className={cn("border rounded-2xl p-4 h-64 overflow-auto font-mono text-xs shadow-inner custom-scrollbar", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-2xl p-4 h-64 overflow-auto font-mono text-xs shadow-inner custom-scrollbar", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
                       {installLogs.length === 0 ? (
                         <div className={cn("italic", isDark ? "text-zinc-600" : "text-slate-900")}>Waiting for provisioning to start...</div>
                       ) : (
@@ -833,7 +834,7 @@ export default function K3sDetailPage() {
                 <ChevronLeft className="w-4 h-4 mr-2" /> Back to Kubernetes Clusters
               </Link>
               {/* Header */}
-              <div className={cn("flex flex-col xl:flex-row xl:items-center justify-between gap-4 border rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("flex flex-col xl:flex-row xl:items-center justify-between gap-4 border rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
 
                 <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-3 sm:gap-4 relative z-10 w-full xl:w-auto">
                   <div className="w-14 h-14 rounded-2xl border border-cyan-500/20 flex items-center justify-center shrink-0">
@@ -956,7 +957,7 @@ export default function K3sDetailPage() {
               {activeTab === "overview" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className={cn("border rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm relative overflow-hidden group", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                       <h2 className={cn("text-base md:text-lg font-bold mb-4 md:mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                           <Activity className="w-4 h-4 text-cyan-400" />
@@ -1031,7 +1032,7 @@ export default function K3sDetailPage() {
                       </div>
                     </div>
 
-                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-hidden group", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                       <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                           <ShieldCheck className="w-4 h-4 text-cyan-400" />
@@ -1042,7 +1043,7 @@ export default function K3sDetailPage() {
                         {cluster.status !== 'RUNNING' || !metrics ? (
                           // Cluster not running or metrics not available: show skeleton/unavailable state
                           ["kube-apiserver", "etcd", "scheduler", "controller-mgr"].map((component) => (
-                            <div key={component} className={cn("border rounded-2xl p-5 text-center flex flex-col items-center justify-center", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                            <div key={component} className={cn("border rounded-2xl p-5 text-center flex flex-col items-center justify-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                               <div className="w-3.5 h-3.5 rounded-full mx-auto mb-3 bg-zinc-700" />
                               <div className="text-sm font-semibold text-white/90">{component}</div>
                               <div className={cn("text-[10px] mt-1.5 uppercase tracking-widest font-bold", isDark ? "text-zinc-600" : "text-slate-900")}>
@@ -1054,11 +1055,11 @@ export default function K3sDetailPage() {
                           ["kube-apiserver", "etcd", "scheduler", "controller-mgr"].map((component) => {
                             const isHealthy = metrics?.components?.[component];
                             return (
-                              <div key={component} className={cn("hover:bg-white/[0.04] transition-colors border hover:border-white/10 rounded-2xl p-5 text-center flex flex-col items-center justify-center", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                              <div key={component} className={cn("hover:bg-slate-800/40 transition-colors border hover:border-white/10 rounded-2xl p-5 text-center flex flex-col items-center justify-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                                 <div className={cn(
                                   "w-3.5 h-3.5 rounded-full mx-auto mb-3",
-                                  isHealthy === true ? "bg-cyan-500 shadow-[0_0_15px_rgba(16,185,129,0.7)]" : 
-                                  isHealthy === false ? "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse" : 
+                                  isHealthy === true ? "bg-cyan-500 " : 
+                                  isHealthy === false ? "bg-red-500  animate-pulse" : 
                                   "bg-zinc-700"
                                 )} />
                                 <div className="text-sm font-semibold text-white/90">{component}</div>
@@ -1080,7 +1081,7 @@ export default function K3sDetailPage() {
                   </div>
 
                   <div className="space-y-6">
-                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-hidden group h-full", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-hidden group h-full", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                       <h2 className={cn("text-lg font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                           <Server className="w-4 h-4 text-cyan-400" />
@@ -1088,11 +1089,11 @@ export default function K3sDetailPage() {
                         Cluster Info
                       </h2>
                       <div className="space-y-5 relative z-10">
-                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                           <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Version</span>
                           <span className={cn("font-mono text-sm bg-white/5 px-2 py-1 rounded-md", isDark ? "text-white" : "text-slate-900")}>{cluster.version}</span>
                         </div>
-                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                           <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Total Nodes</span>
                           <div className="text-right">
                             <span className={cn("text-sm font-bold block", isDark ? "text-white" : "text-slate-900")}>{cluster.nodes?.length || 0} Nodes</span>
@@ -1101,11 +1102,11 @@ export default function K3sDetailPage() {
                             </span>
                           </div>
                         </div>
-                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                           <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Network Plugin</span>
                           <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>Flannel</span>
                         </div>
-                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                        <div className={cn("flex justify-between items-center p-3 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                           <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Created</span>
                           <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{new Date(cluster.createdAt).toLocaleDateString()}</span>
                         </div>
@@ -1117,7 +1118,7 @@ export default function K3sDetailPage() {
 
               {activeTab === "monitoring" && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                  <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                     <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                       <Cpu className="w-5 h-5 text-blue-400" />
                       CPU Usage (Last 1 Hour)
@@ -1148,7 +1149,7 @@ export default function K3sDetailPage() {
                     </div>
                   </div>
 
-                  <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                  <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                     <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                       <HardDrive className="w-5 h-5 text-cyan-400" />
                       Memory Usage (Last 1 Hour)
@@ -1182,7 +1183,7 @@ export default function K3sDetailPage() {
               )}
 
               {activeTab === "nodes" && (
-                <div className={cn("border rounded-3xl overflow-hidden shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                <div className={cn("border rounded-3xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                   <div className={cn("p-4 sm:p-6 border-b flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sm:gap-0", isDark ? "border-white/5" : "border-slate-200")}>
                     <h2 className={cn("text-base sm:text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Cluster Nodes (VMs)</h2>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1252,7 +1253,7 @@ export default function K3sDetailPage() {
                       </thead>
                       <tbody className="divide-y divide-white/5">
                         {cluster.nodes.map((node: any) => (
-                          <tr key={node.id} className="hover:bg-white/[0.02] transition-colors group">
+                          <tr key={node.id} className="hover:bg-slate-800/30 transition-colors group">
                             <td className="py-4 pl-6 pr-2 align-middle">
                               <button
                                 type="button"
@@ -1308,7 +1309,7 @@ export default function K3sDetailPage() {
                             </td>
                             <td className="p-4">
                               <div className="flex items-center gap-2 text-sm">
-                                {node.status === "RUNNING" && <><div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /><span className="text-cyan-400 font-medium">Ready</span></>}
+                                {node.status === "RUNNING" && <><div className="w-2 h-2 rounded-full bg-cyan-500 " /><span className="text-cyan-400 font-medium">Ready</span></>}
                                 {node.status === "INSTALLING_K3S" && <><div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /><span className="text-amber-400 font-medium">Installing K3s...</span></>}
                                 {node.status === "FAILED" && <><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-red-400 font-medium">Failed</span></>}
                                 {!["RUNNING", "INSTALLING_K3S", "FAILED"].includes(node.status) && <><div className="w-2 h-2 rounded-full bg-zinc-500" /><span className={cn("capitalize", isDark ? "text-zinc-300" : "text-slate-500")}>{node.status.toLowerCase()}</span></>}
@@ -1392,7 +1393,7 @@ export default function K3sDetailPage() {
                           <div>
                             <span className={cn("block text-[10px] uppercase font-bold tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Status</span>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              {node.status === "RUNNING" && <><div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /><span className="text-cyan-400 font-medium">Ready</span></>}
+                              {node.status === "RUNNING" && <><div className="w-2 h-2 rounded-full bg-cyan-500 " /><span className="text-cyan-400 font-medium">Ready</span></>}
                               {node.status === "INSTALLING_K3S" && <><div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /><span className="text-amber-400 font-medium">Installing...</span></>}
                               {node.status === "FAILED" && <><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-red-400 font-medium">Failed</span></>}
                               {!["RUNNING", "INSTALLING_K3S", "FAILED"].includes(node.status) && <><div className="w-2 h-2 rounded-full bg-zinc-500" /><span className={cn("capitalize", isDark ? "text-zinc-300" : "text-slate-500")}>{node.status.toLowerCase()}</span></>}
@@ -1444,7 +1445,7 @@ export default function K3sDetailPage() {
               {activeTab === "settings" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in zoom-in-95 duration-500">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                       <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <Settings className="w-5 h-5 text-cyan-400" />
                         General Settings
@@ -1454,7 +1455,7 @@ export default function K3sDetailPage() {
                           <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Cluster Name</label>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <input type="text" value={editClusterName} onChange={(e) => setEditClusterName(e.target.value)} className={cn("flex-1 w-full bg-white/5 border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all min-w-0", isDark ? "border-white/10 text-white" : "border-slate-200 text-slate-900")} />
-                            <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className={cn("px-5 py-2.5 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] flex items-center justify-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                            <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className={cn("px-5 py-2.5 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
                               {isSavingName && <RefreshCw className="w-4 h-4 animate-spin shrink-0" />}
                               Save
                             </button>
@@ -1468,7 +1469,7 @@ export default function K3sDetailPage() {
                       </div>
                     </div>
 
-                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-visible", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-3xl p-6 shadow-sm relative overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                       <h2 className={cn("text-lg font-bold mb-2 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <AlertTriangle className="w-5 h-5 text-red-500" />
                         Delete Cluster
@@ -1486,7 +1487,7 @@ export default function K3sDetailPage() {
                                 onChange={(val) => setReinstallVersion(val)}
                                 options={K3S_VERSIONS.map(v => ({ value: v.id, label: v.name }))}
                                 placeholder="Select version"
-                                className={cn("w-[220px]", isDark ? "bg-white/[0.02]" : "bg-white")}
+                                className={cn("w-[220px]", isDark ? "bg-[#060b14]" : "bg-white")}
                               />
                             </div>
                           </div>
@@ -1511,7 +1512,7 @@ export default function K3sDetailPage() {
                   </div>
 
                   <div className="space-y-6">
-                    <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                       <h2 className={cn("text-lg font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Security Options</h2>
                       <div className="space-y-4">
                         <div className={cn("p-5 bg-white/5 border rounded-2xl hover:border-cyan-500/30 transition-colors group", isDark ? "border-white/10" : "border-slate-200")}>
@@ -1532,7 +1533,7 @@ export default function K3sDetailPage() {
               {activeTab === "logs" && (
                 <div className={cn("bg-[#020917] border rounded-2xl shadow-sm overflow-hidden", isDark ? "border-white/5" : "border-slate-200")}>
                   {/* Terminal header bar */}
-                  <div className={cn("flex items-center gap-2 px-4 py-3 bg-white/[0.03] border-b", isDark ? "border-white/5" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-2 px-4 py-3 bg-[#060b14] border-b", isDark ? "border-white/5" : "border-slate-200")}>
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-red-500/70" />
                       <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
@@ -1556,7 +1557,7 @@ export default function K3sDetailPage() {
 
                   {/* Terminal body */}
                   <div
-                    className={cn("p-4 md:p-6 h-[60vh] overflow-auto font-mono text-sm leading-relaxed custom-scrollbar", isDark ? "bg-white/[0.02]" : "bg-white")}
+                    className={cn("p-4 md:p-6 h-[60vh] overflow-auto font-mono text-sm leading-relaxed custom-scrollbar", isDark ? "bg-[#060b14]" : "bg-white")}
                     style={{ scrollBehavior: 'smooth' }}
                   >
                     {installLogs.length === 0 ? (
@@ -1568,7 +1569,7 @@ export default function K3sDetailPage() {
                     ) : (
                       <div className="flex flex-col min-w-max">
                         {installLogs.map((entry, i) => (
-                          <div key={i} className="flex gap-4 group hover:bg-white/[0.02] rounded px-2 py-0.5 transition-colors">
+                          <div key={i} className="flex gap-4 group hover:bg-slate-800/30 rounded px-2 py-0.5 transition-colors">
                             <span className={cn("shrink-0 text-xs pt-0.5 select-none opacity-60 group-hover:opacity-100 transition-opacity", isDark ? "text-zinc-600" : "text-slate-900")}>
                               {new Date(entry.ts).toLocaleTimeString('en-GB', { hour12: false })}
                             </span>
@@ -1603,7 +1604,7 @@ export default function K3sDetailPage() {
                   </div>
 
                   {/* Footer */}
-                  <div className={cn("flex items-center justify-between px-4 py-2.5 border-t", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                  <div className={cn("flex items-center justify-between px-4 py-2.5 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                     <span className={cn("text-xs font-mono", isDark ? "text-zinc-600" : "text-slate-900")}>
                       {installLogs.length} entries
                     </span>
@@ -1628,14 +1629,14 @@ export default function K3sDetailPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60"
               onClick={() => !editRoleModal.isUpdating && setEditRoleModal(prev => ({ ...prev, isOpen: false }))}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={cn("relative w-full max-w-md border rounded-2xl p-6 overflow-hidden shadow-md", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}
+              className={cn("relative w-full max-w-md border rounded-2xl p-6 overflow-hidden shadow-md", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
             >
               <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Edit Node Role</h3>
               <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1669,7 +1670,7 @@ export default function K3sDetailPage() {
                 <button
                   onClick={() => handleUpdateRole(editRoleModal.currentRole)}
                   disabled={editRoleModal.isUpdating || !editRoleModal.currentRole}
-                  className={cn("flex-1 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:opacity-50 flex items-center justify-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("flex-1 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2", isDark ? "text-white" : "text-slate-900")}
                 >
                   {editRoleModal.isUpdating ? (
                     <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Updating...</>

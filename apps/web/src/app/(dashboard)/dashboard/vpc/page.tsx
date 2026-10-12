@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect, useRef } from "react";
 import { Plus, Server, Trash2, RefreshCw, Loader2, Link2, AlertTriangle, CheckCircle, Info, ShieldAlert, Network, Clock, Plug, Unplug, Copy, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
@@ -145,7 +146,7 @@ const validateCidr = (cidr: string): CidrValidationResult => {
 export default function VpcDashboardPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [activeTab, setActiveTab] = useState("vpcs");
+  const [activeTab, setActiveTab] = useUrlTab<string>("vpcs");
   const [vpcs, setVpcs] = useState<VpcNetwork[]>([]);
   const [peerings, setPeerings] = useState<VpcPeering[]>([]);
 
@@ -159,9 +160,9 @@ export default function VpcDashboardPage() {
   const [showDeletePeeringModal, setShowDeletePeeringModal] = useState<number | 'bulk' | null>(null);
   const [showAttachVmModal, setShowAttachVmModal] = useState<number | null>(null);
   const [showManageVmsModal, setShowManageVmsModal] = useState<number | null>(null);
-  const [manageVmsPage, setManageVmsPage] = useState(1);
-  const [vpcsPage, setVpcsPage] = useState(1);
-  const [peeringsPage, setPeeringsPage] = useState(1);
+  const [manageVmsPage, setManageVmsPage] = useUrlNumber("manageVmsPage", 1);
+  const [vpcsPage, setVpcsPage] = useUrlNumber("vpcsPage", 1);
+  const [peeringsPage, setPeeringsPage] = useUrlNumber("peeringsPage", 1);
   const itemsPerPage = 10;
   
   const [togglingNat, setTogglingNat] = useState<number | null>(null);
@@ -650,7 +651,7 @@ export default function VpcDashboardPage() {
 
   return (
     <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -663,9 +664,8 @@ export default function VpcDashboardPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        <div className={cn("flex border-b relative z-10", isDark ? "border-white/5 bg-black/20" : "border-slate-200 bg-slate-50/50")}>
+      <motion.div variants={itemVariants} className={cn("rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+                <div className={cn("flex border-b relative z-10", isDark ? "border-white/5 bg-black/20" : "border-slate-200 bg-slate-50/50")}>
           <button
             onClick={() => setActiveTab("vpcs")}
             className={cn(
@@ -1084,10 +1084,9 @@ export default function VpcDashboardPage() {
       {/* Create VPC Modal */}
       <AnimatePresence>
         {showAddVpcModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              <h2 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                            <h2 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <VpcIcon className="w-6 h-6 text-cyan-400" /> Create VPC
               </h2>
 
@@ -1099,7 +1098,7 @@ export default function VpcDashboardPage() {
                     value={vpcForm.name}
                     onChange={(e) => setVpcForm({ ...vpcForm, name: e.target.value })}
                     placeholder="e.g. Production Network"
-                    className={cn("w-full border rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-[#1f3e5a] text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-cyan-500")}
+                    className={cn("w-full border rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-cyan-500")}
                   />
                 </div>
 
@@ -1110,7 +1109,7 @@ export default function VpcDashboardPage() {
                     value={vpcForm.description}
                     onChange={(e) => setVpcForm({ ...vpcForm, description: e.target.value })}
                     placeholder="e.g. Main network for web servers"
-                    className={cn("w-full border rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-[#1f3e5a] text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-cyan-500")}
+                    className={cn("w-full border rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-cyan-500")}
                   />
                 </div>
 
@@ -1140,7 +1139,7 @@ export default function VpcDashboardPage() {
                     onChange={(e) => setVpcForm({ ...vpcForm, cidr: e.target.value })}
                     placeholder="e.g. 10.10.100.0/24"
                     className={cn(
-                      isDark ? "w-full bg-white/[0.02] border rounded-lg px-4 py-2 text-white placeholder-zinc-500 focus:outline-none font-mono text-sm" : "w-full bg-white border rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none font-mono text-sm",
+                      isDark ? "w-full bg-[#060b14] border-slate-800 rounded-lg px-4 py-2 text-white placeholder-zinc-500 focus:outline-none font-mono text-sm" : "w-full bg-white border rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none font-mono text-sm",
                       (vpcForm.cidr && validateCidr(vpcForm.cidr).error) ? "border-red-500 focus:border-red-500 ring-1 ring-red-500" : "border-[#1f3e5a] focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     )}
                   />
@@ -1170,7 +1169,7 @@ export default function VpcDashboardPage() {
                 <button
                   onClick={handleCreateVpc}
                   disabled={saving}
-                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-[0_0_15px_rgba(34,211,238,0.3)]" : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md")}
+                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-sm" : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md")}
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   Create VPC
@@ -1184,10 +1183,9 @@ export default function VpcDashboardPage() {
       {/* Create Peering Modal */}
       <AnimatePresence>
         {showAddPeeringModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              <h2 className={cn("text-2xl font-bold mb-2 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                            <h2 className={cn("text-2xl font-bold mb-2 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                 <Link2 className="w-6 h-6 text-cyan-400" />
                 Create VPC Peering
               </h2>
@@ -1236,7 +1234,7 @@ export default function VpcDashboardPage() {
                   type="text"
                   value={peeringForm.description}
                   onChange={(e) => setPeeringForm({ ...peeringForm, description: e.target.value })}
-                  className={cn("w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-[#1f3e5a] text-white" : "bg-white border-slate-200 text-slate-900 focus:ring-1 focus:ring-cyan-500")}
+                  className={cn("w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 focus:ring-1 focus:ring-cyan-500")}
                 />
               </div>
 
@@ -1256,7 +1254,7 @@ export default function VpcDashboardPage() {
                 <button
                   onClick={handleAddPeeringSubmit}
                   disabled={saving}
-                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-[0_0_15px_rgba(34,211,238,0.3)]" : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md")}
+                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-sm" : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md")}
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   Create Peering
@@ -1308,10 +1306,9 @@ export default function VpcDashboardPage() {
       {/* Attach VM Modal */}
       <AnimatePresence>
         {showAttachVmModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              <h2 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                            <h2 className={cn("text-2xl font-bold mb-6 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Plug className="w-6 h-6 text-cyan-400" /> Attach VM
               </h2>
 
@@ -1345,7 +1342,7 @@ export default function VpcDashboardPage() {
                           value={attachForm.privateIpAddress}
                           onChange={(e) => setAttachForm({ ...attachForm, privateIpAddress: e.target.value })}
                           placeholder={placeholderText}
-                          className={cn("w-full border rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500 font-mono text-sm", isDark ? "bg-white/[0.02] border-[#1f3e5a] text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-cyan-500")}
+                          className={cn("w-full border rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500 font-mono text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-cyan-500")}
                         />
                         {ipRange && (
                           <p className="text-[11px] text-cyan-400/70 mt-1.5 font-mono">
@@ -1385,10 +1382,9 @@ export default function VpcDashboardPage() {
       {/* Manage VMs Modal */}
       <AnimatePresence>
         {showManageVmsModal !== null && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              <div className="flex items-center justify-between mb-2 relative z-10">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-md relative overflow-hidden transform-gpu", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                            <div className="flex items-center justify-between mb-2 relative z-10">
                 <h2 className={cn("text-2xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   <Unplug className="w-6 h-6 text-cyan-400" /> Manage Attached VMs
                 </h2>
@@ -1409,7 +1405,7 @@ export default function VpcDashboardPage() {
 
                   if (!currentVpc.vpsServices || currentVpc.vpsServices.length === 0) {
                     return (
-                      <div className={cn("flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed rounded-2xl", isDark ? "border-[#1f3e5a] bg-white/[0.02]" : "border-slate-300 bg-slate-50")}>
+                      <div className={cn("flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed rounded-2xl", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-300 bg-slate-50")}>
                         <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 ring-4", isDark ? "bg-[#1f3e5a]/50 ring-[#1f3e5a]/20" : "bg-slate-200 ring-slate-100")}>
                           <Unplug className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-500")} />
                         </div>
@@ -1444,7 +1440,7 @@ export default function VpcDashboardPage() {
                         </div>
                       )}
 
-                      <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-white/5 bg-white/[0.02]" : "border-slate-200 bg-white")}>
+                      <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-white")}>
                         <table className="w-full text-left border-collapse min-w-[500px]">
                           <thead>
                             <tr className={cn("border-b", isDark ? "border-white/5 bg-white/5" : "border-slate-200 bg-slate-50")}>

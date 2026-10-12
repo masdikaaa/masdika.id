@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Key, Plus, Trash2, Copy, CheckCircle2, Clock, Activity, RefreshCw, KeyRound, FlaskConical, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -67,7 +68,7 @@ export default function DashboardApiKeys() {
   const [newKeyName, setNewKeyName] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const itemsPerPage = 10;
   
   const [services, setServices] = useState<string[]>([]);
@@ -200,7 +201,7 @@ export default function DashboardApiKeys() {
   return (
     <motion.div className="space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group", isDark ? "bg-white/[0.02] border-white/5 shadow-sm" : "bg-white border-black/5 shadow-sm")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
         
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -218,7 +219,7 @@ export default function DashboardApiKeys() {
               <FlaskConical className="w-5 h-5 text-cyan-500" />
               API Lab
             </Link>
-            <Link href="/dashboard/api-stats" className={cn("px-6 py-3.5 rounded-xl text-white font-bold transition-all hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>
+            <Link href="/dashboard/api-stats" className={cn("px-6 py-3.5 rounded-xl text-white font-bold transition-all hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>
               <Activity className="w-5 h-5" />
               View API Stats
             </Link>
@@ -228,7 +229,7 @@ export default function DashboardApiKeys() {
 
       {services.length === 0 ? (
         <motion.div variants={itemVariants}>
-          <div className={cn("backdrop-blur-sm border rounded-3xl p-12 text-center mt-8", isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-black/5")}>
+          <div className={cn(" border rounded-3xl p-12 text-center mt-8", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-black/5")}>
             <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
               <Key className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
             </div>
@@ -236,7 +237,7 @@ export default function DashboardApiKeys() {
             <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
               You need an active subscription to any API service (like File CDN or URL Shortener) to generate and manage API keys.
             </p>
-            <Link href="/dashboard/checkout" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+            <Link href="/dashboard/checkout" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-sm">
               View Plans
             </Link>
           </div>
@@ -244,8 +245,8 @@ export default function DashboardApiKeys() {
       ) : (
         <motion.div className="w-full space-y-8" variants={itemVariants}>
         {/* Generate Key Section */}
-        <div className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 relative group", isDark ? "bg-white/[0.02] border-white/5 shadow-md" : "bg-white border-black/5 shadow-sm")}>
-          <div className={cn("absolute inset-0 rounded-3xl bg-gradient-to-b pointer-events-none", isDark ? "from-white/[0.02] to-transparent" : "from-slate-50/50 to-transparent")} />
+        <div className={cn(" border rounded-3xl p-6 md:p-8 relative group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
+          <div className={cn("absolute inset-0 rounded-3xl bg-gradient-to-b pointer-events-none", isDark ? "from-transparent to-transparent" : "from-slate-50/50 to-transparent")} />
           
           <div className="relative z-10 flex flex-col md:flex-row gap-6 lg:gap-10">
             <div className="flex-1">
@@ -262,7 +263,7 @@ export default function DashboardApiKeys() {
                   placeholder="Key Alias (e.g. Production Key)" 
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  className={cn("flex-1 border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 transition-all shadow-inner", isDark ? "bg-white/[0.02] border-white/10 text-white focus:border-cyan-500/50 focus:ring-cyan-500/20" : "bg-slate-50 border-slate-200 text-slate-800 focus:border-cyan-400 focus:ring-cyan-400/20")}
+                  className={cn("flex-1 border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 transition-all shadow-inner", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-slate-50 border-slate-200 text-slate-800 focus:border-cyan-400 focus:ring-cyan-400/20")}
                 />
                 <div className="w-full sm:w-fit sm:min-w-[220px] shrink-0 relative z-50">
                   <Select
@@ -283,7 +284,7 @@ export default function DashboardApiKeys() {
                 <button 
                   onClick={generateKey}
                   disabled={generating || keys.some(k => (k.service || '').toLowerCase() === selectedService.toLowerCase())}
-                  className={cn("px-6 py-3 rounded-2xl font-bold flex items-center gap-2 whitespace-nowrap transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+                  className={cn("px-6 py-3 rounded-2xl font-bold flex items-center gap-2 whitespace-nowrap transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
                 >
                   {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
                   Generate Key
@@ -305,7 +306,7 @@ export default function DashboardApiKeys() {
             <Activity className="w-5 h-5 text-cyan-500" /> Active Keys
           </h3>
           {keys.length === 0 ? (
-            <div className={cn("border rounded-3xl p-12 text-center backdrop-blur-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-black/5")}>
+            <div className={cn("border rounded-3xl p-12 text-center ", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-black/5")}>
               <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white border border-slate-200 shadow-sm")}>
                 <Key className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
               </div>
@@ -349,10 +350,10 @@ export default function DashboardApiKeys() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.07 }}
                   className={cn(
-                    "backdrop-blur-sm border rounded-3xl p-5 md:p-6 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group relative overflow-hidden",
+                    " border rounded-3xl p-5 md:p-6 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group relative overflow-hidden",
                     selectedKeys.includes(key.id) 
-                      ? (isDark ? "border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)] bg-cyan-500/5" : "border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] bg-cyan-50")
-                      : (isDark ? "bg-white/[0.02]/80 border-white/5 hover:border-cyan-500/30 shadow-lg" : "bg-white border-black/5 hover:border-cyan-300 shadow-sm")
+                      ? (isDark ? "border-cyan-500/50 shadow-sm bg-cyan-500/5" : "border-cyan-400 shadow-sm bg-cyan-50")
+                      : (isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-black/5 hover:border-cyan-300 shadow-sm")
                   )}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:to-cyan-500/[0.03] transition-colors pointer-events-none" />
@@ -385,7 +386,7 @@ export default function DashboardApiKeys() {
                       </label>
                       <span className={cn("font-bold text-lg truncate max-w-[200px] md:max-w-xs", isDark ? "text-white" : "text-slate-900")}>{key.name || "Default Key"}</span>
                       {key.service ? (
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]" : "bg-cyan-50 border border-cyan-200 text-cyan-600")}>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-sm" : "bg-cyan-50 border border-cyan-200 text-cyan-600")}>
                           {key.service.split('_').join(' ')}
                         </span>
                       ) : (
@@ -394,7 +395,7 @@ export default function DashboardApiKeys() {
                         </span>
                       )}
                       {key.isSuspended && (
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-red-500/10 border border-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.1)]" : "bg-red-50 border border-red-200 text-red-600")}>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-red-500/10 border border-red-500/20 text-red-400 shadow-sm" : "bg-red-50 border border-red-200 text-red-600")}>
                           Suspended
                         </span>
                       )}

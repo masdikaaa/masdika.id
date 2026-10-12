@@ -37,7 +37,7 @@ export default function PromoImage({ src, alt }: { src: string; alt: string }) {
         loading="lazy" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#011627] via-transparent to-transparent opacity-80 pointer-events-none" />
         <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-300">
-          <div className={cn("w-12 h-12 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border", isDark ? "text-white border-white/20" : "text-slate-900 border-slate-200")}>
+          <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center border border-white/20 text-white">
             <ZoomIn className="w-6 h-6" />
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function PromoImage({ src, alt }: { src: string; alt: string }) {
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/90 backdrop-blur-md"
+                className="absolute inset-0 bg-black/90"
                 onClick={() => setIsOpen(false)}
               />
               <motion.div 
@@ -63,7 +63,7 @@ export default function PromoImage({ src, alt }: { src: string; alt: string }) {
               >
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className={cn("absolute top-4 right-4 sm:top-6 sm:right-6 z-20 w-12 h-12 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center backdrop-blur-md border transition-all hover:scale-105", isDark ? "text-white border-white/20" : "text-slate-900 border-slate-200")}
+                  className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 w-12 h-12 bg-black/60 hover:bg-black/90 rounded-full flex items-center justify-center border border-white/20 text-white transition-all hover:scale-105"
                 >
                   <X className="w-6 h-6" />
                 </button>

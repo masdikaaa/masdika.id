@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { Wallet, Building2, Store, QrCode, Loader2, ArrowLeft, Check, Plus, ShieldCheck, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -24,7 +25,7 @@ export default function TopUpPage() {
   const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
 
   // Pagination State
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const itemsPerPage = 8;
 
   useEffect(() => {
@@ -137,9 +138,7 @@ export default function TopUpPage() {
       </motion.div>
 
       {/* Header section */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        
-        
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold mb-4 tracking-wide">
             <Wallet className="w-3 h-3" /> Billing & Payment
@@ -157,9 +156,7 @@ export default function TopUpPage() {
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
           
           {/* Step 1: Amount */}
-          <motion.section variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-            
+          <motion.section variants={itemVariants} className={cn("border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex items-center gap-3 mb-6 relative z-10">
               <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm border", isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-300")}>1</div>
               <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Select Amount</h2>
@@ -175,10 +172,10 @@ export default function TopUpPage() {
                       "py-4 rounded-2xl text-base font-bold transition-all border text-center shadow-inner",
                       topUpAmount === amt 
                         ? isDark 
-                          ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                          : "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-sm"
+                          ? "bg-cyan-500/15 border-cyan-500 text-cyan-400 shadow-sm"
+                          : "bg-cyan-50 border-cyan-300 text-cyan-700 shadow-sm"
                         : isDark 
-                          ? "bg-[#0b1120] border-white/5 text-zinc-400 hover:border-white/20 hover:text-white" 
+                          ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:border-slate-700 hover:text-white" 
                           : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
                     )}
                   >
@@ -196,7 +193,7 @@ export default function TopUpPage() {
                     const rawValue = e.target.value.replace(/[^0-9]/g, '');
                     setTopUpAmount(Number(rawValue));
                   }}
-                  className={cn("w-full border rounded-2xl pl-16 pr-6 py-5 focus:outline-none focus:ring-2 font-black text-2xl shadow-inner transition-all", isDark ? "bg-[#0b1120] border-white/10 text-white focus:border-cyan-500/50 focus:ring-cyan-500/20" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500 focus:ring-cyan-500/20")}
+                  className={cn("w-full border rounded-2xl pl-16 pr-6 py-5 focus:outline-none focus:ring-2 font-black text-2xl shadow-inner transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500 focus:ring-cyan-500/20")}
                   placeholder="Custom amount..."
                 />
               </div>
@@ -205,9 +202,7 @@ export default function TopUpPage() {
           </motion.section>
 
           {/* Step 2: Payment Method */}
-          <motion.section variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-            
+          <motion.section variants={itemVariants} className={cn("border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex items-center gap-3 mb-6 relative z-10">
               <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm border", isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-300")}>2</div>
               <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Payment Method</h2>
@@ -215,7 +210,7 @@ export default function TopUpPage() {
 
             <div className="relative z-10">
               {paymentMethods.length === 0 ? (
-                <div className={cn("flex flex-col items-center justify-center py-10 border rounded-2xl", isDark ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("flex flex-col items-center justify-center py-10 border rounded-2xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                   <Loader2 className="w-8 h-8 text-cyan-500 animate-spin mb-4" />
                   <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Loading payment methods...</p>
                 </div>
@@ -230,24 +225,24 @@ export default function TopUpPage() {
                           "flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all shadow-inner",
                           selectedMethod === pm.code
                             ? isDark
-                              ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                              : "bg-cyan-50 border-cyan-200 shadow-sm"
+                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-sm"
+                              : "bg-cyan-50 border-cyan-300 shadow-sm"
                             : isDark
-                              ? "bg-[#0b1120] border-white/5 hover:border-white/20 hover:bg-white/5"
+                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-slate-800/20"
                               : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
                         )}
                       >
                         <div className="flex items-center gap-4">
                           <div className={cn(
                             "w-14 h-12 flex items-center justify-center rounded-xl overflow-hidden shrink-0",
-                            selectedMethod === pm.code ? (isDark ? "bg-white ring-2 ring-cyan-500 ring-offset-2 ring-offset-[#0b1120]" : "bg-white ring-2 ring-cyan-500 ring-offset-2 ring-offset-cyan-50") : (isDark ? "bg-white border border-zinc-200" : "bg-white border border-slate-200")
+                            selectedMethod === pm.code ? (isDark ? "bg-white ring-2 ring-cyan-500 ring-offset-2 ring-offset-[#0b1322]" : "bg-white ring-2 ring-cyan-500 ring-offset-2 ring-offset-cyan-50") : (isDark ? "bg-white border border-zinc-200" : "bg-white border border-slate-200")
                           )}>
                             {pm.image ? (
                               <img referrerPolicy="no-referrer" 
                                 src={pm.image} 
                                 alt={pm.name} 
                                 className="w-full h-full object-contain p-2"
-                              loading="lazy" decoding="async" />
+                                loading="lazy" decoding="async" />
                             ) : (
                               <div className={cn("flex items-center justify-center", isDark ? "text-zinc-800" : "text-slate-900")}>
                                 {pm.type === "VIRTUAL_ACCOUNT" && <Building2 className="w-6 h-6" />}
@@ -266,7 +261,7 @@ export default function TopUpPage() {
                         </div>
                         <div className={cn(
                           "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ml-4 transition-colors",
-                          selectedMethod === pm.code ? (isDark ? "border-cyan-400 bg-cyan-400/20" : "border-cyan-500 bg-cyan-100") : (isDark ? "border-zinc-600 bg-[#011627]" : "border-slate-300 bg-slate-100")
+                          selectedMethod === pm.code ? (isDark ? "border-cyan-400 bg-cyan-400/20" : "border-cyan-500 bg-cyan-100") : (isDark ? "border-zinc-600 bg-[#060b14]" : "border-slate-300 bg-slate-100")
                         )}>
                           {selectedMethod === pm.code && <Check className="w-3 h-3 text-cyan-400" />}
                         </div>
@@ -275,11 +270,11 @@ export default function TopUpPage() {
                   </div>
                   
                   {totalPages > 1 && (
-                    <div className={cn("mt-8 flex items-center justify-center gap-4 border-t pt-6", isDark ? "border-white/5" : "border-slate-200")}>
+                    <div className={cn("mt-8 flex items-center justify-center gap-4 border-t pt-6", isDark ? "border-slate-800" : "border-slate-200")}>
                       <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className={cn("p-2 rounded-xl bg-white/5 border hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}
+                        className={cn("p-2 rounded-xl border hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "bg-slate-800/50 hover:bg-slate-800 border-slate-700 text-zinc-400" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-500")}
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
@@ -289,7 +284,7 @@ export default function TopUpPage() {
                       <button
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className={cn("p-2 rounded-xl bg-white/5 border hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}
+                        className={cn("p-2 rounded-xl border hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "bg-slate-800/50 hover:bg-slate-800 border-slate-700 text-zinc-400" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-500")}
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -304,14 +299,13 @@ export default function TopUpPage() {
 
         {/* Right Column: Order Summary */}
         <motion.div variants={itemVariants} className="lg:col-span-1">
-          <div className={cn("sticky top-6 backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-            <h2 className={cn("text-xl font-bold mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-white/10" : "text-slate-900 border-slate-200")}>
+          <div className={cn("sticky top-6 border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+            <h2 className={cn("text-xl font-bold mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>
               <ShieldCheck className="w-5 h-5 text-cyan-400" /> Payment Details
             </h2>
 
             <div className="space-y-4 mb-8 relative z-10">
-              <div className={cn("flex justify-between items-center p-4 rounded-2xl border shadow-inner", isDark ? "bg-[#0b1120] border-white/5" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("flex justify-between items-center p-4 rounded-2xl border shadow-inner", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <div className={cn("text-sm font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Amount</div>
                 <div className={cn("font-black text-lg", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(topUpAmount)}</div>
               </div>
@@ -319,7 +313,7 @@ export default function TopUpPage() {
               {selectedPmData && (
                 <div className="flex justify-between items-center text-xs px-2 mt-4">
                   <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Method</div>
-                  <div className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "bg-white/5 text-white border-white/5" : "bg-slate-100 text-slate-900 border-slate-200")}>{selectedPmData.name}</div>
+                  <div className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "bg-slate-800/50 text-white border-slate-700" : "bg-slate-100 text-slate-900 border-slate-200")}>{selectedPmData.name}</div>
                 </div>
               )}
 
@@ -344,7 +338,7 @@ export default function TopUpPage() {
                 </div>
               )}
 
-              <div className={cn("flex justify-between items-end border-t pt-4 mt-6", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("flex justify-between items-end border-t pt-4 mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
                 <div>
                   <div className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Payment</div>
                   <div className={cn("text-3xl font-black", isDark ? "text-cyan-400" : "text-cyan-600")}>
@@ -368,7 +362,7 @@ export default function TopUpPage() {
                     onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                     placeholder="e.g. DISCOUNT10"
                     disabled={appliedVoucher !== null || isCheckingVoucher}
-                    className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none disabled:opacity-50", isDark ? "bg-[#0b1120] border-white/10 text-white focus:border-cyan-500/50" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500")}
+                    className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none disabled:opacity-50", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500")}
                   />
                   {appliedVoucher ? (
                     <button
@@ -394,10 +388,10 @@ export default function TopUpPage() {
               onClick={handleTopUp}
               disabled={isProcessing || !selectedMethod || topUpAmount < 50000}
               className={cn(
-                "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg transform",
+                "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm",
                 isProcessing || !selectedMethod || topUpAmount < 50000
                   ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-none cursor-not-allowed"
-                  : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:-translate-y-1"
+                  : "bg-cyan-600 hover:bg-cyan-700 text-white"
               )}
             >
               {isProcessing ? (

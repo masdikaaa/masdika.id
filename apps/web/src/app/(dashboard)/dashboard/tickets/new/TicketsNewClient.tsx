@@ -16,8 +16,8 @@ import { Select } from "@/components/ui/Select";
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 const getInputClass = (isDark: boolean) => cn(
-  'w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 transition-all shadow-inner',
-  isDark ? 'bg-[#0b1120] border-white/10 text-white placeholder-zinc-600 focus:border-cyan-500/50 focus:ring-cyan-500/20' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20'
+  'w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 transition-all',
+  isDark ? 'bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20'
 );
 
 const getLabelClass = (isDark: boolean) => cn(
@@ -123,7 +123,7 @@ export default function TicketsNewClient() {
         </Link>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0 flex items-start gap-4">
           <div>
             <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
@@ -142,9 +142,8 @@ export default function TicketsNewClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         onSubmit={handleSubmit}
-        className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 space-y-6 relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/5 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+        className={cn("border rounded-3xl p-6 md:p-8 space-y-6 relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("absolute inset-0 bg-gradient-to-b pointer-events-none", isDark ? "from-white/[0.02] to-transparent" : "from-slate-50/50 to-transparent")} />
 
         {submitError && (
           <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm flex items-center gap-3 relative z-10">
@@ -297,17 +296,17 @@ export default function TicketsNewClient() {
           )}
         </div>
 
-        <div className={cn("flex justify-end gap-4 pt-6 border-t relative z-10", isDark ? "border-white/5" : "border-slate-100")}>
+        <div className={cn("flex justify-end gap-4 pt-6 border-t relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
           <Link
             href="/dashboard/tickets"
-            className={cn("px-6 py-3.5 text-sm font-bold rounded-2xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
+            className={cn("px-6 py-3.5 text-sm font-bold rounded-2xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-slate-800/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className={cn("px-8 py-3.5 text-sm font-bold text-white rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+            className={cn("px-8 py-3.5 text-sm font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm hover:shadow" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Submit Ticket

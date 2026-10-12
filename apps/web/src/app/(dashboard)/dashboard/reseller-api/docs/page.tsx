@@ -40,7 +40,7 @@ const MethodBadge = ({ method }: { method: string }) => {
 /* ─── Code Block ─── */
 const CodeBlock = ({ isDark, title, children, raw }: { isDark: boolean; title: string; children: React.ReactNode; raw?: string }) => (
   <div className={cn("rounded-xl border overflow-hidden", isDark ? "bg-[#0c0c14] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm")}>
-    <div className={cn("flex items-center justify-between px-4 py-2.5 border-b", isDark ? "border-white/[0.06] bg-white/[0.02]" : "border-slate-100 bg-slate-50/80")}>
+    <div className={cn("flex items-center justify-between px-4 py-2.5 border-b", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-100 bg-slate-50/80")}>
       <span className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-600" : "text-slate-400")}>{title}</span>
       {raw && <CopyBtn text={raw} isDark={isDark} small />}
     </div>
@@ -80,7 +80,7 @@ const EndpointSection = ({ isDark, id, title, method, endpoint, description, par
 
           {/* Endpoint */}
           <div className="mb-6">
-            <div className={cn("flex items-center gap-2 px-4 py-2.5 rounded-lg border font-mono text-sm overflow-x-auto", isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("flex items-center gap-2 px-4 py-2.5 rounded-lg border font-mono text-sm overflow-x-auto", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
               <span className={cn("font-black text-xs",
                 method === "GET" ? "text-blue-400" :
                 method === "POST" ? "text-emerald-400" :
@@ -97,7 +97,7 @@ const EndpointSection = ({ isDark, id, title, method, endpoint, description, par
               <h3 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3", isDark ? "text-zinc-600" : "text-slate-400")}>Parameters</h3>
               <div className={cn("rounded-lg border overflow-x-auto", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <table className="w-full min-w-[500px] text-sm text-left">
-                  <thead className={cn("text-[10px] uppercase tracking-wider border-b", isDark ? "bg-white/[0.02] border-white/[0.06] text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-400")}>
+                  <thead className={cn("text-[10px] uppercase tracking-wider border-b", isDark ? "bg-[#060b14] border-slate-800 text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-400")}>
                     <tr>
                       <th className="px-4 py-2.5 font-bold">Parameter</th>
                       <th className="px-4 py-2.5 font-bold">Type</th>
@@ -106,7 +106,7 @@ const EndpointSection = ({ isDark, id, title, method, endpoint, description, par
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-white/[0.04]" : "divide-slate-100")}>
                     {parameters.map((p: any, i: number) => (
-                      <tr key={i} className={isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/50"}>
+                      <tr key={i} className={isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50/50"}>
                         <td className={cn("px-4 py-2.5 font-mono text-[12px] font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{p.name}</td>
                         <td className={cn("px-4 py-2.5 text-[12px]", isDark ? "text-zinc-600" : "text-slate-400")}>{p.type}</td>
                         <td className={cn("px-4 py-2.5 text-[12px]", isDark ? "text-zinc-400" : "text-slate-600")}>{p.description}</td>
@@ -120,7 +120,7 @@ const EndpointSection = ({ isDark, id, title, method, endpoint, description, par
         </div>
 
         {/* Right: Code Examples */}
-        <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l space-y-6", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200")}>
+        <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l space-y-6", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
           {payload !== undefined && (
             <CodeBlock isDark={isDark} title="Request" raw={curlCommand}>
               <span className={isDark ? "text-pink-400" : "text-pink-600"}>curl</span> <span className={isDark ? "text-amber-300" : "text-amber-600"}>&quot;https://www.masdika.id{endpoint}&quot;</span> \<br/>
@@ -226,7 +226,7 @@ export default function ResellerApiDocsPage() {
                           "flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium transition-all",
                           activeId === item.id
                             ? (isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-50 text-cyan-700")
-                            : (isDark ? "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50")
+                            : (isDark ? "text-zinc-500 hover:text-zinc-300 hover:bg-slate-800/40" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50")
                         )}
                       >
                         <item.icon className="w-3.5 h-3.5 shrink-0" />
@@ -266,9 +266,9 @@ export default function ResellerApiDocsPage() {
                 </div>
               </div>
             </div>
-            <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l flex flex-col justify-center", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200")}>
+            <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
               <h4 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3", isDark ? "text-zinc-600" : "text-slate-400")}>Base URL</h4>
-              <div className={cn("px-4 py-3 rounded-lg border font-mono text-sm", isDark ? "bg-white/[0.03] border-white/[0.06] text-white" : "bg-white border-slate-200 text-slate-700 shadow-sm")}>
+              <div className={cn("px-4 py-3 rounded-lg border font-mono text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-700 shadow-sm")}>
                 https://www.masdika.id/api/v1
               </div>
             </div>
@@ -291,7 +291,7 @@ export default function ResellerApiDocsPage() {
                 </p>
               </div>
             </div>
-            <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l flex flex-col justify-center", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200")}>
+            <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
               <h4 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3", isDark ? "text-zinc-600" : "text-slate-400")}>Header Format</h4>
               <div className={cn("px-4 py-3 rounded-lg border font-mono text-[13px]", isDark ? "bg-[#0c0c14] border-white/[0.06] text-zinc-300" : "bg-white border-slate-200 text-slate-700 shadow-sm")}>
                 <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Authorization:</span> Bearer masdika_YOUR_SECRET_KEY
@@ -457,7 +457,7 @@ export default function ResellerApiDocsPage() {
                     { code: "A1", name: "ATM Bersama" },
                     { code: "FT", name: "Pegadaian/ALFA/Pos" }
                   ].map(pm => (
-                    <span key={pm.code} className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]", isDark ? "bg-white/[0.04] text-zinc-400" : "bg-slate-100 text-slate-500")}>
+                    <span key={pm.code} className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]", isDark ? "bg-slate-800/50 text-zinc-400" : "bg-slate-100 text-slate-500")}>
                       <code className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{pm.code}</code>
                       {pm.name}
                     </span>
@@ -490,8 +490,8 @@ export default function ResellerApiDocsPage() {
                 {[
                   <>Customer places order on <strong className={isDark ? "text-white" : "text-slate-900"}>your website</strong> and pays via your payment gateway.</>,
                   <>Your server receives <strong className={isDark ? "text-white" : "text-slate-900"}>payment webhook</strong> confirming successful payment.</>,
-                  <>Call <code className={cn("font-mono text-[11px] px-1 py-0.5 rounded", isDark ? "bg-white/[0.04] text-cyan-400" : "bg-slate-100 text-cyan-600")}>GET /api/v1/billing</code> to verify your Masdika balance is sufficient.</>,
-                  <>Call <code className={cn("font-mono text-[11px] px-1 py-0.5 rounded", isDark ? "bg-white/[0.04] text-cyan-400" : "bg-slate-100 text-cyan-600")}>POST /api/v1/instances</code> to provision the VPS. Masdika deducts the wholesale cost.</>,
+                  <>Call <code className={cn("font-mono text-[11px] px-1 py-0.5 rounded", isDark ? "bg-slate-800/50 text-cyan-400" : "bg-slate-100 text-cyan-600")}>GET /api/v1/billing</code> to verify your Masdika balance is sufficient.</>,
+                  <>Call <code className={cn("font-mono text-[11px] px-1 py-0.5 rounded", isDark ? "bg-slate-800/50 text-cyan-400" : "bg-slate-100 text-cyan-600")}>POST /api/v1/instances</code> to provision the VPS. Masdika deducts the wholesale cost.</>,
                   <><strong className={isDark ? "text-emerald-400" : "text-emerald-600"}>Your profit</strong> = Customer payment − Masdika wholesale cost. You set your own markup freely.</>,
                 ].map((text, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -502,7 +502,7 @@ export default function ResellerApiDocsPage() {
               </div>
 
               <h3 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3 mt-8", isDark ? "text-zinc-600" : "text-slate-400")}>Billing Lifecycle & Terminations</h3>
-              <div className={cn("space-y-2 text-sm p-4 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.06] text-zinc-400" : "bg-white border-slate-200 text-slate-600")}>
+              <div className={cn("space-y-2 text-sm p-4 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-white border-slate-200 text-slate-600")}>
                 <p><strong className={isDark ? "text-red-400" : "text-red-600"}>Important:</strong> You must maintain a sufficient balance to cover the monthly renewals of all your active instances.</p>
                 <ul className="list-disc pl-5 space-y-1.5">
                   <li><strong className={isDark ? "text-white" : "text-slate-900"}>Low Balance Warning (H-1):</strong> If your balance is insufficient within 24 hours, you will receive an email notification.</li>
@@ -513,7 +513,7 @@ export default function ResellerApiDocsPage() {
               </div>
             </div>
 
-            <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200")}>
+            <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
               <CodeBlock isDark={isDark} title="Pseudocode">
                 <code className={isDark ? "text-zinc-300" : "text-slate-700"}>{`// 1. Customer pays on YOUR website
 onPaymentWebhook(order) {

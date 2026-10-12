@@ -1,4 +1,5 @@
 "use client";
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -21,7 +22,7 @@ export default function AdminMessagesPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(messages.length / itemsPerPage);
   const paginatedMessages = messages.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

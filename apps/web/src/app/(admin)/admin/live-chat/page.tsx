@@ -1,4 +1,5 @@
 "use client";
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -67,7 +68,7 @@ export default function AdminLiveChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Pagination for sessions
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const ITEMS_PER_PAGE = 8;
 
   // Fetch initial status and sessions

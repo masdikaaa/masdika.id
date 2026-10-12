@@ -70,7 +70,7 @@ export default function TicketsClient() {
   return (
     <div className="w-full space-y-6">
       {/* Header section */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold mb-4 tracking-wide">
             <HeadphonesIcon className="w-3 h-3" /> Customer Support
@@ -89,12 +89,12 @@ export default function TicketsClient() {
               placeholder="Search tickets..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn("w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-all focus:outline-none focus:ring-2", isDark ? "bg-white/[0.02] border border-white/10 text-white placeholder-zinc-500 focus:border-sky-500/50 focus:ring-sky-500/20 shadow-inner" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:ring-sky-500/20 shadow-sm")}
+              className={cn("w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-all focus:outline-none focus:ring-2", isDark ? "bg-[#060b14] border border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 shadow-sm")}
             />
           </div>
           <Link
             href="/dashboard/tickets/new"
-            className={cn("px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
+            className={cn("px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
           >
             <Plus className="w-5 h-5" />
             New Ticket
@@ -103,10 +103,8 @@ export default function TicketsClient() {
       </motion.div>
 
       {/* Tickets Table */}
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        
-        <div className={cn("p-6 md:p-8 border-b relative z-10 flex items-center justify-between", isDark ? "border-white/5" : "border-slate-100")}>
+      <motion.div variants={itemVariants} className={cn("rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 md:p-8 border-b relative z-10 flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-100")}>
           <h3 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <MessageSquare className="w-5 h-5 text-sky-400" /> Your Tickets
           </h3>
@@ -146,7 +144,7 @@ export default function TicketsClient() {
               {!searchQuery && (
                 <Link
                   href="/dashboard/tickets/new"
-                  className={cn("mt-2 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
+                  className={cn("mt-2 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
                 >
                   <Plus className="w-4 h-4" /> Open a Ticket
                 </Link>
@@ -154,7 +152,7 @@ export default function TicketsClient() {
             </div>
           ) : (
             <table className="w-full min-w-[600px] text-left">
-              <thead className={cn("border-b bg-black/40", isDark ? "border-white/5" : "border-slate-200")}>
+              <thead className={cn("border-b", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <tr className={cn("text-[10px] uppercase tracking-widest font-black", isDark ? "text-zinc-500" : "text-slate-500")}>
                   <th className="px-6 py-5">Ticket ID & Subject</th>
                   <th className="px-6 py-5">Status</th>
@@ -162,14 +160,14 @@ export default function TicketsClient() {
                   <th className="px-6 py-5 w-10"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/60" : "divide-slate-200")}>
                 {tickets?.map((t: any, i: number) => (
                   <motion.tr
                     key={t.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="hover:bg-white/[0.03] transition-colors group cursor-pointer"
+                    className={cn("transition-colors group cursor-pointer", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50")}
                     onClick={() => router.push(`/dashboard/tickets/${t.ticketId.toLowerCase()}`)}
                   >
                     <td className="px-6 py-5">
@@ -188,8 +186,8 @@ export default function TicketsClient() {
                       </div>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/5 group-hover:bg-sky-500/20 group-hover:text-sky-400 transition-all">
-                        <ChevronRight className={cn("w-4 h-4 group-hover:text-sky-400 transition-colors", isDark ? "text-zinc-600" : "text-slate-900")} />
+                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-all", isDark ? "bg-slate-800/60 group-hover:bg-cyan-500/20 group-hover:text-cyan-400" : "bg-slate-100 group-hover:bg-cyan-50 group-hover:text-cyan-600")}>
+                        <ChevronRight className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-500 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")} />
                       </div>
                     </td>
                   </motion.tr>
@@ -200,7 +198,7 @@ export default function TicketsClient() {
         </div>
 
         {totalPages > 1 && (
-          <div className={cn("p-6 border-t relative z-10", isDark ? "border-white/5 bg-black/20" : "border-slate-200 bg-slate-50/50")}>
+          <div className={cn("p-6 border-t relative z-10", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50/50")}>
             <Pagination
               currentPage={page}
               totalPages={totalPages}

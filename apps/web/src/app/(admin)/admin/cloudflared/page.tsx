@@ -1,4 +1,5 @@
 "use client";
+import { useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Globe, Trash2, Search, RefreshCw, Server, CheckCircle, Shield, Network } from "lucide-react";
@@ -20,8 +21,8 @@ export default function AdminCloudflaredPage() {
   const [deleteDomainId, setDeleteDomainId] = useState<number | null>(null);
   const [isDeletingDomain, setIsDeletingDomain] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'domains' | 'tunnels'>('domains');
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useUrlTab<'domains' | 'tunnels'>('domains', { allowed: ['domains', 'tunnels'] as const });
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
 
   const fetchData = async () => {
     setLoading(true);
@@ -99,13 +100,13 @@ export default function AdminCloudflaredPage() {
   );
 
   // Pagination for Domains
-  const [currentDomainPage, setCurrentDomainPage] = useState(1);
+  const [currentDomainPage, setCurrentDomainPage] = useUrlNumber("currentDomainPage", 1);
   const itemsPerPage = 10;
   const totalDomainPages = Math.ceil(filteredDomains.length / itemsPerPage);
   const paginatedDomains = filteredDomains.slice((currentDomainPage - 1) * itemsPerPage, currentDomainPage * itemsPerPage);
 
   // Pagination for Tunnels
-  const [currentTunnelPage, setCurrentTunnelPage] = useState(1);
+  const [currentTunnelPage, setCurrentTunnelPage] = useUrlNumber("currentTunnelPage", 1);
   const totalTunnelPages = Math.ceil(filteredTunnels.length / itemsPerPage);
   const paginatedTunnels = filteredTunnels.slice((currentTunnelPage - 1) * itemsPerPage, currentTunnelPage * itemsPerPage);
 

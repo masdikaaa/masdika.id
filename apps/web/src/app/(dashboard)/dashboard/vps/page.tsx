@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Server, Play, Square, Power, RotateCcw, Activity, RefreshCw, Terminal, AlertTriangle, XCircle, Settings, Search, ChevronLeft, ChevronRight, HardDrive, Cpu, Network, CheckCircle, Copy, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -38,8 +39,8 @@ export default function MyVpsPage() {
   const [actionConfirm, setActionConfirm] = useState<string | null>(null);
 
   // Pagination & Filter
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchFilter, setSearchFilter] = useState("");
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
+  const [searchFilter, setSearchFilter] = useUrlString<string>("searchFilter", "");
   const itemsPerPage = 10;
 
   const fetchVps = async () => {
@@ -240,9 +241,8 @@ export default function MyVpsPage() {
   return (
     <div className="w-full space-y-6">
       {/* Hero Header */}
-      <div className={cn("backdrop-blur-sm border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200", "relative overflow-hidden rounded-3xl   p-6 md:p-8 shadow-sm group")}>
+      <div className={cn("border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm", "relative overflow-hidden rounded-3xl p-6 md:p-8 group")}>
         
-
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
@@ -262,19 +262,19 @@ export default function MyVpsPage() {
                 placeholder="Search ID, Hostname, IP..."
                 value={searchFilter}
                 onChange={(e) => { setSearchFilter(e.target.value); setCurrentPage(1); }}
-                className={cn("w-full backdrop-blur-md border rounded-2xl pl-9 pr-4 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#011627]/80 border-cyan-500/20 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.05)]" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm placeholder:text-slate-400")}
+                className={cn("w-full border rounded-2xl pl-9 pr-4 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm placeholder:text-slate-400")}
               />
             </div>
             <button
               onClick={fetchVps}
-              className={cn("p-2.5 md:p-3 backdrop-blur-md rounded-2xl border transition-colors shrink-0", isDark ? "bg-[#011627]/80 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/10 shadow-[0_0_20px_rgba(6,182,212,0.05)]" : "bg-white text-cyan-600 border-slate-300 hover:bg-slate-50 shadow-sm")}
+              className={cn("p-2.5 md:p-3 rounded-2xl border transition-colors shrink-0", isDark ? "bg-[#060b14] text-cyan-400 border-slate-800 hover:bg-[#09111e]" : "bg-white text-cyan-600 border-slate-300 hover:bg-slate-50 shadow-sm")}
               title="Refresh Status"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <Link
               href="/dashboard/checkout?service=vps"
-              className={cn("flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3 bg-cyan-600 hover:bg-cyan-700 text-sm font-bold rounded-2xl transition-all shadow-md shrink-0 text-white", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}
+              className="flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3 bg-cyan-600 hover:bg-cyan-700 text-sm font-bold rounded-2xl transition-all shadow-sm hover:shadow shrink-0 text-white"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Create Instance</span>
@@ -284,19 +284,19 @@ export default function MyVpsPage() {
       </div>
 
       {vpsList.length === 0 ? (
-        <div className={cn("border transition-colors", isDark ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]" : "bg-white border-slate-200 hover:bg-slate-50", "  rounded-3xl p-12 text-center shadow-sm")}>
-          <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-100")}>
-            <Server className={cn("w-10 h-10  transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
+        <div className={cn("border transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm", "rounded-3xl p-12 text-center")}>
+          <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-[#060b14] border border-slate-800" : "bg-slate-100")}>
+            <Server className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
-          <h3 className={cn("text-xl font-bold  mb-2", isDark ? "text-white" : "text-slate-900")}>No VPS Found</h3>
-          <p className={cn(" max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any active VPS instances yet. Deploy your first virtual private server to get started.</p>
-          <Link href="/dashboard/checkout?service=vps" className={cn("font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}>
+          <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPS Found</h3>
+          <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any active VPS instances yet. Deploy your first virtual private server to get started.</p>
+          <Link href="/dashboard/checkout?service=vps" className="font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 inline-flex items-center justify-center gap-2">
             Deploy New VPS
           </Link>
         </div>
       ) : (
-        <div className={cn("border rounded-2xl shadow-sm overflow-hidden flex flex-col", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-          <div className={cn("border-b", isDark ? "border-white/5" : "border-slate-100", "px-6 py-2   bg-black/20 flex flex-wrap items-center justify-between min-h-[56px] gap-4")}>
+        <div className={cn("border rounded-2xl shadow-md overflow-hidden flex flex-col", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+          <div className={cn("border-b", isDark ? "border-slate-800/80 bg-[#060b14]" : "border-slate-100 bg-slate-50", "px-6 py-2 flex flex-wrap items-center justify-between min-h-[56px] gap-4")}>
             {totalPages > 1 && (
               <div className="py-2">
                 <Pagination
@@ -386,7 +386,7 @@ export default function MyVpsPage() {
                     const displayStatus = isProvisioning ? "Deploying" : (isSuspended ? "SUSPENDED" : (liveStatus || vps.status));
 
                     return (
-                      <tr key={vps.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <tr key={vps.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50")}>
                         <td className="py-4 pl-6 pr-2 align-middle">
                           <button
                             type="button"
@@ -574,9 +574,9 @@ export default function MyVpsPage() {
 
       {/* Confirmation Modal */}
       {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className={cn("border w-full max-w-sm rounded-3xl p-6 shadow-md relative", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-            <button onClick={() => setConfirmModal(null)} className={cn("absolute top-4 right-4  hover:text-white transition-colors", isDark ? "text-zinc-500" : "text-slate-400")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className={cn("border w-full max-w-sm rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+            <button onClick={() => setConfirmModal(null)} className={cn("absolute top-4 right-4 hover:text-white transition-colors", isDark ? "text-zinc-500" : "text-slate-400")}>
               <XCircle className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-3 mb-4">
@@ -589,10 +589,10 @@ export default function MyVpsPage() {
               )}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h2 className={cn("text-xl font-bold  capitalize", isDark ? "text-white" : "text-slate-900")}>{confirmModal.action} Server</h2>
+              <h2 className={cn("text-xl font-bold capitalize", isDark ? "text-white" : "text-slate-900")}>{confirmModal.action} Server</h2>
             </div>
 
-            <p className={cn(" text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
               Are you sure you want to <strong>{confirmModal.action}</strong> the server <strong className={cn("", isDark ? "text-white" : "text-slate-900")}>{confirmModal.hostname}</strong>?
               {confirmModal.action === "stop" && (
                 <span className="block mt-2 text-red-400">Warning: This is a forced stop. Unsaved data may be lost. Use Shutdown instead for a graceful exit.</span>
@@ -602,18 +602,18 @@ export default function MyVpsPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setConfirmModal(null)}
-                className={cn("px-5 py-2.5  hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleAction(confirmModal.vpsId, confirmModal.action)}
                 className={cn(
-                  "px-6 py-2.5 rounded-xl font-medium transition-colors text-white shadow-lg",
-                  confirmModal.action === "start" ? "bg-cyan-600 hover:bg-cyan-700 shadow-cyan-500/20" :
-                    confirmModal.action === "stop" ? "bg-red-600 hover:bg-red-700 shadow-red-500/20" :
-                      confirmModal.action === "shutdown" ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/20" :
-                        "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+                  "px-6 py-2.5 rounded-xl font-medium transition-colors text-white shadow-sm hover:shadow",
+                  confirmModal.action === "start" ? "bg-cyan-600 hover:bg-cyan-700" :
+                    confirmModal.action === "stop" ? "bg-red-600 hover:bg-red-700" :
+                      confirmModal.action === "shutdown" ? "bg-amber-600 hover:bg-amber-700" :
+                        "bg-blue-600 hover:bg-blue-700"
                 )}
               >
                 Yes, {confirmModal.action}
@@ -624,8 +624,8 @@ export default function MyVpsPage() {
       )}
       {/* Action Confirmation Modal */}
       {actionConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-2xl p-6 w-full max-w-md shadow-md animate-in zoom-in-95 duration-200", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+          <div className={cn("border rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
             <div className="flex items-center gap-4 mb-4">
               <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shrink-0", getActionConfig(actionConfirm).bg)}>
                 {getActionConfig(actionConfirm).icon}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Key, Copy, Plus, Trash2, Code2, AlertTriangle, CheckCircle2, ShieldCheck, TerminalSquare, RefreshCw, Terminal, Settings, Power, Zap, Cpu, Server, Play, Square, RotateCw, KeyRound, BookOpen, HardDrive } from "lucide-react";
 import { toast } from "sonner";
@@ -21,7 +22,7 @@ export default function ResellerApiPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState<number | null>(null);
   
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const itemsPerPage = 10;
 
   const fetchInstances = async () => {
@@ -144,7 +145,7 @@ export default function ResellerApiPage() {
       <motion.div className="space-y-8 pb-10 max-w-[1600px] mx-auto" variants={containerVariants} initial="hidden" animate="visible">
         
         {/* Hero Header */}
-        <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group", isDark ? "bg-white/[0.02] border-white/5 shadow-sm" : "bg-white border-black/5 shadow-sm")}>
+        <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
           
           
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -184,7 +185,7 @@ export default function ResellerApiPage() {
                 className={cn(
                   "w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shrink-0",
                   balance >= 50000 && keys.length === 0
-                    ? isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:-translate-y-0.5" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:-translate-y-0.5"
+                    ? isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:-translate-y-0.5"
                     : "bg-slate-500/20 text-slate-400 cursor-not-allowed opacity-50"
                 )}
                 title={keys.length > 0 ? "You already have an active API Key." : ""}
@@ -197,13 +198,13 @@ export default function ResellerApiPage() {
         </motion.div>
 
         {/* Reseller Instances Table */}
-        <motion.div variants={itemVariants} className={cn("rounded-3xl border overflow-hidden", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-black/5 shadow-sm")}>
+        <motion.div variants={itemVariants} className={cn("rounded-3xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
           <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Server className="w-5 h-5 text-cyan-500" />
               API Instances
             </h2>
-            <div className={cn("px-4 py-2 border rounded-full text-sm font-semibold", isDark ? "bg-white/[0.02] border-white/10 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
+            <div className={cn("px-4 py-2 border rounded-full text-sm font-semibold", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
               {instances.length} Active Instances
             </div>
           </div>
@@ -235,7 +236,7 @@ export default function ResellerApiPage() {
                     const isRunning = vps.liveStatus?.status === 'running';
                     
                     return (
-                      <tr key={vps.id} className={cn("group hover:bg-white/[0.02] transition-colors", isDark ? "text-zinc-300" : "text-slate-600 hover:bg-slate-50")}>
+                      <tr key={vps.id} className={cn("group hover:bg-slate-800/30 transition-colors", isDark ? "text-zinc-300" : "text-slate-600 hover:bg-slate-50")}>
                         <td className="px-6 py-4 font-medium">{vps.id}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -302,7 +303,7 @@ export default function ResellerApiPage() {
         {/* Keys List Empty State / List */}
         {keys.length === 0 ? (
           <motion.div variants={itemVariants}>
-            <div className={cn("backdrop-blur-sm border rounded-3xl p-12 text-center shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn(" border rounded-3xl p-12 text-center shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
               <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
                 <Key className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
               </div>
@@ -310,13 +311,13 @@ export default function ResellerApiPage() {
               <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 You need to generate an API key to start using the Masdika Developer API endpoints.
               </p>
-              <button onClick={handleGenerateKey} disabled={generating || balance < 50000} className={cn("inline-block font-bold py-3.5 px-8 rounded-2xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <button onClick={handleGenerateKey} disabled={generating || balance < 50000} className={cn("inline-block font-bold py-3.5 px-8 rounded-2xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
                 Generate Key Now
               </button>
             </div>
           </motion.div>
         ) : (
-          <motion.div variants={itemVariants} className={cn("rounded-3xl border", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-black/5 shadow-sm")}>
+          <motion.div variants={itemVariants} className={cn("rounded-3xl border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
             <div className="p-6 border-b border-white/5">
               <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Key className="w-5 h-5 text-cyan-500" />
@@ -358,7 +359,7 @@ export default function ResellerApiPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60  animate-in fade-in duration-200">
           <div className={cn("w-full max-w-md p-6 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0A0B1A] border border-white/10" : "bg-white border border-slate-200")}>
             <div className="flex items-center gap-4 mb-4 text-red-500">
               <div className="p-3 bg-red-500/20 rounded-full border border-red-500/20">

@@ -1,4 +1,5 @@
 'use client';
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useEffect, useState } from "react";
@@ -52,7 +53,7 @@ export default function AdminNotificationsPage() {
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
 
   useEffect(() => {

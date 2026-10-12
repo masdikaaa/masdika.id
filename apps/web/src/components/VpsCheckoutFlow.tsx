@@ -622,7 +622,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         <div className="xl:col-span-2 space-y-6 md:space-y-8">
 
           {/* OS Templates */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-50", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-50", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none -z-10">
               {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16" />}
             </div>
@@ -681,7 +681,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           </motion.section>
 
           {serviceType === "KUBERNETES" && !isAddWorkerNode && (
-            <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-40", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+            <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-40", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none -z-10">
                 {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16" />}
               </div>
@@ -707,7 +707,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           )}
 
           {nodes.length > 0 && (
-            <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative mb-8 z-30", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+            <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative mb-8 z-30", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />}
               <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <MapPin className="w-5 h-5 text-cyan-400" />
@@ -731,7 +731,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           )}
 
           {/* Compute Resources & Billing Mode */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative mb-8 z-30", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative mb-8 z-30", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none -z-10">
               {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16" />}
             </div>
@@ -822,7 +822,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           </motion.section>
           {/* Network & Extra (Only for PAYG) */}
 
-            <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative grid md:grid-cols-2 gap-8", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+            <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative grid md:grid-cols-2 gap-8", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />}
               <div className="flex flex-col h-full">
                 <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
@@ -834,9 +834,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   {reservedIps.length > 0 && (
                     <div className={cn(
                       "p-4 w-full rounded-2xl border transition-all shadow-inner space-y-3",
-                      useReservedIp
-                        ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
-                        : "bg-white/5 border-white/10"
+                      useReservedIp ? (isDark ? "bg-cyan-950/20 border-cyan-500/40" : "bg-cyan-50 border-cyan-300") : (isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")
                     )}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -1069,7 +1067,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </div>
                     </div>
                   ) : (
-                    <div className={cn("pt-2.5 border-t flex items-start justify-between text-[11px] sm:text-xs gap-2", isDark ? "border-white/10" : "border-slate-200")}>
+                    <div className={cn("pt-2.5 border-t flex items-start justify-between text-[11px] sm:text-xs gap-2", isDark ? "border-slate-800" : "border-slate-200")}>
                       <span className={cn("font-sans leading-snug", isDark ? "text-zinc-500" : "text-slate-500")}>Enable automatic backups by allocating storage.</span>
                       <div className={cn("font-mono italic text-right shrink-0", isDark ? "text-zinc-500" : "text-slate-400")}>0 GB (No extra cost)</div>
                     </div>
@@ -1084,9 +1082,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </h2>
                 <div className={cn(
                   "flex flex-col p-4 w-full rounded-2xl border transition-all shadow-inner gap-3 flex-1",
-                  useVpc
-                    ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
-                    : "bg-white/5 border-white/10"
+                  useVpc ? (isDark ? "bg-cyan-950/20 border-cyan-500/40" : "bg-cyan-50 border-cyan-300") : (isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")
                 )}>
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4">
@@ -1110,7 +1106,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   {useVpc && (
                     <div className="pt-3 border-t border-cyan-500/20 space-y-4">
                       {isCreatingVpc ? (
-                        <div className={cn("p-4 rounded-xl border space-y-3", isDark ? "bg-black/40 border-white/5" : "bg-slate-50 border-slate-200")}>
+                        <div className={cn("p-4 rounded-xl border space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                           <h4 className={cn("text-sm font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Create New VPC</h4>
                           <div>
                             <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>VPC Name <span className="text-red-500">*</span></label>
@@ -1119,7 +1115,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                               placeholder="e.g. Production Network"
                               value={newVpcName}
                               onChange={(e) => setNewVpcName(e.target.value)}
-                              className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-black/60 border-white/10 text-white" : "bg-white border-slate-300 text-slate-900")}
+                              className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900")}
                             />
                           </div>
                           <div>
@@ -1129,7 +1125,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                               placeholder="e.g. For web servers and databases"
                               value={newVpcDescription}
                               onChange={(e) => setNewVpcDescription(e.target.value)}
-                              className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-black/60 border-white/10 text-white" : "bg-white border-slate-300 text-slate-900")}
+                              className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900")}
                             />
                           </div>
                           <div>
@@ -1141,7 +1137,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                               onChange={(e) => setNewVpcCidr(e.target.value)}
                               className={cn(
                                 "w-full bg-black/60 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 font-mono",
-                                (newVpcCidr && validateCidr(newVpcCidr).error) ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-white/10 focus:border-cyan-500 focus:ring-cyan-500"
+                                (newVpcCidr && validateCidr(newVpcCidr).error) ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-slate-800 focus:border-cyan-500 focus:ring-cyan-500"
                               )}
                             />
                             {(newVpcCidr && validateCidr(newVpcCidr).error) ? (
@@ -1202,7 +1198,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                           </div>
                         </div>
                       ) : vpcs.length === 0 ? (
-                        <div className="text-sm text-zinc-400 bg-black/40 p-4 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center gap-3">
+                        <div className="text-sm text-zinc-400 bg-[#060b14] p-4 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-center gap-3">
                           <p>You don't have any Virtual Private Cloud networks.</p>
                           <button 
                             type="button"
@@ -1315,7 +1311,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                     value={privateIpAddress}
                                     onChange={(e) => setPrivateIpAddress(e.target.value)}
                                     className={cn("w-full bg-black/40 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 font-mono transition-colors", 
-                                      hasError ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" : "border-white/10 focus:border-cyan-500 focus:ring-cyan-500")}
+                                      hasError ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" : "border-slate-800 focus:border-cyan-500 focus:ring-cyan-500")}
                                   />
                                   {isGatewayEntered ? (
                                     <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
@@ -1351,7 +1347,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
             </motion.section>
           {/* Firewall Settings */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-20", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-20", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <h2 className={cn("text-xl font-bold mb-2 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <ShieldCheck className="w-5 h-5 text-cyan-400" />
               7. Firewall
@@ -1360,7 +1356,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
             <div className="space-y-4">
               {/* SSH Rule */}
-              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
@@ -1369,7 +1365,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200",
                       firewallRules.ssh.enabled
                         ? "bg-cyan-400"
-                        : isDark ? "bg-black/40 border-white/10 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
+                        : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
                     )}
                   >
                     <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.ssh.enabled ? "text-[#0f172a]" : "text-transparent")} />
@@ -1382,7 +1378,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 {firewallRules.ssh.enabled && (
                   <div className="flex flex-col gap-2 w-full md:w-64 shrink-0">
                     <Select
-                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                       value={firewallRules.ssh.source}
                       onChange={(val) => setFirewallRules(r => ({ ...r, ssh: { ...r.ssh, source: val } }))}
                       options={[
@@ -1394,7 +1390,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     {firewallRules.ssh.source === "custom" && (
                       <input
                         type="text" placeholder="e.g. 192.168.1.1/32"
-                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                         value={firewallRules.ssh.customIp}
                         onChange={(e) => setFirewallRules(r => ({ ...r, ssh: { ...r.ssh, customIp: e.target.value } }))}
                       />
@@ -1404,7 +1400,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
 
               {/* HTTPS Rule */}
-              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
@@ -1413,7 +1409,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200",
                       firewallRules.https.enabled
                         ? "bg-cyan-400"
-                        : isDark ? "bg-black/40 border-white/10 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
+                        : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
                     )}
                   >
                     <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.https.enabled ? "text-[#0f172a]" : "text-transparent")} />
@@ -1426,7 +1422,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 {firewallRules.https.enabled && (
                   <div className="flex flex-col gap-2 w-full md:w-64 shrink-0">
                     <Select
-                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                       value={firewallRules.https.source}
                       onChange={(val) => setFirewallRules(r => ({ ...r, https: { ...r.https, source: val } }))}
                       options={[
@@ -1438,7 +1434,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     {firewallRules.https.source === "custom" && (
                       <input
                         type="text" placeholder="e.g. 192.168.1.1/32"
-                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                         value={firewallRules.https.customIp}
                         onChange={(e) => setFirewallRules(r => ({ ...r, https: { ...r.https, customIp: e.target.value } }))}
                       />
@@ -1448,7 +1444,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
 
               {/* HTTP Rule */}
-              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
@@ -1457,7 +1453,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200",
                       firewallRules.http.enabled
                         ? "bg-cyan-400"
-                        : isDark ? "bg-black/40 border-white/10 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
+                        : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
                     )}
                   >
                     <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.http.enabled ? "text-[#0f172a]" : "text-transparent")} />
@@ -1470,7 +1466,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 {firewallRules.http.enabled && (
                   <div className="flex flex-col gap-2 w-full md:w-64 shrink-0">
                     <Select
-                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                       value={firewallRules.http.source}
                       onChange={(val) => setFirewallRules(r => ({ ...r, http: { ...r.http, source: val } }))}
                       options={[
@@ -1482,7 +1478,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     {firewallRules.http.source === "custom" && (
                       <input
                         type="text" placeholder="e.g. 192.168.1.1/32"
-                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                         value={firewallRules.http.customIp}
                         onChange={(e) => setFirewallRules(r => ({ ...r, http: { ...r.http, customIp: e.target.value } }))}
                       />
@@ -1495,7 +1491,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
 
           {/* Authentication & Settings */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
+          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />}
             <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Settings2 className="w-5 h-5 text-cyan-400" />
@@ -1511,7 +1507,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     value={hostname}
                     onChange={(e) => setHostname(e.target.value)}
                     placeholder="server.example.com"
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
                   />
                 </div>
                 <div>
@@ -1522,7 +1518,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
                     placeholder="User"
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
                   />
                 </div>
               </div>
@@ -1540,7 +1536,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         isDark ? "w-full bg-black/40 border rounded-2xl pl-5 pr-12 py-3.5 text-sm text-white font-bold focus:outline-none transition-colors shadow-inner placeholder:text-zinc-600" : "w-full border border-slate-200 bg-white rounded-2xl pl-5 pr-12 py-3.5 text-sm text-slate-900 font-bold focus:outline-none transition-colors placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500",
                         passwordError && password.length > 0
                           ? "border-red-500/50 focus:border-red-500 hover:border-red-500/30"
-                          : isDark ? "border-white/10 focus:border-cyan-500/50 hover:border-cyan-500/30" : "hover:border-cyan-400"
+                          : isDark ? "border-slate-800 focus:border-cyan-500/50 hover:border-cyan-500/30" : "hover:border-cyan-400"
                       )}
                     />
                     <button
@@ -1565,7 +1561,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         isDark ? "w-full bg-black/40 border rounded-2xl pl-5 pr-12 py-3.5 text-sm text-white font-bold focus:outline-none transition-colors shadow-inner placeholder:text-zinc-600" : "w-full border border-slate-200 bg-white rounded-2xl pl-5 pr-12 py-3.5 text-sm text-slate-900 font-bold focus:outline-none transition-colors placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500",
                         password !== passwordConfirm && passwordConfirm.length > 0
                           ? "border-red-500/50 focus:border-red-500 hover:border-red-500/30"
-                          : isDark ? "border-white/10 focus:border-cyan-500/50 hover:border-cyan-500/30" : "hover:border-cyan-400"
+                          : isDark ? "border-slate-800 focus:border-cyan-500/50 hover:border-cyan-500/30" : "hover:border-cyan-400"
                       )}
                     />
                     <button
@@ -1611,7 +1607,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 value={sshKey}
                 onChange={(e) => setSshKey(e.target.value)}
                 placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
-                className={cn("w-full h-28 border rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
+                className={cn("w-full h-28 border rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
               />
               <p className="text-xs text-zinc-500 mt-2">Add your public key to login securely without a password.</p>
             </div>
@@ -1620,9 +1616,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
         {/* Order Summary Sidebar */}
         <motion.div variants={itemVariants} className="xl:col-span-1">
-          <div className={cn("rounded-3xl p-6 md:p-8 shadow-md sticky top-6 relative overflow-hidden", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5 shadow-2xl" : "bg-white border-slate-200")}>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-            <h2 className={cn("text-xl font-bold tracking-wide mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-white/10" : "text-slate-900 border-slate-200")}>
+          <div className={cn("rounded-3xl p-6 md:p-8 shadow-md sticky top-6 relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                        <h2 className={cn("text-xl font-bold tracking-wide mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>
               <ListChecks className="w-5 h-5 text-cyan-400" />
               {serviceType === "KUBERNETES" ? (isAddWorkerNode ? "Worker Configuration" : "Cluster Configuration") : "Server Configuration"}
             </h2>
@@ -1630,41 +1625,41 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
             <div className="space-y-4 mb-6 relative z-10">
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Disc className="w-3.5 h-3.5" /> OS Template</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border truncate max-w-[150px]", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border truncate max-w-[150px]", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
                   {templates.find(t => t.id === selectedTemplate)?.name || "-"}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><DollarSign className="w-3.5 h-3.5" /> Billing Mode</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>Pay As You Go</span>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>Pay As You Go</span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Cpu className="w-3.5 h-3.5" /> vCPU</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>{cpuCores} Cores</span>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{cpuCores} Cores</span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><MemoryStick className="w-3.5 h-3.5" /> RAM</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>{ramGb} GB</span>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{ramGb} GB</span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><HardDrive className="w-3.5 h-3.5" /> Disk Storage</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>{diskGb} GB</span>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{diskGb} GB</span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Network className="w-3.5 h-3.5" /> Network IPs</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
                   {ipv4Count > 0 && ipv6Count > 0 ? `${ipv4Count} IPv4 + ${ipv6Count} IPv6` : ipv4Count > 0 ? `${ipv4Count} IPv4` : ipv6Count > 0 ? `${ipv6Count} IPv6` : "None"}
                 </span>
               </div>
               {backupGb > 0 && (
                 <div className="flex justify-between items-center text-sm px-2">
                   <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><DatabaseBackup className="w-3.5 h-3.5" /> Backup Storage</span>
-                  <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>{backupGb} GB</span>
+                  <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{backupGb} GB</span>
                 </div>
               )}
             </div>
 
-            <div className={cn("border-t pt-6 mb-6", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("border-t pt-6 mb-6", isDark ? "border-slate-800" : "border-slate-200")}>
               <div className="flex justify-between items-center text-sm mb-4">
                 <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Total Price</span>
                 <div className="text-right">
@@ -1674,10 +1669,10 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
             </div>
 
-            <div className={cn("mb-6 border-t pt-6", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("mb-6 border-t pt-6", isDark ? "border-slate-800" : "border-slate-200")}>
               <label className="flex items-start gap-3 cursor-pointer group">
                 <div className="relative flex items-center justify-center mt-1 shrink-0">
-                  <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className={cn("w-5 h-5 rounded border cursor-pointer appearance-none transition-all", isDark ? "border-white/20 bg-white/5 text-cyan-500 focus:ring-cyan-500/20 checked:bg-cyan-500 checked:border-cyan-500" : "border-slate-300 bg-white text-cyan-600 focus:ring-cyan-200 checked:bg-cyan-600 checked:border-cyan-600")} />
+                  <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className={cn("w-5 h-5 rounded border cursor-pointer appearance-none transition-all", isDark ? "border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-500/20 checked:bg-cyan-500 checked:border-cyan-500" : "border-slate-300 bg-white text-cyan-600 focus:ring-cyan-200 checked:bg-cyan-600 checked:border-cyan-600")} />
                   <ShieldCheck className={cn("absolute w-3.5 h-3.5 text-white pointer-events-none transition-opacity", termsAccepted ? "opacity-100" : "opacity-0")} />
                 </div>
                 <span className={cn("text-xs leading-relaxed transition-colors", isDark ? "text-zinc-400 group-hover:text-zinc-300" : "text-slate-500 group-hover:text-slate-700")}>
@@ -1762,7 +1757,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 })())) ||
                 (serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0)
               }
-              className={cn("group w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10", isDark ? "shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)]" : "shadow-sm")}
+              className={cn("group w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10", "shadow-sm")}
             >
               {isDisabled ? "Coming Soon" : isSubmitting ? (
                 <>

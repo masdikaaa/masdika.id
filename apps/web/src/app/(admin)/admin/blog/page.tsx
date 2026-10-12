@@ -1,4 +1,5 @@
 "use client";
+import { useUpdateEffect, useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -17,7 +18,7 @@ export default function AdminBlogPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlString<string>("search", "");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
@@ -25,7 +26,7 @@ export default function AdminBlogPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
 
   const fetchArticles = async () => {
@@ -113,7 +114,7 @@ export default function AdminBlogPage() {
   const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
   const paginatedArticles = filteredArticles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     setCurrentPage(1);
   }, [search]);
 

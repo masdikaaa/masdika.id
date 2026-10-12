@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { ShieldCheck, ShieldAlert, Plus, Trash2, RefreshCw, Server, Settings2, X, CheckCircle, Search, Info } from "lucide-react";
@@ -22,7 +23,7 @@ export default function FirewallsDashboardPage() {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [firewallRules, setFirewallRules] = useState<any[]>([]);
   const [firewallLoading, setFirewallLoading] = useState(false);
-  const [rulePage, setRulePage] = useState(1);
+  const [rulePage, setRulePage] = useUrlNumber("rulePage", 1);
   const RULES_PER_PAGE = 10;
   
   const [showFirewallModal, setShowFirewallModal] = useState(false);
@@ -62,7 +63,7 @@ export default function FirewallsDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setFirewallRules(data.rules || []);
-        setRulePage(1);
+        setRulePage((p) => Math.min(p, Math.max(1, Math.ceil((data.rules || []).length / RULES_PER_PAGE))));
       } else {
         toast.error(data.error || "Failed to load firewall rules");
         setFirewallRules([]);
@@ -209,7 +210,7 @@ export default function FirewallsDashboardPage() {
   return (
     <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
 
         <div className="relative z-10">
@@ -223,7 +224,7 @@ export default function FirewallsDashboardPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         <div className="p-6">
           <div className={cn("border rounded-xl p-4 mb-6 flex items-start gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
             <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
@@ -237,7 +238,7 @@ export default function FirewallsDashboardPage() {
             <div className="w-full md:w-1/3">
               <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-700")}>Select Instance</label>
               {loadingVps ? (
-                <div className={cn("w-full border rounded-xl px-4 py-3 text-sm flex items-center gap-2", isDark ? "bg-white/[0.02] border-[#1f3e5a] text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-500")}>
+                <div className={cn("w-full border rounded-xl px-4 py-3 text-sm flex items-center gap-2", isDark ? "bg-[#060b14] border-slate-800 text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-500")}>
                   <RefreshCw className="w-4 h-4 animate-spin" /> Loading instances...
                 </div>
               ) : (
@@ -249,7 +250,7 @@ export default function FirewallsDashboardPage() {
                     label: `${vps.hostname} (${vps.assignedIps?.[0]?.publicIp || vps.assignedIps?.[0]?.ipAddress || 'No IP'})`
                   }))}
                   placeholder={vpsList.length === 0 ? "No VPS instances found" : "Select a VPS Instance"}
-                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-[#1f3e5a] text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
                 />
               )}
             </div>
@@ -262,7 +263,7 @@ export default function FirewallsDashboardPage() {
               }}
               disabled={!selectedVpsId}
               className={cn("w-full md:w-auto px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
-                isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
+                isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
               )}
             >
               <Plus className="w-4 h-4" /> Add Rule
@@ -434,11 +435,10 @@ export default function FirewallsDashboardPage() {
       {/* Add/Edit Firewall Rule Modal */}
       <AnimatePresence>
         {showFirewallModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 ", isDark ? "bg-black/60" : "bg-slate-900/40")}>
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("border rounded-2xl shadow-md w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
               <div className={cn("p-6 border-b flex items-center justify-between relative overflow-hidden", isDark ? "border-white/5" : "border-slate-100")}>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-                <h3 className={cn("text-xl font-bold flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
+                                <h3 className={cn("text-xl font-bold flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                   <ShieldCheck className="w-5 h-5 text-cyan-500" />
                   {editingRule ? 'Edit Firewall Rule' : 'Add Firewall Rule'}
                 </h3>
@@ -526,7 +526,7 @@ export default function FirewallsDashboardPage() {
                     type="submit"
                     disabled={isSavingRule}
                     className={cn("px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
-                      isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
+                      isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
                     )}
                   >
                     {isSavingRule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}

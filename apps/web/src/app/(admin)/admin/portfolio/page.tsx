@@ -1,4 +1,5 @@
 "use client";
+import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { AdminLoader } from "@/components/admin/AdminLoader";
 
@@ -15,7 +16,7 @@ export default function AdminPortfolioPage() {
   const isDark = theme === "dark";
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlString<string>("search", "");
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);

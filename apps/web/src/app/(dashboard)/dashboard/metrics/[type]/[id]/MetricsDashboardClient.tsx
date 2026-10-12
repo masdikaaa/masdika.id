@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlString } from "@/lib/useUrlTab";
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,7 @@ interface MetricsDashboardClientProps {
 export default function MetricsDashboardClient({ type, id }: MetricsDashboardClientProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [timeframe, setTimeframe] = useState("hour");
+  const [timeframe, setTimeframe] = useUrlString<string>("timeframe", "hour");
   const [loading, setLoading] = useState(true);
   const [metricsData, setMetricsData] = useState<any[]>([]);
 
@@ -93,7 +94,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
   };
 
   const renderChart = (title: string, icon: any, dataKey1: string, dataKey2: string | null, color1: string, color2: string | null, unit: string) => (
-    <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+    <div className={cn("border rounded-2xl p-6 shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <h3 className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{title}</h3>
@@ -163,7 +164,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
       </div>
 
       {/* Hero Header */}
-      <div className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">

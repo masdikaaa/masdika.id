@@ -1,4 +1,5 @@
 'use client';
+import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect, useRef } from 'react';
@@ -24,7 +25,7 @@ export default function AdminTicketsClient() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const router = useRouter();
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useUrlString<string>("filter", '');
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);

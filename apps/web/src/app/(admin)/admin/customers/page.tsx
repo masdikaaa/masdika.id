@@ -1,4 +1,5 @@
 "use client";
+import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -45,7 +46,7 @@ export default function AdminCustomersPage() {
   const [suspendReason, setSuspendReason] = useState("");
   const [isSuspending, setIsSuspending] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
 
   const [viewServicesUser, setViewServicesUser] = useState<any>(null);
   const [loadingServices, setLoadingServices] = useState(false);
@@ -64,7 +65,7 @@ export default function AdminCustomersPage() {
   );
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

@@ -1,4 +1,5 @@
 "use client";
+import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect, useRef } from "react";
@@ -14,7 +15,7 @@ export default function AdminTestimonialsPage() {
   const isDark = theme === "dark";
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlString<string>("search", "");
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);

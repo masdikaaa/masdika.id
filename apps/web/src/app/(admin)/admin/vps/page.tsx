@@ -1,5 +1,6 @@
 "use client";
 
+import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, DollarSign, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
@@ -160,7 +161,7 @@ export default function VpsManagementPage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState("settings");
+  const [activeTab, setActiveTab] = useUrlTab<string>("settings");
   const [initialLoad, setInitialLoad] = useState(true);
 
   // Settings State
@@ -174,7 +175,7 @@ export default function VpsManagementPage() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [syncingTemplates, setSyncingTemplates] = useState(false);
-  const [templateCurrentPage, setTemplateCurrentPage] = useState(1);
+  const [templateCurrentPage, setTemplateCurrentPage] = useUrlNumber("templateCurrentPage", 1);
   const templatesPerPage = 9;
   const [selectedAdminOsFamily, setSelectedAdminOsFamily] = useState<string | null>(null);
   const [selectedAdminTemplate, setSelectedAdminTemplate] = useState<number | null>(null);
@@ -187,7 +188,7 @@ export default function VpsManagementPage() {
   const [selectedPools, setSelectedPools] = useState<number[]>([]);
   const [showDeletePoolModal, setShowDeletePoolModal] = useState<number | null>(null);
   const [showBulkDeletePoolModal, setShowBulkDeletePoolModal] = useState<number[]>([]);
-  const [poolCurrentPage, setPoolCurrentPage] = useState(1);
+  const [poolCurrentPage, setPoolCurrentPage] = useUrlNumber("poolCurrentPage", 1);
   const poolsPerPage = 10;
 
   // Pricing State
@@ -203,8 +204,8 @@ export default function VpsManagementPage() {
   const [selectedPlans, setSelectedPlans] = useState<number[]>([]);
   const [showBulkDeletePlanModal, setShowBulkDeletePlanModal] = useState<number[]>([]);
   const [newPlan, setNewPlan] = useState({ id: 0, name: "", cpuCores: 1, ramGb: 1, diskGb: 20, diskType: "HDD", monthlyPrice: 0, quarterlyPrice: 0, semiAnnuallyPrice: 0, annuallyPrice: 0, isReseller: false, isActive: true });
-  const [planCurrentPage, setPlanCurrentPage] = useState(1);
-  const [planFilterDiskType, setPlanFilterDiskType] = useState<"HDD" | "SSD">("HDD");
+  const [planCurrentPage, setPlanCurrentPage] = useUrlNumber("planCurrentPage", 1);
+  const [planFilterDiskType, setPlanFilterDiskType] = useUrlString<"HDD" | "SSD">("planFilterDiskType", "HDD", ["HDD", "SSD"] as const);
   const plansPerPage = 6;
 
   const filteredPlans = plans.filter(p => (p.diskType || "HDD") === planFilterDiskType);
@@ -227,8 +228,8 @@ export default function VpsManagementPage() {
   const [editingPublicIpValue, setEditingPublicIpValue] = useState("");
   const [newIpAddress, setNewIpAddress] = useState("");
   const [ipLoading, setIpLoading] = useState(false);
-  const [ipFilter, setIpFilter] = useState("");
-  const [ipVersionFilter, setIpVersionFilter] = useState<"all" | "ipv4" | "ipv6">("all");
+  const [ipFilter, setIpFilter] = useUrlString<string>("ipFilter", "");
+  const [ipVersionFilter, setIpVersionFilter] = useUrlString<"all" | "ipv4" | "ipv6">("ipVersionFilter", "all", ["all", "ipv4", "ipv6"] as const);
   const [removeIpConfirm, setRemoveIpConfirm] = useState<number | null>(null);
 
   // Reserved IPs State
@@ -237,17 +238,17 @@ export default function VpsManagementPage() {
   const [editingReservedIpId, setEditingReservedIpId] = useState<number | null>(null);
   const [editingReservedIpValue, setEditingReservedIpValue] = useState("");
   const [reservedIpActionLoading, setReservedIpActionLoading] = useState<number | null>(null);
-  const [reservedIpCurrentPage, setReservedIpCurrentPage] = useState(1);
+  const [reservedIpCurrentPage, setReservedIpCurrentPage] = useUrlNumber("reservedIpCurrentPage", 1);
   const reservedIpsPerPage = 10;
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
   const [selectedVps, setSelectedVps] = useState<number[]>([]);
   const [showBulkTerminateModal, setShowBulkTerminateModal] = useState<number[]>([]);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
-  const [vpsCurrentPage, setVpsCurrentPage] = useState(1);
+  const [vpsCurrentPage, setVpsCurrentPage] = useUrlNumber("vpsCurrentPage", 1);
   const vpsPerPage = 10;
 
   // Reset page when tab or search changes
-  useEffect(() => {
+  useUpdateEffect(() => {
     setVpsCurrentPage(1);
   }, [activeTab, searchQuery]);
 

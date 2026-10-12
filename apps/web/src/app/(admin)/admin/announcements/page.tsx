@@ -1,4 +1,5 @@
 "use client";
+import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -27,12 +28,12 @@ export default function AdminAnnouncementsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<'berita' | 'banner'>('berita');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useUrlString<string>("search", "");
+  const [activeTab, setActiveTab] = useUrlTab<'berita' | 'banner'>('berita', { allowed: ['berita', 'banner'] as const });
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     setCurrentPage(1);
   }, [activeTab, search]);
 

@@ -19,7 +19,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
 
   return (
     <div className="space-y-6">
-      <div className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
             <Ticket className="w-3 h-3" /> Special Offers
@@ -32,8 +32,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
       </div>
 
       {promos.length === 0 ? (
-        <div className={cn("backdrop-blur-sm border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-white/[0.02]/40 border-white/5" : "bg-white border-slate-200")}>
-          <div className={cn("absolute inset-0 bg-gradient-to-b pointer-events-none", isDark ? "from-white/[0.02] to-transparent" : "from-slate-50/50 to-transparent")} />
+        <div className={cn("border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="py-20 text-center relative z-10">
             <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <Ticket className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -46,7 +45,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {promos.map((promo) => (
-              <div key={promo.id} className={cn("rounded-2xl overflow-hidden flex flex-col transition-all hover:-translate-y-1 group relative border", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/50 hover:shadow-[0_8px_32px_rgba(6,182,212,0.15)]" : "bg-white border-slate-200 hover:border-cyan-400 hover:shadow-lg")}>
+              <div key={promo.id} className={cn("rounded-2xl overflow-hidden flex flex-col transition-all hover:-translate-y-1 group relative border", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-cyan-500/50 shadow-md hover:shadow-lg" : "bg-white border-slate-200 hover:border-cyan-400 shadow-sm hover:shadow-md")}>
                 {promo.image ? (
                   <PromoImage src={promo.image} alt={promo.title} />
                 ) : (
@@ -59,7 +58,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
                   <h2 className={cn("text-xl font-bold mb-3 line-clamp-2 leading-snug", isDark ? "text-white" : "text-slate-900")}>{promo.title}</h2>
                   <p className={cn("text-sm mb-6 flex-1 line-clamp-3 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>{promo.description}</p>
                   
-                  <div className={cn("mt-auto pt-4 border-t", isDark ? "border-white/5" : "border-slate-100")}>
+                  <div className={cn("mt-auto pt-4 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
                     {promo.isReward ? (
                       <ClaimRewardButton 
                         promoId={promo.id} 
@@ -73,7 +72,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
                         Learn More
                       </a>
                     ) : (
-                      <div className={cn("w-full font-bold py-3 rounded-xl text-center border cursor-not-allowed", isDark ? "bg-white/5 text-zinc-500 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                      <div className={cn("w-full font-bold py-3 rounded-xl text-center border cursor-not-allowed", isDark ? "bg-[#060b14] text-zinc-500 border-slate-800" : "bg-slate-100 text-slate-500 border-slate-200")}>
                         Information Only
                       </div>
                     )}

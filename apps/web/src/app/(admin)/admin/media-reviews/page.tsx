@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import React, { useState, useEffect } from "react";
 import {
   Star, MessageSquare, Trash2, ExternalLink, ShieldCheck,
@@ -66,8 +67,8 @@ export default function AdminMediaReviewsPage() {
     totalMediaReviewed: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"comments" | "ratings">("comments");
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
+  const [activeTab, setActiveTab] = useUrlTab<"comments" | "ratings">("comments", { allowed: ["comments", "ratings"] as const });
   const [ratingFilter, setRatingFilter] = useState<number | "all">("all");
 
   // Deletion modal state

@@ -172,7 +172,7 @@ export default function ReservedIpsPage() {
 
   return (
     <div className="space-y-8">
-      <div className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group", isDark ? "bg-white/[0.02] border-white/5 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -196,7 +196,7 @@ export default function ReservedIpsPage() {
               >
                 <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center transition-all ${selectedIps.length === ips.length && ips.length > 0
                   ? 'bg-cyan-500 text-[#0f172a]'
-                  : 'bg-white/[0.02] border border-white/10 text-transparent'
+                  : 'bg-[#060b14] border border-slate-800 text-transparent'
                   }`}>
                   <CheckCircle className="w-3 h-3 stroke-[2.5]" />
                 </div>
@@ -214,7 +214,7 @@ export default function ReservedIpsPage() {
             )}
             <Link
               href="/dashboard/reserved-ips/new"
-              className={cn("px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}
+              className={cn("px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", "")}
             >
               <Plus className="w-4 h-4" />
               Reserve New IP
@@ -224,7 +224,7 @@ export default function ReservedIpsPage() {
       </div>
 
       {ips.length === 0 ? (
-        <div className={cn("backdrop-blur-sm border rounded-3xl p-12 text-center", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("border rounded-3xl p-12 text-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
           <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-50")}>
             <Network className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
@@ -234,7 +234,7 @@ export default function ReservedIpsPage() {
           </p>
           <Link
             href="/dashboard/reserved-ips/new"
-            className={cn("px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}
+            className={cn("px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", "")}
           >
             Reserve Your First IP
           </Link>
@@ -242,13 +242,13 @@ export default function ReservedIpsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {ips.map(ip => (
-            <div key={ip.id} className={cn("border rounded-xl p-5 transition-all relative", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30" : "bg-white border-slate-200 hover:border-cyan-200 shadow-sm")}>
+            <div key={ip.id} className={cn("border rounded-xl p-5 transition-all relative", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
               <div className="absolute top-4 right-4 z-10">
                 <button
                   onClick={() => toggleSelectIp(ip.id)}
                   className={`w-5 h-5 rounded flex items-center justify-center transition-all ${selectedIps.includes(ip.id)
                     ? 'bg-cyan-500 text-[#0f172a]'
-                    : 'bg-white/[0.02] border border-white/10 hover:border-cyan-500/50 text-transparent'
+                    : 'bg-[#060b14] border border-slate-800 text-transparent'
                     }`}
                 >
                   <CheckCircle className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -382,8 +382,8 @@ export default function ReservedIpsPage() {
       />
 
       {showAttachModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className={cn("border rounded-2xl p-6 max-w-md w-full shadow-md relative", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className={cn("border rounded-2xl p-6 max-w-md w-full shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
             <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Attach Reserved IP</h3>
             <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
               Attach <strong className={cn("", isDark ? "text-white" : "text-slate-900")}>{ipToAttach?.ipAddress}</strong> to an existing VPS. This will replace the current primary public IP of the VPS.

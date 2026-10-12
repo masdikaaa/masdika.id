@@ -100,7 +100,7 @@ export default function ReserveNewIpPage() {
       </Link>
 
       {/* Hero Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
         
         <div className="relative z-10">
@@ -114,9 +114,8 @@ export default function ReserveNewIpPage() {
         </div>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn("border rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+                
         <div className="relative z-10 space-y-8">
           {/* IP Selection */}
           <div>
@@ -159,15 +158,14 @@ export default function ReserveNewIpPage() {
           {/* Cost Calculator */}
           {selectedIp && (
             <div className={cn("ml-0 sm:ml-8 rounded-2xl p-5 space-y-4 relative overflow-hidden border", isDark ? "bg-gradient-to-br from-cyan-500/10 to-transparent border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[40px] -mr-10 -mt-10 pointer-events-none" />
-              <div className="flex items-center gap-3 relative z-10">
+                            <div className="flex items-center gap-3 relative z-10">
                 <div className={cn("p-2.5 rounded-xl shrink-0 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-100 border-cyan-200")}>
                   <Calculator className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 </div>
                 <h5 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Estimated Cost</h5>
               </div>
               
-              <div className={cn("backdrop-blur-sm p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+              <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
                  <div className="min-w-0">
                      <div className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-500")}>
                       Hourly Accumulation
@@ -192,7 +190,7 @@ export default function ReserveNewIpPage() {
             <button
               onClick={handleReserve}
               disabled={isReserving || availableIps.length === 0}
-              className={cn("w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0", isDark ? "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:-translate-y-0.5" : "shadow-md hover:shadow-lg hover:-translate-y-0.5")}
+              className={cn("w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0", "shadow-sm")}
             >
               {isReserving ? (
                 <>

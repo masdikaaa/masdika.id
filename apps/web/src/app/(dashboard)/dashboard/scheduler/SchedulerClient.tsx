@@ -77,7 +77,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
   return (
     <div className="w-full space-y-4 sm:space-y-6">
       {/* Hero Header */}
-      <div className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-5 sm:p-6 md:p-8 shadow-xl group", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-5 sm:p-6 md:p-8 shadow-md group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-3 sm:mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -98,7 +98,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
       </div>
 
       {vpsList.length === 0 ? (
-        <div className={cn("border rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-xl", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("border rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className={cn("w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-50")}>
             <Server className={cn("w-8 h-8 sm:w-10 sm:h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
@@ -108,7 +108,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
       ) : (
         <div className="space-y-4 sm:space-y-6">
           {vpsList.length > 1 && (
-            <div className={cn("p-4 sm:p-6 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4", isDark ? "glass border-white/5" : "bg-white border-slate-200 shadow-sm")}>
+            <div className={cn("p-4 sm:p-6 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <div>
                 <h3 className={cn("text-base sm:text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Select VPS Instance</h3>
                 <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Choose the server you want to schedule.</p>
@@ -128,9 +128,9 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
               const sched = schedules[vps.id];
               const isOnline = vpsStatuses[vps.id] === 'RUNNING';
               return (
-                <div key={vps.id} className={cn("border rounded-2xl p-4 sm:p-6 transition-all shadow-lg", isDark ? "glass border-white/10" : "bg-white border-slate-200")}>
+                <div key={vps.id} className={cn("border rounded-2xl p-4 sm:p-6 transition-all shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   {/* Header: VPS Info + Status + Toggle */}
-                  <div className={cn("flex items-center justify-between gap-3 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b", isDark ? "border-white/5" : "border-slate-100")}>
+                  <div className={cn("flex items-center justify-between gap-3 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                       <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                         <Server className={cn("w-5 h-5 sm:w-6 sm:h-6", isDark ? "text-cyan-500" : "text-cyan-600")} />
@@ -155,7 +155,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                       onClick={() => setConfirmModal({ vpsId: vps.id, enable: !sched.enabled })}
                       className={cn(
                         "shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2",
-                        sched.enabled ? (isDark ? "bg-[#00B4D8] text-white shadow-[0_0_15px_rgba(0,180,216,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-md") : (isDark ? "bg-white/5 border border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-700")
+                        sched.enabled ? (isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm") : (isDark ? "bg-[#060b14] border border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-700")
                       )}
                     >
                       <Power className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -176,7 +176,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                           type="time"
                           value={sched.startTime}
                           onChange={e => updateSchedule(vps.id, "startTime", e.target.value)}
-                          className={cn("w-full border rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 transition-all", isDark ? "bg-black/40 border-white/10 text-white focus:ring-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:ring-cyan-500")}
+                          className={cn("w-full border rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white focus:ring-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:ring-cyan-500")}
                         />
                       </div>
                       <div className="space-y-2">
@@ -188,7 +188,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                           type="time"
                           value={sched.stopTime}
                           onChange={e => updateSchedule(vps.id, "stopTime", e.target.value)}
-                          className={cn("w-full border rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 transition-all", isDark ? "bg-black/40 border-white/10 text-white focus:ring-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:ring-cyan-500")}
+                          className={cn("w-full border rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white focus:ring-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:ring-cyan-500")}
                         />
                       </div>
                     </div>
@@ -206,7 +206,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                             onClick={() => updateSchedule(vps.id, day.key, !sched[day.key as keyof typeof sched])}
                             className={cn(
                               "py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all border text-center",
-                              sched[day.key as keyof typeof sched] ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-black/40 text-zinc-500 border-white/10 hover:border-white/20" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50")
+                              sched[day.key as keyof typeof sched] ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-[#060b14] text-zinc-500 border-slate-800 hover:border-slate-700" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50")
                             )}
                           >
                             {day.label}
@@ -216,11 +216,11 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                     </div>
 
                     {/* Save Button */}
-                    <div className={cn("pt-4 sm:pt-6 mt-4 sm:mt-6 border-t flex justify-end", isDark ? "border-white/5" : "border-slate-100")}>
+                    <div className={cn("pt-4 sm:pt-6 mt-4 sm:mt-6 border-t flex justify-end", isDark ? "border-slate-800" : "border-slate-100")}>
                       <button
                         onClick={() => handleSave(vps.id)}
                         disabled={loading[vps.id]}
-                        className={cn("px-6 py-2.5 text-white text-sm font-bold rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center gap-2", isDark ? "bg-[#00B4D8] hover:bg-[#00cceb] shadow-[0_0_15px_rgba(0,180,216,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-cyan-500/20")}
+                        className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-sm hover:shadow disabled:opacity-50 flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
                       >
                         {loading[vps.id] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Save Schedule
@@ -236,8 +236,8 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
 
       {/* Confirmation Modal */}
       {confirmModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl p-5 sm:p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+          <div className={cn("border rounded-2xl p-5 sm:p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
             <div className="flex items-center gap-3 sm:gap-4 mb-4">
               <div className={cn("w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0", confirmModal.enable ? "bg-cyan-500/10" : "bg-red-500/10")}>
                 <Power className={cn("w-5 h-5 sm:w-6 sm:h-6", confirmModal.enable ? "text-cyan-500" : "text-red-500")} />
@@ -267,8 +267,8 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                   handleSave(confirmModal.vpsId, newSchedule);
                   setConfirmModal(null);
                 }}
-                className={cn("px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white transition-colors shadow-lg",
-                  confirmModal.enable ? "bg-[#00B4D8] hover:bg-[#00cceb] shadow-[0_0_15px_rgba(0,180,216,0.4)]" : "bg-red-500 hover:bg-red-600 shadow-red-500/20"
+                className={cn("px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-colors shadow-sm hover:shadow",
+                  confirmModal.enable ? (isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950" : "bg-cyan-600 hover:bg-cyan-700 text-white") : "bg-red-500 hover:bg-red-600 text-white"
                 )}>
                 Yes, {confirmModal.enable ? "Enable" : "Disable"}
               </button>

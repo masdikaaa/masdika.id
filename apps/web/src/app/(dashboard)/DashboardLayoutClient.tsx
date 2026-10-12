@@ -202,7 +202,7 @@ export default function DashboardLayoutClient({
         <button
           type="button"
           aria-label="Close navigation menu"
-          className="fixed inset-0 z-[90] bg-background/80 backdrop-blur-sm lg:hidden cursor-default"
+          className="fixed inset-0 z-[90] bg-black/60 lg:hidden cursor-default"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -212,11 +212,11 @@ export default function DashboardLayoutClient({
         aria-label="Customer navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-[100] w-64 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 flex flex-col border-r",
-          isDark ? "glass border-white/5" : "bg-white border-slate-200 shadow-sm",
+          isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className={cn("h-16 flex items-center px-6 border-b", isDark ? "border-white/5" : "border-slate-200")}>
+        <div className={cn("h-16 flex items-center px-6 border-b", isDark ? "border-slate-800" : "border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
@@ -235,7 +235,7 @@ export default function DashboardLayoutClient({
             }, {} as Record<string, typeof SIDEBAR_LINKS>)
           ).map(([groupName, links]) => (
             <div key={groupName}>
-              <h3 className={cn("px-3 mb-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>{groupName}</h3>
+              <h3 className={cn("px-3 mb-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-400" : "text-slate-400")}>{groupName}</h3>
               <div className="space-y-1">
                 {links.map((link) => {
                   const isActive = pathname === link.href;
@@ -246,7 +246,7 @@ export default function DashboardLayoutClient({
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
-                        isActive ? "bg-cyan-500 text-slate-900 shadow-md font-bold" : cn("transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")
+                        isActive ? "bg-cyan-500 text-slate-900 shadow-sm font-bold" : cn("transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/60" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")
                       )}
                     >
                       <link.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", 
@@ -263,14 +263,14 @@ export default function DashboardLayoutClient({
           ))}
         </div>
 
-        <div className={cn("absolute bottom-0 left-0 w-full h-[72px] flex items-center px-4 border-t z-10", isDark ? "border-white/5 bg-background/80 backdrop-blur-sm" : "border-slate-200 bg-white")}>
+        <div className={cn("absolute bottom-0 left-0 w-full h-[72px] flex items-center px-4 border-t z-10", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
           <button
             onClick={() => {
               setSidebarOpen(false);
               handleLogout();
             }}
             aria-label="Sign out"
-            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-red-600 hover:bg-red-50")}
+            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/60" : "text-slate-500 hover:text-red-600 hover:bg-red-50")}
           >
             <LogOut className="w-5 h-5" aria-hidden="true" />
             Sign Out
@@ -281,11 +281,11 @@ export default function DashboardLayoutClient({
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
-        <header className={cn("h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "glass border-white/5" : "bg-white/90 backdrop-blur-sm border-slate-200")}>
+        <header className={cn("h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm")}>
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation menu"
-            className={cn("lg:hidden p-2 transition-colors group flex flex-col items-center justify-center w-10 h-10 gap-1.5 relative focus:outline-none", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}
+            className={cn("lg:hidden p-2 transition-colors group flex flex-col items-center justify-center w-10 h-10 gap-1.5 relative focus:outline-none", isDark ? "text-slate-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}
           >
             <span className="w-6 h-[2px] bg-current rounded-full transform transition-all duration-300 ease-out origin-center" />
             <span className="w-6 h-[2px] bg-current rounded-full transform transition-all duration-300 ease-out origin-center" />
@@ -301,11 +301,11 @@ export default function DashboardLayoutClient({
                 <span className="text-xs sm:text-sm font-bold whitespace-nowrap">{formatRupiah(userBalance || 0)}</span>
               </Link>
 
-              <button onClick={() => setTheme(isDark ? 'light' : 'dark')} aria-label="Toggle Theme" className={cn("transition-colors relative group outline-none mr-1 sm:mr-2", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
+              <button onClick={() => setTheme(isDark ? 'light' : 'dark')} aria-label="Toggle Theme" className={cn("transition-colors relative group outline-none mr-1 sm:mr-2", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
                 {isDark ? <Sun className="w-5 h-5 transition-transform group-hover:rotate-12" /> : <Moon className="w-5 h-5 transition-transform group-hover:-rotate-12" />}
               </button>
 
-              <button onClick={() => setShowNotifications(!showNotifications)} aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`} className={cn("transition-colors relative group outline-none mr-1 sm:mr-2", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
+              <button onClick={() => setShowNotifications(!showNotifications)} aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`} className={cn("transition-colors relative group outline-none mr-1 sm:mr-2", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
                 <Bell className={cn("w-5 h-5 transition-transform", showNotifications ? "animate-ring" : "group-hover:rotate-12")} aria-hidden="true" />
                 {unreadCount > 0 && (
                   <span aria-live="polite" className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center border-2 border-background">
@@ -318,9 +318,9 @@ export default function DashboardLayoutClient({
               {showNotifications && (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
-                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:-right-2 sm:left-auto sm:w-80 border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-slate-900/95 backdrop-blur-sm border-white/10" : "bg-white border-slate-200")}>
-                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-white/5" : "border-slate-100")}>
-                      <h3 className={cn("font-bold", isDark ? "bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-500 bg-clip-text text-transparent drop-shadow-sm" : "text-slate-900")}>Notifications</h3>
+                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:-right-2 sm:left-auto sm:w-80 border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-100")}>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">
                         {notifications.length > 0 && (
                           <button
@@ -330,14 +330,14 @@ export default function DashboardLayoutClient({
                             Mark all as read
                           </button>
                         )}
-                        <Link href="/dashboard/notifications" onClick={() => setShowNotifications(false)} className="text-xs text-zinc-400 hover:text-white">
+                        <Link href="/dashboard/notifications" onClick={() => setShowNotifications(false)} className={cn("text-xs", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                           View All
                         </Link>
                       </div>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <div className="p-6 text-center text-zinc-400 text-sm">
+                        <div className={cn("p-6 text-center text-sm", isDark ? "text-slate-400" : "text-slate-500")}>
                           No new notifications
                         </div>
                       ) : (
@@ -346,10 +346,10 @@ export default function DashboardLayoutClient({
                             key={notif.id}
                             href={notif.link || `/dashboard`}
                             onClick={() => setShowNotifications(false)}
-                            className="block p-4 border-b border-white/5 hover:bg-white/5 transition-colors"
+                            className={cn("block p-4 border-b transition-colors", isDark ? "border-slate-800 hover:bg-slate-800/40" : "border-slate-100 hover:bg-slate-50")}
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <div className="font-semibold text-sm text-white truncate">{notif.subject || 'No Subject'}</div>
+                              <div className={cn("font-semibold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{notif.subject || 'No Subject'}</div>
                               {notif.type === 'TICKET' && notif.id.startsWith('ticket-') ? (
                                 <button
                                   onClick={async (e) => {
@@ -377,11 +377,11 @@ export default function DashboardLayoutClient({
                                 <span className="w-2 h-2 rounded-full bg-cyan-500 mt-1 shrink-0" />
                               )}
                             </div>
-                            <div className="text-xs text-zinc-400 mt-1 truncate">
+                            <div className={cn("text-xs mt-1 truncate", isDark ? "text-slate-400" : "text-slate-500")}>
                               <span className="font-medium text-cyan-500 mr-1">{notif.type}</span>
                               {notif.name} - {notif.content}
                             </div>
-                            <div className="text-[10px] text-zinc-500 mt-2">{new Date(notif.createdAt).toLocaleString()}</div>
+                            <div className={cn("text-[10px] mt-2", isDark ? "text-slate-500" : "text-slate-400")}>{new Date(notif.createdAt).toLocaleString()}</div>
                           </Link>
                         ))
                       )}

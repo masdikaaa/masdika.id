@@ -1,4 +1,5 @@
 'use client';
+import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
@@ -56,7 +57,7 @@ const PaginatedTable = ({ data, columns, renderRow, emptyMessage, itemsPerPage =
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   if (!data || data.length === 0) {
     return <div className={cn("p-8 text-center text-sm", isDark ? "text-zinc-500" : "text-slate-500")}>{emptyMessage}</div>;
   }
@@ -94,7 +95,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('summary'); // summary, services, invoices
+  const [activeTab, setActiveTab] = useUrlTab<string>('summary'); // summary, services, invoices
 
   // Suspend Modal State
   const [suspendModalOpen, setSuspendModalOpen] = useState(false);

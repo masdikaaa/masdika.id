@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState } from "react";
 import { Server, Terminal, Activity, Cpu, HardDrive, CircuitBoard, Search, ShieldAlert, Settings, Bell } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
@@ -24,8 +25,8 @@ interface UnifiedAlertsClientProps {
 export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAlertsClientProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [searchFilter, setSearchFilter] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchFilter, setSearchFilter] = useUrlString<string>("searchFilter", "");
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
 
   // Combine items into a unified list
@@ -96,7 +97,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
   return (
     <div className="w-full space-y-6">
       {/* Hero Header */}
-      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 shadow-xl group", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 shadow-md group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -118,7 +119,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
                 placeholder="Search resources..." 
                 value={searchFilter}
                 onChange={(e) => { setSearchFilter(e.target.value); setCurrentPage(1); }}
-                className={cn("w-full backdrop-blur-md border rounded-2xl pl-9 pr-4 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#011627]/80 border-cyan-500/20 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500")}
+                className={cn("w-full border rounded-2xl pl-9 pr-4 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500")}
               />
             </div>
           </div>
@@ -126,7 +127,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
       </div>
 
       {allItems.length === 0 ? (
-        <div className={cn("border rounded-3xl p-12 text-center shadow-xl", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("border rounded-3xl p-12 text-center shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-50")}>
             <ShieldAlert className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
@@ -135,7 +136,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
             You don't have any active Cloud VPS or K3s clusters running. Deploy a service to start monitoring and configuring alerts.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link href="/dashboard/checkout?service=vps" className="px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:-translate-y-0.5 inline-flex items-center gap-2">
+            <Link href="/dashboard/checkout?service=vps" className="px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-sm hover:shadow inline-flex items-center gap-2">
               Deploy VPS
             </Link>
             <Link href="/dashboard/k3s" className={cn("px-6 py-3.5 rounded-xl border font-bold transition-all inline-flex items-center gap-2", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
@@ -144,29 +145,29 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
           </div>
         </div>
       ) : (
-        <div className={cn("border rounded-2xl shadow-xl overflow-hidden flex flex-col", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
-          <div className={cn("px-6 py-2 border-b flex flex-wrap items-center justify-between min-h-[56px] gap-4", isDark ? "border-white/5 bg-black/20" : "border-slate-100 bg-slate-50")}>
+        <div className={cn("border rounded-2xl shadow-md overflow-hidden flex flex-col", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("px-6 py-2 border-b flex flex-wrap items-center justify-between min-h-[56px] gap-4", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-100 bg-slate-50")}>
             <PaginationControls />
           </div>
           
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-max">
               <thead>
-                <tr className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "border-white/5 bg-black/10 text-zinc-400" : "border-slate-100 bg-slate-50 text-slate-500")}>
+                <tr className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "border-slate-800 bg-[#060b14] text-zinc-400" : "border-slate-100 bg-slate-50 text-slate-500")}>
                   <th className="py-4 px-6 font-medium w-72">Resource Name</th>
                   <th className="py-4 px-4 font-medium w-40">Type</th>
                   <th className="py-4 px-4 font-medium">Active Alerts</th>
                   <th className="py-4 pl-4 pr-6 font-medium text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-100")}>
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/60" : "divide-slate-100")}>
                 {paginatedList.length === 0 ? (
                   <tr>
                     <td colSpan={4} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>No resources match your search.</td>
                   </tr>
                 ) : (
                   paginatedList.map((item) => (
-                    <tr key={`${item.type}-${item.id}`} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50")}>
+                    <tr key={`${item.type}-${item.id}`} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50")}>
                       <td className="py-4 px-6 align-middle">
                         <div className="flex items-center gap-4">
                           <div className={cn("w-10 h-10 shrink-0 rounded-xl flex items-center justify-center p-2", isDark ? "bg-white/5" : "bg-slate-100")}>
@@ -223,7 +224,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
             </table>
           </div>
           
-          <div className={cn("px-6 py-2 border-t", isDark ? "border-white/5 bg-black/20" : "border-slate-100 bg-slate-50")}>
+          <div className={cn("px-6 py-2 border-t", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-100 bg-slate-50")}>
             <PaginationControls />
           </div>
         </div>

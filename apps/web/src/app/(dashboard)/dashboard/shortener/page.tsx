@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
@@ -25,7 +26,7 @@ export default function DashboardShortenerPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useUrlNumber("page", 1);
   const itemsPerPage = 10;
 
   const fetchLinks = async () => {
@@ -178,7 +179,7 @@ export default function DashboardShortenerPage() {
   return (
     <motion.div className="space-y-8 pb-10 w-full" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
         
         <div className="relative z-10">
@@ -205,7 +206,7 @@ export default function DashboardShortenerPage() {
           )}
           <button
             onClick={() => setShowCreateModal(true)}
-            className={cn("px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+            className={cn("px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
           >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden md:inline">Create New Link</span>
@@ -216,7 +217,7 @@ export default function DashboardShortenerPage() {
 
       {!hasAccess ? (
         <motion.div variants={itemVariants}>
-          <div className={cn("rounded-3xl p-12 text-center border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("rounded-3xl p-12 text-center border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
             <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-100")}>
               <LinkIcon className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
             </div>
@@ -224,16 +225,15 @@ export default function DashboardShortenerPage() {
             <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
               You need an active URL Shortener subscription to start creating, managing, and tracking your shortened links.
             </p>
-            <Link href="/dashboard/checkout?service=SHORTENER" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+            <Link href="/dashboard/checkout?service=SHORTENER" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-sm">
               View Plans
             </Link>
           </div>
         </motion.div>
       ) : (
         <>
-          <motion.div variants={itemVariants} className={cn("backdrop-blur-sm rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        <div className="overflow-x-auto relative z-10">
+          <motion.div variants={itemVariants} className={cn(" rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+                <div className="overflow-x-auto relative z-10">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className={cn("border-b", isDark ? "border-white/5 bg-cyan-500/5" : "border-slate-200 bg-cyan-50")}>
@@ -276,7 +276,7 @@ export default function DashboardShortenerPage() {
                   const shortUrl = `${window.location.origin}/${link.code}`;
                   const isSelected = selectedIds.includes(link.id);
                   return (
-                    <tr key={link.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50", isSelected ? (isDark ? "bg-cyan-500/5" : "bg-cyan-50") : "")}>
+                    <tr key={link.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50", isSelected ? (isDark ? "bg-cyan-500/5" : "bg-cyan-50") : "")}>
                       <td className="p-3 sm:p-5 text-center">
                         <button 
                           onClick={() => toggleSelect(link.id)} 
@@ -313,7 +313,7 @@ export default function DashboardShortenerPage() {
                         </div>
                       </td>
                       <td className="p-3 sm:p-5">
-                        <div className="inline-flex items-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-black text-xs sm:text-sm shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+                        <div className="inline-flex items-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-black text-xs sm:text-sm shadow-sm">
                           <Activity className="w-3.5 h-3.5" />
                           {link.clicks.toLocaleString()}
                         </div>
@@ -358,13 +358,13 @@ export default function DashboardShortenerPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  px-4"
           >
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className={cn("rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-md border", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}
+              className={cn("rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-md border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
             >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20">
@@ -401,13 +401,13 @@ export default function DashboardShortenerPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  px-4"
           >
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className={cn("rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-md border", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}
+              className={cn("rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-md border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
             >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20">
@@ -444,16 +444,15 @@ export default function DashboardShortenerPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  px-4"
           >
             <motion.div 
               initial={{ scale: 0.95, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 20, opacity: 0 }}
-              className={cn("rounded-3xl p-6 md:p-8 max-w-md w-full shadow-md relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}
+              className={cn("rounded-3xl p-6 md:p-8 max-w-md w-full shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              
+                            
               <div className="flex items-center justify-between mb-8 relative z-10">
                 <h3 className={cn("text-2xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   <Link2 className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} /> Create Short Link
@@ -472,7 +471,7 @@ export default function DashboardShortenerPage() {
                     placeholder="https://example.com/very-long-url"
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
-                    className={cn("w-full rounded-2xl px-5 py-4 text-sm transition-all focus:outline-none focus:ring-2 shadow-inner", isDark ? "bg-white/[0.02] border border-white/10 text-white placeholder-zinc-600 focus:border-cyan-500/50 focus:ring-cyan-500/20" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 shadow-sm")}
+                    className={cn("w-full rounded-2xl px-5 py-4 text-sm transition-all focus:outline-none focus:ring-2 shadow-inner", isDark ? "bg-[#060b14] border border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 shadow-sm")}
                   />
                 </div>
 
@@ -487,7 +486,7 @@ export default function DashboardShortenerPage() {
                   <button
                     type="submit"
                     disabled={isCreating}
-                    className={cn("flex-1 py-3.5 rounded-2xl text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+                    className={cn("flex-1 py-3.5 rounded-2xl text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
                   >
                     {isCreating ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

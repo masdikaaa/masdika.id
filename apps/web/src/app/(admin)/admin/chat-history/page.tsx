@@ -1,4 +1,5 @@
 "use client";
+import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect, useCallback } from "react";
@@ -54,7 +55,7 @@ export default function AdminChatHistoryPage() {
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useUrlString<string>("statusFilter", '');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);

@@ -87,7 +87,7 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
       </div>
 
       {/* Hero Header */}
-      <div className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
 
         <div className="relative z-10">
@@ -101,7 +101,7 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
         </div>
       </div>
 
-      <div className={cn("border rounded-3xl shadow-sm p-6 sm:p-8 relative overflow-hidden", isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-3xl shadow-sm p-6 sm:p-8 relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="space-y-6 relative z-10">
           {alertRules.length === 0 ? (
             <div className="flex items-center justify-center py-12">
@@ -116,12 +116,11 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {alertRules.map((rule, index) => (
-                  <div key={rule.metric} className={cn("border rounded-2xl p-6 relative overflow-hidden transition-all flex flex-col h-full", isDark ? "bg-black/20 border-white/5 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400")}>
-                    <div className={cn("absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 pointer-events-none rounded-full", (isDark && rule.isEnabled) ? "bg-cyan-500" : "bg-transparent")} />
+                  <div key={rule.metric} className={cn("border rounded-2xl p-6 relative overflow-hidden transition-all flex flex-col h-full", isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400")}>
 
                     <div className="relative z-10 flex-1 flex flex-col">
                       {/* Toggle & Title */}
-                      <div className={cn("flex items-center justify-between mb-6 pb-6 border-b", isDark ? "border-white/5" : "border-slate-100")}>
+                      <div className={cn("flex items-center justify-between mb-6 pb-6 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
                         <div className="flex items-center gap-3">
                           <div className={cn("p-2.5 rounded-xl", rule.isEnabled ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-50 text-cyan-600") : (isDark ? "bg-white/5 text-zinc-500" : "bg-slate-100 text-slate-400"))}>
                             {rule.metric === "CPU" && <Cpu className="w-5 h-5" />}
@@ -179,7 +178,7 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
                               newRules[index].notifyEmails = e.target.value;
                               setAlertRules(newRules);
                             }}
-                            className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                            className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                           />
                           <p className={cn("text-xs mt-2", isDark ? "text-white/40" : "text-slate-400")}>
                             Separate multiple emails with commas. <strong className="text-cyan-400 font-medium">Required if active.</strong>
@@ -190,17 +189,17 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
                 ))}
               </div>
 
-              <div className={cn("mt-8 pt-6 border-t flex justify-end gap-4", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("mt-8 pt-6 border-t flex justify-end gap-4", isDark ? "border-slate-800" : "border-slate-200")}>
                 <Link
                   href="/dashboard/alerts"
-                  className={cn("px-6 py-3 border rounded-xl font-medium transition-all inline-flex items-center", isDark ? "bg-white/5 hover:bg-white/10 border-white/5 hover:border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700")}
+                  className={cn("px-6 py-3 border rounded-xl font-medium transition-all inline-flex items-center", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700")}
                 >
                   Cancel
                 </Link>
                 <button
                   onClick={handleSaveAlerts}
                   disabled={isSavingAlerts}
-                  className={cn("px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl font-medium shadow-sm transition-all flex items-center gap-2 disabled:opacity-50", isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]")}
+                  className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl font-medium shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSavingAlerts ? <RefreshCw className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
                   {isSavingAlerts ? "Saving..." : "Save Configuration"}

@@ -1,4 +1,5 @@
 "use client";
+import { useUpdateEffect, useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -55,9 +56,9 @@ export default function AdminPlansPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   // Pagination & Filtering
-  const [activeTab, setActiveTab] = useState<string>("ALL");
+  const [activeTab, setActiveTab] = useUrlTab<string>("ALL");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
   // Form states
   const [limitFields, setLimitFields] = useState<{key: string, value: string}[]>(getDefaultLimitFields("OBJECT_STORAGE"));
@@ -190,7 +191,7 @@ export default function AdminPlansPage() {
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
   const paginatedPlans = filteredPlans.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   // Reset page when tab changes
-  useEffect(() => {
+  useUpdateEffect(() => {
     setCurrentPage(1);
     setSelectedIds([]);
   }, [activeTab]);

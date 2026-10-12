@@ -289,8 +289,7 @@ function CheckoutContent() {
       </motion.div>
 
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10 shrink-0">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
             <ShoppingCart className="w-3 h-3" /> Secure Checkout
@@ -305,11 +304,7 @@ function CheckoutContent() {
       <div className="space-y-8">
         {/* Step 1: Select Service (Moved outside to be full width) */}
         {action !== "add_node" && (
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-[60]", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-slate-200")}>
-            <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none -z-10">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
-            </div>
-
+          <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md relative z-[60] border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex items-center gap-3 mb-6 relative z-10">
               <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30">1</div>
               <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Select Service</h2>
@@ -324,7 +319,7 @@ function CheckoutContent() {
                   setServicePage(1);
                 }}
                 options={CATEGORIES.map(cat => ({ value: cat.id, label: cat.name }))}
-                className={cn("w-full rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-white/[0.02] border-white/10 shadow-inner" : "bg-slate-50 border-slate-200")}
+                className={cn("w-full rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 shadow-inner text-white" : "bg-slate-50 border-slate-200")}
               />
             </div>
 
@@ -352,17 +347,18 @@ function CheckoutContent() {
                         className={cn(
                           "relative p-5 rounded-2xl border text-left transition-all overflow-hidden group shadow-inner h-full min-h-[112px] flex items-center",
                           isSelected
-                            ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
-                            : "bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10"
+                            ? isDark
+                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-sm"
+                              : "bg-cyan-50 border-cyan-300 text-cyan-700 shadow-sm"
+                            : isDark
+                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-slate-800/20"
+                              : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
                         )}
                       >
-                        {isSelected && isDark && (
-                          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-cyan-500/20 to-transparent rounded-bl-3xl pointer-events-none" />
-                        )}
                         <div className="flex items-start gap-4">
                           <div className={cn(
                             "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors shadow-inner",
-                            isSelected ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-300") : (isDark ? "bg-white/5 border-white/10 text-zinc-400 group-hover:bg-white/10 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-cyan-50 group-hover:text-cyan-600")
+                            isSelected ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-100 text-cyan-700 border-cyan-300") : (isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-cyan-50 group-hover:text-cyan-600")
                           )}>
                             <Icon className="w-5 h-5" />
                           </div>
@@ -383,17 +379,17 @@ function CheckoutContent() {
                 <button
                   onClick={() => setServicePage(p => Math.max(1, p - 1))}
                   disabled={servicePage === 1}
-                  className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
+                  className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
                 >
                   Previous
                 </button>
-                <div className={cn("px-4 py-2 border rounded-xl font-bold text-sm", isDark ? "bg-white/5 border-white/10 text-white" : "bg-slate-100 border-slate-200 text-slate-900")}>
+                <div className={cn("px-4 py-2 border rounded-xl font-bold text-sm", isDark ? "bg-slate-800/50 border-slate-700 text-white" : "bg-slate-100 border-slate-200 text-slate-900")}>
                   {servicePage} / {Math.ceil(SERVICES.filter(s => s.category === selectedCategory).length / 4)}
                 </div>
                 <button
                   onClick={() => setServicePage(p => Math.min(Math.ceil(SERVICES.filter(s => s.category === selectedCategory).length / 4), p + 1))}
                   disabled={servicePage === Math.ceil(SERVICES.filter(s => s.category === selectedCategory).length / 4)}
-                  className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
+                  className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
                 >
                   Next
                 </button>
@@ -409,8 +405,7 @@ function CheckoutContent() {
             {/* Left Column - Generic Steps */}
             <div className="xl:col-span-2 space-y-6 md:space-y-8">
               {/* Step 2: Choose Plan */}
-              <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-slate-200")}>
-                {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />}
+              <motion.section variants={itemVariants} className={cn("rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                 <div className="flex items-center gap-3 mb-6 relative z-10">
                   <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30">2</div>
                   <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Choose Tier</h2>
@@ -431,21 +426,23 @@ function CheckoutContent() {
                         onClick={() => !isDisabled && setSelectedPlanId(plan.id)}
                         className={cn(
                           "relative flex flex-col p-6 rounded-3xl border transition-all shadow-inner",
-                          isDisabled ? "opacity-50 cursor-not-allowed bg-black/40 border-white/5 grayscale" : "cursor-pointer",
+                          isDisabled ? "opacity-50 cursor-not-allowed bg-black/40 border-slate-800 grayscale" : "cursor-pointer",
                           isSelected
-                            ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.15)]"
-                            : (!isDisabled && "bg-[#0b1120] border-white/5 hover:border-white/20 hover:bg-white/5")
+                            ? isDark
+                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-sm"
+                              : "bg-cyan-50 border-cyan-300 text-cyan-700 shadow-sm"
+                            : (!isDisabled && (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-slate-800/20" : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"))
                         )}
                       >
                         {isSelected && (
-                          <div className={cn("absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-xl shadow-lg border", isDark ? "bg-gradient-to-r from-cyan-400 to-cyan-600 text-white border-cyan-400/50" : "bg-cyan-600 text-white border-cyan-700")}>
+                          <div className={cn("absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-xl shadow-sm border", isDark ? "bg-cyan-600 text-white border-cyan-500" : "bg-cyan-600 text-white border-cyan-700")}>
                             Selected
                           </div>
                         )}
 
                         <h3 className={cn("text-lg font-bold mb-2 flex items-center justify-between", isDark ? "text-white" : "text-slate-900")}>
                           {plan.name}
-                          {isDowngrade && <span className={cn("text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-lg flex-shrink-0 border", isDark ? "bg-white/10 text-zinc-400 border-white/10" : "bg-slate-100 text-slate-500 border-slate-200")}>Current</span>}
+                          {isDowngrade && <span className={cn("text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-lg flex-shrink-0 border", isDark ? "bg-slate-800 text-zinc-400 border-slate-700" : "bg-slate-100 text-slate-500 border-slate-200")}>Current</span>}
                         </h3>
 
                         <div className={cn("text-3xl font-black mb-6 tracking-tight flex flex-col items-start gap-1", isDark ? "text-white" : "text-slate-900")}>
@@ -472,7 +469,7 @@ function CheckoutContent() {
                     );
                   })}
                   {currentServicePlans.length === 0 && (
-                    <div className={cn("col-span-full py-12 text-center font-medium rounded-3xl border", isDark ? "text-zinc-500 bg-black/20 border-white/5" : "text-slate-500 bg-slate-50 border-slate-200")}>
+                    <div className={cn("col-span-full py-12 text-center font-medium rounded-3xl border", isDark ? "text-zinc-500 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>
                       No active plans available for this service right now.
                     </div>
                   )}
@@ -484,17 +481,17 @@ function CheckoutContent() {
                     <button
                       onClick={() => setTierPage(p => Math.max(1, p - 1))}
                       disabled={tierPage === 1}
-                      className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
+                      className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
                     >
                       Previous
                     </button>
-                    <div className={cn("px-4 py-2 border rounded-xl font-bold text-sm", isDark ? "bg-white/5 border-white/10 text-white" : "bg-slate-100 border-slate-200 text-slate-900")}>
+                    <div className={cn("px-4 py-2 border rounded-xl font-bold text-sm", isDark ? "bg-slate-800/50 border-slate-700 text-white" : "bg-slate-100 border-slate-200 text-slate-900")}>
                       {tierPage} / {Math.ceil(currentServicePlans.length / 6)}
                     </div>
                     <button
                       onClick={() => setTierPage(p => Math.min(Math.ceil(currentServicePlans.length / 6), p + 1))}
                       disabled={tierPage === Math.ceil(currentServicePlans.length / 6)}
-                      className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
+                      className={cn("px-4 py-2 border rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold", isDark ? "bg-slate-800/50 border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
                     >
                       Next
                     </button>
@@ -506,8 +503,7 @@ function CheckoutContent() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
 
                 {/* Payment Method */}
-                <motion.section variants={itemVariants} className={cn("h-fit border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/5" : "bg-white border-slate-200")}>
-                  {isDark && <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />}
+                <motion.section variants={itemVariants} className={cn("h-fit border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
                   <div className="flex items-center gap-3 mb-6 relative z-10">
                     <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30">3</div>
                     <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Payment Method</h2>
@@ -517,7 +513,7 @@ function CheckoutContent() {
                     <div className="flex flex-col gap-2">
                       <div className={cn(
                         "flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-inner",
-                        balance < total ? "opacity-50 border-red-500/30 bg-red-500/5" : "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                        balance < total ? "opacity-50 border-red-500/30 bg-red-500/5" : isDark ? "bg-[#060b14] border-cyan-500/30 shadow-sm" : "bg-cyan-50/50 border-cyan-200 shadow-sm"
                       )}>
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-inner">
                           <Wallet className="w-6 h-6 text-cyan-600" />
@@ -543,14 +539,13 @@ function CheckoutContent() {
 
             {/* Right Column - Order Summary */}
             <motion.div variants={itemVariants} className="xl:col-span-1">
-              <div className={cn("sticky top-6 border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden", isDark ? "bg-white/[0.02] backdrop-blur-sm border-white/10" : "bg-white border-slate-200")}>
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-                <h2 className={cn("text-xl font-bold mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-white/10" : "text-slate-900 border-slate-100")}>
+              <div className={cn("sticky top-6 border rounded-3xl p-6 md:p-8 shadow-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+                <h2 className={cn("text-xl font-bold mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-100")}>
                   <BadgeCheck className="w-5 h-5 text-cyan-400" /> Order Summary
                 </h2>
 
                 <div className="space-y-4 mb-8 relative z-10">
-                  <div className={cn("flex justify-between items-center p-4 rounded-2xl border", isDark ? "bg-[#0b1120] border-white/5 shadow-inner" : "bg-slate-50 border-slate-200")}>
+                  <div className={cn("flex justify-between items-center p-4 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800 shadow-inner" : "bg-slate-50 border-slate-200")}>
                     <div className="flex flex-col gap-1">
                       <div className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>{selectedPlan?.name || 'No Plan'}</div>
                       {(selectedPlan?.hourlyPrice || 0) > 0 && (
@@ -564,11 +559,11 @@ function CheckoutContent() {
 
                   <div className="flex justify-between items-center text-xs px-2">
                     <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Billing Cycle</div>
-                    <div className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-white/5 border-white/5" : "text-slate-900 bg-slate-100 border-slate-200")}>Hourly</div>
+                    <div className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/50 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>Hourly</div>
                   </div>
 
                   {creditAmount > 0 && (
-                    <div className={cn("flex justify-between items-center text-xs py-3 border-y px-2", isDark ? "border-white/5" : "border-slate-100")}>
+                    <div className={cn("flex justify-between items-center text-xs py-3 border-y px-2", isDark ? "border-slate-800" : "border-slate-100")}>
                       <span className="text-cyan-400 font-bold flex items-center gap-2 uppercase tracking-widest">
                         <ArrowUpCircle className="w-3.5 h-3.5" />
                         Prorated Credit
@@ -577,9 +572,7 @@ function CheckoutContent() {
                     </div>
                   )}
 
-
-
-                  <div className={cn("border-t pt-4 flex justify-between items-center text-xs px-2", isDark ? "border-white/10" : "border-slate-100")}>
+                  <div className={cn("border-t pt-4 flex justify-between items-center text-xs px-2", isDark ? "border-slate-800" : "border-slate-100")}>
                     <div className={cn("font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Subtotal</div>
                     <div className={cn("font-black", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(finalSubtotal)}</div>
                   </div>
@@ -590,19 +583,16 @@ function CheckoutContent() {
                   </div>
                 </div>
 
-
-
-                <div className={cn("rounded-3xl p-6 mb-6 border relative overflow-hidden z-10 group", isDark ? "bg-black/40 border-white/10 shadow-inner" : "bg-slate-50 border-slate-200")}>
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-teal-400 opacity-50 group-hover:opacity-100 transition-opacity" />
+                <div className={cn("rounded-3xl p-6 mb-6 border relative overflow-hidden z-10 group", isDark ? "bg-[#060b14] border-slate-800 shadow-inner" : "bg-slate-50 border-slate-200")}>
                   <div className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Payment</div>
-                  <div className={cn("text-3xl font-black tracking-tight leading-tight break-all", isDark ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400" : "text-cyan-700")}>{formatRupiah(total)}</div>
+                  <div className={cn("text-3xl font-black tracking-tight leading-tight break-all", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(total)}</div>
                 </div>
 
                 {/* Legal Checkbox */}
-                <div className={cn("mb-6 relative z-10 border-t pt-6", isDark ? "border-white/10" : "border-slate-100")}>
+                <div className={cn("mb-6 relative z-10 border-t pt-6", isDark ? "border-slate-800" : "border-slate-100")}>
                   <label className="flex items-center gap-3 cursor-pointer group">
                     <div className="relative flex items-center justify-center shrink-0">
-                      <input type="checkbox" checked={isTermsAccepted} onChange={e => setIsTermsAccepted(e.target.checked)} className={cn("w-5 h-5 rounded border cursor-pointer appearance-none checked:bg-cyan-600 checked:border-cyan-600 transition-all", isDark ? "border-white/20 bg-white/5 text-cyan-500" : "border-slate-300 bg-white text-cyan-600")} />
+                      <input type="checkbox" checked={isTermsAccepted} onChange={e => setIsTermsAccepted(e.target.checked)} className={cn("w-5 h-5 rounded border cursor-pointer appearance-none checked:bg-cyan-600 checked:border-cyan-600 transition-all", isDark ? "border-slate-700 bg-[#060b14] text-cyan-500" : "border-slate-300 bg-white text-cyan-600")} />
                       <ShieldCheck className={cn("absolute w-3.5 h-3.5 text-white pointer-events-none transition-opacity", isTermsAccepted ? "opacity-100" : "opacity-0")} />
                     </div>
                     <span className={cn("text-xs leading-relaxed transition-colors", isDark ? "text-zinc-400 group-hover:text-zinc-300" : "text-slate-500 group-hover:text-slate-700")}>
@@ -614,7 +604,7 @@ function CheckoutContent() {
                 <button
                   onClick={handleCheckout}
                   disabled={isProcessing || !selectedPlanId || !selectedPaymentMethod || !isTermsAccepted}
-                  className={cn("w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10", isDark ? "shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)]" : "shadow-sm")}
+                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10 shadow-sm"
                 >
                   {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
                   {isProcessing ? "Processing..." : "Complete Secure Payment"}

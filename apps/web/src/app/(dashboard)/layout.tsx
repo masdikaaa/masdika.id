@@ -78,12 +78,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const blockReason = isSuspended ? auth.error : maintenanceMessage;
   
   const colors = isSuspended ? {
-    glow: "bg-red-500/10", border: "border-red-500/20", shadow: "shadow-red-900/20", accent: "via-red-500",
-    iconBg: "from-red-500/10 to-red-600/20 border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.15)]", iconText: "text-red-500", ping: "bg-red-500/20",
+    glow: "bg-red-500/10", border: "border-red-500/20", shadow: "shadow-md", accent: "via-red-500",
+    iconBg: "from-red-500/10 to-red-600/20 border-red-500/20", iconText: "text-red-500", ping: "bg-red-500/20",
     reasonBorder: "border-red-500/10", reasonTitle: "text-red-400/80"
   } : {
-    glow: "bg-amber-500/10", border: "border-amber-500/20", shadow: "shadow-amber-900/20", accent: "via-amber-500",
-    iconBg: "from-amber-500/10 to-amber-600/20 border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.15)]", iconText: "text-amber-500", ping: "bg-amber-500/20",
+    glow: "bg-amber-500/10", border: "border-amber-500/20", shadow: "shadow-md", accent: "via-amber-500",
+    iconBg: "from-amber-500/10 to-amber-600/20 border-amber-500/20", iconText: "text-amber-500", ping: "bg-amber-500/20",
     reasonBorder: "border-amber-500/10", reasonTitle: "text-amber-400/80"
   };
 

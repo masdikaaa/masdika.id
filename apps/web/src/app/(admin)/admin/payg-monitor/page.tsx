@@ -1,4 +1,5 @@
 "use client";
+import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import React, { useState, useEffect, Fragment } from "react";
@@ -35,9 +36,9 @@ export default function PaygMonitorPage() {
   const [interval, setIntervalVal] = useState<string>("hourly");
   const [customers, setCustomers] = useState<CustomerInfo[]>([]);
   const [expandedCustomerId, setExpandedCustomerId] = useState<number | null>(null);
-  const [customerPage, setCustomerPage] = useState(1);
+  const [customerPage, setCustomerPage] = useUrlNumber("customerPage", 1);
   const customersPerPage = 5;
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
   const [servicePageMap, setServicePageMap] = useState<Record<number, number>>({});
   const servicesPerPage = 5;
   

@@ -1,4 +1,5 @@
 "use client";
+import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -33,7 +34,7 @@ export default function AdminResumePage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'experience' | 'education' | 'certification'>('experience');
+  const [activeTab, setActiveTab] = useUrlTab<'experience' | 'education' | 'certification'>('experience', { allowed: ['experience', 'education', 'certification'] as const });
   
   // Data States
   const [experiences, setExperiences] = useState<any[]>([]);

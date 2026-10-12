@@ -56,7 +56,7 @@ export default function ApiStatsPage() {
 
   if (!stats) {
     return (
-      <div className={cn("flex flex-col items-center justify-center min-h-[60vh] border rounded-3xl backdrop-blur-sm m-4", isDark ? "bg-white/[0.02]/40 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("flex flex-col items-center justify-center min-h-[60vh] border rounded-3xl  m-4", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         <Activity className="w-16 h-16 text-cyan-500/50 mb-6 animate-pulse" />
         <h2 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Data Available</h2>
         <p className={cn("text-center max-w-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Create an API Key and start making requests to see your API statistics here.</p>
@@ -72,7 +72,7 @@ export default function ApiStatsPage() {
       animate="visible"
     >
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -85,8 +85,8 @@ export default function ApiStatsPage() {
             </h1>
             <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor your API usage, performance, and key metrics across all projects in real-time.</p>
           </div>
-          <div className="flex items-center gap-2 px-5 py-2.5 bg-[#011627]/80 backdrop-blur-md text-cyan-400 rounded-2xl border border-cyan-500/20 text-sm font-bold shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-[#011627]/80  text-cyan-400 rounded-2xl border border-cyan-500/20 text-sm font-bold shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse " />
             Live Metrics Active
           </div>
         </div>
@@ -94,10 +94,9 @@ export default function ApiStatsPage() {
 
       {/* Stats Grid - Bento Style */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-cyan-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.02]/80" : "bg-white border-slate-200 hover:bg-slate-50")}>
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all" />
-          <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.15)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all">
+        <motion.div variants={itemVariants} className={cn(" border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-cyan-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50")}>
+                    <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-sm transition-all">
               <Activity className="w-6 h-6 text-cyan-400" />
             </div>
             <span className="flex items-center gap-1 text-[10px] font-black text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2.5 py-1 rounded-full uppercase tracking-wider">
@@ -108,10 +107,9 @@ export default function ApiStatsPage() {
           <p className={cn("text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.totalRequests.toLocaleString()}</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-cyan-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.02]/80" : "bg-white border-slate-200 hover:bg-slate-50")}>
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all" />
-          <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.15)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] transition-all">
+        <motion.div variants={itemVariants} className={cn(" border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-cyan-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50")}>
+                    <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-sm transition-all">
               <Key className="w-6 h-6 text-cyan-400" />
             </div>
           </div>
@@ -122,10 +120,9 @@ export default function ApiStatsPage() {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-blue-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.02]/80" : "bg-white border-slate-200 hover:bg-slate-50")}>
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all" />
-          <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] transition-all">
+        <motion.div variants={itemVariants} className={cn(" border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-blue-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50")}>
+                    <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-sm transition-all">
               <FolderDot className="w-6 h-6 text-blue-400" />
             </div>
           </div>
@@ -135,9 +132,8 @@ export default function ApiStatsPage() {
       </div>
 
       {/* Main Chart */}
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-md relative", isDark ? "bg-white/[0.02]/40 border-white/5" : "bg-white border-slate-200")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none rounded-3xl" />
-        <div className="relative z-10 mb-8">
+      <motion.div variants={itemVariants} className={cn(" border rounded-3xl p-6 md:p-8 shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+                <div className="relative z-10 mb-8">
           <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             Traffic Overview
             <span className={cn("text-xs font-semibold px-2 py-1 rounded-lg", isDark ? "bg-white/10 text-zinc-300" : "bg-slate-100 text-slate-500")}>Last 7 Days</span>
@@ -172,7 +168,7 @@ export default function ApiStatsPage() {
 
       {/* Grid for Pie and Bar charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-sm", isDark ? "bg-white/[0.02]/40 border-white/5" : "bg-white border-slate-200")}>
+        <motion.div variants={itemVariants} className={cn(" border rounded-3xl p-6 md:p-8 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>Usage by Project</h3>
           {stats.projectUsage.length > 0 ? (
             <div className="h-[300px] w-full flex items-center justify-center">
@@ -221,7 +217,7 @@ export default function ApiStatsPage() {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl p-6 md:p-8 shadow-sm", isDark ? "bg-white/[0.02]/40 border-white/5" : "bg-white border-slate-200")}>
+        <motion.div variants={itemVariants} className={cn(" border rounded-3xl p-6 md:p-8 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>Top API Keys</h3>
           {stats.topKeys.length > 0 ? (
             <div className="h-[300px] w-full overflow-y-auto custom-scrollbar pr-2">

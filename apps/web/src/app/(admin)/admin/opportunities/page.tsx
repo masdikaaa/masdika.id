@@ -1,4 +1,5 @@
 "use client";
+import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
@@ -13,8 +14,8 @@ export default function AdminOpportunitiesPage() {
   const isDark = theme === "dark";
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState("ALL");
+  const [search, setSearch] = useUrlString<string>("search", "");
+  const [filterType, setFilterType] = useUrlString<string>("filterType", "ALL");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 

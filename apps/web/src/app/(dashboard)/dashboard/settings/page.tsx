@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect, useRef } from 'react';
@@ -8,17 +9,21 @@ import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const inputClassDark = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner';
+const inputClassDark = 'w-full bg-[#060b14] border border-slate-800 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-sm';
   const inputClassLight = 'w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
-const labelClassDark = 'block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2';
+const labelClassDark = 'block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2';
   const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
 
 
 const OtpInput = ({ value, onChange, isDanger = false }: { value: string; onChange: (val: string) => void; isDanger?: boolean }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const activeColor = isDanger ? 'border-red-500/50 text-white bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'border-cyan-500/50 text-white bg-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]';
-  const focusColor = isDanger ? 'border-2 border-red-400 text-transparent shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-2 border-cyan-400 text-transparent shadow-[0_0_15px_rgba(6,182,212,0.2)]';
+  const activeColor = isDanger 
+    ? (isDark ? 'border-rose-500 text-white bg-rose-500/10' : 'border-rose-500 text-slate-900 bg-rose-50') 
+    : (isDark ? 'border-cyan-500 text-white bg-cyan-500/10' : 'border-cyan-600 text-slate-900 bg-cyan-50');
+  const focusColor = isDanger 
+    ? 'border-2 border-rose-500 text-transparent' 
+    : (isDark ? 'border-2 border-cyan-500 text-transparent' : 'border-2 border-cyan-600 text-transparent');
   return (
     <div className="relative w-full">
       <div className="flex gap-2 justify-between">
@@ -30,7 +35,7 @@ const OtpInput = ({ value, onChange, isDanger = false }: { value: string; onChan
                 ? activeColor 
                 : value.length === i
                 ? focusColor
-                : (isDark ? 'border border-white/10 text-zinc-800 bg-[#0b1120]' : 'border border-slate-200 text-slate-300 bg-slate-50')
+                : (isDark ? 'border border-slate-800 text-slate-600 bg-[#060b14]' : 'border border-slate-200 text-slate-300 bg-slate-50')
             }`}
           >
             {value[i] || '0'}
@@ -55,7 +60,7 @@ export default function SettingsPage() {
   const isDark = theme === 'dark';
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'security'>('profile', { allowed: ['profile', 'security'] as const });
   
   // Profile State
   const [name, setName] = useState('');
@@ -381,7 +386,7 @@ export default function SettingsPage() {
   return (
     <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl backdrop-blur-sm border p-6 md:p-8 group shadow-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
@@ -390,32 +395,32 @@ export default function SettingsPage() {
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Account <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Settings</span>
           </h1>
-          <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your profile information, email address, password, and account security.</p>
+          <p className={cn("text-sm max-w-md", isDark ? "text-slate-400" : "text-slate-500")}>Manage your profile information, email address, password, and account security.</p>
         </div>
       </motion.div>
 
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Navigation Sidebar */}
         <div className="w-full md:w-60 shrink-0">
-          <div className={cn("backdrop-blur-sm rounded-3xl p-2 shadow-md flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("rounded-3xl p-2 shadow-md flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as 'profile' | 'security')}
-                  className={`relative flex items-center gap-3 px-4 py-4 rounded-2xl transition-all text-left shrink-0 w-full ${
+                  className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all text-left shrink-0 w-full border ${
                     isActive
-                      ? (isDark ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm' : 'bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm')
-                      : (isDark ? 'text-zinc-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
+                      ? (isDark ? 'bg-slate-800/90 text-white border-slate-700 shadow-sm' : 'bg-slate-100 text-slate-900 border-slate-300 shadow-sm')
+                      : (isDark ? 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50')
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isActive ? (isDark ? 'bg-cyan-500/20 border border-cyan-500/30' : 'bg-cyan-100 border border-cyan-200') : (isDark ? 'bg-white/5' : 'bg-slate-100')}`}>
-                    <tab.icon className={`w-4 h-4 ${isActive ? (isDark ? 'text-cyan-400' : 'text-cyan-600') : (isDark ? 'text-zinc-500' : 'text-slate-400')}`} />
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-cyan-100 border-cyan-200 text-cyan-700') : (isDark ? 'bg-slate-800/60 border-slate-700/60 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
+                    <tab.icon className="w-4 h-4" />
                   </div>
                   <div className="hidden md:block">
-                    <div className={`text-sm font-bold leading-none ${isActive ? (isDark ? 'text-white' : 'text-slate-900') : (isDark ? 'text-zinc-300' : 'text-slate-600')}`}>{tab.label}</div>
-                    <div className={cn("text-[10px] mt-1", isDark ? "text-zinc-500" : "text-slate-400")}>{tab.desc}</div>
+                    <div className={`text-sm font-bold leading-none ${isActive ? (isDark ? 'text-white' : 'text-slate-900') : (isDark ? 'text-slate-300' : 'text-slate-600')}`}>{tab.label}</div>
+                    <div className={cn("text-[10px] mt-1.5", isDark ? "text-slate-400" : "text-slate-400")}>{tab.desc}</div>
                   </div>
                   <span className="md:hidden text-sm font-bold">{tab.label}</span>
                 </button>
@@ -437,47 +442,50 @@ export default function SettingsPage() {
                 className="space-y-6"
               >
                 {/* Avatar Card */}
-                <div className={cn("backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  
                   <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                     <Camera className="w-5 h-5 text-cyan-400" /> Profile Picture
                   </h3>
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
                     <div className="relative group shrink-0">
-                      <div className={cn("w-32 h-32 rounded-3xl overflow-hidden border-4 ring-2 relative", isDark ? "border-[#0f172a] ring-cyan-500/30 shadow-[0_0_30px_rgba(139,92,246,0.2)]" : "border-white ring-cyan-200 shadow-lg")}>
+                      <div className={cn("w-32 h-32 rounded-3xl overflow-hidden border-2 relative", isDark ? "border-slate-800 bg-[#060b14] shadow-sm" : "border-slate-200 bg-slate-100 shadow-sm")}>
                         {imagePreview ? (
                           <img referrerPolicy="no-referrer" src={imagePreview} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-400 to-blue-600">
-                            <span className={cn("text-5xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-600 to-blue-700">
+                            <span className="text-5xl font-bold text-white">
                               {name ? name.charAt(0).toUpperCase() : <User className="w-16 h-16 text-white/80" />}
                             </span>
                           </div>
                         )}
                         <div
                           onClick={() => fileInputRef.current?.click()}
-                          className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer"
+                          className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer"
                         >
-                          <Upload className={cn("w-7 h-7 mb-1", isDark ? "text-white" : "text-slate-900")} />
-                          <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Change</span>
+                          <Upload className="w-7 h-7 mb-1 text-white" />
+                          <span className="text-xs font-bold text-white">Change</span>
                         </div>
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-9 h-9 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:bg-cyan-400 transition-colors" onClick={() => fileInputRef.current?.click()}>
-                        <Camera className={cn("w-4 h-4", isDark ? "text-white" : "text-slate-900")} />
+                      <div 
+                        className={cn("absolute -bottom-1 -right-1 w-8 h-8 rounded-xl flex items-center justify-center shadow-sm cursor-pointer transition-colors border-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-[#0b1322]" : "bg-cyan-600 hover:bg-cyan-700 text-white border-white")} 
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Camera className="w-4 h-4" />
                       </div>
                       <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
                     </div>
                     
                     <div className="flex-1 text-center sm:text-left">
                       <h4 className={cn("font-bold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>{name || 'Your Name'}</h4>
-                      <p className={cn("text-sm mb-4", isDark ? "text-zinc-500" : "text-slate-500")}>{email}</p>
-                      <p className={cn("text-xs mb-4 rounded-xl px-3 py-2 border inline-block", isDark ? "text-zinc-600 bg-white/5 border-white/5" : "text-slate-500 bg-slate-50 border-slate-200")}>PNG or JPG · Max size 2MB</p>
+                      <p className={cn("text-sm mb-3", isDark ? "text-slate-400" : "text-slate-500")}>{email}</p>
+                      <p className={cn("text-xs mb-4 rounded-xl px-3 py-1.5 border inline-block", isDark ? "text-slate-400 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>PNG or JPG · Max size 2MB</p>
                       <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 hover:bg-cyan-100 border-cyan-200 text-cyan-700")}>
+                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}>
                           <Upload className="w-4 h-4" /> Upload Photo
                         </button>
                         {imagePreview && (
-                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-all border", isDark ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400" : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600")}>
+                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all border", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
                             Remove
                           </button>
                         )}
@@ -487,8 +495,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Personal Info Card */}
-                <div className={cn("backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                  <div className={cn("absolute inset-0 pointer-events-none", isDark ? "bg-gradient-to-b from-white/[0.02] to-transparent" : "")} />
+                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                     <User className="w-5 h-5 text-cyan-400" /> Personal Information
                   </h3>
@@ -510,7 +517,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => setShowEmailModal(true)}
-                          className={cn("text-[10px] font-bold transition-colors px-2.5 py-1 rounded-lg border", isDark ? "text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 hover:text-cyan-800 bg-cyan-50 border-cyan-200")}
+                          className={cn("text-xs font-semibold transition-colors px-3 py-1 rounded-lg border", isDark ? "text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-slate-700" : "text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-200")}
                         >
                           Change Email
                         </button>
@@ -519,29 +526,24 @@ export default function SettingsPage() {
                         type="email"
                         value={email}
                         disabled
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm cursor-not-allowed shadow-inner border", isDark ? "bg-[#0b1120]/50 border-white/5 text-zinc-500" : "bg-slate-100 border-slate-200 text-slate-400")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm cursor-not-allowed border", isDark ? "bg-[#060b14]/70 border-slate-800 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-400")}
                       />
-                      <p className={cn("text-[11px] mt-1.5 ml-1", isDark ? "text-zinc-600" : "text-slate-400")}>Email can only be changed via OTP verification.</p>
+                      <p className={cn("text-[11px] mt-1.5 ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Email can only be changed via OTP verification.</p>
                     </div>
-                  </div>
-
-                  <div className={cn("pt-6 mt-2 border-t relative z-10", isDark ? "border-white/5" : "border-slate-200")}>
-                    <p className={cn("text-xs", isDark ? "text-zinc-600" : "text-slate-400")}>Email can only be changed via OTP verification.</p>
                   </div>
                 </div>
 
                 {/* Billing Info Card */}
-                <div className={cn("backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                  <div className={cn("absolute inset-0 pointer-events-none", isDark ? "bg-gradient-to-b from-white/[0.02] to-transparent" : "")} />
+                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                     <Building2 className="w-5 h-5 text-cyan-400" /> Billing Information
                   </h3>
                   <div className="space-y-5 relative z-10">
                     {/* Company Name */}
                     <div>
-                      <label className={labelClass}>Company Name <span className={cn("normal-case font-normal", isDark ? "text-zinc-600" : "text-slate-400")}>(optional)</span></label>
+                      <label className={labelClass}>Company Name <span className={cn("normal-case font-normal", isDark ? "text-slate-500" : "text-slate-400")}>(optional)</span></label>
                       <div className="relative">
-                        <Briefcase className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-600" : "text-slate-400")} />
+                        <Briefcase className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-slate-500" : "text-slate-400")} />
                         <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Your company or organization" className={inputClass + ' pl-11'} />
                       </div>
                     </div>
@@ -550,7 +552,7 @@ export default function SettingsPage() {
                     <div>
                       <label className={labelClass}>Phone Number</label>
                       <div className="relative">
-                        <Phone className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-600" : "text-slate-400")} />
+                        <Phone className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-slate-500" : "text-slate-400")} />
                         <input type="tel" value={phone} onChange={handlePhoneChange} placeholder="+1 234 567 8900" className={inputClass + ' pl-11'} minLength={8} />
                       </div>
                     </div>
@@ -559,7 +561,7 @@ export default function SettingsPage() {
                     <div>
                       <label className={labelClass}>Address</label>
                       <div className="relative mb-2">
-                        <MapPin className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-600" : "text-slate-400")} />
+                        <MapPin className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-slate-500" : "text-slate-400")} />
                         <input type="text" value={address1} onChange={(e) => setAddress1(e.target.value)} placeholder="Street address" className={inputClass + ' pl-11'} />
                       </div>
                       <input type="text" value={address2} onChange={(e) => setAddress2(e.target.value)} placeholder="Apt, suite, floor (optional)" className={inputClass} />
@@ -608,11 +610,11 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className={cn("pt-6 mt-6 border-t flex justify-end relative z-10", isDark ? "border-white/5" : "border-slate-200")}>
+                  <div className={cn("pt-6 mt-6 border-t flex justify-end relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
                     <button
                       onClick={saveProfile}
                       disabled={isSavingProfile}
-                      className={cn("px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 text-white disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+                      className={cn("px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 text-white disabled:opacity-50 shadow-sm", isDark ? "bg-cyan-500 hover:bg-cyan-400" : "bg-cyan-600 hover:bg-cyan-700")}
                     >
                       {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       Save Changes
@@ -633,15 +635,15 @@ export default function SettingsPage() {
                 className="space-y-6"
               >
                 {/* Change Password Card */}
-                <div className={cn("backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  
                   <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
                       <Lock className="w-6 h-6" />
                     </div>
                     <div>
                       <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Change Password</h3>
-                      <p className={cn("text-sm mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
+                      <p className={cn("text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
                     </div>
                   </div>
 
@@ -657,7 +659,7 @@ export default function SettingsPage() {
                           className={inputClass + ' pr-12'}
                           required
                         />
-                        <button type="button" onClick={() => setShowOldPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                        <button type="button" onClick={() => setShowOldPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                           {showOldPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
@@ -674,7 +676,7 @@ export default function SettingsPage() {
                             className={inputClass + ' pr-12'}
                             required
                           />
-                          <button type="button" onClick={() => setShowNewPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                          <button type="button" onClick={() => setShowNewPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                             {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
@@ -687,27 +689,27 @@ export default function SettingsPage() {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Repeat new password"
-                            className={`${inputClass} pr-12 ${confirmPassword && newPassword && confirmPassword !== newPassword ? 'border-red-500/50 focus:ring-red-500/20' : confirmPassword && confirmPassword === newPassword ? 'border-cyan-500/50 focus:ring-cyan-500/20' : ''}`}
+                            className={`${inputClass} pr-12 ${confirmPassword && newPassword && confirmPassword !== newPassword ? 'border-rose-500/50 focus:ring-rose-500/20' : confirmPassword && confirmPassword === newPassword ? 'border-emerald-500/50 focus:ring-emerald-500/20' : ''}`}
                             required
                           />
-                          <button type="button" onClick={() => setShowConfirmPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                          <button type="button" onClick={() => setShowConfirmPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                             {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
                         {confirmPassword && newPassword && confirmPassword !== newPassword && (
-                          <p className="text-[11px] text-red-400 mt-1.5 ml-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Passwords don't match</p>
+                          <p className="text-[11px] text-rose-400 mt-1.5 ml-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Passwords don't match</p>
                         )}
                         {confirmPassword && confirmPassword === newPassword && (
-                          <p className="text-[11px] text-cyan-400 mt-1.5 ml-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Passwords match</p>
+                          <p className="text-[11px] text-emerald-400 mt-1.5 ml-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Passwords match</p>
                         )}
                       </div>
                     </div>
 
-                    <div className={cn("pt-4 border-t flex justify-end", isDark ? "border-white/5" : "border-slate-200")}>
+                    <div className={cn("pt-4 border-t flex justify-end", isDark ? "border-slate-800" : "border-slate-200")}>
                       <button
                         type="submit"
                         disabled={isPasswordLoading}
-                        className={cn("px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 text-white disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+                        className={cn("px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 text-white disabled:opacity-50 shadow-sm", isDark ? "bg-cyan-500 hover:bg-cyan-400" : "bg-cyan-600 hover:bg-cyan-700")}
                       >
                         {isPasswordLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                         Update Password
@@ -717,26 +719,26 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA Card */}
-                <div className={cn("backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  
                   <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
                       <ShieldCheck className="w-6 h-6" />
                     </div>
                     <div>
                       <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Two-Factor Authentication</h3>
-                      <p className={cn("text-sm mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>Add an extra layer of security with an authenticator app.</p>
+                      <p className={cn("text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Add an extra layer of security with an authenticator app.</p>
                     </div>
                   </div>
 
-                  <div className={`relative z-10 rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 shadow-inner ${twoFactorEnabled ? (isDark ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-cyan-50 border-cyan-200') : (isDark ? 'bg-[#0b1120] border-white/5' : 'bg-slate-50 border-slate-200')}`}>
+                  <div className={`relative z-10 rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50 border-emerald-200') : (isDark ? 'bg-[#060b14] border-slate-800' : 'bg-slate-50 border-slate-200')}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${twoFactorEnabled ? (isDark ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-cyan-100 text-cyan-600 border border-cyan-200') : (isDark ? 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border border-cyan-200 text-cyan-600')}`}>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border-emerald-200') : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
                         <Smartphone className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Authenticator App</h4>
-                        <div className={`mt-1 text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-lg w-fit ${twoFactorEnabled ? (isDark ? 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border border-cyan-200 text-cyan-700') : (isDark ? 'bg-zinc-800 border border-white/10 text-zinc-400 opacity-70' : 'bg-slate-100 border border-slate-200 text-slate-500')}`}>
+                        <h4 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Authenticator App</h4>
+                        <div className={`mt-1 text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-lg w-fit border ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700') : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
                           {twoFactorEnabled ? '✓ Active & Configured' : 'Not configured'}
                         </div>
                       </div>
@@ -745,17 +747,17 @@ export default function SettingsPage() {
                     <button
                       onClick={handle2FAToggle}
                       disabled={is2FALoading}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all shadow-inner disabled:opacity-50 shrink-0 ${twoFactorEnabled ? 'bg-cyan-500' : (isDark ? 'bg-zinc-700' : 'bg-slate-300')}`}
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all disabled:opacity-50 shrink-0 ${twoFactorEnabled ? 'bg-cyan-500' : (isDark ? 'bg-slate-700' : 'bg-slate-300')}`}
                     >
                       {is2FALoading ? (
                         <Loader2 className={cn("w-4 h-4 animate-spin mx-auto", isDark ? "text-white" : "text-slate-900")} />
                       ) : (
-                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md ${twoFactorEnabled ? 'translate-x-8' : 'translate-x-1'}`} />
+                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${twoFactorEnabled ? 'translate-x-8' : 'translate-x-1'}`} />
                       )}
                     </button>
                   </div>
 
-                  <p className={cn("text-xs leading-relaxed relative z-10", isDark ? "text-zinc-600" : "text-slate-500")}>
+                  <p className={cn("text-xs leading-relaxed relative z-10", isDark ? "text-slate-400" : "text-slate-500")}>
                     When 2FA is enabled, you will be prompted for a secure token during login. Retrieve this from your phone's Google Authenticator or Authy application.
                   </p>
                 </div>
@@ -770,22 +772,21 @@ export default function SettingsPage() {
       {/* OTP Verify Password Modal */}
       <AnimatePresence>
         {showOtpModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden", isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -mr-12 -mt-12 pointer-events-none" />
-              <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-zinc-500 hover:text-white bg-white/5" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+              <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
               <div className="text-center mb-6 relative z-10">
-                <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <KeyRound className="w-8 h-8 text-cyan-400" />
+                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <KeyRound className="w-8 h-8" />
                 </div>
                 <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Verify Password Change</h3>
-                <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>We've sent a 6-digit code to your email. Enter it below to confirm the change.</p>
+                <p className={cn("text-sm", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a 6-digit code to your email. Enter it below to confirm the change.</p>
               </div>
               <div className="space-y-4 relative z-10">
                 <OtpInput value={otpCode} onChange={setOtpCode} />
                 <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold transition-all disabled:opacity-50", isDark ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
+                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
                     {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                   </button>
                 </div>
@@ -798,39 +799,38 @@ export default function SettingsPage() {
       {/* Email Change Modal */}
       <AnimatePresence>
         {showEmailModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden", isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -mr-12 -mt-12 pointer-events-none" />
-              <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-zinc-500 hover:text-white bg-white/5" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+              <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Mail className="w-8 h-8 text-cyan-400" />
+                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <Mail className="w-8 h-8" />
                 </div>
                 <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Change Email Address</h3>
               </div>
 
               {!emailOtpStep ? (
                 <form onSubmit={handleEmailRequest} className="space-y-4 relative z-10">
-                  <p className={cn("text-sm text-center -mt-2 mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Enter your new email. We'll send a verification code to your <strong className={isDark ? "text-white" : "text-slate-900"}>current</strong> email.</p>
+                  <p className={cn("text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>Enter your new email. We'll send a verification code to your <strong className={isDark ? "text-white" : "text-slate-900"}>current</strong> email.</p>
                   <div>
                     <label className={labelClass}>New Email Address</label>
                     <input type="email" required value={newEmailInput} onChange={(e) => setNewEmailInput(e.target.value)} className={inputClass} placeholder="new@example.com" />
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold disabled:opacity-50 transition-all", isDark ? "bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
+                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold disabled:opacity-50 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Continue'}
                     </button>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-4 relative z-10">
-                  <p className={cn("text-sm text-center -mt-2 mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
+                  <p className={cn("text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
                   <OtpInput value={emailOtpCode} onChange={setEmailOtpCode} />
                   <div className="flex gap-3">
-                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Back</button>
-                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold disabled:opacity-50 transition-all", isDark ? "bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
+                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Back</button>
+                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold disabled:opacity-50 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify & Save'}
                     </button>
                   </div>
@@ -844,21 +844,20 @@ export default function SettingsPage() {
       {/* 2FA Setup Modal */}
       <AnimatePresence>
         {showTwoFactorModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-md relative overflow-hidden", isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200")}>
-              <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -mr-12 -mt-12 pointer-events-none" />
-              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-zinc-500 hover:text-white bg-white/5" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ShieldCheck className="w-8 h-8 text-cyan-400" />
+                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <ShieldCheck className="w-8 h-8" />
                 </div>
                 <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Setup 2FA</h3>
-                <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Scan this QR code with Google Authenticator or Authy.</p>
+                <p className={cn("text-sm", isDark ? "text-slate-400" : "text-slate-500")}>Scan this QR code with Google Authenticator or Authy.</p>
               </div>
 
               <div className="flex justify-center mb-6 relative z-10">
-                <div className="p-4 bg-white rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
                   {qrCodeUrl && <img referrerPolicy="no-referrer" src={qrCodeUrl} alt="QR Code" className="w-48 h-48" loading="lazy" decoding="async" />}
                 </div>
               </div>
@@ -869,8 +868,8 @@ export default function SettingsPage() {
                   <OtpInput value={twoFactorCode} onChange={setTwoFactorCode} />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold disabled:opacity-50 transition-all", isDark ? "bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
+                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-3.5 rounded-2xl border font-bold transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className={cn("flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold disabled:opacity-50 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}>
                     {is2FALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enable 2FA'}
                   </button>
                 </div>

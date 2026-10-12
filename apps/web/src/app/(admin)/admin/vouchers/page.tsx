@@ -1,5 +1,6 @@
 "use client";
 
+import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Ticket, Settings2, Check, X, RefreshCw, Save, Loader2, LayoutDashboard, Pencil, CheckCircle } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
@@ -34,7 +35,7 @@ export default function AdminVouchersPage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<"vouchers" | "promos">("vouchers");
+  const [activeTab, setActiveTab] = useUrlTab<"vouchers" | "promos">("vouchers", { allowed: ["vouchers", "promos"] as const });
   const [vouchers, setVouchers] = useState<any[]>([]);
   const [deletingVoucherId, setDeletingVoucherId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,9 +57,9 @@ export default function AdminVouchersPage() {
     maxClaims: 0,
     validUntil: ""
   });
-  const [promoCurrentPage, setPromoCurrentPage] = useState(1);
+  const [promoCurrentPage, setPromoCurrentPage] = useUrlNumber("promoCurrentPage", 1);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
 
   // Modal State
