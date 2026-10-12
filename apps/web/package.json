@@ -7,6 +7,7 @@
     "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096 --no-deprecation\" next build",
     "start": "tsx src/server.ts",
     "worker": "tsx scripts/worker.ts",
+    "vnc-proxy": "tsx scripts/vnc-proxy.ts",
     "lint": "eslint",
     "postinstall": "npx prisma generate"
   },

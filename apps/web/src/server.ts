@@ -19,8 +19,7 @@ import { createServer } from "http";
 import next from "next";
 import { WebSocketServer, WebSocket } from "ws";
 import https from "https";
-import httpProxy from "http-proxy";
-import { consumeVncSession } from "./lib/vnc-session";
+import { handleVncUpgrade } from "./lib/vnc-proxy-handler";
 
 const parseCookie = (str: string) => {
   if (!str) return {};
@@ -159,23 +158,8 @@ app.prepare().then(async () => {
     }
   });
 
-  // Setup HTTP Proxy for VNC WebSocket
-  const vncProxy = httpProxy.createProxyServer({
-    ws: true,
-    secure: false, // rejectUnauthorized: false equivalent
-    changeOrigin: true
-  });
-
-  vncProxy.on("error", (err: any, req: any, socket: any) => {
-    console.error("[VNC] Proxy error:", err);
-    if (socket && !socket.destroyed) {
-      socket.write("HTTP/1.1 502 Bad Gateway\r\n\r\n");
-      socket.destroy();
-    }
-  });
-
   server.on("upgrade", async (req: any, socket: any, head: any) => {
-    const reqUrl = new URL(req.url || "/", `http://${req.headers.host}`);
+    const reqUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
     const normalizedPathname = reqUrl.pathname.replace(/\/+/g, '/');
 
     if (normalizedPathname !== "/api/ws/vnc") {
@@ -183,63 +167,7 @@ app.prepare().then(async () => {
       return;
     }
 
-    // ── Auth & session validation ───────────────────────────────────────────
-    const cookieHeader = req.headers.cookie || "";
-    const cookies = parseCookie(cookieHeader);
-    const sessionToken = cookies["admin_session"];
-
-    const userId = verifySessionToken(sessionToken);
-    if (!userId) {
-      socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-      socket.destroy();
-      return;
-    }
-
-    const vncSessionId = cookies["VNC_SESSION_TOKEN"] || reqUrl.searchParams.get("session");
-    if (!vncSessionId) {
-      socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
-      socket.destroy();
-      return;
-    }
-
-    const vncSession = consumeVncSession(vncSessionId);
-    if (!vncSession) {
-      socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
-      socket.destroy();
-      return;
-    }
-
-    if (vncSession.userId !== userId) {
-      socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
-      socket.destroy();
-      return;
-    }
-
-    const { proxmoxHost, node, vmid, port: vncPort, ticket, tokenId, tokenSecret } = vncSession;
-
-    let proxmoxUrl: URL;
-    try { proxmoxUrl = new URL(proxmoxHost); }
-    catch { socket.write("HTTP/1.1 400 Bad Request\r\n\r\n"); socket.destroy(); return; }
-
-    const wsHost = proxmoxUrl.hostname;
-    const wsPort = proxmoxUrl.port || "8006";
-
-    // Build API token auth header: PVEAPIToken=user@realm!tokenname=secret
-    const apiTokenAuth = `PVEAPIToken=${tokenId}=${tokenSecret}`;
-
-    console.log(`[VNC] Upgrading via http-proxy VMID:${vmid}...`);
-
-    // We rewrite the URL so http-proxy connects to the right Proxmox endpoint
-    req.url = `/api2/json/nodes/${node}/qemu/${vmid}/vncwebsocket?port=${vncPort}&vncticket=${encodeURIComponent(ticket)}`;
-    
-    // Proxmox expects the authorization in the headers
-    req.headers["Authorization"] = apiTokenAuth;
-    
-    const targetUrl = `wss://${wsHost}:${wsPort}`;
-
-    vncProxy.ws(req, socket, head, {
-      target: targetUrl
-    });
+    handleVncUpgrade(req, socket, head);
   });
 
   server.listen(port, () => {

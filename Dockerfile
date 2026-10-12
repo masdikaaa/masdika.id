@@ -80,6 +80,18 @@ RUN npx esbuild apps/web/scripts/worker.ts \
     --external:@elastic/elasticsearch \
     --external:elastic-apm-node
 
+# Bundle vnc-proxy script
+RUN npx esbuild apps/web/scripts/vnc-proxy.ts \
+    --bundle \
+    --platform=node \
+    --outfile=apps/web/.next/standalone/apps/web/vnc-proxy.js \
+    --external:http \
+    --external:https \
+    --external:crypto \
+    --external:cookie \
+    --external:http-proxy \
+    --external:@next/env
+
 # ─── Stage 3: Lean production image ──────────────────────────────────────────
 FROM base AS runner
 WORKDIR /app

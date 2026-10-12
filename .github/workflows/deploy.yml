@@ -101,7 +101,7 @@ jobs:
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
             docker compose pull app worker
             docker compose up -d --force-recreate app worker
-            docker compose up -d
+            docker compose up -d --no-recreate
             docker image prune -f
             docker builder prune -f
             docker compose exec -T nginx nginx -s reload || docker compose restart nginx || true
