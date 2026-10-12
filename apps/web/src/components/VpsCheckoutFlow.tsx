@@ -1174,26 +1174,28 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                               </p>
                             )}
                           </div>
-                          <div className="flex items-center justify-between mt-2">
-                            <div>
-                              <div className={cn("text-sm font-medium flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                                Enable NAT Gateway
-                                <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 text-zinc-400 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
+                          <div className="flex items-center justify-between mt-2.5 gap-3 w-full">
+                            <div className="min-w-0 flex-1">
+                              <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap leading-tight", isDark ? "text-white" : "text-slate-900")}>
+                                <span>Enable NAT Gateway</span>
+                                <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 font-bold", isDark ? "bg-white/10 text-zinc-400 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
                               </div>
-                              <div className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Allow instances to access the internet</div>
+                              <div className={cn("text-[11px] sm:text-xs mt-0.5 leading-snug", isDark ? "text-zinc-500" : "text-slate-500")}>Allow instances to access the internet</div>
                             </div>
                             <button
                               type="button"
                               onClick={() => setNewVpcNatEnabled(!newVpcNatEnabled)}
                               className={cn(
-                                "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                                newVpcNatEnabled ? "bg-cyan-500" : "bg-white/10"
+                                "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-[#0f172a] transition-colors",
+                                newVpcNatEnabled ? "bg-cyan-500" : (isDark ? "bg-white/10" : "bg-slate-300")
                               )}
                             >
+                              <span className="sr-only">Toggle NAT Gateway</span>
                               <span
+                                aria-hidden="true"
                                 className={cn(
-                                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                                  newVpcNatEnabled ? "translate-x-5" : "translate-x-0"
+                                  "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                  newVpcNatEnabled ? "translate-x-4" : "translate-x-0"
                                 )}
                               />
                             </button>
@@ -1257,13 +1259,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                   const selectedVpcObj = vpcs.find(v => v.id === selectedVpcId);
                                   if (!selectedVpcObj) return null;
                                   return (
-                                    <div className="flex items-center justify-between mt-3 gap-2">
+                                    <div className="flex items-center justify-between mt-3 gap-3 w-full">
                                       <div className="min-w-0 flex-1">
-                                        <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap", isDark ? "text-white" : "text-slate-900")}>
-                                          NAT Gateway
-                                          <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 text-zinc-400 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
+                                        <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap leading-tight", isDark ? "text-white" : "text-slate-900")}>
+                                          <span>NAT Gateway</span>
+                                          <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 font-bold", isDark ? "bg-white/10 text-zinc-400 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
                                         </div>
-                                        <div className={cn("text-[11px] sm:text-xs truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Enable internet access for all VMs in this VPC</div>
+                                        <div className={cn("text-[11px] sm:text-xs mt-0.5 leading-snug truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Enable internet access for all VMs in this VPC</div>
                                       </div>
                                       <button
                                         type="button"
