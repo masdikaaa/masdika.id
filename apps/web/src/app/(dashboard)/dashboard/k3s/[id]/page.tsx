@@ -742,16 +742,15 @@ export default function K3sDetailPage() {
 
           if (isDeploying) {
             return (
-              <div className={cn("w-full border rounded-3xl shadow-md relative overflow-hidden mt-8 p-6 md:p-10", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-blue-500/3 to-transparent pointer-events-none"></div>
+              <div className={cn("w-full border rounded-3xl shadow-sm relative overflow-hidden mt-8 p-6 md:p-10", isDark ? "bg-[#0b1322] border-slate-800 shadow-md" : "bg-white border-slate-200/90 shadow-sm")}>
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="w-20 h-20 mb-6 relative">
-                    <div className="absolute inset-0 rounded-full border-t-2 border-r-2 border-cyan-400 animate-spin"></div>
-                    <div className="absolute inset-2.5 rounded-full border-b-2 border-l-2 border-blue-400 animate-[spin_2s_linear_reverse]"></div>
-                    <Server className="w-9 h-9 text-cyan-400 absolute inset-0 m-auto animate-pulse" />
+                    <div className={cn("absolute inset-0 rounded-full border-t-2 border-r-2 animate-spin", isDark ? "border-cyan-400" : "border-cyan-500")}></div>
+                    <div className={cn("absolute inset-2.5 rounded-full border-b-2 border-l-2 animate-[spin_2s_linear_reverse]", isDark ? "border-blue-400" : "border-blue-500")}></div>
+                    <Server className={cn("w-9 h-9 absolute inset-0 m-auto animate-pulse", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
                   <h2 className={cn("text-2xl md:text-3xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Deploying Your Cluster</h2>
-                  <p className={cn("text-sm text-center mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  <p className={cn("text-sm text-center mb-6 leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>
                     Installing Kubernetes {cluster.version}. This usually takes 5–10 minutes.
                   </p>
 
@@ -760,18 +759,18 @@ export default function K3sDetailPage() {
                     <span className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border",
                       ['RUNNING', 'INSTALLING_K3S', 'WAITING_FOR_SSH'].includes(cluster.status)
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
-                        : "bg-white/5 text-zinc-500 border-white/10"
+                        ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200")
+                        : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
                     )}>
                       <CheckCircle className="w-3.5 h-3.5" /> VM Provisioned
                     </span>
                     <span className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border",
                       ['INSTALLING_K3S', 'RUNNING'].includes(cluster.status)
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                        ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200")
                         : cluster.status === 'WAITING_FOR_SSH'
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          : "bg-white/5 text-zinc-500 border-white/10"
+                          ? (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
+                          : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
                     )}>
                       {['INSTALLING_K3S', 'RUNNING'].includes(cluster.status)
                         ? <CheckCircle className="w-3.5 h-3.5" />
@@ -781,8 +780,8 @@ export default function K3sDetailPage() {
                     <span className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border",
                       cluster.status === 'INSTALLING_K3S'
-                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                        : "bg-white/5 text-zinc-500 border-white/10"
+                        ? (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
+                        : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
                     )}>
                       {cluster.status === 'INSTALLING_K3S'
                         ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />

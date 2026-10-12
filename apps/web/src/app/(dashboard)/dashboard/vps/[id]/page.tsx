@@ -1196,59 +1196,57 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     <div className="w-full space-y-4 md:space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 overflow-x-hidden">
 
       {vps.status === 'PENDING_PAYMENT' ? (
-        <div className={cn("flex flex-col items-center justify-center py-16 md:py-24 px-4 md:px-8 border rounded-2xl md:rounded-3xl shadow-md relative overflow-hidden mt-4 md:mt-8 w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-cyan-500/10"></div>
+        <div className={cn("flex flex-col items-center justify-center py-16 md:py-24 px-4 md:px-8 border rounded-2xl md:rounded-3xl shadow-sm relative overflow-hidden mt-4 md:mt-8 w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200/90 shadow-sm")}>
           <div className="relative z-10 flex flex-col items-center text-center w-full max-w-lg mx-auto">
-            <div className="w-20 h-20 md:w-24 md:h-24 bg-cyan-500/20 rounded-full flex items-center justify-center mb-6 border border-blue-500/30">
-              <CreditCard className="w-10 h-10 md:w-12 md:h-12 text-blue-400" />
+            <div className={cn("w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mb-6 border", isDark ? "bg-cyan-500/20 border-blue-500/30" : "bg-cyan-50 border-cyan-200")}>
+              <CreditCard className={cn("w-10 h-10 md:w-12 md:h-12", isDark ? "text-blue-400" : "text-cyan-600")} />
             </div>
-            <h2 className={cn("text-2xl md:text-3xl font-bold  mb-2 md:mb-3", isDark ? "text-white" : "text-slate-900")}>Menunggu Pembayaran</h2>
-            <p className={cn(" text-sm md:text-base mb-8 px-2", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <h2 className={cn("text-2xl md:text-3xl font-bold mb-2 md:mb-3", isDark ? "text-white" : "text-slate-900")}>Menunggu Pembayaran</h2>
+            <p className={cn("text-sm md:text-base mb-8 px-2", isDark ? "text-slate-400" : "text-slate-500")}>
               Server ini masih menunggu pembayaran untuk dapat diprovisioning. Silakan selesaikan pembayaran tagihan Anda.
             </p>
             <button
               onClick={() => router.push("/dashboard/billing")}
-              className={cn("px-6 py-3 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700  font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 text-white")}
+              className="px-6 py-3 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 font-bold rounded-xl transition-all shadow-md text-white"
             >
               Lihat Tagihan
             </button>
           </div>
         </div>
       ) : ['PENDING', 'PROVISIONING'].includes(vps.status) ? (
-        <div className={cn("flex flex-col items-center justify-center py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 border rounded-2xl md:rounded-3xl shadow-md relative overflow-hidden mt-4 md:mt-8 w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-cyan-500/10 animate-pulse"></div>
+        <div className={cn("flex flex-col items-center justify-center py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 border rounded-2xl md:rounded-3xl shadow-sm relative overflow-hidden mt-4 md:mt-8 w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200/90 shadow-sm")}>
           <div className="relative z-10 flex flex-col items-center w-full max-w-lg mx-auto">
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 mb-5 sm:mb-6 md:mb-8 relative">
-              <div className="absolute inset-0 rounded-full border-t-2 border-r-2 border-cyan-400 animate-spin"></div>
-              <div className="absolute inset-1.5 sm:inset-2 md:inset-3 rounded-full border-b-2 border-l-2 border-blue-400 animate-[spin_2s_linear_reverse]"></div>
-              <Server className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 text-cyan-400 absolute inset-0 m-auto animate-pulse" />
+              <div className={cn("absolute inset-0 rounded-full border-t-2 border-r-2 animate-spin", isDark ? "border-cyan-400" : "border-cyan-500")}></div>
+              <div className={cn("absolute inset-1.5 sm:inset-2 md:inset-3 rounded-full border-b-2 border-l-2 animate-[spin_2s_linear_reverse]", isDark ? "border-blue-400" : "border-blue-500")}></div>
+              <Server className={cn("w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 absolute inset-0 m-auto animate-pulse", isDark ? "text-cyan-400" : "text-cyan-600")} />
             </div>
-            <h2 className={cn("text-xl sm:text-2xl md:text-3xl font-bold  mb-2 md:mb-3 tracking-tight text-center", isDark ? "text-white" : "text-slate-900")}>
+            <h2 className={cn("text-xl sm:text-2xl md:text-3xl font-bold mb-2 md:mb-3 tracking-tight text-center", isDark ? "text-white" : "text-slate-900")}>
               {vps.status === 'PROVISIONING' ? "Reinstalling Your Server" : "Deploying Your Server"}
             </h2>
-            <p className={cn(" text-xs sm:text-sm md:text-base text-center mb-6 sm:mb-8 md:mb-10 leading-relaxed px-1 sm:px-2", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <p className={cn("text-xs sm:text-sm md:text-base text-center mb-6 sm:mb-8 md:mb-10 leading-relaxed px-1 sm:px-2", isDark ? "text-slate-400" : "text-slate-500")}>
               {vps.status === 'PROVISIONING'
                 ? `We are currently deleting the old instance, installing ${vps.osTemplate || "your OS"}, and booting up. This takes about 5 minutes.`
                 : `We are currently allocating resources, installing ${vps.osTemplate || "your OS"}, and booting up your instance. This usually takes 5 minutes.`}
             </p>
 
             <div className="w-full space-y-2.5 sm:space-y-3 md:space-y-4">
-              <div className={cn("flex items-center gap-2.5 sm:gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-xl border", isDark ? "border-white/5" : "border-slate-200")}>
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
-                <span className="text-xs sm:text-sm md:text-base font-medium text-cyan-400">
+              <div className={cn("flex items-center gap-2.5 sm:gap-3 md:gap-4 p-3 md:p-4 rounded-xl border transition-all", isDark ? "bg-[#060b14] border-slate-800 text-cyan-400" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-sm")}>
+                <CheckCircle className={cn("w-4 h-4 sm:w-5 sm:h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                <span className={cn("text-xs sm:text-sm md:text-base font-semibold", isDark ? "text-cyan-400" : "text-slate-800")}>
                   {vps.status === 'PROVISIONING' ? "Reinstall Requested" : "Order Confirmed"}
                 </span>
               </div>
-              <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4 bg-cyan-500/5 p-3 md:p-4 rounded-xl border border-cyan-500/20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer"></div>
-                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin shrink-0 relative z-10"></div>
-                <span className="text-xs sm:text-sm md:text-base font-medium text-cyan-400 relative z-10">
+              <div className={cn("flex items-center gap-2.5 sm:gap-3 md:gap-4 p-3 md:p-4 rounded-xl border relative overflow-hidden transition-all", isDark ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30" : "bg-cyan-50/70 border-cyan-400 text-cyan-950 shadow-sm ring-1 ring-cyan-400/20")}>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
+                <div className={cn("w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-t-transparent animate-spin shrink-0 relative z-10", isDark ? "border-cyan-400" : "border-cyan-600")}></div>
+                <span className={cn("text-xs sm:text-sm md:text-base font-bold relative z-10", isDark ? "text-cyan-400" : "text-cyan-900")}>
                   {vps.status === 'PROVISIONING' ? "Rebuilding Infrastructure..." : "Provisioning Infrastructure..."}
                 </span>
               </div>
-              <div className={cn("flex items-center gap-2.5 sm:gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-xl border", isDark ? "border-white/5" : "border-slate-200")}>
-                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-zinc-600 shrink-0 opacity-50"></div>
-                <span className={cn("text-xs sm:text-sm md:text-base font-medium ", isDark ? "text-zinc-500" : "text-slate-400")}>
+              <div className={cn("flex items-center gap-2.5 sm:gap-3 md:gap-4 p-3 md:p-4 rounded-xl border transition-all", isDark ? "bg-[#060b14]/60 border-slate-800/60" : "bg-slate-50/70 border-slate-200/80")}>
+                <div className={cn("w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 shrink-0 opacity-50", isDark ? "border-slate-700" : "border-slate-300")}></div>
+                <span className={cn("text-xs sm:text-sm md:text-base font-medium", isDark ? "text-slate-500" : "text-slate-400")}>
                   {vps.status === 'PROVISIONING' ? "Waiting for Guest OS" : "Waiting for Network IP"}
                 </span>
               </div>
