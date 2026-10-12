@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     let vpsData: any = {
       userId,
       hostname,
-      username: username || "root",
+      username: template.name.toLowerCase().includes("windows") ? "Administrator" : (username || "root"),
       osTemplate: template.name,
       rootPassword: encryptDeterministic(finalPassword),
       sshKey: sshKey ? sshKey.trim() : null,

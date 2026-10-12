@@ -12,13 +12,12 @@ import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, DollarSign, 
 import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
-import { FaWindows } from "react-icons/fa";
 
 const getOsIcon = (name: string, isDark: boolean = false) => {
   const lowerName = name.toLowerCase();
   if (lowerName.includes('ubuntu')) return <SiUbuntu className="w-5 h-5 text-[#E95420]" />;
   if (lowerName.includes('debian')) return <SiDebian className="w-5 h-5 text-[#A81D33]" />;
-  if (lowerName.includes('windows')) return <FaWindows className="w-5 h-5 text-[#0078D6]" />;
+  if (lowerName.includes('windows')) return <img referrerPolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg" alt="Windows" className="w-5 h-5" loading="lazy" decoding="async" />;
   if (lowerName.includes('alma')) return <img referrerPolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg" alt="AlmaLinux" className="w-5 h-5" loading="lazy" decoding="async" />;
   if (lowerName.includes('rocky')) return <SiRockylinux className="w-5 h-5 text-[#10B981]" />;
   if (lowerName.includes('centos')) return <SiCentos className="w-5 h-5 text-[#262577]" />;
@@ -181,6 +180,18 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   // Order State
   const [hostname, setHostname] = useState("");
   const [username, setUsername] = useState("");
+
+  const isWindows = Boolean(
+    selectedOsFamily?.toLowerCase().includes("windows") ||
+    templates.find(t => t.id === selectedTemplate)?.name.toLowerCase().includes("windows")
+  );
+
+  useEffect(() => {
+    if (isWindows) {
+      setUsername("Administrator");
+    }
+  }, [isWindows]);
+
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -518,7 +529,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           hostname,
-          username,
+          username: isWindows ? "Administrator" : username,
           rootPassword: password,
           sshKey: sshKey,
           templateId: selectedTemplate,
@@ -636,9 +647,15 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   <Select
                     value={selectedOsFamily || ""}
                     onChange={(val) => {
-                      setSelectedOsFamily(val.toString());
-                      const firstVersion = templates.find(t => t.name.startsWith(val.toString() + "-")) || templates.find(t => t.name.startsWith(val.toString()));
+                      const fam = val.toString();
+                      setSelectedOsFamily(fam);
+                      const firstVersion = templates.find(t => t.name.startsWith(fam + "-")) || templates.find(t => t.name.startsWith(fam));
                       if (firstVersion) setSelectedTemplate(firstVersion.id);
+                      if (fam.toLowerCase().includes("windows")) {
+                        setUsername("Administrator");
+                      } else if (username === "Administrator") {
+                        setUsername("");
+                      }
                     }}
                     options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({ 
                       value: fam, 
@@ -1533,15 +1550,39 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   />
                 </div>
                 <div>
-                  <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Username</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className={cn("block text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Username</label>
+                    {isWindows && (
+                      <span className="text-[11px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+                        Default Administrator
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                    placeholder="User"
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
+                    value={isWindows ? "Administrator" : username}
+                    disabled={isWindows}
+                    readOnly={isWindows}
+                    onChange={(e) => {
+                      if (!isWindows) {
+                        setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''));
+                      }
+                    }}
+                    placeholder={isWindows ? "Administrator" : "User"}
+                    className={cn(
+                      "w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors",
+                      isWindows
+                        ? (isDark ? "bg-[#060b14]/70 border-slate-800 text-zinc-400 cursor-not-allowed select-none" : "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed select-none")
+                        : (isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")
+                    )}
                   />
+                  {isWindows && (
+                    <p className={cn("text-[11px] mt-1.5 flex items-center gap-1.5 font-medium", isDark ? "text-cyan-400/90" : "text-cyan-700")}>
+                      <Info className="w-3.5 h-3.5 shrink-0" />
+                      <span>Windows requires the default user <strong>Administrator</strong> (cannot be changed).</span>
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="space-y-4">

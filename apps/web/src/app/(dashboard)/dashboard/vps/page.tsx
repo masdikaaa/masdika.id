@@ -18,7 +18,7 @@ const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
   if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
   if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
   if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
-  if (os.includes("windows")) return "https://cdn.simpleicons.org/windows/3b82f6";
+  if (os.includes("windows")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
   if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
   if (os.includes("mikrotik") || os.includes("chr")) {
     return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";

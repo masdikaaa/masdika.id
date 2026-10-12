@@ -607,10 +607,18 @@ export class VpsProvisioningService {
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
 
+    const isWindowsReinstall = newTemplateName.toLowerCase().includes("windows");
+    const newUsername = isWindowsReinstall ? "Administrator" : (vps.username === "Administrator" ? "root" : (vps.username || "root"));
+
     // Update status to provisioning
     await prisma.vpsService.update({
       where: { id: vps.id },
-      data: { status: "PROVISIONING", osTemplate: newTemplateName }
+      data: {
+        status: "PROVISIONING",
+        osTemplate: newTemplateName,
+        username: newUsername,
+        ...(newPassword ? { rootPassword: encryptDeterministic(newPassword) } : {})
+      }
     });
 
     try {
@@ -658,7 +666,7 @@ export class VpsProvisioningService {
         vga: "std",
         cpu: "host",
         onboot: 1,
-        ciuser: "root",
+        ciuser: newUsername,
         cipassword: newPassword || (decryptDeterministic(vps.rootPassword) || vps.rootPassword),
         searchdomain: "masdika.id",
       };

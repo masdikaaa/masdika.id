@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Server, Play, Square, Power, RotateCcw, Activity,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
-  ArrowLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle
+  ArrowLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
   if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
   if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
   if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
-  if (os.includes("windows")) return "https://cdn.simpleicons.org/windows/3b82f6";
+  if (os.includes("windows")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
   if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
   if (os.includes("mikrotik") || os.includes("chr")) {
     return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";
@@ -2450,67 +2450,102 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   {/* Password Form */}
-                  <div className={cn("border rounded-2xl overflow-hidden shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                    <div className={cn("border-b", isDark ? "border-white/10" : "border-slate-200", "bg-white/5 px-6 py-3 flex items-center justify-between")}>
-                      <h3 className={cn("font-medium text-sm", isDark ? "text-white" : "text-slate-900")}>Password for OS after reinstallation</h3>
-                      <span className={cn("text-xs px-2 py-1 rounded", isDark ? "bg-white/10 text-white/70" : "bg-slate-100 text-slate-500")}>Default user: <b>root</b></span>
-                    </div>
-                    <div className="p-6 space-y-4 max-w-md">
-                      <div>
-                        <div className="relative">
-                          <input
-                            type={showReinstallPassword ? "text" : "password"}
-                            placeholder="New Password"
-                            value={reinstallPassword}
-                            onChange={(e) => setReinstallPassword(e.target.value)}
-                            className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200 text-slate-900 focus:border-cyan-500")}
-                          />
+                  {(() => {
+                    const isWindowsReinstall = Boolean(
+                      activeOsFamily?.toLowerCase().includes("windows") ||
+                      selectedTemplate?.toLowerCase().includes("windows")
+                    );
+                    return (
+                      <div className={cn("border rounded-2xl overflow-hidden shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                        <div className={cn("border-b", isDark ? "border-white/10" : "border-slate-200", "bg-white/5 px-6 py-3 flex items-center justify-between")}>
+                          <h3 className={cn("font-medium text-sm", isDark ? "text-white" : "text-slate-900")}>Password for OS after reinstallation</h3>
+                          <span className={cn(
+                            "text-xs px-2.5 py-1 rounded font-medium",
+                            isDark ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border border-cyan-200"
+                          )}>
+                            Default user: <b>{isWindowsReinstall ? "Administrator" : "root"}</b>
+                          </span>
+                        </div>
+                        <div className="p-6 space-y-4 max-w-md">
+                          {isWindowsReinstall ? (
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs", isDark ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-900")}>
+                              <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-bold mb-0.5">Windows Access Note:</p>
+                                <p className={isDark ? "text-cyan-300/90 leading-relaxed" : "text-cyan-800 leading-relaxed"}>
+                                  The default user for Windows is <strong>Administrator</strong>. This new password will be used to log in as Administrator via RDP (Remote Desktop) or Web Console.
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs", isDark ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-900")}>
+                              <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-bold mb-0.5">Linux Access Note:</p>
+                                <p className={isDark ? "text-cyan-300/90 leading-relaxed" : "text-cyan-800 leading-relaxed"}>
+                                  The default user after reinstallation is <strong>root</strong>. This new password will be used to log in as root via SSH or Web Console.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          <div>
+                            <div className="relative">
+                              <input
+                                type={showReinstallPassword ? "text" : "password"}
+                                placeholder="New Password"
+                                value={reinstallPassword}
+                                onChange={(e) => setReinstallPassword(e.target.value)}
+                                className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200 text-slate-900 focus:border-cyan-500")}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowReinstallPassword(!showReinstallPassword)}
+                                className={cn("absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded transition-colors text-slate-400 hover:text-cyan-500")}
+                              >
+                                {showReinstallPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Password Strength Indicator (Visual Only) */}
+                          <div className="flex gap-1 h-1.5">
+                            <div className={cn("flex-1 rounded-full", reinstallPassword.length > 0 ? "bg-red-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                            <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 6 ? "bg-yellow-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                            <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 8 ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                            <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 10 && /[!@#$%^&*]/.test(reinstallPassword) ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                          </div>
+                          <p className={cn("text-xs ", isDark ? "text-zinc-500" : "text-slate-400")}>Strength Indicator</p>
+
+                          <div className="relative">
+                            <input
+                              type={showReinstallPassword ? "text" : "password"}
+                              placeholder="Retype Password"
+                              value={reinstallPasswordConfirm}
+                              onChange={(e) => setReinstallPasswordConfirm(e.target.value)}
+                              className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200 text-slate-900 focus:border-cyan-500")}
+                            />
+                          </div>
+
+                          {reinstallPasswordError && (
+                            <p className="text-red-400 text-xs">{reinstallPasswordError}</p>
+                          )}
+
                           <button
-                            type="button"
-                            onClick={() => setShowReinstallPassword(!showReinstallPassword)}
-                            className={cn("absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded transition-colors text-slate-400 hover:text-cyan-500")}
+                            onClick={handleReinstallClick}
+                            disabled={reinstalling || !selectedTemplate || vps.status === 'SUSPENDED' || reinstallPassword.length < 8 || reinstallPassword !== reinstallPasswordConfirm}
+                            className={cn("w-full mt-2 flex items-center justify-center gap-2 px-8 py-3 bg-cyan-600 hover:bg-cyan-700  font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 text-white")}
                           >
-                            {showReinstallPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {reinstalling ? (
+                              <><div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div> Rebuilding...</>
+                            ) : (
+                              <><HardDrive className="w-5 h-5" /> Reinstall Server</>
+                            )}
                           </button>
                         </div>
                       </div>
-
-                      {/* Password Strength Indicator (Visual Only) */}
-                      <div className="flex gap-1 h-1.5">
-                        <div className={cn("flex-1 rounded-full", reinstallPassword.length > 0 ? "bg-red-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                        <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 6 ? "bg-yellow-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                        <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 8 ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                        <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 10 && /[!@#$%^&*]/.test(reinstallPassword) ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                      </div>
-                      <p className={cn("text-xs ", isDark ? "text-zinc-500" : "text-slate-400")}>Strength Indicator</p>
-
-                      <div className="relative">
-                        <input
-                          type={showReinstallPassword ? "text" : "password"}
-                          placeholder="Retype Password"
-                          value={reinstallPasswordConfirm}
-                          onChange={(e) => setReinstallPasswordConfirm(e.target.value)}
-                          className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200 text-slate-900 focus:border-cyan-500")}
-                        />
-                      </div>
-
-                      {reinstallPasswordError && (
-                        <p className="text-red-400 text-xs">{reinstallPasswordError}</p>
-                      )}
-
-                      <button
-                        onClick={handleReinstallClick}
-                        disabled={reinstalling || !selectedTemplate || vps.status === 'SUSPENDED' || reinstallPassword.length < 8 || reinstallPassword !== reinstallPasswordConfirm}
-                        className={cn("w-full mt-2 flex items-center justify-center gap-2 px-8 py-3 bg-cyan-600 hover:bg-cyan-700  font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 text-white")}
-                      >
-                        {reinstalling ? (
-                          <><div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div> Rebuilding...</>
-                        ) : (
-                          <><HardDrive className="w-5 h-5" /> Reinstall Server</>
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -3213,7 +3248,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         onClose={() => setShowReinstallModal(false)}
         onConfirm={executeReinstall}
         title="Reinstall Operating System"
-        description={`This action will completely format the disk and rebuild the server using the "${selectedTemplate}" template. All existing data will be permanently destroyed. Are you absolutely sure?`}
+        description={`This action will completely format the disk and rebuild the server using the "${selectedTemplate}" template. All existing data will be permanently destroyed.${selectedTemplate?.toLowerCase().includes("windows") || activeOsFamily?.toLowerCase().includes("windows") ? " The default user after reinstallation is Administrator." : " The default user after reinstallation is root."} Are you absolutely sure?`}
         confirmText="Rebuild"
         cancelText="Cancel"
         variant="danger"
