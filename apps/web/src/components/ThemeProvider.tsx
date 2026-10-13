@@ -26,7 +26,7 @@ function persistTheme(theme: Theme) {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children, initialTheme = "dark" }: { children: React.ReactNode, initialTheme?: Theme }) {
+export function ThemeProvider({ children, initialTheme = "light" }: { children: React.ReactNode, initialTheme?: Theme }) {
   const [theme, setThemeState] = useState<Theme>(initialTheme);
   const [mounted, setMounted] = useState(false);
 

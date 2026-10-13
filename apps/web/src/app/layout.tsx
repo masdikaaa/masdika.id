@@ -94,7 +94,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get("masdika-theme")?.value;
-  const initialTheme = (themeCookie === "light" || themeCookie === "dark") ? themeCookie : "dark";
+  const initialTheme = (themeCookie === "light" || themeCookie === "dark") ? themeCookie : "light";
 
   return (
     <html
@@ -111,12 +111,12 @@ export default async function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('masdika-theme');
-                  if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                  } else {
+                  if (theme === 'dark') {
                     document.documentElement.classList.remove('light');
                     document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
                   }
                 } catch(e) {}
               })();

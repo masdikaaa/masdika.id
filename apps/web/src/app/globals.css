@@ -2,37 +2,37 @@
 
 /* ===== Theme Variables ===== */
 :root {
-  --background: #011627;
-  --foreground: #ededed;
+  --background: #f8fafb;
+  --foreground: #1a2332;
   --accent-blue: #3b82f6;
   --accent-cyan: #00d2ff;
   --accent-purple: #a855f7;
   /* Semantic tokens */
-  --surface: #050B14;
-  --surface-secondary: #0b1120;
-  --surface-elevated: rgba(255, 255, 255, 0.02);
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --border-primary: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.02);
-  --glass-border: rgba(6, 182, 212, 0.1);
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(6, 182, 212, 0.2);
-  --card-shadow: rgba(0, 0, 0, 0.3);
-  --navbar-bg: rgba(5, 11, 20, 0.95);
-  --navbar-bg-solid: #050B14;
-  --scrollbar-track: rgba(1, 22, 39, 0.5);
-  --scrollbar-thumb: rgba(34, 211, 238, 0.2);
-  --scrollbar-thumb-hover: rgba(34, 211, 238, 0.5);
-  --selection-bg: rgba(6, 182, 212, 0.3);
-  --footer-bg: #011627;
-  --premium-bg: #050B14;
-  --vignette-color: #050B14;
-  --glow-color: rgba(6, 182, 212, 0.2);
-  --input-bg: rgba(0, 0, 0, 0.4);
-  --newsletter-bg: #0b1120;
+  --surface: #ffffff;
+  --surface-secondary: #f1f5f9;
+  --surface-elevated: rgba(0, 0, 0, 0.02);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-primary: rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(6, 182, 212, 0.15);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(6, 182, 212, 0.15);
+  --card-shadow: rgba(0, 0, 0, 0.06);
+  --navbar-bg: rgba(255, 255, 255, 0.95);
+  --navbar-bg-solid: #ffffff;
+  --scrollbar-track: rgba(241, 245, 249, 0.8);
+  --scrollbar-thumb: rgba(6, 182, 212, 0.25);
+  --scrollbar-thumb-hover: rgba(6, 182, 212, 0.45);
+  --selection-bg: rgba(6, 182, 212, 0.2);
+  --footer-bg: #0f172a;
+  --premium-bg: #f8fafb;
+  --vignette-color: #f8fafb;
+  --glow-color: rgba(6, 182, 212, 0.08);
+  --input-bg: rgba(241, 245, 249, 0.8);
+  --newsletter-bg: #f1f5f9;
 }
 
 html.light {
