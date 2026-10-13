@@ -406,7 +406,7 @@ function CheckoutContent() {
                       setServicePage(1);
                     }}
                     className={cn(
-                      "p-3 sm:p-3.5 lg:p-4 rounded-2xl border text-left transition-all flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 relative group cursor-pointer",
+                      "p-3 sm:p-3.5 lg:p-4 rounded-2xl border text-left transition-all flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 relative group cursor-pointer min-h-[76px] sm:min-h-[80px] hover:-translate-y-0.5 active:scale-[0.99]",
                       active
                         ? isDark
                           ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30"
@@ -417,12 +417,12 @@ function CheckoutContent() {
                     )}
                   >
                     <div className={cn(
-                      "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
                       active
                         ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
                         : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-900"
                     )}>
-                      <CatIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                      <CatIcon className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1 w-full sm:w-auto sm:pr-4">
                       <div className={cn("text-xs sm:text-sm font-bold leading-snug break-words", active ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}>
@@ -468,10 +468,10 @@ function CheckoutContent() {
             })()}
 
             {/* Service Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 relative z-10">
               <AnimatePresence mode="popLayout">
                 {SERVICES.filter(s => s.category === selectedCategory)
-                  .slice((servicePage - 1) * 4, servicePage * 4)
+                  .slice((servicePage - 1) * 8, servicePage * 8)
                   .map(srv => {
                     const Icon = srv.icon;
                     const isSelected = selectedService === srv.id;
@@ -484,44 +484,53 @@ function CheckoutContent() {
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.99 }}
                         key={srv.id}
+                        id={`checkout-service-${srv.id.toLowerCase()}`}
                         onClick={() => {
                           setSelectedService(srv.id);
                           setTierPage(1);
                         }}
                         className={cn(
-                          "relative p-4 sm:p-5 rounded-2xl border text-left transition-all overflow-hidden group shadow-sm h-full min-h-[96px] sm:min-h-[104px] flex items-center cursor-pointer",
+                          "p-3 sm:p-3.5 lg:p-4 rounded-2xl border text-left transition-all flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 relative group cursor-pointer min-h-[76px] sm:min-h-[80px]",
                           isSelected
                             ? isDark
-                              ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30"
-                              : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20"
+                              ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30"
+                              : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20"
                             : isDark
-                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]"
-                              : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md"
+                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white"
+                              : "bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:text-slate-900 shadow-sm"
                         )}
                       >
-                        <div className="flex items-start gap-3.5 sm:gap-4 pr-8 min-w-0 flex-1 w-full">
-                          <div className={cn(
-                            "w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
-                            isSelected
-                              ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
-                              : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200 text-slate-600 group-hover:bg-slate-200 group-hover:text-slate-900"
-                          )}>
-                            <Icon className="w-5 h-5" />
+                        <div className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
+                          isSelected
+                            ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
+                            : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-900"
+                        )}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0 flex-1 w-full sm:w-auto sm:pr-4">
+                          <div
+                            className={cn("text-xs sm:text-sm font-bold leading-snug break-words truncate", isSelected ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}
+                            title={srv.name}
+                          >
+                            {srv.name}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className={cn("font-bold text-sm sm:text-base mb-1", isSelected ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}>{srv.name}</div>
-                            <div className={cn("text-xs font-medium leading-relaxed", isDark ? "text-slate-400" : "text-slate-500")}>{srv.desc}</div>
+                          <div
+                            className={cn("text-[10px] sm:text-xs font-medium mt-0.5 line-clamp-1", isSelected ? (isDark ? "text-cyan-400/70" : "text-cyan-700/70") : (isDark ? "text-zinc-500" : "text-slate-500"))}
+                            title={srv.desc}
+                          >
+                            {srv.desc}
                           </div>
                         </div>
 
-                        {/* Radio selection check */}
+                        {/* Active check indicator */}
                         <div className={cn(
-                          "absolute top-3.5 right-3.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all",
+                          "absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-all",
                           isSelected
                             ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
-                            : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
+                            : isDark ? "border-slate-800 bg-slate-900/40" : "border-slate-200 bg-slate-50"
                         )}>
-                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                         </div>
                       </motion.button>
                     );
@@ -532,7 +541,7 @@ function CheckoutContent() {
             {/* Pagination Controls */}
             <Pager
               page={servicePage}
-              pageSize={4}
+              pageSize={8}
               total={SERVICES.filter(s => s.category === selectedCategory).length}
               onChange={setServicePage}
               isDark={isDark}
