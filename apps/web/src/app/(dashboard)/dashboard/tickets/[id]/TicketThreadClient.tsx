@@ -25,11 +25,11 @@ function StatusBadge({ status }: { status: string }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  if (status === 'OPEN') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">OPEN</span>;
-  if (status === 'ANSWERED') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">ANSWERED</span>;
-  if (status === 'CUSTOMER_REPLY') return <span className="bg-orange-500/10 text-orange-400 border border-orange-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">CUSTOMER REPLY</span>;
-  if (status === 'MERGED') return <span className="bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">MERGED</span>;
-  return <span className={cn("bg-zinc-500/10 border border-zinc-500/30 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm", isDark ? "text-zinc-300" : "text-slate-600")}>CLOSED</span>;
+  if (status === 'OPEN') return <span className={cn("px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>OPEN</span>;
+  if (status === 'ANSWERED') return <span className={cn("px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>ANSWERED</span>;
+  if (status === 'CUSTOMER_REPLY') return <span className={cn("px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm border", isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/30" : "bg-orange-50 text-orange-700 border-orange-200")}>CUSTOMER REPLY</span>;
+  if (status === 'MERGED') return <span className={cn("px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm border", isDark ? "bg-purple-500/10 text-purple-400 border-purple-500/30" : "bg-purple-50 text-purple-700 border-purple-200")}>MERGED</span>;
+  return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm", isDark ? "bg-zinc-500/10 border-zinc-500/30 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700")}>CLOSED</span>;
 }
 
 function linkifyHtml(html: string) {
@@ -202,15 +202,15 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               </div>
               <div className={cn("text-xs sm:text-sm flex flex-wrap items-center gap-1.5 sm:gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
                 {ticket.service && (
-                  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
-                    Service: <span className="text-cyan-400 font-semibold">{ticket.service.replace('_', ' ')}</span>
+                  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                    Service: <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.service.replace('_', ' ')}</span>
                   </span>
                 )}
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] sm:text-[11px] font-bold uppercase tracking-wider ${
-                  ticket.priority === 'CRITICAL' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 
-                  ticket.priority === 'HIGH' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 
-                  'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                }`}>
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] sm:text-[11px] font-bold uppercase tracking-wider",
+                  ticket.priority === 'CRITICAL' ? (isDark ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-200 text-red-700') : 
+                  ticket.priority === 'HIGH' ? (isDark ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-700') : 
+                  (isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-700')
+                )}>
                   Priority: {ticket.priority}
                 </span>
               </div>
@@ -294,7 +294,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                 
                 <div className={`px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-3xl shadow-md relative group max-w-full min-w-0 ${
                   isAdmin 
-                    ? isDark ? 'bg-[#060b14] border border-slate-800 text-zinc-200 rounded-tl-sm' : 'bg-slate-100 border border-slate-200 text-slate-800 rounded-tl-sm'
+                    ? isDark ? 'bg-[#060b14] border border-slate-800 text-zinc-200 rounded-tl-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-sm'
                     : 'bg-cyan-600 text-white rounded-tr-sm border border-cyan-500/30'
                 }`}>
                   <div className="text-sm leading-relaxed break-words quill-message-content">
@@ -302,8 +302,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   </div>
                   
                   {msg.attachments?.length > 0 && (
-                    <div className={`mt-3 pt-3 sm:mt-4 sm:pt-4 border-t ${isAdmin ? 'border-white/10' : 'border-white/20'} space-y-2`}>
-                      <p className={`text-[10px] font-bold uppercase tracking-wider ${isAdmin ? 'text-zinc-500' : 'text-cyan-200'}`}>Attachments ({msg.attachments.length})</p>
+                    <div className={`mt-3 pt-3 sm:mt-4 sm:pt-4 border-t ${isAdmin ? (isDark ? 'border-white/10' : 'border-slate-200') : 'border-white/20'} space-y-2`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-wider ${isAdmin ? (isDark ? 'text-zinc-500' : 'text-slate-500') : 'text-cyan-200'}`}>Attachments ({msg.attachments.length})</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full min-w-0">
                         {msg.attachments.map((att: any) => {
                           const isImage = att.mimeType.startsWith('image/');
@@ -314,11 +314,11 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                                 onClick={(e) => { e.preventDefault(); setLightboxImage(`/api/tickets/attachments/${att.filename}`); setZoomLevel(1); }}
                                 className={`flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 ${
                                   isAdmin 
-                                    ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10' 
-                                    : 'bg-black/20 hover:bg-black/30 border border-white/10'
+                                    ? isDark ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-200' : 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800'
+                                    : 'bg-black/20 hover:bg-black/30 border border-white/10 text-white'
                                 } hover:-translate-y-0.5 shadow-sm text-left`}
                               >
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/20 text-white'}`}>
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? (isDark ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-50 text-cyan-700') : 'bg-white/20 text-white'}`}>
                                   <ImageIcon className="w-4 h-4" />
                                 </div>
                                 <span className="truncate min-w-0 flex-1">{att.originalName}</span>
@@ -331,11 +331,11 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                                 rel="noopener noreferrer"
                                 className={`flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 ${
                                   isAdmin 
-                                    ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10' 
-                                    : 'bg-black/20 hover:bg-black/30 border border-white/10'
+                                    ? isDark ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-200' : 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800'
+                                    : 'bg-black/20 hover:bg-black/30 border border-white/10 text-white'
                                 } hover:-translate-y-0.5 shadow-sm`}
                               >
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/20 text-white'}`}>
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? (isDark ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-50 text-cyan-700') : 'bg-white/20 text-white'}`}>
                                   <FileText className="w-4 h-4" />
                                 </div>
                                 <span className="truncate min-w-0 flex-1">{att.originalName}</span>
@@ -373,8 +373,9 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                 </div>
               )}
               
-              <div className="flex flex-col relative quill-dark-theme pb-2">
+              <div className={cn("flex flex-col relative pb-2", isDark ? "quill-dark-theme" : "quill-light-theme")}>
                 <style>{`
+                  /* Dark theme */
                   .quill-dark-theme .ql-toolbar {
                     border: none;
                     border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -415,6 +416,48 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   .quill-dark-theme button:hover .ql-fill {
                     fill: white;
                   }
+
+                  /* Light theme */
+                  .quill-light-theme .ql-toolbar {
+                    border: none;
+                    border-bottom: 1px solid #e2e8f0;
+                    background: #f8fafc;
+                    border-top-left-radius: 1rem;
+                    border-top-right-radius: 1rem;
+                    padding: 6px 12px;
+                  }
+                  .quill-light-theme .ql-container {
+                    border: none;
+                    font-size: 14px;
+                    color: #0f172a;
+                    min-height: 70px;
+                    max-height: 180px;
+                    overflow-y: auto;
+                  }
+                  .quill-light-theme .ql-editor {
+                    padding: 12px 16px;
+                  }
+                  .quill-light-theme .ql-editor.ql-blank::before {
+                    color: #94a3b8;
+                    font-style: normal;
+                    left: 16px;
+                    right: 16px;
+                  }
+                  .quill-light-theme .ql-stroke {
+                    stroke: #64748b;
+                  }
+                  .quill-light-theme .ql-fill {
+                    fill: #64748b;
+                  }
+                  .quill-light-theme .ql-picker-label {
+                    color: #64748b;
+                  }
+                  .quill-light-theme button:hover .ql-stroke {
+                    stroke: #0284c7;
+                  }
+                  .quill-light-theme button:hover .ql-fill {
+                    fill: #0284c7;
+                  }
                   
                   /* Formatted Message Styles */
                   .quill-message-content {
@@ -427,7 +470,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     margin-bottom: 0;
                   }
                   .quill-message-content a {
-                    color: #22d3ee;
+                    color: ${isDark ? '#22d3ee' : '#0284c7'};
                     text-decoration: none;
                     font-weight: 500;
                   }
@@ -435,8 +478,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     text-decoration: underline;
                   }
                   .quill-message-content pre, .quill-message-content .ql-syntax {
-                    background: #0f172a;
-                    border: 1px solid rgba(255,255,255,0.1);
+                    background: ${isDark ? '#0f172a' : '#f8fafc'};
+                    border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'};
                     border-radius: 0.75rem;
                     padding: 2.25rem 1.25rem 1.25rem 1.25rem;
                     margin: 1rem 0;
@@ -444,8 +487,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     overflow-x: auto;
                     font-family: monospace;
                     font-size: 13px;
-                    color: #e2e8f0;
-                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+                    color: ${isDark ? '#e2e8f0' : '#1e293b'};
+                    box-shadow: inset 0 2px 4px rgba(0,0,0,${isDark ? '0.2' : '0.04'});
                   }
                   /* macOS Window Dots for Code Blocks */
                   .quill-message-content pre::before, .quill-message-content .ql-syntax::before {
@@ -460,17 +503,17 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     box-shadow: 16px 0 0 #f59e0b, 32px 0 0 #10b981; /* yellow, green */
                   }
                   .quill-message-content code:not(pre code):not(.ql-syntax) {
-                    background: rgba(255,255,255,0.1);
+                    background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'};
                     padding: 0.1rem 0.3rem;
                     border-radius: 0.25rem;
                     font-size: 0.9em;
                     font-family: monospace;
-                    color: #bae6fd;
+                    color: ${isDark ? '#bae6fd' : '#0369a1'};
                   }
                   .quill-message-content blockquote {
                     border-left: 3px solid #06b6d4;
                     padding-left: 1rem;
-                    color: rgba(255,255,255,0.7);
+                    color: ${isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'};
                     margin: 1rem 0;
                     font-style: italic;
                   }
@@ -483,7 +526,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                 `}</style>
                 <ReactQuill 
                   theme="snow"
-                  bounds=".quill-dark-theme"
+                  bounds={isDark ? ".quill-dark-theme" : ".quill-light-theme"}
                   value={message}
                   onChange={setMessage}
                   placeholder="Type your reply to this ticket..."
@@ -501,10 +544,10 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                 {attachments.length > 0 && (
                   <div className="px-4 sm:px-6 pb-2 flex flex-wrap gap-2">
                     {attachments.map((file, i) => (
-                      <div key={i} className="bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg flex items-center gap-2 text-xs text-cyan-300 font-medium">
+                      <div key={i} className={cn("px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg flex items-center gap-2 text-xs font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                         <Paperclip className="w-3.5 h-3.5" />
                         <span className="truncate max-w-[120px]">{file.name}</span>
-                        <button type="button" onClick={() => removeAttachment(i)} className="text-cyan-500 hover:text-cyan-300 ml-1 hover:bg-cyan-500/20 rounded p-0.5 transition-colors">
+                        <button type="button" onClick={() => removeAttachment(i)} className={cn("ml-1 rounded p-0.5 transition-colors", isDark ? "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20" : "text-cyan-600 hover:text-cyan-800 hover:bg-cyan-100")}>
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -554,10 +597,10 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
           >
             <div className="p-4 flex justify-between items-center bg-black/50">
               <div className="flex gap-2">
-                <button onClick={() => setZoomLevel(z => Math.min(z + 0.5, 3))} className={cn("p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-colors", isDark ? "text-white" : "text-slate-900")}>
+                <button onClick={() => setZoomLevel(z => Math.min(z + 0.5, 3))} className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
                   <ZoomIn className="w-5 h-5" />
                 </button>
-                <button onClick={() => setZoomLevel(z => Math.max(z - 0.5, 0.5))} className={cn("p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-colors", isDark ? "text-white" : "text-slate-900")}>
+                <button onClick={() => setZoomLevel(z => Math.max(z - 0.5, 0.5))} className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
                   <ZoomOut className="w-5 h-5" />
                 </button>
                 <a href={lightboxImage} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 rounded-xl transition-colors">

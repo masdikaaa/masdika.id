@@ -20,15 +20,12 @@ const fetcher = async (url: string) => {
 function StatusBadge({ status }: { status: string }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  if (status === 'OPEN') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest">Open</span>;
-  if (status === 'ANSWERED') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest">Answered</span>;
-  if (status === 'CUSTOMER_REPLY') return <span className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest">Your Reply</span>;
-  if (status === 'MERGED') return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest">Merged</span>;
-  return <span className={cn("bg-zinc-500/10 border border-zinc-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Closed</span>;
+  if (status === 'OPEN') return <span className={cn("border px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>Open</span>;
+  if (status === 'ANSWERED') return <span className={cn("border px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>Answered</span>;
+  if (status === 'CUSTOMER_REPLY') return <span className={cn("border px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-orange-50 text-orange-700 border-orange-200")}>Your Reply</span>;
+  if (status === 'MERGED') return <span className={cn("border px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "bg-purple-500/10 text-purple-400 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>Merged</span>;
+  return <span className={cn("border px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest", isDark ? "bg-zinc-500/10 border-zinc-500/20 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-700")}>Closed</span>;
 }
-
-const inputClass = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
-const labelClass = 'block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2';
 
 export default function TicketsClient() {
   const { theme } = useTheme();
@@ -172,8 +169,8 @@ export default function TicketsClient() {
                   >
                     <td className="px-6 py-5">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-1 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-lg w-fit">#{t.ticketId}</span>
-                        <span className={cn("text-sm font-bold group-hover:text-sky-300 transition-colors mt-1", isDark ? "text-white" : "text-slate-900")}>{t.subject}</span>
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1 border px-2 py-0.5 rounded-lg w-fit", isDark ? "text-sky-400 bg-sky-500/10 border-sky-500/20" : "text-sky-700 bg-sky-50 border-sky-200")}>#{t.ticketId}</span>
+                        <span className={cn("text-sm font-bold transition-colors mt-1", isDark ? "text-white group-hover:text-sky-300" : "text-slate-900 group-hover:text-sky-600")}>{t.subject}</span>
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -181,7 +178,7 @@ export default function TicketsClient() {
                     </td>
                     <td className="px-6 py-5">
                       <div className={cn("flex items-center gap-2 text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        <Clock className={cn("w-3.5 h-3.5", isDark ? "text-zinc-600" : "text-slate-900")} />
+                        <Clock className={cn("w-3.5 h-3.5", isDark ? "text-zinc-500" : "text-slate-400")} />
                         {new Date(t.updatedAt).toLocaleString('id-ID')}
                       </div>
                     </td>

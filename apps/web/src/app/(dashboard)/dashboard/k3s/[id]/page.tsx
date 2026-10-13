@@ -871,7 +871,9 @@ export default function K3sDetailPage() {
                           onClick={() => handleNodePowerAction(master.id, "start")}
                           disabled={isRunning || isTerminated || isSuspended}
                           title="Start Cluster"
-                          className="p-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          className={cn("p-2.5 rounded-xl transition-all border shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
+                            isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                          )}
                         >
                           <Play className="w-4 h-4" />
                         </button>
@@ -879,7 +881,9 @@ export default function K3sDetailPage() {
                           onClick={() => handleNodePowerAction(master.id, "shutdown")}
                           disabled={!isRunning || isTerminated || isSuspended}
                           title="Graceful Shutdown"
-                          className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          className={cn("p-2.5 rounded-xl transition-all border shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
+                            isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
+                          )}
                         >
                           <Power className="w-4 h-4" />
                         </button>
@@ -887,7 +891,9 @@ export default function K3sDetailPage() {
                           onClick={() => handleNodePowerAction(master.id, "stop")}
                           disabled={!isRunning || isTerminated || isSuspended}
                           title="Force Stop"
-                          className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          className={cn("p-2.5 rounded-xl transition-all border shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
+                            isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+                          )}
                         >
                           <Square className="w-4 h-4" />
                         </button>
@@ -895,7 +901,9 @@ export default function K3sDetailPage() {
                           onClick={() => handleNodePowerAction(master.id, "reboot")}
                           disabled={!isRunning || isTerminated || isSuspended}
                           title="Restart Cluster"
-                          className="p-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          className={cn("p-2.5 rounded-xl transition-all border shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
+                            isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                          )}
                         >
                           <RotateCcw className="w-4 h-4" />
                         </button>
@@ -903,7 +911,9 @@ export default function K3sDetailPage() {
                           onClick={() => openConsole(master.id)}
                           disabled={isTerminated}
                           title="Open Console"
-                          className={cn("p-2.5 bg-cyan-500 hover:bg-cyan-600 rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-40 disabled:cursor-not-allowed", isDark ? "text-white" : "text-slate-900")}
+                          className={cn("p-2.5 rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
+                            isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold" : "bg-cyan-600 hover:bg-cyan-700 text-white font-bold"
+                          )}
                         >
                           <Terminal className="w-4 h-4" />
                         </button>
@@ -1188,18 +1198,18 @@ export default function K3sDetailPage() {
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                       {selectedNodes.length > 0 && (
                         <div className="flex items-center gap-1.5 md:gap-2 animate-in fade-in slide-in-from-right-4 duration-300 flex-wrap shrink-0">
-                          <span className="text-xs text-cyan-400 font-bold bg-cyan-500/10 px-2 py-1 rounded-md mr-1 md:mr-2">{selectedNodes.length} selected</span>
+                          <span className={cn("text-xs font-bold px-2 py-1 rounded-md mr-1 md:mr-2 border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border-cyan-200")}>{selectedNodes.length} selected</span>
                           {cluster.nodes.filter((n: any) => selectedNodes.includes(n.id)).some((n: any) => n.status !== "RUNNING") && (
-                            <button onClick={() => handleBulkNodeAction('start')} disabled={bulkLoading || isSuspended} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 border border-green-500/20">
+                            <button onClick={() => handleBulkNodeAction('start')} disabled={bulkLoading || isSuspended} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}>
                               <Play className="w-3.5 h-3.5" /> <span className="hidden md:inline">Start</span>
                             </button>
                           )}
                           {cluster.nodes.filter((n: any) => selectedNodes.includes(n.id)).some((n: any) => n.status === "RUNNING") && (
                             <>
-                              <button onClick={() => handleBulkNodeAction('shutdown')} disabled={bulkLoading || isSuspended} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 border border-orange-500/20">
+                              <button onClick={() => handleBulkNodeAction('shutdown')} disabled={bulkLoading || isSuspended} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200")}>
                                 <Power className="w-3.5 h-3.5" /> <span className="hidden md:inline">Shutdown</span>
                               </button>
-                              <button onClick={() => handleBulkNodeAction('reboot')} disabled={bulkLoading || isSuspended} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 border border-cyan-500/20">
+                              <button onClick={() => handleBulkNodeAction('reboot')} disabled={bulkLoading || isSuspended} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200")}>
                                 <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden md:inline">Reboot</span>
                               </button>
                             </>
@@ -1326,12 +1336,16 @@ export default function K3sDetailPage() {
                                       isUpdating: false
                                     });
                                   }}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 text-xs font-bold text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors whitespace-nowrap shrink-0"
+                                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap shrink-0 border",
+                                    isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
+                                  )}
                                 >
                                   <Settings className="w-3.5 h-3.5" />
                                   Edit Role
                                 </button>
-                                <Link href={`/dashboard/vps/${node.id}`} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 text-xs font-bold text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors whitespace-nowrap shrink-0">
+                                <Link href={`/dashboard/vps/${node.id}`} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap shrink-0 border",
+                                  isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
+                                )}>
                                   <Server className="w-3.5 h-3.5" />
                                   Manage VM
                                 </Link>

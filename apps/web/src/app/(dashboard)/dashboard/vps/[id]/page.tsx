@@ -1336,7 +1336,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               <button
                 onClick={() => handleAction("stop")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
                 className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
-                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20" : "bg-white hover:bg-slate-50 text-rose-700 border-slate-200"
+                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20" : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
                 )}
                 title="Force Stop"
               >
@@ -1345,7 +1345,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               <button
                 onClick={() => handleAction("reboot")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
                 className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
-                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20" : "bg-white hover:bg-slate-50 text-sky-700 border-slate-200"
+                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20" : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
                 )}
                 title="Restart"
               >
@@ -1353,7 +1353,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("console")} disabled={actionLoading || vps.status === 'TERMINATED' || vps.status === 'SUSPENDED'}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold",
+                  isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950" : "bg-cyan-600 hover:bg-cyan-700 text-white"
+                )}
                 title="NoVNC Console"
               >
                 <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Console</span>

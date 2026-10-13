@@ -313,24 +313,24 @@ export default function MyVpsPage() {
 
               return (
                 <div className="flex items-center gap-1.5 md:gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <span className="text-xs text-cyan-400 font-bold bg-cyan-500/10 px-2 py-1 rounded-md mr-2">{selectedVps.length} selected</span>
+                  <span className={cn("text-xs font-bold px-2 py-1 rounded-md mr-2 border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border-cyan-200")}>{selectedVps.length} selected</span>
                   {canStart && (
-                    <button onClick={() => handleBulkAction('start')} disabled={bulkLoading} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50">
+                    <button onClick={() => handleBulkAction('start')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}>
                       <Play className="w-3.5 h-3.5" /> <span className="hidden md:inline">Start</span>
                     </button>
                   )}
                   {canShutdownOrReboot && (
-                    <button onClick={() => handleBulkAction('shutdown')} disabled={bulkLoading} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50">
+                    <button onClick={() => handleBulkAction('shutdown')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200")}>
                       <Power className="w-3.5 h-3.5" /> <span className="hidden md:inline">Shutdown</span>
                     </button>
                   )}
                   {canShutdownOrReboot && (
-                    <button onClick={() => handleBulkAction('reboot')} disabled={bulkLoading} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50">
+                    <button onClick={() => handleBulkAction('reboot')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200")}>
                       <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden md:inline">Reboot</span>
                     </button>
                   )}
-                  <div className="w-px h-4 bg-white/10 mx-1" />
-                  <button onClick={() => handleBulkAction('delete')} disabled={bulkLoading} className="p-1.5 md:px-3 md:py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 border border-red-500/20">
+                  <div className={cn("w-px h-4 mx-1", isDark ? "bg-white/10" : "bg-slate-200")} />
+                  <button onClick={() => handleBulkAction('delete')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200")}>
                     <AlertTriangle className="w-3.5 h-3.5" /> <span className="hidden md:inline">{selectedVps.length === paginatedList.length && paginatedList.length > 1 ? 'Delete All' : 'Delete'}</span>
                   </button>
                 </div>
@@ -495,57 +495,85 @@ export default function MyVpsPage() {
                             {vps.status !== 'TERMINATED' ? (
                               <a
                                 href={`/dashboard/vps/${vps.id}`}
-                                className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors border border-blue-500/20"
+                                className={cn(
+                                  "p-2 rounded-lg transition-colors border shadow-sm",
+                                  isDark 
+                                    ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" 
+                                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                                )}
                                 title="Manage"
                               >
                                 <Settings className="w-4 h-4" />
                               </a>
                             ) : (
-                              <div className="p-2 bg-red-500/5 text-red-500/40 rounded-lg border border-red-500/10 cursor-not-allowed">
+                              <div className={cn(
+                                "p-2 rounded-lg border cursor-not-allowed",
+                                isDark ? "bg-red-500/5 text-red-500/40 border-red-500/10" : "bg-red-50 text-red-300 border-red-100"
+                              )}>
                                 <Settings className="w-4 h-4" />
                               </div>
                             )}
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "start", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
-                              className={cn("border shadow-sm", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-white hover:bg-slate-50 text-cyan-700 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn(
+                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-xs",
+                                isDark 
+                                  ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" 
+                                  : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                              )}
                               title="Start"
                             >
-                              <Play className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Start</span>
+                              <Play className="w-4 h-4" /> <span className="hidden xl:inline">Start</span>
                             </button>
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "shutdown", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn("border shadow-sm", isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-white hover:bg-slate-50 text-amber-700 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn(
+                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-xs",
+                                isDark 
+                                  ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" 
+                                  : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
+                              )}
                               title="Shutdown"
                             >
-                              <Power className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Shutdown</span>
+                              <Power className="w-4 h-4" /> <span className="hidden xl:inline">Shutdown</span>
                             </button>
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "stop", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn("border shadow-sm", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-white hover:bg-slate-50 text-red-600 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn(
+                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-xs",
+                                isDark 
+                                  ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" 
+                                  : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+                              )}
                               title="Stop"
                             >
-                              <Square className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Stop</span>
+                              <Square className="w-4 h-4" /> <span className="hidden xl:inline">Stop</span>
                             </button>
                             <button
                               onClick={() => setConfirmModal({ vpsId: vps.id, action: "reboot", hostname: vps.hostname })}
                               disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn("border shadow-sm", isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-white hover:bg-slate-50 text-blue-700 border-slate-200", "flex items-center gap-1.5 p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed")}
+                              className={cn(
+                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-xs",
+                                isDark 
+                                  ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" 
+                                  : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                              )}
                               title="Restart"
                             >
-                              <RotateCcw className="w-4 h-4" /> <span className="hidden xl:inline text-xs font-medium">Restart</span>
+                              <RotateCcw className="w-4 h-4" /> <span className="hidden xl:inline">Restart</span>
                             </button>
                             {!vps.kubernetesRole && (
                               <button
                                 onClick={() => openConsole(vps.id)}
                                 disabled={consoleLoading === vps.id || vps.status === 'TERMINATED'}
-                                className="flex items-center gap-1.5 p-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                                className="flex items-center gap-1.5 p-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs"
                                 title="Console"
                               >
                                 {consoleLoading === vps.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Terminal className="w-4 h-4" />}
-                                <span className="hidden xl:inline text-xs font-medium">Console</span>
+                                <span className="hidden xl:inline">Console</span>
                               </button>
                             )}
                           </div>
