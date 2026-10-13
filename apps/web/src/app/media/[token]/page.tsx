@@ -514,6 +514,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
               src={inlineUrl}
               mimeType={media.mimeType}
               title={media.originalName}
+              downloadUrl={downloadUrl}
             />
           </div>
         )}

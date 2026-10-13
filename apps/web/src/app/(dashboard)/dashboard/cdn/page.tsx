@@ -174,8 +174,9 @@ function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClos
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
           {type === "image" && <ImageViewer src={mediaUrl} alt={item.originalName} />}
           {type === "video" && (
-            <video controls controlsList="nodownload" className="max-w-full max-h-[75vh]" onContextMenu={(e) => e.preventDefault()}>
-              <source src={mediaUrl} type={item.mimeType} />
+            <video controls controlsList="nodownload" className="max-w-full max-h-[75vh]" onContextMenu={(e) => e.preventDefault()} playsInline>
+              <source src={mediaUrl} type={item.mimeType === "video/quicktime" ? "video/mp4" : item.mimeType} />
+              {item.mimeType === "video/quicktime" && <source src={mediaUrl} type="video/quicktime" />}
             </video>
           )}
           {type === "audio" && (

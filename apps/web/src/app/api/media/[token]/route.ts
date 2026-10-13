@@ -111,19 +111,27 @@ export async function GET(
       return new NextResponse("Too Many Requests", { status: 429 });
     }
 
+    // QuickTime (.mov) and ISO MP4 share the same ISO-BMFF container format.
+    // Browsers (Chrome on Android/Desktop, Firefox, Edge) do not recognize "video/quicktime" as a valid HTML5 video MIME type
+    // and will reject playback under "X-Content-Type-Options: nosniff".
+    // For inline streaming, normalizing .mov / video/quicktime to "video/mp4" enables playback
+    // across all modern browsers and Android devices.
+    const isMov = media.mimeType === "video/quicktime" || media.originalName.toLowerCase().endsWith(".mov");
+    const streamMime = canInline && isMov ? "video/mp4" : media.mimeType;
+
+    const requestOrigin = req.headers.get("origin");
+    const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || "https://masdika.id";
+
     const securityHeaders: Record<string, string> = {
-      "Content-Type": media.mimeType,
+      "Content-Type": streamMime,
       "Content-Disposition": contentDispositionFilename(media.originalName, canInline),
       "X-Content-Type-Options": "nosniff",
       "Cache-Control": canInline ? "private, max-age=3600" : "private, no-store",
       "Accept-Ranges": "bytes",
-      // Allow same-origin fetch from PDF.js web worker
-      "Access-Control-Allow-Origin": (() => {
-        const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || "https://masdika.id";
-        const requestOrigin = req.headers.get("origin");
-        return requestOrigin === allowedOrigin ? allowedOrigin : "";
-      })(),
-      "Access-Control-Allow-Methods": "GET",
+      "Access-Control-Allow-Origin": requestOrigin || allowedOrigin,
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": "Range, Origin, Content-Type, Accept",
+      "Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges",
     };
 
     // Read entire file into buffer and decrypt in-memory.
@@ -193,4 +201,16 @@ export async function GET(
     console.error("Download media error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": "Range, Origin, Content-Type, Accept",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
 }

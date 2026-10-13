@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
+import { AlertCircle, ExternalLink, Download } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 
@@ -12,55 +13,96 @@ interface VideoPlayerProps {
   mimeType: string;
   poster?: string;
   title?: string;
+  downloadUrl?: string;
 }
 
-export function VideoPlayer({ src, mimeType, poster, title }: VideoPlayerProps) {
+export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
+  const [playbackError, setPlaybackError] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   useEffect(() => {
     // Ensure container element exists
     if (!videoRef.current) return;
 
+    setPlaybackError(false);
+    setErrorDetails(null);
+
     // Create video element dynamically for clean disposal and hot reloading in React 19
     const videoElement = document.createElement("video-js");
     videoElement.classList.add("vjs-big-play-centered", "vjs-theme-masdika");
     videoElement.setAttribute("playsinline", "true");
-    videoElement.setAttribute("crossorigin", "anonymous");
+    videoElement.setAttribute("webkit-playsinline", "true");
     videoRef.current.appendChild(videoElement);
 
-    const player = videojs(videoElement, {
-      autoplay: false,
-      controls: true,
-      responsive: true,
-      fluid: true,
-      preload: "metadata",
-      poster: poster || undefined,
-      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
-      userActions: {
-        hotkeys: true,
-      },
-      controlBar: {
-        children: [
-          "playToggle",
-          "volumePanel",
-          "currentTimeDisplay",
-          "timeDivider",
-          "durationDisplay",
-          "progressControl",
-          "playbackRateMenuButton",
-          "pictureInPictureToggle",
-          "fullscreenToggle",
-        ],
-      },
-      sources: [
-        {
-          src,
-          type: mimeType || "video/mp4",
+    const isQuickTime =
+      mimeType === "video/quicktime" ||
+      (src && src.toLowerCase().includes(".mov")) ||
+      (title && title.toLowerCase().endsWith(".mov"));
+
+    // QuickTime (.mov) shares the ISO-BMFF container with MP4.
+    // Modern browsers (Chrome on Android/Desktop, Firefox) do NOT support "video/quicktime"
+    // as an HTML5 video MIME type and will reject it with MEDIA_ERR_SRC_NOT_SUPPORTED.
+    // Providing "video/mp4" as the primary source allows browsers to use their ISO-BMFF demuxer.
+    const sources = isQuickTime
+      ? [
+          { src, type: "video/mp4" },
+          { src, type: "video/quicktime" },
+        ]
+      : [
+          { src, type: mimeType || "video/mp4" },
+        ];
+
+    const player = videojs(
+      videoElement,
+      {
+        autoplay: false,
+        controls: true,
+        responsive: true,
+        fluid: true,
+        preload: "metadata",
+        poster: poster || undefined,
+        playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+        userActions: {
+          hotkeys: true,
         },
-      ],
-    }, () => {
-      // Player ready
+        html5: {
+          vhs: {
+            overrideNative: false,
+          },
+          nativeAudioTracks: true,
+          nativeVideoTracks: true,
+        },
+        controlBar: {
+          children: [
+            "playToggle",
+            "volumePanel",
+            "currentTimeDisplay",
+            "timeDivider",
+            "durationDisplay",
+            "progressControl",
+            "playbackRateMenuButton",
+            "pictureInPictureToggle",
+            "fullscreenToggle",
+          ],
+        },
+        sources,
+      },
+      () => {
+        // Player ready
+      }
+    );
+
+    player.on("error", () => {
+      const err = player.error();
+      console.warn("Video.js playback error:", err);
+      setPlaybackError(true);
+      if (err?.code === 4) {
+        setErrorDetails("Codec video (seperti HEVC / ProRes iPhone) mungkin memerlukan pemutar bawaan perangkat Anda.");
+      } else {
+        setErrorDetails("Gagal memutar video di browser ini.");
+      }
     });
 
     playerRef.current = player;
@@ -71,7 +113,7 @@ export function VideoPlayer({ src, mimeType, poster, title }: VideoPlayerProps) 
         playerRef.current = null;
       }
     };
-  }, [src, mimeType, poster]);
+  }, [src, mimeType, poster, title]);
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -90,6 +132,42 @@ export function VideoPlayer({ src, mimeType, poster, title }: VideoPlayerProps) 
         <div className="absolute top-4 left-4 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-xs font-medium text-zinc-200 truncate max-w-sm">
             {title}
+          </div>
+        </div>
+      )}
+
+      {/* Fallback Overlay if Codec is completely unsupported by browser */}
+      {playbackError && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-[#03040b]/95 backdrop-blur-md text-center">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-3 sm:mb-4 shadow-[0_0_25px_rgba(245,158,11,0.2)]">
+            <AlertCircle className="w-6 h-6 sm:w-7 sm:h-7" />
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-white mb-2">
+            Perlu Pemutar Bawaan Perangkat
+          </h3>
+          <p className="text-xs sm:text-sm text-zinc-400 max-w-md mb-5 sm:mb-6 leading-relaxed">
+            {errorDetails || "Format file iPhone (.mov) ini membutuhkan pemutar sistem bawaan perangkat Anda."}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(6,182,212,0.35)]"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Buka di Pemutar Bawaan
+            </a>
+            {downloadUrl && (
+              <a
+                href={downloadUrl}
+                download
+                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs sm:text-sm border border-white/15 flex items-center gap-2 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                Unduh Video Asli
+              </a>
+            )}
           </div>
         </div>
       )}

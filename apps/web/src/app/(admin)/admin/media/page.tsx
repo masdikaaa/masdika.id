@@ -172,8 +172,9 @@ function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClos
         <div className={cn("flex-1 overflow-auto flex items-center justify-center min-h-0", isDark ? "bg-black/40" : "bg-slate-50")}>
           {type === "image" && <ImageViewer src={mediaUrl} alt={item.originalName} />}
           {type === "video" && (
-            <video controls controlsList="nodownload" className="max-w-full max-h-[75vh]" onContextMenu={(e) => e.preventDefault()}>
-              <source src={mediaUrl} type={item.mimeType} />
+            <video controls controlsList="nodownload" className="max-w-full max-h-[75vh]" onContextMenu={(e) => e.preventDefault()} playsInline>
+              <source src={mediaUrl} type={item.mimeType === "video/quicktime" ? "video/mp4" : item.mimeType} />
+              {item.mimeType === "video/quicktime" && <source src={mediaUrl} type="video/quicktime" />}
             </video>
           )}
           {type === "audio" && (
