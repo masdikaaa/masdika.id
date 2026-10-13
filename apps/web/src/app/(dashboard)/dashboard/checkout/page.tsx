@@ -471,7 +471,7 @@ function CheckoutContent() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 relative z-10">
               <AnimatePresence mode="popLayout">
                 {SERVICES.filter(s => s.category === selectedCategory)
-                  .slice((servicePage - 1) * 8, servicePage * 8)
+                  .slice((servicePage - 1) * 4, servicePage * 4)
                   .map(srv => {
                     const Icon = srv.icon;
                     const isSelected = selectedService === srv.id;
@@ -541,7 +541,7 @@ function CheckoutContent() {
             {/* Pagination Controls */}
             <Pager
               page={servicePage}
-              pageSize={8}
+              pageSize={4}
               total={SERVICES.filter(s => s.category === selectedCategory).length}
               onChange={setServicePage}
               isDark={isDark}
