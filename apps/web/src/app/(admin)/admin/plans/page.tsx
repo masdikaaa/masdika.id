@@ -239,6 +239,11 @@ export default function AdminPlansPage() {
       setIsDeleting(false);
     }
   };
+
+  if (loading) {
+    return <AdminLoader />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">

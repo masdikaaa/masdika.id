@@ -301,6 +301,10 @@ export default function AdminInvoicesPage() {
     }, 250);
   };
 
+  if (loading) {
+    return <AdminLoader />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
@@ -375,7 +379,7 @@ export default function AdminInvoicesPage() {
             <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
+                  <td colSpan={9} className="px-6 py-12 text-center">
                     <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
