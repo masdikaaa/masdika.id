@@ -429,6 +429,11 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
         }
 
         /* Buttons & Icons */
+        .vjs-theme-masdika .vjs-button {
+          height: 48px !important;
+          width: 38px !important;
+        }
+
         .vjs-theme-masdika .vjs-button > .vjs-icon-placeholder:before {
           font-size: 20px;
           line-height: 48px;
@@ -439,6 +444,63 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
         .vjs-theme-masdika .vjs-button:hover > .vjs-icon-placeholder:before {
           color: #38bdf8;
           text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+        }
+
+        /* Playback Rate Button (1x, 1.25x, etc.) Centered & Aligned */
+        .vjs-theme-masdika .vjs-playback-rate,
+        .vjs-theme-masdika .vjs-playback-rate .vjs-button {
+          position: relative !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          height: 48px !important;
+          width: 38px !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          cursor: pointer !important;
+          border: none !important;
+          background: transparent !important;
+        }
+
+        .vjs-theme-masdika .vjs-playback-rate .vjs-playback-rate-value {
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-family: inherit !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          line-height: 48px !important;
+          color: #cbd5e1 !important;
+          text-align: center !important;
+          pointer-events: none !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          transition: color 0.15s ease, text-shadow 0.15s ease !important;
+        }
+
+        .vjs-theme-masdika .vjs-playback-rate:hover .vjs-playback-rate-value,
+        .vjs-theme-masdika .vjs-playback-rate:focus .vjs-playback-rate-value {
+          color: #38bdf8 !important;
+          text-shadow: 0 0 12px rgba(6, 182, 212, 0.6) !important;
+        }
+
+        /* Picture in Picture & Fullscreen Controls Alignment */
+        .vjs-theme-masdika .vjs-picture-in-picture-control,
+        .vjs-theme-masdika .vjs-fullscreen-control {
+          height: 48px !important;
+          width: 38px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
         /* Time Display */
