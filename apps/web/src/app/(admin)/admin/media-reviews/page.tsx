@@ -14,6 +14,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { Select } from "@/components/ui/Select";
 
 interface MediaItem {
   id: number;
@@ -389,23 +390,21 @@ export default function AdminMediaReviewsPage() {
         {/* Search & Rating Filter */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Star Filter Dropdown */}
-          <div className={cn(
-            "flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs",
-            isDark ? "bg-black/40 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700"
-          )}>
-            <Filter className={cn("w-3.5 h-3.5", isDark ? "text-zinc-400" : "text-slate-400")} />
-            <select
+          <div className="w-40">
+            <Select
               value={ratingFilter}
-              onChange={(e) => setRatingFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-              className={cn("bg-transparent focus:outline-none cursor-pointer", isDark ? "text-white" : "text-slate-900")}
-            >
-              <option value="all" className={isDark ? "bg-[#0b0e24] text-white" : "bg-white text-slate-900"}>All Ratings</option>
-              <option value="5" className={isDark ? "bg-[#0b0e24] text-white" : "bg-white text-slate-900"}>5 Stars only</option>
-              <option value="4" className={isDark ? "bg-[#0b0e24] text-white" : "bg-white text-slate-900"}>4 Stars only</option>
-              <option value="3" className={isDark ? "bg-[#0b0e24] text-white" : "bg-white text-slate-900"}>3 Stars only</option>
-              <option value="2" className={isDark ? "bg-[#0b0e24] text-white" : "bg-white text-slate-900"}>2 Stars only</option>
-              <option value="1" className={isDark ? "bg-[#0b0e24] text-white" : "bg-white text-slate-900"}>1 Star only</option>
-            </select>
+              onChange={(val) => setRatingFilter(val === "all" ? "all" : Number(val))}
+              options={[
+                { value: "all", label: "All Ratings" },
+                { value: "5", label: "5 Stars only" },
+                { value: "4", label: "4 Stars only" },
+                { value: "3", label: "3 Stars only" },
+                { value: "2", label: "2 Stars only" },
+                { value: "1", label: "1 Star only" }
+              ]}
+              placeholder="Rating"
+              className={cn("w-full rounded-xl px-3 py-2 text-xs", isDark ? "border-white/10" : "border-slate-200")}
+            />
           </div>
 
           {/* Search Input */}

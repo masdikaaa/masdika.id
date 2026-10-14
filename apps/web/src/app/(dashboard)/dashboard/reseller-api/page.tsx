@@ -225,10 +225,11 @@ export default function ResellerApiPage() {
                 {instances.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-16 text-center">
-                      <div className={cn("w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-4 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
-                        <Server className={cn("w-8 h-8 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
+                      <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
+                        <Server className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
                       </div>
-                      <p className={isDark ? "text-zinc-500 font-medium" : "text-slate-500 font-medium"}>No instances deployed via API yet.</p>
+                      <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Instances Deployed</h4>
+                      <p className={cn("text-sm max-w-md mx-auto leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>No instances deployed via API yet.</p>
                     </td>
                   </tr>
                 ) : (

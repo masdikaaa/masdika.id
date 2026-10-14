@@ -493,23 +493,26 @@ export default function MyVpsPage() {
                         <td className="py-4 pl-4 pr-6 align-middle text-right">
                           <div className="flex items-center justify-end gap-2">
                             {vps.status !== 'TERMINATED' ? (
-                              <a
+                              <Link
                                 href={`/dashboard/vps/${vps.id}`}
                                 className={cn(
                                   "p-2 rounded-lg transition-colors border shadow-sm",
                                   isDark 
-                                    ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" 
-                                    : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                                    ? "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border-white/10 hover:border-white/20" 
+                                    : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
                                 )}
-                                title="Manage"
+                                title="Manage Settings"
                               >
                                 <Settings className="w-4 h-4" />
-                              </a>
+                              </Link>
                             ) : (
-                              <div className={cn(
-                                "p-2 rounded-lg border cursor-not-allowed",
-                                isDark ? "bg-red-500/5 text-red-500/40 border-red-500/10" : "bg-red-50 text-red-300 border-red-100"
-                              )}>
+                              <div 
+                                className={cn(
+                                  "p-2 rounded-lg border cursor-not-allowed opacity-40",
+                                  isDark ? "bg-white/5 text-zinc-500 border-white/5" : "bg-slate-100 text-slate-400 border-slate-200"
+                                )}
+                                title="Terminated"
+                              >
                                 <Settings className="w-4 h-4" />
                               </div>
                             )}

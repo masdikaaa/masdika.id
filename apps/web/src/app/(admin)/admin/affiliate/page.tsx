@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { motion } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { Select } from "@/components/ui/Select";
 
 export default function AdminAffiliatePage() {
   const { theme } = useTheme();
@@ -87,20 +88,24 @@ export default function AdminAffiliatePage() {
           </p>
         </div>
 
-        <div className="flex gap-4">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className={cn("border rounded-xl px-4 py-2 outline-none focus:border-cyan-500/50", isDark ? "bg-zinc-900 border-zinc-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
-          >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="PAID">Paid</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
+        <div className="flex items-center gap-3">
+          <div className="w-44">
+            <Select
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              options={[
+                { value: "ALL", label: "All Status" },
+                { value: "PENDING", label: "Pending" },
+                { value: "PAID", label: "Paid" },
+                { value: "REJECTED", label: "Rejected" }
+              ]}
+              placeholder="Status"
+              className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+            />
+          </div>
           <button
             onClick={fetchWithdrawals}
-            className={cn("p-3 hover:bg-zinc-800 border rounded-xl transition-colors", isDark ? "bg-zinc-900 border-zinc-800" : "bg-slate-50 border-slate-200")}
+            className={cn("p-2.5 hover:bg-zinc-800 border rounded-xl transition-colors", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}
           >
             <RefreshCw className={cn("w-5 h-5", isDark ? "text-zinc-400" : "text-slate-500")} />
           </button>

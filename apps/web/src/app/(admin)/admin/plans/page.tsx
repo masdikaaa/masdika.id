@@ -8,6 +8,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { Select } from "@/components/ui/Select";
 interface Plan {
   id: number;
   name: string;
@@ -429,25 +430,26 @@ export default function AdminPlansPage() {
                 </div>
                 <div className="space-y-2">
                   <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Target Service</label>
-                  <select
-                    required
+                  <Select
                     value={formData.service}
-                    onChange={(e) => {
-                      const newService = e.target.value;
+                    onChange={(val) => {
+                      const newService = val.toString();
                       setFormData({...formData, service: newService});
                       setLimitFields(getDefaultLimitFields(newService));
                     }}
-                    className={cn("w-full bg-[#0a1f33] border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                  >
-                    <option value="SHORTENER">URL Shortener</option>
-                    <option value="CDN">CDN</option>
-                    <option value="TIKTOK">TikTok Downloader</option>
-                    <option value="SPOTIFY">Spotify Downloader</option>
-                    <option value="YOUTUBE">YouTube API</option>
-                    <option value="BLOG">Blog Service</option>
-                    <option value="BMKG_WEATHER">BMKG Weather API</option>
-                    <option value="BMKG_EARTHQUAKE">BMKG Earthquake API</option>
-                  </select>
+                    options={[
+                      { value: "SHORTENER", label: "URL Shortener" },
+                      { value: "CDN", label: "CDN" },
+                      { value: "TIKTOK", label: "TikTok Downloader" },
+                      { value: "SPOTIFY", label: "Spotify Downloader" },
+                      { value: "YOUTUBE", label: "YouTube API" },
+                      { value: "BLOG", label: "Blog Service" },
+                      { value: "BMKG_WEATHER", label: "BMKG Weather API" },
+                      { value: "BMKG_EARTHQUAKE", label: "BMKG Earthquake API" }
+                    ]}
+                    placeholder="Select Target Service..."
+                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                  />
                 </div>
               </div>
               <div className="space-y-2">

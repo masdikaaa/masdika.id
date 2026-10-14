@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { Select } from "@/components/ui/Select";
 
 export default function EditOpportunityPage({ params }: { params: Promise<{ id: string }> }) {
   const { theme } = useTheme();
@@ -213,29 +214,31 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
             
             <div>
               <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Type</label>
-              <select 
-                name="type" 
+              <Select 
                 value={formData.type} 
-                onChange={handleChange}
-                className={cn("w-full bg-black/40 border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors appearance-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-              >
-                <option value="EVENT" className={cn("bg-[#0f172a]", isDark ? "text-white" : "text-slate-900")}>Event</option>
-                <option value="WEBINAR" className={cn("bg-[#0f172a]", isDark ? "text-white" : "text-slate-900")}>Webinar</option>
-                <option value="JOBS" className={cn("bg-[#0f172a]", isDark ? "text-white" : "text-slate-900")}>Job Vacancy</option>
-              </select>
+                onChange={(val) => setFormData(prev => ({ ...prev, type: val }))}
+                options={[
+                  { value: "EVENT", label: "Event" },
+                  { value: "WEBINAR", label: "Webinar" },
+                  { value: "JOBS", label: "Job Vacancy" }
+                ]}
+                placeholder="Type"
+                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+              />
             </div>
 
             <div>
               <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Status</label>
-              <select 
-                name="status" 
+              <Select 
                 value={formData.status} 
-                onChange={handleChange}
-                className={cn("w-full bg-black/40 border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors appearance-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-              >
-                <option value="PUBLISHED" className={cn("bg-[#0f172a]", isDark ? "text-white" : "text-slate-900")}>Published</option>
-                <option value="DRAFT" className={cn("bg-[#0f172a]", isDark ? "text-white" : "text-slate-900")}>Draft</option>
-              </select>
+                onChange={(val) => setFormData(prev => ({ ...prev, status: val }))}
+                options={[
+                  { value: "PUBLISHED", label: "Published" },
+                  { value: "DRAFT", label: "Draft" }
+                ]}
+                placeholder="Status"
+                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+              />
             </div>
 
             <div>

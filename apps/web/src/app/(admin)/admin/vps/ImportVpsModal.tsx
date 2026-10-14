@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { X, Server, Save, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
+import { Select } from "@/components/ui/Select";
 
 interface ImportVpsModalProps {
   isOpen: boolean;
@@ -119,17 +120,16 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                 {loadingUsers ? (
                   <div className={cn("h-[48px] animate-pulse rounded-xl", isDark ? "bg-[#1e293b]" : "bg-slate-100")} />
                 ) : (
-                  <select
-                    required
+                  <Select
                     value={formData.userId}
-                    onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                    className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-                  >
-                    <option value="">-- Choose User --</option>
-                    {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, userId: val })}
+                    options={[
+                      { value: "", label: "-- Choose User --" },
+                      ...users.map(u => ({ value: u.id, label: `${u.name} (${u.email})` }))
+                    ]}
+                    placeholder="-- Choose User --"
+                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                  />
                 )}
               </div>
               
@@ -192,16 +192,17 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
 
               <div>
                 <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Billing Cycle</label>
-                <select
-                  required
+                <Select
                   value={formData.billingCycle}
-                  onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-                >
-                  <option value="PAYG">Pay As You Go (Hourly)</option>
-                  <option value="MONTHLY">Monthly (Fixed)</option>
-                  <option value="ANNUALLY">Annually (Fixed)</option>
-                </select>
+                  onChange={(val) => setFormData({ ...formData, billingCycle: val })}
+                  options={[
+                    { value: "PAYG", label: "Pay As You Go (Hourly)" },
+                    { value: "MONTHLY", label: "Monthly (Fixed)" },
+                    { value: "ANNUALLY", label: "Annually (Fixed)" }
+                  ]}
+                  placeholder="Select Billing Cycle..."
+                  className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                />
               </div>
             </div>
 
@@ -243,14 +244,16 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                 </div>
                 <div>
                   <label className={cn("block text-xs font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Disk Type</label>
-                  <select
+                  <Select
                     value={formData.diskType}
-                    onChange={(e) => setFormData({ ...formData, diskType: e.target.value })}
-                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                  >
-                    <option value="SSD">SSD SATA</option>
-                    <option value="HDD">HDD</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, diskType: val })}
+                    options={[
+                      { value: "SSD", label: "SSD SATA" },
+                      { value: "HDD", label: "HDD" }
+                    ]}
+                    placeholder="Disk Type"
+                    className={cn("w-full rounded-xl px-3 py-2 text-xs", isDark ? "border-white/10" : "border-slate-200")}
+                  />
                 </div>
               </div>
             </div>

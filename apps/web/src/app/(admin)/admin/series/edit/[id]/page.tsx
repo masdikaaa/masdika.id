@@ -12,6 +12,7 @@ import MediaLibrary from "@/components/admin/MediaLibrary";
 import Editor from "@/components/admin/Editor";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { motion } from "framer-motion";
+import { Select } from "@/components/ui/Select";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
@@ -171,10 +172,13 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Level</label>
-            <select value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all appearance-none shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}>
-              {LEVELS.map(l => <option key={l} value={l} className="bg-[#0a0e12]">{l}</option>)}
-            </select>
+            <Select 
+              value={form.level} 
+              onChange={val => setForm(f => ({ ...f, level: val }))}
+              options={LEVELS.map(l => ({ value: l, label: l }))}
+              placeholder="Select Level..."
+              className={cn("w-full rounded-xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+            />
           </div>
           <div className="space-y-3">
             <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Tags (comma separated)</label>

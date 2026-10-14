@@ -1,0 +1,1716 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import {
+  Activity,
+  Cpu,
+  Network,
+  ShieldAlert,
+  AlertTriangle,
+  CheckCircle2,
+  RefreshCw,
+  Search,
+  Copy,
+  ExternalLink,
+  Power,
+  RotateCw,
+  Ban,
+  X,
+  Server,
+  User,
+  Mail,
+  Clock,
+  ArrowDownRight,
+  ArrowUpRight,
+  SlidersHorizontal,
+  ChevronRight,
+  HardDrive,
+  Eye,
+} from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useTheme } from "@/components/ThemeProvider";
+import { AdminLoader } from "@/components/admin/AdminLoader";
+import { Pagination } from "@/components/ui/Pagination";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { Select, SelectOption } from "@/components/ui/Select";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface VpsResourceItem {
+  id: number;
+  vmid: number | null;
+  hostname: string;
+  osTemplate: string;
+  node: string;
+  dbStatus: string;
+  liveStatus: string;
+  isOnline: boolean;
+  primaryIp: string;
+  cpuPercent: number;
+  cpuCores: number;
+  memBytes: number;
+  maxMemBytes: number;
+  memPercent: number;
+  diskBytes: number;
+  maxDiskBytes: number;
+  diskPercent: number;
+  netIn: number;
+  netOut: number;
+  totalBandwidth: number;
+  netSpeedIn: number; // Real-time Bytes/sec matching Proxmox GUI graph
+  netSpeedOut: number; // Real-time Bytes/sec
+  netSpeedTotal: number;
+  uptime: number;
+  severity: "CRITICAL" | "WARNING" | "NORMAL" | "OFFLINE";
+  suspendReason?: string | null;
+  createdAt: string;
+  user: {
+    id?: number;
+    name: string;
+    email: string;
+    image?: string | null;
+  };
+}
+
+interface SummaryData {
+  totalVps: number;
+  runningCount: number;
+  criticalCount: number;
+  warningCount: number;
+  highCpuCount: number;
+  highRamCount: number;
+  highNetCount: number;
+  totalNetIn: number;
+  totalNetOut: number;
+  totalBandwidth: number;
+  totalNetSpeedIn: number;
+  totalNetSpeedOut: number;
+}
+
+type FilterTab = "ALL" | "CRITICAL" | "WARNING" | "HIGH_CPU" | "HIGH_RAM" | "HIGH_NET" | "OFFLINE";
+type SortOption = "CPU_DESC" | "RAM_DESC" | "NET_SPEED_DESC" | "NET_DESC" | "DISK_DESC" | "VMID_ASC" | "VMID_DESC";
+
+function formatSpeed(bytesPerSec: number): string {
+  if (!bytesPerSec || bytesPerSec <= 0 || isNaN(bytesPerSec)) return "0 B/s";
+  const units = ["B/s", "KB/s", "MB/s", "GB/s"];
+  const i = Math.floor(Math.log(bytesPerSec) / Math.log(1024));
+  const clampedI = Math.min(Math.max(i, 0), units.length - 1);
+  const val = bytesPerSec / Math.pow(1024, clampedI);
+  return `${val >= 100 || clampedI === 0 ? Math.round(val) : val.toFixed(1)} ${units[clampedI]}`;
+}
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (!bytes || bytes <= 0) return "0 B";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const safeI = Math.min(i, sizes.length - 1);
+  return `${parseFloat((bytes / Math.pow(k, safeI)).toFixed(dm))} ${sizes[safeI]}`;
+}
+
+function formatUptime(seconds: number) {
+  if (!seconds || seconds <= 0) return "-";
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+export default function AdminResourceFindingPage() {
+  const sortOptions: SelectOption[] = [
+    { value: "CPU_DESC", label: "Highest CPU (%)" },
+    { value: "RAM_DESC", label: "Highest RAM (%)" },
+    { value: "NET_SPEED_DESC", label: "Highest Network Speed" },
+    { value: "NET_DESC", label: "Highest Total Bandwidth" },
+    { value: "DISK_DESC", label: "Highest Disk (%)" },
+    { value: "VMID_ASC", label: "VMID (Ascending)" },
+    { value: "VMID_DESC", label: "VMID (Descending)" },
+  ];
+
+  const refreshOptions: SelectOption[] = [
+    { value: 0, label: "Refresh: Off" },
+    { value: 15, label: "Refresh: 15s" },
+    { value: 30, label: "Refresh: 30s" },
+    { value: 60, label: "Refresh: 60s" },
+  ];
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string>("");
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState<number>(30); // in seconds, 0 = off
+
+  const [summary, setSummary] = useState<SummaryData>({
+    totalVps: 0,
+    runningCount: 0,
+    criticalCount: 0,
+    warningCount: 0,
+    highCpuCount: 0,
+    highRamCount: 0,
+    highNetCount: 0,
+    totalNetIn: 0,
+    totalNetOut: 0,
+    totalBandwidth: 0,
+    totalNetSpeedIn: 0,
+    totalNetSpeedOut: 0,
+  });
+  const [vpsList, setVpsList] = useState<VpsResourceItem[]>([]);
+
+  // Filtering & Search
+  const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("CPU_DESC");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+
+  // Inspect Modal State
+  const [inspectVps, setInspectVps] = useState<VpsResourceItem | null>(null);
+  const [inspectTimeframe, setInspectTimeframe] = useState<"hour" | "day" | "week">("hour");
+  const [inspectLoading, setInspectLoading] = useState(false);
+  const [inspectMetrics, setInspectMetrics] = useState<any[]>([]);
+
+  // Action Modals State
+  const [suspendModalVps, setSuspendModalVps] = useState<VpsResourceItem | null>(null);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmText: string;
+    variant: "danger" | "warning";
+    onConfirm: () => Promise<void>;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "",
+    variant: "warning",
+    onConfirm: async () => {},
+  });
+
+  const fetchData = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    try {
+      const res = await fetch("/api/admin/resource-finding", { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSummary(data.summary);
+        setVpsList(data.vpsList || []);
+        const now = new Date();
+        setLastUpdated(now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      } else {
+        toast.error(data.error || "Failed to load resource metrics");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Network error while fetching resource finding metrics");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Auto-refresh timer
+  useEffect(() => {
+    if (autoRefreshInterval <= 0) return;
+    const timer = setInterval(() => {
+      fetchData();
+    }, autoRefreshInterval * 1000);
+    return () => clearInterval(timer);
+  }, [autoRefreshInterval]);
+
+  // Fetch RRD deep inspection data
+  const fetchRrdMetrics = async (vps: VpsResourceItem, timeframe: "hour" | "day" | "week") => {
+    if (!vps.vmid) return;
+    setInspectLoading(true);
+    try {
+      const res = await fetch(
+        `/api/admin/resource-finding?rrd=true&vmid=${vps.vmid}&node=${encodeURIComponent(vps.node)}&timeframe=${timeframe}`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.rrd)) {
+        const formatted = data.rrd
+          .map((pt: any) => {
+            const date = new Date((pt.time || 0) * 1000);
+            return {
+              time:
+                timeframe === "hour"
+                  ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                  : date.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit" }),
+              cpu: pt.cpu !== undefined ? parseFloat((pt.cpu * 100).toFixed(2)) : 0,
+              memory:
+                pt.maxmem && pt.mem ? parseFloat(((pt.mem / pt.maxmem) * 100).toFixed(2)) : 0,
+              netin: pt.netin ? parseFloat((pt.netin / (1024 * 1024)).toFixed(2)) : 0,
+              netout: pt.netout ? parseFloat((pt.netout / (1024 * 1024)).toFixed(2)) : 0,
+            };
+          })
+          .filter((p: any) => p.cpu > 0 || p.memory > 0 || p.netin > 0 || p.netout > 0);
+        setInspectMetrics(formatted);
+      } else {
+        setInspectMetrics([]);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load historical RRD data");
+    } finally {
+      setInspectLoading(false);
+    }
+  };
+
+  const openInspectModal = (vps: VpsResourceItem) => {
+    setInspectVps(vps);
+    setInspectTimeframe("hour");
+    fetchRrdMetrics(vps, "hour");
+  };
+
+  const handleTimeframeChange = (tf: "hour" | "day" | "week") => {
+    setInspectTimeframe(tf);
+    if (inspectVps) {
+      fetchRrdMetrics(inspectVps, tf);
+    }
+  };
+
+  // Perform Power / Suspend Actions
+  const handleVpsAction = async (id: number, action: string, reason?: string) => {
+    setActionLoading(true);
+    const toastId = toast.loading(`Executing ${action}...`);
+    try {
+      const res = await fetch("/api/admin/resource-finding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action, reason }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || `Action ${action} successful`, { id: toastId });
+        setSuspendModalVps(null);
+        setSuspendReason("");
+        fetchData();
+      } else {
+        toast.error(data.error || `Failed to execute ${action}`, { id: toastId });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Internal error performing action", { id: toastId });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("IP copied to clipboard");
+  };
+
+  // Filtered & Sorted VPS List
+  const filteredVps = useMemo(() => {
+    let list = [...vpsList];
+
+    // Quick Tab Filter
+    if (activeTab === "CRITICAL") {
+      list = list.filter((v) => v.severity === "CRITICAL");
+    } else if (activeTab === "WARNING") {
+      list = list.filter((v) => v.severity === "WARNING");
+    } else if (activeTab === "HIGH_CPU") {
+      list = list.filter((v) => v.cpuPercent >= 60);
+    } else if (activeTab === "HIGH_RAM") {
+      list = list.filter((v) => v.memPercent >= 75);
+    } else if (activeTab === "HIGH_NET") {
+      list = list.filter((v) => (v.netSpeedTotal || 0) >= 3 * 1024 * 1024 || v.totalBandwidth >= 100 * 1024 * 1024 * 1024);
+    } else if (activeTab === "OFFLINE") {
+      list = list.filter((v) => v.severity === "OFFLINE" || !v.isOnline);
+    }
+
+    // Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (v) =>
+          v.hostname.toLowerCase().includes(q) ||
+          (v.vmid && v.vmid.toString().includes(q)) ||
+          v.primaryIp.toLowerCase().includes(q) ||
+          v.node.toLowerCase().includes(q) ||
+          v.user.name.toLowerCase().includes(q) ||
+          v.user.email.toLowerCase().includes(q)
+      );
+    }
+
+    // Sorting
+    list.sort((a, b) => {
+      switch (sortBy) {
+        case "CPU_DESC":
+          return b.cpuPercent - a.cpuPercent;
+        case "RAM_DESC":
+          return b.memPercent - a.memPercent;
+        case "NET_SPEED_DESC":
+          return (b.netSpeedTotal || 0) - (a.netSpeedTotal || 0);
+        case "NET_DESC":
+          return b.totalBandwidth - a.totalBandwidth;
+        case "DISK_DESC":
+          return b.diskPercent - a.diskPercent;
+        case "VMID_ASC":
+          return (a.vmid || 0) - (b.vmid || 0);
+        case "VMID_DESC":
+          return (b.vmid || 0) - (a.vmid || 0);
+        default:
+          return b.cpuPercent - a.cpuPercent;
+      }
+    });
+
+    return list;
+  }, [vpsList, activeTab, searchQuery, sortBy]);
+
+  const totalPages = Math.ceil(filteredVps.length / itemsPerPage) || 1;
+  const paginatedVps = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredVps.slice(start, start + itemsPerPage);
+  }, [filteredVps, currentPage, itemsPerPage]);
+
+  if (loading) {
+    return <AdminLoader />;
+  }
+
+  return (
+    <div className="w-full space-y-6 pb-12">
+      {/* Top Header - Responsive Stack on Mobile */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h1
+            className={cn(
+              "text-2xl sm:text-3xl font-extrabold tracking-tight",
+              isDark ? "text-white" : "text-slate-900"
+            )}
+          >
+            Resource Finding
+          </h1>
+          <p className={cn("text-xs sm:text-sm mt-1 max-w-2xl", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Identify customer VPS instances consuming high CPU, saturated RAM, or heavy network bandwidth in real-time.
+          </p>
+        </div>
+
+        {/* Action Controls & Auto-refresh (Mobile Friendly Wrap) */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="w-36 shrink-0 relative z-30">
+            <Select
+              value={autoRefreshInterval}
+              onChange={(val) => setAutoRefreshInterval(Number(val))}
+              options={refreshOptions}
+              className="py-2 px-3 text-xs font-semibold rounded-xl"
+            />
+          </div>
+
+          <button
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all shadow-sm active:scale-95 disabled:opacity-50",
+              isDark
+                ? "bg-[#0b1322] hover:bg-white/5 border-white/10 text-white"
+                : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800"
+            )}
+            title="Refresh now"
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", refreshing && "animate-spin text-cyan-500")} />
+            <span>{refreshing ? "Refreshing..." : "Refresh"}</span>
+            {lastUpdated && <span className="text-[11px] font-normal hidden md:inline opacity-60">({lastUpdated})</span>}
+          </button>
+
+          <Link
+            href="/admin/vps"
+            className={cn(
+              "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all",
+              isDark
+                ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
+                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 shadow-sm"
+            )}
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>VPS Manager</span>
+            <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+          </Link>
+        </div>
+      </div>
+
+      {/* 4 Top KPI Stat Cards - Unified Design.md Containers */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Card 1: Critical Alerts */}
+        <div
+          onClick={() => setActiveTab(activeTab === "CRITICAL" ? "ALL" : "CRITICAL")}
+          className={cn(
+            "p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group",
+            activeTab === "CRITICAL"
+              ? isDark
+                ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
+                : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
+              : isDark
+              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+              Critical Alerts
+            </span>
+            <div
+              className={cn(
+                "p-2 rounded-xl border shrink-0",
+                summary.criticalCount > 0
+                  ? isDark
+                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    : "bg-rose-50 text-rose-700 border-rose-200"
+                  : isDark
+                  ? "bg-white/5 border-white/10 text-zinc-400"
+                  : "bg-slate-100 border-slate-200 text-slate-600"
+              )}
+            >
+              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              {summary.criticalCount}
+            </span>
+            {summary.criticalCount > 0 && (
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+              </span>
+            )}
+          </div>
+          <p className={cn("text-[11px] sm:text-xs mt-1 truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            CPU ≥ 80% or RAM ≥ 90%
+          </p>
+        </div>
+
+        {/* Card 2: High CPU Load */}
+        <div
+          onClick={() => setActiveTab(activeTab === "HIGH_CPU" ? "ALL" : "HIGH_CPU")}
+          className={cn(
+            "p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group",
+            activeTab === "HIGH_CPU"
+              ? isDark
+                ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
+                : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
+              : isDark
+              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+              High CPU Load
+            </span>
+            <div
+              className={cn(
+                "p-2 rounded-xl border shrink-0",
+                isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+              )}
+            >
+              <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              {summary.highCpuCount}
+            </span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-400")}>/ {summary.runningCount} online</span>
+          </div>
+          <p className={cn("text-[11px] sm:text-xs mt-1 truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            CPU load ≥ 60%
+          </p>
+        </div>
+
+        {/* Card 3: High RAM Usage */}
+        <div
+          onClick={() => setActiveTab(activeTab === "HIGH_RAM" ? "ALL" : "HIGH_RAM")}
+          className={cn(
+            "p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group",
+            activeTab === "HIGH_RAM"
+              ? isDark
+                ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
+                : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
+              : isDark
+              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+              High RAM Usage
+            </span>
+            <div
+              className={cn(
+                "p-2 rounded-xl border shrink-0",
+                isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+              )}
+            >
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              {summary.highRamCount}
+            </span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-400")}>/ {summary.runningCount} online</span>
+          </div>
+          <p className={cn("text-[11px] sm:text-xs mt-1 truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Memory usage ≥ 75%
+          </p>
+        </div>
+
+        {/* Card 4: Total Network Traffic */}
+        <div
+          onClick={() => setActiveTab(activeTab === "HIGH_NET" ? "ALL" : "HIGH_NET")}
+          className={cn(
+            "p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group",
+            activeTab === "HIGH_NET"
+              ? isDark
+                ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
+                : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
+              : isDark
+              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+              Total Network I/O
+            </span>
+            <div
+              className={cn(
+                "p-2 rounded-xl border shrink-0",
+                isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+              )}
+            >
+              <Network className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+              {formatBytes(summary.totalBandwidth)}
+            </span>
+          </div>
+          <p className={cn("text-[11px] sm:text-xs mt-1 flex items-center gap-1.5 truncate font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <span className="text-cyan-400">Live: ⬇ {formatSpeed(summary.totalNetSpeedIn)}</span>
+            <span>•</span>
+            <span className="text-emerald-400">⬆ {formatSpeed(summary.totalNetSpeedOut)}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Filter Tabs & Search / Sort Bar */}
+      <div className={cn("p-4 rounded-2xl border space-y-4 relative z-20", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200 shadow-sm")}>
+        {/* Quick Filter Tabs - Mobile Horizontal Touch Scroll */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-none">
+          {[
+            { id: "ALL", label: "All VPS", count: summary.totalVps },
+            { id: "CRITICAL", label: "Critical Abuse", count: summary.criticalCount },
+            { id: "HIGH_CPU", label: "High CPU (>60%)", count: summary.highCpuCount },
+            { id: "HIGH_RAM", label: "High RAM (>75%)", count: summary.highRamCount },
+            { id: "HIGH_NET", label: "High Bandwidth", count: summary.highNetCount },
+            { id: "OFFLINE", label: "Offline / Suspended", count: summary.totalVps - summary.runningCount },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as FilterTab);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 border",
+                  isActive
+                    ? isDark
+                      ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-sm"
+                      : "bg-cyan-50 border-cyan-300 text-cyan-800 shadow-sm"
+                    : isDark
+                    ? "bg-white/5 border-transparent text-zinc-400 hover:text-white hover:bg-white/10"
+                    : "bg-slate-50 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                )}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={cn(
+                    "px-1.5 py-0.5 rounded-md text-[11px] font-bold",
+                    isActive
+                      ? isDark
+                        ? "bg-cyan-500/30 text-cyan-200"
+                        : "bg-cyan-200 text-cyan-900"
+                      : isDark
+                      ? "bg-white/10 text-zinc-400"
+                      : "bg-slate-200 text-slate-600"
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Search & Sort Controls - Responsive Flex Stack */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-white/5">
+          {/* Search Box */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Search Hostname, VMID, Customer, IP, Node..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "w-full pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none transition-colors",
+                isDark
+                  ? "bg-black/30 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500/50"
+                  : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:bg-white"
+              )}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+            <SlidersHorizontal className="w-4 h-4 text-zinc-400 shrink-0 hidden sm:block" />
+            <span className={cn("text-xs font-medium whitespace-nowrap hidden sm:inline", isDark ? "text-zinc-400" : "text-slate-600")}>
+              Sort:
+            </span>
+            <div className="w-full sm:w-56 shrink-0 relative z-30">
+              <Select
+                value={sortBy}
+                onChange={(val) => setSortBy(val as SortOption)}
+                options={sortOptions}
+                className="py-2.5 px-3.5 text-xs sm:text-sm font-semibold rounded-xl"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MOBILE CARDS VIEW (block lg:hidden) - Zero horizontal clutter on phones! */}
+      <div className="block lg:hidden space-y-3">
+        {paginatedVps.length === 0 ? (
+          <div className={cn("p-10 rounded-2xl border text-center", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200")}>
+            <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+            <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>No VPS matches this filter</p>
+            <p className="text-xs text-zinc-500 mt-1">All customer VPS instances are within normal bounds.</p>
+          </div>
+        ) : (
+          paginatedVps.map((vps) => {
+            const cpuColor =
+              vps.cpuPercent >= 80 ? "bg-rose-500" : vps.cpuPercent >= 60 ? "bg-amber-500" : "bg-cyan-500";
+            const memColor =
+              vps.memPercent >= 90 ? "bg-rose-500" : vps.memPercent >= 75 ? "bg-amber-500" : "bg-cyan-500";
+
+            return (
+              <div
+                key={vps.id}
+                className={cn(
+                  "p-4 rounded-2xl border space-y-3.5 transition-colors",
+                  vps.severity === "CRITICAL"
+                    ? isDark
+                      ? "bg-rose-500/[0.04] border-rose-500/30"
+                      : "bg-rose-50/60 border-rose-200"
+                    : isDark
+                    ? "bg-[#0b1322] border-white/10"
+                    : "bg-white border-slate-200 shadow-sm"
+                )}
+              >
+                {/* Header: Hostname, VMID, Node, Status */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={cn("font-bold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>
+                        {vps.hostname}
+                      </span>
+                      {vps.vmid && (
+                        <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border", isDark ? "bg-white/5 border-white/10 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                          #{vps.vmid}
+                        </span>
+                      )}
+                      <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-medium border", isDark ? "bg-white/5 border-white/5 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>
+                        {vps.node}
+                      </span>
+                    </div>
+                    <div className="mt-1 space-y-1 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <span className={cn("font-medium truncate max-w-[170px]", isDark ? "text-zinc-200" : "text-slate-800")} title={vps.user.name}>{vps.user.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <span className={cn("text-[11px] truncate max-w-[190px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")} title={vps.user.email}>
+                          {vps.user.email}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status & Severity Badges (Side-by-Side, Never Stacked) */}
+                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0",
+                        vps.isOnline
+                          ? isDark
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : vps.dbStatus === "SUSPENDED"
+                          ? isDark
+                            ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
+                          : isDark
+                          ? "bg-white/5 text-zinc-400 border-white/10"
+                          : "bg-slate-100 text-slate-600 border-slate-200"
+                      )
+                    }
+                  >
+                    <span
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        vps.isOnline
+                          ? "bg-emerald-500 animate-pulse"
+                          : vps.dbStatus === "SUSPENDED"
+                          ? "bg-rose-500"
+                          : "bg-zinc-500"
+                      )}
+                    />
+                    {vps.dbStatus === "SUSPENDED" ? "Suspended" : vps.isOnline ? "Running" : "Stopped"}
+                  </span>
+
+                    {vps.severity === "CRITICAL" && (
+                      <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border", isDark ? "bg-rose-500/15 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200")}>
+                        <AlertTriangle className="w-3.5 h-3.5" /> Critical
+                      </span>
+                    )}
+                    {vps.severity === "WARNING" && (
+                      <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border", isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                        Warning
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Primary IP bar */}
+                <div className="flex items-center justify-between text-xs font-mono pt-1 border-t border-slate-100 dark:border-white/5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-zinc-500 font-sans">IP:</span>
+                    <span className={cn("font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>{vps.primaryIp}</span>
+                    {vps.primaryIp !== "-" && (
+                      <button
+                        onClick={() => copyToClipboard(vps.primaryIp)}
+                        className="p-1 rounded text-zinc-400 hover:text-white"
+                        title="Copy IP"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-zinc-400 text-[11px] font-sans">
+                    Uptime: {formatUptime(vps.uptime)}
+                  </div>
+                </div>
+
+                {/* 2x2 Resource Stats Grid */}
+                <div className={cn("grid grid-cols-2 gap-2.5 p-3 rounded-xl border text-xs", isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-100")}>
+                  {/* CPU */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-zinc-400 font-medium">CPU ({vps.cpuCores}c)</span>
+                      <span className={cn("font-bold font-mono", vps.cpuPercent >= 80 ? "text-rose-500" : vps.cpuPercent >= 60 ? "text-amber-500" : isDark ? "text-zinc-300" : "text-slate-700")}>
+                        {vps.cpuPercent.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className={cn("w-full h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                      <div className={cn("h-full", cpuColor)} style={{ width: `${Math.min(vps.cpuPercent, 100)}%` }} />
+                    </div>
+                  </div>
+
+                  {/* RAM */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-zinc-400 font-medium">RAM</span>
+                      <span className={cn("font-bold font-mono", vps.memPercent >= 90 ? "text-rose-500" : vps.memPercent >= 75 ? "text-amber-500" : isDark ? "text-zinc-300" : "text-slate-700")}>
+                        {vps.memPercent.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className={cn("w-full h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                      <div className={cn("h-full", memColor)} style={{ width: `${Math.min(vps.memPercent, 100)}%` }} />
+                    </div>
+                  </div>
+
+                  {/* Bandwidth */}
+                  <div className="col-span-2 flex items-center justify-between pt-1 border-t border-slate-200/40 dark:border-white/5 text-[11px]">
+                    <span className="text-zinc-400">Speed / Total:</span>
+                    <span className="font-mono font-semibold">
+                      <span className="text-cyan-400">⬇ {formatSpeed(vps.netSpeedIn)}</span> / <span className="text-emerald-400">⬆ {formatSpeed(vps.netSpeedOut)}</span> ({formatBytes(vps.totalBandwidth)})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mobile Actions Toolbar */}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => openInspectModal(vps)}
+                    className={cn(
+                      "flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm",
+                      isDark
+                        ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
+                        : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
+                    )}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Inspect</span>
+                  </button>
+
+                  {vps.isOnline && (
+                    <button
+                      onClick={() => {
+                        setConfirmModal({
+                          isOpen: true,
+                          title: `Reboot VPS #${vps.vmid || vps.id}?`,
+                          description: `Reboot ${vps.hostname}? This will momentarily restart customer services.`,
+                          confirmText: "Reboot",
+                          variant: "warning",
+                          onConfirm: async () => {
+                            await handleVpsAction(vps.id, "reboot");
+                          },
+                        });
+                      }}
+                      className={cn(
+                        "p-2 rounded-xl border transition-all text-xs font-semibold",
+                        isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                      )}
+                      title="Reboot"
+                    >
+                      <RotateCw className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {vps.isOnline && (
+                    <button
+                      onClick={() => {
+                        setConfirmModal({
+                          isOpen: true,
+                          title: `Force Stop VPS #${vps.vmid || vps.id}?`,
+                          description: `Force stop ${vps.hostname}? Use this if it's consuming 100% resources.`,
+                          confirmText: "Force Stop",
+                          variant: "danger",
+                          onConfirm: async () => {
+                            await handleVpsAction(vps.id, "stop");
+                          },
+                        });
+                      }}
+                      className={cn(
+                        "p-2 rounded-xl border transition-all text-xs font-semibold",
+                        isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                      )}
+                      title="Force Stop"
+                    >
+                      <Power className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {vps.dbStatus === "SUSPENDED" ? (
+                    <button
+                      onClick={() => handleVpsAction(vps.id, "unsuspend")}
+                      className={cn(
+                        "p-2 rounded-xl border text-xs font-semibold transition-all",
+                        isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      )}
+                      title="Unsuspend"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setSuspendModalVps(vps);
+                        setSuspendReason(
+                          vps.cpuPercent >= 80
+                            ? `[RESOURCE_LIMIT] Excessive CPU load detected (${vps.cpuPercent.toFixed(1)}%). Suspended to protect node stability.`
+                            : `[RESOURCE_LIMIT] High resource consumption detected. Please contact administrator.`
+                        );
+                      }}
+                      className={cn(
+                        "p-2 rounded-xl border text-xs font-semibold transition-all",
+                        isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-rose-400" : "bg-slate-50 border-slate-200 text-slate-700 hover:text-rose-600"
+                      )}
+                      title="Suspend"
+                    >
+                      <Ban className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* DESKTOP FULL-SPACE DATA TABLE (hidden lg:block) */}
+      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className={cn("border-b text-xs uppercase font-bold tracking-wider", isDark ? "bg-white/[0.02] border-white/10 text-zinc-400" : "bg-slate-50/80 border-slate-200 text-slate-500")}>
+                <th className="py-3.5 px-4">VPS & Customer</th>
+                <th className="py-3.5 px-4">Network & IP</th>
+                <th className="py-3.5 px-4 min-w-[170px]">CPU Load</th>
+                <th className="py-3.5 px-4 min-w-[170px]">Memory (RAM)</th>
+                <th className="py-3.5 px-4 min-w-[170px]">Disk & Uptime</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
+                <th className="py-3.5 px-4 text-center">Severity</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-normal">
+              {paginatedVps.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-16 text-center">
+                    <div className="max-w-md mx-auto space-y-3">
+                      <div className={cn("w-14 h-14 rounded-2xl mx-auto flex items-center justify-center border", isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-400")}>
+                        <CheckCircle2 className="w-7 h-7 text-emerald-500" />
+                      </div>
+                      <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
+                        No Abusive or High Resource VPS Found
+                      </h3>
+                      <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        {searchQuery
+                          ? "No instances matched your search criteria. Try clearing search filters."
+                          : "All customer VPS instances are running within normal and healthy performance thresholds."}
+                      </p>
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="mt-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:underline"
+                        >
+                          Clear Search Filter
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedVps.map((vps) => {
+                  const cpuColor =
+                    vps.cpuPercent >= 80 ? "bg-rose-500" : vps.cpuPercent >= 60 ? "bg-amber-500" : "bg-cyan-500";
+                  const memColor =
+                    vps.memPercent >= 90 ? "bg-rose-500" : vps.memPercent >= 75 ? "bg-amber-500" : "bg-cyan-500";
+
+                  return (
+                    <tr
+                      key={vps.id}
+                      className={cn(
+                        "transition-colors",
+                        vps.severity === "CRITICAL"
+                          ? isDark
+                            ? "bg-rose-500/[0.04] hover:bg-rose-500/[0.08]"
+                            : "bg-rose-50/50 hover:bg-rose-50"
+                          : isDark
+                          ? "hover:bg-white/[0.02]"
+                          : "hover:bg-slate-50/70"
+                      )}
+                    >
+                      {/* VPS & Customer */}
+                      <td className="py-4 px-4 align-middle">
+                        <div className="flex items-start gap-3">
+                          <div className={cn("p-2 rounded-xl mt-0.5 border shrink-0", isDark ? "bg-black/30 border-white/10" : "bg-slate-100 border-slate-200")}>
+                            <Server className={cn("w-4 h-4", vps.isOnline ? "text-cyan-500" : "text-zinc-400")} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={cn("font-bold text-sm truncate max-w-[170px]", isDark ? "text-white" : "text-slate-900")} title={vps.hostname}>
+                                {vps.hostname}
+                              </span>
+                              {vps.vmid && (
+                                <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border", isDark ? "bg-white/5 border-white/10 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                                  #{vps.vmid}
+                                </span>
+                              )}
+                              <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-medium border", isDark ? "bg-white/5 border-white/5 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>
+                                {vps.node}
+                              </span>
+                            </div>
+                            <div className="mt-1 space-y-1 text-xs">
+                              <div className="flex items-center gap-1.5">
+                                <User className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                                <span className={cn("font-medium truncate max-w-[180px]", isDark ? "text-zinc-200" : "text-slate-800")} title={vps.user.name}>
+                                  {vps.user.name}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                                <span className={cn("text-[11px] truncate max-w-[180px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")} title={vps.user.email}>
+                                  {vps.user.email}
+                                </span>
+                              </div>
+                            </div>
+                            {vps.suspendReason && (
+                              <div className="mt-1 text-[11px] font-medium text-rose-500 dark:text-rose-400 line-clamp-1" title={vps.suspendReason}>
+                                Reason: {vps.suspendReason}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Network & IP */}
+                      <td className="py-4 px-4 align-middle">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-semibold">
+                            <span className={isDark ? "text-zinc-200" : "text-slate-800"}>{vps.primaryIp}</span>
+                            {vps.primaryIp !== "-" && (
+                              <button
+                                onClick={() => copyToClipboard(vps.primaryIp)}
+                                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                title="Copy IP address"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs font-mono font-medium">
+                            <span className="inline-flex items-center gap-0.5 text-[11px] text-cyan-400 font-semibold" title="Live Incoming Throughput">
+                              <ArrowDownRight className="w-3.5 h-3.5 shrink-0" /> {formatSpeed(vps.netSpeedIn)}
+                            </span>
+                            <span className="opacity-30">/</span>
+                            <span className="inline-flex items-center gap-0.5 text-[11px] text-emerald-400 font-semibold" title="Live Outgoing Throughput">
+                              <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> {formatSpeed(vps.netSpeedOut)}
+                            </span>
+                          </div>
+                          <div className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            Total: <span className="font-semibold">{formatBytes(vps.totalBandwidth)}</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* CPU Load - Perfectly Level & Symmetric */}
+                      <td className="py-4 px-4 align-middle">
+                        <div className="space-y-2">
+                          <div className="flex items-baseline justify-between h-5">
+                            <span
+                              className={cn(
+                                "font-extrabold text-sm font-mono leading-none",
+                                vps.cpuPercent >= 80
+                                  ? "text-rose-500"
+                                  : vps.cpuPercent >= 60
+                                  ? "text-amber-500"
+                                  : isDark
+                                  ? "text-zinc-300"
+                                  : "text-slate-700"
+                              )}
+                            >
+                              {vps.cpuPercent.toFixed(1)}%
+                            </span>
+                            <span className={cn("text-[11px] font-mono leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              {vps.cpuCores} {vps.cpuCores > 1 ? "Cores" : "Core"}
+                            </span>
+                          </div>
+                          <div className={cn("w-full h-2 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                            <div
+                              className={cn("h-full transition-all duration-500", cpuColor, vps.cpuPercent >= 80 && "animate-pulse")}
+                              style={{ width: `${Math.min(vps.cpuPercent, 100)}%` }}
+                            />
+                          </div>
+                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {vps.cpuPercent >= 80 ? "Critical Strain" : vps.cpuPercent >= 60 ? "Elevated Usage" : "Normal Load"}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Memory (RAM) - Perfectly Level & Symmetric */}
+                      <td className="py-4 px-4 align-middle">
+                        <div className="space-y-2">
+                          <div className="flex items-baseline justify-between h-5">
+                            <span
+                              className={cn(
+                                "font-extrabold text-sm font-mono leading-none",
+                                vps.memPercent >= 90
+                                  ? "text-rose-500"
+                                  : vps.memPercent >= 75
+                                  ? "text-amber-500"
+                                  : isDark
+                                  ? "text-zinc-300"
+                                  : "text-slate-700"
+                              )}
+                            >
+                              {vps.memPercent.toFixed(1)}%
+                            </span>
+                            <span className={cn("text-[11px] font-mono leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              {formatBytes(vps.memBytes, 1)} / {formatBytes(vps.maxMemBytes, 0)}
+                            </span>
+                          </div>
+                          <div className={cn("w-full h-2 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                            <div
+                              className={cn("h-full transition-all duration-500", memColor)}
+                              style={{ width: `${Math.min(vps.memPercent, 100)}%` }}
+                            />
+                          </div>
+                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {vps.memPercent >= 90 ? "Out-of-Memory Danger" : vps.memPercent >= 75 ? "High Allocation" : "Optimal Memory"}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Disk & Uptime - Perfectly Level & Symmetric */}
+                      <td className="py-4 px-4 align-middle">
+                        <div className="space-y-2">
+                          <div className="flex items-baseline justify-between h-5">
+                            <span
+                              className={cn(
+                                "font-extrabold text-sm font-mono leading-none",
+                                vps.diskPercent >= 90
+                                  ? "text-rose-500"
+                                  : isDark
+                                  ? "text-zinc-300"
+                                  : "text-slate-700"
+                              )}
+                            >
+                              {vps.diskPercent.toFixed(1)}%
+                            </span>
+                            <span className={cn("text-[11px] font-mono leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              {formatBytes(vps.maxDiskBytes, 0)}
+                            </span>
+                          </div>
+                          <div className={cn("w-full h-2 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                            <div
+                              className={cn("h-full transition-all duration-500", vps.diskPercent >= 90 ? "bg-rose-500" : "bg-cyan-500")}
+                              style={{ width: `${Math.min(vps.diskPercent, 100)}%` }}
+                            />
+                          </div>
+                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center gap-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            <Clock className="w-2.5 h-2.5 shrink-0" />
+                            <span>Uptime: {formatUptime(vps.uptime)}</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-4 px-4 align-middle text-center whitespace-nowrap">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border",
+                            vps.isOnline
+                              ? isDark
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : vps.dbStatus === "SUSPENDED"
+                              ? isDark
+                                ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                : "bg-rose-50 text-rose-700 border-rose-200"
+                              : isDark
+                              ? "bg-white/5 text-zinc-400 border-white/10"
+                              : "bg-slate-100 text-slate-600 border-slate-200"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              vps.isOnline
+                                ? "bg-emerald-500 animate-pulse"
+                                : vps.dbStatus === "SUSPENDED"
+                                ? "bg-rose-500"
+                                : "bg-zinc-500"
+                            )}
+                          />
+                          {vps.dbStatus === "SUSPENDED" ? "Suspended" : vps.isOnline ? "Running" : "Stopped"}
+                        </span>
+                      </td>
+
+                      {/* Severity */}
+                      <td className="py-4 px-4 align-middle text-center whitespace-nowrap">
+                        {vps.severity === "CRITICAL" ? (
+                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border", isDark ? "bg-rose-500/15 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200")}>
+                            <AlertTriangle className="w-3.5 h-3.5" /> Critical
+                          </span>
+                        ) : vps.severity === "WARNING" ? (
+                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border", isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                            Warning
+                          </span>
+                        ) : (
+                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border", isDark ? "bg-white/5 text-zinc-400 border-white/10" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                            {vps.isOnline ? "Normal" : "Offline"}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-4 align-middle text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Inspect Modal Trigger */}
+                          <button
+                            onClick={() => openInspectModal(vps)}
+                            className={cn(
+                              "p-2 rounded-xl border text-xs font-semibold transition-all shadow-sm active:scale-95 flex items-center gap-1",
+                              isDark
+                                ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
+                                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
+                            )}
+                            title="Inspect Deep Telemetry & Graphs"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="hidden xl:inline">Inspect</span>
+                          </button>
+
+                          {/* Power Actions: Reboot */}
+                          {vps.isOnline && (
+                            <button
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: `Reboot VPS #${vps.vmid || vps.id}?`,
+                                  description: `Are you sure you want to reboot ${vps.hostname}? This will momentarily disrupt customer workloads.`,
+                                  confirmText: "Reboot Now",
+                                  variant: "warning",
+                                  onConfirm: async () => {
+                                    await handleVpsAction(vps.id, "reboot");
+                                  },
+                                });
+                              }}
+                              className={cn(
+                                "p-2 rounded-xl border transition-all text-xs font-semibold",
+                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 shadow-sm"
+                              )}
+                              title="Reboot VPS"
+                            >
+                              <RotateCw className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+
+                          {/* Power Actions: Stop */}
+                          {vps.isOnline && (
+                            <button
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: `Force Stop VPS #${vps.vmid || vps.id}?`,
+                                  description: `Are you sure you want to forcefully stop ${vps.hostname}? Use this if the VM is consuming 100% CPU or unresponsive.`,
+                                  confirmText: "Force Stop",
+                                  variant: "danger",
+                                  onConfirm: async () => {
+                                    await handleVpsAction(vps.id, "stop");
+                                  },
+                                });
+                              }}
+                              className={cn(
+                                "p-2 rounded-xl border transition-all text-xs font-semibold",
+                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 shadow-sm"
+                              )}
+                              title="Force Stop VPS"
+                            >
+                              <Power className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+
+                          {/* Suspend / Lock or Unsuspend */}
+                          {vps.dbStatus === "SUSPENDED" ? (
+                            <button
+                              onClick={() => handleVpsAction(vps.id, "unsuspend")}
+                              className={cn(
+                                "p-2 rounded-xl border text-xs font-semibold transition-all",
+                                isDark
+                                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                                  : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                              )}
+                              title="Unsuspend and restore customer VPS"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setSuspendModalVps(vps);
+                                setSuspendReason(
+                                  vps.cpuPercent >= 80
+                                    ? `[RESOURCE_LIMIT] Excessive CPU load detected (${vps.cpuPercent.toFixed(1)}%). Suspended to protect node stability.`
+                                    : `[RESOURCE_LIMIT] High resource consumption detected. Please contact administrator.`
+                                );
+                              }}
+                              className={cn(
+                                "p-2 rounded-xl border text-xs font-semibold transition-all",
+                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-rose-400 border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-rose-600 border-slate-200 shadow-sm"
+                              )}
+                              title="Suspend & Lock VPS due to resource abuse"
+                            >
+                              <Ban className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Table Footer with Pagination */}
+        {filteredVps.length > itemsPerPage && (
+          <div className="p-4 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Showing <span className="font-semibold text-slate-800 dark:text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">{Math.min(currentPage * itemsPerPage, filteredVps.length)}</span> of{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">{filteredVps.length}</span> instances
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Inspect Deep Telemetry & RRD Modal */}
+      {inspectVps && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border shadow-2xl p-5 sm:p-7 space-y-6 transition-colors",
+              isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+            )}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg sm:text-2xl font-extrabold tracking-tight">
+                    {inspectVps.hostname}
+                  </h2>
+                  {inspectVps.vmid && (
+                    <span className={cn("px-2 py-0.5 rounded-lg text-xs font-mono font-bold border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                      VMID #{inspectVps.vmid}
+                    </span>
+                  )}
+                  <span className={cn("px-2 py-0.5 rounded-lg text-xs font-semibold border", isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700")}>
+                    Node: {inspectVps.node}
+                  </span>
+                </div>
+                <p className={cn("text-xs sm:text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Customer: <span className="font-semibold">{inspectVps.user.name}</span> ({inspectVps.user.email}) • IP: <span className="font-mono">{inspectVps.primaryIp}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setInspectVps(null)}
+                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Timeframe selector & Quick Stats */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Timeframe:
+                </span>
+                {(["hour", "day", "week"] as const).map((tf) => (
+                  <button
+                    key={tf}
+                    onClick={() => handleTimeframeChange(tf)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl text-xs font-semibold capitalize border transition-all",
+                      inspectTimeframe === tf
+                        ? isDark
+                          ? "bg-cyan-500/20 border-cyan-500 text-cyan-300"
+                          : "bg-cyan-600 text-white border-cyan-600 shadow-sm"
+                        : isDark
+                        ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white"
+                        : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
+                    )}
+                  >
+                    1 {tf}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-zinc-500">Live CPU:</span>{" "}
+                  <span className={cn("font-bold", inspectVps.cpuPercent >= 80 ? "text-rose-500" : "text-cyan-500")}>
+                    {inspectVps.cpuPercent.toFixed(1)}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-zinc-500">Live RAM:</span>{" "}
+                  <span className={cn("font-bold", inspectVps.memPercent >= 75 ? "text-amber-500" : "text-cyan-500")}>
+                    {inspectVps.memPercent.toFixed(1)}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-zinc-500">Uptime:</span>{" "}
+                  <span className="font-bold">{formatUptime(inspectVps.uptime)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Charts Grid */}
+            {inspectLoading ? (
+              <div className="h-64 flex flex-col items-center justify-center gap-3">
+                <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
+                <span className="text-xs text-zinc-400">Loading historical metrics from Proxmox RRD...</span>
+              </div>
+            ) : inspectMetrics.length === 0 ? (
+              <div className="h-64 flex flex-col items-center justify-center text-center p-6 border rounded-2xl border-dashed border-zinc-700">
+                <Activity className="w-10 h-10 text-zinc-600 mb-2" />
+                <span className="text-sm font-semibold">No RRD metric points recorded for this timeframe</span>
+                <span className="text-xs text-zinc-500 mt-1">Metrics accumulate as the VM runs continuously.</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* CPU Chart */}
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-black/30 border-white/10" : "bg-slate-50 border-slate-200")}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="w-4 h-4 text-cyan-500" />
+                      <h4 className="text-sm font-bold">CPU Usage Over Time (%)</h4>
+                    </div>
+                    <span className="text-xs font-mono text-zinc-400">Limit: 100%</span>
+                  </div>
+                  <div className="h-44 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={inspectMetrics} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="cpuGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
+                        <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
+                        <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} domain={[0, 100]} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                            borderColor: isDark ? "#334155" : "#e2e8f0",
+                            borderRadius: "12px",
+                            fontSize: "12px",
+                          }}
+                        />
+                        <Area type="monotone" dataKey="cpu" name="CPU %" stroke="#06b6d4" strokeWidth={2} fill="url(#cpuGrad)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Memory (RAM) Chart */}
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-black/30 border-white/10" : "bg-slate-50 border-slate-200")}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-cyan-500" />
+                      <h4 className="text-sm font-bold">Memory (RAM) Usage Over Time (%)</h4>
+                    </div>
+                    <span className="text-xs font-mono text-zinc-400">Total: {formatBytes(inspectVps.maxMemBytes, 0)}</span>
+                  </div>
+                  <div className="h-44 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={inspectMetrics} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="memGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
+                        <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
+                        <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} domain={[0, 100]} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                            borderColor: isDark ? "#334155" : "#e2e8f0",
+                            borderRadius: "12px",
+                            fontSize: "12px",
+                          }}
+                        />
+                        <Area type="monotone" dataKey="memory" name="RAM %" stroke="#06b6d4" strokeWidth={2} fill="url(#memGrad)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Network Throughput Chart (Download vs Upload) */}
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-black/30 border-white/10" : "bg-slate-50 border-slate-200")}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Network className="w-4 h-4 text-cyan-500" />
+                      <h4 className="text-sm font-bold">Network Traffic (MB)</h4>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="flex items-center gap-1 text-cyan-500 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-cyan-500" /> Inbound (NetIn)
+                      </span>
+                      <span className="flex items-center gap-1 text-zinc-400 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-zinc-400" /> Outbound (NetOut)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-44 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={inspectMetrics} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="netinGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="netoutGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
+                        <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
+                        <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                            borderColor: isDark ? "#334155" : "#e2e8f0",
+                            borderRadius: "12px",
+                            fontSize: "12px",
+                          }}
+                        />
+                        <Area type="monotone" dataKey="netin" name="Download (MB)" stroke="#06b6d4" strokeWidth={2} fill="url(#netinGrad)" />
+                        <Area type="monotone" dataKey="netout" name="Upload (MB)" stroke="#94a3b8" strokeWidth={2} fill="url(#netoutGrad)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
+              <Link
+                href={`/admin/vps?q=${inspectVps.hostname}`}
+                className="text-xs font-semibold flex items-center gap-1 text-cyan-600 dark:text-cyan-400 hover:underline"
+              >
+                <span>Open in VPS Service Page</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+
+              <button
+                onClick={() => setInspectVps(null)}
+                className={cn(
+                  "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all",
+                  isDark ? "bg-white/10 hover:bg-white/20 border-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800"
+                )}
+              >
+                Close Inspector
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suspend / Lock Modal */}
+      {suspendModalVps && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-md rounded-3xl border shadow-2xl p-6 sm:p-7 space-y-5 transition-colors",
+              isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                <Ban className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Suspend Customer VPS</h3>
+                <p className="text-xs text-zinc-400">VMID #{suspendModalVps.vmid} ({suspendModalVps.hostname})</p>
+              </div>
+            </div>
+
+            <div className={cn("p-3.5 rounded-2xl text-xs leading-relaxed border", isDark ? "bg-rose-500/5 border-rose-500/20 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-800")}>
+              <strong>Notice:</strong> Suspending this VPS will immediately power off the VM in Proxmox and restrict customer access until unsuspended.
+            </div>
+
+            <div className="space-y-2">
+              <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
+                Suspension Reason (Visible to Customer)
+              </label>
+              <textarea
+                rows={3}
+                value={suspendReason}
+                onChange={(e) => setSuspendReason(e.target.value)}
+                placeholder="Specify reason for suspension..."
+                className={cn(
+                  "w-full p-3 rounded-xl text-xs sm:text-sm border outline-none resize-none transition-colors",
+                  isDark
+                    ? "bg-black/30 border-white/10 text-white placeholder-zinc-500 focus:border-rose-500/50"
+                    : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-rose-500 focus:bg-white"
+                )}
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setSuspendModalVps(null)}
+                disabled={actionLoading}
+                className={cn(
+                  "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all",
+                  isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleVpsAction(suspendModalVps.id, "suspend", suspendReason)}
+                disabled={actionLoading}
+                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                <span>Confirm Suspend</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal for Power actions */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={async () => {
+          await confirmModal.onConfirm();
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        }}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        confirmText={confirmModal.confirmText}
+        variant={confirmModal.variant}
+      />
+    </div>
+  );
+}

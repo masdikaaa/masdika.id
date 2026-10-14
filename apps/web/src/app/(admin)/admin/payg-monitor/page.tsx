@@ -8,6 +8,7 @@ import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package }
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
+import { Select } from "@/components/ui/Select";
 
 interface ServiceInfo {
   id: string;
@@ -130,15 +131,16 @@ export default function PaygMonitorPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Cron Execution Frequency</label>
-                <select
+                <Select
                   value={interval}
-                  onChange={(e) => setIntervalVal(e.target.value)}
-                  className={cn("w-full border rounded-lg p-3 focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                  style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2306b6d4%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
-                >
-                  <option value="hourly" className={cn(isDark ? "bg-[#0A0B1A] text-white" : "bg-white text-slate-900")}>Hourly (Normal Production)</option>
-                  <option value="minutely" className={cn(isDark ? "bg-[#0A0B1A] text-white" : "bg-white text-slate-900")}>Minutely (Fast Testing / Accelerated)</option>
-                </select>
+                  onChange={(val) => setIntervalVal(val)}
+                  options={[
+                    { value: "hourly", label: "Hourly (Normal Production)" },
+                    { value: "minutely", label: "Minutely (Fast Testing / Accelerated)" }
+                  ]}
+                  placeholder="Select frequency..."
+                  className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                />
                 <p className={cn("text-xs leading-relaxed mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
                   When set to "Minutely", the cron will execute the billing deduction every 1 minute. 
                   Note: The cron Docker container schedule is set to `* * * * *`. The API will check this setting to decide whether to process every minute or wait for the top of the hour.

@@ -13,6 +13,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { AdminEditServiceModal } from '@/components/ui/AdminEditServiceModal';
 import { AdminLoader } from '@/components/admin/AdminLoader';
+import { Select } from '@/components/ui/Select';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const { theme } = useTheme();
@@ -820,16 +821,18 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Billing Cycle</label>
-                    <select
+                    <Select
                       value={csForm.billingCycle}
-                      onChange={(e) => setCsForm({...csForm, billingCycle: e.target.value})}
-                      className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all [color-scheme:dark]", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                    >
-                      <option value="1_MONTH" className={cn(isDark ? "bg-zinc-900 text-white" : "bg-slate-50 text-slate-900")}>1 Bulan</option>
-                      <option value="3_MONTHS" className={cn(isDark ? "bg-zinc-900 text-white" : "bg-slate-50 text-slate-900")}>3 Bulan</option>
-                      <option value="6_MONTHS" className={cn(isDark ? "bg-zinc-900 text-white" : "bg-slate-50 text-slate-900")}>6 Bulan</option>
-                      <option value="1_YEAR" className={cn(isDark ? "bg-zinc-900 text-white" : "bg-slate-50 text-slate-900")}>1 Tahun</option>
-                    </select>
+                      onChange={(val) => setCsForm({...csForm, billingCycle: val})}
+                      options={[
+                        { value: "1_MONTH", label: "1 Bulan" },
+                        { value: "3_MONTHS", label: "3 Bulan" },
+                        { value: "6_MONTHS", label: "6 Bulan" },
+                        { value: "1_YEAR", label: "1 Tahun" }
+                      ]}
+                      placeholder="Billing Cycle"
+                      className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                    />
                   </div>
                   <div>
                     <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Due Date / Expiry</label>

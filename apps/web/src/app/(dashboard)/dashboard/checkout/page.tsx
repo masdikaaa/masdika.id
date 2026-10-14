@@ -40,14 +40,14 @@ function Pager({
   const to = Math.min(page * pageSize, total);
 
   const navBtn = cn(
-    "w-9 h-9 rounded-lg border flex items-center justify-center transition-colors disabled:opacity-40 disabled:pointer-events-none",
+    "w-9 h-9 rounded-lg border flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer",
     isDark
       ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white hover:border-slate-700"
       : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-300"
   );
 
   return (
-    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t relative z-10", isDark ? "border-slate-800" : "border-slate-100")}>
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t relative z-10 transition-colors", isDark ? "border-slate-800" : "border-slate-100")}>
       <div className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
         Showing <span className={cn("font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>{from}–{to}</span> of{" "}
         <span className={cn("font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>{total}</span> {label}
@@ -65,12 +65,12 @@ function Pager({
               onClick={() => onChange(p)}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "min-w-9 h-9 px-3 rounded-lg border text-sm font-bold transition-colors",
+                "min-w-9 h-9 px-3 rounded-lg border text-sm font-bold transition-all duration-200 active:scale-95 cursor-pointer",
                 active
-                  ? "bg-cyan-600 border-cyan-600 text-white"
+                  ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
                   : isDark
-                    ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white hover:border-slate-700"
-                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                    ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white hover:border-slate-700 hover:bg-white/5"
+                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50"
               )}
             >
               {p}
@@ -468,73 +468,77 @@ function CheckoutContent() {
             })()}
 
             {/* Service Cards Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 relative z-10">
-              <AnimatePresence mode="popLayout">
-                {SERVICES.filter(s => s.category === selectedCategory)
-                  .slice((servicePage - 1) * 4, servicePage * 4)
-                  .map(srv => {
-                    const Icon = srv.icon;
-                    const isSelected = selectedService === srv.id;
-                    return (
-                      <motion.button
-                        layout
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.99 }}
-                        key={srv.id}
-                        id={`checkout-service-${srv.id.toLowerCase()}`}
-                        onClick={() => {
-                          setSelectedService(srv.id);
-                          setTierPage(1);
-                        }}
-                        className={cn(
-                          "p-3 sm:p-3.5 lg:p-4 rounded-2xl border text-left transition-all flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 relative group cursor-pointer min-h-[76px] sm:min-h-[80px]",
-                          isSelected
-                            ? isDark
-                              ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30"
-                              : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20"
-                            : isDark
-                              ? "bg-[#060b14] border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white"
-                              : "bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:text-slate-900 shadow-sm"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
-                          isSelected
-                            ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
-                            : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-900"
-                        )}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0 flex-1 w-full sm:w-auto sm:pr-4">
-                          <div
-                            className={cn("text-xs sm:text-sm font-bold leading-snug break-words truncate", isSelected ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}
-                            title={srv.name}
-                          >
-                            {srv.name}
+            <div className={cn("relative z-10", SERVICES.filter(s => s.category === selectedCategory).length > 2 && "min-h-[162px] sm:min-h-[170px]")}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={`${selectedCategory}-${servicePage}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3"
+                >
+                  {SERVICES.filter(s => s.category === selectedCategory)
+                    .slice((servicePage - 1) * 4, servicePage * 4)
+                    .map(srv => {
+                      const Icon = srv.icon;
+                      const isSelected = selectedService === srv.id;
+                      return (
+                        <button
+                          type="button"
+                          key={srv.id}
+                          id={`checkout-service-${srv.id.toLowerCase()}`}
+                          onClick={() => {
+                            setSelectedService(srv.id);
+                            setTierPage(1);
+                          }}
+                          className={cn(
+                            "p-3 sm:p-3.5 lg:p-4 rounded-2xl border text-left transition-all duration-200 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 relative group cursor-pointer min-h-[76px] sm:min-h-[80px] hover:-translate-y-0.5 active:scale-[0.99]",
+                            isSelected
+                              ? isDark
+                                ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30"
+                                : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20"
+                              : isDark
+                                ? "bg-[#060b14] border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white"
+                                : "bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:text-slate-900 shadow-sm"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors border shadow-sm",
+                            isSelected
+                              ? isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-100 text-cyan-700 border-slate-300"
+                              : isDark ? "bg-slate-800/80 border-slate-700 text-slate-400 group-hover:text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-900"
+                          )}>
+                            <Icon className="w-5 h-5" />
                           </div>
-                          <div
-                            className={cn("text-[10px] sm:text-xs font-medium mt-0.5 line-clamp-1", isSelected ? (isDark ? "text-cyan-400/70" : "text-cyan-700/70") : (isDark ? "text-zinc-500" : "text-slate-500"))}
-                            title={srv.desc}
-                          >
-                            {srv.desc}
+                          <div className="min-w-0 flex-1 w-full sm:w-auto sm:pr-4">
+                            <div
+                              className={cn("text-xs sm:text-sm font-bold leading-snug break-words truncate", isSelected ? (isDark ? "text-cyan-400" : "text-cyan-900") : (isDark ? "text-white" : "text-slate-900"))}
+                              title={srv.name}
+                            >
+                              {srv.name}
+                            </div>
+                            <div
+                              className={cn("text-[10px] sm:text-xs font-medium mt-0.5 line-clamp-1", isSelected ? (isDark ? "text-cyan-400/70" : "text-cyan-700/70") : (isDark ? "text-zinc-500" : "text-slate-500"))}
+                              title={srv.desc}
+                            >
+                              {srv.desc}
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Active check indicator */}
-                        <div className={cn(
-                          "absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-all",
-                          isSelected
-                            ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
-                            : isDark ? "border-slate-800 bg-slate-900/40" : "border-slate-200 bg-slate-50"
-                        )}>
-                          {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                        </div>
-                      </motion.button>
-                    );
-                  })}
+                          {/* Active check indicator */}
+                          <div className={cn(
+                            "absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-all duration-200",
+                            isSelected
+                              ? "bg-cyan-600 border-cyan-600 text-white shadow-sm scale-100"
+                              : isDark ? "border-slate-800 bg-slate-900/40 scale-90" : "border-slate-200 bg-slate-50 scale-90"
+                          )}>
+                            {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                </motion.div>
               </AnimatePresence>
             </div>
 
@@ -550,10 +554,26 @@ function CheckoutContent() {
           </motion.section>
         )}
 
-        {selectedService === "VPS" || selectedService === "KUBERNETES" ? (
-          <VpsCheckoutFlow serviceType={selectedService} />
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full max-w-full min-w-0">
+        <AnimatePresence mode="wait" initial={false}>
+          {selectedService === "VPS" || selectedService === "KUBERNETES" ? (
+            <motion.div
+              key="vps-flow"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              <VpsCheckoutFlow serviceType={selectedService} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="generic-flow"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full max-w-full min-w-0"
+            >
             {/* Left Column - Generic Steps */}
             <div className="xl:col-span-2 space-y-6 md:space-y-8 w-full max-w-full min-w-0">
               {/* Step 2: Choose Plan */}
@@ -563,96 +583,106 @@ function CheckoutContent() {
                   <h2 className={cn("text-xl font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Choose Tier</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10">
-                  {currentServicePlans.slice((tierPage - 1) * 6, tierPage * 6).map(plan => {
-                    const currentSubForService = activeSubscriptions.find(s => s.plan.service === selectedService);
-                    const isDowngrade = currentSubForService && plan.price <= currentSubForService.plan.price;
-                    const isCustom = plan.price === 0;
-                    const isDisabled = isCustom || isDowngrade;
-                    const isSelected = selectedPlanId === plan.id;
+                <div className="relative z-10 min-h-[220px]">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={`${selectedService}-${tierPage}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                    >
+                      {currentServicePlans.slice((tierPage - 1) * 6, tierPage * 6).map(plan => {
+                        const currentSubForService = activeSubscriptions.find(s => s.plan.service === selectedService);
+                        const isDowngrade = currentSubForService && plan.price <= currentSubForService.plan.price;
+                        const isCustom = plan.price === 0;
+                        const isDisabled = isCustom || isDowngrade;
+                        const isSelected = selectedPlanId === plan.id;
 
-                    return (
-                      <motion.div
-                        whileHover={!isDisabled ? { y: -4 } : {}}
-                        key={plan.id}
-                        onClick={() => !isDisabled && setSelectedPlanId(plan.id)}
-                        className={cn(
-                          "relative flex flex-col p-5 sm:p-6 rounded-2xl border transition-all shadow-sm cursor-pointer",
-                          isDisabled && "opacity-50 cursor-not-allowed bg-black/40 border-slate-800 grayscale",
-                          isSelected
-                            ? isDark
-                              ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30"
-                              : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20"
-                            : (!isDisabled && (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md"))
-                        )}
-                      >
-                        {/* Header: Name + Radio check */}
-                        <div className="flex items-center justify-between gap-2 mb-4">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <h3 className={cn("text-base sm:text-lg font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
-                              {plan.name}
-                            </h3>
-                            {isDowngrade && (
-                              <span className={cn("text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border shrink-0", isDark ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-200")}>
-                                Current
-                              </span>
+                        return (
+                          <div
+                            key={plan.id}
+                            onClick={() => !isDisabled && setSelectedPlanId(plan.id)}
+                            className={cn(
+                              "relative flex flex-col p-5 sm:p-6 rounded-2xl border transition-all duration-200 shadow-sm cursor-pointer hover:-translate-y-1 active:scale-[0.99]",
+                              isDisabled && "opacity-50 cursor-not-allowed bg-black/40 border-slate-800 grayscale hover:translate-y-0",
+                              isSelected
+                                ? isDark
+                                  ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30"
+                                  : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20"
+                                : (!isDisabled && (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md"))
                             )}
-                          </div>
-                          <div className={cn(
-                            "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                            isSelected
-                              ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
-                              : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
-                          )}>
-                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                          </div>
-                        </div>
-
-                        {/* Pricing */}
-                        <div className={cn("mb-5 pb-5 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
-                          <div className="flex items-baseline gap-1">
-                            <span className={cn("text-2xl sm:text-3xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                              {isCustom ? "Custom" : formatRupiah(plan.hourlyPrice || 0)}
-                            </span>
-                            {!isCustom && (
-                              <span className={cn("text-xs font-semibold", isDark ? "text-slate-400" : "text-slate-500")}>
-                                / hr
-                              </span>
-                            )}
-                          </div>
-                          {!isCustom && (plan.hourlyPrice || 0) > 0 && (
-                            <div className={cn("text-xs font-medium mt-1", isDark ? "text-slate-400" : "text-slate-500")}>
-                              ≈ <span className="font-semibold">{formatRupiah((plan.hourlyPrice || 0) * 24 * 30)}</span> / mo
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Feature list */}
-                        <ul className="space-y-2.5 text-xs flex-1">
-                          {getPlanFeatures(plan).map((feature: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-2.5">
-                              <div className={cn(
-                                "w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                                isSelected
-                                  ? isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-slate-100 text-cyan-700 border border-slate-200"
-                                  : isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
-                              )}>
-                                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                          >
+                            {/* Header: Name + Radio check */}
+                            <div className="flex items-center justify-between gap-2 mb-4">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <h3 className={cn("text-base sm:text-lg font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                                  {plan.name}
+                                </h3>
+                                {isDowngrade && (
+                                  <span className={cn("text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border shrink-0", isDark ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                                    Current
+                                  </span>
+                                )}
                               </div>
-                              <span className={cn("font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-600")}>
-                                {feature}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </motion.div>
-                    );
-                  })}
-                  {currentServicePlans.length === 0 && (
-                    <div className={cn("col-span-full py-12 text-center font-medium rounded-2xl border shadow-sm", isDark ? "text-zinc-500 bg-[#060b14] border-slate-800" : "text-slate-500 bg-white border-slate-200/90")}>
-                      No active plans available for this service right now.
-                    </div>
-                  )}
+                              <div className={cn(
+                                "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                isSelected
+                                  ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                                  : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
+                              )}>
+                                {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                            </div>
+
+                            {/* Pricing */}
+                            <div className={cn("mb-5 pb-5 border-b", isDark ? "border-slate-800" : "border-slate-100")}>
+                              <div className="flex items-baseline gap-1">
+                                <span className={cn("text-2xl sm:text-3xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                                  {isCustom ? "Custom" : formatRupiah(plan.hourlyPrice || 0)}
+                                </span>
+                                {!isCustom && (
+                                  <span className={cn("text-xs font-semibold", isDark ? "text-slate-400" : "text-slate-500")}>
+                                    / hr
+                                  </span>
+                                )}
+                              </div>
+                              {!isCustom && (plan.hourlyPrice || 0) > 0 && (
+                                <div className={cn("text-xs font-medium mt-1", isDark ? "text-slate-400" : "text-slate-500")}>
+                                  ≈ <span className="font-semibold">{formatRupiah((plan.hourlyPrice || 0) * 24 * 30)}</span> / mo
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Feature list */}
+                            <ul className="space-y-2.5 text-xs flex-1">
+                              {getPlanFeatures(plan).map((feature: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-2.5">
+                                  <div className={cn(
+                                    "w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                                    isSelected
+                                      ? isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-slate-100 text-cyan-700 border border-slate-200"
+                                      : isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
+                                  )}>
+                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  </div>
+                                  <span className={cn("font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-600")}>
+                                    {feature}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                      {currentServicePlans.length === 0 && (
+                        <div className={cn("col-span-full py-12 text-center font-medium rounded-2xl border shadow-sm", isDark ? "text-zinc-500 bg-[#060b14] border-slate-800" : "text-slate-500 bg-white border-slate-200/90")}>
+                          No active plans available for this service right now.
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
 
                 {/* Tier Pagination Controls */}
@@ -804,8 +834,9 @@ function CheckoutContent() {
                 </div>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );

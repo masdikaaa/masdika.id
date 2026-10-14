@@ -28,6 +28,7 @@ const SIDEBAR_LINKS = [
   { name: "Media Reviews", href: "/admin/media-reviews", icon: Star, color: "text-cyan-400", group: "Engagement & Community" },
 
   { name: "Proxmox VPS", href: "/admin/vps", icon: Terminal, color: "text-cyan-500", group: "Cloud Services" },
+  { name: "Resource Finding", href: "/admin/resource-finding", icon: Activity, color: "text-rose-400", group: "Cloud Services" },
   { name: "VPC Routers", href: "/admin/vpc-routers", icon: Network, color: "text-cyan-500", group: "Cloud Services" },
   { name: "Secure Media", href: "/admin/media", icon: HardDrive, color: "text-sky-400", group: "Cloud Services" },
   { name: "Cloudflared Tunnels", href: "/admin/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "Cloud Services" },

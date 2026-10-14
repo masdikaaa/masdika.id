@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
 import { motion, AnimatePresence } from "framer-motion";
+import { Select } from "@/components/ui/Select";
 
 // ─── Preview helpers ──────────────────────────────────────────────────────────
 
@@ -972,12 +973,19 @@ export default function AdminMediaLibrary() {
 
             <div className="mb-8 space-y-3">
               <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Link Expiration</label>
-              <select value={expiresIn} onChange={(e) => setExpiresIn(e.target.value)} disabled={uploading} className={cn("w-full border font-bold rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner block p-3.5 appearance-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}>
-                <option value="1d" className={cn(isDark ? "bg-[#0a192f] text-white" : "bg-white text-slate-900")}>Expires in 1 Day</option>
-                <option value="1w" className={cn(isDark ? "bg-[#0a192f] text-white" : "bg-white text-slate-900")}>Expires in 1 Week</option>
-                <option value="1m" className={cn(isDark ? "bg-[#0a192f] text-white" : "bg-white text-slate-900")}>Expires in 1 Month</option>
-                <option value="permanent" className={cn(isDark ? "bg-[#0a192f] text-white" : "bg-white text-slate-900")}>Permanent</option>
-              </select>
+              <Select 
+                value={expiresIn} 
+                onChange={(val) => setExpiresIn(val)} 
+                disabled={uploading}
+                options={[
+                  { value: "1d", label: "Expires in 1 Day" },
+                  { value: "1w", label: "Expires in 1 Week" },
+                  { value: "1m", label: "Expires in 1 Month" },
+                  { value: "permanent", label: "Permanent" }
+                ]}
+                placeholder="Link Expiration"
+                className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+              />
             </div>
 
             {uploading && (

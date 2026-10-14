@@ -214,8 +214,6 @@ app.prepare().then(async () => {
   // 4. /api/cron/cleanup - 0 * * * *
   setupCronJob('0 * * * *', 'cleanup');
 
-  // 5. /api/cron/abuse-monitor - */5 * * * *
-  setupCronJob('*/5 * * * *', 'abuse-monitor');
 
   // 6. /api/cron/resource-monitor - */5 * * * *
   setupCronJob('*/5 * * * *', 'resource-monitor');

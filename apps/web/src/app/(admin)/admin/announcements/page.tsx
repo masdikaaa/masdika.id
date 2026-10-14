@@ -10,6 +10,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
 import { motion } from "framer-motion";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { Select } from "@/components/ui/Select";
 
 const defaultFormData = {
   title: "",
@@ -655,15 +656,17 @@ export default function AdminAnnouncementsPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div className="space-y-1.5">
                         <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Type</label>
-                        <select
+                        <Select
                           value={formData.type}
-                          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                          className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                        >
-                          <option value="INFO" className={cn(isDark ? "bg-[#0f172a] text-white" : "bg-white text-slate-900")}>Info</option>
-                          <option value="MAINTENANCE" className={cn(isDark ? "bg-[#0f172a] text-white" : "bg-white text-slate-900")}>Maintenance</option>
-                          <option value="WARNING" className={cn(isDark ? "bg-[#0f172a] text-white" : "bg-white text-slate-900")}>Warning</option>
-                        </select>
+                          onChange={(val) => setFormData({ ...formData, type: val })}
+                          options={[
+                            { value: "INFO", label: "Info" },
+                            { value: "MAINTENANCE", label: "Maintenance" },
+                            { value: "WARNING", label: "Warning" }
+                          ]}
+                          placeholder="Type"
+                          className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                        />
                       </div>
 
                       <div className="space-y-1.5">

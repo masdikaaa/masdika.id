@@ -10,6 +10,7 @@ import { MessageSquare, ChevronRight, User, Trash2, X, CheckCircle, Search, Chev
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
 import { AdminLoader } from '@/components/admin/AdminLoader';
+import { Select } from '@/components/ui/Select';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -213,22 +214,21 @@ export default function AdminTicketsClient() {
               <Plus className="w-4 h-4 shrink-0" />
               <span className="truncate">Open Ticket</span>
             </button>
-            <div className="col-span-1 sm:col-span-1 relative">
-              <select 
+            <div className="col-span-1 sm:col-span-1">
+              <Select 
                 value={filter} 
-                onChange={(e) => setFilter(e.target.value)}
-                className={cn("w-full border rounded-xl pl-3 pr-8 py-2 text-sm focus:outline-none appearance-none shrink-0", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-              >
-                <option value="">All Status</option>
-                <option value="OPEN">Open</option>
-                <option value="CUSTOMER_REPLY">Customer Reply</option>
-                <option value="ANSWERED">Answered</option>
-                <option value="CLOSED">Closed</option>
-                <option value="MERGED">Merged</option>
-              </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <svg className={cn("w-4 h-4", isDark ? "text-zinc-400" : "text-slate-500")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
+                onChange={(val) => setFilter(val)}
+                options={[
+                  { value: "", label: "All Status" },
+                  { value: "OPEN", label: "Open" },
+                  { value: "CUSTOMER_REPLY", label: "Customer Reply" },
+                  { value: "ANSWERED", label: "Answered" },
+                  { value: "CLOSED", label: "Closed" },
+                  { value: "MERGED", label: "Merged" }
+                ]}
+                placeholder="All Status"
+                className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+              />
             </div>
           </div>
         </div>
@@ -444,16 +444,16 @@ export default function AdminTicketsClient() {
                     <label className={cn("block text-[10px] font-black uppercase tracking-widest mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>
                       Related Service {isFetchingServices && <Loader2 className={cn("w-3 h-3 animate-spin inline-block ml-1", isDark ? "text-cyan-400" : "text-cyan-700")} />}
                     </label>
-                    <select
+                    <Select
                       value={formData.service}
-                      onChange={e => setFormData({...formData, service: e.target.value})}
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-all appearance-none cursor-pointer", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                    >
-                      <option value="" className={cn(isDark ? "bg-[#0A0B1A]" : "bg-white")}>-- Select Service (Optional) --</option>
-                      {userServices.map(s => (
-                        <option key={s.id} value={s.value} className={cn(isDark ? "bg-[#0A0B1A]" : "bg-white")}>{s.value}</option>
-                      ))}
-                    </select>
+                      onChange={val => setFormData({...formData, service: val})}
+                      options={[
+                        { value: "", label: "-- Select Service (Optional) --" },
+                        ...userServices.map(s => ({ value: s.value, label: s.value }))
+                      ]}
+                      placeholder="-- Select Service (Optional) --"
+                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                    />
                   </div>
                 </div>
 
@@ -471,16 +471,18 @@ export default function AdminTicketsClient() {
                   </div>
                   <div className="sm:col-span-1">
                     <label className={cn("block text-[10px] font-black uppercase tracking-widest mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Priority</label>
-                    <select
+                    <Select
                       value={formData.priority}
-                      onChange={e => setFormData({...formData, priority: e.target.value})}
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-all appearance-none cursor-pointer", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
-                    >
-                      <option value="LOW" className={cn(isDark ? "bg-[#0A0B1A]" : "bg-white")}>Low</option>
-                      <option value="NORMAL" className={cn(isDark ? "bg-[#0A0B1A]" : "bg-white")}>Normal</option>
-                      <option value="HIGH" className={cn(isDark ? "bg-[#0A0B1A]" : "bg-white")}>High</option>
-                      <option value="CRITICAL" className={cn(isDark ? "bg-[#0A0B1A]" : "bg-white")}>Critical</option>
-                    </select>
+                      onChange={val => setFormData({...formData, priority: val})}
+                      options={[
+                        { value: "LOW", label: "Low" },
+                        { value: "NORMAL", label: "Normal" },
+                        { value: "HIGH", label: "High" },
+                        { value: "CRITICAL", label: "Critical" }
+                      ]}
+                      placeholder="Priority"
+                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                    />
                   </div>
                 </div>
 

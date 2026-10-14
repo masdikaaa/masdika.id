@@ -12,6 +12,7 @@ import MediaLibrary from "@/components/admin/MediaLibrary";
 import { CodeBlock } from "@/components/ui/CodeBlock";
 import Editor from "@/components/admin/Editor";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { Select } from "@/components/ui/Select";
 
 export default function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { theme } = useTheme();
@@ -370,18 +371,19 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Category</label>
-            <div className="flex gap-2">
-              <select
-                name="categoryName"
-                value={formData.categoryName}
-                onChange={handleChange}
-                className={cn("flex-1 px-5 py-3.5 bg-black/40 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all appearance-none", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")}
-              >
-                <option value="">Select Category...</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.name}>{cat.name}</option>
-                ))}
-              </select>
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <Select
+                  value={formData.categoryName}
+                  onChange={(val) => setFormData(prev => ({ ...prev, categoryName: val }))}
+                  options={[
+                    { value: "", label: "Select Category..." },
+                    ...categories.map(cat => ({ value: cat.name, label: cat.name }))
+                  ]}
+                  placeholder="Select Category..."
+                  className={cn("w-full rounded-xl px-5 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                />
+              </div>
               {formData.categoryName && (
                 <button
                   onClick={() => {

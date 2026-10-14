@@ -946,18 +946,19 @@ export default function VpsManagementPage() {
                       </button>
                     </div>
                     {availableStorages.length > 0 ? (
-                      <select
+                      <Select
                         value={settings.backupStorage || ""}
-                        onChange={(e) => setSettings({ ...settings, backupStorage: e.target.value })}
-                        className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner appearance-none cursor-pointer", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-                      >
-                        <option value="">Select backup storage...</option>
-                        {availableStorages.map(storage => (
-                          <option key={storage.storage} value={storage.storage}>
-                            {storage.storage} ({storage.type}) - {(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val) => setSettings({ ...settings, backupStorage: val })}
+                        options={[
+                          { value: "", label: "Select backup storage..." },
+                          ...availableStorages.map(storage => ({
+                            value: storage.storage,
+                            label: `${storage.storage} (${storage.type}) - ${(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free`
+                          }))
+                        ]}
+                        placeholder="Select backup storage..."
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                      />
                     ) : (
                       <div className="flex gap-2">
                         <input
@@ -979,18 +980,19 @@ export default function VpsManagementPage() {
                       </button>
                     </div>
                     {availableStorages.length > 0 ? (
-                      <select
+                      <Select
                         value={settings.mainDiskStorage || ""}
-                        onChange={(e) => setSettings({ ...settings, mainDiskStorage: e.target.value })}
-                        className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all appearance-none cursor-pointer shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-                      >
-                        <option value="">Select main storage...</option>
-                        {availableStorages.map(storage => (
-                          <option key={storage.storage} value={storage.storage}>
-                            {storage.storage} ({storage.type}) - {(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val) => setSettings({ ...settings, mainDiskStorage: val })}
+                        options={[
+                          { value: "", label: "Select main storage..." },
+                          ...availableStorages.map(storage => ({
+                            value: storage.storage,
+                            label: `${storage.storage} (${storage.type}) - ${(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free`
+                          }))
+                        ]}
+                        placeholder="Select main storage..."
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                      />
                     ) : (
                       <div className="flex gap-2">
                         <input
@@ -1012,18 +1014,19 @@ export default function VpsManagementPage() {
                       </button>
                     </div>
                     {availableStorages.length > 0 ? (
-                      <select
+                      <Select
                         value={settings.mainDiskStorageSsd || ""}
-                        onChange={(e) => setSettings({ ...settings, mainDiskStorageSsd: e.target.value })}
-                        className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all appearance-none cursor-pointer shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-                      >
-                        <option value="">Select SSD storage...</option>
-                        {availableStorages.map(storage => (
-                          <option key={storage.storage} value={storage.storage}>
-                            {storage.storage} ({storage.type}) - {(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val) => setSettings({ ...settings, mainDiskStorageSsd: val })}
+                        options={[
+                          { value: "", label: "Select SSD storage..." },
+                          ...availableStorages.map(storage => ({
+                            value: storage.storage,
+                            label: `${storage.storage} (${storage.type}) - ${(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free`
+                          }))
+                        ]}
+                        placeholder="Select SSD storage..."
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                      />
                     ) : (
                       <div className="flex gap-2">
                         <input
@@ -1045,18 +1048,19 @@ export default function VpsManagementPage() {
                       </button>
                     </div>
                     {availableStorages.length > 0 ? (
-                      <select
+                      <Select
                         value={settings.addonDiskStorages || ""}
-                        onChange={(e) => setSettings({ ...settings, addonDiskStorages: e.target.value })}
-                        className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all appearance-none cursor-pointer shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
-                      >
-                        <option value="">Select add-on storage...</option>
-                        {availableStorages.map(storage => (
-                          <option key={storage.storage} value={storage.storage}>
-                            {storage.storage} ({storage.type}) - {(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val) => setSettings({ ...settings, addonDiskStorages: val })}
+                        options={[
+                          { value: "", label: "Select add-on storage..." },
+                          ...availableStorages.map(storage => ({
+                            value: storage.storage,
+                            label: `${storage.storage} (${storage.type}) - ${(storage.avail / 1024 / 1024 / 1024).toFixed(1)} GB free`
+                          }))
+                        ]}
+                        placeholder="Select add-on storage..."
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                      />
                     ) : (
                       <div className="flex gap-2">
                         <input
