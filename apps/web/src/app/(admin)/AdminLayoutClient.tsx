@@ -194,7 +194,7 @@ export default function AdminLayout({
         aria-label="Admin navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 lg:translate-x-0 lg:relative lg:inset-0 flex flex-col h-full border-r",
-          isDark ? "glass border-white/5" : "bg-white border-slate-200 shadow-sm",
+          isDark ? "glass border-white/5" : "bg-white border-slate-200",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -229,7 +229,7 @@ export default function AdminLayout({
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
-                        isActive ? "bg-cyan-500 text-slate-900 shadow-md font-bold" : cn("transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")
+                        isActive ? "bg-cyan-500 text-slate-900 font-bold" : cn("transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")
                       )}
                     >
                       <link.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-slate-900" : cn("group-hover:scale-110 transition-transform", isDark ? "text-cyan-500/60 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600"))} />
@@ -281,7 +281,7 @@ export default function AdminLayout({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                className={cn("w-full backdrop-blur-md border text-sm rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full backdrop-blur-md border text-sm rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
 
               {/* Search Results Dropdown */}
@@ -330,7 +330,7 @@ export default function AdminLayout({
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
                   <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-slate-900/95 backdrop-blur-sm border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "border-white/10" : "border-slate-200")}>
                     <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
-                      <h3 className={cn("font-bold drop-shadow-sm", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">
                         {notifications.length > 0 && (
                           <button

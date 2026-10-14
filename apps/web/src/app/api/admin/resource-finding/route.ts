@@ -122,6 +122,7 @@ export async function GET(req: NextRequest) {
       netOutTotal: number; // Lifetime cumulative bytes
       uptime: number;
       rateLimit?: number | null;
+      isNetDisabled?: boolean;
     }>();
 
     await Promise.all(
@@ -135,6 +136,19 @@ export async function GET(req: NextRequest) {
             const status = await proxmox.getVmStatus(node, vmid);
             if (!status || status.status !== "running") {
               if (status) {
+                let isNetDisabled = false;
+                try {
+                  const conf = await proxmox.getVmConfig(node, vmid);
+                  if (conf && typeof conf === "object") {
+                    for (const [k, v] of Object.entries(conf)) {
+                      if (/^net\d+$/.test(k) && typeof v === "string" && v.includes("link_down=1")) {
+                        isNetDisabled = true;
+                        break;
+                      }
+                    }
+                  }
+                } catch {}
+
                 liveMetricsMap.set(vmid, {
                   status: status.status || "stopped",
                   cpuPercent: 0,
@@ -150,6 +164,7 @@ export async function GET(req: NextRequest) {
                   netOutTotal: status.netout || 0,
                   uptime: status.uptime || 0,
                   rateLimit: null,
+                  isNetDisabled,
                 });
               }
               return;
@@ -189,15 +204,18 @@ export async function GET(req: NextRequest) {
             const diskPercent = maxDiskBytes > 0 ? Math.min(100, Math.round((diskBytes / maxDiskBytes) * 10000) / 100) : 0;
 
             let rateLimit: number | null = null;
+            let isNetDisabled = false;
             try {
               const conf = await proxmox.getVmConfig(node, vmid);
               if (conf && typeof conf === "object") {
                 for (const [k, v] of Object.entries(conf)) {
                   if (/^net\d+$/.test(k) && typeof v === "string") {
+                    if (v.includes("link_down=1")) {
+                      isNetDisabled = true;
+                    }
                     const match = v.match(/rate=([0-9.]+)/);
                     if (match && parseFloat(match[1]) > 0) {
                       rateLimit = parseFloat(match[1]);
-                      break;
                     }
                   }
                 }
@@ -221,6 +239,7 @@ export async function GET(req: NextRequest) {
               netOutTotal: status.netout || 0,
               uptime: status.uptime || 0,
               rateLimit,
+              isNetDisabled,
             });
           } catch (err) {
             // will fallback to cluster/resources
@@ -235,6 +254,7 @@ export async function GET(req: NextRequest) {
     let highRamCount = 0;
     let highNetCount = 0;
     let throttledCount = 0;
+    let netDisabledCount = 0;
     let runningCount = 0;
     let totalNetIn = 0;
     let totalNetOut = 0;
@@ -298,9 +318,12 @@ export async function GET(req: NextRequest) {
       totalNetSpeedIn += netSpeedIn;
       totalNetSpeedOut += netSpeedOut;
 
-      // Rate limit check
+      // Rate limit and net disabled checks
+      const isNetDisabled = Boolean(live?.isNetDisabled);
+      if (isNetDisabled) netDisabledCount++;
+
       const rateLimit = live?.rateLimit || null;
-      if (rateLimit && rateLimit > 0) throttledCount++;
+      if (rateLimit && rateLimit > 0 && !isNetDisabled) throttledCount++;
 
       // Real Threshold Checks for Resource Abuse Detection:
       // High CPU: CPU >= 60%
@@ -320,6 +343,9 @@ export async function GET(req: NextRequest) {
       let severity: "CRITICAL" | "WARNING" | "NORMAL" | "OFFLINE" = "NORMAL";
       if (!isOnline || vps.status === "SUSPENDED" || vps.status === "STOPPED") {
         severity = "OFFLINE";
+      } else if (isNetDisabled) {
+        severity = "CRITICAL";
+        criticalCount++;
       } else if (cpuPercent >= 85 || netSpeedTotal >= 10 * 1024 * 1024) {
         // Critical: CPU pegged at >= 85% or Network flood >= 10 MB/s
         severity = "CRITICAL";
@@ -355,7 +381,8 @@ export async function GET(req: NextRequest) {
         netSpeedOut,
         netSpeedTotal,
         rateLimit,
-        isThrottled: Boolean(rateLimit && rateLimit > 0),
+        isThrottled: Boolean(rateLimit && rateLimit > 0 && !isNetDisabled),
+        isNetDisabled,
         uptime: live?.uptime || pve?.uptime || 0,
         severity,
         suspendReason: vps.suspendReason,
@@ -388,6 +415,7 @@ export async function GET(req: NextRequest) {
         highRamCount,
         highNetCount,
         throttledCount,
+        netDisabledCount,
         totalNetIn,
         totalNetOut,
         totalBandwidth: totalNetIn + totalNetOut,
@@ -568,6 +596,60 @@ export async function POST(req: NextRequest) {
           resultMsg = `Bandwidth limit removed for VPS #${vmid}. Restored to full speed.`;
         } else {
           resultMsg = `VPS #${vmid} has no active rate limit.`;
+        }
+        break;
+      }
+
+      case "disable-net": {
+        const currentConf = await proxmox.getVmConfig(node, vmid!);
+        if (!currentConf) {
+          return NextResponse.json({ error: `Could not retrieve configuration for VPS #${vmid}` }, { status: 500 });
+        }
+
+        const updates: Record<string, string> = {};
+        let netCount = 0;
+
+        for (const [key, val] of Object.entries(currentConf)) {
+          if (/^net\d+$/.test(key) && typeof val === "string") {
+            const cleanNet = val.replace(/,link_down=[01]/g, "");
+            updates[key] = `${cleanNet},link_down=1`;
+            netCount++;
+          }
+        }
+
+        if (netCount === 0) {
+          return NextResponse.json({ error: `VPS #${vmid} does not have any network interfaces configured` }, { status: 400 });
+        }
+
+        await proxmox.configVm(node, vmid!, updates);
+        resultMsg = `Internet disabled (virtual network link disconnected) for VPS #${vmid} (${vps.hostname})`;
+        break;
+      }
+
+      case "enable-net": {
+        const currentConf = await proxmox.getVmConfig(node, vmid!);
+        if (!currentConf) {
+          return NextResponse.json({ error: `Could not retrieve configuration for VPS #${vmid}` }, { status: 500 });
+        }
+
+        const updates: Record<string, string> = {};
+        let netCount = 0;
+
+        for (const [key, val] of Object.entries(currentConf)) {
+          if (/^net\d+$/.test(key) && typeof val === "string") {
+            const cleanNet = val.replace(/,link_down=[01]/g, "");
+            if (cleanNet !== val) {
+              updates[key] = cleanNet;
+              netCount++;
+            }
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await proxmox.configVm(node, vmid!, updates);
+          resultMsg = `Internet re-enabled (virtual network link connected) for VPS #${vmid} (${vps.hostname})`;
+        } else {
+          resultMsg = `VPS #${vmid} internet access is already enabled.`;
         }
         break;
       }

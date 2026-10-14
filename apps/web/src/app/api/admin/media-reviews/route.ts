@@ -38,10 +38,64 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    // Pre-resolve avatars for registered users (Google/custom image) or fallback to /api/avatar
+    // Cross-reference IP with LoginLog to match customer identity if userEmail is null
+    const loginLogs = await prisma.loginLog.findMany({
+      where: { success: true },
+      orderBy: { createdAt: "desc" },
+      take: 500,
+    });
+
+    const ipToEmailMap = new Map<string, string>();
+    const subnetToEmailMap = new Map<string, string>();
+    for (const log of loginLogs) {
+      if (log.emailAttempt && log.emailAttempt !== "unknown") {
+        const ip = log.ipAddress.trim();
+        const email = log.emailAttempt.toLowerCase().trim();
+        if (!ipToEmailMap.has(ip)) {
+          ipToEmailMap.set(ip, email);
+        }
+        if (ip.includes(".") && ip.split(".").length === 4) {
+          const prefix = ip.substring(0, ip.lastIndexOf(".") + 1);
+          if (!subnetToEmailMap.has(prefix)) {
+            subnetToEmailMap.set(prefix, email);
+          }
+        } else if (ip.includes(":")) {
+          const prefix = ip.split(":").slice(0, 4).join(":");
+          if (!subnetToEmailMap.has(prefix)) {
+            subnetToEmailMap.set(prefix, email);
+          }
+        }
+      }
+    }
+
+    const resolvedRatings = ratings.map((r) => {
+      let email = r.userEmail?.toLowerCase().trim() || "";
+      if (!email && r.ipAddress) {
+        const ip = r.ipAddress.trim();
+        email = ipToEmailMap.get(ip) || "";
+        if (!email) {
+          if (ip.includes(".") && ip.split(".").length === 4) {
+            const prefix = ip.substring(0, ip.lastIndexOf(".") + 1);
+            email = subnetToEmailMap.get(prefix) || "";
+          } else if (ip.includes(":")) {
+            const prefix = ip.split(":").slice(0, 4).join(":");
+            email = subnetToEmailMap.get(prefix) || "";
+          }
+        }
+        if (email) {
+          prisma.mediaRating.update({
+            where: { id: r.id },
+            data: { userEmail: email },
+          }).catch(() => {});
+        }
+      }
+      return { ...r, userEmail: email || null };
+    });
+
+    // Pre-resolve avatars and names for registered users (Google/custom image) or fallback to /api/avatar
     const plainEmails = [
       ...comments.map((c) => c.email.toLowerCase().trim()),
-      ...ratings.filter((r) => r.userEmail).map((r) => r.userEmail!.toLowerCase().trim()),
+      ...resolvedRatings.filter((r) => r.userEmail).map((r) => r.userEmail!.toLowerCase().trim()),
     ];
     const encryptedEmails = plainEmails.map((e) => encryptDeterministic(e));
     const allEmailLookups = Array.from(new Set([...plainEmails, ...encryptedEmails]));
@@ -49,20 +103,22 @@ export async function GET() {
       where: {
         email: { in: allEmailLookups },
       },
-      select: { email: true, image: true },
+      select: { email: true, name: true, image: true },
     });
     const userImageMap = new Map<string, string>();
+    const userNameMap = new Map<string, string>();
     for (const u of registeredUsers) {
+      const dec = decryptDeterministic(u.email) || u.email;
+      const lower = dec.toLowerCase().trim();
+      const enc = encryptDeterministic(lower);
       if (u.image) {
-        userImageMap.set(u.email.toLowerCase().trim(), u.image);
-        try {
-          const dec = decryptDeterministic(u.email);
-          if (dec) userImageMap.set(dec.toLowerCase().trim(), u.image);
-          const enc = encryptDeterministic(u.email);
-          if (enc) userImageMap.set(enc, u.image);
-        } catch {
-          // ignore
-        }
+        userImageMap.set(lower, u.image);
+        userImageMap.set(enc, u.image);
+      }
+      if (u.name) {
+        const nameDec = decryptDeterministic(u.name) || u.name;
+        userNameMap.set(lower, nameDec);
+        userNameMap.set(enc, nameDec);
       }
     }
 
@@ -70,16 +126,22 @@ export async function GET() {
       const lower = c.email.toLowerCase().trim();
       const enc = encryptDeterministic(lower);
       const customAvatar = userImageMap.get(enc) || userImageMap.get(lower);
-      const avatar = customAvatar || `/api/avatar?email=${encodeURIComponent(c.email)}&name=${encodeURIComponent(c.name)}&v=4`;
-      return { ...c, avatar };
+      const resolvedName = userNameMap.get(enc) || userNameMap.get(lower);
+      const avatar = customAvatar || `/api/avatar?email=${encodeURIComponent(c.email)}&name=${encodeURIComponent(resolvedName || c.name)}&v=4`;
+      return { ...c, name: resolvedName || c.name, avatar };
     });
 
-    const mappedRatings = ratings.map((r) => {
+    const mappedRatings = resolvedRatings.map((r) => {
       const email = r.userEmail?.toLowerCase().trim() || "";
       const enc = email ? encryptDeterministic(email) : "";
       const customAvatar = enc ? (userImageMap.get(enc) || userImageMap.get(email)) : null;
-      const avatar = customAvatar || (email ? `/api/avatar?email=${encodeURIComponent(email)}&name=User&v=4` : null);
-      return { ...r, avatar };
+      const resolvedName = enc ? (userNameMap.get(enc) || userNameMap.get(email)) : null;
+      const avatar = customAvatar || (email ? `/api/avatar?email=${encodeURIComponent(email)}&name=${encodeURIComponent(resolvedName || "User")}&v=4` : null);
+      return {
+        ...r,
+        userName: resolvedName || null,
+        avatar,
+      };
     });
 
     // Compute platform media metrics

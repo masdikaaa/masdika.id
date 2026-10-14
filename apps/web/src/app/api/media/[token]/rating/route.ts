@@ -3,6 +3,9 @@ import { getClientIp, getIpVariants } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendAdminMediaNotificationEmail } from "@/lib/email";
+import { cookies } from "next/headers";
+import { verifySessionToken } from "@/lib/session";
+import { decryptDeterministic } from "@/lib/encryption";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -24,7 +27,33 @@ export async function GET(
 
     const ip = getClientIp(req);
     const ipVariants = getIpVariants(ip);
-    const emailParam = req.nextUrl.searchParams.get("email");
+    let emailParam = req.nextUrl.searchParams.get("email");
+
+    // Auto-detect logged-in customer session for GET if emailParam not provided
+    if (!emailParam) {
+      try {
+        const cookieStore = await cookies();
+        const tokenCookie = cookieStore.get("admin_session")?.value;
+        if (tokenCookie) {
+          const userId = verifySessionToken(tokenCookie);
+          if (userId) {
+            const user = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { email: true },
+            });
+            if (user?.email) {
+              try {
+                emailParam = (decryptDeterministic(user.email) || user.email).toLowerCase().trim();
+              } catch {
+                emailParam = user.email.toLowerCase().trim();
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     const ratings = await prisma.mediaRating.findMany({
       where: { mediaId: media.id },
@@ -107,7 +136,48 @@ export async function POST(
 
     const body = await req.json().catch(() => null);
     const ratingVal = Number(body?.rating);
-    const email = body?.email ? String(body.email).trim().toLowerCase() : null;
+    let email = body?.email ? String(body.email).trim().toLowerCase() : null;
+
+    // 1. Auto-detect logged-in customer session
+    if (!email) {
+      try {
+        const cookieStore = await cookies();
+        const tokenCookie = cookieStore.get("admin_session")?.value;
+        if (tokenCookie) {
+          const userId = verifySessionToken(tokenCookie);
+          if (userId) {
+            const user = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { email: true },
+            });
+            if (user?.email) {
+              try {
+                email = (decryptDeterministic(user.email) || user.email).toLowerCase().trim();
+              } catch {
+                email = user.email.toLowerCase().trim();
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    // 2. Fallback: Auto-associate with customer from loginLog if IP matches a known login
+    if (!email && ip !== "unknown") {
+      try {
+        const recentLogin = await prisma.loginLog.findFirst({
+          where: { ipAddress: ip, success: true },
+          orderBy: { createdAt: "desc" },
+        });
+        if (recentLogin?.emailAttempt && recentLogin.emailAttempt !== "unknown") {
+          email = recentLogin.emailAttempt.toLowerCase().trim();
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     if (!ratingVal || ratingVal < 1 || ratingVal > 5) {
       return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });

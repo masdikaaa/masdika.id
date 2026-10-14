@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
           runningCount: 0,
           throttledCount: 0,
           suspendedCount: 0,
+          netDisabledCount: 0,
           incidentCount: 0,
           healthyCount: 0,
         },
@@ -127,6 +128,7 @@ export async function GET(req: NextRequest) {
           runningCount: 0,
           throttledCount: 0,
           suspendedCount: 0,
+          netDisabledCount: 0,
           incidentCount: 0,
           healthyCount: 0,
         },
@@ -157,6 +159,7 @@ export async function GET(req: NextRequest) {
         netOutTotal: number;
         uptime: number;
         rateLimit: number | null; // in MB/s
+        isNetDisabled?: boolean;
       }
     >();
 
@@ -170,6 +173,19 @@ export async function GET(req: NextRequest) {
           try {
             const status = await proxmox.getVmStatus(node, vmid);
             if (!status || status.status !== "running") {
+              let isNetDisabled = false;
+              try {
+                const conf = await proxmox.getVmConfig(node, vmid);
+                if (conf && typeof conf === "object") {
+                  for (const [k, v] of Object.entries(conf)) {
+                    if (/^net\d+$/.test(k) && typeof v === "string" && v.includes("link_down=1")) {
+                      isNetDisabled = true;
+                      break;
+                    }
+                  }
+                }
+              } catch {}
+
               liveMetricsMap.set(vmid, {
                 status: status?.status || "stopped",
                 cpuPercent: 0,
@@ -185,6 +201,7 @@ export async function GET(req: NextRequest) {
                 netOutTotal: status?.netout || 0,
                 uptime: status?.uptime || 0,
                 rateLimit: null,
+                isNetDisabled,
               });
               return;
             }
@@ -223,17 +240,20 @@ export async function GET(req: NextRequest) {
             const diskPercent =
               maxDiskBytes > 0 ? Math.min(100, Math.round((diskBytes / maxDiskBytes) * 10000) / 100) : 0;
 
-            // Check if network adapter has rate limit applied
+            // Check if network adapter has rate limit applied or link_down=1 (disabled internet)
             let rateLimit: number | null = null;
+            let isNetDisabled = false;
             try {
               const conf = await proxmox.getVmConfig(node, vmid);
               if (conf && typeof conf === "object") {
                 for (const [k, v] of Object.entries(conf)) {
                   if (/^net\d+$/.test(k) && typeof v === "string") {
+                    if (v.includes("link_down=1")) {
+                      isNetDisabled = true;
+                    }
                     const match = v.match(/rate=([0-9.]+)/);
                     if (match && parseFloat(match[1]) > 0) {
                       rateLimit = parseFloat(match[1]);
-                      break;
                     }
                   }
                 }
@@ -257,6 +277,7 @@ export async function GET(req: NextRequest) {
               netOutTotal: status.netout || 0,
               uptime: status.uptime || 0,
               rateLimit,
+              isNetDisabled,
             });
           } catch (err) {
             console.error(`Telemetry error for VMID ${vmid}:`, err);
@@ -268,6 +289,7 @@ export async function GET(req: NextRequest) {
     let runningCount = 0;
     let throttledCount = 0;
     let suspendedCount = 0;
+    let netDisabledCount = 0;
     let incidentCount = 0;
     let healthyCount = 0;
 
@@ -293,8 +315,11 @@ export async function GET(req: NextRequest) {
       const isSuspended = vps.status === "SUSPENDED";
       if (isSuspended) suspendedCount++;
 
+      const isNetDisabled = Boolean(live?.isNetDisabled);
+      if (isNetDisabled) netDisabledCount++;
+
       const rateLimit = live?.rateLimit || null;
-      const isThrottled = typeof rateLimit === "number" && rateLimit > 0;
+      const isThrottled = typeof rateLimit === "number" && rateLimit > 0 && !isNetDisabled;
       if (isThrottled) throttledCount++;
 
       const cpuPercent = live?.cpuPercent ?? 0;
@@ -330,6 +355,11 @@ export async function GET(req: NextRequest) {
           vps.suspendReason
             ? `Instance Suspended: ${vps.suspendReason}`
             : "Instance Suspended: Node protection or security audit"
+        );
+      } else if (isNetDisabled) {
+        severity = "CRITICAL";
+        incidentReasons.push(
+          "Internet Access Disabled: Virtual network link offline (quarantined by administrator security protocol)."
         );
       } else if (!isRunning) {
         severity = "OFFLINE";
@@ -393,6 +423,7 @@ export async function GET(req: NextRequest) {
         status: vps.status,
         isRunning,
         isSuspended,
+        isNetDisabled,
         suspendReason: vps.suspendReason,
         isThrottled,
         rateLimitMb: rateLimit,
@@ -446,6 +477,7 @@ export async function GET(req: NextRequest) {
         runningCount,
         throttledCount,
         suspendedCount,
+        netDisabledCount,
         incidentCount,
         healthyCount,
       },

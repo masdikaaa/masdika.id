@@ -82,7 +82,7 @@ export function VisitorChart() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" : "text-cyan-600")} />
+            <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
             <h2 className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Visitor Traffic</h2>
           </div>
           <div className="flex items-baseline gap-2">
@@ -92,13 +92,13 @@ export function VisitorChart() {
         </div>
 
         {/* Range Toggles */}
-        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border shadow-inner overflow-x-auto max-w-full", isDark ? "bg-[#0A0B1A]/80 border-white/5" : "bg-slate-100 border-slate-200")}>
+        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#0A0B1A]/80 border-white/5" : "bg-slate-100 border-slate-200")}>
           {RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setRange(r.value)}
               className={`px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${range === r.value
-                  ? "bg-cyan-500 text-slate-900 shadow-md font-bold"
+                  ? "bg-cyan-500 text-slate-900 font-bold"
                   : cn(isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-white")
                 }`}
             >
@@ -155,7 +155,7 @@ export function VisitorChart() {
               <Tooltip content={({ active, payload, label }: any) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className={cn("backdrop-blur-md border p-4 rounded-xl shadow-2xl", isDark ? "bg-[#0f172a]/90 border-cyan-500/20" : "bg-white/90 border-slate-200")}>
+                    <div className={cn("backdrop-blur-md border p-4 rounded-xl", isDark ? "bg-[#0f172a]/90 border-cyan-500/20" : "bg-white/90 border-slate-200")}>
                       <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>{formatXAxis(label)}</p>
                       <p className={cn("font-bold text-lg flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         {formatCompact(payload[0].value)} <span className="text-zinc-500 text-xs font-normal">Visitors</span>

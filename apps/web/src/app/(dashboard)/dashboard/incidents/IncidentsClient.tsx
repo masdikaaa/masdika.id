@@ -29,6 +29,8 @@ import {
   ChevronRight,
   Gauge,
   Info,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import {
   AreaChart,
@@ -67,6 +69,7 @@ interface IncidentItem {
   status: string;
   isRunning: boolean;
   isSuspended: boolean;
+  isNetDisabled?: boolean;
   suspendReason: string | null;
   isThrottled: boolean;
   rateLimitMb: number | null;
@@ -99,6 +102,7 @@ interface ApiResponse {
     runningCount: number;
     throttledCount: number;
     suspendedCount: number;
+    netDisabledCount?: number;
     incidentCount: number;
     healthyCount: number;
   };
@@ -144,7 +148,7 @@ export default function IncidentsClient() {
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "INCIDENTS" | "THROTTLED" | "SUSPENDED" | "HEALTHY">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "INCIDENTS" | "ISOLATED" | "THROTTLED" | "SUSPENDED" | "HEALTHY">("ALL");
 
   // Telemetry inspection modal
   const [telemetryModalItem, setTelemetryModalItem] = useState<IncidentItem | null>(null);
@@ -239,6 +243,9 @@ export default function IncidentsClient() {
       if (statusFilter === "INCIDENTS") {
         return item.severity === "CRITICAL" || item.severity === "WARNING";
       }
+      if (statusFilter === "ISOLATED") {
+        return Boolean(item.isNetDisabled);
+      }
       if (statusFilter === "THROTTLED") {
         return item.isThrottled;
       }
@@ -267,6 +274,7 @@ export default function IncidentsClient() {
       "Node",
       "Status",
       "Severity",
+      "Is Net Disabled",
       "Is Throttled",
       "Rate Limit (MB/s)",
       "Rate Limit (Mbps)",
@@ -298,6 +306,7 @@ export default function IncidentsClient() {
         `"${vps.node}"`,
         `"${vps.status}"`,
         `"${vps.severity}"`,
+        vps.isNetDisabled ? "YES (ISOLATED)" : "NO",
         vps.isThrottled ? "YES" : "NO",
         vps.rateLimitMb ?? "N/A",
         vps.rateLimitMbps ?? "N/A",
@@ -638,6 +647,7 @@ export default function IncidentsClient() {
         {[
           { id: "ALL", label: `All (${data?.incidents?.length ?? 0})` },
           { id: "INCIDENTS", label: `Incidents (${data?.summary?.incidentCount ?? 0})` },
+          { id: "ISOLATED", label: `Net Isolated (${data?.summary?.netDisabledCount ?? 0})` },
           { id: "THROTTLED", label: `Throttled (${data?.summary?.throttledCount ?? 0})` },
           { id: "SUSPENDED", label: `Suspended (${data?.summary?.suspendedCount ?? 0})` },
           { id: "HEALTHY", label: `Healthy (${data?.summary?.healthyCount ?? 0})` },
@@ -761,6 +771,34 @@ export default function IncidentsClient() {
                   </div>
                 )}
 
+                {vps.isNetDisabled && (
+                  <div
+                    className={cn(
+                      "mb-4 p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm animate-in slide-in-from-bottom-2",
+                      isDark
+                        ? "bg-rose-500/10 border-rose-500/20 text-rose-200"
+                        : "bg-rose-50 border-rose-200 text-rose-800"
+                    )}
+                  >
+                    <div className="flex items-start sm:items-center gap-3 min-w-0">
+                      <WifiOff className={cn("w-5 h-5 shrink-0 mt-0.5 sm:mt-0", isDark ? "text-rose-400" : "text-rose-600")} />
+                      <div className="leading-relaxed">
+                        <span className={cn("font-medium", isDark ? "text-rose-400" : "text-rose-900")}>Internet Access Disabled:</span>{" "}
+                        Virtual network link is offline (isolated by administrator security quarantine). Your instance is running but public & private network traffic is disconnected.
+                      </div>
+                    </div>
+                    <Link
+                      href={`/dashboard/tickets/new?service=VPS&subject=${encodeURIComponent(
+                        `Request Network Reconnect for VMID ${vps.vmid} (${vps.hostname})`
+                      )}`}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-bold shrink-0 text-xs bg-rose-600 hover:bg-rose-700 text-white transition-all w-full sm:w-auto shadow-sm"
+                    >
+                      <span>Request Network Reconnect</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                )}
+
                 {vps.isSuspended && (
                   <div
                     className={cn(
@@ -803,7 +841,7 @@ export default function IncidentsClient() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={cn("font-bold text-sm sm:text-base truncate", isDark ? "text-white" : "text-slate-900")}>
+                        <span className={cn("font-bold text-sm sm:base truncate", isDark ? "text-white" : "text-slate-900")}>
                           {vps.hostname}
                         </span>
                         <span
@@ -850,6 +888,21 @@ export default function IncidentsClient() {
 
                   {/* Badges Right */}
                   <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                    {/* Net Isolated Badge */}
+                    {vps.isNetDisabled && (
+                      <span
+                        className={cn(
+                          "px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold border inline-flex items-center gap-1.5",
+                          isDark
+                            ? "bg-rose-500/15 text-rose-400 border-rose-500/30"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
+                        )}
+                      >
+                        <WifiOff className="w-3 h-3 text-rose-500" />
+                        <span>NET ISOLATED</span>
+                      </span>
+                    )}
+
                     {/* Status Pill */}
                     <span
                       className={cn(
@@ -972,29 +1025,47 @@ export default function IncidentsClient() {
                   <div className="space-y-1 sm:space-y-1.5">
                     <div className="flex items-center justify-between text-[11px] sm:text-xs">
                       <span className={cn("font-medium flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        <Network className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Network Rate
+                        {vps.isNetDisabled ? (
+                          <WifiOff className="w-3.5 h-3.5 text-rose-500" />
+                        ) : (
+                          <Network className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                        )} Network Rate
                       </span>
                       <span
                         className={cn(
                           "font-bold font-mono text-[10px] sm:text-[11px]",
-                          isDark ? "text-cyan-400" : "text-cyan-700"
+                          vps.isNetDisabled
+                            ? "text-rose-500"
+                            : isDark
+                            ? "text-cyan-400"
+                            : "text-cyan-700"
                         )}
                       >
-                        {formatSpeed(vps.metrics.netSpeedTotal)}
+                        {vps.isNetDisabled ? "0 B/s (ISOLATED)" : formatSpeed(vps.metrics.netSpeedTotal)}
                       </span>
                     </div>
                     <div
                       className={cn(
                         "p-1.5 sm:p-2 rounded-lg text-xs font-mono flex items-center justify-between border",
-                        isDark ? "bg-[#060b14] border-white/5" : "bg-slate-50 border-slate-200"
+                        vps.isNetDisabled
+                          ? (isDark ? "bg-rose-950/20 border-rose-500/20" : "bg-rose-50 border-rose-200")
+                          : (isDark ? "bg-[#060b14] border-white/5" : "bg-slate-50 border-slate-200")
                       )}
                     >
-                      <span className={cn("text-[9px] sm:text-[10px] font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                        ↓ {formatSpeed(vps.metrics.netSpeedIn)}
-                      </span>
-                      <span className={cn("text-[9px] sm:text-[10px] font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        ↑ {formatSpeed(vps.metrics.netSpeedOut)}
-                      </span>
+                      {vps.isNetDisabled ? (
+                        <span className="text-[9px] sm:text-[10px] font-bold text-rose-500 mx-auto">
+                          LINK DISCONNECTED (ISOLATED)
+                        </span>
+                      ) : (
+                        <>
+                          <span className={cn("text-[9px] sm:text-[10px] font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                            ↓ {formatSpeed(vps.metrics.netSpeedIn)}
+                          </span>
+                          <span className={cn("text-[9px] sm:text-[10px] font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            ↑ {formatSpeed(vps.metrics.netSpeedOut)}
+                          </span>
+                        </>
+                      )}
                     </div>
                     <div className={cn("text-[9px] sm:text-[10px]", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Transferred: {formatBytes(vps.metrics.totalBandwidth)}
@@ -1466,15 +1537,24 @@ export default function IncidentsClient() {
                     },
                     {
                       metric: "Network I/O Rate",
-                      util: `↓ ${formatSpeed(reportModalItem.metrics.netSpeedIn)} / ↑ ${formatSpeed(reportModalItem.metrics.netSpeedOut)}`,
-                      capacity: reportModalItem.isThrottled
+                      util: reportModalItem.isNetDisabled
+                        ? "0 B/s (Offline)"
+                        : `↓ ${formatSpeed(reportModalItem.metrics.netSpeedIn)} / ↑ ${formatSpeed(reportModalItem.metrics.netSpeedOut)}`,
+                      capacity: reportModalItem.isNetDisabled
+                        ? "Virtual Link Disconnected (Isolated)"
+                        : reportModalItem.isThrottled
                         ? `Throttled (${reportModalItem.rateLimitMb} MB/s)`
                         : "Unthrottled (Full Link)",
-                      status: reportModalItem.isThrottled ? "SAFEGUARD ACTIVE" : "NORMAL",
-                      statusColor:
-                        reportModalItem.isThrottled
-                          ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-300 border-cyan-300"
-                          : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-300",
+                      status: reportModalItem.isNetDisabled
+                        ? "NET ISOLATED"
+                        : reportModalItem.isThrottled
+                        ? "SAFEGUARD ACTIVE"
+                        : "NORMAL",
+                      statusColor: reportModalItem.isNetDisabled
+                        ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border-rose-300"
+                        : reportModalItem.isThrottled
+                        ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-300 border-cyan-300"
+                        : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-300",
                     },
                     {
                       metric: "Cumulative Bandwidth",
@@ -1559,10 +1639,16 @@ export default function IncidentsClient() {
                       <tr>
                         <td className="p-3 font-semibold">Instantaneous Network I/O</td>
                         <td className="p-3 font-mono font-bold">
-                          ↓ {formatSpeed(reportModalItem.metrics.netSpeedIn)} / ↑ {formatSpeed(reportModalItem.metrics.netSpeedOut)}
+                          {reportModalItem.isNetDisabled
+                            ? "0 B/s (Offline)"
+                            : `↓ ${formatSpeed(reportModalItem.metrics.netSpeedIn)} / ↑ ${formatSpeed(reportModalItem.metrics.netSpeedOut)}`}
                         </td>
                         <td className="p-3">
-                          {reportModalItem.isThrottled ? (
+                          {reportModalItem.isNetDisabled ? (
+                            <span className="text-rose-600 dark:text-rose-400 font-bold">
+                              Virtual Link Disconnected (Isolated)
+                            </span>
+                          ) : reportModalItem.isThrottled ? (
                             <span className="text-cyan-600 dark:text-cyan-400 font-bold">
                               Throttled ({reportModalItem.rateLimitMb} MB/s)
                             </span>
@@ -1574,12 +1660,18 @@ export default function IncidentsClient() {
                           <span
                             className={cn(
                               "px-2 py-0.5 rounded font-bold text-[10px]",
-                              reportModalItem.isThrottled
+                              reportModalItem.isNetDisabled
+                                ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
+                                : reportModalItem.isThrottled
                                 ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-300"
                                 : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
                             )}
                           >
-                            {reportModalItem.isThrottled ? "SAFEGUARD ACTIVE" : "NORMAL"}
+                            {reportModalItem.isNetDisabled
+                              ? "NET ISOLATED"
+                              : reportModalItem.isThrottled
+                              ? "SAFEGUARD ACTIVE"
+                              : "NORMAL"}
                           </span>
                         </td>
                       </tr>
@@ -1683,7 +1775,11 @@ export default function IncidentsClient() {
                           CPU: {vps.metrics.cpuPercent}% • RAM: {vps.metrics.memPercent}%
                         </span>
                         <span className="font-semibold">
-                          {vps.isThrottled ? `Rate: ${vps.rateLimitMb} MB/s` : "Full Link"}
+                          {vps.isNetDisabled
+                            ? "Net Disabled"
+                            : vps.isThrottled
+                            ? `Rate: ${vps.rateLimitMb} MB/s`
+                            : "Full Link"}
                         </span>
                       </div>
                     </div>
@@ -1728,7 +1824,11 @@ export default function IncidentsClient() {
                           <td className="p-3 font-mono">{vps.metrics.cpuPercent}%</td>
                           <td className="p-3 font-mono">{vps.metrics.memPercent}%</td>
                           <td className="p-3">
-                            {vps.isThrottled ? (
+                            {vps.isNetDisabled ? (
+                              <span className="font-bold text-rose-600 dark:text-rose-400">
+                                Disabled (Isolated)
+                              </span>
+                            ) : vps.isThrottled ? (
                               <span className="font-bold text-cyan-600 dark:text-cyan-400">
                                 {vps.rateLimitMb} MB/s
                               </span>

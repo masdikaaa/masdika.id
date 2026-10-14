@@ -33,6 +33,8 @@ import {
   HardDrive,
   Eye,
   Gauge,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import {
   AreaChart,
@@ -77,6 +79,7 @@ interface VpsResourceItem {
   netSpeedTotal: number;
   rateLimit?: number | null; // in MB/s
   isThrottled?: boolean;
+  isNetDisabled?: boolean;
   uptime: number;
   severity: "CRITICAL" | "WARNING" | "NORMAL" | "OFFLINE";
   suspendReason?: string | null;
@@ -98,6 +101,7 @@ interface SummaryData {
   highRamCount: number;
   highNetCount: number;
   throttledCount?: number;
+  netDisabledCount?: number;
   totalNetIn: number;
   totalNetOut: number;
   totalBandwidth: number;
@@ -105,7 +109,7 @@ interface SummaryData {
   totalNetSpeedOut: number;
 }
 
-type FilterTab = "ALL" | "CRITICAL" | "WARNING" | "HIGH_CPU" | "HIGH_RAM" | "HIGH_NET" | "THROTTLED" | "OFFLINE";
+type FilterTab = "ALL" | "CRITICAL" | "WARNING" | "HIGH_CPU" | "HIGH_RAM" | "HIGH_NET" | "THROTTLED" | "ISOLATED" | "OFFLINE";
 type SortOption = "CPU_DESC" | "RAM_DESC" | "NET_SPEED_DESC" | "NET_DESC" | "DISK_DESC" | "VMID_ASC" | "VMID_DESC";
 
 function formatSpeed(bytesPerSec: number): string {
@@ -350,7 +354,9 @@ export default function AdminResourceFindingPage() {
     } else if (activeTab === "HIGH_NET") {
       list = list.filter((v) => (v.netSpeedTotal || 0) >= 3 * 1024 * 1024 || v.totalBandwidth >= 100 * 1024 * 1024 * 1024);
     } else if (activeTab === "THROTTLED") {
-      list = list.filter((v) => v.rateLimit && v.rateLimit > 0);
+      list = list.filter((v) => v.rateLimit && v.rateLimit > 0 && !v.isNetDisabled);
+    } else if (activeTab === "ISOLATED") {
+      list = list.filter((v) => v.isNetDisabled);
     } else if (activeTab === "OFFLINE") {
       list = list.filter((v) => v.severity === "OFFLINE" || !v.isOnline);
     }
@@ -650,6 +656,7 @@ export default function AdminResourceFindingPage() {
             { id: "HIGH_RAM", label: "High RAM (>75%)", count: summary.highRamCount },
             { id: "HIGH_NET", label: "High Bandwidth", count: summary.highNetCount },
             { id: "THROTTLED", label: "Throttled", count: summary.throttledCount || 0 },
+            { id: "ISOLATED", label: "Net Disabled", count: summary.netDisabledCount || 0 },
             { id: "OFFLINE", label: "Offline / Suspended", count: summary.totalVps - summary.runningCount },
           ].map((tab) => {
             const isActive = activeTab === tab.id;
@@ -918,8 +925,35 @@ export default function AdminResourceFindingPage() {
                     </div>
                   </div>
 
-                  {/* Rate Limit Active Pill */}
-                  {vps.rateLimit && vps.rateLimit > 0 && (
+                  {/* Rate Limit or Network Isolated Active Pill */}
+                  {vps.isNetDisabled ? (
+                    <div
+                      className={cn(
+                        "flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-[11px] transition-colors",
+                        isDark
+                          ? "bg-rose-950/40 border-rose-500/30 text-rose-300"
+                          : "bg-rose-50 border-rose-200 text-rose-800"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 font-medium truncate">
+                        <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                        <span className="truncate"><strong>Net Disabled</strong> (Isolated)</span>
+                      </div>
+                      <button
+                        onClick={() => handleVpsAction(vps.id, "enable-net")}
+                        disabled={actionLoading}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all shrink-0 ml-2 active:scale-95 shadow-2xs",
+                          isDark
+                            ? "bg-rose-500/20 hover:bg-emerald-500 hover:text-black text-rose-200 border-rose-500/30"
+                            : "bg-white hover:bg-emerald-600 hover:text-white text-rose-800 border-rose-200"
+                        )}
+                        title="Re-enable internet access"
+                      >
+                        Restore
+                      </button>
+                    </div>
+                  ) : vps.rateLimit && vps.rateLimit > 0 ? (
                     <div
                       className={cn(
                         "flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-[11px] transition-colors",
@@ -946,7 +980,7 @@ export default function AdminResourceFindingPage() {
                         Restore
                       </button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Mobile Actions Toolbar */}
@@ -975,7 +1009,11 @@ export default function AdminResourceFindingPage() {
                       }}
                       className={cn(
                         "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
-                        vps.rateLimit && vps.rateLimit > 0
+                        vps.isNetDisabled
+                          ? isDark
+                            ? "bg-rose-500/15 text-rose-300 border-rose-500/40 shadow-sm"
+                            : "bg-rose-50 text-rose-700 border-rose-200 shadow-sm"
+                          : vps.rateLimit && vps.rateLimit > 0
                           ? isDark
                             ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10"
                             : "bg-cyan-50 text-cyan-700 border-cyan-200 shadow-sm"
@@ -983,10 +1021,10 @@ export default function AdminResourceFindingPage() {
                           ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                           : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
                       )}
-                      title={vps.rateLimit ? `Currently throttled: ${vps.rateLimit} MB/s` : "Set Bandwidth Rate Limit"}
+                      title={vps.isNetDisabled ? "Internet access is disabled" : vps.rateLimit ? `Currently throttled: ${vps.rateLimit} MB/s` : "Set Bandwidth Rate Limit"}
                     >
-                      <Gauge className="w-3.5 h-3.5 shrink-0" />
-                      <span>{vps.rateLimit && vps.rateLimit > 0 ? "Throttled" : "Throttle"}</span>
+                      {vps.isNetDisabled ? <WifiOff className="w-3.5 h-3.5 shrink-0" /> : <Gauge className="w-3.5 h-3.5 shrink-0" />}
+                      <span>{vps.isNetDisabled ? "Net Off" : vps.rateLimit && vps.rateLimit > 0 ? "Throttled" : "Throttle"}</span>
                     </button>
 
                     {/* Suspend / Unsuspend */}
@@ -1327,7 +1365,36 @@ export default function AdminResourceFindingPage() {
                           <div className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
                             Total: <span className="font-semibold">{formatBytes(vps.totalBandwidth)}</span>
                           </div>
-                          {vps.rateLimit && vps.rateLimit > 0 && (
+                          {vps.isNetDisabled ? (
+                            <div className="pt-1">
+                              <div
+                                className={cn(
+                                  "inline-flex items-center gap-2 pl-2 pr-1.5 py-0.5 rounded-lg border text-[11px] font-medium whitespace-nowrap transition-colors",
+                                  isDark
+                                    ? "bg-rose-500/10 border-rose-500/25 text-rose-300"
+                                    : "bg-rose-50 border-rose-200 text-rose-900"
+                                )}
+                              >
+                                <div className="flex items-center gap-1.5 font-mono">
+                                  <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                                  <span><strong className="font-bold">Net Disabled</strong> (Isolated)</span>
+                                </div>
+                                <button
+                                  onClick={() => handleVpsAction(vps.id, "enable-net")}
+                                  disabled={actionLoading}
+                                  className={cn(
+                                    "px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all active:scale-95 shadow-2xs",
+                                    isDark
+                                      ? "bg-rose-500/20 hover:bg-emerald-500 hover:text-black border-rose-500/30 text-rose-200"
+                                      : "bg-white hover:bg-emerald-600 hover:text-white border-rose-200 text-rose-800"
+                                  )}
+                                  title="Re-enable internet access"
+                                >
+                                  Restore
+                                </button>
+                              </div>
+                            </div>
+                          ) : vps.rateLimit && vps.rateLimit > 0 ? (
                             <div className="pt-1">
                               <div
                                 className={cn(
@@ -1359,7 +1426,7 @@ export default function AdminResourceFindingPage() {
                                 </button>
                               </div>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </td>
 
@@ -1651,7 +1718,11 @@ export default function AdminResourceFindingPage() {
                             }}
                             className={cn(
                               "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
-                              vps.rateLimit && vps.rateLimit > 0
+                              vps.isNetDisabled
+                                ? isDark
+                                  ? "bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25 shadow-sm"
+                                  : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 shadow-sm"
+                                : vps.rateLimit && vps.rateLimit > 0
                                 ? isDark
                                   ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/25 shadow-sm shadow-cyan-500/10"
                                   : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 shadow-sm"
@@ -1660,12 +1731,14 @@ export default function AdminResourceFindingPage() {
                                 : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border-slate-200 hover:border-cyan-200 shadow-sm"
                             )}
                             title={
-                              vps.rateLimit && vps.rateLimit > 0
+                              vps.isNetDisabled
+                                ? "Internet access is disabled (Click to manage)"
+                                : vps.rateLimit && vps.rateLimit > 0
                                 ? `Currently throttled to ${vps.rateLimit} MB/s (~${Math.round(vps.rateLimit * 8)} Mbps). Click to adjust or unthrottle.`
                                 : "Throttle Bandwidth (Set Rate Limit)"
                             }
                           >
-                            <Gauge className="w-3.5 h-3.5" />
+                            {vps.isNetDisabled ? <WifiOff className="w-3.5 h-3.5" /> : <Gauge className="w-3.5 h-3.5" />}
                           </button>
 
                           {/* Suspend / Lock or Unsuspend */}
@@ -2111,7 +2184,11 @@ export default function AdminResourceFindingPage() {
             <div
               className={cn(
                 "p-3.5 rounded-2xl text-xs flex items-center justify-between border transition-colors",
-                throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
+                throttleModalVps.isNetDisabled
+                  ? isDark
+                    ? "bg-rose-950/40 border-rose-500/30 text-rose-300"
+                    : "bg-rose-50 border-rose-200 text-rose-900"
+                  : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
                   ? isDark
                     ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-300"
                     : "bg-cyan-50 border-cyan-200 text-cyan-900"
@@ -2124,16 +2201,35 @@ export default function AdminResourceFindingPage() {
                 <span
                   className={cn(
                     "w-2 h-2 rounded-full",
-                    throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0 ? "bg-cyan-400 animate-pulse" : "bg-emerald-500"
+                    throttleModalVps.isNetDisabled
+                      ? "bg-rose-500 animate-pulse"
+                      : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
+                      ? "bg-cyan-400 animate-pulse"
+                      : "bg-emerald-500"
                   )}
                 />
                 <span className="font-semibold">
-                  Status: {throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
+                  Status: {throttleModalVps.isNetDisabled
+                    ? "Internet Disabled (Network Link Down / Isolated)"
+                    : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
                     ? `Throttled to ${throttleModalVps.rateLimit} MB/s (~${Math.round(throttleModalVps.rateLimit * 8)} Mbps)`
                     : "Unlimited (Full Host Speed)"}
                 </span>
               </div>
-              {throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0 && (
+              {throttleModalVps.isNetDisabled ? (
+                <button
+                  onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
+                  disabled={actionLoading}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95",
+                    isDark
+                      ? "bg-emerald-500/20 hover:bg-emerald-500 hover:text-black text-emerald-300 border-emerald-500/30"
+                      : "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent shadow-sm"
+                  )}
+                >
+                  Enable Internet
+                </button>
+              ) : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0 ? (
                 <button
                   onClick={() => handleVpsAction(throttleModalVps.id, "unthrottle")}
                   disabled={actionLoading}
@@ -2145,6 +2241,97 @@ export default function AdminResourceFindingPage() {
                   )}
                 >
                   Restore Full Speed
+                </button>
+              ) : null}
+            </div>
+
+            {/* Network Access & Isolation Controller */}
+            <div
+              className={cn(
+                "p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3",
+                throttleModalVps.isNetDisabled
+                  ? isDark
+                    ? "bg-rose-500/10 border-rose-500/30 text-rose-200"
+                    : "bg-rose-50 border-rose-200 text-rose-900"
+                  : isDark
+                  ? "bg-white/[0.02] border-white/10 text-zinc-300"
+                  : "bg-slate-50 border-slate-200 text-slate-700"
+              )}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={cn(
+                    "p-2.5 rounded-xl shrink-0 border",
+                    throttleModalVps.isNetDisabled
+                      ? isDark
+                        ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                        : "bg-rose-100 text-rose-600 border-rose-200"
+                      : isDark
+                      ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                      : "bg-cyan-50 text-cyan-600 border-cyan-200"
+                  )}
+                >
+                  {throttleModalVps.isNetDisabled ? <WifiOff className="w-5 h-5" /> : <Wifi className="w-5 h-5" />}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>Internet Access</span>
+                    <span
+                      className={cn(
+                        "text-[10px] px-1.5 py-0.5 rounded-md font-mono font-semibold",
+                        throttleModalVps.isNetDisabled
+                          ? "bg-rose-500/20 text-rose-300"
+                          : isDark
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-emerald-100 text-emerald-800"
+                      )}
+                    >
+                      {throttleModalVps.isNetDisabled ? "DISABLED (ISOLATED)" : "ONLINE"}
+                    </span>
+                  </div>
+                  <p className={cn("text-[11px] truncate mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    {throttleModalVps.isNetDisabled
+                      ? "Virtual network link is disconnected. Registered in incident reports."
+                      : "Disconnect virtual network link instantly (quarantine / security lock)."}
+                  </p>
+                </div>
+              </div>
+
+              {throttleModalVps.isNetDisabled ? (
+                <button
+                  type="button"
+                  onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
+                  disabled={actionLoading}
+                  className={cn(
+                    "px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-sm",
+                    "bg-emerald-600 hover:bg-emerald-500"
+                  )}
+                >
+                  <Wifi className="w-3.5 h-3.5" />
+                  <span>Enable Internet</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Are you sure you want to DISABLE internet for VMID #${throttleModalVps.vmid} (${throttleModalVps.hostname})?\n\nThis will instantly disconnect virtual network links via Proxmox link_down=1 without restarting the VM, and log a critical incident in the audit report.`
+                      )
+                    ) {
+                      handleVpsAction(throttleModalVps.id, "disable-net");
+                    }
+                  }}
+                  disabled={actionLoading}
+                  className={cn(
+                    "px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 border",
+                    isDark
+                      ? "bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30"
+                      : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                  )}
+                >
+                  <WifiOff className="w-3.5 h-3.5" />
+                  <span>Disable Internet</span>
                 </button>
               )}
             </div>
@@ -2222,7 +2409,7 @@ export default function AdminResourceFindingPage() {
 
             {/* Explanatory Notice */}
             <div className={cn("p-3 rounded-2xl text-[11px] leading-relaxed border", isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
-              <strong>Notice:</strong> Proxmox applies this bandwidth rate limit directly to the VM's network interfaces in real time via Linux kernel traffic control (tc). The VM does <em>not</em> restart and customer connections remain active.
+              <strong>Notice:</strong> Proxmox applies bandwidth rate limits and network link disconnection (link_down=1) directly to the VM's network interfaces in real time via Linux kernel traffic control (tc) and QEMU monitor. Disabling internet isolates the server without shutting down the VM and is registered in the customer Incident Report.
             </div>
 
             {/* Modal Actions */}

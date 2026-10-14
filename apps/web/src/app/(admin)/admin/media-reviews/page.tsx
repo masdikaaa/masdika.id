@@ -43,6 +43,7 @@ interface RatingItem {
   rating: number;
   ipAddress: string | null;
   userEmail: string | null;
+  userName?: string | null;
   avatar?: string;
   createdAt: string;
   media: MediaItem;
@@ -158,6 +159,7 @@ export default function AdminMediaReviewsPage() {
   // Filtered ratings
   const filteredRatings = ratings.filter((r) => {
     const matchesSearch =
+      (r.userName && r.userName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (r.userEmail && r.userEmail.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (r.ipAddress && r.ipAddress.includes(searchQuery)) ||
       r.media?.originalName?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -605,7 +607,13 @@ export default function AdminMediaReviewsPage() {
                     <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/10" : "border-slate-200")}>
                       <img
                         referrerPolicy="no-referrer"
-                        src={rating.avatar ? `${rating.avatar}${rating.avatar.includes('?') ? '&' : '?'}v=4` : (rating.userEmail ? `/api/avatar?email=${encodeURIComponent(rating.userEmail)}&name=User&v=4` : `/api/avatar?name=Guest&v=4`)}
+                        src={
+                          rating.avatar
+                            ? `${rating.avatar}${rating.avatar.includes('?') ? '&' : '?'}v=4`
+                            : rating.userEmail
+                            ? `/api/avatar?email=${encodeURIComponent(rating.userEmail)}&name=${encodeURIComponent(rating.userName || rating.userEmail || 'Customer')}&v=4`
+                            : `/api/avatar?name=Customer&v=4`
+                        }
                         alt="User"
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -620,12 +628,12 @@ export default function AdminMediaReviewsPage() {
                         style={{ display: "none" }}
                         className="w-full h-full bg-[#137333] items-center justify-center text-white font-medium text-sm"
                       >
-                        {(rating.userEmail || "G").charAt(0).toUpperCase()}
+                        {(rating.userName || rating.userEmail || "C").charAt(0).toUpperCase()}
                       </div>
                     </div>
 
                     <div className="min-w-0 space-y-2 flex-1">
-                      {/* Rating score, type badge, and user identifier */}
+                      {/* Rating score, type badge, user identifier, and IP address */}
                       <div className="flex flex-wrap items-center gap-2">
                         <div className={cn(
                           "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border font-bold text-xs shrink-0",
@@ -642,13 +650,35 @@ export default function AdminMediaReviewsPage() {
                           <ShieldCheck className="w-3 h-3" /> Direct Rating
                         </span>
 
-                        <span className={cn(
-                          "text-xs font-semibold flex items-center gap-1.5 truncate max-w-full sm:max-w-md",
-                          isDark ? "text-zinc-200" : "text-slate-800"
-                        )}>
-                          <Mail className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-zinc-500" : "text-slate-400")} />
-                          <span className="truncate">{rating.userEmail || rating.ipAddress || "Anonymous Guest"}</span>
-                        </span>
+                        {rating.userEmail ? (
+                          <span className={cn(
+                            "text-xs font-semibold flex items-center gap-1.5 truncate max-w-full sm:max-w-md",
+                            isDark ? "text-zinc-200" : "text-slate-800"
+                          )}>
+                            <Mail className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <span className="truncate">
+                              {rating.userName ? `${rating.userName} (${rating.userEmail})` : rating.userEmail}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className={cn(
+                            "text-xs font-semibold flex items-center gap-1.5 truncate max-w-full sm:max-w-md",
+                            isDark ? "text-zinc-400" : "text-slate-600"
+                          )}>
+                            <User className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-zinc-500" : "text-slate-400")} />
+                            <span className="truncate">Customer Visitor</span>
+                          </span>
+                        )}
+
+                        {rating.ipAddress && (
+                          <span className={cn(
+                            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-mono text-[11px] border shrink-0",
+                            isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+                          )}>
+                            <span className="text-[10px] text-zinc-500 font-sans font-medium">IP:</span>
+                            {rating.ipAddress}
+                          </span>
+                        )}
                       </div>
 
                       {/* File and timestamp */}

@@ -13,20 +13,29 @@
  * risk is mitigated.
  */
 export function getClientIp(req: Request): string {
-  // Cloudflare Tunnel: CF-Connecting-IP is the real visitor IP
+  // 1. Cloudflare edge header (highest priority, untamperable via Cloudflare proxy)
   const cfIp = req.headers.get('cf-connecting-ip');
-  if (cfIp && cfIp.trim()) return cfIp.trim();
+  if (cfIp && cfIp.trim() && cfIp !== 'unknown') return cfIp.trim();
 
-  // Nginx / load balancer real IP header
-  const realIp = req.headers.get('x-real-ip');
-  if (realIp && realIp.trim()) return realIp.trim();
+  // 2. Akamai / Cloudflare Enterprise true client header
+  const trueClientIp = req.headers.get('true-client-ip');
+  if (trueClientIp && trueClientIp.trim() && trueClientIp !== 'unknown') return trueClientIp.trim();
 
-  // Standard forwarded-for: take first (original client) entry
+  // 3. NextRequest internal client IP if available
+  if ('ip' in req && typeof (req as any).ip === 'string' && (req as any).ip.trim() && (req as any).ip !== 'unknown') {
+    return (req as any).ip.trim();
+  }
+
+  // 4. Standard forwarded-for: first entry is the original client
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) {
     const first = forwarded.split(',')[0].trim();
-    if (first) return first;
+    if (first && first !== 'unknown') return first;
   }
+
+  // 5. Nginx / load balancer real IP header
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp && realIp.trim() && realIp !== 'unknown') return realIp.trim();
 
   return 'unknown';
 }
