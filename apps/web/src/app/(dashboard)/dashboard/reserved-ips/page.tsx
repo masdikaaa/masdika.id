@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { Network, Plus, Calculator, Trash2, CheckCircle, RefreshCw, AlertTriangle, ShieldCheck, Server, Check, Link2, Globe, Copy } from "lucide-react";
+import { Network, Plus, Calculator, Trash2, CheckCircle, RefreshCw, AlertTriangle, ShieldCheck, Server, Check, Link2, Globe, Copy, Info } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
 import { formatRupiah } from "@/lib/billing";
@@ -403,11 +403,12 @@ export default function ReservedIpsPage() {
               />
             </div>
 
-            <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl mb-6">
-              <div className="flex gap-3">
-                <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                <p className="text-xs text-yellow-500/90 leading-relaxed">
-                  <strong>Important:</strong> After attaching, you must <strong>Reboot</strong> your VPS from the dashboard to apply the new network configuration.
+            <div className={cn("border p-4 rounded-xl mb-6 flex items-start gap-3 text-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-5 h-5 flex-shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <div>
+                <p className={cn("font-medium mb-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Important Notice:</p>
+                <p className="text-xs leading-relaxed">
+                  After attaching, you must <strong>Reboot</strong> your VPS from the dashboard to apply the new network configuration.
                 </p>
               </div>
             </div>

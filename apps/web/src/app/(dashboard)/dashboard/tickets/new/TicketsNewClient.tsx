@@ -55,6 +55,18 @@ export default function TicketsNewClient() {
 
   useEffect(() => {
     setIsFetchingServices(true);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const sub = params.get('subject');
+      const srv = params.get('service');
+      if (sub || srv) {
+        setFormData(prev => ({
+          ...prev,
+          subject: sub || prev.subject,
+          service: srv || prev.service
+        }));
+      }
+    }
     fetch('/api/services/list')
       .then(res => res.json())
       .then(data => {

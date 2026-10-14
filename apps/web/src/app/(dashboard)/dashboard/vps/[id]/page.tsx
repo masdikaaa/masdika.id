@@ -2272,9 +2272,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   {allowedAddonStorages.length === 0 ? (
-                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 rounded-xl text-sm flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 shrink-0" />
-                      <p>Add-on disks are currently not available. No storage providers have been configured by the administrator.</p>
+                    <div className={cn("p-4 border rounded-xl text-sm flex items-start gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                      <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                      <div>
+                        <p className={cn("font-medium mb-0.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Add-on Disks Notice:</p>
+                        <p className="text-xs leading-relaxed">Add-on disks are currently not available. No storage providers have been configured by the administrator.</p>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-8">
@@ -2989,8 +2992,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
                 <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-amber-500/10 rounded-lg">
-                      <AlertTriangle className="w-5 h-5 text-amber-500" />
+                    <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                      <AlertTriangle className="w-5 h-5 text-cyan-400" />
                     </div>
                     <div>
                       <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Resource Alerts (CloudWatch-like)</h3>

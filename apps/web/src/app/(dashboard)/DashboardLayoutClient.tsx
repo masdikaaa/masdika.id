@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Link2, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Link2, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -79,6 +79,7 @@ const SIDEBAR_LINKS = [
   { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-blue-400", group: "Compute & Network" },
   { name: "Managed K3s", href: "/dashboard/k3s", icon: SiKubernetes, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Compute & Network" },
+  { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Reserved IPs", href: "/dashboard/reserved-ips", icon: Network, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Virtual Private Cloud", href: "/dashboard/vpc", icon: VpcIcon, color: "text-cyan-400", group: "Compute & Network" },

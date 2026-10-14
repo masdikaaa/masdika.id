@@ -65,6 +65,9 @@ export async function GET(req: NextRequest) {
         assignedIps: {
           select: { ipAddress: true, publicIp: true, isPrimary: true },
         },
+        reservedIps: {
+          select: { ipAddress: true, publicIp: true, isAttached: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -118,6 +121,7 @@ export async function GET(req: NextRequest) {
       netInTotal: number; // Lifetime cumulative bytes
       netOutTotal: number; // Lifetime cumulative bytes
       uptime: number;
+      rateLimit?: number | null;
     }>();
 
     await Promise.all(
@@ -145,6 +149,7 @@ export async function GET(req: NextRequest) {
                   netInTotal: status.netin || 0,
                   netOutTotal: status.netout || 0,
                   uptime: status.uptime || 0,
+                  rateLimit: null,
                 });
               }
               return;
@@ -183,6 +188,24 @@ export async function GET(req: NextRequest) {
             const diskBytes = status.disk || 0;
             const diskPercent = maxDiskBytes > 0 ? Math.min(100, Math.round((diskBytes / maxDiskBytes) * 10000) / 100) : 0;
 
+            let rateLimit: number | null = null;
+            try {
+              const conf = await proxmox.getVmConfig(node, vmid);
+              if (conf && typeof conf === "object") {
+                for (const [k, v] of Object.entries(conf)) {
+                  if (/^net\d+$/.test(k) && typeof v === "string") {
+                    const match = v.match(/rate=([0-9.]+)/);
+                    if (match && parseFloat(match[1]) > 0) {
+                      rateLimit = parseFloat(match[1]);
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch {
+              // config fallback
+            }
+
             liveMetricsMap.set(vmid, {
               status: "running",
               cpuPercent,
@@ -197,6 +220,7 @@ export async function GET(req: NextRequest) {
               netInTotal: status.netin || 0,
               netOutTotal: status.netout || 0,
               uptime: status.uptime || 0,
+              rateLimit,
             });
           } catch (err) {
             // will fallback to cluster/resources
@@ -210,6 +234,7 @@ export async function GET(req: NextRequest) {
     let highCpuCount = 0;
     let highRamCount = 0;
     let highNetCount = 0;
+    let throttledCount = 0;
     let runningCount = 0;
     let totalNetIn = 0;
     let totalNetOut = 0;
@@ -221,11 +246,16 @@ export async function GET(req: NextRequest) {
       const live = vmid ? liveMetricsMap.get(vmid) : null;
       const pve = vmid ? pveVmMap.get(vmid) : null;
 
-      // Primary IP resolution
-      const primaryIp = vps.assignedIps.find((ip) => ip.isPrimary)?.ipAddress ||
-        vps.assignedIps[0]?.ipAddress ||
-        vps.assignedIps.find((ip) => ip.isPrimary)?.publicIp ||
-        vps.assignedIps[0]?.publicIp ||
+      // Primary IP resolution (Prioritize Public IP matching Cloud VPS)
+      const assignedWithPublic = vps.assignedIps.find((ip) => ip.publicIp && ip.publicIp.trim().length > 0);
+      const primaryAssigned = vps.assignedIps.find((ip) => ip.isPrimary) || vps.assignedIps[0];
+      const attachedReserved = vps.reservedIps?.find((r) => r.isAttached);
+      const primaryIp =
+        primaryAssigned?.publicIp?.trim() ||
+        assignedWithPublic?.publicIp?.trim() ||
+        attachedReserved?.publicIp?.trim() ||
+        primaryAssigned?.ipAddress ||
+        attachedReserved?.ipAddress ||
         vps.vpcIp ||
         "-";
 
@@ -267,6 +297,10 @@ export async function GET(req: NextRequest) {
       totalNetOut += netOut;
       totalNetSpeedIn += netSpeedIn;
       totalNetSpeedOut += netSpeedOut;
+
+      // Rate limit check
+      const rateLimit = live?.rateLimit || null;
+      if (rateLimit && rateLimit > 0) throttledCount++;
 
       // Real Threshold Checks for Resource Abuse Detection:
       // High CPU: CPU >= 60%
@@ -320,6 +354,8 @@ export async function GET(req: NextRequest) {
         netSpeedIn,
         netSpeedOut,
         netSpeedTotal,
+        rateLimit,
+        isThrottled: Boolean(rateLimit && rateLimit > 0),
         uptime: live?.uptime || pve?.uptime || 0,
         severity,
         suspendReason: vps.suspendReason,
@@ -351,6 +387,7 @@ export async function GET(req: NextRequest) {
         highCpuCount,
         highRamCount,
         highNetCount,
+        throttledCount,
         totalNetIn,
         totalNetOut,
         totalBandwidth: totalNetIn + totalNetOut,
@@ -373,14 +410,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { action, vpsId, reason } = body;
+    const action = body.action;
+    const vpsId = body.vpsId || body.id;
+    const reason = body.reason;
 
     if (!action || !vpsId) {
       return NextResponse.json({ error: "Missing action or vpsId" }, { status: 400 });
     }
 
     const vps = await prisma.vpsService.findUnique({
-      where: { id: parseInt(vpsId, 10) },
+      where: { id: parseInt(vpsId.toString(), 10) },
       include: { user: true },
     });
 
@@ -404,9 +443,31 @@ export async function POST(req: NextRequest) {
     let resultMsg = "";
 
     switch (action) {
+      case "start":
+        await proxmox.startVm(node, vmid!);
+        await prisma.vpsService.update({
+          where: { id: vps.id },
+          data: { status: "RUNNING" },
+        });
+        resultMsg = `Start command sent to VPS #${vmid}`;
+        break;
+
       case "reboot":
         await proxmox.rebootVm(node, vmid!);
+        await prisma.vpsService.update({
+          where: { id: vps.id },
+          data: { status: "RUNNING" },
+        });
         resultMsg = `Reboot command sent to VPS #${vmid}`;
+        break;
+
+      case "shutdown":
+        await proxmox.shutdownVm(node, vmid!);
+        await prisma.vpsService.update({
+          where: { id: vps.id },
+          data: { status: "STOPPED" },
+        });
+        resultMsg = `Graceful Shutdown sent to VPS #${vmid}`;
         break;
 
       case "stop":
@@ -416,11 +477,6 @@ export async function POST(req: NextRequest) {
           data: { status: "STOPPED" },
         });
         resultMsg = `Force Stop command sent to VPS #${vmid}`;
-        break;
-
-      case "shutdown":
-        await proxmox.shutdownVm(node, vmid!);
-        resultMsg = `Graceful Shutdown sent to VPS #${vmid}`;
         break;
 
       case "suspend":
@@ -458,6 +514,63 @@ export async function POST(req: NextRequest) {
         }
         resultMsg = `VPS #${vmid || vps.id} has been unsuspended and restored`;
         break;
+
+      case "throttle": {
+        const rateVal = parseFloat(body.rate);
+        if (isNaN(rateVal) || rateVal <= 0) {
+          return NextResponse.json({ error: "Invalid rate value. Rate must be greater than 0 MB/s." }, { status: 400 });
+        }
+
+        const currentConf = await proxmox.getVmConfig(node, vmid!);
+        if (!currentConf) {
+          return NextResponse.json({ error: `Could not retrieve configuration for VPS #${vmid}` }, { status: 500 });
+        }
+
+        const updates: Record<string, string> = {};
+        let netCount = 0;
+
+        for (const [key, val] of Object.entries(currentConf)) {
+          if (/^net\d+$/.test(key) && typeof val === "string") {
+            const baseNet = val.replace(/,rate=[0-9.]+/g, "");
+            updates[key] = `${baseNet},rate=${rateVal}`;
+            netCount++;
+          }
+        }
+
+        if (netCount === 0) {
+          return NextResponse.json({ error: `VPS #${vmid} does not have any network interfaces configured` }, { status: 400 });
+        }
+
+        await proxmox.configVm(node, vmid!, updates);
+        const approxMbps = Math.round(rateVal * 8);
+        resultMsg = `Bandwidth throttled to ${rateVal} MB/s (~${approxMbps} Mbps) on VPS #${vmid} (${vps.hostname})`;
+        break;
+      }
+
+      case "unthrottle": {
+        const currentConf = await proxmox.getVmConfig(node, vmid!);
+        if (!currentConf) {
+          return NextResponse.json({ error: `Could not retrieve configuration for VPS #${vmid}` }, { status: 500 });
+        }
+
+        const updates: Record<string, string> = {};
+        for (const [key, val] of Object.entries(currentConf)) {
+          if (/^net\d+$/.test(key) && typeof val === "string") {
+            const cleanNet = val.replace(/,rate=[0-9.]+/g, "");
+            if (cleanNet !== val) {
+              updates[key] = cleanNet;
+            }
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await proxmox.configVm(node, vmid!, updates);
+          resultMsg = `Bandwidth limit removed for VPS #${vmid}. Restored to full speed.`;
+        } else {
+          resultMsg = `VPS #${vmid} has no active rate limit.`;
+        }
+        break;
+      }
 
       default:
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });

@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Key, Copy, Plus, Trash2, Code2, AlertTriangle, CheckCircle2, ShieldCheck, TerminalSquare, RefreshCw, Terminal, Settings, Power, Zap, Cpu, Server, Play, Square, RotateCw, KeyRound, BookOpen, HardDrive } from "lucide-react";
+import { Key, Copy, Plus, Trash2, Code2, AlertTriangle, CheckCircle2, ShieldCheck, TerminalSquare, RefreshCw, Terminal, Settings, Power, Zap, Cpu, Server, Play, Square, RotateCw, KeyRound, BookOpen, HardDrive, Info } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -161,11 +161,11 @@ export default function ResellerApiPage() {
               </p>
               
               {balance < 50000 && (
-                <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3 max-w-md">
-                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                <div className={cn("mb-6 p-4 rounded-xl border flex items-start gap-3 max-w-md text-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                  <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   <div>
-                    <h4 className="font-semibold text-amber-500 mb-1 text-sm">Syarat Pengaktifan</h4>
-                    <p className={cn("text-xs leading-relaxed", isDark ? "text-amber-200/70" : "text-amber-700")}>
+                    <h4 className={cn("font-medium mb-1 text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Syarat Pengaktifan:</h4>
+                    <p className={cn("text-xs leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
                       Wajib Saldo minimal <b>Rp 50.000</b>.<br/>
                       Saldo Anda: <b>{formatRupiah(balance)}</b>.
                     </p>

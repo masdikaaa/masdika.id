@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
-import { RefreshCw, CheckCircle, Bell, ArrowLeft, Cpu, MemoryStick, HardDrive, AlertTriangle, Settings } from "lucide-react";
+import { RefreshCw, CheckCircle, Bell, ArrowLeft, Cpu, MemoryStick, HardDrive, AlertTriangle, Settings, Info } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -109,9 +109,9 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
             </div>
           ) : (
             <>
-              <div className={cn("p-4 border rounded-xl flex items-start sm:items-center gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
-                <AlertTriangle className={cn("w-5 h-5 shrink-0 mt-0.5 sm:mt-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <p className={cn("text-sm font-medium", isDark ? "text-slate-300" : "text-slate-700")}>Alert checks are performed every 5 minutes by the monitoring agent.</p>
+              <div className={cn("p-4 border rounded-xl flex items-start sm:items-center gap-3 text-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                <Info className={cn("w-5 h-5 shrink-0 mt-0.5 sm:mt-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                <p className="font-medium text-xs sm:text-sm">Alert checks are performed every 5 minutes by the monitoring agent.</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -14,19 +14,25 @@ import {
   Copy,
   ExternalLink,
   Power,
+  PowerOff,
   RotateCw,
+  Play,
+  Square,
   Ban,
   X,
   Server,
   User,
   Mail,
   Clock,
+  ArrowDown,
+  ArrowUp,
   ArrowDownRight,
   ArrowUpRight,
   SlidersHorizontal,
   ChevronRight,
   HardDrive,
   Eye,
+  Gauge,
 } from "lucide-react";
 import {
   AreaChart,
@@ -69,6 +75,8 @@ interface VpsResourceItem {
   netSpeedIn: number; // Real-time Bytes/sec matching Proxmox GUI graph
   netSpeedOut: number; // Real-time Bytes/sec
   netSpeedTotal: number;
+  rateLimit?: number | null; // in MB/s
+  isThrottled?: boolean;
   uptime: number;
   severity: "CRITICAL" | "WARNING" | "NORMAL" | "OFFLINE";
   suspendReason?: string | null;
@@ -89,6 +97,7 @@ interface SummaryData {
   highCpuCount: number;
   highRamCount: number;
   highNetCount: number;
+  throttledCount?: number;
   totalNetIn: number;
   totalNetOut: number;
   totalBandwidth: number;
@@ -96,7 +105,7 @@ interface SummaryData {
   totalNetSpeedOut: number;
 }
 
-type FilterTab = "ALL" | "CRITICAL" | "WARNING" | "HIGH_CPU" | "HIGH_RAM" | "HIGH_NET" | "OFFLINE";
+type FilterTab = "ALL" | "CRITICAL" | "WARNING" | "HIGH_CPU" | "HIGH_RAM" | "HIGH_NET" | "THROTTLED" | "OFFLINE";
 type SortOption = "CPU_DESC" | "RAM_DESC" | "NET_SPEED_DESC" | "NET_DESC" | "DISK_DESC" | "VMID_ASC" | "VMID_DESC";
 
 function formatSpeed(bytesPerSec: number): string {
@@ -185,6 +194,8 @@ export default function AdminResourceFindingPage() {
   // Action Modals State
   const [suspendModalVps, setSuspendModalVps] = useState<VpsResourceItem | null>(null);
   const [suspendReason, setSuspendReason] = useState("");
+  const [throttleModalVps, setThrottleModalVps] = useState<VpsResourceItem | null>(null);
+  const [throttleRate, setThrottleRate] = useState<string>("1.25");
   const [actionLoading, setActionLoading] = useState(false);
 
   const [confirmModal, setConfirmModal] = useState<{
@@ -192,7 +203,7 @@ export default function AdminResourceFindingPage() {
     title: string;
     description: string;
     confirmText: string;
-    variant: "danger" | "warning";
+    variant: "danger" | "warning" | "success";
     onConfirm: () => Promise<void>;
   }>({
     isOpen: false,
@@ -290,21 +301,22 @@ export default function AdminResourceFindingPage() {
     }
   };
 
-  // Perform Power / Suspend Actions
-  const handleVpsAction = async (id: number, action: string, reason?: string) => {
+  // Perform Power / Suspend / Throttle Actions
+  const handleVpsAction = async (id: number, action: string, reason?: string, rate?: number) => {
     setActionLoading(true);
     const toastId = toast.loading(`Executing ${action}...`);
     try {
       const res = await fetch("/api/admin/resource-finding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, action, reason }),
+        body: JSON.stringify({ vpsId: id, id, action, reason, rate }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success(data.message || `Action ${action} successful`, { id: toastId });
         setSuspendModalVps(null);
         setSuspendReason("");
+        setThrottleModalVps(null);
         fetchData();
       } else {
         toast.error(data.error || `Failed to execute ${action}`, { id: toastId });
@@ -337,6 +349,8 @@ export default function AdminResourceFindingPage() {
       list = list.filter((v) => v.memPercent >= 75);
     } else if (activeTab === "HIGH_NET") {
       list = list.filter((v) => (v.netSpeedTotal || 0) >= 3 * 1024 * 1024 || v.totalBandwidth >= 100 * 1024 * 1024 * 1024);
+    } else if (activeTab === "THROTTLED") {
+      list = list.filter((v) => v.rateLimit && v.rateLimit > 0);
     } else if (activeTab === "OFFLINE") {
       list = list.filter((v) => v.severity === "OFFLINE" || !v.isOnline);
     }
@@ -610,10 +624,17 @@ export default function AdminResourceFindingPage() {
               {formatBytes(summary.totalBandwidth)}
             </span>
           </div>
-          <p className={cn("text-[11px] sm:text-xs mt-1 flex items-center gap-1.5 truncate font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <span className="text-cyan-400">Live: ⬇ {formatSpeed(summary.totalNetSpeedIn)}</span>
-            <span>•</span>
-            <span className="text-emerald-400">⬆ {formatSpeed(summary.totalNetSpeedOut)}</span>
+          <p className={cn("text-[11px] sm:text-xs mt-1 flex items-center gap-2 truncate font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <span className="inline-flex items-center gap-1 text-cyan-400">
+              <span className="text-zinc-400 font-sans">Live:</span>
+              <ArrowDown className="w-3.5 h-3.5 shrink-0" />
+              <span>{formatSpeed(summary.totalNetSpeedIn)}</span>
+            </span>
+            <span className="text-zinc-500">•</span>
+            <span className="inline-flex items-center gap-1 text-emerald-400">
+              <ArrowUp className="w-3.5 h-3.5 shrink-0" />
+              <span>{formatSpeed(summary.totalNetSpeedOut)}</span>
+            </span>
           </p>
         </div>
       </div>
@@ -628,6 +649,7 @@ export default function AdminResourceFindingPage() {
             { id: "HIGH_CPU", label: "High CPU (>60%)", count: summary.highCpuCount },
             { id: "HIGH_RAM", label: "High RAM (>75%)", count: summary.highRamCount },
             { id: "HIGH_NET", label: "High Bandwidth", count: summary.highNetCount },
+            { id: "THROTTLED", label: "Throttled", count: summary.throttledCount || 0 },
             { id: "OFFLINE", label: "Offline / Suspended", count: summary.totalVps - summary.runningCount },
           ].map((tab) => {
             const isActive = activeTab === tab.id;
@@ -736,7 +758,7 @@ export default function AdminResourceFindingPage() {
               <div
                 key={vps.id}
                 className={cn(
-                  "p-4 rounded-2xl border space-y-3.5 transition-colors",
+                  "p-4 rounded-2xl border space-y-3 transition-colors",
                   vps.severity === "CRITICAL"
                     ? isDark
                       ? "bg-rose-500/[0.04] border-rose-500/30"
@@ -747,8 +769,8 @@ export default function AdminResourceFindingPage() {
                 )}
               >
                 {/* Header: Hostname, VMID, Node, Status */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className={cn("font-bold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>
                         {vps.hostname}
@@ -762,22 +784,24 @@ export default function AdminResourceFindingPage() {
                         {vps.node}
                       </span>
                     </div>
-                    <div className="mt-1 space-y-1 text-xs">
-                      <div className="flex items-center gap-1.5">
+                    <div className="mt-1 space-y-0.5 text-xs">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                        <span className={cn("font-medium truncate max-w-[170px]", isDark ? "text-zinc-200" : "text-slate-800")} title={vps.user.name}>{vps.user.name}</span>
+                        <span className={cn("font-medium truncate", isDark ? "text-zinc-200" : "text-slate-800")} title={vps.user.name}>
+                          {vps.user.name}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                        <span className={cn("text-[11px] truncate max-w-[190px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")} title={vps.user.email}>
+                        <span className={cn("text-[11px] truncate font-mono", isDark ? "text-zinc-400" : "text-slate-500")} title={vps.user.email}>
                           {vps.user.email}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Status & Severity Badges (Side-by-Side, Never Stacked) */}
-                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                  {/* Status & Severity Badges */}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
                     <span
                       className={cn(
                         "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0",
@@ -792,109 +816,265 @@ export default function AdminResourceFindingPage() {
                           : isDark
                           ? "bg-white/5 text-zinc-400 border-white/10"
                           : "bg-slate-100 text-slate-600 border-slate-200"
-                      )
-                    }
-                  >
-                    <span
-                      className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        vps.isOnline
-                          ? "bg-emerald-500 animate-pulse"
-                          : vps.dbStatus === "SUSPENDED"
-                          ? "bg-rose-500"
-                          : "bg-zinc-500"
                       )}
-                    />
-                    {vps.dbStatus === "SUSPENDED" ? "Suspended" : vps.isOnline ? "Running" : "Stopped"}
-                  </span>
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          vps.isOnline
+                            ? "bg-emerald-500 animate-pulse"
+                            : vps.dbStatus === "SUSPENDED"
+                            ? "bg-rose-500"
+                            : "bg-zinc-500"
+                        )}
+                      />
+                      {vps.dbStatus === "SUSPENDED" ? "Suspended" : vps.isOnline ? "Running" : "Stopped"}
+                    </span>
 
                     {vps.severity === "CRITICAL" && (
-                      <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border", isDark ? "bg-rose-500/15 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200")}>
-                        <AlertTriangle className="w-3.5 h-3.5" /> Critical
+                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", isDark ? "bg-rose-500/15 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200")}>
+                        <AlertTriangle className="w-3 h-3" /> Critical
                       </span>
                     )}
                     {vps.severity === "WARNING" && (
-                      <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border", isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}>
                         Warning
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Primary IP bar */}
-                <div className="flex items-center justify-between text-xs font-mono pt-1 border-t border-slate-100 dark:border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-zinc-500 font-sans">IP:</span>
-                    <span className={cn("font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>{vps.primaryIp}</span>
+                {/* Primary IP & Uptime bar */}
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-white/5">
+                  <div className="flex items-center gap-1.5 font-mono">
+                    <span className={cn("text-[11px] font-sans font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>IP:</span>
+                    <span className={cn("font-bold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>{vps.primaryIp}</span>
                     {vps.primaryIp !== "-" && (
                       <button
                         onClick={() => copyToClipboard(vps.primaryIp)}
-                        className="p-1 rounded text-zinc-400 hover:text-white"
+                        className="p-1 rounded text-zinc-400 hover:text-white transition-colors"
                         title="Copy IP"
                       >
                         <Copy className="w-3 h-3" />
                       </button>
                     )}
                   </div>
-                  <div className="text-zinc-400 text-[11px] font-sans">
-                    Uptime: {formatUptime(vps.uptime)}
+                  <div className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    <span className="font-sans text-zinc-500 mr-1">Uptime:</span>
+                    <span className="font-semibold">{formatUptime(vps.uptime)}</span>
                   </div>
                 </div>
 
-                {/* 2x2 Resource Stats Grid */}
-                <div className={cn("grid grid-cols-2 gap-2.5 p-3 rounded-xl border text-xs", isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-100")}>
-                  {/* CPU */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-zinc-400 font-medium">CPU ({vps.cpuCores}c)</span>
-                      <span className={cn("font-bold font-mono", vps.cpuPercent >= 80 ? "text-rose-500" : vps.cpuPercent >= 60 ? "text-amber-500" : isDark ? "text-zinc-300" : "text-slate-700")}>
-                        {vps.cpuPercent.toFixed(1)}%
-                      </span>
+                {/* Resource Metrics Box */}
+                <div className={cn("p-3 rounded-xl border space-y-2.5 text-xs transition-colors", isDark ? "bg-black/25 border-white/5" : "bg-slate-50 border-slate-200")}>
+                  {/* CPU & RAM 2-Column Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* CPU */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>CPU ({vps.cpuCores}c)</span>
+                        <span className={cn("font-bold font-mono text-xs", vps.cpuPercent >= 80 ? "text-rose-500" : vps.cpuPercent >= 60 ? "text-amber-500" : isDark ? "text-zinc-200" : "text-slate-800")}>
+                          {vps.cpuPercent.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className={cn("w-full h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                        <div className={cn("h-full transition-all duration-500", cpuColor)} style={{ width: `${Math.min(vps.cpuPercent, 100)}%` }} />
+                      </div>
                     </div>
-                    <div className={cn("w-full h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
-                      <div className={cn("h-full", cpuColor)} style={{ width: `${Math.min(vps.cpuPercent, 100)}%` }} />
+
+                    {/* RAM */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>RAM</span>
+                        <span className={cn("font-bold font-mono text-xs", vps.memPercent >= 90 ? "text-rose-500" : vps.memPercent >= 75 ? "text-amber-500" : isDark ? "text-zinc-200" : "text-slate-800")}>
+                          {vps.memPercent.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className={cn("w-full h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
+                        <div className={cn("h-full transition-all duration-500", memColor)} style={{ width: `${Math.min(vps.memPercent, 100)}%` }} />
+                      </div>
                     </div>
                   </div>
 
-                  {/* RAM */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-zinc-400 font-medium">RAM</span>
-                      <span className={cn("font-bold font-mono", vps.memPercent >= 90 ? "text-rose-500" : vps.memPercent >= 75 ? "text-amber-500" : isDark ? "text-zinc-300" : "text-slate-700")}>
-                        {vps.memPercent.toFixed(1)}%
-                      </span>
+                  {/* Bandwidth Traffic Row */}
+                  <div className="pt-2 border-t border-slate-200/50 dark:border-white/5 flex items-center justify-between text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <Network className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Network:</span>
                     </div>
-                    <div className={cn("w-full h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-slate-200")}>
-                      <div className={cn("h-full", memColor)} style={{ width: `${Math.min(vps.memPercent, 100)}%` }} />
+                    <div className="flex items-center gap-1.5 sm:gap-2 font-mono font-semibold">
+                      <span className="inline-flex items-center gap-0.5 text-cyan-400" title="Incoming">
+                        <ArrowDown className="w-3 h-3 shrink-0" />
+                        <span>{formatSpeed(vps.netSpeedIn)}</span>
+                      </span>
+                      <span className="text-zinc-500 font-normal">/</span>
+                      <span className="inline-flex items-center gap-0.5 text-emerald-400" title="Outgoing">
+                        <ArrowUp className="w-3 h-3 shrink-0" />
+                        <span>{formatSpeed(vps.netSpeedOut)}</span>
+                      </span>
+                      <span className={cn("text-[10px] font-normal pl-1 border-l border-slate-200 dark:border-white/10", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        {formatBytes(vps.totalBandwidth)}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Bandwidth */}
-                  <div className="col-span-2 flex items-center justify-between pt-1 border-t border-slate-200/40 dark:border-white/5 text-[11px]">
-                    <span className="text-zinc-400">Speed / Total:</span>
-                    <span className="font-mono font-semibold">
-                      <span className="text-cyan-400">⬇ {formatSpeed(vps.netSpeedIn)}</span> / <span className="text-emerald-400">⬆ {formatSpeed(vps.netSpeedOut)}</span> ({formatBytes(vps.totalBandwidth)})
-                    </span>
-                  </div>
+                  {/* Rate Limit Active Pill */}
+                  {vps.rateLimit && vps.rateLimit > 0 && (
+                    <div
+                      className={cn(
+                        "flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-[11px] transition-colors",
+                        isDark
+                          ? "bg-cyan-950/30 border-cyan-500/25 text-cyan-300"
+                          : "bg-cyan-50 border-cyan-200 text-cyan-800"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 font-medium truncate">
+                        <Gauge className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="truncate">Throttled: <strong>{vps.rateLimit} MB/s</strong> (~{Math.round(vps.rateLimit * 8)} Mbps)</span>
+                      </div>
+                      <button
+                        onClick={() => handleVpsAction(vps.id, "unthrottle")}
+                        disabled={actionLoading}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all shrink-0 ml-2 active:scale-95 shadow-2xs",
+                          isDark
+                            ? "bg-white/10 hover:bg-cyan-500 hover:text-black text-white border-white/15"
+                            : "bg-white hover:bg-cyan-600 hover:text-white text-cyan-800 border-cyan-200"
+                        )}
+                        title="Restore full unthrottled speed"
+                      >
+                        Restore
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Mobile Actions Toolbar */}
-                <div className="flex items-center gap-2 pt-1">
-                  <button
-                    onClick={() => openInspectModal(vps)}
-                    className={cn(
-                      "flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm",
-                      isDark
-                        ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
-                        : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
-                    )}
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Inspect</span>
-                  </button>
-
-                  {vps.isOnline && (
+                <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-white/5">
+                  {/* Row 1: Primary Actions (Inspect, Throttle, Suspend) - 3 Equal Balanced Columns */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Inspect */}
                     <button
+                      onClick={() => openInspectModal(vps)}
+                      className={cn(
+                        "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95",
+                        isDark
+                          ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border-cyan-500/30"
+                          : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                      )}
+                    >
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <span>Inspect</span>
+                    </button>
+
+                    {/* Throttle */}
+                    <button
+                      onClick={() => {
+                        setThrottleModalVps(vps);
+                        setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "1.25");
+                      }}
+                      className={cn(
+                        "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
+                        vps.rateLimit && vps.rateLimit > 0
+                          ? isDark
+                            ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10"
+                            : "bg-cyan-50 text-cyan-700 border-cyan-200 shadow-sm"
+                          : isDark
+                          ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                          : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                      )}
+                      title={vps.rateLimit ? `Currently throttled: ${vps.rateLimit} MB/s` : "Set Bandwidth Rate Limit"}
+                    >
+                      <Gauge className="w-3.5 h-3.5 shrink-0" />
+                      <span>{vps.rateLimit && vps.rateLimit > 0 ? "Throttled" : "Throttle"}</span>
+                    </button>
+
+                    {/* Suspend / Unsuspend */}
+                    {vps.dbStatus === "SUSPENDED" ? (
+                      <button
+                        onClick={() => {
+                          setConfirmModal({
+                            isOpen: true,
+                            title: `Unsuspend VPS #${vps.vmid || vps.id}?`,
+                            description: `Unsuspend ${vps.hostname}? This will restore access and boot the VPS.`,
+                            confirmText: "Unsuspend",
+                            variant: "success",
+                            onConfirm: async () => {
+                              await handleVpsAction(vps.id, "unsuspend");
+                            },
+                          });
+                        }}
+                        className={cn(
+                          "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
+                          isDark
+                            ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                        )}
+                        title="Unsuspend VPS"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>Unsuspend</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setSuspendModalVps(vps);
+                          setSuspendReason(
+                            vps.cpuPercent >= 80
+                              ? `[RESOURCE_LIMIT] Excessive CPU load detected (${vps.cpuPercent.toFixed(1)}%). Suspended to protect node stability.`
+                              : `[RESOURCE_LIMIT] High resource consumption detected. Please contact administrator.`
+                          );
+                        }}
+                        className={cn(
+                          "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
+                          isDark
+                            ? "bg-white/5 border-white/10 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/10"
+                            : "bg-slate-50 border-slate-200 text-slate-700 hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50"
+                        )}
+                        title="Suspend VPS"
+                      >
+                        <Ban className="w-3.5 h-3.5 shrink-0" />
+                        <span>Suspend</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Row 2: Power Controls Toolbar (Start | Reboot | Shutdown | Stop) - 4 Equal Balanced Columns */}
+                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                    {/* Start */}
+                    <button
+                      disabled={vps.isOnline || vps.dbStatus === "SUSPENDED"}
+                      onClick={() => {
+                        setConfirmModal({
+                          isOpen: true,
+                          title: `Start VPS #${vps.vmid || vps.id}?`,
+                          description: `Power on ${vps.hostname}? This will boot up the operating system.`,
+                          confirmText: "Start VPS",
+                          variant: "success",
+                          onConfirm: async () => {
+                            await handleVpsAction(vps.id, "start");
+                          },
+                        });
+                      }}
+                      className={cn(
+                        "h-9 rounded-xl border text-[10.5px] sm:text-[11px] font-semibold flex items-center justify-center px-1 transition-all active:scale-95",
+                        vps.isOnline || vps.dbStatus === "SUSPENDED"
+                          ? isDark
+                            ? "opacity-30 cursor-not-allowed bg-white/[0.02] border-white/5 text-zinc-500"
+                            : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
+                          : isDark
+                          ? "bg-white/5 hover:bg-emerald-500/15 text-zinc-300 hover:text-emerald-300 border-white/10 hover:border-emerald-500/30"
+                          : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border-slate-200 hover:border-emerald-300 shadow-xs"
+                      )}
+                      title={vps.isOnline ? "VPS is already running" : "Start VPS"}
+                    >
+                      <Play className={cn("w-3 h-3 shrink-0 mr-1.5", !vps.isOnline && vps.dbStatus !== "SUSPENDED" ? "text-emerald-400 fill-emerald-400" : "fill-current")} />
+                      <span className="truncate">Start</span>
+                    </button>
+
+                    {/* Reboot */}
+                    <button
+                      disabled={!vps.isOnline}
                       onClick={() => {
                         setConfirmModal({
                           isOpen: true,
@@ -908,22 +1088,60 @@ export default function AdminResourceFindingPage() {
                         });
                       }}
                       className={cn(
-                        "p-2 rounded-xl border transition-all text-xs font-semibold",
-                        isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                        "h-9 rounded-xl border text-[10.5px] sm:text-[11px] font-semibold flex items-center justify-center px-1 transition-all active:scale-95",
+                        !vps.isOnline
+                          ? isDark
+                            ? "opacity-30 cursor-not-allowed bg-white/[0.02] border-white/5 text-zinc-500"
+                            : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
+                          : isDark
+                          ? "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30"
+                          : "bg-white hover:bg-slate-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300 shadow-xs"
                       )}
-                      title="Reboot"
+                      title={!vps.isOnline ? "VPS is offline" : "Reboot VPS"}
                     >
-                      <RotateCw className="w-4 h-4" />
+                      <RotateCw className={cn("w-3 h-3 shrink-0 mr-1.5", vps.isOnline ? "text-cyan-400" : "")} />
+                      <span className="truncate">Reboot</span>
                     </button>
-                  )}
 
-                  {vps.isOnline && (
+                    {/* Shutdown */}
                     <button
+                      disabled={!vps.isOnline}
+                      onClick={() => {
+                        setConfirmModal({
+                          isOpen: true,
+                          title: `Shutdown VPS #${vps.vmid || vps.id}?`,
+                          description: `Send graceful ACPI shutdown to ${vps.hostname}? System will safely close open files and stop.`,
+                          confirmText: "Shutdown",
+                          variant: "warning",
+                          onConfirm: async () => {
+                            await handleVpsAction(vps.id, "shutdown");
+                          },
+                        });
+                      }}
+                      className={cn(
+                        "h-9 rounded-xl border text-[10.5px] sm:text-[11px] font-semibold flex items-center justify-center px-1 transition-all active:scale-95",
+                        !vps.isOnline
+                          ? isDark
+                            ? "opacity-30 cursor-not-allowed bg-white/[0.02] border-white/5 text-zinc-500"
+                            : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
+                          : isDark
+                          ? "bg-white/5 hover:bg-amber-500/15 text-zinc-300 hover:text-amber-300 border-white/10 hover:border-amber-500/30"
+                          : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300 shadow-xs"
+                      )}
+                      title={!vps.isOnline ? "VPS is offline" : "Graceful Shutdown (Power Off)"}
+                    >
+                      <Power className={cn("w-3.5 h-3.5 shrink-0 mr-1.5", vps.isOnline ? "text-amber-400" : "")} />
+                      <span className="truncate">Shutdown</span>
+                    </button>
+
+                    {/* Stop */}
+                    <button
+                      disabled={!vps.isOnline}
                       onClick={() => {
                         setConfirmModal({
                           isOpen: true,
                           title: `Force Stop VPS #${vps.vmid || vps.id}?`,
-                          description: `Force stop ${vps.hostname}? Use this if it's consuming 100% resources.`,
+                          description: `Force stop ${vps.hostname}? Power will be cut immediately. Use if VPS is unresponsive or abusing CPU.`,
                           confirmText: "Force Stop",
                           variant: "danger",
                           onConfirm: async () => {
@@ -932,49 +1150,46 @@ export default function AdminResourceFindingPage() {
                         });
                       }}
                       className={cn(
-                        "p-2 rounded-xl border transition-all text-xs font-semibold",
-                        isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                        "h-9 rounded-xl border text-[10.5px] sm:text-[11px] font-semibold flex items-center justify-center px-1 transition-all active:scale-95",
+                        !vps.isOnline
+                          ? isDark
+                            ? "opacity-30 cursor-not-allowed bg-white/[0.02] border-white/5 text-zinc-500"
+                            : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
+                          : isDark
+                          ? "bg-white/5 hover:bg-rose-500/15 text-zinc-300 hover:text-rose-300 border-white/10 hover:border-rose-500/30"
+                          : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300 shadow-xs"
                       )}
-                      title="Force Stop"
+                      title={!vps.isOnline ? "VPS is offline" : "Force Stop VPS"}
                     >
-                      <Power className="w-4 h-4" />
+                      <Square className={cn("w-3 h-3 shrink-0 mr-1.5", vps.isOnline ? "text-rose-400 fill-rose-400" : "fill-current")} />
+                      <span className="truncate">Stop</span>
                     </button>
-                  )}
-
-                  {vps.dbStatus === "SUSPENDED" ? (
-                    <button
-                      onClick={() => handleVpsAction(vps.id, "unsuspend")}
-                      className={cn(
-                        "p-2 rounded-xl border text-xs font-semibold transition-all",
-                        isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      )}
-                      title="Unsuspend"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setSuspendModalVps(vps);
-                        setSuspendReason(
-                          vps.cpuPercent >= 80
-                            ? `[RESOURCE_LIMIT] Excessive CPU load detected (${vps.cpuPercent.toFixed(1)}%). Suspended to protect node stability.`
-                            : `[RESOURCE_LIMIT] High resource consumption detected. Please contact administrator.`
-                        );
-                      }}
-                      className={cn(
-                        "p-2 rounded-xl border text-xs font-semibold transition-all",
-                        isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-rose-400" : "bg-slate-50 border-slate-200 text-slate-700 hover:text-rose-600"
-                      )}
-                      title="Suspend"
-                    >
-                      <Ban className="w-4 h-4" />
-                    </button>
-                  )}
+                  </div>
                 </div>
               </div>
             );
           })
+        )}
+
+        {/* Mobile Pagination */}
+        {filteredVps.length > itemsPerPage && (
+          <div
+            className={cn(
+              "p-4 rounded-2xl border flex flex-col items-center justify-center gap-3",
+              isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200 shadow-sm"
+            )}
+          >
+            <div className={cn("text-xs text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Showing <span className="font-semibold text-slate-800 dark:text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">{Math.min(currentPage * itemsPerPage, filteredVps.length)}</span> of{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">{filteredVps.length}</span> instances
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </div>
         )}
       </div>
 
@@ -991,7 +1206,7 @@ export default function AdminResourceFindingPage() {
                 <th className="py-3.5 px-4 min-w-[170px]">Disk & Uptime</th>
                 <th className="py-3.5 px-4 text-center">Status</th>
                 <th className="py-3.5 px-4 text-center">Severity</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3.5 px-4 text-right min-w-[280px]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-normal">
@@ -1112,6 +1327,39 @@ export default function AdminResourceFindingPage() {
                           <div className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
                             Total: <span className="font-semibold">{formatBytes(vps.totalBandwidth)}</span>
                           </div>
+                          {vps.rateLimit && vps.rateLimit > 0 && (
+                            <div className="pt-1">
+                              <div
+                                className={cn(
+                                  "inline-flex items-center gap-2 pl-2 pr-1.5 py-0.5 rounded-lg border text-[11px] font-medium whitespace-nowrap transition-colors",
+                                  isDark
+                                    ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-300"
+                                    : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                                )}
+                              >
+                                <div className="flex items-center gap-1.5 font-mono">
+                                  <Gauge className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                  <span>Throttled: <strong className="font-bold">{vps.rateLimit} MB/s</strong></span>
+                                  <span className={cn("text-[10px]", isDark ? "text-cyan-400/70" : "text-cyan-700/70")}>
+                                    (~{Math.round(vps.rateLimit * 8)}M)
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => handleVpsAction(vps.id, "unthrottle")}
+                                  disabled={actionLoading}
+                                  className={cn(
+                                    "px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all active:scale-95 shadow-2xs",
+                                    isDark
+                                      ? "bg-white/10 hover:bg-cyan-500 hover:text-black border-white/15 text-white"
+                                      : "bg-white hover:bg-cyan-600 hover:text-white border-cyan-200 text-cyan-800"
+                                  )}
+                                  title="Remove bandwidth limit & restore full speed"
+                                >
+                                  Restore
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </td>
 
@@ -1272,10 +1520,10 @@ export default function AdminResourceFindingPage() {
                           <button
                             onClick={() => openInspectModal(vps)}
                             className={cn(
-                              "p-2 rounded-xl border text-xs font-semibold transition-all shadow-sm active:scale-95 flex items-center gap-1",
+                              "p-2 rounded-xl border text-xs font-semibold transition-all shadow-sm active:scale-95 flex items-center gap-1.5",
                               isDark
-                                ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
-                                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
+                                ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border-cyan-500/30"
+                                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
                             )}
                             title="Inspect Deep Telemetry & Graphs"
                           >
@@ -1283,65 +1531,163 @@ export default function AdminResourceFindingPage() {
                             <span className="hidden xl:inline">Inspect</span>
                           </button>
 
-                          {/* Power Actions: Reboot */}
-                          {vps.isOnline && (
-                            <button
-                              onClick={() => {
-                                setConfirmModal({
-                                  isOpen: true,
-                                  title: `Reboot VPS #${vps.vmid || vps.id}?`,
-                                  description: `Are you sure you want to reboot ${vps.hostname}? This will momentarily disrupt customer workloads.`,
-                                  confirmText: "Reboot Now",
-                                  variant: "warning",
-                                  onConfirm: async () => {
-                                    await handleVpsAction(vps.id, "reboot");
-                                  },
-                                });
-                              }}
-                              className={cn(
-                                "p-2 rounded-xl border transition-all text-xs font-semibold",
-                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 shadow-sm"
-                              )}
-                              title="Reboot VPS"
-                            >
-                              <RotateCw className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                          {/* Power Actions: Start */}
+                          <button
+                            disabled={vps.isOnline || vps.dbStatus === "SUSPENDED"}
+                            onClick={() => {
+                              setConfirmModal({
+                                isOpen: true,
+                                title: `Start VPS #${vps.vmid || vps.id}?`,
+                                description: `Power on ${vps.hostname}? This will boot up the operating system.`,
+                                confirmText: "Start VPS",
+                                variant: "success",
+                                onConfirm: async () => {
+                                  await handleVpsAction(vps.id, "start");
+                                },
+                              });
+                            }}
+                            className={cn(
+                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
+                              vps.isOnline || vps.dbStatus === "SUSPENDED"
+                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
+                                : isDark
+                                ? "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/30 shadow-sm"
+                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm"
+                            )}
+                            title={vps.isOnline ? "VPS is already running" : "Start VPS"}
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                          </button>
 
-                          {/* Power Actions: Stop */}
-                          {vps.isOnline && (
-                            <button
-                              onClick={() => {
-                                setConfirmModal({
-                                  isOpen: true,
-                                  title: `Force Stop VPS #${vps.vmid || vps.id}?`,
-                                  description: `Are you sure you want to forcefully stop ${vps.hostname}? Use this if the VM is consuming 100% CPU or unresponsive.`,
-                                  confirmText: "Force Stop",
-                                  variant: "danger",
-                                  onConfirm: async () => {
-                                    await handleVpsAction(vps.id, "stop");
-                                  },
-                                });
-                              }}
-                              className={cn(
-                                "p-2 rounded-xl border transition-all text-xs font-semibold",
-                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200 shadow-sm"
-                              )}
-                              title="Force Stop VPS"
-                            >
-                              <Power className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                          {/* Power Actions: Reboot */}
+                          <button
+                            disabled={!vps.isOnline}
+                            onClick={() => {
+                              setConfirmModal({
+                                isOpen: true,
+                                title: `Reboot VPS #${vps.vmid || vps.id}?`,
+                                description: `Are you sure you want to reboot ${vps.hostname}? This will momentarily disrupt customer workloads.`,
+                                confirmText: "Reboot Now",
+                                variant: "warning",
+                                onConfirm: async () => {
+                                  await handleVpsAction(vps.id, "reboot");
+                                },
+                              });
+                            }}
+                            className={cn(
+                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
+                              !vps.isOnline
+                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
+                                : isDark
+                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30 shadow-sm"
+                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300 shadow-sm"
+                            )}
+                            title={!vps.isOnline ? "VPS is offline" : "Reboot VPS"}
+                          >
+                            <RotateCw className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Power Actions: Shutdown (Graceful) */}
+                          <button
+                            disabled={!vps.isOnline}
+                            onClick={() => {
+                              setConfirmModal({
+                                isOpen: true,
+                                title: `Shutdown VPS #${vps.vmid || vps.id}?`,
+                                description: `Send graceful ACPI shutdown signal to ${vps.hostname}? Operating system will safely close processes and power off.`,
+                                confirmText: "Shutdown",
+                                variant: "warning",
+                                onConfirm: async () => {
+                                  await handleVpsAction(vps.id, "shutdown");
+                                },
+                              });
+                            }}
+                            className={cn(
+                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
+                              !vps.isOnline
+                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
+                                : isDark
+                                ? "bg-white/5 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 border-white/10 hover:border-amber-500/30 shadow-sm"
+                                : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300 shadow-sm"
+                            )}
+                            title={!vps.isOnline ? "VPS is offline" : "Graceful Shutdown (Power Off)"}
+                          >
+                            <Power className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Power Actions: Force Stop */}
+                          <button
+                            disabled={!vps.isOnline}
+                            onClick={() => {
+                              setConfirmModal({
+                                isOpen: true,
+                                title: `Force Stop VPS #${vps.vmid || vps.id}?`,
+                                description: `Are you sure you want to forcefully stop ${vps.hostname}? Use this if the VM is consuming 100% CPU or unresponsive.`,
+                                confirmText: "Force Stop",
+                                variant: "danger",
+                                onConfirm: async () => {
+                                  await handleVpsAction(vps.id, "stop");
+                                },
+                              });
+                            }}
+                            className={cn(
+                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
+                              !vps.isOnline
+                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
+                                : isDark
+                                ? "bg-white/5 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border-white/10 hover:border-rose-500/30 shadow-sm"
+                                : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300 shadow-sm"
+                            )}
+                            title={!vps.isOnline ? "VPS is offline" : "Force Stop VPS"}
+                          >
+                            <Square className="w-3.5 h-3.5 fill-current" />
+                          </button>
+
+                          {/* Bandwidth Throttle / Rate Limiter */}
+                          <button
+                            onClick={() => {
+                              setThrottleModalVps(vps);
+                              setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "1.25");
+                            }}
+                            className={cn(
+                              "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
+                              vps.rateLimit && vps.rateLimit > 0
+                                ? isDark
+                                  ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/25 shadow-sm shadow-cyan-500/10"
+                                  : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 shadow-sm"
+                                : isDark
+                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30 shadow-sm"
+                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border-slate-200 hover:border-cyan-200 shadow-sm"
+                            )}
+                            title={
+                              vps.rateLimit && vps.rateLimit > 0
+                                ? `Currently throttled to ${vps.rateLimit} MB/s (~${Math.round(vps.rateLimit * 8)} Mbps). Click to adjust or unthrottle.`
+                                : "Throttle Bandwidth (Set Rate Limit)"
+                            }
+                          >
+                            <Gauge className="w-3.5 h-3.5" />
+                          </button>
 
                           {/* Suspend / Lock or Unsuspend */}
                           {vps.dbStatus === "SUSPENDED" ? (
                             <button
-                              onClick={() => handleVpsAction(vps.id, "unsuspend")}
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: `Unsuspend VPS #${vps.vmid || vps.id}?`,
+                                  description: `Unsuspend and restore ${vps.hostname}? Customer access will be reinstated and the VPS will boot.`,
+                                  confirmText: "Unsuspend VPS",
+                                  variant: "success",
+                                  onConfirm: async () => {
+                                    await handleVpsAction(vps.id, "unsuspend");
+                                  },
+                                });
+                              }}
                               className={cn(
-                                "p-2 rounded-xl border text-xs font-semibold transition-all",
+                                "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
                                 isDark
                                   ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                                  : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                                  : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 shadow-sm"
                               )}
                               title="Unsuspend and restore customer VPS"
                             >
@@ -1358,7 +1704,7 @@ export default function AdminResourceFindingPage() {
                                 );
                               }}
                               className={cn(
-                                "p-2 rounded-xl border text-xs font-semibold transition-all",
+                                "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
                                 isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-rose-400 border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-rose-600 border-slate-200 shadow-sm"
                               )}
                               title="Suspend & Lock VPS due to resource abuse"
@@ -1472,6 +1818,29 @@ export default function AdminResourceFindingPage() {
                 <div>
                   <span className="text-zinc-500">Uptime:</span>{" "}
                   <span className="font-bold">{formatUptime(inspectVps.uptime)}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-zinc-500">Rate Limit:</span>{" "}
+                  {inspectVps.rateLimit && inspectVps.rateLimit > 0 ? (
+                    <span className={cn("font-bold font-mono", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      {inspectVps.rateLimit} MB/s (~{Math.round(inspectVps.rateLimit * 8)} Mbps)
+                    </span>
+                  ) : (
+                    <span className="text-emerald-400 font-semibold">Unlimited</span>
+                  )}
+                  <button
+                    onClick={() => {
+                      setThrottleModalVps(inspectVps);
+                      setThrottleRate(inspectVps.rateLimit ? inspectVps.rateLimit.toString() : "1.25");
+                    }}
+                    className={cn(
+                      "p-1 rounded transition-colors",
+                      isDark ? "hover:bg-white/10 text-zinc-400 hover:text-cyan-400" : "hover:bg-slate-100 text-slate-500 hover:text-cyan-700"
+                    )}
+                    title="Adjust Bandwidth Limit"
+                  >
+                    <Gauge className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -1692,6 +2061,201 @@ export default function AdminResourceFindingPage() {
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Suspend</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bandwidth Throttle / Rate Limiter Modal */}
+      {throttleModalVps && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-lg rounded-3xl border shadow-2xl p-6 sm:p-7 space-y-5 transition-colors",
+              isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+            )}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    "p-3 rounded-2xl border transition-colors",
+                    isDark
+                      ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                      : "bg-cyan-50 text-cyan-600 border-cyan-100"
+                  )}
+                >
+                  <Gauge className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">Bandwidth Rate Limiting</h3>
+                  <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    VMID #{throttleModalVps.vmid} ({throttleModalVps.hostname})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setThrottleModalVps(null)}
+                className={cn(
+                  "p-2 rounded-xl transition-colors",
+                  isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                )}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Current Status banner */}
+            <div
+              className={cn(
+                "p-3.5 rounded-2xl text-xs flex items-center justify-between border transition-colors",
+                throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
+                  ? isDark
+                    ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-300"
+                    : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                  : isDark
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-900"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "w-2 h-2 rounded-full",
+                    throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0 ? "bg-cyan-400 animate-pulse" : "bg-emerald-500"
+                  )}
+                />
+                <span className="font-semibold">
+                  Status: {throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
+                    ? `Throttled to ${throttleModalVps.rateLimit} MB/s (~${Math.round(throttleModalVps.rateLimit * 8)} Mbps)`
+                    : "Unlimited (Full Host Speed)"}
+                </span>
+              </div>
+              {throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0 && (
+                <button
+                  onClick={() => handleVpsAction(throttleModalVps.id, "unthrottle")}
+                  disabled={actionLoading}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95",
+                    isDark
+                      ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
+                      : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-sm"
+                  )}
+                >
+                  Restore Full Speed
+                </button>
+              )}
+            </div>
+
+            {/* Quick Presets */}
+            <div className="space-y-2">
+              <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
+                Speed Presets (Megabytes/sec)
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "1 MB/s", mbps: "8 Mbps", val: "1", desc: "Flood / Torrent" },
+                  { label: "1.25 MB/s", mbps: "10 Mbps", val: "1.25", desc: "Emergency Cap" },
+                  { label: "2.5 MB/s", mbps: "20 Mbps", val: "2.5", desc: "Strict Limit" },
+                  { label: "5 MB/s", mbps: "40 Mbps", val: "5", desc: "Moderate Limit" },
+                  { label: "10 MB/s", mbps: "80 Mbps", val: "10", desc: "Mild Limit" },
+                  { label: "12.5 MB/s", mbps: "100 Mbps", val: "12.5", desc: "100M Cap" },
+                ].map((preset) => {
+                  const isSelected = throttleRate === preset.val;
+                  return (
+                    <button
+                      key={preset.val}
+                      type="button"
+                      onClick={() => setThrottleRate(preset.val)}
+                      className={cn(
+                        "p-2.5 rounded-xl border text-left transition-all active:scale-[0.98]",
+                        isSelected
+                          ? isDark
+                            ? "bg-cyan-500/15 border-cyan-400 text-cyan-300 ring-1 ring-cyan-500/40 shadow-sm shadow-cyan-500/10"
+                            : "bg-cyan-50 border-cyan-500 text-cyan-900 ring-1 ring-cyan-500/30 shadow-sm"
+                          : isDark
+                          ? "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
+                          : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                      )}
+                    >
+                      <div className={cn("font-bold text-xs", isSelected && (isDark ? "text-cyan-300" : "text-cyan-700"))}>{preset.label}</div>
+                      <div className="text-[10px] opacity-75">{preset.mbps} • {preset.desc}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Input */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className={cn("font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
+                  Custom Limit (MB/s)
+                </span>
+                <span className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                  ≈ {Math.round((parseFloat(throttleRate) || 0) * 8)} Mbps
+                </span>
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.25"
+                  min="0.1"
+                  max="1000"
+                  value={throttleRate}
+                  onChange={(e) => setThrottleRate(e.target.value)}
+                  placeholder="Enter limit in MB/s (e.g. 1.25)..."
+                  className={cn(
+                    "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border outline-none font-mono transition-all",
+                    isDark
+                      ? "bg-[#0a1624] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+                      : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm"
+                  )}
+                />
+                <span className={cn("absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-semibold", isDark ? "text-zinc-400" : "text-slate-400")}>
+                  MB/s
+                </span>
+              </div>
+            </div>
+
+            {/* Explanatory Notice */}
+            <div className={cn("p-3 rounded-2xl text-[11px] leading-relaxed border", isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
+              <strong>Notice:</strong> Proxmox applies this bandwidth rate limit directly to the VM's network interfaces in real time via Linux kernel traffic control (tc). The VM does <em>not</em> restart and customer connections remain active.
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-white/5">
+              <button
+                onClick={() => setThrottleModalVps(null)}
+                disabled={actionLoading}
+                className={cn(
+                  "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all active:scale-95",
+                  isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
+                )}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  const rateNum = parseFloat(throttleRate);
+                  if (isNaN(rateNum) || rateNum <= 0) {
+                    toast.error("Please enter a valid rate limit greater than 0 MB/s");
+                    return;
+                  }
+                  handleVpsAction(throttleModalVps.id, "throttle", undefined, rateNum);
+                }}
+                disabled={actionLoading}
+                className={cn(
+                  "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95",
+                  "bg-cyan-600 hover:bg-cyan-500 shadow-md",
+                  isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]"
+                )}
+              >
+                {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                <span>Apply Rate Limit</span>
               </button>
             </div>
           </div>

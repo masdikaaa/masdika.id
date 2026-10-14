@@ -1238,16 +1238,22 @@ export default function VpcDashboardPage() {
                 />
               </div>
 
-              <div className={cn("border rounded-lg p-3 mt-6 flex items-start gap-2", isDark ? "bg-amber-500/10 border-amber-500/20" : "bg-amber-50 border-amber-200")}>
-                <AlertTriangle className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-amber-500" : "text-amber-600")} />
-                <p className={cn("text-xs", isDark ? "text-amber-200" : "text-amber-800")}>VPC CIDR ranges must not overlap. The system will auto-configure Mikrotik routing tables.</p>
+              <div className={cn("border rounded-xl p-4 mt-6 flex items-start gap-3 text-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                <div>
+                  <p className={cn("font-medium mb-1", isDark ? "text-cyan-400" : "text-cyan-900")}>VPC CIDR Configuration:</p>
+                  <p className="text-xs leading-relaxed">VPC CIDR ranges must not overlap. The system will auto-configure Mikrotik routing tables.</p>
+                </div>
               </div>
 
-              <div className={cn("border rounded-lg p-3 mt-3 flex items-start gap-2", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
-                <ShieldAlert className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <p className={cn("text-xs", isDark ? "text-slate-300" : "text-slate-600")}>
-                  <strong className={cn(isDark ? "text-white" : "text-slate-900")}>Security Note:</strong> After peering is created, you must manually add a Firewall Rule to your VMs (via Global Firewall Management) to allow inbound traffic from the peered VPC's CIDR block.
-                </p>
+              <div className={cn("border rounded-xl p-4 mt-3 flex items-start gap-3 text-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                <ShieldAlert className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                <div>
+                  <p className={cn("font-medium mb-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Security Note:</p>
+                  <p className="text-xs leading-relaxed">
+                    After peering is created, you must manually add a Firewall Rule to your VMs (via Global Firewall Management) to allow inbound traffic from the peered VPC's CIDR block.
+                  </p>
+                </div>
               </div>
 
               <div className="flex justify-start gap-3 mt-6">
