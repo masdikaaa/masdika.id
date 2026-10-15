@@ -1,20 +1,97 @@
-node_modules
-npm-debug.log
+# ==============================================================================
+# .dockerignore - Masdika.ID
+# Mencegah file tidak penting, cache, dan data sensitif masuk ke Docker Image
+# ==============================================================================
+
+# 1. Environment & Kredensial Sensitif (WAJIB DIABAIKAN)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa*
+**/id_rsa*
+
+# 2. Version Control & CI/CD
 .git
-.next
-#.env
-#.env.*
-.vercel
-Dockerfile
-docker-compose.yml
-.dockerignore
-mysql_data
-masdika.sql
-public/uploads
-storage/secure-media
-*.log
+.github
+.gitignore
+.gitattributes
+
+# 3. Dependencies & Build Cache
+**/node_modules
+**/.next
+**/.turbo
+**/.vercel
+**/.pnp
+**/.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+
+# 4. Dynamic Storage & Uploads (Dikelola via Volume Mount, bukan di dalam Image)
+apps/web/public/uploads/**
+!apps/web/public/uploads/.gitkeep
+apps/web/storage/**
+!apps/web/storage/.gitkeep
+public/uploads/**
+storage/**
+
+# 5. Build Artifacts, Reports, & Logs
+**/*.tsbuildinfo
+**/*.log
+**/*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage
+**/coverage
+*.report.json
+**/*_report*.json
+debug_*.json
+**/debug_*.json
+.eslintcache
+
+# 6. Database Storage & Volume Mount Directories di Host
 postgres_data
 redis_data
 grafana_data
 prometheus_data
 elasticsearch_data
+mysql_data
+mysql_shared_data
+postgres_shared_data
+mongo_shared_data
+*.sql
+*.sql.gz
+*.dump
+
+# 7. File Konfigurasi & Service Infrastruktur Terpisah
+nginx
+prometheus
+logstash
+k3s-masdika.yaml
+docker-compose.yml
+set_secrets.bat
+Dockerfile
+.dockerignore
+
+# 8. Dokumentasi & Panduan Developer
+README.md
+design.md
+CLAUDE.md
+AGENTS.md
+.agents
+
+# 9. IDE & OS Junk Files
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+ehthumbs.db

@@ -110,6 +110,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 RUN mkdir -p apps/web/public/uploads \
     apps/web/storage/secure-media \
     apps/web/storage/tickets \
+    apps/web/storage/ssh \
+    apps/web/storage/upload-buffers \
     apps/web/.next
 
 RUN chown -R nextjs:nodejs apps
