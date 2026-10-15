@@ -4,6 +4,8 @@
   <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-blue?logo=postgresql" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Docker-Swarm-blue?logo=docker" alt="Docker" />
+  <img src="https://img.shields.io/badge/Kubernetes-K3s-326CE5?logo=kubernetes" alt="Kubernetes K3s" />
+  <img src="https://img.shields.io/badge/Ingress-Traefik-24A1C1?logo=traefik" alt="Traefik" />
   <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions" alt="CI/CD" />
 </div>
 
@@ -77,6 +79,66 @@ If you need to deploy manually on a fresh Ubuntu Server:
    ```bash
    docker compose up -d --build
    ```
+
+---
+
+## ☸️ Production Deployment dengan Kubernetes (K3s)
+
+Aplikasi ini sudah dilengkapi dengan manifest produksi lengkap di [`k3s-masdika.yaml`](k3s-masdika.yaml) yang mendukung **Traefik Ingress**, **Persistent Storage (200GB)**, **InitContainers Anti-Crash**, dan **Horizontal Pod Autoscaler (HPA)**.
+
+### 1. Prasyarat
+- Server Linux/VPS dengan **K3s** yang sudah terinstall (Traefik Ingress Controller bawaan K3s aktif).
+- File konfigurasi `.env` production yang valid di direktori project.
+
+### 2. Langkah Deployment
+
+#### Langkah A: Buat Namespace & Inject `.env` ke Secret Kubernetes
+Anda **tidak perlu** mengedit variabel satu per satu di file YAML. Cukup import langsung file `.env` yang ada ke dalam Secret Kubernetes:
+```bash
+# 1. Buat namespace masdika
+sudo kubectl create namespace masdika
+
+# 2. Inject seluruh isi file .env ke dalam secret masdika-env
+sudo kubectl create secret generic masdika-env --from-env-file=.env -n masdika
+```
+
+#### Langkah B: Apply Manifest Kubernetes
+Jalankan file manifest all-in-one:
+```bash
+sudo kubectl apply -f k3s-masdika.yaml
+```
+
+Semua service (PostgreSQL 18, Redis 7, Next.js Web App, Background Worker, VNC Proxy, dan Ingress) akan berjalan secara berurutan dan aman dari race-condition.
+
+#### Langkah C: Hubungkan ke Cloudflare Tunnel (`cloudflared`)
+Karena Traefik bawaan K3s secara otomatis mendengarkan port `80` di host OS:
+1. Di Dashboard **Cloudflare Zero Trust** > **Tunnels** > Pilih Tunnel Anda.
+2. Tambahkan **Public Hostname**:
+   - **Type**: `HTTP`
+   - **URL**: `localhost:80` (atau `127.0.0.1:80`)
+3. Buka **Additional application settings** > **HTTP Settings** > Aktifkan toggle **WebSockets** ke posisi `ON` (wajib agar VNC Console & chat lancar).
+4. Klik **Save hostname**.
+
+---
+
+### 🔍 Perintah Berguna untuk Monitoring K3s
+
+```bash
+# Pantau status seluruh pod berjalan
+sudo kubectl get pods -n masdika -w
+
+# Pantau kinerja Horizontal Pod Autoscaler (Auto-Scaling CPU & RAM)
+sudo kubectl get hpa -n masdika -w
+
+# Cek konsumsi CPU & RAM per pod secara real-time
+sudo kubectl top pods -n masdika
+
+# Lihat log aplikasi web secara live
+sudo kubectl logs -n masdika -l app=masdika-app -f
+
+# Lakukan restart aplikasi web tanpa downtime (Rolling Restart)
+sudo kubectl rollout restart deployment masdika-app -n masdika
+```
 
 ---
 
