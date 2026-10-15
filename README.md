@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🚀 Masdika.ID</h1>
-  <p><strong>The Ultimate Cloud, VPS Management & Developer Portfolio Platform</strong></p>
+  <p><strong>Platform Manajemen Cloud, VPS & Portofolio Developer Modern</strong></p>
   <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-blue?logo=postgresql" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Docker-Swarm-blue?logo=docker" alt="Docker" />
@@ -11,112 +11,116 @@
 
 <br>
 
-Welcome to the official repository of **Masdika.ID**. This project is a modern, high-performance web application built with Next.js (App Router), Prisma, and PostgreSQL. It serves as a comprehensive **Cloud Hosting & VPS Provider Platform**, integrated with a personal portfolio, technical blog, and community hub.
-
-## ✨ Core Features
-
-### 💻 Cloud & VPS Provider (Core Business)
-- **VPS Provisioning**: Automated deployment of Virtual Private Servers.
-- **Client Area & Billing**: Integrated payment gateways, invoice management, and secure client dashboard.
-- **Resource Monitoring**: Live tracking of VPS CPU, RAM, and Disk Usage via Grafana & Prometheus.
-- **Support Ticketing**: Built-in ticketing system for customer support.
-
-### 🌐 Developer Hub & Portfolio
-- **Personal Portfolio & Resume**: Showcase projects, skills, certifications, and experiences with a beautiful, responsive, modern UI.
-- **Tech Blog & Series**: A fully functional blog system to share insights on Cloud Infrastructure, DevOps, and Linux.
-- **K3s / Kubernetes Automation**: Automated deployment and installation logs for K3s clusters on managed VPS instances.
-- **Developer Community**: A directory of WhatsApp IT & Developer groups (with Anti-Spam & SSRF Protection).
-
-### 🛠️ Admin Control Panel
-- **Infrastructure Management**: A secure dashboard to manage nodes, monitor system alerts, and handle user submissions.
-- **Utility Tools**: Features a built-in URL shortener, object storage manager, and media downloader.
-
-## 🏗️ Technology Stack
-
-Our architecture is built for scale, monitoring, and security:
-
-- **Frontend & Backend**: [Next.js](https://nextjs.org/) (App Router) with Tailwind CSS & Framer Motion.
-- **Database**: PostgreSQL 18 (Managed via Prisma ORM)
-- **Cache & Queue**: Redis 7
-- **Logging & Monitoring**: ELK Stack (Elasticsearch, Logstash, Kibana) & Prometheus + Grafana
-- **Deployment**: Docker Compose V2, Nginx, & Automated CI/CD (GitHub Actions)
+Selamat datang di repositori resmi **Masdika.ID**. Proyek ini adalah aplikasi web modern berperforma tinggi yang dibangun menggunakan Next.js (App Router), Prisma, dan PostgreSQL. Platform ini berfungsi sebagai layanan **Cloud Hosting & VPS Provider**, yang terintegrasi langsung dengan portofolio pribadi, blog teknis, dan pusat komunitas developer.
 
 ---
 
-## 🚀 CI/CD & Production Deployment
+## ✨ Fitur Utama
 
-We use a fully automated, **Zero-Touch Deployment** pipeline powered by **GitHub Actions**.
+### 💻 Provider Cloud & VPS (Bisnis Utama)
+- **Otomasi Provisioning VPS**: Pembuatan dan deployment instance Virtual Private Server (VPS) secara otomatis via Proxmox API.
+- **Area Klien & Sistem Billing**: Integrasi payment gateway (Duitku), manajemen invoice otomatis, saldo akun, dan dasbor klien yang aman.
+- **Monitoring Sumber Daya Real-Time**: Pelacakan penggunaan CPU, RAM, dan Disk VPS secara live menggunakan integrasi Prometheus & Grafana.
+- **Sistem Tiket Bantuan (Support Ticket)**: Manajemen tiket bantuan pelanggan langsung dari dashboard.
 
-### How it works:
-1. Push your code to the `master` branch.
-2. The GitHub Actions runner securely connects to the production VPS via SSH.
-3. Code is synchronized instantly using `rsync` (excluding sensitive data like `.env`, `postgres_data`, `grafana_data`).
-4. The deployment script triggers `docker compose up -d --build` to automatically rebuild the Next.js app and restart the containers gracefully.
+### 🌐 Hub Developer & Portofolio
+- **Portofolio Personal & Resume**: Menampilkan proyek, keterampilan, sertifikasi, dan riwayat pengalaman dengan antarmuka yang modern, cepat, dan responsif.
+- **Blog Teknis & Artikel Seri**: Sistem blog lengkap untuk membagikan wawasan seputar infrastruktur cloud, DevOps, dan Linux.
+- **Otomasi K3s / Kubernetes**: Pembuatan dan pelacakan log instalasi cluster K3s secara otomatis pada instance VPS klien.
+- **Komunitas Developer**: Direktori grup WhatsApp IT & developer dengan proteksi Anti-Spam dan Anti-SSRF.
 
-### Manual Setup (If needed)
-If you need to deploy manually on a fresh Ubuntu Server:
+### 🛠️ Panel Kontrol Admin
+- **Manajemen Infrastruktur**: Dasbor terpusat untuk mengelola node server, memantau alert sistem, audit resource, dan mengelola pengguna.
+- **Alat Utilitas**: Dilengkapi fitur URL shortener, object storage / secure media manager, dan media review.
 
-1. **Clone the repository**
+---
+
+## 🏗️ Teknologi yang Digunakan (Tech Stack)
+
+Arsitektur aplikasi dirancang untuk skalabilitas, keamanan, dan pemantauan menyeluruh:
+
+- **Frontend & Backend**: [Next.js](https://nextjs.org/) (App Router) dengan Tailwind CSS & Framer Motion.
+- **Database**: PostgreSQL 18 (Dikelola menggunakan Prisma ORM).
+- **Cache & Antrean (Queue)**: Redis 7.
+- **Logging & Monitoring**: ELK Stack (Elasticsearch, Logstash, Kibana) & Prometheus + Grafana.
+- **Deployment**: Docker Compose V2, K3s (Kubernetes), Traefik Ingress Controller, Nginx, & GitHub Actions (CI/CD).
+
+---
+
+## 🚀 CI/CD & Deployment Produksi (Docker Compose)
+
+Platform ini mendukung alur **Zero-Touch Deployment** otomatis menggunakan **GitHub Actions**:
+
+1. Lakukan `push` kode ke branch `master`.
+2. GitHub Actions runner terhubung secara aman ke server VPS melalui SSH.
+3. Sinkronisasi kode berjalan otomatis via `rsync` (mengabaikan data sensitif seperti `.env`, `postgres_data`, dsb).
+4. Skrip otomatis memicu `docker compose up -d --build` untuk memperbarui aplikasi tanpa memutus layanan.
+
+### Panduan Setup Manual (Docker Compose)
+Jika Anda ingin menjalankan secara manual di server Ubuntu/Debian:
+
+1. **Clone repositori**
    ```bash
    git clone https://github.com/masdikaaa/masdika.id.git
-   cd masdika.id
+   cd masdika
    ```
 
-2. **Configure `.env`**
+2. **Konfigurasi file `.env`**
+   Salin atau buat file `.env` di root folder dengan variabel koneksi:
    ```env
    # Database
    DATABASE_URL="postgresql://masdika:password@db:5432/masdika?schema=public"
    
    # Redis
-   REDIS_PASSWORD="your-redis-password"
+   REDIS_PASSWORD="password-redis-anda"
    
-   # Elastic Stack
-   ELASTIC_PASSWORD="your-elastic-password"
-   KIBANA_PASSWORD="your-kibana-password"
+   # Kredensial Keamanan
+   SESSION_SECRET="kunci-rahasia-sesi-anda"
+   CRON_SECRET="kunci-rahasia-cron-anda"
    ```
 
-3. **Deploy with Docker Compose V2**
+3. **Jalankan dengan Docker Compose**
    ```bash
    docker compose up -d --build
    ```
 
 ---
 
-## ☸️ Production Deployment dengan Kubernetes (K3s)
+## ☸️ Panduan Deployment Kubernetes (K3s)
 
-Aplikasi ini sudah dilengkapi dengan manifest produksi lengkap di [`k3s-masdika.yaml`](k3s-masdika.yaml) yang mendukung **Traefik Ingress**, **Persistent Storage (200GB)**, **InitContainers Anti-Crash**, dan **Horizontal Pod Autoscaler (HPA)**.
+Aplikasi ini sudah dilengkapi dengan manifest siap pakai di file [`k3s-masdika.yaml`](k3s-masdika.yaml). Konfigurasi ini mendukung **Traefik Ingress Bawaan K3s**, **Penyimpanan Persisten (200 GB)**, **InitContainers Anti-Crash**, dan **Horizontal Pod Autoscaler (HPA)**.
 
 ### 1. Prasyarat
-- Server Linux/VPS dengan **K3s** yang sudah terinstall (Traefik Ingress Controller bawaan K3s aktif).
-- File konfigurasi `.env` production yang valid di direktori project.
+- Server VPS dengan **K3s** yang sudah aktif (Traefik Ingress bawaan K3s aktif).
+- File konfigurasi `.env` production yang berada di direktori project.
 
 ### 2. Langkah Deployment
 
-#### Langkah A: Buat Namespace & Inject `.env` ke Secret Kubernetes
-Anda **tidak perlu** mengedit variabel satu per satu di file YAML. Cukup import langsung file `.env` yang ada ke dalam Secret Kubernetes:
+#### Langkah A: Buat Namespace & Import `.env` ke Secret Kubernetes
+Anda **tidak perlu** menyalin variabel satu per satu ke dalam YAML. Cukup import otomatis file `.env` ke dalam Secret Kubernetes:
 ```bash
 # 1. Buat namespace masdika
 sudo kubectl create namespace masdika
 
-# 2. Inject seluruh isi file .env ke dalam secret masdika-env
+# 2. Masukkan seluruh konfigurasi .env ke secret masdika-env
 sudo kubectl create secret generic masdika-env --from-env-file=.env -n masdika
 ```
 
-#### Langkah B: Apply Manifest Kubernetes
-Jalankan file manifest all-in-one:
+#### Langkah B: Jalankan Manifest All-in-One
+Eksekusi manifest Kubernetes:
 ```bash
 sudo kubectl apply -f k3s-masdika.yaml
 ```
 
-Semua service (PostgreSQL 18, Redis 7, Next.js Web App, Background Worker, VNC Proxy, dan Ingress) akan berjalan secara berurutan dan aman dari race-condition.
+Semua service (PostgreSQL 18, Redis 7, Next.js Web App, Background Worker, VNC Proxy, dan Traefik Ingress) akan berjalan secara teratur dan terlindungi dari *race-condition* saat database booting.
 
 #### Langkah C: Hubungkan ke Cloudflare Tunnel (`cloudflared`)
-Karena Traefik bawaan K3s secara otomatis mendengarkan port `80` di host OS:
-1. Di Dashboard **Cloudflare Zero Trust** > **Tunnels** > Pilih Tunnel Anda.
+Karena Traefik bawaan K3s otomatis mendengarkan port `80` di host server:
+1. Masuk ke **Cloudflare Zero Trust Dashboard** > **Networks** > **Tunnels** > Pilih Tunnel Anda.
 2. Tambahkan **Public Hostname**:
    - **Type**: `HTTP`
    - **URL**: `localhost:80` (atau `127.0.0.1:80`)
-3. Buka **Additional application settings** > **HTTP Settings** > Aktifkan toggle **WebSockets** ke posisi `ON` (wajib agar VNC Console & chat lancar).
+3. Buka tab **Additional application settings** > **HTTP Settings** > Aktifkan toggle **WebSockets** ke posisi `ON` (wajib aktif untuk VNC console dan chat).
 4. Klik **Save hostname**.
 
 ---
@@ -124,16 +128,16 @@ Karena Traefik bawaan K3s secara otomatis mendengarkan port `80` di host OS:
 ### 🔍 Perintah Berguna untuk Monitoring K3s
 
 ```bash
-# Pantau status seluruh pod berjalan
+# Pantau status seluruh pod yang sedang berjalan
 sudo kubectl get pods -n masdika -w
 
-# Pantau kinerja Horizontal Pod Autoscaler (Auto-Scaling CPU & RAM)
+# Pantau status Auto-Scaling HPA (skala pod otomatis 1-5 pod berdasarkan beban CPU/RAM)
 sudo kubectl get hpa -n masdika -w
 
-# Cek konsumsi CPU & RAM per pod secara real-time
+# Cek pemakaian CPU & RAM riil per pod
 sudo kubectl top pods -n masdika
 
-# Lihat log aplikasi web secara live
+# Lihat live logs aplikasi web
 sudo kubectl logs -n masdika -l app=masdika-app -f
 
 # Lakukan restart aplikasi web tanpa downtime (Rolling Restart)
@@ -142,15 +146,17 @@ sudo kubectl rollout restart deployment masdika-app -n masdika
 
 ---
 
-## 🔒 DevSecOps & Security
+## 🔒 Keamanan & DevSecOps
 
-- **Strict Data Persistence**: Critical volumes (`postgres_data`, `redis_data`, `grafana_data`, `elasticsearch_data`) are isolated and protected from CI/CD wipes.
-- **Non-Root Execution**: Application containers run as secure non-root users (`nextjs`) to prevent privilege escalation.
-- **Rate Limiting & Anti-Spam**: Protection against abuse on public endpoints (e.g. community group submissions).
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! 
+- **Persistensi Data Mutlak**: Seluruh volume database (`postgres_data`), cache (`redis_data`), dan penyimpanan web (`uploads`, `secure-media`, `tickets`, `ssh`) dipisahkan ke Persistent Volume khusus sehingga aman dari risiko terhapus saat update.
+- **Eksekusi Non-Root**: Seluruh container aplikasi berjalan menggunakan user non-root (`nextjs`, GID: `1001`) demi mencegah eskalasi hak akses sistem.
+- **Rate Limiting & Anti-Spam**: Proteksi otomatis terhadap serangan brute-force dan spam pada endpoint publik.
 
 ---
-*Built with ❤️ by [Masdika](https://masdika.id).*
+
+## 🤝 Kontribusi
+
+Kontribusi, laporan bug, dan saran fitur sangat kami hargai! Silakan buat *issue* atau kirimkan *pull request*.
+
+---
+*Dikembangkan dengan ❤️ oleh [Masdika](https://masdika.id).*
