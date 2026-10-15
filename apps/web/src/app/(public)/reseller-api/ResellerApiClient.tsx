@@ -497,7 +497,42 @@ export default function ResellerApiClient() {
               description="Create a top-up request to add funds to your reseller balance. This endpoint returns a secure payment URL (Duitku) and payment identifiers (Virtual Account / QR string) for automated customer flows. Note: Both /api/v1/billing/topup and /api/v1/billing/deposit are supported."
               parameters={[
                 { name: "amount", type: "Integer", description: "Required. Top-up amount in IDR (Minimum: 50,000, Maximum: 50,000,000)." },
-                { name: "paymentMethodCode", type: "String", description: "Required. Payment channel code (e.g. 'SQ' for QRIS, 'M2' for Mandiri VA, 'BR' for BRIVA, etc.). Call GET /api/v1/billing/topup to view real-time codes." },
+                {
+                  name: "paymentMethodCode",
+                  type: "String",
+                  description: (
+                    <div className="flex flex-col gap-2">
+                      <span>Required. Code of the payment method to use. Available channel codes:</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {[
+                          { code: "SQ", name: "Nusapay QRIS" },
+                          { code: "SA", name: "Shopee Pay Apps" },
+                          { code: "OV", name: "OVO" },
+                          { code: "DA", name: "DANA" },
+                          { code: "LA", name: "LinkAja" },
+                          { code: "M2", name: "Mandiri VA" },
+                          { code: "I1", name: "BNI VA" },
+                          { code: "B1", name: "CIMB Niaga VA" },
+                          { code: "BR", name: "BRIVA" },
+                          { code: "BV", name: "BSI VA" },
+                          { code: "VA", name: "Maybank VA" },
+                          { code: "BT", name: "Permata Bank VA" },
+                          { code: "NC", name: "Bank Neo Commerce/BNC" },
+                          { code: "AG", name: "Bank Artha Graha" },
+                          { code: "DM", name: "Danamon VA" },
+                          { code: "S1", name: "Bank Sahabat Sampoerna" },
+                          { code: "A1", name: "ATM Bersama" },
+                          { code: "FT", name: "Pegadaian/ALFA/Pos" }
+                        ].map(pm => (
+                          <span key={pm.code} className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border", isDark ? "bg-white/[0.04] border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700")}>
+                            <code className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{pm.code}</code>
+                            <span>{pm.name}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                },
                 { name: "voucherCode", type: "String", description: "Optional. Promo / discount voucher code if available." }
               ]}
               payload={`{\n  "amount": 100000,\n  "paymentMethodCode": "SQ",\n  "voucherCode": "PROMO2026"\n}`}
