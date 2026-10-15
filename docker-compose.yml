@@ -54,7 +54,6 @@ services:
       - ./apps/web/public/uploads:/app/apps/web/public/uploads
       - ./apps/web/storage/secure-media:/app/apps/web/storage/secure-media
       - ./apps/web/storage/tickets:/app/apps/web/storage/tickets
-      - ./apps/web/storage/db-backups:/app/apps/web/storage/db-backups
       - ./prometheus_data:/app/prometheus_data
       - ./grafana_data:/app/grafana_data
       - /var/run/docker.sock:/var/run/docker.sock
@@ -98,7 +97,6 @@ services:
       - ./apps/web/public/uploads:/app/apps/web/public/uploads
       - ./apps/web/storage/secure-media:/app/apps/web/storage/secure-media
       - ./apps/web/storage/tickets:/app/apps/web/storage/tickets
-      - ./apps/web/storage/db-backups:/app/apps/web/storage/db-backups
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - internal

@@ -1,0 +1,810 @@
+# ==============================================================================
+# Masdika.ID - Production Kubernetes (K3s) All-in-One Manifest
+# 
+# Stack:
+#   - Ingress: Traefik (Built-in K3s Ingress Controller, bound to host port 80/443)
+#   - Tunnel: Cloudflare Tunnel (cloudflared) -> pointing to http://localhost:80
+#   - Database: PostgreSQL 18 Alpine (PersistentVolume: local-path)
+#   - Cache / Queue: Redis 7 Alpine (PersistentVolume: local-path)
+#   - Web Application: Next.js Standalone (masdika-app)
+#   - Background Worker: Node Queue / Cron Worker (masdika-worker)
+#   - VNC Proxy: Dedicated WebSocket Proxy for VNC Console (masdika-vnc-proxy)
+#
+# Cara Deploy Cepat:
+#   1. Buat secret dari file .env:
+#      kubectl create namespace masdika
+#      kubectl create secret generic masdika-env --from-env-file=.env -n masdika
+#   2. Apply manifest ini:
+#      kubectl apply -f k3s-masdika.yaml
+#   3. Arahkan Cloudflare Tunnel (cloudflared) ke:
+#      Type: HTTP
+#      URL: localhost:80
+#      (Pastikan toggle WebSocket diaktifkan di dashboard Cloudflare Tunnel)
+# ==============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: masdika
+  labels:
+    app.kubernetes.io/name: masdika
+
+---
+# ==============================================================================
+# 1. STORAGE (PersistentVolumeClaims - K3s local-path provisioner)
+# ==============================================================================
+
+# PVC untuk PostgreSQL Database Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-db-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 30Gi
+
+---
+# PVC untuk Redis Data & AOF persistence
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-redis-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+# PVC Terpusat untuk Web Storage (uploads, secure-media, tickets, ssh, upload-buffers)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-storage-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 160Gi
+
+---
+# ==============================================================================
+# 2. CONFIGMAP (Non-sensitive application settings)
+# ==============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-config
+  namespace: masdika
+data:
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TZ: "Asia/Jakarta"
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  USE_REDIS: "true"
+  DB_HOST: "masdika-db"
+  DB_PORT: "5432"
+  DB_NAME: "masdika"
+  DB_USER: "masdika"
+
+---
+# ==============================================================================
+# 3. SECRET (Sensitive Credentials & Database Connection)
+# Catatan: Jika Anda menjalankan `kubectl create secret generic masdika-env --from-env-file=.env -n masdika`,
+# secret tersebut akan otomatis digunakan oleh container di bawah.
+# ==============================================================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: masdika-credentials
+  namespace: masdika
+type: Opaque
+stringData:
+  # Ganti password sesuai dengan production environment Anda
+  POSTGRES_DB: "masdika"
+  POSTGRES_USER: "masdika"
+  POSTGRES_PASSWORD: "Andikaferdi11"
+  DATABASE_URL: "postgresql://masdika:Andikaferdi11@masdika-db:5432/masdika?schema=public"
+  REDIS_PASSWORD: "Andikaferdi11"
+  REDIS_URL: "redis://:Andikaferdi11@masdika-redis:6379"
+  SESSION_SECRET: "8d9f4c7f1a2e6b9d5e3f8a1c7d4b2e9f6a3c8d1e5f7b9a2c4d6e8f1a3b5c7d9e2f4a6b8c1d3e5f7a9b2c4d6e8f1a3b5"
+  CRON_SECRET: "9Kf4Np7Xw2Qm8Rz1Tg6Yh3Uc5Vb9Ln2Ds7Ae4Fk8Mp1Qr6Xt3Zw9Hy2Nu5Cv7Bj1Pd8Rs4Wt6Yk2Lm9Gh3Jx7Zq5Vc1Fn8Tb4"
+
+---
+# ==============================================================================
+# 4. DATABASE (PostgreSQL 18)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-db
+  namespace: masdika
+  labels:
+    app: masdika-db
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-db
+  template:
+    metadata:
+      labels:
+        app: masdika-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18-alpine
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-c"
+            - "max_connections=300"
+            - "-c"
+            - "shared_buffers=512MB"
+            - "-c"
+            - "effective_cache_size=1536MB"
+            - "-c"
+            - "work_mem=4MB"
+            - "-c"
+            - "random_page_cost=1.1"
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: POSTGRES_DB
+                  optional: true
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: POSTGRES_USER
+                  optional: true
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "${POSTGRES_USER:-masdika}" -d "${POSTGRES_DB:-masdika}"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "${POSTGRES_USER:-masdika}" -d "${POSTGRES_DB:-masdika}"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: masdika-db-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-db
+  namespace: masdika
+  labels:
+    app: masdika-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: masdika-db
+
+---
+# ==============================================================================
+# 5. CACHE & QUEUE (Redis 7)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-redis
+  namespace: masdika
+  labels:
+    app: masdika-redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-redis
+  template:
+    metadata:
+      labels:
+        app: masdika-redis
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              if [ -n "$REDIS_PASSWORD" ]; then
+                exec redis-server --requirepass "$REDIS_PASSWORD" --bind 0.0.0.0 --appendonly yes
+              else
+                exec redis-server --bind 0.0.0.0 --appendonly yes
+              fi
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: REDIS_PASSWORD
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  if [ -n "$REDIS_PASSWORD" ]; then
+                    redis-cli -a "$REDIS_PASSWORD" ping | grep -q PONG
+                  else
+                    redis-cli ping | grep -q PONG
+                  fi
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  if [ -n "$REDIS_PASSWORD" ]; then
+                    redis-cli -a "$REDIS_PASSWORD" ping | grep -q PONG
+                  else
+                    redis-cli ping | grep -q PONG
+                  fi
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: masdika-redis-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-redis
+  namespace: masdika
+  labels:
+    app: masdika-redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  selector:
+    app: masdika-redis
+
+---
+# ==============================================================================
+# 6. APPLICATION (Next.js Standalone Web App)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-app
+  namespace: masdika
+  labels:
+    app: masdika-app
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: masdika-app
+  template:
+    metadata:
+      labels:
+        app: masdika-app
+    spec:
+      securityContext:
+        fsGroup: 1001 # GID nodejs agar permissions mount uploads writable oleh user nextjs
+      initContainers:
+        - name: wait-for-dependencies
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              echo "Checking PostgreSQL connection (masdika-db:5432)..."
+              until nc -z -w 3 masdika-db 5432; do
+                echo "PostgreSQL is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "PostgreSQL is online and accepting connections!"
+
+              echo "Checking Redis connection (masdika-redis:6379)..."
+              until nc -z -w 3 masdika-redis 6379; do
+                echo "Redis is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "Redis is online and accepting connections!"
+      containers:
+        - name: app
+          image: andikaferdialvianto/masdika-id:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: masdika-config
+            - secretRef:
+                name: masdika-credentials
+            # Opsional: Jika Anda membuat secret `masdika-env` dari file .env:
+            - secretRef:
+                name: masdika-env
+                optional: true
+          env:
+            # Overrides eksplisit agar mengarah ke Service internal Kubernetes
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: REDIS_URL
+          volumeMounts:
+            - name: app-storage
+              mountPath: /app/apps/web/public/uploads
+              subPath: uploads
+            - name: app-storage
+              mountPath: /app/apps/web/storage/secure-media
+              subPath: secure-media
+            - name: app-storage
+              mountPath: /app/apps/web/storage/tickets
+              subPath: tickets
+            - name: app-storage
+              mountPath: /app/apps/web/storage/ssh
+              subPath: ssh
+            - name: app-storage
+              mountPath: /app/apps/web/storage/upload-buffers
+              subPath: upload-buffers
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 25
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: "300m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+      volumes:
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: masdika-storage-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-app
+  namespace: masdika
+  labels:
+    app: masdika-app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  selector:
+    app: masdika-app
+
+---
+# ==============================================================================
+# 7. BACKGROUND WORKER (Cron, Queue & Auto Billing Checks)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-worker
+  namespace: masdika
+  labels:
+    app: masdika-worker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-worker
+  template:
+    metadata:
+      labels:
+        app: masdika-worker
+    spec:
+      securityContext:
+        fsGroup: 1001
+      initContainers:
+        - name: wait-for-dependencies
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              echo "Checking PostgreSQL connection (masdika-db:5432)..."
+              until nc -z -w 3 masdika-db 5432; do
+                echo "PostgreSQL is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "PostgreSQL is online and accepting connections!"
+
+              echo "Checking Redis connection (masdika-redis:6379)..."
+              until nc -z -w 3 masdika-redis 6379; do
+                echo "Redis is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "Redis is online and accepting connections!"
+      containers:
+        - name: worker
+          image: andikaferdialvianto/masdika-id:v1.0.0
+          imagePullPolicy: Always
+          args:
+            - "sh"
+            - "-c"
+            - "cd /app/apps/web && exec node worker.js"
+          envFrom:
+            - configMapRef:
+                name: masdika-config
+            - secretRef:
+                name: masdika-credentials
+            - secretRef:
+                name: masdika-env
+                optional: true
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: REDIS_URL
+          volumeMounts:
+            - name: app-storage
+              mountPath: /app/apps/web/public/uploads
+              subPath: uploads
+            - name: app-storage
+              mountPath: /app/apps/web/storage/secure-media
+              subPath: secure-media
+            - name: app-storage
+              mountPath: /app/apps/web/storage/tickets
+              subPath: tickets
+            - name: app-storage
+              mountPath: /app/apps/web/storage/ssh
+              subPath: ssh
+            - name: app-storage
+              mountPath: /app/apps/web/storage/upload-buffers
+              subPath: upload-buffers
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+      volumes:
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: masdika-storage-pvc
+
+---
+# ==============================================================================
+# 8. VNC PROXY (Dedicated WebSocket Proxy for Server / VNC Console)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-vnc-proxy
+  namespace: masdika
+  labels:
+    app: masdika-vnc-proxy
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-vnc-proxy
+  template:
+    metadata:
+      labels:
+        app: masdika-vnc-proxy
+    spec:
+      initContainers:
+        - name: wait-for-dependencies
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              echo "Checking PostgreSQL connection (masdika-db:5432)..."
+              until nc -z -w 3 masdika-db 5432; do
+                echo "PostgreSQL is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "PostgreSQL is online and accepting connections!"
+
+              echo "Checking Redis connection (masdika-redis:6379)..."
+              until nc -z -w 3 masdika-redis 6379; do
+                echo "Redis is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "Redis is online and accepting connections!"
+      containers:
+        - name: vnc-proxy
+          image: andikaferdialvianto/masdika-id:v1.0.0
+          imagePullPolicy: Always
+          args:
+            - "sh"
+            - "-c"
+            - "cd /app/apps/web && exec node vnc-proxy.js"
+          ports:
+            - containerPort: 3001
+              name: vnc-proxy
+          envFrom:
+            - configMapRef:
+                name: masdika-config
+            - secretRef:
+                name: masdika-credentials
+            - secretRef:
+                name: masdika-env
+                optional: true
+          env:
+            - name: PORT
+              value: "3001"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: REDIS_URL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-vnc-proxy
+  namespace: masdika
+  labels:
+    app: masdika-vnc-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3001
+      targetPort: 3001
+      name: vnc-proxy
+  selector:
+    app: masdika-vnc-proxy
+
+---
+# ==============================================================================
+# 9. TRAEFIK MIDDLEWARE (Security Headers & 10GB Upload Buffering)
+# ==============================================================================
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-headers
+  namespace: masdika
+spec:
+  headers:
+    customResponseHeaders:
+      X-Frame-Options: "SAMEORIGIN"
+      X-XSS-Protection: "1; mode=block"
+      X-Content-Type-Options: "nosniff"
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-buffering
+  namespace: masdika
+spec:
+  buffering:
+    maxRequestBodyBytes: 10737418240 # 10 GB limit untuk upload ISO / VM Image / Media
+    memRequestBodyBytes: 2097152     # 2 MB buffer di memory sebelum spool ke disk
+
+---
+# ==============================================================================
+# 10. TRAEFIK INGRESS
+# Mengatur routing HTTP & WebSocket langsung dari port 80 Traefik K3s.
+# Traefik secara otomatis mendengarkan port 80 & 443 di host OS K3s.
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: masdika-ingress
+  namespace: masdika
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd,masdika-masdika-buffering@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          # 1. Dedicated WebSocket Proxy untuk VNC Console
+          - path: /api/ws
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-vnc-proxy
+                port:
+                  number: 3001
+
+          # 2. Aplikasi Web Utama (Next.js)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+
+---
+# ==============================================================================
+# 11. HORIZONTAL POD AUTOSCALER (HPA)
+# Mengatur auto-scaling otomatis untuk aplikasi web Next.js (masdika-app)
+# berdasarkan penggunaan CPU dan RAM.
+# K3s sudah menyertakan 'metrics-server' secara default sehingga HPA langsung aktif.
+# ==============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: masdika-app-hpa
+  namespace: masdika
+  labels:
+    app: masdika-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: masdika-app
+  minReplicas: 1 # Minimal 1 pod berjalan (hemat RAM/CPU saat sepi)
+  maxReplicas: 5 # Maksimal 5 pod berjalan otomatis saat traffic melonjak
+  metrics:
+    # Scale up jika rata-rata CPU melebihi 75% dari request (300m)
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    # Scale up jika rata-rata Memory melebihi 80% dari request (512Mi)
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleDown:
+      # Jeda 5 menit stabil sebelum pod dikurangi agar tidak fluktuatif (flapping)
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60

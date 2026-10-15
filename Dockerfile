@@ -99,7 +99,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache openssl vips dcron wget su-exec postgresql-client mariadb-client mongodb-tools docker-cli iputils mtr traceroute bind-tools
+RUN apk add --no-cache openssl vips dcron wget su-exec postgresql-client docker-cli iputils mtr traceroute bind-tools
 
 
 

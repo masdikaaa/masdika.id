@@ -2,7 +2,7 @@
 set -e
 
 # Fix permissions for the bind-mounted uploads and secure media directories
-mkdir -p /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets
+mkdir -p /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets /app/apps/web/storage/ssh /app/apps/web/storage/upload-buffers
 mkdir -p /app/prometheus_data /app/grafana_data
 
 # Fix permissions for external services securely without 777.
@@ -11,9 +11,14 @@ chown -R 65534:65534 /app/prometheus_data 2>/dev/null || true
 chown -R 472:472 /app/grafana_data 2>/dev/null || true
 
 # Set safe permissions: 755 for directories, 644 for files (non-executable)
-find /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets -type d -exec chmod 755 {} \; 2>/dev/null || true
-find /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets -type f -exec chmod 644 {} \; 2>/dev/null || true
-chown -R nextjs:nodejs /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets
+find /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets /app/apps/web/storage/upload-buffers -type d -exec chmod 755 {} \; 2>/dev/null || true
+find /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets /app/apps/web/storage/upload-buffers -type f -exec chmod 644 {} \; 2>/dev/null || true
+
+# SSH directory requires strict permissions (700 for dir, 600 for keys)
+chmod 700 /app/apps/web/storage/ssh 2>/dev/null || true
+find /app/apps/web/storage/ssh -type f -exec chmod 600 {} \; 2>/dev/null || true
+
+chown -R nextjs:nodejs /app/apps/web/public/uploads /app/apps/web/storage/secure-media /app/apps/web/storage/tickets /app/apps/web/storage/ssh /app/apps/web/storage/upload-buffers
 
 
 # Apply database migrations before starting the application
