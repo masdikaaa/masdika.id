@@ -248,7 +248,7 @@ export default function AdminChatHistoryPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Chat History</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Chat History</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor all AI Assistant conversation sessions ({total} {total === 1 ? 'session' : 'sessions'})</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -437,7 +437,7 @@ export default function AdminChatHistoryPage() {
             className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm cursor-default"
             onClick={() => { setDetailSession(null); setLoadingDetail(false); }}
           />
-          <div className={cn("fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[600px] sm:max-h-[80vh] z-50 border rounded-2xl shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0a1f33] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[600px] sm:max-h-[80vh] z-50 border rounded-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0a1f33] border-white/10" : "bg-white border-slate-200")}>
             {loadingDetail && !detailSession ? (
               <div className="flex items-center justify-center p-12">
                 <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
@@ -449,7 +449,7 @@ export default function AdminChatHistoryPage() {
                   <div className="flex gap-3 sm:gap-4 flex-1 min-w-0">
                     <img referrerPolicy="no-referrer"                       src={`/api/avatar?email=${encodeURIComponent(detailSession.email)}&name=${encodeURIComponent(detailSession.name)}`}
                       alt={detailSession.name}
-                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-cyan-500/20 object-cover flex-shrink-0 shadow-lg shadow-cyan-500/10 bg-[#0f172a]"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-cyan-500/20 object-cover flex-shrink-0 bg-[#0f172a]"
                     loading="lazy" decoding="async" />
                     <div className="flex-1 min-w-0">
                       <h3 className={cn("font-bold text-base sm:text-lg leading-tight truncate", isDark ? "text-white" : "text-slate-900")}>{detailSession.name}</h3>
@@ -470,7 +470,7 @@ export default function AdminChatHistoryPage() {
                   </div>
                   <button
                     onClick={() => setDetailSession(null)}
-                    className={cn("w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/20 hover:text-red-400 transition-all border hover:border-red-500/20 shadow-sm flex-shrink-0", isDark ? "text-zinc-400 border-white/5" : "text-slate-500 border-slate-200")}
+                    className={cn("w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/20 hover:text-red-400 transition-all border hover:border-red-500/20 flex-shrink-0", isDark ? "text-zinc-400 border-white/5" : "text-slate-500 border-slate-200")}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -501,7 +501,7 @@ export default function AdminChatHistoryPage() {
                             <span>Output Blocked</span>
                           </div>
                         )}
-                        <div className={cn("relative max-w-[85%] sm:max-w-[75%] px-4 py-3 text-sm shadow-md", msg.role === "user" ? (msg.isInjectionAttempt ? "bg-red-950/80 border-red-500/30 text-white rounded-2xl rounded-tr-sm border shadow-cyan-500/10" : "bg-gradient-to-br from-cyan-600 to-cyan-600 border-cyan-400/20 text-white rounded-2xl rounded-tr-sm border shadow-cyan-500/10") : (isDark ? "bg-white/5 backdrop-blur-md border border-white/10 text-gray-200 rounded-2xl rounded-tl-sm " + (msg.isOutputBlocked ? "border-orange-500/30" : "") : "bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-sm shadow-sm " + (msg.isOutputBlocked ? "border-orange-500" : "")))}>
+                        <div className={cn("relative max-w-[85%] sm:max-w-[75%] px-4 py-3 text-sm", msg.role === "user" ? (msg.isInjectionAttempt ? "bg-red-950/80 border-red-500/30 text-white rounded-2xl rounded-tr-sm border" : "bg-gradient-to-br from-cyan-600 to-cyan-600 border-cyan-400/20 text-white rounded-2xl rounded-tr-sm border") : (isDark ? "bg-white/5 backdrop-blur-md border border-white/10 text-gray-200 rounded-2xl rounded-tl-sm " + (msg.isOutputBlocked ? "border-orange-500/30" : "") : "bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-sm" + (msg.isOutputBlocked ? "border-orange-500" : "")))}>
                           <p className="break-words whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                         </div>
                         <span className="text-[10px] text-zinc-500 mt-1.5 px-1 font-medium">
@@ -545,7 +545,7 @@ export default function AdminChatHistoryPage() {
       {banIpSession && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setBanIpSession(null)} />
-          <div className={cn("relative border rounded-2xl shadow-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0a1f33] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0a1f33] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-5 border-b flex items-center gap-3", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                 <Shield className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-600")} />

@@ -129,12 +129,12 @@ export default function AdminSeriesPage() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Series Management</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Series Management</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage learning series and their episodes.</p>
         </div>
       </div>
         <Link href="/admin/series/edit/new"
-          className={cn("inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          className={cn("inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
           <Plus className="w-4 h-4" /> Add Series
         </Link>
       </motion.div>
@@ -148,7 +148,7 @@ export default function AdminSeriesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search series..." 
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500 shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -197,7 +197,7 @@ export default function AdminSeriesPage() {
                 <tr>
                   <td colSpan={6} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>
                         <BookOpen className="w-8 h-8 text-zinc-500" />
                       </div>
                       <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No series found</h3>
@@ -217,7 +217,7 @@ export default function AdminSeriesPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-4">
-                      <div className={cn("w-12 h-12 rounded-xl overflow-hidden border flex items-center justify-center shrink-0 shadow-inner group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-12 h-12 rounded-xl overflow-hidden border flex items-center justify-center shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
                         {s.image ? <img referrerPolicy="no-referrer" src={s.image} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <BookOpen className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />}
                       </div>
                       <Link href={`/admin/series/edit/${s.id}`} className={cn("font-bold line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
@@ -231,28 +231,28 @@ export default function AdminSeriesPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border shadow-inner", isDark ? "text-zinc-300 border-white/10" : "text-slate-600 border-slate-200")}>
+                    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-300 border-white/10" : "text-slate-600 border-slate-200")}>
                       {s.episodes?.length ?? 0} Episodes
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border shadow-inner ${s.published ? 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' : isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200"}`}>
+ <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border ${s.published ?'text-cyan-400 bg-cyan-500/10 border-cyan-500/20': isDark ?"text-zinc-400 border-white/10":"text-slate-500 border-slate-200"}`}>
                       {s.published ? 'Published' : 'Draft'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => handleTogglePublish(s.id, s.published)}
-                        className={`p-2 rounded-lg transition-all border shadow-inner ${s.published ? isDark ? "bg-white/5 border-transparent hover:border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-transparent hover:border-slate-200 text-slate-500 hover:text-slate-900" : 'bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-cyan-400 hover:text-white'}`}
+ className={`p-2 rounded-lg transition-all border ${s.published ? isDark ?"bg-white/5 border-transparent hover:border-white/10 text-zinc-400 hover:text-white":"bg-slate-100 border-transparent hover:border-slate-200 text-slate-500 hover:text-slate-900":'bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-cyan-400 hover:text-white'}`}
                         title={s.published ? 'Unpublish' : 'Publish'}>
                         {s.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                       <Link href={`/admin/series/edit/${s.id}`}
-                        className={cn("p-2 rounded-lg bg-cyan-500/10 hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20 shadow-inner", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        className={cn("p-2 rounded-lg bg-cyan-500/10 hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         <Edit2 className="w-4 h-4" />
                       </Link>
                       <button onClick={() => setDeleteId(s.id)}
-                        className={cn("p-2 rounded-lg bg-red-500/10 hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20 shadow-inner", isDark ? "text-red-400" : "text-red-700")}>
+                        className={cn("p-2 rounded-lg bg-red-500/10 hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20", isDark ? "text-red-400" : "text-red-700")}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

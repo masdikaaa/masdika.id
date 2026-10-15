@@ -80,7 +80,7 @@ export default function AdminAffiliatePage() {
     <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Affiliate System
           </h1>
           <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -112,7 +112,7 @@ export default function AdminAffiliatePage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl overflow-hidden shadow-2xl relative", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("backdrop-blur-sm border rounded-3xl overflow-hidden relative", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
         <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent pointer-events-none" />
         <div className="overflow-x-auto relative z-10">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>

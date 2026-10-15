@@ -146,7 +146,7 @@ export default function AdminMessagesPage() {
             <div className={cn("flex items-center gap-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <MessageSquareQuote className="w-4 h-4" /> System Notification
             </div>
-            <div className="p-5 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border-l-4 border-cyan-500 rounded-r-2xl rounded-l-sm shadow-inner relative overflow-hidden">
+            <div className="p-5 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border-l-4 border-cyan-500 rounded-r-2xl rounded-l-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5">
                  <MessageSquareQuote className="w-16 h-16" />
               </div>
@@ -176,7 +176,7 @@ export default function AdminMessagesPage() {
     <div className="space-y-8 relative z-10 w-full">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Messages</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Messages</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage inquiries and messages from your contact form.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -214,8 +214,8 @@ export default function AdminMessagesPage() {
 
       <div className="grid gap-6">
         {messages.length === 0 ? (
-          <div className={cn("glass-card rounded-[32px] p-16 text-center border shadow-2xl relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+          <div className={cn("glass-card rounded-[32px] p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <MailOpen className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
             <h2 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Messages Yet</h2>
@@ -228,7 +228,7 @@ export default function AdminMessagesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={cn("glass-card rounded-3xl p-5 sm:p-8 border transition-all", msg.isRead ? (isDark ? "bg-white/[0.01] border-white/5" : "bg-white border-slate-200 shadow-sm") : (isDark ? "bg-cyan-500/[0.03] border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.1)]" : "bg-cyan-50 border-cyan-200 shadow-sm"))}
+              className={cn("glass-card rounded-3xl p-5 sm:p-8 border transition-all", msg.isRead ? (isDark ? "bg-white/[0.01] border-white/5" : "bg-white border-slate-200") : (isDark ? "bg-cyan-500/[0.03] border-cyan-500/20" : "bg-cyan-50 border-cyan-200"))}
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
                 <div className="pt-1">
@@ -241,7 +241,7 @@ export default function AdminMessagesPage() {
                     <div className="min-w-0">
                       <div className="flex items-start gap-3 mb-1">
                         {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse mt-2 shrink-0" />}
-                        <h3 className={cn("text-lg sm:text-xl font-bold drop-shadow-sm break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
+                        <h3 className={cn("text-lg sm:text-xl font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <span className={cn("font-medium truncate max-w-full", isDark ? "text-cyan-400" : "text-cyan-700")}>{msg.name}</span>

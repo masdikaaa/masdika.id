@@ -96,7 +96,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
+      <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
         <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
           <div className="flex items-center gap-3">
             <div className={cn("w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -272,7 +272,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
             form="import-vps-form"
             type="submit"
             disabled={loading}
-            className={cn("flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-cyan-500/25 disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+            className={cn("flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 px-6 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
           >
             {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {loading ? "Importing..." : "Import VPS"}

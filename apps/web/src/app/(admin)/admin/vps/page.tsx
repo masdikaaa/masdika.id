@@ -780,7 +780,7 @@ export default function VpsManagementPage() {
     <div className="space-y-8 pb-10">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Proxmox VPS Management</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Proxmox VPS Management</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage Proxmox integration, IP pools, templates, and pricing.</p>
         </div>
       </div>
@@ -814,7 +814,7 @@ export default function VpsManagementPage() {
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className={cn("glass p-8 rounded-3xl border w-full shadow-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("glass p-8 rounded-3xl border w-full", isDark ? "border-white/10" : "border-slate-200")}>
           <h2 className={cn("text-xl font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Proxmox Server Configuration</h2>
 
           {loadingSettings ? (
@@ -838,7 +838,7 @@ export default function VpsManagementPage() {
                       value={settings.name || ""}
                       onChange={(e) => setSettings({ ...settings, name: e.target.value })}
                       placeholder="e.g., Main Proxmox Node"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
@@ -849,7 +849,7 @@ export default function VpsManagementPage() {
                       value={settings.host || ""}
                       onChange={(e) => setSettings({ ...settings, host: e.target.value })}
                       placeholder="e.g., https://proxmox.masdika.id:8006"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
@@ -860,7 +860,7 @@ export default function VpsManagementPage() {
                       value={settings.tokenId || ""}
                       onChange={(e) => setSettings({ ...settings, tokenId: e.target.value })}
                       placeholder="e.g., root@pam!compute"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
@@ -871,7 +871,7 @@ export default function VpsManagementPage() {
                       value={settings.tokenSecret || ""}
                       onChange={(e) => setSettings({ ...settings, tokenSecret: e.target.value })}
                       placeholder="e.g., e7f01eb6-..."
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                   </div>
                 </div>
@@ -891,7 +891,7 @@ export default function VpsManagementPage() {
                       value={settings.networkBridge || "vmbr0"}
                       onChange={(e) => setSettings({ ...settings, networkBridge: e.target.value })}
                       placeholder="e.g., vmbr0"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">This network bridge will be used for VPC / Internal VPS instances.</p>
                   </div>
@@ -903,7 +903,7 @@ export default function VpsManagementPage() {
                       value={settings.publicNetworkBridge || "vmbr1"}
                       onChange={(e) => setSettings({ ...settings, publicNetworkBridge: e.target.value })}
                       placeholder="e.g., vmbr1"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">This network bridge will be used specifically for Public IPs on net0.</p>
                   </div>
@@ -914,7 +914,7 @@ export default function VpsManagementPage() {
                       value={settings.primaryDns || ""}
                       onChange={(e) => setSettings({ ...settings, primaryDns: e.target.value })}
                       placeholder="e.g., 8.8.8.8"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">Primary DNS server for new VPS instances.</p>
                   </div>
@@ -925,7 +925,7 @@ export default function VpsManagementPage() {
                       value={settings.secondaryDns || ""}
                       onChange={(e) => setSettings({ ...settings, secondaryDns: e.target.value })}
                       placeholder="e.g., 1.1.1.1"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">Secondary DNS server for new VPS instances.</p>
                   </div>
@@ -957,7 +957,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select backup storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -966,7 +966,7 @@ export default function VpsManagementPage() {
                           value={settings.backupStorage || ""}
                           onChange={(e) => setSettings({ ...settings, backupStorage: e.target.value })}
                           placeholder="e.g., backup, pbs-backup"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                         />
                       </div>
                     )}
@@ -991,7 +991,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select main storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1000,7 +1000,7 @@ export default function VpsManagementPage() {
                           value={settings.mainDiskStorage || ""}
                           onChange={(e) => setSettings({ ...settings, mainDiskStorage: e.target.value })}
                           placeholder="e.g., local-lvm, p-net"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                         />
                       </div>
                     )}
@@ -1025,7 +1025,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select SSD storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1034,7 +1034,7 @@ export default function VpsManagementPage() {
                           value={settings.mainDiskStorageSsd || ""}
                           onChange={(e) => setSettings({ ...settings, mainDiskStorageSsd: e.target.value })}
                           placeholder="e.g., local-lvm, ssd-pool"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                         />
                       </div>
                     )}
@@ -1059,7 +1059,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select add-on storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1068,7 +1068,7 @@ export default function VpsManagementPage() {
                           value={settings.addonDiskStorages || ""}
                           onChange={(e) => setSettings({ ...settings, addonDiskStorages: e.target.value })}
                           placeholder="e.g., local-lvm, p-net"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                         />
                       </div>
                     )}
@@ -1132,7 +1132,7 @@ export default function VpsManagementPage() {
           </div>
 
           {showAddPool && (
-            <form onSubmit={handleAddPool} className={cn("glass p-8 rounded-3xl border shadow-2xl space-y-6", isDark ? "border-white/10" : "border-slate-200")}>
+            <form onSubmit={handleAddPool} className={cn("glass p-8 rounded-3xl border space-y-6", isDark ? "border-white/10" : "border-slate-200")}>
 
               {/* IP Version Selector */}
               <div>
@@ -1152,25 +1152,25 @@ export default function VpsManagementPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Network (Subnet/CIDR)</label>
-                  <input type="text" required value={newPool.network} onChange={e => setNewPool({ ...newPool, network: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.0/24" : "2001:db8:1234:5678::/64"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
+                  <input type="text" required value={newPool.network} onChange={e => setNewPool({ ...newPool, network: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.0/24" : "2001:db8:1234:5678::/64"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Gateway IP</label>
-                  <input type="text" required value={newPool.gateway} onChange={e => setNewPool({ ...newPool, gateway: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.1" : "2001:db8:1234:5678::1"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
+                  <input type="text" required value={newPool.gateway} onChange={e => setNewPool({ ...newPool, gateway: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.1" : "2001:db8:1234:5678::1"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
                 </div>
 
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Start IP</label>
-                  <input type="text" required value={newPool.startIp} onChange={e => setNewPool({ ...newPool, startIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.2" : "2001:db8:1234:5678::2"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
+                  <input type="text" required value={newPool.startIp} onChange={e => setNewPool({ ...newPool, startIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.2" : "2001:db8:1234:5678::2"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>End IP</label>
-                  <input type="text" required value={newPool.endIp} onChange={e => setNewPool({ ...newPool, endIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.254" : "2001:db8:1234:5678::ffff"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
+                  <input type="text" required value={newPool.endIp} onChange={e => setNewPool({ ...newPool, endIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.254" : "2001:db8:1234:5678::ffff"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")} />
                 </div>
               </div>
 
               <div className="flex justify-end pt-2">
-                <button type="submit" className={cn("bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 px-8 py-3 rounded-2xl font-bold transition-all shadow-lg transform hover:-translate-y-1 text-sm", isDark ? "text-white" : "text-slate-900")}>
+                <button type="submit" className={cn("bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 px-8 py-3 rounded-2xl font-bold transition-all transform hover:-translate-y-1 text-sm", isDark ? "text-white" : "text-slate-900")}>
                   Save Pool
                 </button>
               </div>
@@ -1187,7 +1187,7 @@ export default function VpsManagementPage() {
                       className={cn(
                         "w-5 h-5 rounded flex items-center justify-center transition-colors",
                         selectedPools.length > 0
-                          ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                          ? "bg-cyan-500 text-[#0f172a]"
                           : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                       )}
                     >
@@ -1222,7 +1222,7 @@ export default function VpsManagementPage() {
                           className={cn(
                             "w-5 h-5 rounded flex items-center justify-center transition-colors",
                             selectedPools.includes(pool.id)
-                              ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                              ? "bg-cyan-500 text-[#0f172a]"
                               : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                           )}
                         >
@@ -1324,7 +1324,7 @@ export default function VpsManagementPage() {
                         )
                       }))}
                       placeholder="Select Image / App..."
-                      className={cn("w-full rounded-xl px-4 py-3 text-sm font-bold shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                      className={cn("w-full rounded-xl px-4 py-3 text-sm font-bold", isDark ? "border-white/10" : "border-slate-200")}
                     />
                   </div>
                   <div>
@@ -1344,7 +1344,7 @@ export default function VpsManagementPage() {
                         })
                       }
                       placeholder="Select Version..."
-                      className={cn("w-full rounded-xl px-4 py-3 text-sm font-bold shadow-inner", isDark ? "border-white/10" : "border-slate-200")}
+                      className={cn("w-full rounded-xl px-4 py-3 text-sm font-bold", isDark ? "border-white/10" : "border-slate-200")}
                     />
                   </div>
                 </div>
@@ -1353,9 +1353,9 @@ export default function VpsManagementPage() {
                   const selectedTpl = templates.find(t => t.id === selectedAdminTemplate);
                   if (!selectedTpl) return null;
                   return (
-                    <div className={cn("glass p-6 md:p-8 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-6 mt-8 shadow-xl bg-gradient-to-br from-[#0f172a]/80 to-[#0a1f33]/80 w-full group hover:border-cyan-500/30 transition-all duration-300", isDark ? "border-white/10" : "border-slate-200")}>
+                    <div className={cn("glass p-6 md:p-8 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-6 mt-8 bg-gradient-to-br from-[#0f172a]/80 to-[#0a1f33]/80 w-full group hover:border-cyan-500/30 transition-all duration-300", isDark ? "border-white/10" : "border-slate-200")}>
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full">
-                        <div className={cn("p-4 md:p-5 bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 rounded-2xl border shadow-inner group-hover:scale-105 transition-transform", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                        <div className={cn("p-4 md:p-5 bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 rounded-2xl border group-hover:scale-105 transition-transform", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
                           {getOsIconUrl(selectedTpl.name.split('-')[0], isDark) ? (
                             <img referrerPolicy="no-referrer" src={getOsIconUrl(selectedTpl.name.split('-')[0], isDark)!} alt={selectedTpl.name} className="w-10 h-10 md:w-12 md:h-12 object-contain" loading="lazy" decoding="async" />
                           ) : (
@@ -1371,7 +1371,7 @@ export default function VpsManagementPage() {
                         </div>
                       </div>
                       <div className="w-full md:w-auto mt-4 md:mt-0 flex shrink-0">
-                        <div className={cn("px-6 py-4 bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 font-bold rounded-xl border border-emerald-500/30 text-center w-full shadow-lg", isDark ? "text-emerald-400" : "text-emerald-700")}>
+                        <div className={cn("px-6 py-4 bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 font-bold rounded-xl border border-emerald-500/30 text-center w-full", isDark ? "text-emerald-400" : "text-emerald-700")}>
                           <div className="text-[11px] uppercase tracking-wider opacity-80 mb-1 font-semibold">Proxmox VMID</div>
                           <div className="text-3xl md:text-4xl font-black tabular-nums tracking-tighter">{selectedTpl.vmid}</div>
                         </div>
@@ -1475,7 +1475,7 @@ export default function VpsManagementPage() {
               }}
               className={cn(
                 "flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300",
-                planFilterDiskType === "HDD" ? "bg-white/10 text-white shadow-md" : "text-zinc-500 hover:text-zinc-300"
+                planFilterDiskType === "HDD" ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300"
               )}
             >
               Disk HDD
@@ -1487,7 +1487,7 @@ export default function VpsManagementPage() {
               }}
               className={cn(
                 "flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300",
-                planFilterDiskType === "SSD" ? "bg-cyan-600 text-white shadow-md shadow-cyan-900/20" : "text-zinc-500 hover:text-zinc-300"
+                planFilterDiskType === "SSD" ? "bg-cyan-600 text-white" : "text-zinc-500 hover:text-zinc-300"
               )}
             >
               Disk SSD
@@ -1574,7 +1574,7 @@ export default function VpsManagementPage() {
                     className={cn(
                       "w-5 h-5 rounded flex items-center justify-center transition-colors shrink-0",
                       selectedPlans.length === filteredPlans.length && filteredPlans.length > 0
-                        ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                        ? "bg-cyan-500 text-[#0f172a]"
                         : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                     )}
                   >
@@ -1600,7 +1600,7 @@ export default function VpsManagementPage() {
                         className={cn(
                           "w-5 h-5 rounded flex items-center justify-center transition-colors shrink-0 mt-1",
                           selectedPlans.includes(plan.id)
-                            ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                            ? "bg-cyan-500 text-[#0f172a]"
                             : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                         )}
                       >
@@ -1662,7 +1662,7 @@ export default function VpsManagementPage() {
 
       {/* Services and K3s Nodes Tabs */}
       {(activeTab === "services" || activeTab === "k3s") && (
-        <div className={cn("glass p-6 md:p-8 rounded-3xl border w-full shadow-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("glass p-6 md:p-8 rounded-3xl border w-full", isDark ? "border-white/10" : "border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-slate-900")}>
@@ -1678,7 +1678,7 @@ export default function VpsManagementPage() {
               {selectedVps.length > 0 && (
                 <button
                   onClick={() => setShowBulkTerminateModal(selectedVps)}
-                  className={cn("px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-sm font-medium hover:bg-red-500 hover:text-white transition-colors h-[48px] flex items-center whitespace-nowrap shadow-lg shadow-red-500/10", isDark ? "text-red-400" : "text-red-700")}
+                  className={cn("px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-sm font-medium hover:bg-red-500 hover:text-white transition-colors h-[48px] flex items-center whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}
                 >
                   Delete Selected ({selectedVps.length})
                 </button>
@@ -1711,7 +1711,7 @@ export default function VpsManagementPage() {
                         className={cn(
                           "w-5 h-5 rounded flex items-center justify-center transition-colors",
                           selectedVps.length > 0
-                            ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                            ? "bg-cyan-500 text-[#0f172a]"
                             : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                         )}
                       >
@@ -1741,7 +1741,7 @@ export default function VpsManagementPage() {
                             className={cn(
                               "w-5 h-5 rounded flex items-center justify-center transition-colors",
                               selectedVps.includes(vps.id)
-                                ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                ? "bg-cyan-500 text-[#0f172a]"
                                 : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                             )}
                           >
@@ -1929,7 +1929,7 @@ export default function VpsManagementPage() {
 
       {/* Reserved IPs Tab */}
       {activeTab === "reserved-ips" && (
-        <div className={cn("glass p-6 md:p-8 rounded-3xl border w-full shadow-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("glass p-6 md:p-8 rounded-3xl border w-full", isDark ? "border-white/10" : "border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-slate-900")}>Reserved IPs Management</h2>
@@ -2127,7 +2127,7 @@ export default function VpsManagementPage() {
       {/* Suspend Modal */}
       {showSuspendModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border border-orange-500/20 w-full max-w-md rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0f172a]" : "bg-white border-slate-200")}>
+          <div className={cn("border border-orange-500/20 w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a]" : "bg-white border-slate-200")}>
             <button onClick={() => setShowSuspendModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
             <div className="flex items-center gap-3 mb-4 text-orange-500">
               <AlertTriangle className="w-8 h-8" />
@@ -2145,7 +2145,7 @@ export default function VpsManagementPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowSuspendModal(null)} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={() => handleVpsAction(showSuspendModal.id, "suspend", suspendReason)} className={cn("bg-orange-500 hover:bg-orange-600 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-orange-500/20", isDark ? "text-white" : "text-slate-900")}>Confirm Suspend</button>
+              <button onClick={() => handleVpsAction(showSuspendModal.id, "suspend", suspendReason)} className={cn("bg-orange-500 hover:bg-orange-600 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Confirm Suspend</button>
             </div>
           </div>
         </div>
@@ -2180,7 +2180,7 @@ export default function VpsManagementPage() {
       {/* Delete Pool Modal */}
       {showDeletePoolModal !== null && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
             <button onClick={() => setShowDeletePoolModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-500" : "text-red-700")}>
               <Trash2 className="w-8 h-8" />
@@ -2192,7 +2192,7 @@ export default function VpsManagementPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowDeletePoolModal(null)} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={() => handleDeletePool(showDeletePoolModal)} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-red-500/20", isDark ? "text-white" : "text-slate-900")}>Delete</button>
+              <button onClick={() => handleDeletePool(showDeletePoolModal)} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Delete</button>
             </div>
           </div>
         </div>
@@ -2201,7 +2201,7 @@ export default function VpsManagementPage() {
       {/* Bulk Delete Pool Modal */}
       {showBulkDeletePoolModal.length > 0 && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
             <button onClick={() => setShowBulkDeletePoolModal([])} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-500" : "text-red-700")}>
               <Trash2 className="w-8 h-8" />
@@ -2213,7 +2213,7 @@ export default function VpsManagementPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={handleBulkDeletePools} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-red-500/20", isDark ? "text-white" : "text-slate-900")}>Delete All</button>
+              <button onClick={handleBulkDeletePools} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Delete All</button>
             </div>
           </div>
         </div>
@@ -2222,7 +2222,7 @@ export default function VpsManagementPage() {
       {/* Delete Plan Modal */}
       {showDeletePlanModal !== null && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
             <button onClick={() => setShowDeletePlanModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-500" : "text-red-700")}>
               <Trash2 className="w-8 h-8" />
@@ -2234,7 +2234,7 @@ export default function VpsManagementPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowDeletePlanModal(null)} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={() => handleDeletePlan(showDeletePlanModal)} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-red-500/20", isDark ? "text-white" : "text-slate-900")}>Delete</button>
+              <button onClick={() => handleDeletePlan(showDeletePlanModal)} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Delete</button>
             </div>
           </div>
         </div>
@@ -2243,7 +2243,7 @@ export default function VpsManagementPage() {
       {/* IP Management Modal */}
       {showIpModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-3xl rounded-3xl shadow-2xl relative flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("border w-full max-w-3xl rounded-3xl relative flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-6 border-b", isDark ? "border-white/10" : "border-slate-200")}>
               <button onClick={() => setShowIpModal(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
               <div className="flex items-center gap-3">
@@ -2350,7 +2350,7 @@ export default function VpsManagementPage() {
                                   value={editingPublicIpValue}
                                   onChange={(e) => setEditingPublicIpValue(e.target.value)}
                                   placeholder="e.g. 103.x.x.x (Optional)"
-                                  className={cn("w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none transition-colors shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C] focus:border-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50 focus:border-cyan-500")}
+                                  className={cn("w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C] focus:border-cyan-500/50" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50 focus:border-cyan-500")}
                                 />
                                 <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                   <button
@@ -2394,7 +2394,7 @@ export default function VpsManagementPage() {
                                   <button
                                     onClick={() => { setEditingPublicIpId(ip.id); setEditingPublicIpValue(ip.publicIp || ""); }}
                                     disabled={ipLoading}
-                                    className={cn("hover:text-white hover:bg-cyan-500 p-2 bg-cyan-400/10 rounded-lg transition-all shadow-sm", isDark ? "text-cyan-400" : "text-cyan-700")}
+                                    className={cn("hover:text-white hover:bg-cyan-500 p-2 bg-cyan-400/10 rounded-lg transition-all", isDark ? "text-cyan-400" : "text-cyan-700")}
                                     title="Edit Public IP"
                                   >
                                     <Edit className="w-4 h-4" />
@@ -2402,7 +2402,7 @@ export default function VpsManagementPage() {
                                   <button
                                     onClick={() => setRemoveIpConfirm(ip.id)}
                                     disabled={ipLoading}
-                                    className={cn("hover:text-white hover:bg-red-500 p-2 bg-red-400/10 rounded-lg transition-all shadow-sm", isDark ? "text-red-400" : "text-red-700")}
+                                    className={cn("hover:text-white hover:bg-red-500 p-2 bg-red-400/10 rounded-lg transition-all", isDark ? "text-red-400" : "text-red-700")}
                                     title="Remove IP"
                                   >
                                     <XCircle className="w-4 h-4" />
@@ -2433,7 +2433,7 @@ export default function VpsManagementPage() {
       {/* Reset Password Modal */}
       {showResetPasswordModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0f172a] border-cyan-500/30" : "bg-white border-cyan-500/30")}>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-cyan-500/30" : "bg-white border-cyan-500/30")}>
             <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-cyan-500" : "text-cyan-700")}>
               <Key className="w-8 h-8" />
@@ -2471,7 +2471,7 @@ export default function VpsManagementPage() {
               <button
                 onClick={() => handleResetPassword(showResetPasswordModal.id, newPassword)}
                 disabled={actionLoading === showResetPasswordModal.id || !newPassword || newPassword.length < 8 || newPassword !== confirmPassword}
-                className={cn("bg-cyan-600 hover:bg-cyan-700 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-cyan-500/20 disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                className={cn("bg-cyan-600 hover:bg-cyan-700 px-6 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
               >
                 {actionLoading === showResetPasswordModal.id && <RefreshCw className="w-4 h-4 animate-spin" />}
                 Reset Password

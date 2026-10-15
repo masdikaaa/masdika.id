@@ -173,7 +173,8 @@ const navSections = [
     label: "Billing",
     items: [
       { id: "get-balance", label: "Get Balance", icon: Wallet },
-      { id: "create-deposit", label: "Create Deposit", icon: Zap },
+      { id: "topup-balance", label: "Top Up Balance (Deposit)", icon: Zap },
+      { id: "topup-methods", label: "Payment Methods & Status", icon: List },
       { id: "integration-guide", label: "Integration Guide", icon: CodeXml },
     ],
   },
@@ -426,48 +427,32 @@ export default function ResellerApiDocsPage() {
 
         <EndpointSection
           isDark={isDark}
-          id="create-deposit"
-          title="Create Deposit"
+          id="topup-balance"
+          title="Top Up Balance (Deposit)"
           method="POST"
-          endpoint="/api/v1/billing/deposit"
-          description="Create a top-up request to add funds to your reseller balance. This endpoint returns a payment URL (Duitku) that you or your automated systems can use to complete the payment."
+          endpoint="/api/v1/billing/topup"
+          description="Create a top-up request to add funds to your reseller balance. This endpoint returns a secure payment URL (Duitku) and payment identifiers (Virtual Account / QR string) for automated customer flows. Note: Both /api/v1/billing/topup and /api/v1/billing/deposit are supported."
           parameters={[
-            { name: "amount", type: "Integer", description: "Required. The top-up amount (Minimum: 50,000)." },
-            { name: "paymentMethodCode", type: "String", description: (
-              <div className="flex flex-col gap-2">
-                <span>Required. Code of the payment method to use. Available codes:</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {[
-                    { code: "SQ", name: "Nusapay QRIS" },
-                    { code: "SA", name: "Shopee Pay Apps" },
-                    { code: "OV", name: "OVO" },
-                    { code: "DA", name: "DANA" },
-                    { code: "LA", name: "LinkAja" },
-                    { code: "M2", name: "Mandiri VA" },
-                    { code: "I1", name: "BNI VA" },
-                    { code: "B1", name: "CIMB Niaga VA" },
-                    { code: "BR", name: "BRIVA" },
-                    { code: "BV", name: "BSI VA" },
-                    { code: "VA", name: "Maybank VA" },
-                    { code: "BT", name: "Permata Bank VA" },
-                    { code: "NC", name: "Bank Neo Commerce/BNC" },
-                    { code: "AG", name: "Bank Artha Graha" },
-                    { code: "DM", name: "Danamon VA" },
-                    { code: "S1", name: "Bank Sahabat Sampoerna" },
-                    { code: "A1", name: "ATM Bersama" },
-                    { code: "FT", name: "Pegadaian/ALFA/Pos" }
-                  ].map(pm => (
-                    <span key={pm.code} className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]", isDark ? "bg-slate-800/50 text-zinc-400" : "bg-slate-100 text-slate-500")}>
-                      <code className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{pm.code}</code>
-                      {pm.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) }
+            { name: "amount", type: "Integer", description: "Required. Top-up amount in IDR (Minimum: 50,000, Maximum: 50,000,000)." },
+            { name: "paymentMethodCode", type: "String", description: "Required. Payment channel code (e.g. 'SQ' for QRIS, 'M2' for Mandiri VA, 'BR' for BRIVA, etc.). Call GET /api/v1/billing/topup to view real-time codes." },
+            { name: "voucherCode", type: "String", description: "Optional. Promo / discount voucher code if available." }
           ]}
-          payload={`{\n  "amount": 100000,\n  "paymentMethodCode": "SQ"\n}`}
-          response={`{\n  "success": true,\n  "data": {\n    "invoiceNumber": "TOPUP-1710000000000-123",\n    "amount": 101000,\n    "paymentUrl": "https://sandbox.duitku.com/webapi/...",\n    "reference": "D12345678",\n    "paymentMethod": "QRIS",\n    "expiresAt": "2024-03-10T12:00:00Z"\n  }\n}`}
+          payload={`{\n  "amount": 100000,\n  "paymentMethodCode": "SQ",\n  "voucherCode": "PROMO2026"\n}`}
+          response={`{\n  "success": true,\n  "message": "Top up invoice created successfully",\n  "data": {\n    "invoiceNumber": "TOPUP-1710000000000-AB12",\n    "subtotal": 100000,\n    "discountAmount": 0,\n    "taxAmount": 11000,\n    "taxRate": 11,\n    "fee": 1000,\n    "totalAmount": 112000,\n    "creditedBalance": 100000,\n    "currency": "IDR",\n    "paymentMethod": "Nusapay QRIS",\n    "paymentMethodCode": "SQ",\n    "paymentUrl": "https://passport.duitku.com/webapi/...",\n    "reference": "D12345678",\n    "vaNumber": null,\n    "qrString": "00020101021226...",\n    "status": "PENDING",\n    "expiresAt": "2026-10-16T12:00:00.000Z"\n  }\n}`}
+        />
+
+        <EndpointSection
+          isDark={isDark}
+          id="topup-methods"
+          title="Payment Methods & Top Up Status"
+          method="GET"
+          endpoint="/api/v1/billing/topup"
+          description="Retrieve available active payment channels and deposit limits, or verify the payment settlement status of an existing top-up invoice using the ?invoiceNumber parameter. Note: Both /api/v1/billing/topup and /api/v1/billing/deposit are supported."
+          parameters={[
+            { name: "invoiceNumber", type: "String", description: "Optional. Query param to look up a specific top up invoice (e.g. ?invoiceNumber=TOPUP-1710000000000-AB12). If omitted, returns active payment channels and limits." }
+          ]}
+          payload={""}
+          response={`{\n  "success": true,\n  "data": {\n    "limits": {\n      "minAmount": 50000,\n      "maxAmount": 50000000,\n      "currency": "IDR",\n      "taxRatePercent": 11\n    },\n    "paymentMethods": [\n      {\n        "code": "SQ",\n        "name": "Nusapay QRIS",\n        "type": "QRIS",\n        "fee": 1000\n      },\n      {\n        "code": "M2",\n        "name": "Mandiri VA",\n        "type": "VA",\n        "fee": 3000\n      }\n    ],\n    "recentTopups": [\n      {\n        "invoiceNumber": "TOPUP-1710000000000-AB12",\n        "subtotal": 100000,\n        "amount": 112000,\n        "status": "PAID",\n        "paidAt": "2026-10-15T08:30:00.000Z"\n      }\n    ]\n  }\n}`}
         />
 
         {/* Integration Guide Section */}

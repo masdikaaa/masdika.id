@@ -173,7 +173,7 @@ export default function AdminPaymentSettingsPage() {
                 )}
               >
                 <span className={cn(
-                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out",
                   pm.isActive ? "translate-x-5" : "translate-x-0"
                 )} />
               </button>
@@ -188,12 +188,12 @@ export default function AdminPaymentSettingsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Payment Settings</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Payment Settings</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Enable or disable payment methods across the platform.</p>
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl shadow-xl overflow-hidden p-6", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden p-6", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         {loading ? (
           <AdminLoader className="min-h-[300px] py-20" />
         ) : (

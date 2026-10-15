@@ -121,12 +121,12 @@ export default function TagsPage() {
   return (
     <div className="space-y-8 w-full relative z-10">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
-        <Link href="/admin/blog" className={cn("p-2.5 rounded-xl transition-all shadow-sm border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}>
+        <Link href="/admin/blog" className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}>
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Blog Tags</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Blog Tags</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your article tags.</p>
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function TagsPage() {
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className={cn("glass-card rounded-2xl p-6 border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
-        <h2 className={cn("text-lg font-bold drop-shadow-sm mb-4", isDark ? "text-white" : "text-slate-900")}>Add New Tag</h2>
+        <h2 className={cn("text-lg font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Add New Tag</h2>
         <div className="flex gap-3">
           <input
             type="text"
@@ -157,7 +157,7 @@ export default function TagsPage() {
           />
           <button
             onClick={handleCreate}
-            className={cn("flex items-center gap-2 px-6 py-3  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+            className={cn("flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
           >
             <Plus className="w-5 h-5" /> Add
           </button>
@@ -174,7 +174,7 @@ export default function TagsPage() {
             <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <Tag className={cn("w-8 h-8 opacity-50", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
-            <h2 className={cn("text-lg font-bold drop-shadow-sm mb-1", isDark ? "text-white" : "text-slate-900")}>No Tags</h2>
+            <h2 className={cn("text-lg font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No Tags</h2>
             <p className="text-zinc-500 text-sm">Create your first tag using the form above.</p>
           </div>
         ) : (

@@ -106,7 +106,7 @@ export default function PaygMonitorPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             PAYG Billing Monitor
           </h1>
           <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Manage and monitor Pay-As-You-Go billing execution.</p>
@@ -150,7 +150,7 @@ export default function PaygMonitorPage() {
               <button
                 onClick={handleSave}
                 disabled={saving || loading}
-                className={cn("w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all shadow-md hover:shadow-lg hover:from-cyan-400 hover:to-cyan-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-cyan-600/20")}
+                className={cn("w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all hover:from-cyan-400 hover:to-cyan-400 transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
               >
                 {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 Save Setting

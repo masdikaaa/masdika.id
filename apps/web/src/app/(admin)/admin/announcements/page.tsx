@@ -406,7 +406,7 @@ export default function AdminAnnouncementsPage() {
     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>News & Announcements</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>News & Announcements</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage news, promos, and information displayed to customers.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -414,13 +414,13 @@ export default function AdminAnnouncementsPage() {
             <button
               onClick={handleBulkDelete}
               disabled={isBulkDeleting}
-              className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-sm font-bold hover:bg-red-500/30 hover:text-red-300 transition-all shadow-[0_0_15px_rgba(239,68,68,0.15)] disabled:opacity-50", isDark ? "text-red-400" : "text-red-700")}
+              className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-sm font-bold hover:bg-red-500/30 hover:text-red-300 transition-all disabled:opacity-50", isDark ? "text-red-400" : "text-red-700")}
             >
               {isBulkDeleting ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
               Delete Selected ({selectedIds.length})
             </button>
           )}
-          <button onClick={() => openModal()} className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={() => openModal()} className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             <Plus className="w-4 h-4" /> {activeTab === 'banner' ? 'Create Banner' : 'Create Announcement'}
           </button>
         </div>
@@ -435,7 +435,7 @@ export default function AdminAnnouncementsPage() {
           >
             News & Promos
             {activeTab === 'berita' && (
-              <div className={cn("absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full", isDark ? "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" : "bg-cyan-500")} />
+              <div className={cn("absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full", isDark ? "bg-cyan-400" : "bg-cyan-500")} />
             )}
           </button>
           <button
@@ -444,7 +444,7 @@ export default function AdminAnnouncementsPage() {
           >
             Dashboard Banners
             {activeTab === 'banner' && (
-              <div className={cn("absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full", isDark ? "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" : "bg-cyan-500")} />
+              <div className={cn("absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full", isDark ? "bg-cyan-400" : "bg-cyan-500")} />
             )}
           </button>
         </div>
@@ -457,14 +457,14 @@ export default function AdminAnnouncementsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={activeTab === 'banner' ? "Search banners..." : "Search news..."}
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-slate-400 shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-slate-400", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
             />
           </div>
         </div>
       </motion.div>
 
       {/* Table Section */}
-      <motion.div variants={itemVariants} className={cn("border rounded-2xl shadow-xl overflow-hidden backdrop-blur-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden backdrop-blur-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -476,7 +476,7 @@ export default function AdminAnnouncementsPage() {
                       return (
                         <label className="relative flex items-center justify-center cursor-pointer group">
                           <input type="checkbox" className="sr-only" checked={allSelected} onChange={toggleSelectAll} />
-                          <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", allSelected ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                          <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", allSelected ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                             {allSelected && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                           </div>
                         </label>
@@ -504,7 +504,7 @@ export default function AdminAnnouncementsPage() {
                 <tr>
                   <td colSpan={activeTab === 'berita' ? 6 : 5} className="px-6 py-16">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>
                         <AlertCircle className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
                       </div>
                       <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No {activeTab === 'banner' ? 'Banners' : 'News'}</h3>
@@ -522,7 +522,7 @@ export default function AdminAnnouncementsPage() {
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelect(announcement.id)} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -621,7 +621,7 @@ export default function AdminAnnouncementsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={cn("relative w-full max-w-3xl border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}
+            className={cn("relative w-full max-w-3xl border rounded-2xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}
           >
             <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
@@ -780,7 +780,7 @@ export default function AdminAnnouncementsPage() {
                               <button
                                 type="button"
                                 onClick={() => setShowRemoveImageModal(true)}
-                                className={cn("p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium shadow-xl", isDark ? "text-white" : "text-slate-900")}
+                                className={cn("p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium", isDark ? "text-white" : "text-slate-900")}
                               >
                                 <Trash2 className="w-4 h-4" /> Remove Image
                               </button>

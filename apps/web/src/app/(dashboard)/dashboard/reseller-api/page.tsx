@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Key, Copy, Plus, Trash2, Code2, AlertTriangle, CheckCircle2, ShieldCheck, TerminalSquare, RefreshCw, Terminal, Settings, Power, Zap, Cpu, Server, Play, Square, RotateCw, KeyRound, BookOpen, HardDrive, Info } from "lucide-react";
+import { Key, Copy, Plus, Trash2, Code2, AlertTriangle, CheckCircle2, ShieldCheck, TerminalSquare, RefreshCw, Terminal, Settings, Power, Zap, Cpu, Server, Play, Square, RotateCw, KeyRound, BookOpen, HardDrive, Info, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -175,6 +175,10 @@ export default function ResellerApiPage() {
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-3">
+              <Link href="/dashboard/billing" className={cn("w-full sm:w-auto border px-5 py-3.5 rounded-2xl font-medium transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
+                <Wallet className="w-5 h-5 text-cyan-500" />
+                Top Up Saldo
+              </Link>
               <Link href="/dashboard/reseller-api/docs" className={cn("w-full sm:w-auto border px-5 py-3.5 rounded-2xl font-medium transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
                 <BookOpen className="w-5 h-5 text-cyan-500" />
                 Documentation
@@ -185,7 +189,7 @@ export default function ResellerApiPage() {
                 className={cn(
                   "w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shrink-0",
                   balance >= 50000 && keys.length === 0
-                    ? isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:-translate-y-0.5"
+                    ? isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white hover:-translate-y-0.5"
                     : "bg-slate-500/20 text-slate-400 cursor-not-allowed opacity-50"
                 )}
                 title={keys.length > 0 ? "You already have an active API Key." : ""}
@@ -198,7 +202,7 @@ export default function ResellerApiPage() {
         </motion.div>
 
         {/* Reseller Instances Table */}
-        <motion.div variants={itemVariants} className={cn("rounded-3xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
+        <motion.div variants={itemVariants} className={cn("rounded-3xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-black/5")}>
           <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Server className="w-5 h-5 text-cyan-500" />

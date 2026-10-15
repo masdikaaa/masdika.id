@@ -193,7 +193,7 @@ export default function AdminMediaReviewsPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Media Reviews & Comments
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -209,7 +209,7 @@ export default function AdminMediaReviewsPage() {
             onClick={fetchData}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all shadow-xs cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
@@ -227,8 +227,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10 shadow-lg"
-            : "bg-white border-slate-200 shadow-xs"
+            ? "bg-[#0A0B1A]/80 border-white/10"
+            : "bg-white border-slate-200"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -253,8 +253,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10 shadow-lg"
-            : "bg-white border-slate-200 shadow-xs"
+            ? "bg-[#0A0B1A]/80 border-white/10"
+            : "bg-white border-slate-200"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -279,8 +279,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10 shadow-lg"
-            : "bg-white border-slate-200 shadow-xs"
+            ? "bg-[#0A0B1A]/80 border-white/10"
+            : "bg-white border-slate-200"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -305,8 +305,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10 shadow-lg"
-            : "bg-white border-slate-200 shadow-xs"
+            ? "bg-[#0A0B1A]/80 border-white/10"
+            : "bg-white border-slate-200"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -331,7 +331,7 @@ export default function AdminMediaReviewsPage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl backdrop-blur-xl transition-colors w-full",
-        isDark ? "bg-[#0A0B1A]/80 border-white/10" : "bg-white border-slate-200 shadow-xs"
+        isDark ? "bg-[#0A0B1A]/80 border-white/10" : "bg-white border-slate-200"
       )}>
         {/* Tab switch */}
         <div className={cn(
@@ -343,7 +343,7 @@ export default function AdminMediaReviewsPage() {
             className={cn(
               "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
               activeTab === "comments"
-                ? "bg-cyan-500 text-white shadow-xs font-bold"
+                ? "bg-cyan-500 text-white font-bold"
                 : isDark
                   ? "text-zinc-400 hover:text-white hover:bg-white/5"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
@@ -368,7 +368,7 @@ export default function AdminMediaReviewsPage() {
             className={cn(
               "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
               activeTab === "ratings"
-                ? "bg-cyan-500 text-white shadow-xs font-bold"
+                ? "bg-cyan-500 text-white font-bold"
                 : isDark
                   ? "text-zinc-400 hover:text-white hover:bg-white/5"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
@@ -437,7 +437,7 @@ export default function AdminMediaReviewsPage() {
           filteredComments.length === 0 ? (
             <div className={cn(
               "rounded-2xl border p-12 text-center",
-              isDark ? "border-white/10 bg-[#0A0B1A]/60" : "border-slate-200 bg-white shadow-xs"
+              isDark ? "border-white/10 bg-[#0A0B1A]/60" : "border-slate-200 bg-white"
             )}>
               <MessageSquare className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No comments found</p>
@@ -453,7 +453,7 @@ export default function AdminMediaReviewsPage() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "rounded-2xl border p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
+                    "rounded-2xl border p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
                       ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30"
                       : "bg-white border-slate-200 hover:border-cyan-500/40"
@@ -580,7 +580,7 @@ export default function AdminMediaReviewsPage() {
           filteredRatings.length === 0 ? (
             <div className={cn(
               "rounded-2xl border p-12 text-center",
-              isDark ? "border-white/10 bg-[#0A0B1A]/60" : "border-slate-200 bg-white shadow-xs"
+              isDark ? "border-white/10 bg-[#0A0B1A]/60" : "border-slate-200 bg-white"
             )}>
               <Star className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No ratings found</p>
@@ -596,7 +596,7 @@ export default function AdminMediaReviewsPage() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "rounded-2xl border p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
+                    "rounded-2xl border p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
                       ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30"
                       : "bg-white border-slate-200 hover:border-cyan-500/40"

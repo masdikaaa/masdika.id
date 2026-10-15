@@ -36,12 +36,30 @@ export async function POST(req: NextRequest) {
     const voucherCode = body.voucherCode;
 
     const MAX_TOPUP = 50000000; // Rp 50.000.000
-    if (!amount || isNaN(amount) || !paymentMethodCode || amount < 50000 || amount > MAX_TOPUP) {
-      return NextResponse.json({ error: "Invalid amount or missing fields. Minimum top up is Rp 50.000 and max is Rp50.000.000" }, { status: 400 });
+    const MIN_TOPUP = 50000;    // Rp 50.000
+
+    if (
+      !amount ||
+      isNaN(amount) ||
+      !Number.isFinite(amount) ||
+      Math.floor(amount) !== amount ||
+      amount < MIN_TOPUP ||
+      amount > MAX_TOPUP
+    ) {
+      return NextResponse.json({ error: "Invalid amount. Minimum top up is Rp 50.000 and max is Rp 50.000.000 (must be an integer)" }, { status: 400 });
     }
 
-    const paymentMethod = await prisma.paymentMethod.findUnique({ where: { code: paymentMethodCode } });
-    if (!paymentMethod || !paymentMethod.isActive) {
+    if (!paymentMethodCode) {
+      return NextResponse.json({ error: "Payment method is required" }, { status: 400 });
+    }
+
+    const paymentMethod = await prisma.paymentMethod.findFirst({
+      where: {
+        code: { equals: String(paymentMethodCode).trim(), mode: 'insensitive' },
+        isActive: true
+      }
+    });
+    if (!paymentMethod) {
       return NextResponse.json({ error: "Invalid or inactive payment method" }, { status: 400 });
     }
 
@@ -123,7 +141,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.masdika.id';
     
     let transaction;
     try {
@@ -164,17 +182,19 @@ export async function POST(req: NextRequest) {
       console.log("[TOPUP API] Duitku response received");
     } catch (duitkuError) {
       console.error("Duitku Transaction Failed for topup, rolling back...", duitkuError);
-      await prisma.invoice.delete({ where: { id: invoice.id } });
+      await prisma.invoice.delete({ where: { id: invoice.id } }).catch(() => {});
       if (appliedVoucherCode) {
-        await prisma.voucher.update({ where: { code: appliedVoucherCode }, data: { currentUses: { decrement: 1 } } }).catch(console.error);
+        await prisma.voucher.update({ where: { code: appliedVoucherCode }, data: { currentUses: { decrement: 1 } } }).catch(() => {});
+        await prisma.voucherUsage.deleteMany({ where: { userId, voucher: { code: appliedVoucherCode } } }).catch(() => {});
       }
       return NextResponse.json({ error: "Failed to connect to payment gateway. Please check your payment method and try again." }, { status: 500 });
     }
 
     if (!transaction || !transaction.paymentUrl) {
-      await prisma.invoice.delete({ where: { id: invoice.id } });
+      await prisma.invoice.delete({ where: { id: invoice.id } }).catch(() => {});
       if (appliedVoucherCode) {
-        await prisma.voucher.update({ where: { code: appliedVoucherCode }, data: { currentUses: { decrement: 1 } } }).catch(console.error);
+        await prisma.voucher.update({ where: { code: appliedVoucherCode }, data: { currentUses: { decrement: 1 } } }).catch(() => {});
+        await prisma.voucherUsage.deleteMany({ where: { userId, voucher: { code: appliedVoucherCode } } }).catch(() => {});
       }
       return NextResponse.json({ error: "Failed to generate payment gateway link for top up" }, { status: 500 });
     }

@@ -101,7 +101,7 @@ export default function K3sManagement() {
         </div>
       </div>
 
-      <div className={cn("bg-[#0f172a] border rounded-2xl overflow-hidden shadow-2xl relative", isDark ? "border-white/10" : "border-slate-200")}>
+      <div className={cn("bg-[#0f172a] border rounded-2xl overflow-hidden relative", isDark ? "border-white/10" : "border-slate-200")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
@@ -112,7 +112,7 @@ export default function K3sManagement() {
                     className={cn(
                       "w-5 h-5 rounded flex items-center justify-center transition-colors",
                       selectedClusters.length > 0
-                        ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                        ? "bg-cyan-500 text-[#0f172a]"
                         : "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50"
                     )}
                   >
@@ -137,7 +137,7 @@ export default function K3sManagement() {
                       className={cn(
                         "w-5 h-5 rounded flex items-center justify-center transition-colors",
                         selectedClusters.includes(cluster.id)
-                          ? "bg-cyan-500 text-[#0f172a] shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                          ? "bg-cyan-500 text-[#0f172a]"
                           : "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50"
                       )}
                     >

@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-const inputClassDark = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner';
-const inputClassLight = 'w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
+const inputClassDark = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all';
+const inputClassLight = 'w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all';
 const labelClassDark = 'block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2';
 const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
 
@@ -456,12 +456,12 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 md:space-y-8 pb-10 w-full relative z-10">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0f172a] to-[#011627] border p-6 md:p-8 shadow-2xl group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0f172a] to-[#011627] border p-6 md:p-8 group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-semibold mb-4 tracking-wide", isDark ? "text-cyan-400" : "text-cyan-700")}>
             <Settings className="w-3 h-3" /> Account Management
           </div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             System <span className={cn(isDark ? "bg-gradient-to-r from-cyan-400 to-cyan-500 bg-clip-text text-transparent" : "text-cyan-600")}>Settings</span>
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your profile, website content, SEO, and security.</p>
@@ -471,14 +471,14 @@ export default function SettingsPage() {
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Navigation Sidebar */}
         <div className="w-full md:w-60 shrink-0">
-          <div className={cn("backdrop-blur-sm border rounded-3xl p-2 shadow-2xl flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("backdrop-blur-sm border rounded-3xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={cn("relative flex items-center gap-3 px-4 py-4 rounded-2xl transition-all text-left shrink-0 w-full border", isActive ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 shadow-sm" : "bg-white text-slate-900 border-slate-200 shadow-sm") : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-transparent"))}
+                  className={cn("relative flex items-center gap-3 px-4 py-4 rounded-2xl transition-all text-left shrink-0 w-full border", isActive ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-white text-slate-900 border-slate-200") : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-transparent"))}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isActive ? 'bg-cyan-500/20 border border-cyan-500/30' : isDark ? "bg-white/5" : "bg-slate-100"}`}>
                     <tab.icon className={cn("w-4 h-4", isActive ? (isDark ? "text-cyan-400" : "text-slate-900") : (isDark ? "text-zinc-500" : "text-slate-400"))} />
@@ -502,7 +502,7 @@ export default function SettingsPage() {
                 {/* Profile Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         
         
@@ -520,7 +520,7 @@ export default function SettingsPage() {
         <div className="flex flex-col md:flex-row gap-10 relative z-10">
           <div className="flex flex-col items-center gap-4">
             <div className="relative group/avatar">
-              <div className={cn("w-36 h-36 rounded-full border-4 border-black overflow-hidden flex items-center justify-center shadow-[0_0_0_2px_rgba(6,182,212,0.3)] group-hover/avatar:shadow-[0_0_0_4px_rgba(6,182,212,0.5)] transition-all", isDark ? "bg-zinc-900" : "bg-slate-50")}>
+ <div className={cn("w-36 h-36 rounded-full border-4 border-black overflow-hidden flex items-center justify-center group-hover/-[0_0_0_4px_rgba(6,182,212,0.5)] transition-all", isDark ?"bg-zinc-900":"bg-slate-50")}>
                 {profilePreview ? (
                   <img referrerPolicy="no-referrer" src={profilePreview} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
@@ -529,7 +529,7 @@ export default function SettingsPage() {
                   </span>
                 )}
               </div>
-              <label className="absolute bottom-2 right-2 p-3 rounded-full bg-cyan-500 text-black cursor-pointer shadow-[0_4px_20px_rgba(6,182,212,0.5)] hover:bg-cyan-400 hover:scale-110 transition-all z-10">
+              <label className="absolute bottom-2 right-2 p-3 rounded-full bg-cyan-500 text-black cursor-pointer hover:bg-cyan-400 hover:scale-110 transition-all z-10">
                 <Camera className="w-4 h-4" />
                 <input type="file" className="hidden" accept="image/*" onChange={handleProfileChange} />
               </label>
@@ -542,7 +542,7 @@ export default function SettingsPage() {
                     exit={{ opacity: 0, scale: 0.5 }}
                     onClick={() => setShowDeleteProfileModal(true)}
                     disabled={isDeletingProfile}
-                    className={cn("absolute top-2 right-2 p-2 rounded-full bg-red-500/90 cursor-pointer shadow-lg hover:bg-red-400 hover:scale-110 transition-all z-10 disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                    className={cn("absolute top-2 right-2 p-2 rounded-full bg-red-500/90 cursor-pointer hover:bg-red-400 hover:scale-110 transition-all z-10 disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
                     title="Remove photo"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -573,7 +573,7 @@ export default function SettingsPage() {
             </div>
             
             <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-              <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
                 {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
                 {saving ? "Saving..." : "Save Profile"}
               </button>
@@ -589,7 +589,7 @@ export default function SettingsPage() {
                 {/* Contact Information Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -616,7 +616,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Contact Info"}
           </button>
@@ -625,7 +625,7 @@ export default function SettingsPage() {
                 {/* Social Links Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -660,7 +660,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Social Links"}
           </button>
@@ -674,7 +674,7 @@ export default function SettingsPage() {
                 {/* Website Content Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -701,7 +701,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Content"}
           </button>
@@ -710,7 +710,7 @@ export default function SettingsPage() {
                 {/* Resume / CV Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -724,7 +724,7 @@ export default function SettingsPage() {
 
         <div className="space-y-4 relative z-10">
           <div className="flex items-center gap-4">
-            <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all shadow-sm", isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}>
               <input type="file" accept="application/pdf" className="hidden" onChange={handleCVUpload} />
               <FileText className={cn("w-5 h-5 mr-2", isDark ? "text-cyan-400" : "text-cyan-700")} />
               Upload New CV
@@ -749,7 +749,7 @@ export default function SettingsPage() {
           </p>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save CV"}
           </button>
@@ -765,7 +765,7 @@ export default function SettingsPage() {
                 {/* SEO & Favicon Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -831,7 +831,7 @@ export default function SettingsPage() {
                 <img referrerPolicy="no-referrer" src={`/favicon.ico?v=${faviconKey}`} alt="Favicon" className="w-8 h-8" onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgY3Vyc29yPSJwb2ludGVyIj48cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik00IDE2bDQuNTg2LTQuNTg2YTIgMiAwIDAxMi44MjggMEwxNiAxNm0tMi0ybDEuNTg2LTEuNTg2YTIgMiAwIDAxMi44MjggMEwyMCAxNG0tNi02aC4wMSIgLz48L3N2Zz4=' }} />
               </div>
               <div className="flex items-center gap-4">
-                <label className={cn("flex flex-col items-center justify-center px-6 py-2 border hover:border-cyan-500/50 rounded-xl cursor-pointer transition-all shadow-sm", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200")}>
+                <label className={cn("flex flex-col items-center justify-center px-6 py-2 border hover:border-cyan-500/50 rounded-xl cursor-pointer transition-all", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200")}>
                   <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Upload .ico</span>
                   <span className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>Recommended: 32x32px</span>
                   <input type="file" accept=".ico" className="hidden" onChange={handleFaviconUpload} />
@@ -839,7 +839,7 @@ export default function SettingsPage() {
                 <button 
                   onClick={() => setShowDeleteFaviconModal(true)}
                   disabled={isDeletingFavicon}
-                  className={cn("p-2.5 rounded-xl transition-all shadow-sm border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                  className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                   title="Delete Favicon"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -850,7 +850,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save SEO Settings"}
           </button>
@@ -864,7 +864,7 @@ export default function SettingsPage() {
                 {/* Security Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
 
         <div className="flex items-center gap-4 border-b border-cyan-500/10 pb-6 relative z-10">
@@ -893,7 +893,7 @@ export default function SettingsPage() {
                 className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.twoFactorEnabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
               >
                 <span className="sr-only">Use setting</span>
-                <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.twoFactorEnabled ? 'translate-x-3' : '-translate-x-3'}`} />
+ <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.twoFactorEnabled ?'translate-x-3':'-translate-x-3'}`} />
               </button>
             </div>
 
@@ -905,9 +905,9 @@ export default function SettingsPage() {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className={cn("p-8 rounded-2xl border flex flex-col items-center gap-6 text-center", isDark ? "bg-[#0f172a] border-cyan-500/20" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className={cn("p-8 rounded-2xl border flex flex-col items-center gap-6 text-center", isDark ? "bg-[#0f172a] border-cyan-500/20" : "bg-white border-slate-200")}>
                     <p className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-600")}>1. Scan this QR Code with your Authenticator app</p>
-                    <div className="p-4 bg-white rounded-2xl shadow-lg">
+                    <div className="p-4 bg-white rounded-2xl">
                       <img referrerPolicy="no-referrer" src={setup2FAData.url} alt="2FA QR Code" className="w-48 h-48" loading="lazy" decoding="async" />
                     </div>
                     
@@ -939,7 +939,7 @@ export default function SettingsPage() {
                         <button 
                           onClick={handleVerify2FA}
                           disabled={verifyCode.length !== 6 || verifying2FA}
-                          className={cn("flex-1 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                          className={cn("flex-1 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
                         >
                           {verifying2FA ? "Verifying..." : "Verify"}
                         </button>
@@ -980,7 +980,7 @@ export default function SettingsPage() {
       {/* System Maintenance Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -1007,7 +1007,7 @@ export default function SettingsPage() {
               className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.maintenance_mode ? 'bg-cyan-500' : 'bg-zinc-700'}`}
             >
               <span className="sr-only">Toggle Maintenance Mode</span>
-              <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.maintenance_mode ? 'translate-x-3' : '-translate-x-3'}`} />
+ <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.maintenance_mode ?'translate-x-3':'-translate-x-3'}`} />
             </button>
           </div>
 
@@ -1024,7 +1024,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Maintenance Settings"}
           </button>
@@ -1039,7 +1039,7 @@ export default function SettingsPage() {
       {/* Service Management */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border shadow-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
       >
         <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
@@ -1066,7 +1066,7 @@ export default function SettingsPage() {
               className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.vps_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
             >
               <span className="sr-only">Toggle Cloud VPS</span>
-              <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.vps_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
+ <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.vps_enabled ?'translate-x-3':'-translate-x-3'}`} />
             </button>
           </div>
 
@@ -1084,7 +1084,7 @@ export default function SettingsPage() {
               className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.k3s_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
             >
               <span className="sr-only">Toggle Kubernetes</span>
-              <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.k3s_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
+ <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.k3s_enabled ?'translate-x-3':'-translate-x-3'}`} />
             </button>
           </div>
 
@@ -1104,7 +1104,7 @@ export default function SettingsPage() {
               className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.cdn_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
             >
               <span className="sr-only">Toggle CDN</span>
-              <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.cdn_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
+ <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.cdn_enabled ?'translate-x-3':'-translate-x-3'}`} />
             </button>
           </div>
 
@@ -1125,7 +1125,7 @@ export default function SettingsPage() {
 
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Service Settings"}
           </button>

@@ -151,7 +151,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className={cn("w-full max-w-5xl h-[85vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1823] border-white/10" : "bg-white border-slate-200")}
+          className={cn("w-full max-w-5xl h-[85vh] rounded-3xl border flex flex-col overflow-hidden", isDark ? "bg-[#0b1823] border-white/10" : "bg-white border-slate-200")}
         >
           {/* Header */}
           <div className={cn("flex items-center justify-between p-6 border-b", isDark ? "border-white/10 bg-white/[0.02]" : "border-slate-200 bg-slate-50")}>
@@ -210,11 +210,11 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
                     <div 
                       key={file.name}
                       onClick={() => setSelectedFile(file)}
-                      className={cn("relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all", selectedFile?.name === file.name ? 'border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : isDark ? 'border-white/5 hover:border-white/20' : 'border-slate-200 hover:border-slate-300')}
+                      className={cn("relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all", selectedFile?.name === file.name ? 'border-cyan-500' : isDark ? 'border-white/5 hover:border-white/20' : 'border-slate-200 hover:border-slate-300')}
                     >
                       <img referrerPolicy="no-referrer" src={file.url} alt={file.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       {selectedFile?.name === file.name && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+                        <div className="absolute top-2 right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
                           <Check className="w-3.5 h-3.5 text-white" />
                         </div>
                       )}

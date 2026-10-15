@@ -242,7 +242,7 @@ export default function AdminCommunityPage() {
     <div className="space-y-8 relative z-10 w-full p-6 sm:p-0">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Community</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Community</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage WhatsApp IT groups</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -271,16 +271,16 @@ export default function AdminCommunityPage() {
 
       <div className="grid gap-6">
         {groups.length === 0 ? (
-          <div className={cn("glass-card rounded-[32px] p-16 text-center border shadow-2xl relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("glass-card rounded-[32px] p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
             <div className={cn("absolute top-0 left-1/4 w-96 h-96 blur-[100px] rounded-full pointer-events-none", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <Users className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
-            <h2 className={cn("text-2xl font-extrabold drop-shadow-sm mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Groups Yet</h2>
+            <h2 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Groups Yet</h2>
             <p className={cn("font-medium max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>When someone submits a WhatsApp group, it will appear here for you to review and publish.</p>
           </div>
         ) : (
-          <div className={cn("glass-card rounded-2xl overflow-hidden border shadow-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("glass-card rounded-2xl overflow-hidden border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className={cn("bg-white/5 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-400" : "bg-white border-slate-200 text-slate-500")}>
@@ -421,7 +421,7 @@ export default function AdminCommunityPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className={cn("border shadow-2xl rounded-[32px] w-full max-w-lg overflow-hidden relative z-10", isDark ? "glass-card border-cyan-500/30" : "bg-white border-slate-200")}
+            className={cn("border rounded-[32px] w-full max-w-lg overflow-hidden relative z-10", isDark ? "glass-card border-cyan-500/30" : "bg-white border-slate-200")}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-cyan-500"></div>
             <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/10" : "border-slate-200")}>
@@ -441,7 +441,7 @@ export default function AdminCommunityPage() {
                   type="text" 
                   value={editGroup.name}
                   onChange={e => setEditGroup({...editGroup, name: e.target.value})}
-                  className={cn("w-full border rounded-xl px-5 py-3.5 font-bold focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-5 py-3.5 font-bold focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
                   required
                 />
               </div>
@@ -454,7 +454,7 @@ export default function AdminCommunityPage() {
                     type="url" 
                     value={editGroup.link}
                     onChange={e => setEditGroup({...editGroup, link: e.target.value})}
-                    className={cn("w-full border rounded-xl pl-12 pr-5 py-3.5 font-medium focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl pl-12 pr-5 py-3.5 font-medium focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
                     required
                   />
                 </div>
@@ -501,7 +501,7 @@ export default function AdminCommunityPage() {
                 <button type="button" onClick={() => setEditGroup(null)} className={cn("px-5 py-2.5 rounded-xl font-bold transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
                   Cancel
                 </button>
-                <button type="submit" disabled={saving || uploading} className={cn("flex items-center justify-center gap-2 px-6 py-2.5  font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+                <button type="submit" disabled={saving || uploading} className={cn("flex items-center justify-center gap-2 px-6 py-2.5 font-bold rounded-xl transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
                   {saving ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <Save className="w-4 h-4" />} 
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>

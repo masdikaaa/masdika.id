@@ -151,7 +151,7 @@ export default function MenuOrderPage() {
             <Reorder.Item
               key={key}
               value={key}
-              className={cn("flex items-center gap-3 p-3 sm:p-4 rounded-2xl bg-white/[0.04] border hover:border-white/20 cursor-grab active:cursor-grabbing active:scale-[1.01] active:shadow-2xl transition-colors select-none", isDark ? "border-white/10" : "border-slate-200")}
+              className={cn("flex items-center gap-3 p-3 sm:p-4 rounded-2xl bg-white/[0.04] border hover:border-white/20 cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "border-white/10" : "border-slate-200")}
             >
               <GripVertical className="w-5 h-5 text-zinc-500 shrink-0" />
 
@@ -205,7 +205,7 @@ export default function MenuOrderPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-8">
-        <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+        <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
           Menu Order Configuration
         </h1>
         <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Drag to reorder dropdown items. Toggle the "New" badge on each item.</p>
@@ -248,7 +248,7 @@ export default function MenuOrderPage() {
             <RotateCcw className="w-4 h-4" /> Reset to Default
           </button>
           <button onClick={handleSave} disabled={saving}
-            className={cn("flex items-center justify-center gap-2 px-8 py-2.5 transition-all shadow-md hover:shadow-lg hover:from-cyan-400 hover:to-cyan-400 font-bold rounded-xl disabled:opacity-50 transition-all shadow-lg shadow-cyan-500/20", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-cyan-600/20")}>
+            className={cn("flex items-center justify-center gap-2 px-8 py-2.5 transition-all hover:from-cyan-400 hover:to-cyan-400 font-bold rounded-xl disabled:opacity-50 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save All Changes'}
           </button>
         </div>

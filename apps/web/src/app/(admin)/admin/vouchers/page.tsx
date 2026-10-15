@@ -387,7 +387,7 @@ export default function AdminVouchersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage promo codes and global promos.</p>
         </div>
       </div>
@@ -449,7 +449,7 @@ export default function AdminVouchersPage() {
             </div>
           </div>
 
-          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "overflow-hidden shadow-xl", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className="overflow-x-auto">
               <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
                 <thead className={cn("bg-white/5 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
@@ -461,7 +461,7 @@ export default function AdminVouchersPage() {
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={toggleSelectAllVouchers} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -487,7 +487,7 @@ export default function AdminVouchersPage() {
                             return (
                               <label className="relative flex items-center justify-center cursor-pointer group">
                                 <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelectVoucher(v.id)} />
-                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                                   {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                                 </div>
                               </label>
@@ -586,7 +586,7 @@ export default function AdminVouchersPage() {
             </div>
           </div>
 
-          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "overflow-hidden shadow-xl", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className="overflow-x-auto">
               <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
                 <thead className={cn("bg-white/5 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
@@ -598,7 +598,7 @@ export default function AdminVouchersPage() {
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={toggleSelectAllPromos} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -624,7 +624,7 @@ export default function AdminVouchersPage() {
                             return (
                               <label className="relative flex items-center justify-center cursor-pointer group">
                                 <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelectPromo(p.id)} />
-                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                                   {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                                 </div>
                               </label>
@@ -692,7 +692,7 @@ export default function AdminVouchersPage() {
       {/* Voucher Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-md shadow-2xl overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-md overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingVoucherId ? "Edit Voucher" : "Create Voucher"}</h2>
               <button onClick={closeVoucherModal} className={cn("hover:text-white", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -775,7 +775,7 @@ export default function AdminVouchersPage() {
       {/* Promo Modal */}
       {isPromoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-md shadow-2xl overflow-hidden my-8", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-md overflow-hidden my-8", isDark ? "border-white/10" : "border-slate-200")}>
             <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingPromoId ? "Edit Promo" : "Create Promo"}</h2>
               <button onClick={() => setIsPromoModalOpen(false)} className={cn("hover:text-white", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -848,7 +848,7 @@ export default function AdminVouchersPage() {
                           checked={isChecked}
                           onChange={e => setNewPromo({ ...newPromo, isReward: e.target.checked })}
                         />
-                        <div className={cn("w-5 h-5 flex-shrink-0 rounded-md border transition-all flex items-center justify-center shadow-inner group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
+                        <div className={cn("w-5 h-5 flex-shrink-0 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
                           {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                         </div>
                       </>
@@ -907,7 +907,7 @@ export default function AdminVouchersPage() {
       {/* Delete Confirmation Modal */}
       {deletingVoucherId !== null && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-sm overflow-hidden shadow-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-sm overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className="p-6">
               <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete Voucher</h3>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Are you sure you want to delete this voucher? This action cannot be undone.</p>
@@ -934,7 +934,7 @@ export default function AdminVouchersPage() {
       {/* Delete Promo Confirmation Modal */}
       {deletingPromoId !== null && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-sm overflow-hidden shadow-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-sm overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className="p-6">
               <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete Promo</h3>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Are you sure you want to delete this promo? This action cannot be undone.</p>

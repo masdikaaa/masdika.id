@@ -309,12 +309,12 @@ export default function AdminInvoicesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900 dark:text-slate-900")}>Invoices</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900 dark:text-slate-900")}>Invoices</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage customer orders and billing history.</p>
         </div>
       </div>
 
-      <div className={cn("glass-card border rounded-[32px] shadow-2xl overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("glass-card border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto flex-1">
             <h2 className={cn("text-lg font-semibold shrink-0", isDark ? "text-white" : "text-slate-900 dark:text-slate-900")}>All Invoices</h2>
@@ -565,7 +565,7 @@ export default function AdminInvoicesPage() {
       {/* Invoice Details Modal */}
       {selectedInvoiceDetails && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-2xl bg-[#0f172a] rounded-3xl border border-cyan-500/20 shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="w-full max-w-2xl bg-[#0f172a] rounded-3xl border border-cyan-500/20 flex flex-col max-h-[90vh]">
             <div className={cn("p-6 border-b flex justify-between items-center", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div>
                 <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900 dark:text-slate-900")}>

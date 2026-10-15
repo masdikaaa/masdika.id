@@ -241,12 +241,12 @@ export default function AdminCustomersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Customers</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Customers</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage registered users on the platform.</p>
         </div>
       </div>
 
-      <div className={cn("glass-card border rounded-[32px] shadow-2xl overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("glass-card border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto flex-1">
             <h2 className={cn("text-lg font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>All Users</h2>
@@ -432,7 +432,7 @@ export default function AdminCustomersPage() {
       {editBalanceUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isUpdatingBalance && setEditBalanceUser(null)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-sm overflow-hidden p-6", isDark ? "border-white/10" : "border-slate-200")}>
             <h2 className={cn("text-xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Edit Balance</h2>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{editBalanceUser.name}</span></p>
             <div className="mb-6">
@@ -471,7 +471,7 @@ export default function AdminCustomersPage() {
       {suspendUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isSuspending && setSuspendUser(null)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-sm overflow-hidden p-6", isDark ? "border-white/10" : "border-slate-200")}>
             <h2 className={cn("text-xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{suspendUser.isSuspended ? "Unsuspend User" : "Suspend User"}</h2>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{suspendUser.name}</span></p>
             
@@ -522,7 +522,7 @@ export default function AdminCustomersPage() {
       {/* View Referrals Modal */}
       {referralsUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
             {/* Header */}
             <div className={cn("p-4 sm:p-6 border-b flex items-start justify-between gap-3 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div className="min-w-0">

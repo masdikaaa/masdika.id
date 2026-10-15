@@ -286,7 +286,7 @@ export default function AdminLayout({
 
               {/* Search Results Dropdown */}
               {isSearchFocused && searchQuery.trim() !== "" && (
-                <div className={cn("absolute top-full mt-2 w-full bg-slate-900/95 backdrop-blur-sm border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200", isDark ? "border-white/10" : "border-slate-200")}>
+                <div className={cn("absolute top-full mt-2 w-full bg-slate-900/95 backdrop-blur-sm border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200", isDark ? "border-white/10" : "border-slate-200")}>
                   <div className="max-h-64 overflow-y-auto p-2">
                     {searchResults.length > 0 ? (
                       searchResults.map(link => (
@@ -328,7 +328,7 @@ export default function AdminLayout({
               {showNotifications && (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
-                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-slate-900/95 backdrop-blur-sm border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "border-white/10" : "border-slate-200")}>
+                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-slate-900/95 backdrop-blur-sm border rounded-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "border-white/10" : "border-slate-200")}>
                     <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
                       <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">

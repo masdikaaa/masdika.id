@@ -39,7 +39,7 @@ export default function AdminResellersPage() {
     <div className="space-y-6 md:space-y-8 pb-10 w-full relative z-10">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Reseller Management
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -53,7 +53,7 @@ export default function AdminResellersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {resellers.map((reseller, idx) => (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} key={reseller.id} className={cn("rounded-2xl md:rounded-[32px] p-5 md:p-6 relative overflow-hidden group border shadow-2xl transition-colors", isDark ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30" : "bg-white border-slate-200 hover:border-cyan-500/30")}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} key={reseller.id} className={cn("rounded-2xl md:rounded-[32px] p-5 md:p-6 relative overflow-hidden group border transition-colors", isDark ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30" : "bg-white border-slate-200 hover:border-cyan-500/30")}>
             {/* Background Glow */}
             <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none transition-all", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
             
@@ -115,7 +115,7 @@ export default function AdminResellersPage() {
         ))}
 
         {resellers.length === 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("col-span-full py-12 md:py-24 px-6 text-center border rounded-2xl md:rounded-[32px] border-dashed shadow-sm", isDark ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200")}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("col-span-full py-12 md:py-24 px-6 text-center border rounded-2xl md:rounded-[32px] border-dashed", isDark ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200")}>
             <ShieldCheck className={cn("w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 opacity-50", isDark ? "text-zinc-600" : "text-slate-400")} />
             <h3 className={cn("text-xl md:text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Resellers Found</h3>
             <p className={cn("max-w-md mx-auto text-sm md:text-base", isDark ? "text-zinc-400" : "text-slate-500")}>Users who generate a Reseller API Key will appear here.</p>

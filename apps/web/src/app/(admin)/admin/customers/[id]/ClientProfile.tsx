@@ -194,7 +194,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             <span className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Expires: {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString() : 'N/A'}</span>
             <span className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>Registration Date: {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : 'N/A'}</span>
             {s.billingType === 'PAYG' && (
-              <span className={cn("text-xs font-semibold mt-1 px-2 py-0.5 rounded w-fit border shadow-sm", isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+              <span className={cn("text-xs font-semibold mt-1 px-2 py-0.5 rounded w-fit border", isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
                 PAYG Meter: {s.usageCount ? s.usageCount.toLocaleString() : 0} reqs
               </span>
             )}
@@ -412,7 +412,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             <ArrowLeft className={cn("w-5 h-5", isDark ? "text-zinc-300" : "text-slate-600")} />
           </button>
           
-          <div className={cn("w-14 h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center shadow-lg", isDark ? "bg-[#0f172a] border-white/20" : "bg-white border-slate-200")}>
+          <div className={cn("w-14 h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#0f172a] border-white/20" : "bg-white border-slate-200")}>
             <img referrerPolicy="no-referrer" 
               src={user.image || `/api/avatar?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || 'User')}`} 
               alt="Profile" 
@@ -421,7 +421,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
           </div>
           
           <div>
-            <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {user.name}
               {user.isSuspended && <span className={cn("text-xs bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20", isDark ? "text-red-400" : "text-red-700")}>SUSPENDED</span>}
             </h1>
@@ -559,7 +559,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <h3 className={cn("font-semibold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} /> All Products & Services</h3>
               <button
                 onClick={() => setCreateCustomServiceModal(true)}
-                className={cn("px-3 py-1.5 text-xs font-semibold bg-cyan-500 hover:bg-cyan-600 rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-cyan-500/20", isDark ? "text-white" : "text-slate-900")}
+                className={cn("px-3 py-1.5 text-xs font-semibold bg-cyan-500 hover:bg-cyan-600 rounded-lg transition-colors flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
               >
                 + Custom Service
               </button>
@@ -603,28 +603,28 @@ export default function ClientProfile({ userId }: { userId: string }) {
                           setEditTarget(svc);
                           setEditModalOpen(true);
                         }}
-                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border whitespace-nowrap flex items-center gap-1.5", isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm")}
+                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border whitespace-nowrap flex items-center gap-1.5", isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}
                       >
                         <Edit3 className="w-3.5 h-3.5" /> Edit
                       </button>
                       <button
                         onClick={() => handleSuspendService(svc.type, svc.id, svc.status, svc.category.toLowerCase())}
                         disabled={svc.status !== 'ACTIVE' && svc.status !== 'RUNNING' && svc.status !== 'SUSPENDED'}
-                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border disabled:opacity-50 whitespace-nowrap", svc.status === "SUSPENDED" ? (isDark ? "border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 shadow-sm") : (isDark ? "border-orange-500/30 hover:bg-orange-500/10 text-orange-400" : "bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 shadow-sm"))}
+                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border disabled:opacity-50 whitespace-nowrap", svc.status === "SUSPENDED" ? (isDark ? "border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100") : (isDark ? "border-orange-500/30 hover:bg-orange-500/10 text-orange-400" : "bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"))}
                       >
                         {svc.status === 'SUSPENDED' ? 'Unsuspend' : 'Suspend'}
                       </button>
                       <button
                         onClick={() => handleTerminateService(svc.type, svc.id, svc.category.toLowerCase())}
                         disabled={svc.status === 'TERMINATED' || svc.status === 'CANCELED'}
-                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border disabled:opacity-50 whitespace-nowrap", isDark ? "border-red-500/30 hover:bg-red-500/10 text-red-400" : "bg-red-50 border-red-200 text-red-600 hover:bg-red-100 shadow-sm")}
+                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border disabled:opacity-50 whitespace-nowrap", isDark ? "border-red-500/30 hover:bg-red-500/10 text-red-400" : "bg-red-50 border-red-200 text-red-600 hover:bg-red-100")}
                       >
                         Terminate
                       </button>
                       {(svc.status === 'TERMINATED' || svc.status === 'CANCELED') && (
                         <button
                           onClick={() => handleDeleteService(svc.type, svc.id, svc.category.toLowerCase())}
-                          className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border border-red-600/50 bg-red-600/20 hover:bg-red-600 hover:text-white whitespace-nowrap shadow-lg shadow-red-500/10", isDark ? "text-red-400" : "text-red-700")}
+                          className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border border-red-600/50 bg-red-600/20 hover:bg-red-600 hover:text-white whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}
                         >
                           Delete
                         </button>
@@ -676,7 +676,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       {/* Suspend Modal */}
       {suspendModalOpen && suspendTarget && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-white/10" : "border-slate-200")}>
               <h3 className={cn("font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
@@ -706,7 +706,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <button 
                 onClick={() => executeSuspend(suspendTarget.serviceType, suspendTarget.id, true, suspendReason, suspendTarget.label)}
                 disabled={isSuspending || !suspendReason.trim()}
-                className={cn("px-4 py-2 text-sm font-medium bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 shadow-[0_0_15px_rgba(249,115,22,0.3)]", isDark ? "text-white" : "text-slate-900")}
+                className={cn("px-4 py-2 text-sm font-medium bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
               >
                 {isSuspending ? (
                   <><div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> Suspending...</>
@@ -776,7 +776,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       {/* Create Custom Service Modal */}
       {createCustomServiceModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-white/10" : "border-slate-200")}>
               <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Create Custom Service</h3>
               <button onClick={() => setCreateCustomServiceModal(false)} className={cn("hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>

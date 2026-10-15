@@ -159,7 +159,7 @@ export default function VpcRoutersPage() {
     <div>
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             VPC Routers
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage Mikrotik routers for Virtual Private Clouds</p>
@@ -174,7 +174,7 @@ export default function VpcRoutersPage() {
         </button>
       </div>
 
-      <div className={cn("glass rounded-3xl border overflow-hidden shadow-2xl", isDark ? "border-white/10" : "border-slate-200")}>
+      <div className={cn("glass rounded-3xl border overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className={cn("bg-white/5 text-sm border-b", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>
@@ -251,7 +251,7 @@ export default function VpcRoutersPage() {
       {/* Add / Edit Modal */}
       {(showAddModal || showEditModal) && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-6 border-b flex items-center justify-between shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Network className={cn("w-5 h-5", isDark ? "text-cyan-500" : "text-cyan-700")} />

@@ -180,7 +180,7 @@ export default function LoginLogsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Security & Login Logs</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Security & Login Logs</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor login attempts and brute-force blocks</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -214,7 +214,7 @@ export default function LoginLogsPage() {
       </div>
 
       {/* Main Content */}
-      <div className={cn("border rounded-2xl shadow-xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         {loading ? (
           <AdminLoader className="min-h-[250px] p-12" />
         ) : logs.length === 0 ? (
@@ -281,7 +281,7 @@ export default function LoginLogsPage() {
                             title="Unban IP Address"
                           >
                             <UserX className="w-4 h-4" />
-                            <span className={cn("absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm", isDark ? "bg-black/80 text-white" : "bg-white text-slate-900 border border-slate-200")}>Unban IP</span>
+                            <span className={cn("absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none", isDark ? "bg-black/80 text-white" : "bg-white text-slate-900 border border-slate-200")}>Unban IP</span>
                           </button>
                         )}
                         <button
@@ -290,7 +290,7 @@ export default function LoginLogsPage() {
                           title="Delete Log"
                         >
                           <Trash2 className="w-4 h-4" />
-                          <span className={cn("absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm", isDark ? "bg-black/80 text-white" : "bg-white text-slate-900 border border-slate-200")}>Delete Log</span>
+                          <span className={cn("absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none", isDark ? "bg-black/80 text-white" : "bg-white text-slate-900 border border-slate-200")}>Delete Log</span>
                         </button>
                       </div>
                     </td>

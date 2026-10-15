@@ -443,7 +443,7 @@ export default function AdminResourceFindingPage() {
             onClick={() => fetchData(true)}
             disabled={refreshing}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all shadow-sm active:scale-95 disabled:opacity-50",
+              "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all active:scale-95 disabled:opacity-50",
               isDark
                 ? "bg-[#0b1322] hover:bg-white/5 border-white/10 text-white"
                 : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800"
@@ -461,7 +461,7 @@ export default function AdminResourceFindingPage() {
               "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all",
               isDark
                 ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
-                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 shadow-sm"
+                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
             )}
           >
             <Server className="w-3.5 h-3.5" />
@@ -484,7 +484,7 @@ export default function AdminResourceFindingPage() {
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
               ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
-              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+              : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
           <div className="flex items-center justify-between">
@@ -533,7 +533,7 @@ export default function AdminResourceFindingPage() {
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
               ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
-              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+              : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
           <div className="flex items-center justify-between">
@@ -571,7 +571,7 @@ export default function AdminResourceFindingPage() {
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
               ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
-              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+              : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
           <div className="flex items-center justify-between">
@@ -609,7 +609,7 @@ export default function AdminResourceFindingPage() {
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
               ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
-              : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm"
+              : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
           <div className="flex items-center justify-between">
@@ -646,7 +646,7 @@ export default function AdminResourceFindingPage() {
       </div>
 
       {/* Filter Tabs & Search / Sort Bar */}
-      <div className={cn("p-4 rounded-2xl border space-y-4 relative z-20", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("p-4 rounded-2xl border space-y-4 relative z-20", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200")}>
         {/* Quick Filter Tabs - Mobile Horizontal Touch Scroll */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-none">
           {[
@@ -671,8 +671,8 @@ export default function AdminResourceFindingPage() {
                   "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 border",
                   isActive
                     ? isDark
-                      ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-sm"
-                      : "bg-cyan-50 border-cyan-300 text-cyan-800 shadow-sm"
+                      ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300"
+                      : "bg-cyan-50 border-cyan-300 text-cyan-800"
                     : isDark
                     ? "bg-white/5 border-transparent text-zinc-400 hover:text-white hover:bg-white/10"
                     : "bg-slate-50 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -772,7 +772,7 @@ export default function AdminResourceFindingPage() {
                       : "bg-rose-50/60 border-rose-200"
                     : isDark
                     ? "bg-[#0b1322] border-white/10"
-                    : "bg-white border-slate-200 shadow-sm"
+                    : "bg-white border-slate-200"
                 )}
               >
                 {/* Header: Hostname, VMID, Node, Status */}
@@ -943,7 +943,7 @@ export default function AdminResourceFindingPage() {
                         onClick={() => handleVpsAction(vps.id, "enable-net")}
                         disabled={actionLoading}
                         className={cn(
-                          "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all shrink-0 ml-2 active:scale-95 shadow-2xs",
+                          "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all shrink-0 ml-2 active:scale-95",
                           isDark
                             ? "bg-rose-500/20 hover:bg-emerald-500 hover:text-black text-rose-200 border-rose-500/30"
                             : "bg-white hover:bg-emerald-600 hover:text-white text-rose-800 border-rose-200"
@@ -970,7 +970,7 @@ export default function AdminResourceFindingPage() {
                         onClick={() => handleVpsAction(vps.id, "unthrottle")}
                         disabled={actionLoading}
                         className={cn(
-                          "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all shrink-0 ml-2 active:scale-95 shadow-2xs",
+                          "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all shrink-0 ml-2 active:scale-95",
                           isDark
                             ? "bg-white/10 hover:bg-cyan-500 hover:text-black text-white border-white/15"
                             : "bg-white hover:bg-cyan-600 hover:text-white text-cyan-800 border-cyan-200"
@@ -991,7 +991,7 @@ export default function AdminResourceFindingPage() {
                     <button
                       onClick={() => openInspectModal(vps)}
                       className={cn(
-                        "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95",
+                        "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
                         isDark
                           ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border-cyan-500/30"
                           : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
@@ -1011,12 +1011,12 @@ export default function AdminResourceFindingPage() {
                         "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
                         vps.isNetDisabled
                           ? isDark
-                            ? "bg-rose-500/15 text-rose-300 border-rose-500/40 shadow-sm"
-                            : "bg-rose-50 text-rose-700 border-rose-200 shadow-sm"
+                            ? "bg-rose-500/15 text-rose-300 border-rose-500/40"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
                           : vps.rateLimit && vps.rateLimit > 0
                           ? isDark
-                            ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10"
-                            : "bg-cyan-50 text-cyan-700 border-cyan-200 shadow-sm"
+                            ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40"
+                            : "bg-cyan-50 text-cyan-700 border-cyan-200"
                           : isDark
                           ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                           : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
@@ -1102,7 +1102,7 @@ export default function AdminResourceFindingPage() {
                             : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
                           : isDark
                           ? "bg-white/5 hover:bg-emerald-500/15 text-zinc-300 hover:text-emerald-300 border-white/10 hover:border-emerald-500/30"
-                          : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border-slate-200 hover:border-emerald-300 shadow-xs"
+                          : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border-slate-200 hover:border-emerald-300"
                       )}
                       title={vps.isOnline ? "VPS is already running" : "Start VPS"}
                     >
@@ -1133,7 +1133,7 @@ export default function AdminResourceFindingPage() {
                             : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
                           : isDark
                           ? "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30"
-                          : "bg-white hover:bg-slate-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300 shadow-xs"
+                          : "bg-white hover:bg-slate-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300"
                       )}
                       title={!vps.isOnline ? "VPS is offline" : "Reboot VPS"}
                     >
@@ -1164,7 +1164,7 @@ export default function AdminResourceFindingPage() {
                             : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
                           : isDark
                           ? "bg-white/5 hover:bg-amber-500/15 text-zinc-300 hover:text-amber-300 border-white/10 hover:border-amber-500/30"
-                          : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300 shadow-xs"
+                          : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300"
                       )}
                       title={!vps.isOnline ? "VPS is offline" : "Graceful Shutdown (Power Off)"}
                     >
@@ -1195,7 +1195,7 @@ export default function AdminResourceFindingPage() {
                             : "opacity-35 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400"
                           : isDark
                           ? "bg-white/5 hover:bg-rose-500/15 text-zinc-300 hover:text-rose-300 border-white/10 hover:border-rose-500/30"
-                          : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300 shadow-xs"
+                          : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300"
                       )}
                       title={!vps.isOnline ? "VPS is offline" : "Force Stop VPS"}
                     >
@@ -1214,7 +1214,7 @@ export default function AdminResourceFindingPage() {
           <div
             className={cn(
               "p-4 rounded-2xl border flex flex-col items-center justify-center gap-3",
-              isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200 shadow-sm"
+              isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200"
             )}
           >
             <div className={cn("text-xs text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1232,7 +1232,7 @@ export default function AdminResourceFindingPage() {
       </div>
 
       {/* DESKTOP FULL-SPACE DATA TABLE (hidden lg:block) */}
-      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
@@ -1383,7 +1383,7 @@ export default function AdminResourceFindingPage() {
                                   onClick={() => handleVpsAction(vps.id, "enable-net")}
                                   disabled={actionLoading}
                                   className={cn(
-                                    "px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all active:scale-95 shadow-2xs",
+                                    "px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all active:scale-95",
                                     isDark
                                       ? "bg-rose-500/20 hover:bg-emerald-500 hover:text-black border-rose-500/30 text-rose-200"
                                       : "bg-white hover:bg-emerald-600 hover:text-white border-rose-200 text-rose-800"
@@ -1415,7 +1415,7 @@ export default function AdminResourceFindingPage() {
                                   onClick={() => handleVpsAction(vps.id, "unthrottle")}
                                   disabled={actionLoading}
                                   className={cn(
-                                    "px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all active:scale-95 shadow-2xs",
+                                    "px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all active:scale-95",
                                     isDark
                                       ? "bg-white/10 hover:bg-cyan-500 hover:text-black border-white/15 text-white"
                                       : "bg-white hover:bg-cyan-600 hover:text-white border-cyan-200 text-cyan-800"
@@ -1587,7 +1587,7 @@ export default function AdminResourceFindingPage() {
                           <button
                             onClick={() => openInspectModal(vps)}
                             className={cn(
-                              "p-2 rounded-xl border text-xs font-semibold transition-all shadow-sm active:scale-95 flex items-center gap-1.5",
+                              "p-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5",
                               isDark
                                 ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border-cyan-500/30"
                                 : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
@@ -1618,8 +1618,8 @@ export default function AdminResourceFindingPage() {
                               vps.isOnline || vps.dbStatus === "SUSPENDED"
                                 ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
                                 : isDark
-                                ? "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/30 shadow-sm"
-                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm"
+                                ? "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/30"
+                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300"
                             )}
                             title={vps.isOnline ? "VPS is already running" : "Start VPS"}
                           >
@@ -1646,8 +1646,8 @@ export default function AdminResourceFindingPage() {
                               !vps.isOnline
                                 ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
                                 : isDark
-                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30 shadow-sm"
-                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300 shadow-sm"
+                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30"
+                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300"
                             )}
                             title={!vps.isOnline ? "VPS is offline" : "Reboot VPS"}
                           >
@@ -1674,8 +1674,8 @@ export default function AdminResourceFindingPage() {
                               !vps.isOnline
                                 ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
                                 : isDark
-                                ? "bg-white/5 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 border-white/10 hover:border-amber-500/30 shadow-sm"
-                                : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300 shadow-sm"
+                                ? "bg-white/5 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 border-white/10 hover:border-amber-500/30"
+                                : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300"
                             )}
                             title={!vps.isOnline ? "VPS is offline" : "Graceful Shutdown (Power Off)"}
                           >
@@ -1702,8 +1702,8 @@ export default function AdminResourceFindingPage() {
                               !vps.isOnline
                                 ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
                                 : isDark
-                                ? "bg-white/5 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border-white/10 hover:border-rose-500/30 shadow-sm"
-                                : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300 shadow-sm"
+                                ? "bg-white/5 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border-white/10 hover:border-rose-500/30"
+                                : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300"
                             )}
                             title={!vps.isOnline ? "VPS is offline" : "Force Stop VPS"}
                           >
@@ -1720,15 +1720,15 @@ export default function AdminResourceFindingPage() {
                               "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
                               vps.isNetDisabled
                                 ? isDark
-                                  ? "bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25 shadow-sm"
-                                  : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 shadow-sm"
+                                  ? "bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25"
+                                  : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
                                 : vps.rateLimit && vps.rateLimit > 0
                                 ? isDark
-                                  ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/25 shadow-sm shadow-cyan-500/10"
-                                  : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 shadow-sm"
+                                  ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/25"
+                                  : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
                                 : isDark
-                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30 shadow-sm"
-                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border-slate-200 hover:border-cyan-200 shadow-sm"
+                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30"
+                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border-slate-200 hover:border-cyan-200"
                             )}
                             title={
                               vps.isNetDisabled
@@ -1760,7 +1760,7 @@ export default function AdminResourceFindingPage() {
                                 "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
                                 isDark
                                   ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                                  : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 shadow-sm"
+                                  : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
                               )}
                               title="Unsuspend and restore customer VPS"
                             >
@@ -1778,7 +1778,7 @@ export default function AdminResourceFindingPage() {
                               }}
                               className={cn(
                                 "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
-                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-rose-400 border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-rose-600 border-slate-200 shadow-sm"
+                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-rose-400 border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-rose-600 border-slate-200"
                               )}
                               title="Suspend & Lock VPS due to resource abuse"
                             >
@@ -1817,7 +1817,7 @@ export default function AdminResourceFindingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div
             className={cn(
-              "w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border shadow-2xl p-5 sm:p-7 space-y-6 transition-colors",
+              "w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border p-5 sm:p-7 space-y-6 transition-colors",
               isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
@@ -1864,7 +1864,7 @@ export default function AdminResourceFindingPage() {
                       inspectTimeframe === tf
                         ? isDark
                           ? "bg-cyan-500/20 border-cyan-500 text-cyan-300"
-                          : "bg-cyan-600 text-white border-cyan-600 shadow-sm"
+                          : "bg-cyan-600 text-white border-cyan-600"
                         : isDark
                         ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white"
                         : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
@@ -2080,7 +2080,7 @@ export default function AdminResourceFindingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div
             className={cn(
-              "w-full max-w-md rounded-3xl border shadow-2xl p-6 sm:p-7 space-y-5 transition-colors",
+              "w-full max-w-md rounded-3xl border p-6 sm:p-7 space-y-5 transition-colors",
               isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
@@ -2130,7 +2130,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => handleVpsAction(suspendModalVps.id, "suspend", suspendReason)}
                 disabled={actionLoading}
-                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Suspend</span>
@@ -2145,7 +2145,7 @@ export default function AdminResourceFindingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div
             className={cn(
-              "w-full max-w-lg rounded-3xl border shadow-2xl p-6 sm:p-7 space-y-5 transition-colors",
+              "w-full max-w-lg rounded-3xl border p-6 sm:p-7 space-y-5 transition-colors",
               isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
@@ -2224,7 +2224,7 @@ export default function AdminResourceFindingPage() {
                     "px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95",
                     isDark
                       ? "bg-emerald-500/20 hover:bg-emerald-500 hover:text-black text-emerald-300 border-emerald-500/30"
-                      : "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent shadow-sm"
+                      : "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent"
                   )}
                 >
                   Enable Internet
@@ -2237,7 +2237,7 @@ export default function AdminResourceFindingPage() {
                     "px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95",
                     isDark
                       ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
-                      : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-sm"
+                      : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200"
                   )}
                 >
                   Restore Full Speed
@@ -2303,7 +2303,7 @@ export default function AdminResourceFindingPage() {
                   onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
                   disabled={actionLoading}
                   className={cn(
-                    "px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-sm",
+                    "px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5 shrink-0 active:scale-95",
                     "bg-emerald-600 hover:bg-emerald-500"
                   )}
                 >
@@ -2360,8 +2360,8 @@ export default function AdminResourceFindingPage() {
                         "p-2.5 rounded-xl border text-left transition-all active:scale-[0.98]",
                         isSelected
                           ? isDark
-                            ? "bg-cyan-500/15 border-cyan-400 text-cyan-300 ring-1 ring-cyan-500/40 shadow-sm shadow-cyan-500/10"
-                            : "bg-cyan-50 border-cyan-500 text-cyan-900 ring-1 ring-cyan-500/30 shadow-sm"
+                            ? "bg-cyan-500/15 border-cyan-400 text-cyan-300 ring-1 ring-cyan-500/40"
+                            : "bg-cyan-50 border-cyan-500 text-cyan-900 ring-1 ring-cyan-500/30"
                           : isDark
                           ? "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
                           : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
@@ -2398,7 +2398,7 @@ export default function AdminResourceFindingPage() {
                     "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border outline-none font-mono transition-all",
                     isDark
                       ? "bg-[#0a1624] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
-                      : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm"
+                      : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                   )}
                 />
                 <span className={cn("absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-semibold", isDark ? "text-zinc-400" : "text-slate-400")}>
@@ -2437,8 +2437,8 @@ export default function AdminResourceFindingPage() {
                 disabled={actionLoading}
                 className={cn(
                   "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95",
-                  "bg-cyan-600 hover:bg-cyan-500 shadow-md",
-                  isDark && "shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]"
+                  "bg-cyan-600 hover:bg-cyan-500",
+                  isDark && ""
                 )}
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}

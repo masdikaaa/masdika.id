@@ -264,12 +264,12 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/admin/blog" className={cn("p-2.5 rounded-xl transition-all shadow-sm border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}>
+          <Link href="/admin/blog" className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}>
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Article' : 'Edit Article'}</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Article' : 'Edit Article'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Write and publish your thoughts.</p>
         </div>
       </div>
@@ -281,7 +281,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         drag
         dragMomentum={false}
         initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-        className={cn("fixed bottom-[76px] left-4 right-4 md:left-auto md:bottom-[96px] md:right-6 lg:bottom-[112px] lg:right-10 z-50 flex items-center justify-between md:justify-end gap-3 p-3 backdrop-blur-sm border rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing", isDark ? "bg-[#0a0e12]/90 border-white/10" : "bg-white/90 border-slate-200")}
+        className={cn("fixed bottom-[76px] left-4 right-4 md:left-auto md:bottom-[96px] md:right-6 lg:bottom-[112px] lg:right-10 z-50 flex items-center justify-between md:justify-end gap-3 p-3 backdrop-blur-sm border rounded-2xl cursor-grab active:cursor-grabbing", isDark ? "bg-[#0a0e12]/90 border-white/10" : "bg-white/90 border-slate-200")}
       >
         <button
           onClick={() => handleSave(false)}
@@ -293,7 +293,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         <button
           onClick={() => handleSave(true)}
           disabled={saving}
-          className={cn("flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-5 py-3  font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 whitespace-nowrap", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+          className={cn("flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-5 py-3 font-bold rounded-xl transition-all disabled:opacity-50 whitespace-nowrap", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
         >
           <Send className="w-4 h-4" /> {saving ? "Publishing..." : "Publish"}
         </button>
@@ -308,18 +308,18 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         <div className="space-y-3">
           <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><ImageIcon className="w-4 h-4" /> Featured Image</label>
           {formData.image ? (
-            <div className={cn("relative aspect-[21/9] w-full rounded-2xl overflow-hidden border group bg-black/40 shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("relative aspect-[21/9] w-full rounded-2xl overflow-hidden border group bg-black/40", isDark ? "border-white/10" : "border-slate-200")}>
               <img referrerPolicy="no-referrer" src={formData.image} alt="Featured" className="w-full h-full object-cover" loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                 <button 
                   onClick={() => { setMediaLibraryMode('featured'); setShowMediaLibrary(true); }}
-                  className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20"
+                  className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-all"
                 >
                   Change Image
                 </button>
                 <button 
                   onClick={() => setFormData(prev => ({ ...prev, image: "" }))}
-                  className={cn("px-5 py-2.5 bg-red-500/20 hover:bg-red-500/40 font-bold rounded-xl transition-all shadow-inner", isDark ? "text-red-400" : "text-red-700")}
+                  className={cn("px-5 py-2.5 bg-red-500/20 hover:bg-red-500/40 font-bold rounded-xl transition-all", isDark ? "text-red-400" : "text-red-700")}
                 >
                   Remove
                 </button>
@@ -328,9 +328,9 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           ) : (
             <button
               onClick={() => { setMediaLibraryMode('featured'); setShowMediaLibrary(true); }}
-              className={cn("w-full aspect-[21/9] rounded-2xl border-2 border-dashed hover:border-cyan-500/50 hover:bg-cyan-500/5 flex flex-col items-center justify-center gap-4 hover:text-cyan-400 transition-all group shadow-inner", isDark ? "border-white/10 bg-white/[0.02] text-zinc-400" : "border-slate-200 bg-white text-slate-500")}
+              className={cn("w-full aspect-[21/9] rounded-2xl border-2 border-dashed hover:border-cyan-500/50 hover:bg-cyan-500/5 flex flex-col items-center justify-center gap-4 hover:text-cyan-400 transition-all group", isDark ? "border-white/10 bg-white/[0.02] text-zinc-400" : "border-slate-200 bg-white text-slate-500")}
             >
-              <div className={cn("w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner border", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border", isDark ? "border-white/10" : "border-slate-200")}>
                 <ImagePlus className="w-6 h-6" />
               </div>
               <span className="font-bold text-sm">Upload or Select Featured Image</span>
@@ -348,12 +348,12 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g. Next.js 14 Server Actions Guide" 
-              className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500 placeholder:font-medium", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} 
+              className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500 placeholder:font-medium", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} 
             />
           </div>
           <div className="space-y-3">
             <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Link2 className="w-4 h-4" /> Permalink / Slug</label>
-            <div className={cn("flex items-center px-5 py-3.5 border rounded-xl transition-all focus-within:border-cyan-500/50 focus-within:bg-white/10 shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("flex items-center px-5 py-3.5 border rounded-xl transition-all focus-within:border-cyan-500/50 focus-within:bg-white/10", isDark ? "border-white/10" : "border-slate-200")}>
               <span className="text-zinc-500 mr-1 whitespace-nowrap overflow-hidden font-medium">/blog/</span>
               <input 
                 type="text" 
@@ -582,7 +582,7 @@ function renderMarkdown(md: string): string {
     // Inline code
     .replace(/`([^`]+)`/g, '<code class="bg-white/5 px-1.5 py-0.5 rounded text-cyan-400 text-sm">$1</code>')
     // YouTube links (matches raw, <link>, or [link](link))
-    .replace(/^(?:<)?(?:\[.*?\]\()?https?:\/\/(?:www\.youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)[^\s>)]*(?:\))?(?:>)?$/gm, '<div class="w-full aspect-video my-8 rounded-xl overflow-hidden shadow-2xl border border-white/10"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/$1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>')
+    .replace(/^(?:<)?(?:\[.*?\]\()?https?:\/\/(?:www\.youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)[^\s>)]*(?:\))?(?:>)?$/gm, '<div class="w-full aspect-video my-8 rounded-xl overflow-hidden border border-white/10"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/$1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>')
     // Links
     .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-cyan-400 underline">$1</a>')
     // Line breaks

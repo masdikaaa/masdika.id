@@ -115,11 +115,11 @@ export default function AdminOpportunitiesPage() {
     <div>
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Events & Jobs</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Events & Jobs</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage events, webinars, and job vacancies.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/admin/opportunities/edit/new" className={cn("inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-all shadow-md hover:shadow-lg", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-cyan-600/20")}>
+          <Link href="/admin/opportunities/edit/new" className={cn("inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             <Plus className="w-5 h-5" /> New Item
           </Link>
       </div>

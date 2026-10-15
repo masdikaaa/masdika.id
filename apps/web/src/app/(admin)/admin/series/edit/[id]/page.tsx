@@ -147,12 +147,12 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 w-full">
       {/* Header */}
       <div className="flex items-center gap-4 mb-2">
-        <Link href="/admin/series" className={cn("p-2.5 transition-all shadow-inner border rounded-xl", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}>
+        <Link href="/admin/series" className={cn("p-2.5 transition-all border rounded-xl", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}>
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Series' : 'Edit Series'}</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Series' : 'Edit Series'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage series details and episodes.</p>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Series Title *</label>
           <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
             placeholder="e.g. Learn Kubernetes from Scratch"
-            className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500 placeholder:font-medium", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+            className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500 placeholder:font-medium", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -184,7 +184,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
             <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Tags (comma separated)</label>
             <input type="text" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
               placeholder="e.g. devops, kubernetes, cloud"
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
           </div>
         </div>
 
@@ -192,7 +192,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Description</label>
           <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             rows={3} placeholder="Brief description of this series..."
-            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all resize-none shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all resize-none placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
         </div>
 
         <div className="space-y-3">
@@ -200,14 +200,14 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-col sm:flex-row gap-3">
             <input type="text" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
               placeholder="https://... or select from media library"
-              className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+              className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
             <button type="button" onClick={() => { setMediaTarget('series'); setShowMediaLibrary(true); }}
-              className={cn("px-5 py-3.5 hover:bg-white/10 border rounded-xl flex items-center justify-center gap-2 text-sm font-bold shadow-inner whitespace-nowrap transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}>
+              className={cn("px-5 py-3.5 hover:bg-white/10 border rounded-xl flex items-center justify-center gap-2 text-sm font-bold whitespace-nowrap transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}>
               Select Image
             </button>
           </div>
           {form.image && (
-            <div className={cn("mt-4 aspect-video w-full max-w-sm rounded-2xl overflow-hidden border shadow-inner group", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("mt-4 aspect-video w-full max-w-sm rounded-2xl overflow-hidden border group", isDark ? "border-white/10" : "border-slate-200")}>
               <img referrerPolicy="no-referrer" src={form.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
             </div>
           )}
@@ -215,14 +215,14 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
 
         <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
           <label className="flex items-center gap-3 cursor-pointer group">
-            <div className={cn("relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", form.published ? "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)]" : isDark ? "bg-white/10 hover:bg-white/20" : "bg-slate-300 hover:bg-slate-400")}
+            <div className={cn("relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", form.published ? "bg-cyan-500" : isDark ? "bg-white/10 hover:bg-white/20" : "bg-slate-300 hover:bg-slate-400")}
               onClick={() => setForm(f => ({ ...f, published: !f.published }))}>
-              <span className={cn("pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out", form.published ? "translate-x-5" : "translate-x-0")} />
+              <span className={cn("pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out", form.published ? "translate-x-5" : "translate-x-0")} />
             </div>
             <span className={cn("text-sm font-bold transition-colors", form.published ? "text-cyan-500" : isDark ? "text-white" : "text-slate-900")}>{form.published ? 'Published' : 'Draft'}</span>
           </label>
           <button onClick={handleSaveSeries} disabled={saving}
-            className={cn("flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto font-bold rounded-xl disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+            className={cn("flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto font-bold rounded-xl disabled:opacity-50 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
             <Save className="w-5 h-5" /> {saving ? 'Saving...' : 'Save Series'}
           </button>
         </div>
@@ -234,7 +234,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <div className={cn("flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-b pb-4", isDark ? "border-white/10" : "border-slate-200")}>
             <h2 className={cn("text-xl font-extrabold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Play className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} /> Episodes ({epTotal})</h2>
             <button onClick={openNewEpisode}
-              className={cn("flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 font-bold rounded-xl transition-all text-sm shadow-inner whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>
+              className={cn("flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 font-bold rounded-xl transition-all text-sm whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Plus className="w-4 h-4" /> Add Episode
             </button>
           </div>
@@ -242,7 +242,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-col gap-3">
             {episodes.length === 0 ? (
               <div className="text-center py-12">
-                <div className={cn("w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-4 shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+                <div className={cn("w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-4", isDark ? "border-white/10" : "border-slate-200")}>
                   <Play className="w-8 h-8 text-zinc-500" />
                 </div>
                 <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No episodes yet</h3>
@@ -259,17 +259,17 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center text-cyan-400 font-bold text-sm shrink-0 shadow-inner group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
+                  <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center text-cyan-400 font-bold text-sm shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
                     {i + 1}
                   </div>
-                  {ep.image && <img referrerPolicy="no-referrer" src={ep.image} alt="" className={cn("w-20 h-12 rounded-lg object-cover border shrink-0 shadow-inner", isDark ? "border-white/10" : "border-slate-200")} loading="lazy" decoding="async" />}
+                  {ep.image && <img referrerPolicy="no-referrer" src={ep.image} alt="" className={cn("w-20 h-12 rounded-lg object-cover border shrink-0", isDark ? "border-white/10" : "border-slate-200")} loading="lazy" decoding="async" />}
                   
                   <div className="flex-1 min-w-0 sm:hidden">
                     <p className={cn("font-bold text-sm line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{ep.title}</p>
                     <div className="mt-1">
                       {ep.published
-                        ? <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 shadow-inner", isDark ? "text-cyan-400" : "text-cyan-700")}>Published</span>
-                        : <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border shadow-inner", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>Draft</span>
+                        ? <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>Published</span>
+                        : <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>Draft</span>
                       }
                     </div>
                   </div>
@@ -279,19 +279,19 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                   <p className={cn("font-bold text-sm line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{ep.title}</p>
                   <div className="mt-1.5">
                     {ep.published
-                      ? <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 shadow-inner", isDark ? "text-cyan-400" : "text-cyan-700")}>Published</span>
-                      : <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border shadow-inner", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>Draft</span>
+                      ? <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>Published</span>
+                      : <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>Draft</span>
                     }
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-2 mt-2 sm:mt-0 justify-end sm:justify-start w-full sm:w-auto">
                   <button onClick={() => openEditEpisode(ep)}
-                    className={cn("p-2 rounded-lg bg-cyan-500/10 hover:text-white hover:bg-cyan-500/20 border border-transparent hover:border-cyan-500/20 transition-colors shadow-inner flex-1 sm:flex-none flex justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    className={cn("p-2 rounded-lg bg-cyan-500/10 hover:text-white hover:bg-cyan-500/20 border border-transparent hover:border-cyan-500/20 transition-colors flex-1 sm:flex-none flex justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button onClick={() => setDeleteEpId(ep.id)}
-                    className={cn("p-2 rounded-lg bg-red-500/10 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-500/20 transition-colors shadow-inner flex-1 sm:flex-none flex justify-center", isDark ? "text-red-400" : "text-red-700")}>
+                    className={cn("p-2 rounded-lg bg-red-500/10 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-500/20 transition-colors flex-1 sm:flex-none flex justify-center", isDark ? "text-red-400" : "text-red-700")}>
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -332,7 +332,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
       {editingEp !== null && (
         <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-16 overflow-y-auto">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingEp(null)} />
-          <div className="relative z-10 w-full max-w-4xl bg-[#0a1f33] border border-cyan-500/20 rounded-2xl shadow-2xl">
+          <div className="relative z-10 w-full max-w-4xl bg-[#0a1f33] border border-cyan-500/20 rounded-2xl">
             <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/10" : "border-slate-200")}>
               <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingEp.id ? 'Edit Episode' : 'Add New Episode'}</h3>
               <button onClick={() => setEditingEp(null)} className={cn("hover:text-white text-2xl leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>×</button>
@@ -343,14 +343,14 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Episode Title *</label>
                 <input type="text" value={epForm.title} onChange={e => setEpForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Episode 1 - Introduction to Kubernetes"
-                  className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+                  className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
               </div>
 
               <div className="space-y-3">
                 <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Excerpt / Short Summary</label>
                 <textarea value={epForm.excerpt} onChange={e => setEpForm(f => ({ ...f, excerpt: e.target.value }))}
                   rows={2} placeholder="Brief overview of this episode..."
-                  className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all resize-none shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+                  className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all resize-none placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -360,7 +360,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                     <Play className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 /70", isDark ? "text-cyan-500" : "text-cyan-700")} />
                     <input type="url" value={epForm.videoUrl} onChange={e => setEpForm(f => ({ ...f, videoUrl: e.target.value }))}
                       placeholder="https://youtube.com/watch?v=..."
-                      className={cn("w-full pl-11 pr-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+                      className={cn("w-full pl-11 pr-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -368,9 +368,9 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                   <div className="flex gap-3">
                     <input type="text" value={epForm.image} onChange={e => setEpForm(f => ({ ...f, image: e.target.value }))}
                       placeholder="https://..."
-                      className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all shadow-inner placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
+                      className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")} />
                     <button type="button" onClick={() => { setMediaTarget(0); setShowMediaLibrary(true); }}
-                      className={cn("px-5 py-3.5 border rounded-xl font-bold hover:bg-white/10 transition-all shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}>
+                      className={cn("px-5 py-3.5 border rounded-xl font-bold hover:bg-white/10 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}>
                       Select
                     </button>
                   </div>
@@ -394,9 +394,9 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
 
               <div className={cn("flex items-center justify-between pt-6 border-t mt-6", isDark ? "border-white/10" : "border-slate-200")}>
                 <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-12 h-7 rounded-full transition-colors border shadow-inner ${epForm.published ? 'bg-cyan-500 border-cyan-400' : isDark ? "bg-white/5 border-white/10" : "bg-slate-200 border-slate-300"} relative`}
+ <div className={`w-12 h-7 rounded-full transition-colors border ${epForm.published ?'bg-cyan-500 border-cyan-400': isDark ?"bg-white/5 border-white/10":"bg-slate-200 border-slate-300"} relative`}
                     onClick={() => setEpForm(f => ({ ...f, published: !f.published }))}>
-                    <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${epForm.published ? 'left-6' : 'left-1'}`} />
+ <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${epForm.published ?'left-6':'left-1'}`} />
                   </div>
                   <span className={cn("text-sm font-bold group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{epForm.published ? 'Published' : 'Draft'}</span>
                 </label>
@@ -405,7 +405,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                     Cancel
                   </button>
                   <button onClick={handleSaveEpisode} disabled={epSaving}
-                    className={cn("flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 font-bold rounded-xl disabled:opacity-50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all", isDark ? "text-white" : "text-slate-900")}>
+                    className={cn("flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 font-bold rounded-xl disabled:opacity-50 transition-all", isDark ? "text-white" : "text-slate-900")}>
                     <Save className="w-4 h-4" /> {epSaving ? 'Saving...' : 'Save Episode'}
                   </button>
                 </div>

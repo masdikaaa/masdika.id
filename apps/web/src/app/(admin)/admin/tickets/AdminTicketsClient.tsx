@@ -179,7 +179,7 @@ export default function AdminTicketsClient() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Manage Support Tickets
           </h1>
           <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>View and respond to customer support requests.</p>
@@ -209,7 +209,7 @@ export default function AdminTicketsClient() {
             )}
             <button
               onClick={() => setIsModalOpen(true)}
-              className={cn("col-span-1 sm:col-span-1 px-2 sm:px-4 py-2 rounded-xl text-sm font-bold transition-colors shrink-0 flex items-center justify-center gap-1 sm:gap-2 shadow-lg", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
+              className={cn("col-span-1 sm:col-span-1 px-2 sm:px-4 py-2 rounded-xl text-sm font-bold transition-colors shrink-0 flex items-center justify-center gap-1 sm:gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="truncate">Open Ticket</span>
@@ -234,14 +234,14 @@ export default function AdminTicketsClient() {
         </div>
       </div>
 
-      <div className={cn("glass-card border rounded-[32px] overflow-hidden shadow-2xl relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("glass-card border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         {isLoading ? (
           <AdminLoader className="min-h-[250px] py-20" />
         ) : error ? (
           <div className={cn("p-8 text-center", isDark ? "text-red-400" : "text-red-700")}>Failed to load tickets.</div>
         ) : tickets?.length === 0 ? (
           <div className="p-16 text-center relative overflow-hidden group">
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <MessageSquare className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
             <h3 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No tickets found</h3>
@@ -346,7 +346,7 @@ export default function AdminTicketsClient() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className={cn("p-2.5 rounded-xl transition-all shadow-sm border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+            className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
           >
             <ChevronLeft className={cn("w-5 h-5", isDark ? "text-white" : "text-slate-900")} />
           </button>
@@ -356,7 +356,7 @@ export default function AdminTicketsClient() {
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className={cn("p-2.5 rounded-xl transition-all shadow-sm border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+            className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
           >
             <ChevronRight className={cn("w-5 h-5", isDark ? "text-white" : "text-slate-900")} />
           </button>
@@ -365,7 +365,7 @@ export default function AdminTicketsClient() {
 
       {showBulkDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0A0B1A] border-red-500/20" : "bg-white border-red-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0A0B1A] border-red-500/20" : "bg-white border-red-200")}>
             <div className="p-5 border-b border-red-500/10 flex justify-between items-center bg-red-500/[0.04]">
               <h3 className={cn("font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Trash2 className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-700")} />
@@ -391,7 +391,7 @@ export default function AdminTicketsClient() {
                 <button
                   onClick={handleBulkDelete}
                   disabled={isBulkDeleting}
-                  className={cn("px-6 py-2 text-sm font-bold bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("px-6 py-2 text-sm font-bold bg-red-500 hover:bg-red-600 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
                 >
                   {isBulkDeleting ? 'Deleting...' : 'Delete Permanently'}
                 </button>
@@ -404,7 +404,7 @@ export default function AdminTicketsClient() {
       {/* New Ticket Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("bg-[#0f172a] border rounded-3xl w-full max-w-2xl overflow-hidden relative max-h-[90vh] flex flex-col", isDark ? "border-white/10" : "border-slate-200")}>
             <div className={cn("p-4 md:p-6 border-b flex justify-between items-start md:items-center relative z-10 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div className="flex-1 pr-4">
                 <h3 className={cn("text-lg md:text-xl font-bold flex items-start md:items-center gap-3", isDark ? "text-white" : "text-slate-900")}>
@@ -536,7 +536,7 @@ export default function AdminTicketsClient() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={cn("w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
+                    className={cn("w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
                   >
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     Submit Ticket

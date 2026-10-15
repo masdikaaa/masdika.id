@@ -56,11 +56,11 @@ const renderMessageWithLinks = (text: string) => {
 function StatusBadge({ status }: { status: string }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  if (status === 'OPEN') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-xs", isDark ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>OPEN</span>;
-  if (status === 'ANSWERED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-xs", isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>ANSWERED</span>;
-  if (status === 'CUSTOMER_REPLY') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-xs", isDark ? "bg-orange-500/20 text-orange-300 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)]" : "bg-orange-50 text-orange-700 border-orange-200")}>CUSTOMER REPLY</span>;
-  if (status === 'MERGED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-xs", isDark ? "bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]" : "bg-purple-50 text-purple-700 border-purple-200")}>MERGED</span>;
-  return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase shadow-xs", isDark ? "bg-zinc-500/20 border-zinc-500/30 text-zinc-300 shadow-[0_0_10px_rgba(113,113,122,0.2)]" : "bg-slate-100 border-slate-200 text-slate-700")}>CLOSED</span>;
+  if (status === 'OPEN') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>OPEN</span>;
+  if (status === 'ANSWERED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>ANSWERED</span>;
+  if (status === 'CUSTOMER_REPLY') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-orange-500/20 text-orange-300 border-orange-500/30" : "bg-orange-50 text-orange-700 border-orange-200")}>CUSTOMER REPLY</span>;
+  if (status === 'MERGED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-purple-50 text-purple-700 border-purple-200")}>MERGED</span>;
+  return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-zinc-500/20 border-zinc-500/30 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700")}>CLOSED</span>;
 }
 
 export default function AdminTicketThreadClient({ ticketId }: { ticketId: string }) {
@@ -222,7 +222,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
   return (
     <div className="space-y-6 pb-40 md:pb-48">
       {/* Header Card */}
-      <div className={cn("backdrop-blur-sm border p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-sm relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/80 border-white/10 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("backdrop-blur-sm border p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/80 border-white/10" : "bg-white border-slate-200")}>
         <div className={cn("absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-colors duration-700", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
         
         <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-5">
@@ -238,11 +238,11 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 <StatusBadge status={ticket.status} />
               </div>
               <div className={cn("text-xs sm:text-sm flex flex-wrap items-center gap-1.5 sm:gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium shadow-xs", isDark ? "bg-[#0A0B1A]/50 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium", isDark ? "bg-[#0A0B1A]/50 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
                   User: <Link href={`/admin/customers/${ticket.userId}`} className={cn("hover:underline font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.user.name}</Link>
                 </span>
                 {ticket.service && (
-                  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium shadow-xs", isDark ? "bg-[#0A0B1A]/50 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium", isDark ? "bg-[#0A0B1A]/50 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
                     Service: <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.service.replace('_', ' ')}</span>
                   </span>
                 )}
@@ -262,14 +262,14 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               <>
                 <button
                   onClick={() => setShowMergeModal(true)}
-                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border shadow-xs whitespace-nowrap", isDark ? "bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20 hover:border-purple-500/30 text-purple-400" : "bg-purple-50 hover:bg-purple-100 border-purple-200 hover:border-purple-300 text-purple-700")}
+                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border whitespace-nowrap", isDark ? "bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20 hover:border-purple-500/30 text-purple-400" : "bg-purple-50 hover:bg-purple-100 border-purple-200 hover:border-purple-300 text-purple-700")}
                 >
                   <GitMerge className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Merge
                 </button>
                 <button
                   onClick={() => handleAction('close')}
                   disabled={isSubmitting}
-                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border shadow-xs whitespace-nowrap", isDark ? "bg-zinc-500/10 hover:bg-zinc-500/20 border-zinc-500/20 hover:border-zinc-500/30 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700")}
+                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border whitespace-nowrap", isDark ? "bg-zinc-500/10 hover:bg-zinc-500/20 border-zinc-500/20 hover:border-zinc-500/30 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700")}
                 >
                   <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Close
                 </button>
@@ -277,7 +277,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
             )}
             <button
               onClick={() => setShowDeleteModal(true)}
-              className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border shadow-xs whitespace-nowrap", isDark ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 hover:border-red-500/30 text-red-400" : "bg-red-50 hover:bg-red-100 border-red-200 hover:border-red-300 text-red-700")}
+              className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border whitespace-nowrap", isDark ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 hover:border-red-500/30 text-red-400" : "bg-red-50 hover:bg-red-100 border-red-200 hover:border-red-300 text-red-700")}
             >
               <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Delete
             </button>
@@ -288,7 +288,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
       {/* Messages Area */}
       <div className="space-y-5 md:space-y-6 mt-6 sm:mt-8">
         {ticket.status === 'MERGED' && ticket.mergedInto && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.1)]", isDark ? "bg-purple-500/10 border-purple-500/20" : "bg-purple-50 border-purple-200")}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 text-purple-200", isDark ? "bg-purple-500/10 border-purple-500/20" : "bg-purple-50 border-purple-200")}>
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
               <ShieldAlert className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-700")} />
             </div>
@@ -303,7 +303,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
           if (isSystem) {
             return (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={msg.id} className="flex justify-center my-4 sm:my-6">
-                <span className={cn("bg-white/5 border text-xs px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-medium shadow-sm flex items-center gap-2", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
+                <span className={cn("bg-white/5 border text-xs px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-medium flex items-center gap-2", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
                   <CheckCircle2 className={cn("w-3.5 h-3.5", isDark ? "text-cyan-500" : "text-cyan-700")} /> {msg.message}
                 </span>
               </motion.div>
@@ -321,7 +321,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               <div className={cn(
                 "w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2",
                 isAdmin 
-                  ? "border-cyan-500/50 shadow-sm" 
+                  ? "border-cyan-500/50" 
                   : isDark ? "border-slate-700 bg-slate-800" : "border-slate-300 bg-slate-100"
               )}>
                 <img referrerPolicy="no-referrer" 
@@ -332,18 +332,18 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               </div>
               <div className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] flex flex-col min-w-0 ${isAdmin ? 'items-end' : 'items-start'}`}>
                 <div className={`flex items-center gap-1.5 sm:gap-2 mb-1 px-1 flex-wrap ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                  {isAdmin && <span className="bg-cyan-500 text-slate-900 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Staff</span>}
+                  {isAdmin && <span className="bg-cyan-500 text-slate-900 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider">Staff</span>}
                   <span className={cn("font-semibold text-xs sm:text-sm", isDark ? "text-zinc-200" : "text-slate-900")}>{msg.user.name}</span>
                   <span className={cn("text-[10px] sm:text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>{new Date(msg.createdAt).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
                 </div>
                 
                 <div className={cn(
-                  "px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-3xl shadow-sm relative group max-w-full min-w-0 text-left",
+                  "px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-3xl relative group max-w-full min-w-0 text-left",
                   isAdmin 
                     ? "bg-cyan-600 text-white rounded-tr-sm border border-cyan-500/30"
                     : isDark 
                       ? "bg-[#0b1322] border border-slate-800 text-zinc-200 rounded-tl-sm" 
-                      : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-sm"
+                      : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm"
                 )}>
                   <div className="text-sm leading-relaxed break-words quill-message-content">
                     {msg.message && renderMessageWithLinks(msg.message)}
@@ -358,7 +358,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                         {msg.attachments.map((att: any) => {
                           const isImage = att.mimeType.startsWith('image/');
                           const attBtnClass = cn(
-                            "flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 shadow-xs text-left hover:-translate-y-0.5",
+                            "flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 text-left hover:-translate-y-0.5",
                             isAdmin
                               ? "bg-black/20 hover:bg-black/30 border border-white/15 text-white"
                               : isDark
@@ -424,10 +424,10 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
             <form 
               onSubmit={(e) => { e.preventDefault(); handleAction('reply'); }} 
               className={cn(
-                "w-full relative border rounded-2xl sm:rounded-3xl transition-all duration-300 shadow-xl",
+                "w-full relative border rounded-2xl sm:rounded-3xl transition-all duration-300",
                 isDark 
                   ? "bg-[#0a1f33]/90 backdrop-blur-sm border-white/10" 
-                  : "bg-white border-slate-200 shadow-xl",
+                  : "bg-white border-slate-200",
                 isDragging 
                   ? "border-cyan-500 ring-4 ring-cyan-500/20" 
                   : "focus-within:border-cyan-500/50 focus-within:ring-2 focus-within:ring-cyan-500/10"
@@ -642,7 +642,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   <button
                     type="submit"
                     disabled={isSubmitting || ((!message || message === '<p><br></p>') && attachments.length === 0)}
-                    className={cn("transition-all px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
+                    className={cn("transition-all px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
                   >
                     <span className="hidden sm:inline">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <Send className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'}`} />
@@ -656,7 +656,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
 
       {showMergeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("border rounded-3xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-3xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-6 border-b flex justify-between items-center", isDark ? "border-white/10 bg-white/[0.02]" : "border-slate-200 bg-white")}>
               <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-white" : "text-slate-900")}>
                 <GitMerge className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-700")} />
@@ -678,7 +678,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   type="text"
                   value={mergeTarget}
                   onChange={e => setMergeTarget(e.target.value)}
-                  className={cn("w-full border rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/30 transition-all shadow-inner", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                  className={cn("w-full border rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/30 transition-all", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
                   placeholder="e.g. TKT-123456"
                 />
               </div>
@@ -695,7 +695,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 <button
                   type="submit"
                   disabled={isMerging || !mergeTarget}
-                  className={cn("w-full sm:w-auto px-6 py-3 text-sm font-bold bg-purple-500 hover:bg-purple-600 rounded-xl transition-colors shadow-lg shadow-purple-500/20 disabled:opacity-50 flex justify-center items-center", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full sm:w-auto px-6 py-3 text-sm font-bold bg-purple-500 hover:bg-purple-600 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center", isDark ? "text-white" : "text-slate-900")}
                 >
                   {isMerging ? 'Merging...' : 'Merge Ticket'}
                 </button>
@@ -707,7 +707,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("border rounded-3xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-red-500/20" : "bg-white border-red-200")}>
+          <div className={cn("border rounded-3xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-red-500/20" : "bg-white border-red-200")}>
             <div className={cn("p-6 border-b flex justify-between items-center", isDark ? "border-red-500/10 bg-red-500/[0.04]" : "border-red-100 bg-red-50/50")}>
               <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-white" : "text-slate-900")}>
                 <Trash2 className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-600")} />
@@ -740,7 +740,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   {isDeleting ? 'Deleting...' : 'Delete Permanently'}
@@ -781,7 +781,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 alt="Attachment" 
                 style={{ scale: zoomLevel }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl cursor-grab active:cursor-grabbing origin-center"
+                className="max-w-full max-h-[80vh] object-contain rounded-lg cursor-grab active:cursor-grabbing origin-center"
                 onClick={(e) => e.stopPropagation()}
                 drag
                 dragConstraints={{ left: -500, right: 500, top: -500, bottom: 500 }}

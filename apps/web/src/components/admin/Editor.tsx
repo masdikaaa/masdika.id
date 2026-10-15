@@ -178,7 +178,7 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="w-full max-w-md bg-[#0f172a] rounded-3xl p-6 border border-cyan-500/20 shadow-2xl"
+                className="w-full max-w-md bg-[#0f172a] rounded-3xl p-6 border border-cyan-500/20"
               >
                 <div className="flex items-center gap-4 mb-6">
                   <div className={cn("p-3 rounded-2xl border", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
@@ -215,7 +215,7 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                   </button>
                   <button
                     onClick={handleYoutubeSubmit}
-                    className="px-6 py-3 font-bold rounded-xl transition-colors shadow-lg bg-cyan-500 hover:bg-cyan-600 text-[#011627] shadow-cyan-500/20"
+                    className="px-6 py-3 font-bold rounded-xl transition-colors bg-cyan-500 hover:bg-cyan-600 text-[#011627]"
                   >
                     Insert Video
                   </button>

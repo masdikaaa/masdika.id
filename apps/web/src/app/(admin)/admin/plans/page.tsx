@@ -249,7 +249,7 @@ export default function AdminPlansPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Subscription Plans</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Subscription Plans</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage pricing, specs, and availability for all services.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -264,7 +264,7 @@ export default function AdminPlansPage() {
           )}
           <button
             onClick={openAddModal}
-            className={cn("flex items-center gap-2  font-semibold py-2 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+            className={cn("flex items-center gap-2 font-semibold py-2 px-6 rounded-xl transition-all shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
           >
             <Plus className="w-4 h-4" />
             Add New Plan
@@ -284,7 +284,7 @@ export default function AdminPlansPage() {
           {isDropdownOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
-              <div className={cn("absolute z-50 w-full mt-2 bg-[#0f172a] border rounded-xl shadow-2xl overflow-hidden py-1", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("absolute z-50 w-full mt-2 bg-[#0f172a] border rounded-xl overflow-hidden py-1", isDark ? "border-white/10" : "border-slate-200")}>
                 <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                   {services.map((service) => (
                     <button
@@ -305,7 +305,7 @@ export default function AdminPlansPage() {
           )}
         </div>
       </div>
-      <div className={cn("bg-[#0f172a] border rounded-2xl shadow-xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("bg-[#0f172a] border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
             <thead className={cn("text-xs uppercase border-b", isDark ? "text-zinc-500 bg-[#0A0B1A]/50 border-white/5" : "text-slate-500 bg-white border-slate-200")}>
@@ -404,7 +404,7 @@ export default function AdminPlansPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto", isDark ? "border-white/10" : "border-slate-200")}>
             
             <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 bg-[#0f172a]/95 backdrop-blur z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
@@ -555,7 +555,7 @@ export default function AdminPlansPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={cn("px-6 py-2.5 rounded-xl font-semibold  shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 transition-all flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                  className={cn("px-6 py-2.5 rounded-xl font-semibold disabled:opacity-50 transition-all flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
                 >
                   {isSubmitting ? (
                     <>
@@ -578,7 +578,7 @@ export default function AdminPlansPage() {
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setDeleteConfirmId(null)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-md p-6 overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
@@ -601,7 +601,7 @@ export default function AdminPlansPage() {
                   type="button"
                   onClick={executeDelete}
                   disabled={isDeleting}
-                  className={cn("flex-1 py-2.5 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm disabled:opacity-50 transition-all flex justify-center items-center gap-2")}
+                  className={cn("flex-1 py-2.5 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-all flex justify-center items-center gap-2")}
                 >
                   {isDeleting ? (
                     <>
@@ -618,7 +618,7 @@ export default function AdminPlansPage() {
       {isBulkDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsBulkDeleteModalOpen(false)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-md p-6 overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
@@ -641,7 +641,7 @@ export default function AdminPlansPage() {
                   type="button"
                   onClick={executeBulkDelete}
                   disabled={isDeleting}
-                  className={cn("flex-1 py-2.5 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm disabled:opacity-50 transition-all flex justify-center items-center gap-2")}
+                  className={cn("flex-1 py-2.5 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-all flex justify-center items-center gap-2")}
                 >
                   {isDeleting ? (
                     <>

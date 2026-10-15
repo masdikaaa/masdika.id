@@ -90,7 +90,7 @@ export default function AdminRevenuePage() {
       
       {/* Top Title */}
       <div className="flex items-center justify-between mb-2">
-        <h1 className={cn("text-3xl font-extrabold drop-shadow-sm tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+        <h1 className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
           Revenue Monitoring
         </h1>
         <div className={cn("text-sm hidden sm:block", isDark ? "text-zinc-400" : "text-slate-500")}>Track financial performance in real-time</div>
@@ -99,7 +99,7 @@ export default function AdminRevenuePage() {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Revenue */}
-        <div className={cn("backdrop-blur-md rounded-3xl border p-6 shadow-xl relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
           <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
           <div className="relative z-10 flex items-center justify-between mb-4">
             <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Revenue</h2>
@@ -117,7 +117,7 @@ export default function AdminRevenuePage() {
         </div>
 
         {/* Monthly Revenue */}
-        <div className={cn("backdrop-blur-md rounded-3xl border p-6 shadow-xl relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
           <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
           <div className="relative z-10 flex items-center justify-between mb-4">
             <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>This Month</h2>
@@ -135,7 +135,7 @@ export default function AdminRevenuePage() {
         </div>
 
         {/* Daily Revenue */}
-        <div className={cn("backdrop-blur-md rounded-3xl border p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
           <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-700", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")} />
           <div className="relative z-10 flex items-center justify-between mb-4">
             <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Today</h2>
@@ -154,7 +154,7 @@ export default function AdminRevenuePage() {
       </div>
 
       {/* Main Chart Card */}
-      <div className={cn("backdrop-blur-md rounded-3xl border p-4 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("backdrop-blur-md rounded-3xl border p-4 sm:p-6 relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div>
             <h2 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>30-Day Revenue Trend</h2>
@@ -177,7 +177,7 @@ export default function AdminRevenuePage() {
       </div>
 
       {/* Paid Invoices Table */}
-      <div className={cn("backdrop-blur-md rounded-3xl border p-6 shadow-xl relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <h2 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Paid Invoices</h2>
           

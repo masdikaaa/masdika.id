@@ -102,7 +102,7 @@ export default function AdminNotificationsPage() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Admin Notifications</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Admin Notifications</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor all platform activities, new messages, and system alerts.</p>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function AdminNotificationsPage() {
         )}
       </div>
 
-      <div className={cn("bg-[#0a1f33]/40 backdrop-blur-sm border rounded-3xl overflow-hidden shadow-2xl relative", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("bg-[#0a1f33]/40 backdrop-blur-sm border rounded-3xl overflow-hidden relative", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
         
         {notifications.length === 0 ? (
@@ -139,19 +139,19 @@ export default function AdminNotificationsPage() {
                   <div className="flex gap-4 sm:gap-6">
                     <div className="shrink-0 mt-1">
                       {notif.type === 'MESSAGE' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
                           <MessageSquare className="w-5 h-5" />
                         </div>
                       ) : notif.type === 'TICKET' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
                           <AlertCircle className="w-5 h-5" />
                         </div>
                       ) : notif.type === 'COMMUNITY' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-purple-500/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-purple-500/20 text-purple-400'}`}>
                           <Users className="w-5 h-5" />
                         </div>
                       ) : (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
                           <HardDrive className="w-5 h-5" />
                         </div>
                       )}

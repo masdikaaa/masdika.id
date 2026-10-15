@@ -123,11 +123,11 @@ export default function AdminPortfolioPage() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Portfolio Management</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Portfolio Management</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your projects, categories, and case studies.</p>
         </div>
       </div>
-        <Link href="/admin/portfolio/edit/new" className={cn("inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+        <Link href="/admin/portfolio/edit/new" className={cn("inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
           <Plus className="w-4 h-4" /> Add Project
         </Link>
       </motion.div>
@@ -141,7 +141,7 @@ export default function AdminPortfolioPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search projects..." 
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500 shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -159,7 +159,7 @@ export default function AdminPortfolioPage() {
             {selectedIds.length > 0 && (
               <button 
                 onClick={() => setShowDeleteAllModal(true)}
-                className={cn("flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-sm font-bold rounded-xl transition-all border border-red-500/20 whitespace-nowrap shadow-inner", isDark ? "text-red-400" : "text-red-700")}
+                className={cn("flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-sm font-bold rounded-xl transition-all border border-red-500/20 whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete ({selectedIds.length})</span>
@@ -191,7 +191,7 @@ export default function AdminPortfolioPage() {
                 <tr>
                   <td colSpan={6} className="px-6 py-16">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>
                         <Search className="w-8 h-8 text-zinc-500" />
                       </div>
                       <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No projects found</h3>
@@ -221,17 +221,17 @@ export default function AdminPortfolioPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 shadow-inner", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         {project.status || 'Active'}
                       </span>
                     </td>
                     <td className={cn("px-6 py-4 whitespace-nowrap font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{new Date(project.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
-                        <Link href={`/admin/portfolio/edit/${project.id}`} className={cn("p-2 bg-cyan-500/10 rounded-lg hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20 shadow-inner", isDark ? "text-cyan-400" : "text-cyan-700")} title="Edit">
+                        <Link href={`/admin/portfolio/edit/${project.id}`} className={cn("p-2 bg-cyan-500/10 rounded-lg hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")} title="Edit">
                           <Edit2 className="w-4 h-4" />
                         </Link>
-                        <button onClick={() => setDeleteId(project.id)} className={cn("p-2 bg-red-500/10 rounded-lg hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20 shadow-inner", isDark ? "text-red-400" : "text-red-700")} title="Delete">
+                        <button onClick={() => setDeleteId(project.id)} className={cn("p-2 bg-red-500/10 rounded-lg hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20", isDark ? "text-red-400" : "text-red-700")} title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

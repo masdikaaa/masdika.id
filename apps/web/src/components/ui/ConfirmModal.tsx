@@ -38,7 +38,7 @@ export function ConfirmModal({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`w-full max-w-sm rounded-2xl p-6 border shadow-2xl transition-colors ${
+ className={`w-full max-w-sm rounded-2xl p-6 border transition-colors ${
               isDark
                 ? "bg-[#0b1322] border-slate-800 text-white"
                 : "bg-white border-slate-200 text-slate-900"
@@ -89,7 +89,7 @@ export function ConfirmModal({
               <button
                 onClick={onConfirm}
                 disabled={isLoading}
-                className={`flex-1 py-3 font-semibold rounded-xl transition-colors shadow-sm flex justify-center items-center gap-2 disabled:opacity-50 text-sm ${
+ className={`flex-1 py-3 font-semibold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 text-sm ${
                   variant === "danger"
                     ? "bg-red-600 hover:bg-red-700 text-white"
                     : variant === "warning"

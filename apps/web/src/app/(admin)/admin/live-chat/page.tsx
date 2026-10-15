@@ -158,13 +158,13 @@ export default function AdminLiveChat() {
     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col h-full space-y-6 pb-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 shrink-0">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Live Chat</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Live Chat</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage active chat sessions and manually reply to users.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={toggleStatus}
-            className={cn("flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border", status === "ONLINE" ? (isDark ? "bg-gradient-to-r from-cyan-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(34,211,238,0.3)]" : "bg-cyan-50 text-cyan-700 border-cyan-200 shadow-sm") : (isDark ? "bg-red-500/10 text-red-400 border-red-500/30 shadow-inner" : "bg-red-50 text-red-700 border-red-200 shadow-sm"))}
+            className={cn("flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border", status === "ONLINE" ? (isDark ? "bg-gradient-to-r from-cyan-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200"))}
           >
             <Power size={16} />
             {status === 'ONLINE' ? 'Admin is ONLINE' : 'Admin is OFFLINE'}
@@ -172,7 +172,7 @@ export default function AdminLiveChat() {
         </div>
       </div>
 
-      <motion.div variants={itemVariants} className={cn("flex flex-col md:flex-row flex-1 glass-card border overflow-hidden h-[calc(100vh-220px)] md:h-[calc(100vh-240px)] min-h-[400px]", isDark ? "border-cyan-500/30" : "bg-white border-slate-200 shadow-sm")}>
+      <motion.div variants={itemVariants} className={cn("flex flex-col md:flex-row flex-1 glass-card border overflow-hidden h-[calc(100vh-220px)] md:h-[calc(100vh-240px)] min-h-[400px]", isDark ? "border-cyan-500/30" : "bg-white border-slate-200")}>
         {/* Sidebar: Sessions */}
         <div className={cn(`md:w-1/3 border-b md:border-b-0 md:border-r flex flex-col ${selectedSessionId ? 'hidden md:flex' : 'flex flex-1'}`, isDark ? "border-white/10" : "border-slate-200")}>
           <div className={cn("p-4 border-b flex justify-between items-center", isDark ? "bg-[#0A0B1A]/50 border-white/10" : "bg-slate-50 border-slate-200")}>
@@ -190,7 +190,7 @@ export default function AdminLiveChat() {
                 <div
                   key={session.id}
                   onClick={() => setSelectedSessionId(session.id)}
-                  className={cn("p-3 rounded-lg cursor-pointer transition-all border", selectedSessionId === session.id ? (isDark ? "bg-cyan-500/10 border-cyan-500/50 shadow-inner" : "bg-cyan-50 border-cyan-300 shadow-sm") : (isDark ? "bg-white/5 border-white/5 hover:border-cyan-500/30" : "bg-white border-slate-200 hover:border-cyan-400"))}
+                  className={cn("p-3 rounded-lg cursor-pointer transition-all border", selectedSessionId === session.id ? (isDark ? "bg-cyan-500/10 border-cyan-500/50" : "bg-cyan-50 border-cyan-300") : (isDark ? "bg-white/5 border-white/5 hover:border-cyan-500/30" : "bg-white border-slate-200 hover:border-cyan-400"))}
                 >
                   <div className="flex justify-between items-start mb-1">
                     <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>{session.name}</span>
@@ -246,7 +246,7 @@ export default function AdminLiveChat() {
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={cn("max-w-[85%] sm:max-w-[75%] p-3 text-sm leading-relaxed", msg.role === "user" ? (isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-white rounded-2xl rounded-tr-sm" : "bg-cyan-600 border border-cyan-700 text-white rounded-2xl rounded-tr-sm shadow-sm") : msg.isAdmin ? (isDark ? "bg-gradient-to-br from-cyan-600/30 to-cyan-600/30 border border-cyan-500/40 text-cyan-50 rounded-2xl rounded-tl-sm shadow-inner" : "bg-white border border-slate-300 text-slate-800 rounded-2xl rounded-tl-sm shadow-sm") : (isDark ? "bg-white/5 border border-white/10 text-zinc-300 rounded-2xl rounded-tl-sm" : "bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl rounded-tl-sm shadow-sm"))}
+                      className={cn("max-w-[85%] sm:max-w-[75%] p-3 text-sm leading-relaxed", msg.role === "user" ? (isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-white rounded-2xl rounded-tr-sm" : "bg-cyan-600 border border-cyan-700 text-white rounded-2xl rounded-tr-sm") : msg.isAdmin ? (isDark ? "bg-gradient-to-br from-cyan-600/30 to-cyan-600/30 border border-cyan-500/40 text-cyan-50 rounded-2xl rounded-tl-sm" : "bg-white border border-slate-300 text-slate-800 rounded-2xl rounded-tl-sm") : (isDark ? "bg-white/5 border border-white/10 text-zinc-300 rounded-2xl rounded-tl-sm" : "bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl rounded-tl-sm"))}
                     >
                       {msg.role !== 'user' && (
                         <div className="text-[10px] font-bold mb-1.5 uppercase tracking-wider opacity-70 flex items-center gap-1.5">
@@ -280,12 +280,12 @@ export default function AdminLiveChat() {
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder={status === 'ONLINE' ? 'Type your manual reply here...' : 'Go ONLINE to take over chat...'}
                     disabled={status === 'OFFLINE'}
-                    className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 placeholder:text-zinc-500 disabled:opacity-50 transition-all shadow-inner", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 placeholder:text-zinc-500 disabled:opacity-50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
                   />
                   <button
                     onClick={handleSend}
                     disabled={isSending || !replyText.trim() || status === 'OFFLINE'}
-                    className={cn("transition-all shadow-md hover:shadow-lg hover:from-cyan-400 hover:to-cyan-400 p-3 rounded-xl transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(6,182,212,0.2)] flex items-center justify-center min-w-[50px]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-cyan-600/20")}
+                    className={cn("transition-all hover:from-cyan-400 hover:to-cyan-400 p-3 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center min-w-[50px]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
                   >
                     {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                   </button>

@@ -163,7 +163,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
           </Link>
           <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Item' : 'Edit Item'}</h1>
+          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Item' : 'Edit Item'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Fill in the details for your event, webinar, or job vacancy.</p>
         </div>
       </div>
@@ -171,7 +171,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
         <button 
           onClick={handleSubmit}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-all disabled:opacity-50"
         >
           {saving ? 'Saving...' : <><Save className="w-4 h-4" /> Save</>}
         </button>
