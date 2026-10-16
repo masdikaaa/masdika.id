@@ -325,17 +325,15 @@ export default function LoginPage() {
               )}
 
               {/* Turnstile */}
-              <div className="pt-1 w-full min-w-0 overflow-hidden flex justify-center">
+              <div className="pt-1 w-full min-w-0 flex justify-center px-px">
                 {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                  <div className="w-full max-w-full overflow-hidden flex justify-center">
-                    <Turnstile
-                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                      onSuccess={(token) => setTurnstileToken(token)}
-                      options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
-                      className="w-full max-w-full"
-                      style={{ width: "100%", maxWidth: "100%" }}
-                    />
-                  </div>
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
+                    className="w-full"
+                    style={{ width: "100%" }}
+                  />
                 )}
               </div>
 
