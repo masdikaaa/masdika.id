@@ -135,7 +135,7 @@ export default function LoginPage() {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={cn(
-          "relative z-10 w-full max-w-5xl rounded-3xl sm:rounded-[2.5rem] border backdrop-blur-xl shadow-2xl overflow-hidden grid lg:grid-cols-12 transition-all duration-300",
+          "relative z-10 w-full max-w-5xl rounded-2xl sm:rounded-[2.5rem] border backdrop-blur-xl shadow-2xl overflow-hidden grid lg:grid-cols-12 transition-all duration-300",
           isDark
             ? "bg-[#020d18]/85 border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
             : "bg-white/95 border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
@@ -145,7 +145,7 @@ export default function LoginPage() {
         <div className="lg:col-span-6 p-6 pt-8 sm:p-12 lg:p-12 xl:p-14 flex flex-col justify-between relative z-10">
           <div>
             {/* Top Brand Header & Theme Toggle */}
-            <div className="flex items-center justify-between mb-6 sm:mb-8 px-1 pt-0.5">
+            <div className="flex items-center justify-between mb-6 sm:mb-8 pt-1">
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
                 <img
                   src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
@@ -158,7 +158,7 @@ export default function LoginPage() {
                 onClick={toggleTheme}
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
                 className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
+                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm mr-2.5 sm:mr-0",
                   isDark
                     ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
                     : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
