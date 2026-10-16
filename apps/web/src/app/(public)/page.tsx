@@ -350,13 +350,13 @@ export default function HomePage() {
                   priority={true}
                   fetchPriority="high"
                   unoptimized={true}
-                  className="w-full h-full object-contain object-bottom relative z-10 origin-bottom filter drop-shadow-2xl"
+                  className="w-full h-full object-contain object-bottom relative z-20 origin-bottom filter drop-shadow-2xl"
                 />
 
-                {/* 1. AWS Certified Badge (Top Left - placed clear to the left of pointing hand) */}
+                {/* 1. AWS Certified Badge (Top Left - placed high up clear above pointing hand) */}
                 <div
                   className={cn(
-                    "absolute top-[28%] sm:top-[30%] lg:top-[32%] -left-3 sm:-left-8 lg:-left-24 xl:-left-32 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float transform-gpu",
+                    "absolute top-[12%] sm:top-[14%] lg:top-[16%] -left-3 sm:-left-8 lg:-left-16 xl:-left-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float transform-gpu",
                     isDark
                       ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
                       : "bg-white/95 border border-slate-200/80 shadow-xl"
@@ -375,10 +375,10 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* 2. CI/CD Pipeline Badge (Bottom Left - placed clear to the left of torso/arm) */}
+                {/* 2. CI/CD Pipeline Badge (Bottom Left - placed low down clear below pointing hand/arm) */}
                 <div
                   className={cn(
-                    "absolute bottom-[10%] sm:bottom-[14%] lg:bottom-[18%] -left-3 sm:-left-8 lg:-left-20 xl:-left-28 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-delayed transform-gpu",
+                    "absolute bottom-[10%] sm:bottom-[12%] lg:bottom-[14%] -left-3 sm:-left-8 lg:-left-16 xl:-left-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-delayed transform-gpu",
                     isDark
                       ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
                       : "bg-white/95 border border-slate-200/80 shadow-xl"
@@ -400,7 +400,7 @@ export default function HomePage() {
                 {/* 3. High Availability DB Badge (Top Right - placed clear to the right of head/shoulder) */}
                 <div
                   className={cn(
-                    "absolute top-[14%] sm:top-[16%] lg:top-[18%] -right-3 sm:-right-8 lg:-right-16 xl:-right-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-reverse-delayed transform-gpu",
+                    "absolute top-[12%] sm:top-[14%] lg:top-[16%] -right-3 sm:-right-8 lg:-right-16 xl:-right-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-reverse-delayed transform-gpu",
                     isDark
                       ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
                       : "bg-white/95 border border-slate-200/80 shadow-xl"
@@ -422,7 +422,7 @@ export default function HomePage() {
                 {/* 4. Kubernetes Mastery Badge (Bottom Right - placed clear to the right of tablet) */}
                 <div
                   className={cn(
-                    "absolute bottom-[24%] sm:bottom-[28%] lg:bottom-[30%] -right-3 sm:-right-8 lg:-right-16 xl:-right-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-reverse transform-gpu",
+                    "absolute bottom-[20%] sm:bottom-[22%] lg:bottom-[24%] -right-3 sm:-right-8 lg:-right-16 xl:-right-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-reverse transform-gpu",
                     isDark
                       ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
                       : "bg-white/95 border border-slate-200/80 shadow-xl"
@@ -587,7 +587,7 @@ export default function HomePage() {
             ].map((step, idx) => (
               <FadeIn key={idx} delay={idx * 0.1} direction="up" className="relative z-10 flex flex-col items-center text-center group">
                 <TiltCard intensity={15} className={cn(
-                  "w-28 h-28 rounded-3xl backdrop-blur-sm border-2 flex items-center justify-center mb-8 relative group-hover:-translate-y-2 transition-colors transform-gpu duration-300 shadow-xl", 
+                  "w-28 h-28 rounded-3xl backdrop-blur-sm border-2 flex items-center justify-center mb-8 relative group-hover:-translate-y-2 transition-colors transform-gpu duration-300 shadow-xl",
                   isDark ? `${step.bg} ${step.border}` : "bg-white border-cyan-100 shadow-cyan-500/5 hover:border-cyan-300 hover:shadow-cyan-500/10"
                 )}>
                   <div className={cn(
@@ -644,11 +644,11 @@ export default function HomePage() {
                 <Link href={prod.href} className="block group h-full">
                   <TiltCard intensity={10} className={cn(
                     "relative h-full backdrop-blur-xl rounded-2xl p-8 flex flex-col border-2 overflow-hidden transition-all duration-500 hover:-translate-y-2 group",
-                    isDark 
-                      ? "border-cyan-500/20 bg-gradient-to-br from-slate-900/95 via-cyan-950/30 to-slate-900/95 shadow-[0_4px_30px_rgba(0,0,0,0.4)] hover:border-cyan-400/60 hover:shadow-[0_0_40px_rgba(6,182,212,0.25)]" 
+                    isDark
+                      ? "border-cyan-500/20 bg-gradient-to-br from-slate-900/95 via-cyan-950/30 to-slate-900/95 shadow-[0_4px_30px_rgba(0,0,0,0.4)] hover:border-cyan-400/60 hover:shadow-[0_0_40px_rgba(6,182,212,0.25)]"
                       : "border-black/5 bg-white shadow-xl hover:border-cyan-500/30 hover:shadow-2xl"
                   )}>
-                    
+
 
                     <div className="flex items-start justify-between mb-6 relative z-10">
                       <div className={cn(
@@ -859,7 +859,7 @@ export default function HomePage() {
                     isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-black/5"
                   )}>
                     <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="block w-full h-full relative">
-                      <Image referrerPolicy="no-referrer"                         src={project.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
+                      <Image referrerPolicy="no-referrer" src={project.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
                         alt={project.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
@@ -1005,7 +1005,7 @@ export default function HomePage() {
                   )}>
                     <Link href={`/blog/${post.slug || '#'}`} className="flex flex-col h-full w-full">
                       <div className="relative h-56 sm:h-64 w-full overflow-hidden shrink-0">
-                        <Image referrerPolicy="no-referrer"                           src={post.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
+                        <Image referrerPolicy="no-referrer" src={post.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
                           alt={post.title}
                           fill
                           sizes="(max-width: 768px) 100vw, 33vw"
