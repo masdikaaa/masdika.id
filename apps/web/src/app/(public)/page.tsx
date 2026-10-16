@@ -243,7 +243,7 @@ export default function HomePage() {
       seq.push(2500);
     });
     if (seq.length === 0) {
-      seq.push("Cloud Engineer", 2500, "DevOps Expert", 2500, "SysAdmin Pro", 2500, "Backend Dev", 2500);
+      seq.push("DevOps Engineer", 2500, "Cloud Engineer", 2500, "SysAdmin Pro", 2500, "Backend Dev", 2500);
     }
     return seq;
   }, [settings?.hero_typing_text]);
@@ -339,9 +339,11 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Foreground Image */}
-              <div className="relative z-10 w-full max-w-[320px] h-[400px] sm:max-w-[350px] sm:h-[450px] lg:max-w-[480px] lg:h-[600px] mx-auto flex items-end justify-center pointer-events-auto">
-                <Image referrerPolicy="no-referrer"                   src="/masdika.png"
+              {/* Foreground Image & Floating Badges */}
+              <div className="relative z-10 w-full max-w-[340px] h-[420px] sm:max-w-[400px] sm:h-[480px] lg:max-w-[500px] lg:h-[620px] xl:max-w-[560px] xl:h-[680px] mx-auto flex items-end justify-center pointer-events-auto">
+                <Image
+                  referrerPolicy="no-referrer"
+                  src="/masdika.png"
                   alt="Masdika - Cloud Engineer"
                   width={583}
                   height={875}
@@ -351,58 +353,91 @@ export default function HomePage() {
                   className="w-full h-full object-contain object-bottom relative z-10 origin-bottom filter drop-shadow-2xl"
                 />
 
-                {/* Floating Glass Badges */}
-                <div className={cn(
-                  "absolute top-[45%] sm:top-[50%] lg:top-[40%] -left-2 sm:-left-4 lg:-left-16 backdrop-blur-md p-2 sm:p-4 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 z-30 animate-float transform-gpu",
-                  isDark ? "bg-slate-900/80 border border-cyan-500/20 shadow-[0_8px_30px_rgba(6,182,212,0.15)]" : "bg-white/90 border border-black/5 shadow-xl"
-                )}>
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                    <Cloud className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                {/* 1. AWS Certified Badge (Top Left - placed clear to the left of pointing hand) */}
+                <div
+                  className={cn(
+                    "absolute top-[28%] sm:top-[30%] lg:top-[32%] -left-3 sm:-left-8 lg:-left-24 xl:-left-32 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float transform-gpu",
+                    isDark
+                      ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
+                      : "bg-white/95 border border-slate-200/80 shadow-xl"
+                  )}
+                >
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                    <Cloud className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <div className={cn("text-[8px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>AWS Certified</div>
-                    <div className={cn("font-black text-[10px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>Cloud Expert</div>
+                    <div className={cn("text-[8px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      AWS Certified
+                    </div>
+                    <div className={cn("font-black text-[11px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                      Cloud Expert
+                    </div>
                   </div>
                 </div>
 
-                <div className={cn(
-                  "absolute bottom-[25%] sm:bottom-[30%] lg:bottom-[35%] -right-2 sm:-right-4 lg:-right-16 backdrop-blur-md p-2 sm:p-4 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 z-30 animate-float-reverse transform-gpu",
-                  isDark ? "bg-slate-900/80 border border-cyan-500/20 shadow-[0_8px_30px_rgba(6,182,212,0.15)]" : "bg-white/90 border border-black/5 shadow-xl"
-                )}>
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                    <SiKubernetes className="w-4 h-4 sm:w-6 sm:h-6" />
+                {/* 2. CI/CD Pipeline Badge (Bottom Left - placed clear to the left of torso/arm) */}
+                <div
+                  className={cn(
+                    "absolute bottom-[10%] sm:bottom-[14%] lg:bottom-[18%] -left-3 sm:-left-8 lg:-left-20 xl:-left-28 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-delayed transform-gpu",
+                    isDark
+                      ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
+                      : "bg-white/95 border border-slate-200/80 shadow-xl"
+                  )}
+                >
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                    <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <div className={cn("text-[8px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>Kubernetes</div>
-                    <div className={cn("font-black text-[10px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>Mastery</div>
+                    <div className={cn("text-[8px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      CI/CD Pipeline
+                    </div>
+                    <div className={cn("font-black text-[11px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                      Automation
+                    </div>
                   </div>
                 </div>
 
-                {/* New Floating Badge 3: CI/CD */}
-                <div className={cn(
-                  "absolute bottom-[5%] sm:bottom-[10%] lg:bottom-[15%] -left-2 sm:-left-8 lg:-left-8 backdrop-blur-md p-2 sm:p-4 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 z-30 animate-float-delayed transform-gpu",
-                  isDark ? "bg-slate-900/80 border border-cyan-500/20 shadow-[0_8px_30px_rgba(6,182,212,0.15)]" : "bg-white/90 border border-black/5 shadow-xl"
-                )}>
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                    <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                {/* 3. High Availability DB Badge (Top Right - placed clear to the right of head/shoulder) */}
+                <div
+                  className={cn(
+                    "absolute top-[14%] sm:top-[16%] lg:top-[18%] -right-3 sm:-right-8 lg:-right-16 xl:-right-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-reverse-delayed transform-gpu",
+                    isDark
+                      ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
+                      : "bg-white/95 border border-slate-200/80 shadow-xl"
+                  )}
+                >
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                    <Database className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <div className={cn("text-[8px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>CI/CD Pipeline</div>
-                    <div className={cn("font-black text-[10px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>Automation</div>
+                    <div className={cn("text-[8px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      High Availability
+                    </div>
+                    <div className={cn("font-black text-[11px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                      DB Architect
+                    </div>
                   </div>
                 </div>
 
-                {/* New Floating Badge 4: Database */}
-                <div className={cn(
-                  "absolute top-[5%] sm:top-[10%] lg:top-[15%] -right-2 sm:-right-8 lg:-right-8 backdrop-blur-md p-2 sm:p-4 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 z-30 animate-float-reverse-delayed transform-gpu",
-                  isDark ? "bg-slate-900/80 border border-cyan-500/20 shadow-[0_8px_30px_rgba(6,182,212,0.15)]" : "bg-white/90 border border-black/5 shadow-xl"
-                )}>
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                    <Database className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                {/* 4. Kubernetes Mastery Badge (Bottom Right - placed clear to the right of tablet) */}
+                <div
+                  className={cn(
+                    "absolute bottom-[24%] sm:bottom-[28%] lg:bottom-[30%] -right-3 sm:-right-8 lg:-right-16 xl:-right-24 backdrop-blur-md p-2.5 sm:p-3.5 xl:p-4 rounded-2xl flex items-center gap-2.5 sm:gap-3 z-30 animate-float-reverse transform-gpu",
+                    isDark
+                      ? "bg-slate-900/85 border border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.18)]"
+                      : "bg-white/95 border border-slate-200/80 shadow-xl"
+                  )}
+                >
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                    <SiKubernetes className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <div className={cn("text-[8px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>High Availability</div>
-                    <div className={cn("font-black text-[10px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>DB Architect</div>
+                    <div className={cn("text-[8px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Kubernetes
+                    </div>
+                    <div className={cn("font-black text-[11px] sm:text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                      Mastery
+                    </div>
                   </div>
                 </div>
               </div>

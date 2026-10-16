@@ -1727,3 +1727,24 @@ input[type="range"]::-moz-range-progress {
 html.light input[type="range"]::-moz-range-progress {
   background: #0891b2;
 }
+
+
+/* Elegant slim scrollbar for auth forms */
+.auth-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.3) transparent;
+}
+.auth-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.auth-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 6px 0;
+}
+.auth-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.3);
+  border-radius: 9999px;
+}
+.auth-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.6);
+}

@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
-import { ServerBackground } from "@/components/ui/ServerBackground";
 
 const VpcIcon = ({ className }: { className?: string }) => (
   <svg
@@ -195,8 +194,35 @@ export default function DashboardLayoutClient({
   return (
     <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#011627] text-white" : "bg-[#f8fafb] text-slate-900")}>
 
-      {/* Background Effect matching login page but without server racks */}
-      <ServerBackground showRacks={false} />
+      {/* Lightweight, elegant ambient background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div
+          className={cn(
+            "absolute inset-0 transition-colors duration-500",
+            isDark ? "bg-[#011627]" : "bg-[#f8fafb]"
+          )}
+        />
+        <div
+          className={cn(
+            "absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full blur-[140px] pointer-events-none",
+            isDark ? "bg-cyan-500/10" : "bg-cyan-300/25"
+          )}
+        />
+        <div
+          className={cn(
+            "absolute -bottom-32 -right-32 w-[580px] h-[580px] rounded-full blur-[150px] pointer-events-none",
+            isDark ? "bg-blue-600/10" : "bg-blue-300/20"
+          )}
+        />
+        <div
+          className={cn(
+            "absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)] pointer-events-none",
+            isDark
+              ? "bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:48px_48px]"
+              : "bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:48px_48px]"
+          )}
+        />
+      </div>
 
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
