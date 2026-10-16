@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Play, Key, AlertCircle, CheckCircle2, ChevronRight, Terminal, RefreshCw, Loader2, Lock, Activity } from "lucide-react";
+import { ArrowLeft, ChevronLeft, Play, Key, AlertCircle, CheckCircle2, ChevronRight, Terminal, RefreshCw, Loader2, Lock, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -192,9 +192,19 @@ export default function ApiLabClient({ project }: { project: any }) {
     <div className={cn("min-h-screen pt-28 md:pt-32 pb-32 lg:pb-40 px-4 relative overflow-hidden bg-transparent", isDark ? "text-white" : "text-slate-900")}>
       <div className="max-w-6xl mx-auto relative z-10 pt-10">
 
-        <Link href="/api-hub" className={cn("inline-flex items-center mb-8 transition-colors font-medium", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-800")}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to API Hub
-        </Link>
+        <div className="flex items-center mb-8">
+          <Link 
+            href="/api-hub" 
+            className={cn(
+              "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+              isDark 
+                ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+            )}
+          >
+            <ChevronLeft className="w-4 h-4" /> Back to API Hub
+          </Link>
+        </div>
 
         {/* Header */}
         <div className="mb-10">

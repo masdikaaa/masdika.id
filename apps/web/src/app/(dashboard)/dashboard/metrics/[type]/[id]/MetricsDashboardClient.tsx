@@ -4,7 +4,7 @@ import { useUrlString } from "@/lib/useUrlTab";
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, RefreshCw, Server, Activity, HardDrive, Network, MemoryStick } from "lucide-react";
+import { ArrowLeft, ChevronLeft, RefreshCw, Server, Activity, HardDrive, Network, MemoryStick } from "lucide-react";
 import Link from "next/link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
@@ -156,9 +156,17 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
 
   return (
     <div className="w-full space-y-6">
-      <div>
-        <Link href="/dashboard/alerts" className={cn("inline-flex items-center gap-2 text-sm font-medium hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
-          <ArrowLeft className="w-4 h-4" />
+      <div className="flex items-center">
+        <Link 
+          href="/dashboard/alerts" 
+          className={cn(
+            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            isDark 
+              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" />
           Back to Alerts
         </Link>
       </div>

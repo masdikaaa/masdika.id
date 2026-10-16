@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Server, Play, Square, Power, RotateCcw, Activity,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
-  ArrowLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
+  ArrowLeft, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -1255,18 +1255,25 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         </div>
       ) : (
         <>
-          <button
-            onClick={() => {
-              if (vps.kubernetesClusterId) {
-                router.push(`/dashboard/k3s/${vps.kubernetesClusterId}`);
-              } else {
-                router.push("/dashboard/vps");
-              }
-            }}
-            className={cn("inline-flex items-center  hover:text-white transition-colors font-medium text-sm", isDark ? "text-zinc-400" : "text-slate-500")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to {vps.kubernetesClusterId ? "Cluster" : "VPS List"}
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => {
+                if (vps.kubernetesClusterId) {
+                  router.push(`/dashboard/k3s/${vps.kubernetesClusterId}`);
+                } else {
+                  router.push("/dashboard/vps");
+                }
+              }}
+              className={cn(
+                "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+                isDark 
+                  ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                  : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+              )}
+            >
+              <ChevronLeft className="w-4 h-4" /> Back to {vps.kubernetesClusterId ? "Cluster" : "VPS List"}
+            </button>
+          </div>
 
           {/* Header Bar */}
           <div className={cn("flex flex-col md:flex-row justify-between items-start md:items-center border rounded-2xl p-4 sm:p-6 shadow-sm relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>

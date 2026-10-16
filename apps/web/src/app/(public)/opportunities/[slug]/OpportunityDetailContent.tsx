@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Briefcase, Video, ExternalLink, ArrowLeft, Clock } from "lucide-react";
+import { Calendar, Briefcase, Video, ExternalLink, ChevronLeft, Clock } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { ImageZoom } from "@/components/ui/ImageZoom";
 import Link from "next/link";
@@ -62,12 +62,19 @@ export function OpportunityDetailContent({ opportunity }: { opportunity: Opportu
           <div className={cn("absolute top-1/2 left-0 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] blur-[100px] rounded-full pointer-events-none", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
 
           <div className="relative z-10">
-            <Link href={backLink} className={cn("inline-flex items-center text-sm font-medium hover:text-white mb-8 transition-colors gap-2 group", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-              <div className={cn("w-8 h-8 rounded-full border flex items-center justify-center transition-all", isDark ? "bg-white/5 border-white/10 group-hover:bg-white/10" : "bg-slate-50 border-black/10 group-hover:bg-slate-100 group-hover:border-black/20")}>
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              </div>
-              Back to list
-            </Link>
+            <div className="flex items-center mb-8">
+              <Link 
+                href={backLink} 
+                className={cn(
+                  "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+                  isDark 
+                    ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                    : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+                )}
+              >
+                <ChevronLeft className="w-4 h-4" /> Back to list
+              </Link>
+            </div>
 
             <div className={cn("flex flex-wrap items-center gap-4 text-sm font-medium mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
               <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border backdrop-blur-md ${getTypeColor(opportunity.type)} ${isDark ? "shadow-[0_0_15px_rgba(255,255,255,0.05)]" : "shadow-sm"}`}>

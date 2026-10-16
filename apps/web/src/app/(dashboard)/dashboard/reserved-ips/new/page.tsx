@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { Network, Plus, Calculator, ArrowLeft, RefreshCw, AlertTriangle, CheckCircle, ChevronDown, Info } from "lucide-react";
+import { Network, Plus, Calculator, ChevronLeft, RefreshCw, AlertTriangle, CheckCircle, ChevronDown, Info } from "lucide-react";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -95,9 +95,20 @@ export default function ReserveNewIpPage() {
 
   return (
     <div className="w-full space-y-6 md:space-y-8 pb-10">
-      <Link href="/dashboard/reserved-ips" className={cn("inline-flex items-center hover:text-white transition-colors font-medium text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Reserved IPs
-      </Link>
+      <div className="flex items-center">
+        <Link 
+          href="/dashboard/reserved-ips" 
+          className={cn(
+            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            isDark 
+              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back to Reserved IPs
+        </Link>
+      </div>
 
       {/* Hero Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>

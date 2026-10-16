@@ -829,9 +829,19 @@ export default function K3sDetailPage() {
 
           return (
             <>
-              <Link href="/dashboard/k3s" className={cn("inline-flex items-center hover:text-white transition-colors font-medium text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <ChevronLeft className="w-4 h-4 mr-2" /> Back to Kubernetes Clusters
-              </Link>
+              <div className="flex items-center">
+                <Link 
+                  href="/dashboard/k3s" 
+                  className={cn(
+                    "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+                    isDark 
+                      ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                      : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+                  )}
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to Kubernetes Clusters
+                </Link>
+              </div>
               {/* Header */}
               <div className={cn("flex flex-col xl:flex-row xl:items-center justify-between gap-4 border rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
 

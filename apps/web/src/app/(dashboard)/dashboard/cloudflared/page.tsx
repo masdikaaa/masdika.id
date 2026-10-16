@@ -4,7 +4,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
-  Network, ArrowRight, ArrowLeft, Globe, CheckCircle2, Copy, ChevronDown, Save,
+  Network, ArrowRight, ArrowLeft, ChevronLeft, Globe, CheckCircle2, Copy, ChevronDown, Save,
   ShieldAlert, ExternalLink, Trash2, Plus, RefreshCw, AlertTriangle,
   Activity, Server, XCircle, Pencil, Link, Info
 } from "lucide-react";
@@ -606,8 +606,13 @@ export default function CloudflaredPage() {
         {/* Back Button */}
         <div className="flex items-center mb-4">
           <button onClick={() => { setViewingTunnel(null); setIsEditMode(false); setEditingTunnelId(null); fetchTunnels(); }}
-            className={cn("transition-colors flex items-center gap-2 text-sm", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-            <ArrowLeft className="w-4 h-4" /> Back to tunnel list
+            className={cn(
+              "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+              isDark 
+                ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+            )}>
+            <ChevronLeft className="w-4 h-4" /> Back to tunnel list
           </button>
         </div>
 
@@ -1222,10 +1227,17 @@ export default function CloudflaredPage() {
           {showCreateTunnel && (
             <div className="space-y-4 animate-in fade-in duration-300">
               {/* Back button */}
-              <button onClick={() => { resetCreateForm(); setShowCreateTunnel(false); }}
-                className={cn("text-sm transition-colors flex items-center gap-2", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-                <ArrowLeft className="w-4 h-4" /> Back to tunnel list
-              </button>
+              <div className="flex items-center">
+                <button onClick={() => { resetCreateForm(); setShowCreateTunnel(false); }}
+                  className={cn(
+                    "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+                    isDark 
+                      ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                      : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+                  )}>
+                  <ChevronLeft className="w-4 h-4" /> Back to tunnel list
+                </button>
+              </div>
 
               {/* Progress Steps */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm font-medium">

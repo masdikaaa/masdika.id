@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Check, Upload, AlertCircle, Lock, Loader2, ArrowLeft, Cloud, Link as LinkIcon, Radio, CloudRain, RefreshCw } from "lucide-react";
+import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Check, Upload, AlertCircle, Lock, Loader2, ArrowLeft, ChevronLeft, Cloud, Link as LinkIcon, Radio, CloudRain, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -230,9 +230,19 @@ export default function ApiLabPage() {
 
   return (
     <div className="space-y-6 w-full pb-10">
-      <Link href="/dashboard" className={cn("inline-flex items-center hover:text-cyan-500 transition-colors font-medium text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
-      </Link>
+      <div className="flex items-center">
+        <Link 
+          href="/dashboard" 
+          className={cn(
+            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            isDark 
+              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
+      </div>
       
       <div className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-black/5 shadow-sm")}>
         

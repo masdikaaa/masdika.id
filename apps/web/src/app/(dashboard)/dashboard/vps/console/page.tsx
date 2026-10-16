@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Maximize2, Power, RefreshCw, ArrowLeft, Monitor } from "lucide-react";
+import { Maximize2, Power, RefreshCw, ChevronLeft, Monitor } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 
 function ConsoleContent() {
@@ -110,7 +110,7 @@ function ConsoleContent() {
       <div className={cn("flex items-center justify-between px-4 bg-[#0d1825] border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")} style={{ height: "44px" }}>
         <div className="flex items-center gap-3">
           <button onClick={() => window.close()} className={cn("flex items-center gap-1.5 hover:text-white transition-colors text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <ArrowLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4" />
             Close
           </button>
           <div className="w-px h-4 bg-white/10" />

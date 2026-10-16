@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { motion, Variants } from "framer-motion";
-import { Bell, BellRing, CheckCircle2, AlertCircle, MessageSquare, Receipt, ArrowLeft, RefreshCw } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, AlertCircle, MessageSquare, Receipt, ChevronLeft, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Pagination } from "@/components/ui/Pagination";
@@ -124,7 +124,7 @@ export default function NotificationsPage() {
             href="/dashboard"
             className={cn("w-full sm:w-auto px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border transition-all", isDark ? "bg-slate-800/60 hover:bg-slate-800 text-white border-slate-700/80" : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200 shadow-sm")}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5" />
             Back to Dashboard
           </Link>
           {unreadCount > 0 && (

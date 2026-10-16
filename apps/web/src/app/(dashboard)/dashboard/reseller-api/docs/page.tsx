@@ -2,7 +2,7 @@
 
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, BookOpen, Key, Link as LinkIcon, Server, ShieldCheck, Zap, Cloud, CheckCircle2, Activity, CodeXml, Copy, Check, Terminal, Wallet, Trash2, RotateCcw, Monitor, Power, List, ImageIcon } from "lucide-react";
+import { ArrowLeft, ChevronLeft, BookOpen, Key, Link as LinkIcon, Server, ShieldCheck, Zap, Cloud, CheckCircle2, Activity, CodeXml, Copy, Check, Terminal, Wallet, Trash2, RotateCcw, Monitor, Power, List, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -210,8 +210,16 @@ export default function ResellerApiDocsPage() {
       {/* Sidebar Navigation */}
       <div className={cn("xl:w-64 flex-shrink-0 border-r xl:h-[calc(100vh-4rem)] xl:sticky xl:top-16 overflow-y-auto hidden xl:block z-10", isDark ? "bg-[#0A0B1A] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
         <div className="p-5">
-          <Link href="/dashboard/reseller-api" className={cn("inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-cyan-500 mb-8 px-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <ArrowLeft className="w-4 h-4" /> Back to Panel
+          <Link 
+            href="/dashboard/reseller-api" 
+            className={cn(
+              "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm mb-6",
+              isDark 
+                ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+                : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+            )}
+          >
+            <ChevronLeft className="w-4 h-4" /> Back to Panel
           </Link>
           
           <div className="space-y-6">

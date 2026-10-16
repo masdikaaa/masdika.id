@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { MessageSquare, ArrowLeft, Send, Paperclip, X, Image as ImageIcon, FileText, User, ShieldAlert, CheckCircle2, Bold, Italic, Link as LinkIcon, Code, ZoomIn, ZoomOut, Download } from 'lucide-react';
+import { MessageSquare, ArrowLeft, ChevronLeft, Send, Paperclip, X, Image as ImageIcon, FileText, User, ShieldAlert, CheckCircle2, Bold, Italic, Link as LinkIcon, Code, ZoomIn, ZoomOut, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mutate as globalMutate } from 'swr';
 import DOMPurify from 'isomorphic-dompurify';
@@ -191,7 +191,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
           <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
             <Link href="/dashboard/tickets" className={cn("p-2 sm:p-2.5 border rounded-xl transition-all hover:-translate-x-1 shrink-0 mt-0.5", isDark ? "bg-slate-800/60 border-slate-700/80 text-zinc-300 hover:bg-slate-800" : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200")}>
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
