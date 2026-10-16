@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { Cloud, Zap, ShieldCheck, Shield, Terminal, ArrowRight, Cpu, Box, Globe, CheckCircle2, Database, MapPin, HardDrive, Activity, TrendingUp, Network, Server } from "lucide-react";
+import { Cloud, Zap, ShieldCheck, Shield, Terminal, ArrowRight, Cpu, Box, Globe, CheckCircle2, Database, MapPin, HardDrive, Activity, TrendingUp, Network, Server, ChevronLeft, ChevronRight } from "lucide-react";
 import VpsSpecSlider from "@/components/ui/VpsSpecSlider";
 import Link from "next/link";
 import { FadeIn } from "@/components/animations/FadeIn";
@@ -38,6 +39,15 @@ const SUPPORTED_OPERATING_SYSTEMS = [
   { name: "Windows Server", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows8/windows8-original.svg" },
 ];
 
+const REPEATED_OPERATING_SYSTEMS = [
+  ...SUPPORTED_OPERATING_SYSTEMS,
+  ...SUPPORTED_OPERATING_SYSTEMS,
+  ...SUPPORTED_OPERATING_SYSTEMS,
+  ...SUPPORTED_OPERATING_SYSTEMS,
+  ...SUPPORTED_OPERATING_SYSTEMS,
+  ...SUPPORTED_OPERATING_SYSTEMS,
+];
+
 const VPS_FAQS = [
   {
     q: "Why is the Sidoarjo datacenter important?",
@@ -61,11 +71,172 @@ const VPS_FAQS = [
   }
 ];
 
-
-
 export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: any, isVpsEnabled: boolean }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const osScrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const isPausedRef = useRef(false);
+  const dragLastXRef = useRef(0);
+  const lastTouchXRef = useRef(0);
+
+  // Helper to measure exact width of 1 complete OS set
+  const getItemSetWidth = useCallback((container: HTMLDivElement) => {
+    const children = container.children;
+    const n = SUPPORTED_OPERATING_SYSTEMS.length;
+    if (children.length >= n * 2) {
+      const el0 = children[0] as HTMLElement;
+      const elN = children[n] as HTMLElement;
+      const diff = elN.offsetLeft - el0.offsetLeft;
+      if (diff > 0) return diff;
+    }
+    return container.scrollWidth / 6;
+  }, []);
+
+  // Seamless wrap-around logic ensuring infinite continuous flow
+  const wrapScroll = useCallback((container: HTMLDivElement) => {
+    const setWidth = getItemSetWidth(container);
+    if (!setWidth || setWidth <= 10) return;
+
+    // Buffer range keeping viewport centered around Set 2 and Set 3
+    const minScroll = setWidth * 1.5;
+    const maxScroll = setWidth * 3.5;
+
+    while (container.scrollLeft >= maxScroll) {
+      container.scrollLeft -= setWidth;
+    }
+    while (container.scrollLeft < minScroll) {
+      container.scrollLeft += setWidth;
+    }
+  }, [getItemSetWidth]);
+
+  // Initial scroll positioning into the middle sets
+  useEffect(() => {
+    const container = osScrollRef.current;
+    if (!container) return;
+
+    const initPos = () => {
+      const setWidth = getItemSetWidth(container);
+      if (setWidth > 0 && (container.scrollLeft === 0 || container.scrollLeft < setWidth)) {
+        container.scrollLeft = setWidth * 2;
+      }
+    };
+
+    initPos();
+    const timer = setTimeout(initPos, 150);
+    return () => clearTimeout(timer);
+  }, [getItemSetWidth]);
+
+  // Infinite continuous auto-scroll loop (60fps)
+  useEffect(() => {
+    const container = osScrollRef.current;
+    if (!container) return;
+
+    let animationId: number;
+    let accumulated = 0;
+    const speed = 0.75; // smooth auto-scroll speed
+    let isVisible = true;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]) {
+        isVisible = entries[0].isIntersecting;
+      }
+    });
+    observer.observe(container);
+
+    const step = () => {
+      if (!isPausedRef.current && !isDraggingRef.current && isVisible) {
+        accumulated += speed;
+        if (accumulated >= 1) {
+          const px = Math.floor(accumulated);
+          container.scrollLeft += px;
+          accumulated -= px;
+          wrapScroll(container);
+        }
+      }
+      animationId = requestAnimationFrame(step);
+    };
+
+    animationId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      observer.disconnect();
+    };
+  }, [wrapScroll]);
+
+  // Mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!osScrollRef.current) return;
+    setIsDragging(true);
+    isDraggingRef.current = true;
+    isPausedRef.current = true;
+    dragLastXRef.current = e.pageX;
+  };
+
+  // Window mousemove / mouseup for unrestricted drag
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      const container = osScrollRef.current;
+      if (!container || !isDraggingRef.current) return;
+      e.preventDefault();
+      const deltaX = e.pageX - dragLastXRef.current;
+      dragLastXRef.current = e.pageX;
+      container.scrollLeft -= deltaX;
+      wrapScroll(container);
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      isDraggingRef.current = false;
+      isPausedRef.current = false;
+    };
+
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    window.addEventListener("blur", handleGlobalMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleGlobalMouseMove);
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener("blur", handleGlobalMouseUp);
+    };
+  }, [isDragging, wrapScroll]);
+
+  // Touch drag handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isPausedRef.current = true;
+    if (e.touches[0]) {
+      lastTouchXRef.current = e.touches[0].pageX;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const container = osScrollRef.current;
+    if (!container || !e.touches[0]) return;
+    const currentX = e.touches[0].pageX;
+    const deltaX = currentX - lastTouchXRef.current;
+    lastTouchXRef.current = currentX;
+    container.scrollLeft -= deltaX;
+    wrapScroll(container);
+  };
+
+  const handleTouchEnd = () => {
+    isPausedRef.current = false;
+  };
+
+  // Arrow button click step
+  const handleManualSlide = (direction: "left" | "right") => {
+    const container = osScrollRef.current;
+    if (!container) return;
+    const delta = direction === "left" ? -280 : 280;
+    container.scrollBy({ left: delta, behavior: "smooth" });
+  };
 
   return (
     <div className={cn("pt-24 md:pt-32 pb-20 px-4  selection:bg-cyan-500/30 font-sans overflow-hidden relative min-h-screen bg-transparent".trim(), isDark ? "text-white" : "text-slate-900")}>
@@ -277,32 +448,96 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         {/* Supported OS Section */}
         <section className="py-16 lg:py-24 relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className={cn("text-3xl md:text-4xl font-black  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>Available Operating Systems</h2>
-              <p className={cn(" font-medium text-lg".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Deploy your instance with your preferred OS in seconds.</p>
+            <div className="text-center mb-10">
+              <h2 className={cn("text-3xl md:text-4xl font-black mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>Available Operating Systems</h2>
+              <p className={cn("font-medium text-lg".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Deploy your instance with your preferred OS in seconds.</p>
+              <div className={cn("inline-flex items-center gap-2 mt-4 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wider uppercase border select-none", isDark ? "border-cyan-500/20 bg-cyan-500/5 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
+                <ChevronLeft className="w-3.5 h-3.5 animate-pulse" />
+                <span>Drag left / right to explore</span>
+                <ChevronRight className="w-3.5 h-3.5 animate-pulse" />
+              </div>
             </div>
+
             <div className={cn(
-              "relative overflow-hidden flex w-full backdrop-blur-md border rounded-[2rem] p-6 shadow-2xl group [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] transition-all",
+              "relative overflow-hidden w-full backdrop-blur-md border rounded-[2rem] p-6 shadow-2xl group transition-all",
               isDark 
                 ? "bg-cyan-500/5 border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.1)]" 
                 : "bg-white border-cyan-200 shadow-md"
             )}>
-              <div className="flex whitespace-nowrap animate-marquee shrink-0 items-center gap-12 sm:gap-20 min-w-full pr-12 sm:pr-20 group-hover:[animation-play-state:paused]">
-                {SUPPORTED_OPERATING_SYSTEMS.map((os, idx) => (
-                  <div key={`os-1-${idx}`} className="flex items-center gap-3 md:gap-4 transition-transform duration-300 cursor-default">
-                    <img referrerPolicy="no-referrer" src={os.icon} alt={os.name} className="h-8 w-8 md:h-10 md:w-10" loading="lazy" decoding="async" />
-                    <span className={cn("font-bold text-lg md:text-2xl tracking-tight", isDark ? "text-white" : "text-slate-900")}>{os.name}</span>
-                  </div>
-                ))}
+              {/* Left Arrow Button */}
+              <button
+                type="button"
+                onClick={() => handleManualSlide("left")}
+                className={cn(
+                  "absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border transition-all duration-200 shadow-lg backdrop-blur-md hidden sm:flex items-center justify-center",
+                  "opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95 focus:opacity-100",
+                  isDark
+                    ? "bg-[#0b1120]/90 border-cyan-500/40 text-cyan-400 hover:bg-cyan-950 hover:border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                    : "bg-white/95 border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500 shadow-sm"
+                )}
+                aria-label="Previous OS"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {/* Scroll Track with Gradient Mask on Edges */}
+              <div className="w-full [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+                <div
+                  ref={osScrollRef}
+                  onMouseDown={handleMouseDown}
+                  onMouseEnter={() => { isPausedRef.current = true; }}
+                  onMouseLeave={() => {
+                    if (!isDraggingRef.current) isPausedRef.current = false;
+                  }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onScroll={() => {
+                    if (osScrollRef.current) wrapScroll(osScrollRef.current);
+                  }}
+                  className={cn(
+                    "flex items-center gap-12 sm:gap-20 overflow-x-auto select-none py-2 w-full",
+                    "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
+                    isDragging ? "cursor-grabbing" : "cursor-grab"
+                  )}
+                >
+                  {REPEATED_OPERATING_SYSTEMS.map((os, idx) => (
+                    <div
+                      key={`os-${idx}`}
+                      className="flex items-center gap-3 md:gap-4 shrink-0 transition-transform duration-200 select-none hover:scale-105"
+                    >
+                      <img
+                        referrerPolicy="no-referrer"
+                        src={os.icon}
+                        alt={os.name}
+                        className="h-8 w-8 md:h-10 md:w-10 object-contain pointer-events-none select-none"
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                      />
+                      <span className={cn("font-bold text-lg md:text-2xl tracking-tight select-none pointer-events-none", isDark ? "text-white" : "text-slate-900")}>
+                        {os.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex whitespace-nowrap animate-marquee shrink-0 items-center gap-12 sm:gap-20 min-w-full pr-12 sm:pr-20 group-hover:[animation-play-state:paused]" aria-hidden="true">
-                {SUPPORTED_OPERATING_SYSTEMS.map((os, idx) => (
-                  <div key={`os-2-${idx}`} className="flex items-center gap-3 md:gap-4 transition-transform duration-300 cursor-default">
-                    <img referrerPolicy="no-referrer" src={os.icon} alt={os.name} className="h-8 w-8 md:h-10 md:w-10" loading="lazy" decoding="async" />
-                    <span className={cn("font-bold text-lg md:text-2xl tracking-tight", isDark ? "text-white" : "text-slate-900")}>{os.name}</span>
-                  </div>
-                ))}
-              </div>
+
+              {/* Right Arrow Button */}
+              <button
+                type="button"
+                onClick={() => handleManualSlide("right")}
+                className={cn(
+                  "absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border transition-all duration-200 shadow-lg backdrop-blur-md hidden sm:flex items-center justify-center",
+                  "opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95 focus:opacity-100",
+                  isDark
+                    ? "bg-[#0b1120]/90 border-cyan-500/40 text-cyan-400 hover:bg-cyan-950 hover:border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                    : "bg-white/95 border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500 shadow-sm"
+                )}
+                aria-label="Next OS"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </section>
