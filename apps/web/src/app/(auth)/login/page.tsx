@@ -135,17 +135,17 @@ export default function LoginPage() {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={cn(
-          "relative z-10 w-full max-w-5xl rounded-[2.5rem] border backdrop-blur-xl shadow-2xl overflow-hidden grid lg:grid-cols-12 transition-all duration-300",
+          "relative z-10 w-full max-w-5xl rounded-3xl sm:rounded-[2.5rem] border backdrop-blur-xl shadow-2xl overflow-hidden grid lg:grid-cols-12 transition-all duration-300",
           isDark
             ? "bg-[#020d18]/85 border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
             : "bg-white/95 border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
         )}
       >
         {/* LEFT COLUMN: Form */}
-        <div className="lg:col-span-6 p-8 sm:p-12 lg:p-12 xl:p-14 flex flex-col justify-between relative z-10">
+        <div className="lg:col-span-6 p-6 pt-8 sm:p-12 lg:p-12 xl:p-14 flex flex-col justify-between relative z-10">
           <div>
             {/* Top Brand Header & Theme Toggle */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 sm:mb-8 px-1 pt-0.5">
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
                 <img
                   src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
@@ -181,15 +181,15 @@ export default function LoginPage() {
             </div>
 
             {/* Mobile Character Avatar (Only on small screens where right panel is hidden) */}
-            <div className="lg:hidden flex items-center gap-3 p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20">
-              <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center">
+            <div className="lg:hidden flex items-center gap-3.5 p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20">
+              <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-1">
                 <Image
                   src="/images/auth/login.png"
                   alt="Masdika Assistant"
                   width={48}
                   height={48}
                   unoptimized
-                  className="object-contain"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div>

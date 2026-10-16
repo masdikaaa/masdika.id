@@ -107,7 +107,7 @@ function ResetPasswordForm() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className={cn("w-full backdrop-blur-sm border rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden", isDark ? "bg-[#020d18]/50 border-white/5" : "bg-white/70 border-slate-200")}
+          className={cn("w-full backdrop-blur-sm border rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden", isDark ? "bg-[#020d18]/50 border-white/5" : "bg-white/70 border-slate-200")}
         >
           {/* Decorative glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
