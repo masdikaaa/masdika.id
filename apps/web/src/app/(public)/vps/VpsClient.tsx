@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { Cloud, Zap, ShieldCheck, Shield, Terminal, ArrowRight, Cpu, Box, Globe, CheckCircle2, Database, MapPin, HardDrive, Activity, TrendingUp, Network, Server, ChevronLeft, ChevronRight } from "lucide-react";
+import { Cloud, Zap, ShieldCheck, Shield, Terminal, ArrowRight, Cpu, Box, Globe, CheckCircle2, Database, MapPin, HardDrive, Activity, TrendingUp, Network, Server, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import VpsSpecSlider from "@/components/ui/VpsSpecSlider";
 import Link from "next/link";
 import { FadeIn } from "@/components/animations/FadeIn";
@@ -391,9 +391,12 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
             <p className={cn(" text-lg leading-relaxed font-medium mb-8".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
               Choose Pay-As-You-Go (hourly) billing. Simply top up your deposit balance to get started and deploy your server instantly.
             </p>
-            <div className={cn("inline-block px-5 py-3 rounded-2xl bg-cyan-950/30 backdrop-blur-md border border-cyan-500/20  text-sm font-medium shadow-xl".trim(), isDark ? "text-white" : "text-slate-900")}>
-              <span className="font-bold text-cyan-400 mr-2">Note:</span>
-              By default, all VPS are provisioned with NAT IPv4. Dedicated IPs are available via support ticket.
+            <div className={cn("inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl border transition-all shadow-md text-sm font-medium", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <span>
+                <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong>
+                By default, all VPS are provisioned with NAT IPv4. Dedicated IPs are available via support ticket.
+              </span>
             </div>
           </div>
 

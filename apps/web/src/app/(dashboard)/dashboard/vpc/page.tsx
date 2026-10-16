@@ -692,11 +692,11 @@ export default function VpcDashboardPage() {
 
         {activeTab === "vpcs" && (
           <div className="p-6">
-            <div className={cn("rounded-xl p-4 mb-6 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
-              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-              <div className="text-sm">
-                <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>About Virtual Private Cloud</p>
-                <p className={cn(isDark ? "text-slate-300" : "text-slate-600")}>A VPC is a secure, isolated private cloud hosted within the public cloud. It allows you to launch resources in a virtual network that you define.</p>
+            <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <div className="space-y-1 flex-1 min-w-0">
+                <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>About Virtual Private Cloud:</p>
+                <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>A VPC is a secure, isolated private cloud hosted within the public cloud. It allows you to launch resources in a virtual network that you define.</p>
               </div>
             </div>
 
@@ -931,11 +931,11 @@ export default function VpcDashboardPage() {
 
         {activeTab === "peering" && (
           <div className="p-6">
-            <div className={cn("rounded-xl p-4 mb-6 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
-              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-              <div className="text-sm">
-                <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>About VPC Peering</p>
-                <p className={cn(isDark ? "text-slate-300" : "text-slate-600")}>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
+            <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <div className="space-y-1 flex-1 min-w-0">
+                <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>About VPC Peering:</p>
+                <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
               </div>
             </div>
 
@@ -1358,9 +1358,12 @@ export default function VpcDashboardPage() {
                       </>
                     );
                   })()}
-                  <p className={cn("text-[11px] mt-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Note: Attaching the VM to a VPC requires a reboot to apply the new network interface. Please restart the VM from its control panel afterward.
-                  </p>
+                  <div className={cn("border rounded-xl p-3.5 mt-3 flex items-start gap-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                    <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                    <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                      <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Attaching the VM to a VPC requires a reboot to apply the new network interface. Please restart the VM from its control panel afterward.
+                    </p>
+                  </div>
                 </div>
               </div>
 

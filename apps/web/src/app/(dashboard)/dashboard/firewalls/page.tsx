@@ -226,11 +226,11 @@ export default function FirewallsDashboardPage() {
 
       <motion.div variants={itemVariants} className={cn("rounded-3xl overflow-hidden shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         <div className="p-6">
-          <div className={cn("border rounded-xl p-4 mb-6 flex items-start gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
-            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-            <div className={cn("text-sm", isDark ? "text-slate-300" : "text-slate-700")}>
-              <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>Global Firewall Management</p>
-              <p>Select a VPS instance below to manage its security group rules. Changes take effect immediately without requiring a restart.</p>
+          <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+            <div className="space-y-1 flex-1 min-w-0">
+              <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Global Firewall Management:</p>
+              <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>Select a VPS instance below to manage its security group rules. Changes take effect immediately without requiring a restart.</p>
             </div>
           </div>
 

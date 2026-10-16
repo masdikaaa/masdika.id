@@ -153,10 +153,10 @@ export default function ReserveNewIpPage() {
                       className="font-mono text-sm py-3.5"
                     />
                     
-                    <div className={cn("p-3 rounded-lg flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
+                    <div className={cn("p-4 rounded-xl flex items-start gap-3 border transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
                       <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                      <p className={cn("text-sm", isDark ? "text-slate-300" : "text-slate-600")}>
-                        <strong>Note:</strong> After reserving a Local IP, please open a support ticket to request a Public IP allocation.
+                      <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                        <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> After reserving a Local IP, please open a support ticket to request a Public IP allocation.
                       </p>
                     </div>
                   </div>

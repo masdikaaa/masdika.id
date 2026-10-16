@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import React, { useState, useEffect, Fragment } from "react";
 import { toast } from "sonner";
-import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package } from "lucide-react";
+import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -141,10 +141,13 @@ export default function PaygMonitorPage() {
                   placeholder="Select frequency..."
                   className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
                 />
-                <p className={cn("text-xs leading-relaxed mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
-                  When set to "Minutely", the cron will execute the billing deduction every 1 minute. 
-                  Note: The cron Docker container schedule is set to `* * * * *`. The API will check this setting to decide whether to process every minute or wait for the top of the hour.
-                </p>
+                <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm mt-3", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                  <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                  <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                    When set to &quot;Minutely&quot;, the cron executes billing deduction every minute.<br/>
+                    <strong className={cn("font-medium", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> The cron Docker container schedule is set to <code className="px-1 py-0.5 rounded bg-black/20 dark:bg-black/40 font-mono">* * * * *</code>. The API checks this setting to decide whether to process every minute or wait for the top of the hour.
+                  </p>
+                </div>
               </div>
               
               <button

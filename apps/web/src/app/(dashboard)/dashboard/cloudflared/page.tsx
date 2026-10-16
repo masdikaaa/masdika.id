@@ -169,11 +169,14 @@ const ConnectorInstructions = ({ isDark,
         <h4 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Refresh token</h4>
         <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>You may need to generate a new token for security reasons.</p>
         
-        <div className={cn("rounded-xl p-4 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
+        <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
           <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-          <p className={cn("text-sm font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-700")}>
-            This action will invalidate the previous token. Note that this will prevent new connections made with the old token, but it won&apos;t close existing connections.
-          </p>
+          <div className="space-y-1 flex-1 min-w-0">
+            <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Security Notice:</p>
+            <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+              This action will invalidate the previous token. Note that this will prevent new connections made with the old token, but it won&apos;t close existing connections.
+            </p>
+          </div>
         </div>
 
         <button 
@@ -1087,11 +1090,11 @@ export default function CloudflaredPage() {
         <div className="space-y-4 animate-in fade-in duration-300">
           {/* No domains warning */}
           {domains.length === 0 && !domainsLoading && (
-            <div className={cn("rounded-xl p-4 flex items-start gap-3 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90")}>
-              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-              <div className={cn("text-sm", isDark ? "text-slate-300" : "text-slate-700")}>
-                <p className={cn("font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>Note: Add a domain first.</p>
-                <p>You need at least one domain before creating tunnels. <button onClick={() => setActiveTab("domains")} className={cn("underline transition-colors font-medium", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700")}>Go to Domains tab</button></p>
+            <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <div className="space-y-1 flex-1 min-w-0">
+                <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Note: Add a domain first.</p>
+                <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>You need at least one domain before creating tunnels. <button onClick={() => setActiveTab("domains")} className={cn("underline transition-colors font-medium", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700")}>Go to Domains tab</button></p>
               </div>
             </div>
           )}

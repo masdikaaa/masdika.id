@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings , RefreshCw } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings , RefreshCw, Info } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -846,7 +846,13 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-            <p className={cn("text-xs italic", isDark ? "text-zinc-500" : "text-slate-500")}>Note: Browsers cache favicons heavily. Press CTRL + F5 after uploading to see the change.</p>
+            <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong>
+                Browsers cache favicons heavily. Press CTRL + F5 after uploading to see the change.
+              </p>
+            </div>
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>

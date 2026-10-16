@@ -90,11 +90,14 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
         </div>
       </div>
 
-      <div className={cn("border rounded-xl p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200/90 text-slate-700")}>
-        <Info className={cn("w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5", isDark ? "text-cyan-500" : "text-cyan-600")} />
-        <p className={cn("text-xs sm:text-sm font-medium leading-relaxed", isDark ? "text-slate-300" : "text-slate-600")}>
-          The Auto Scheduler automatically starts and stops your VPS according to your set schedule. You will not be charged for CPU and RAM while your VPS is stopped. Storage costs still apply.
-        </p>
+      <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+        <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+        <div className="space-y-1 flex-1 min-w-0">
+          <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Auto Scheduler Policy:</p>
+          <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+            The Auto Scheduler automatically starts and stops your VPS according to your set schedule. You will not be charged for CPU and RAM while your VPS is stopped. Storage costs still apply.
+          </p>
+        </div>
       </div>
 
       {vpsList.length === 0 ? (

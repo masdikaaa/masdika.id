@@ -35,6 +35,7 @@ import {
   Gauge,
   Wifi,
   WifiOff,
+  Info,
 } from "lucide-react";
 import {
   AreaChart,
@@ -2408,8 +2409,12 @@ export default function AdminResourceFindingPage() {
             </div>
 
             {/* Explanatory Notice */}
-            <div className={cn("p-3 rounded-2xl text-[11px] leading-relaxed border", isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
-              <strong>Notice:</strong> Proxmox applies bandwidth rate limits and network link disconnection (link_down=1) directly to the VM's network interfaces in real time via Linux kernel traffic control (tc) and QEMU monitor. Disabling internet isolates the server without shutting down the VM and is registered in the customer Incident Report.
+            <div className={cn("p-3 rounded-2xl text-[11px] leading-relaxed border flex items-start gap-2.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <div>
+                <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Notice:</strong>
+                <span className={cn(isDark ? "text-cyan-200/90" : "text-slate-600")}>Proxmox applies bandwidth rate limits and network link disconnection (link_down=1) directly to the VM's network interfaces in real time via Linux kernel traffic control (tc) and QEMU monitor. Disabling internet isolates the server without shutting down the VM and is registered in the customer Incident Report.</span>
+              </div>
             </div>
 
             {/* Modal Actions */}

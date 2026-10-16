@@ -1878,7 +1878,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   {settingsMenu === "password" && (
                     <div className="space-y-6 max-w-md">
                       <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Change Root Password</h3>
-                      <p className={cn(" text-sm text-amber-400/80", isDark ? "text-zinc-400" : "text-slate-500")}>Note: Requires a VPS restart to apply via Cloud-Init.</p>
+                      <div className={cn("p-3.5 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                        <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                        <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                          <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Requires a VPS restart to apply via Cloud-Init.
+                        </p>
+                      </div>
                       <form onSubmit={handleSettingsSubmit} className="space-y-4">
                         <div className="space-y-2">
                           <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>New Password</label>
@@ -1930,7 +1935,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   {settingsMenu === "ssh" && (
                     <div className="space-y-6 max-w-xl">
                       <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Change SSH Public Key</h3>
-                      <p className={cn(" text-sm text-amber-400/80", isDark ? "text-zinc-400" : "text-slate-500")}>Note: Requires a VPS restart to apply via Cloud-Init.</p>
+                      <div className={cn("p-3.5 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                        <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                        <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                          <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Requires a VPS restart to apply via Cloud-Init.
+                        </p>
+                      </div>
                       <form onSubmit={handleSettingsSubmit} className="space-y-4">
                         <div className="space-y-2">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
@@ -2361,8 +2371,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             </div>
                           )}
 
-                          <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-xl text-sm">
-                            <strong>Note:</strong> Attached disks will appear as unformatted block devices (e.g., <code>/dev/sdb</code>) inside your VPS. You will need to partition and format them manually via the console or SSH.
+                          <div className={cn("p-4 rounded-xl flex items-start gap-3 border transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                              <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Attached disks will appear as unformatted block devices (e.g., <code className="px-1 py-0.5 rounded bg-black/20 dark:bg-black/40 font-mono">/dev/sdb</code>) inside your VPS. You will need to partition and format them manually via the console or SSH.
+                            </p>
                           </div>
 
                           <div className="flex justify-end pt-4">
@@ -2478,21 +2491,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         </div>
                         <div className="p-6 space-y-4 max-w-md">
                           {isWindowsReinstall ? (
-                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs", isDark ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-900")}>
-                              <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                               <div>
-                                <p className="font-bold mb-0.5">Windows Access Note:</p>
-                                <p className={isDark ? "text-cyan-300/90 leading-relaxed" : "text-cyan-800 leading-relaxed"}>
+                                <p className={cn("font-medium mb-0.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Windows Access Note:</p>
+                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
                                   The default user for Windows is <strong>Administrator</strong>. This new password will be used to log in as Administrator via RDP (Remote Desktop) or Web Console.
                                 </p>
                               </div>
                             </div>
                           ) : (
-                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs", isDark ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-900")}>
-                              <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                               <div>
-                                <p className="font-bold mb-0.5">Linux Access Note:</p>
-                                <p className={isDark ? "text-cyan-300/90 leading-relaxed" : "text-cyan-800 leading-relaxed"}>
+                                <p className={cn("font-medium mb-0.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Linux Access Note:</p>
+                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
                                   The default user after reinstallation is <strong>root</strong>. This new password will be used to log in as root via SSH or Web Console.
                                 </p>
                               </div>
