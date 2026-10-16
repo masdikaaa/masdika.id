@@ -147,7 +147,7 @@ export default function ServicesPage() {
               <TiltCard intensity={5} className={cn(
                 "group relative backdrop-blur-xl rounded-tl-[3rem] rounded-br-[3rem] rounded-tr-xl rounded-bl-xl p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 border transition-all duration-500 overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.7)]",
                 isDark 
-                  ? "bg-gradient-to-br from-[#0b1120]/95 to-[#070b14]/95 hover:from-[#0f1a2e]/95 hover:to-[#070b14]/95 border-slate-800 border-t-2 border-l-2 border-t-cyan-500/10 border-l-cyan-500/10 hover:border-t-cyan-400 hover:border-l-cyan-400"
+                  ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] hover:from-[#13203c] hover:to-[#0e172a] border-slate-700/80 border-t-2 border-l-2 border-t-cyan-400 border-l-cyan-400 hover:border-t-cyan-300 hover:border-l-cyan-300 shadow-xl shadow-black/40 ring-1 ring-white/5"
                   : "bg-white border-black/5 border-t-2 border-l-2 border-t-cyan-500/30 border-l-cyan-500/30 hover:border-t-cyan-500 hover:border-l-cyan-500 hover:shadow-xl"
               )}>
                 {/* Background Glow on Hover */}
@@ -246,7 +246,7 @@ export default function ServicesPage() {
                 <TiltCard intensity={10} className={cn(
                   "relative h-full backdrop-blur-xl rounded-2xl p-8 flex flex-col border transition-all duration-500 overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] border-b-[6px] hover:-translate-y-2 group",
                   isDark 
-                    ? "bg-gradient-to-b from-[#0f172a]/95 to-[#050914]/95 border-slate-800 border-b-cyan-500/20 hover:border-b-cyan-400 hover:border-t-cyan-500/30 hover:border-x-cyan-500/30"
+                    ? "bg-gradient-to-b from-[#0e172a] to-[#0a1324] border-slate-700/80 border-b-cyan-400 hover:border-b-cyan-300 hover:border-t-cyan-400/50 hover:border-x-cyan-400/50 shadow-xl shadow-black/40 ring-1 ring-white/5"
                     : "bg-white border-black/5 border-b-cyan-500/30 hover:border-b-cyan-500 hover:shadow-xl hover:border-black/10"
                 )}>
                   {/* Background Glow on Hover */}
@@ -356,7 +356,7 @@ export default function ServicesPage() {
               <TiltCard intensity={12} className={cn(
                 "relative z-10 backdrop-blur-md rounded-t-[5rem] rounded-b-2xl p-10 pt-14 text-center border transition-all shadow-[0_20px_50px_rgba(0,0,0,0.5)] group h-full",
                 isDark 
-                  ? "bg-gradient-to-t from-[#0b1120]/90 to-[#121d33]/90 border-white/10 hover:border-cyan-500/40 hover:from-[#0d1627]/90 hover:to-[#172543]/90"
+                  ? "bg-gradient-to-t from-[#0e172a] to-[#121f38] border-slate-700/80 hover:border-cyan-500/50 hover:from-[#111e38] hover:to-[#172748] shadow-xl shadow-black/40 ring-1 ring-white/5"
                   : "bg-white border-black/5 hover:border-cyan-500/40 hover:shadow-2xl"
               )}>
                 <div className={cn(

@@ -206,7 +206,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
 
         {/* Table of Contents */}
         {toc.length > 0 && (
-          <details className={cn("backdrop-blur-sm border p-5 rounded-2xl mb-10 group shadow-md", isDark ? "bg-[#0b1120] border-slate-800" : "bg-white border-black/5 shadow-sm")}>
+          <details className={cn("backdrop-blur-sm border p-5 rounded-2xl mb-10 group shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 shadow-black/40 ring-1 ring-white/5" : "bg-white border-black/5 shadow-sm")}>
             <summary className={cn("text-base font-bold flex items-center gap-2 cursor-pointer list-none select-none outline-none", isDark ? "text-white" : "text-slate-900")}>
               <span className="w-1.5 h-5 bg-cyan-500 rounded-full" />
               Table of Contents
@@ -233,7 +233,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
         <div className={cn("mt-16 pt-10 border-t grid grid-cols-1 sm:grid-cols-2 gap-4", isDark ? "border-slate-800" : "border-black/5")}>
           {prev ? (
             <Link href={`/series/${slug}/${prev.slug}`}
-              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5", isDark ? "bg-[#0b1120] hover:bg-[#0f192d] border-slate-800 hover:border-cyan-500/40 shadow-md" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
+              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5", isDark ? "bg-[#0d1629] hover:bg-[#111f38] border-slate-700/80 hover:border-cyan-500/50 shadow-xl shadow-black/40 ring-1 ring-white/5" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
               <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <ChevronLeft className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>
@@ -245,7 +245,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
           ) : <div />}
           {next && (
             <Link href={`/series/${slug}/${next.slug}`}
-              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 sm:flex-row-reverse sm:text-right", isDark ? "bg-[#0b1120] hover:bg-[#0f192d] border-slate-800 hover:border-cyan-500/40 shadow-md" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
+              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 sm:flex-row-reverse sm:text-right", isDark ? "bg-[#0d1629] hover:bg-[#111f38] border-slate-700/80 hover:border-cyan-500/50 shadow-xl shadow-black/40 ring-1 ring-white/5" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
               <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <ChevronRight className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>

@@ -100,10 +100,10 @@ export function OpportunityDetailContent({ opportunity }: { opportunity: Opportu
         )}
 
         <div className={cn(
-          "backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-6 sm:p-10 mb-10 border-l-4 relative overflow-hidden transition-colors border",
+          "backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-6 sm:p-10 mb-10 relative overflow-hidden transition-colors border border-l-4",
           isDark 
-            ? "bg-gradient-to-br from-[#0b1120]/95 to-[#070b14]/95 border-white/5 border-l-cyan-500/30 shadow-[0_10px_30px_rgba(0,0,0,0.5)]" 
-            : "bg-white border-black/5 border-l-cyan-500/40 shadow-xl"
+            ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 border-l-cyan-400 ring-1 ring-white/5 shadow-xl shadow-black/40" 
+            : "bg-white border-slate-200 border-l-cyan-500 shadow-xl"
         )}>
           <div className="relative z-10">
             <div className={cn("whitespace-pre-wrap antialiased text-base sm:text-[1.05rem] leading-[1.8] font-medium tracking-wide", isDark ? "text-zinc-200" : "text-slate-700")}>
@@ -116,7 +116,7 @@ export function OpportunityDetailContent({ opportunity }: { opportunity: Opportu
           <div className={cn(
             "flex flex-col sm:flex-row items-center gap-6 backdrop-blur-md rounded-2xl rounded-tr-xl rounded-bl-[3rem] rounded-br-md p-8 text-center sm:text-left justify-between relative overflow-hidden group transition-all duration-300 border",
             isDark 
-              ? "bg-gradient-to-r from-cyan-950/40 to-[#070b14]/90 border-cyan-500/40 hover:border-cyan-400/80 shadow-[0_10px_30px_rgba(6,182,212,0.15)]"
+              ? "bg-gradient-to-r from-[#0e172a] to-[#0d1f38] border-cyan-500/50 hover:border-cyan-400 ring-1 ring-cyan-500/20 shadow-xl shadow-black/40"
               : "bg-gradient-to-r from-cyan-50 to-white border-cyan-200 hover:border-cyan-300 shadow-lg"
           )}>
             {/* Hover glow effect for the CTA card */}

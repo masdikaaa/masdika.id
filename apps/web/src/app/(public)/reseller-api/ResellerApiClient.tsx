@@ -41,9 +41,9 @@ const MethodBadge = ({ method }: { method: string }) => {
 
 /* ─── Code Block ─── */
 const CodeBlock = ({ isDark, title, children, raw }: { isDark: boolean; title: string; children: React.ReactNode; raw?: string }) => (
-  <div className={cn("rounded-xl border overflow-hidden", isDark ? "bg-[#0c0c14] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm")}>
-    <div className={cn("flex items-center justify-between px-4 py-2.5 border-b", isDark ? "border-white/[0.06] bg-white/[0.02]" : "border-slate-100 bg-slate-50/80")}>
-      <span className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-600" : "text-slate-400")}>{title}</span>
+  <div className={cn("rounded-xl border overflow-hidden", isDark ? "bg-[#080d1a] border-slate-700/60 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+    <div className={cn("flex items-center justify-between px-4 py-2.5 border-b", isDark ? "border-slate-700/60 bg-white/[0.02]" : "border-slate-100 bg-slate-50/80")}>
+      <span className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-400")}>{title}</span>
       {raw && <CopyBtn text={raw} isDark={isDark} small />}
     </div>
     <div className="p-4 overflow-x-auto">
@@ -255,7 +255,7 @@ export default function ResellerApiClient() {
                 { icon: CheckCircle2, title: "Prepaid Billing", sub: "Monthly Upfront" },
                 { icon: Activity, title: "Real-time Control", sub: "Power & VNC" },
               ].map((b, i) => (
-                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm")}>
+                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-md shadow-black/30" : "bg-white border-slate-200 shadow-sm")}>
                   <b.icon className={cn("w-6 h-6 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   <div className="text-left">
                     <span className={cn("font-bold text-sm leading-tight block", isDark ? "text-white" : "text-slate-900")}>{b.title}</span>
@@ -270,7 +270,7 @@ export default function ResellerApiClient() {
 
       {/* ══════════ Documentation ══════════ */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 lg:pt-16 pb-12 md:pb-20" id="documentation">
-        <div className={cn("flex w-full border rounded-2xl overflow-hidden", isDark ? "border-white/[0.06] bg-[#080d18]/80 backdrop-blur-xl" : "border-slate-200 bg-white shadow-xl")}>
+        <div className={cn("flex w-full border rounded-2xl overflow-hidden", isDark ? "border-slate-700/80 bg-[#0d1629] ring-1 ring-white/5 shadow-2xl shadow-black/50" : "border-slate-200 bg-white shadow-xl")}>
 
           {/* Sidebar */}
           <div className={cn("w-64 flex-shrink-0 border-r hidden xl:block", isDark ? "border-white/[0.06]" : "border-slate-200")}>

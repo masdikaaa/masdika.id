@@ -832,10 +832,10 @@ export function AIChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={cn("fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-32px)] sm:w-96 h-[560px] max-h-[85vh] sm:max-h-[90vh] backdrop-blur-sm border rounded-xl shadow-2xl flex flex-col z-50 overflow-hidden", isDark ? "bg-[#011627]/90 border-cyan-500/20" : "bg-white border-slate-200")}
+            className={cn("fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-32px)] sm:w-96 h-[560px] max-h-[85vh] sm:max-h-[90vh] backdrop-blur-md border rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/60" : "bg-white border-slate-200")}
           >
             {/* Header */}
-            <div className={cn("flex items-center justify-between p-4 border-b", isDark ? "border-cyan-500/20 bg-[#011627]/80" : "border-slate-200 bg-white")}>
+            <div className={cn("flex items-center justify-between p-4 border-b", isDark ? "border-slate-700/80 bg-[#080d1a]" : "border-slate-200 bg-white")}>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-[#0F3B4A] border-[1.5px] border-cyan-400 flex items-center justify-center text-cyan-400 shadow-[2px_2px_0_#22d3ee]">
                   <Bot size={18} strokeWidth={2.5} />
@@ -1160,7 +1160,7 @@ export function AIChat() {
                             </div>
                           ) : msg.content ? (
                             <div
-                              className={cn("p-3 rounded-2xl text-sm rounded-tl-none prose prose-sm max-w-none min-w-0 overflow-x-auto", isDark ? "bg-[#011627] border border-cyan-500/20 text-gray-200 prose-invert" : "bg-slate-100 text-slate-800")}
+                              className={cn("p-3 rounded-2xl text-sm rounded-tl-none prose prose-sm max-w-none min-w-0 overflow-x-auto", isDark ? "bg-[#080d1a] border border-slate-700/80 text-gray-200 prose-invert" : "bg-slate-100 text-slate-800")}
                               dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
                             />
                           ) : (
@@ -1191,7 +1191,7 @@ export function AIChat() {
                 </div>
 
                 {/* Input Area */}
-                <div className={cn("p-3 border-t backdrop-blur-sm", isDark ? "border-cyan-500/20 bg-[#011627]/90" : "border-slate-200 bg-white")}>
+                <div className={cn("p-3 border-t backdrop-blur-sm", isDark ? "border-slate-700/80 bg-[#080d1a]" : "border-slate-200 bg-white")}>
                   {inputWarning && (
                     <div className="flex items-center gap-1.5 mb-2 px-1 text-xs text-cyan-400">
                       <AlertTriangle size={12} />
@@ -1212,7 +1212,7 @@ export function AIChat() {
                       }}
                       placeholder="Type a message..."
                       maxLength={MAX_INPUT_LENGTH}
-                      className={cn("w-full border rounded-full py-2 pl-4 pr-20 text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[#0d1117] border-cyan-500/20 text-white placeholder-gray-500" : "bg-slate-100 border-slate-200 text-slate-900 placeholder-slate-400")}
+                      className={cn("w-full border rounded-full py-2 pl-4 pr-20 text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[#0d1629] border-slate-700/80 text-white placeholder-gray-500" : "bg-slate-100 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                     <div className="absolute right-2 flex items-center gap-1">
                       <button

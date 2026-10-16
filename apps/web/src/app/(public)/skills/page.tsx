@@ -135,7 +135,7 @@ export default function SkillsPage() {
               className={cn(
                 "backdrop-blur-xl rounded-2xl rounded-tr-[3rem] p-8 md:p-10 border-r-2 border-t-2 transition-all transform-gpu duration-500 relative overflow-hidden group border",
                 isDark 
-                  ? "bg-gradient-to-br from-[#0b1120]/95 to-[#050a14]/95 border-slate-800 border-r-cyan-500/20 border-t-cyan-500/20 hover:border-r-cyan-400 hover:border-t-cyan-400 hover:bg-gradient-to-bl hover:from-[#0d1627]/95 hover:to-[#050a14]/95 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                  ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 border-r-cyan-400 border-t-cyan-400/80 hover:border-r-cyan-300 hover:border-t-cyan-300 hover:bg-gradient-to-bl hover:from-[#13203c] hover:to-[#0e172a] shadow-xl shadow-black/40 ring-1 ring-white/5"
                   : "bg-white border-black/5 border-r-cyan-500/30 border-t-cyan-500/30 hover:border-r-cyan-500 hover:border-t-cyan-500 hover:bg-slate-50 shadow-xl"
               )}
             >
@@ -221,7 +221,7 @@ export default function SkillsPage() {
                 className={cn(
                   "backdrop-blur-md border border-t-[6px] rounded-3xl p-10 flex flex-col items-center text-center transition-all transform-gpu duration-300 group",
                   isDark 
-                    ? "bg-gradient-to-b from-[#0b1120]/90 to-[#070b14]/90 border-slate-800 border-t-cyan-500/20 hover:border-t-cyan-400 hover:from-[#0f1926]/90 hover:to-[#070b14]/90 shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
+                    ? "bg-gradient-to-b from-[#0e172a] to-[#0a1324] border-slate-700/80 border-t-cyan-400 hover:border-t-cyan-300 hover:from-[#13203c] hover:to-[#0e172a] shadow-xl shadow-black/40 ring-1 ring-white/5"
                     : "bg-white border-black/5 border-t-cyan-500/30 hover:border-t-cyan-500 hover:bg-slate-50 shadow-xl"
                 )}
               >
@@ -270,7 +270,7 @@ export default function SkillsPage() {
                     className={cn(
                       "backdrop-blur-md border border-l-[6px] rounded-2xl rounded-tr-[2rem] rounded-br-md p-8 transition-all transform-gpu duration-300 flex flex-col gap-6 group overflow-hidden relative",
                       isDark 
-                        ? "bg-gradient-to-r from-[#0b1120]/95 to-[#070b14]/95 border-slate-800 border-l-cyan-500/30 hover:border-l-cyan-400 hover:from-[#0f1926]/95 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+                        ? "bg-gradient-to-r from-[#0e172a] to-[#0a1324] border-slate-700/80 border-l-cyan-400 hover:border-l-cyan-300 hover:from-[#13203c] shadow-xl shadow-black/40 ring-1 ring-white/5"
                         : "bg-white border-black/5 border-l-cyan-500/40 hover:border-l-cyan-500 hover:bg-slate-50 shadow-xl"
                     )}
                   >
@@ -278,7 +278,7 @@ export default function SkillsPage() {
                       <div className={cn("w-16 h-16 rounded-2xl flex-shrink-0 flex items-center justify-center border transition-transform group-hover:scale-110", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-inner" : "bg-cyan-50 border-cyan-200")}>
                         <IconComponent className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} strokeWidth={1.5} />
                       </div>
-                      <span className={cn("text-xs font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider", isDark ? "text-zinc-500 bg-[#050B14] border-slate-800" : "text-slate-500 bg-slate-50 border-black/5")}>{cert.date}</span>
+                      <span className={cn("text-xs font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider", isDark ? "text-cyan-400 bg-cyan-950/40 border-cyan-500/30" : "text-slate-500 bg-slate-50 border-black/5")}>{cert.date}</span>
                     </div>
                     <div>
                       <h3 className={cn("text-xl font-bold mb-2 leading-tight", isDark ? "text-white" : "text-slate-900")}>{cert.title}</h3>

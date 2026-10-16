@@ -40,7 +40,7 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
   if (opportunities.length === 0) {
     const EmptyIcon = emptyType === 'JOBS' ? Briefcase : emptyType === 'EVENT' ? CalendarDays : Inbox;
     return (
-      <div className={cn("text-center py-20 px-6 sm:px-10 mx-4 sm:mx-0 rounded-3xl border", isDark ? "bg-cyan-950/30 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+      <div className={cn("text-center py-20 px-6 sm:px-10 mx-4 sm:mx-0 rounded-3xl border shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
         <EmptyIcon className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-cyan-400/40" : "text-cyan-600/40")} />
         <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No items found</h3>
         <p className={isDark ? "text-white/40" : "text-slate-500"}>There are currently no items published in this category.</p>
@@ -79,7 +79,7 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
             className={cn(
               "w-full border rounded-2xl py-3.5 pl-12 pr-4 focus:outline-none focus:ring-4 transition-all backdrop-blur-sm",
               isDark 
-                ? "bg-[#011627]/40 border-white/[0.08] focus:border-cyan-500/30 text-white placeholder:text-zinc-500 focus:ring-cyan-500/10" 
+                ? "bg-[#0d1629] border-slate-700/80 focus:border-cyan-500/50 text-white placeholder:text-zinc-500 focus:ring-cyan-500/20" 
                 : "bg-white border-black/10 focus:border-cyan-500 text-slate-900 placeholder:text-slate-400 focus:ring-cyan-500/20 shadow-sm"
             )}
           />
@@ -87,7 +87,7 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
       </div>
 
       {filteredOpportunities.length === 0 && searchQuery.trim() !== "" ? (
-        <div className={cn("text-center py-16 px-6 rounded-3xl border backdrop-blur-sm", isDark ? "bg-[#011627]/40 border-white/[0.08]" : "bg-white border-black/10 shadow-sm")}>
+        <div className={cn("text-center py-16 px-6 rounded-3xl border backdrop-blur-sm shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-black/10 shadow-sm")}>
           <Search className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-zinc-500" : "text-slate-300")} />
           <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No results found</h3>
           <p className={cn("max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>We couldn't find anything matching "{searchQuery}". Try adjusting your search.</p>
@@ -105,16 +105,16 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
                 style={{ willChange: "transform, opacity" }}
               >
                 {/* Entire card is a link */}
-            <Link href={getHref(item)} className="group relative rounded-tl-2xl rounded-tr-[3rem] rounded-br-2xl rounded-bl-[3rem] overflow-hidden flex flex-col hover:-translate-y-2 transition-all transform-gpu duration-500 h-full shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+            <Link href={getHref(item)} className="group relative rounded-tl-2xl rounded-tr-[3rem] rounded-br-2xl rounded-bl-[3rem] overflow-hidden flex flex-col hover:-translate-y-2 transition-all transform-gpu duration-500 h-full shadow-xl shadow-black/40">
               {/* Glass base */}
-              <div className={cn("absolute inset-0 backdrop-blur-xl transition-colors", isDark ? "bg-gradient-to-br from-[#0b1120]/95 to-[#070b14]/95 group-hover:from-[#0f1926]/95 group-hover:to-[#070b14]/95" : "bg-white group-hover:bg-slate-50")} />
+              <div className={cn("absolute inset-0 backdrop-blur-xl transition-colors", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] group-hover:from-[#111f38] group-hover:to-[#0d1629]" : "bg-white group-hover:bg-slate-50")} />
               {/* Blobs on hover */}
               <div className={cn("absolute -top-10 -left-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
               <div className={cn("absolute -bottom-10 -right-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
               {/* Shine */}
               <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
               {/* Border */}
-              <div className={cn("absolute inset-0 rounded-tl-2xl rounded-tr-[3rem] rounded-br-2xl rounded-bl-[3rem] border border-l-4 transition-all duration-500 pointer-events-none", isDark ? "border-white/5 border-l-cyan-500/30 group-hover:border-l-cyan-400 group-hover:border-cyan-500/30" : "border-black/5 border-l-cyan-500/40 group-hover:border-l-cyan-500 group-hover:border-cyan-500/20")} />
+              <div className={cn("absolute inset-0 rounded-tl-2xl rounded-tr-[3rem] rounded-br-2xl rounded-bl-[3rem] border border-l-4 transition-all duration-500 pointer-events-none", isDark ? "border-slate-700/80 border-l-cyan-400 group-hover:border-l-cyan-300 group-hover:border-cyan-500/50 ring-1 ring-white/5" : "border-black/5 border-l-cyan-500/40 group-hover:border-l-cyan-500 group-hover:border-cyan-500/20")} />
 
               {/* Image */}
               <div className="relative z-10 h-48 w-full shrink-0 overflow-hidden">
@@ -144,14 +144,14 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
                 <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center gap-2">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md", 
-                    isDark ? "text-cyan-400 bg-black/70" : "text-cyan-600 bg-white/90 border border-cyan-100 shadow-sm"
+                    isDark ? "text-cyan-400 bg-black/70 border border-cyan-500/30" : "text-cyan-600 bg-white/90 border border-cyan-100 shadow-sm"
                   )}>
                     {getTypeIcon(item.type)}
                     {item.type}
                   </span>
                   
                   {item.isNew && (
-                    <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md", isDark ? "text-cyan-400 bg-black/70" : "text-cyan-600 bg-white/90 border border-cyan-100 shadow-sm")}>
+                    <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md", isDark ? "text-cyan-400 bg-black/70 border border-cyan-500/30" : "text-cyan-600 bg-white/90 border border-cyan-100 shadow-sm")}>
                       NEW
                     </span>
                   )}
@@ -173,7 +173,7 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
                 <div className="flex-grow" />
 
                 {/* Footer */}
-                <div className={cn("flex items-center justify-between mt-auto pt-4 border-t", isDark ? "border-white/[0.06]" : "border-black/5")}>
+                <div className={cn("flex items-center justify-between mt-auto pt-4 border-t", isDark ? "border-slate-700/80" : "border-black/5")}>
                   <div className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                     {new Date(item.createdAt).toLocaleDateString('en-GB')}
                   </div>

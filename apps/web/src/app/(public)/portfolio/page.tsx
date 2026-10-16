@@ -124,7 +124,7 @@ export default function PortfolioPage() {
                 const techList = project.techStack ? project.techStack.split(',').map((t: string) => t.trim()) : [];
                 return (
                   <FadeIn key={project.id} delay={index * 0.1} direction="up" className="h-full">
-                    <TiltCard intensity={5} className={cn("group flex flex-col rounded-[24px] overflow-hidden transition-all duration-300 h-full shadow-xl border hover:border-cyan-500/40", isDark ? "bg-[#0b1120] border-slate-800 shadow-[0_10px_30px_rgba(0,0,0,0.5)]" : "bg-white border-black/5 hover:shadow-xl")}>
+                    <TiltCard intensity={5} className={cn("group flex flex-col rounded-[24px] overflow-hidden transition-all duration-300 h-full shadow-xl border", isDark ? "bg-[#0d1629] border-slate-700/80 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40 ring-1 ring-white/5" : "bg-white border-slate-200 hover:border-cyan-500/40 hover:shadow-xl")}>
                       {/* Image Section */}
                       <div className={cn("relative h-48 sm:h-56 overflow-hidden", isDark ? "bg-black/40" : "bg-slate-100")}>
                         {project.image ? (

@@ -170,7 +170,7 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
                 ))}
               </div>
             ) : (
-              <div className="bg-[#0a1f33]/50 backdrop-blur-md border border-white/5 rounded-3xl p-12 text-center">
+              <div className={cn("backdrop-blur-md rounded-3xl p-12 text-center shadow-xl", isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border border-slate-200 shadow-sm")}>
                 <Code className="w-12 h-12 text-cyan-500/30 mx-auto mb-4" />
                 <h3 className={cn("text-xl font-bold  mb-2".trim(), isDark ? "text-white" : "text-slate-900")}>No APIs found</h3>
                 <p className="text-zinc-500">Check back later for more updates.</p>
@@ -212,7 +212,7 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
                 }
               ].map((feat, i) => (
                 <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
-                  <TiltCard intensity={5} className="bg-cyan-500/5 border border-cyan-500/30 p-8 rounded-3xl hover:bg-cyan-500/10 hover:border-cyan-400/50 transition-all h-full">
+                  <TiltCard intensity={5} className={cn("p-8 rounded-3xl transition-all h-full shadow-xl", isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md")}>
                     <div className={cn("w-14 h-14 flex items-center justify-center rounded-2xl mb-6", isDark ? `${feat.bgColor} ${feat.color}` : "bg-cyan-50 border border-cyan-200 text-cyan-600")}>
                       <feat.icon className="w-7 h-7" />
                     </div>
@@ -279,10 +279,10 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
                   <div
                     key={plan.id}
                     className={cn(
-                      "relative rounded-[2rem] p-8 h-full transition-all",
+                      "relative rounded-[2rem] p-8 h-full transition-all shadow-xl",
                       isPopular
-                        ? (isDark ? "bg-gradient-to-b from-cyan-900/40 to-[#0a1929] border border-cyan-400 transform md:-translate-y-4" : "bg-white border-[3px] border-cyan-400 shadow-xl transform md:-translate-y-4")
-                        : (isDark ? "bg-cyan-500/5 border border-cyan-500/30 hover:border-cyan-400/50 hover:bg-cyan-500/10" : "bg-white border border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md")
+                        ? (isDark ? "bg-gradient-to-b from-[#0e172a] to-[#0a1324] border-2 border-cyan-400 ring-1 ring-white/10 shadow-black/50 transform md:-translate-y-4" : "bg-white border-[3px] border-cyan-400 shadow-xl transform md:-translate-y-4")
+                        : (isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md")
                     )}
                   >
                     {isPopular && (
@@ -359,10 +359,10 @@ export default function ApiHubClient({ initialProjects, initialPlans }: { initia
                 { step: "03", title: "Integrate & Go Live", desc: "Use our provided code snippets to integrate the API into your application instantly." }
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border  p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
+                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/50 hover:bg-[#111f38] transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border border-black/5 shadow-xl")}>
 
                     {/* Animated Step Circle */}
-                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
+                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#091122] border-slate-700/80" : "bg-white border-cyan-200")}>
                       <OrbitalRings />
                       <span className={cn("relative z-10 text-3xl font-black bg-clip-text text-transparent", isDark ? "bg-gradient-to-br from-white to-zinc-400" : "bg-gradient-to-br from-cyan-600 to-cyan-400")}>{item.step}</span>
                     </div>
@@ -397,7 +397,7 @@ function ApiCard({ project, getIcon }: { project: any, getIcon: (str: string) =>
   const isDark = theme === "dark";
   return (
     <Link href={`/api-hub/${project.slug}/lab`} className="group block h-full">
-      <div className={cn("backdrop-blur-sm border hover:border-cyan-500/50 rounded-2xl p-6 transition-colors transform-gpu h-full flex flex-col relative overflow-hidden", isDark ? "bg-[#0b1120]/80 border-white/10 shadow-xl" : "bg-white border-slate-200 shadow-xl")}>
+      <div className={cn("backdrop-blur-sm border hover:border-cyan-500/50 rounded-2xl p-6 transition-colors transform-gpu h-full flex flex-col relative overflow-hidden shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:bg-[#111f38] shadow-black/40" : "bg-white border-slate-200 shadow-xl")}>
         {/* Glow effect on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-cyan-500/0 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 

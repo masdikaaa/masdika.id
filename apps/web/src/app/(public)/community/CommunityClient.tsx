@@ -117,7 +117,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: any[
 
         {/* Grid of Groups */}
         {groups.length === 0 ? (
-          <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm", isDark ? "bg-cyan-950/30 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+          <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
             <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border relative", isDark ? "bg-gradient-to-br from-cyan-500/10 via-cyan-500/5 to-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-300")}>
               <Users className="w-10 h-10" style={{ stroke: isDark ? "url(#icon-gradient-community)" : "#0284c7" }} />
             </div>
@@ -136,13 +136,13 @@ export default function CommunityClient({ initialGroups }: { initialGroups: any[
                   transition={{ duration: 0.5, delay: index * 0.05 }}
                   className="group relative flex flex-col items-center p-5 sm:p-6 rounded-3xl overflow-hidden hover:-translate-y-1 transition-transform duration-300"
                 >
-                  <div className={cn("absolute inset-0 backdrop-blur-sm transition-colors", isDark ? "bg-[#011627]/40 group-hover:bg-[#011627]/60" : "bg-white group-hover:bg-cyan-50/50")} />
+                  <div className={cn("absolute inset-0 backdrop-blur-sm transition-colors", isDark ? "bg-[#0d1629] group-hover:bg-[#111f38]" : "bg-white group-hover:bg-cyan-50/50")} />
                   {/* Blobs on hover */}
                   <div className={cn("absolute -top-6 -left-6 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
                   <div className={cn("absolute -bottom-6 -right-6 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
                   {/* Shine */}
                   <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
-                  <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-300 pointer-events-none", isDark ? "border-white/[0.08] group-hover:border-cyan-500/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" : "border-slate-200 group-hover:border-cyan-300 shadow-[0_4px_24px_rgba(0,0,0,0.07)]")} />
+                  <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-300 pointer-events-none", isDark ? "border-slate-700/80 group-hover:border-cyan-500/50 ring-1 ring-white/5 shadow-xl shadow-black/40" : "border-slate-200 group-hover:border-cyan-300 shadow-[0_4px_24px_rgba(0,0,0,0.07)]")} />
 
                   {/* Avatar */}
                   <div className={cn("relative z-10 w-16 h-16 mb-4 rounded-2xl overflow-hidden border flex items-center justify-center shrink-0", isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-slate-50")}>
@@ -215,11 +215,11 @@ export default function CommunityClient({ initialGroups }: { initialGroups: any[
         >
           <div className="relative w-full flex flex-col md:flex-row items-center md:items-start gap-8 p-8 rounded-3xl overflow-hidden shadow-2xl">
             {/* Glass */}
-            <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-[#011627]/40" : "bg-white")} />
+            <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324]" : "bg-white")} />
             <div className={cn("absolute -top-10 -left-10 w-56 h-56 rounded-full blur-3xl pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
             <div className={cn("absolute -bottom-10 -right-10 w-56 h-56 rounded-full blur-3xl pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
             <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
-            <div className={cn("absolute inset-0 rounded-3xl border pointer-events-none", isDark ? "border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" : "border-transparent")} />
+            <div className={cn("absolute inset-0 rounded-3xl border pointer-events-none", isDark ? "border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "border-transparent")} />
 
             <div className="relative z-10 flex-1 text-center md:text-left">
               <h2 className={cn("text-2xl font-bold mb-3", isDark ? "bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-200 bg-clip-text text-transparent" : "text-slate-900")}>

@@ -483,7 +483,7 @@ export default function HomePage() {
             >
               <div className={cn(
                 "backdrop-blur-md rounded-3xl p-12 flex flex-col items-center justify-center text-center relative overflow-hidden group transition-colors shadow-2xl",
-                isDark ? "bg-gradient-to-br from-cyan-950/40 to-slate-900/40 border border-cyan-500/20 hover:border-cyan-400/50" : "bg-white border border-black/5 hover:border-cyan-500/30"
+                isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-black/5 hover:border-cyan-500/30"
               )}>
                 <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <h2 className={cn(
@@ -495,7 +495,7 @@ export default function HomePage() {
 
               <div className={cn(
                 "backdrop-blur-md rounded-3xl p-6 flex items-center gap-6 transition-colors shadow-xl",
-                isDark ? "bg-cyan-950/30 border border-cyan-500/10 hover:border-cyan-500/30" : "bg-white border border-black/5 hover:border-cyan-500/30"
+                isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-black/5 hover:border-cyan-500/30"
               )}>
                 <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                   <Server className={cn("w-7 h-7", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -528,8 +528,8 @@ export default function HomePage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                 <div className={cn(
-                  "backdrop-blur-md rounded-3xl p-6 transition-colors",
-                  isDark ? "bg-cyan-950/30 border border-cyan-500/10 hover:bg-cyan-900/40 hover:border-cyan-500/30" : "bg-white border border-black/5 shadow-lg hover:border-cyan-500/30"
+                  "backdrop-blur-md rounded-3xl p-6 transition-colors shadow-xl",
+                  isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:bg-[#111f38] hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-black/5 shadow-lg hover:border-cyan-500/30"
                 )}>
                   <div className="flex items-center gap-4 mb-4">
                     <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border-cyan-200")}>
@@ -541,8 +541,8 @@ export default function HomePage() {
                 </div>
 
                 <div className={cn(
-                  "backdrop-blur-md rounded-3xl p-6 transition-colors",
-                  isDark ? "bg-cyan-950/30 border border-cyan-500/10 hover:bg-cyan-900/40 hover:border-cyan-500/30" : "bg-white border border-black/5 shadow-lg hover:border-cyan-500/30"
+                  "backdrop-blur-md rounded-3xl p-6 transition-colors shadow-xl",
+                  isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:bg-[#111f38] hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-black/5 shadow-lg hover:border-cyan-500/30"
                 )}>
                   <div className="flex items-center gap-4 mb-4">
                     <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border-cyan-200")}>
@@ -791,7 +791,7 @@ export default function HomePage() {
               <Link href="/services" key={idx} className="block h-full group">
                 <TiltCard intensity={5} className={cn(
                   "backdrop-blur-md p-8 md:p-10 rounded-3xl border transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl",
-                  isDark ? "bg-[#0b1120]/80 border-white/10 group-hover:bg-[#0f1926] group-hover:border-cyan-500/30" : "bg-white border-black/5 group-hover:bg-slate-50 group-hover:border-cyan-500/30"
+                  isDark ? "bg-[#0d1629] border-slate-700/80 group-hover:bg-[#111f38] group-hover:border-cyan-500/50 shadow-black/40 ring-1 ring-white/5" : "bg-white border-black/5 group-hover:bg-slate-50 group-hover:border-cyan-500/30"
                 )}>
                   <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110", isDark ? srv.bg : "bg-cyan-50 border border-cyan-100")}>
                     <srv.icon className={cn("w-8 h-8", isDark ? srv.color : "text-cyan-600")} />
@@ -839,7 +839,7 @@ export default function HomePage() {
           {portfolioProjects.length === 0 ? (
             <div className={cn(
               "text-center py-20 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl",
-              isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200"
+              isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5" : "bg-white border-slate-200"
             )}>
               <div className={cn(
                 "w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 border",
@@ -856,7 +856,7 @@ export default function HomePage() {
                 <FadeIn key={project.id} delay={index * 0.1} direction="up" className="h-full">
                   <TiltCard intensity={8} className={cn(
                     "group relative rounded-3xl overflow-hidden border hover:border-cyan-500/50 transition-colors transform-gpu shadow-2xl h-[350px] sm:h-[400px] md:h-[450px]",
-                    isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-black/5"
+                    isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5" : "bg-white border-black/5"
                   )}>
                     <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="block w-full h-full relative">
                       <Image referrerPolicy="no-referrer" src={project.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
@@ -930,7 +930,7 @@ export default function HomePage() {
                   className={cn(
                     "p-8 md:p-10 rounded-3xl border relative w-[85vw] sm:w-[450px] min-w-[85vw] sm:min-w-[450px] flex-shrink-0 transition-all duration-300 flex flex-col shadow-2xl",
                     isDark 
-                      ? "bg-[#0b1120] border-white/10 hover:border-cyan-500/30 hover:bg-[#0e172a] shadow-[0_4px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]" 
+                      ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/50" 
                       : "bg-white border-slate-200 hover:border-cyan-500/30 hover:bg-slate-50/50 shadow-lg hover:shadow-xl"
                   )}
                 >
@@ -1000,7 +1000,7 @@ export default function HomePage() {
           {latestPosts.length === 0 ? (
             <div className={cn(
               "text-center py-20 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl",
-              isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200"
+              isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5" : "bg-white border-slate-200"
             )}>
               <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No posts yet</h3>
               <p className={cn("max-w-sm mx-auto font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Articles will appear here once published.</p>
@@ -1011,7 +1011,7 @@ export default function HomePage() {
                 <FadeIn key={post.id || index} delay={index * 0.1} direction="up" className="h-full">
                   <TiltCard intensity={8} className={cn(
                     "group relative rounded-[2rem] overflow-hidden border hover:border-cyan-500/50 transition-colors transform-gpu flex flex-col h-full shadow-2xl",
-                    isDark ? "border-white/10 bg-[#0b1120]" : "border-black/5 bg-white"
+                    isDark ? "border-slate-700/80 bg-[#0d1629] ring-1 ring-white/5 shadow-black/40" : "border-black/5 bg-white"
                   )}>
                     <Link href={`/blog/${post.slug || '#'}`} className="flex flex-col h-full w-full">
                       <div className="relative h-56 sm:h-64 w-full overflow-hidden shrink-0">
@@ -1033,7 +1033,7 @@ export default function HomePage() {
                         {/* Smooth gradient blending into the card body */}
                         <div className={cn(
                           "absolute inset-x-0 bottom-0 h-32 z-10",
-                          isDark ? "bg-gradient-to-t from-[#0b1120] via-[#0b1120]/80 to-transparent" : "bg-gradient-to-t from-white via-white/20 to-transparent"
+                          isDark ? "bg-gradient-to-t from-[#0d1629] via-[#0d1629]/80 to-transparent" : "bg-gradient-to-t from-white via-white/20 to-transparent"
                         )} />
 
                         {/* Hover glow effect */}
@@ -1095,7 +1095,7 @@ export default function HomePage() {
             transition={{ duration: 1, ease: "easeOut" }}
             className={cn(
               "relative rounded-3xl md:rounded-[3rem] overflow-hidden px-6 py-12 sm:p-10 md:p-16 lg:p-20 text-center shadow-2xl group border-2 transition-all duration-300",
-              isDark ? "bg-[#0b1322] border-slate-800 hover:border-cyan-500/40 shadow-[0_15px_60px_rgba(0,0,0,0.6)]" : "bg-white border-slate-200 shadow-2xl"
+              isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 shadow-[0_15px_60px_rgba(0,0,0,0.6)]" : "bg-white border-slate-200 shadow-2xl"
             )}
           >
             {/* Top Cyan Accent Line */}

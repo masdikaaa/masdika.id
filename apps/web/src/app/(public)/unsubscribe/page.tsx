@@ -52,13 +52,13 @@ function UnsubscribeForm() {
           onChange={e => setEmail(e.target.value)}
           required
           placeholder="your@email.com"
-          className="w-full px-5 py-4 bg-white/[0.03] border border-cyan-500/20 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+          className="w-full px-5 py-4 bg-[#080d1a] border border-slate-700/80 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
         />
       </div>
       <button 
         type="submit"
         disabled={status === "loading"}
-        className="w-full py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold rounded-xl transition-all disabled:opacity-50 flex justify-center items-center"
+        className="w-full py-4 bg-red-500/15 hover:bg-red-500/25 text-red-300 hover:text-white border border-red-500/30 font-bold rounded-xl transition-all disabled:opacity-50 flex justify-center items-center shadow-lg shadow-black/20"
       >
         {status === "loading" ? (
           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -88,7 +88,7 @@ export default function UnsubscribePage() {
           We're sorry to see you go. Enter your email below to unsubscribe from our newsletter updates.
         </p>
         
-        <div className="max-w-md mx-auto text-left">
+        <div className="max-w-md mx-auto text-left bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/40">
           <Suspense fallback={<div className="text-center text-zinc-500 py-10">Loading...</div>}>
             <UnsubscribeForm />
           </Suspense>

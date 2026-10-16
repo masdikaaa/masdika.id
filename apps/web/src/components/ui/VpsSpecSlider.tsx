@@ -116,7 +116,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
   return (
     <div className={cn(
       "backdrop-blur-md border rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0 transition-all",
-      isDark ? "bg-[#0b1120] border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.1)]" : "bg-white border-cyan-200 shadow-xl"
+      isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-2xl shadow-black/50" : "bg-white border-cyan-200 shadow-xl"
     )}>
       <div className={cn(
         "absolute top-0 right-0 w-96 h-96 blur-[100px] rounded-full mix-blend-screen pointer-events-none",
@@ -294,8 +294,8 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
           {/* Bandwidth Banner */}
           <div className="pt-2 lg:pt-4">
             <div className={cn(
-              "p-4 backdrop-blur-md rounded-2xl flex items-start sm:items-center gap-4 border hover:border-cyan-300 transition-colors",
-              isDark ? "bg-cyan-950/30 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200"
+              "p-4 backdrop-blur-md rounded-2xl flex items-start sm:items-center gap-4 border transition-colors",
+              isDark ? "bg-[#080d1a] border-slate-700/80 hover:border-cyan-500/50" : "bg-slate-50 border-slate-200"
             )}>
               <div className={cn(
                 "w-12 h-12 rounded-xl border text-cyan-500 flex items-center justify-center shrink-0",
@@ -314,7 +314,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
         {/* Pricing Summary */}
         <div className={cn(
           "lg:col-span-5 xl:col-span-4 border rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-8 flex flex-col justify-between relative overflow-hidden group shadow-xl",
-          isDark ? "bg-[#050B14] border-white/10" : "bg-slate-50 border-slate-200"
+          isDark ? "bg-[#080d1a] border-slate-700/80 ring-1 ring-white/5" : "bg-slate-50 border-slate-200"
         )}>
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 

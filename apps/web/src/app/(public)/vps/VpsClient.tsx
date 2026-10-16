@@ -343,27 +343,27 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:gap-6">
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/40 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/50 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">40</div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Physical Cores</div>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/40 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/50 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Threads</div>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <HardDrive className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>SSD / HDD</div>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <MapPin className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Sidoarjo</div>
                 </div>
-                <div className={cn("col-span-2 backdrop-blur-md border p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-gradient-to-br from-cyan-950/40 to-[#0b1120]/80 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                <div className={cn("col-span-2 backdrop-blur-md border p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/20 shrink-0">
                       <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
@@ -552,7 +552,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                 { icon: Globe, title: "High-Traffic Web Hosting", desc: "Host your Next.js, Laravel, or WordPress applications. With dedicated resources, your sites stay fast and responsive." },
                 { icon: Database, title: "Database Clusters", desc: "Run MySQL, PostgreSQL, or Redis with confidence. Our enterprise-grade SSD storage ensures high IOPS for database-heavy workloads." }
               ].map((srv, idx) => (
-                <TiltCard key={idx} intensity={5} className={cn("backdrop-blur-md p-8 md:p-10 rounded-3xl border hover:border-cyan-500/40 transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl group", isDark ? "bg-[#0b1120] border-cyan-500/20 hover:bg-cyan-950/30" : "bg-white border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
+                <TiltCard key={idx} intensity={5} className={cn("backdrop-blur-md p-8 md:p-10 rounded-3xl border hover:border-cyan-500/50 transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl group", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:bg-[#111f38] shadow-black/40" : "bg-white border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
                   <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <srv.icon className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
@@ -589,7 +589,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                   <div className={cn(
                     "backdrop-blur-sm border p-8 rounded-3xl transition-all flex flex-col shadow-xl h-full group aspect-square",
                     isDark 
-                      ? "bg-cyan-500/5 border-cyan-500/30 hover:border-cyan-400/50 hover:bg-cyan-500/10" 
+                      ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" 
                       : "bg-white border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md"
                   )}>
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform">
@@ -628,10 +628,10 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                 { step: "03", title: "Deploy Instantly", desc: "Your high-performance cloud instance will be provisioned and ready to use in less than 60 seconds." }
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
+                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/50 hover:bg-[#111f38] transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
 
                     {/* Animated Step Circle */}
-                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
+                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#091122] border-slate-700/80" : "bg-white border-cyan-200")}>
                       <OrbitalRings />
                       <span className={cn("relative z-10 text-3xl font-black bg-clip-text text-transparent", isDark ? "bg-gradient-to-br from-white to-zinc-400" : "bg-gradient-to-br from-cyan-600 to-cyan-400")}>{item.step}</span>
                     </div>

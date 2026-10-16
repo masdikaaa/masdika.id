@@ -175,7 +175,7 @@ export default function ShortenerPage() {
                 }
               ].map((feat, i) => (
                 <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
-                  <TiltCard intensity={5} className="bg-cyan-500/5 border border-cyan-500/30 p-8 rounded-3xl hover:bg-cyan-500/10 hover:border-cyan-400/50 transition-all h-full">
+                  <TiltCard intensity={5} className={cn("p-8 rounded-3xl transition-all h-full shadow-xl", isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
                     <div className={cn("w-14 h-14 flex items-center justify-center rounded-2xl mb-6", isDark ? `${feat.bgColor} ${feat.color}` : "bg-cyan-50 border border-cyan-200 text-cyan-600")}>
                       <feat.icon className="w-7 h-7" />
                     </div>
@@ -204,7 +204,7 @@ export default function ShortenerPage() {
                 <FadeIn key={plan.id} delay={index * 0.1} direction="up" className="h-full">
                   <TiltCard
                     intensity={5}
-                    className={cn( "relative rounded-[2rem] p-8 h-full transition-all", isPopular ? (isDark ? "bg-gradient-to-b from-cyan-900/40 to-[#0a1929] border border-cyan-400 transform md:-translate-y-4" : "bg-white border-[3px] border-cyan-400 shadow-xl transform md:-translate-y-4") : (isDark ? "bg-cyan-500/5 border border-cyan-500/30 hover:border-cyan-400/50 hover:bg-cyan-500/10" : "bg-white border border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md") )}
+                    className={cn("relative rounded-[2rem] p-8 h-full transition-all shadow-xl", isPopular ? (isDark ? "bg-gradient-to-b from-[#0e172a] to-[#0a1324] border-2 border-cyan-400 ring-1 ring-white/10 shadow-black/50 transform md:-translate-y-4" : "bg-white border-[3px] border-cyan-400 shadow-xl transform md:-translate-y-4") : (isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md"))}
                   >
                     {isPopular && (
                       <div className={cn("absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-cyan-500 text-xs font-bold uppercase tracking-wider py-1.5 px-4 rounded-full", isDark ? "text-[#0a1929]" : "text-white shadow-md")}>
@@ -277,10 +277,10 @@ export default function ShortenerPage() {
                 { step: "03", title: "Share & Track", desc: "Share your branded short link and track real-time analytics in your dashboard." }
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border  p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
+                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/50 hover:bg-[#111f38] transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border border-black/5 shadow-xl")}>
                     
                     {/* Animated Step Circle */}
-                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
+                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#091122] border-slate-700/80" : "bg-white border-cyan-200")}>
                       <OrbitalRings />
                       <span className={cn("relative z-10 text-3xl font-black bg-gradient-to-br bg-clip-text text-transparent", isDark ? "from-white to-zinc-400" : "from-cyan-600 to-cyan-400")}>{item.step}</span>
                     </div>

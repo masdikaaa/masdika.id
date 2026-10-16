@@ -57,13 +57,13 @@ export default function SeriesClient({ initialSeries }: { initialSeries: any[] }
                 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}>
                 <Link href={`/series/${s.slug}`}
-                  className={cn("group relative flex flex-col rounded-3xl overflow-hidden hover:-translate-y-1 transition-transform duration-300 h-full border", isDark ? "shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-slate-800 bg-[#0b1120]" : "shadow-md hover:shadow-xl border-black/5 bg-white")}>
+                  className={cn("group relative flex flex-col rounded-3xl overflow-hidden hover:-translate-y-1 transition-transform duration-300 h-full border", isDark ? "shadow-xl shadow-black/40 border-slate-700/80 bg-[#0d1629] ring-1 ring-white/5" : "shadow-md hover:shadow-xl border-slate-200 bg-white")}>
                   {/* Glass */}
-                  <div className={cn("absolute inset-0 backdrop-blur-sm transition-colors duration-300", isDark ? "bg-[#0b1120]/80 group-hover:bg-[#0d1527]" : "bg-white group-hover:bg-slate-50")} />
+                  <div className={cn("absolute inset-0 backdrop-blur-sm transition-colors duration-300", isDark ? "bg-[#0d1629] group-hover:bg-[#111f38]" : "bg-white group-hover:bg-slate-50")} />
                   <div className={cn("absolute -top-10 -left-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
                   <div className={cn("absolute -bottom-10 -right-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
                   <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
-                  <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-300 pointer-events-none", isDark ? "border-slate-800 group-hover:border-cyan-500/40" : "border-transparent group-hover:border-cyan-500/30")} />
+                  <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-300 pointer-events-none", isDark ? "border-slate-700/80 group-hover:border-cyan-500/50" : "border-transparent group-hover:border-cyan-500/30")} />
 
                   {/* Thumbnail */}
                   <div className={cn("relative z-10 w-full aspect-[1730/909] overflow-hidden shrink-0", isDark ? "bg-black/30" : "bg-slate-100")}>

@@ -67,7 +67,7 @@ export function ProvisioningVisualizer({ logs, stats, title = "PROVISIONING", ic
   const progress = Math.min(Math.floor((activeStep / logs.length) * 100), 100);
 
   return (
-    <div className={cn("w-full rounded-3xl overflow-hidden relative", isDark ? "bg-[#050b14]/80 backdrop-blur-xl border border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.1)]" : "bg-white border border-slate-200 shadow-xl")}>
+    <div className={cn("w-full rounded-3xl overflow-hidden relative", isDark ? "bg-[#0d1629] backdrop-blur-xl border border-slate-700/80 ring-1 ring-white/5 shadow-2xl shadow-black/50" : "bg-white border border-slate-200 shadow-xl")}>
       {/* Top Progress Bar */}
       <div className={cn("absolute top-0 left-0 right-0 h-1", isDark ? "bg-white/5" : "bg-slate-100")}>
         <motion.div 
@@ -136,7 +136,7 @@ export function ProvisioningVisualizer({ logs, stats, title = "PROVISIONING", ic
           </div>
 
           {/* Right: Visualizer Graphic */}
-          <div className={cn("relative flex flex-col items-center justify-center border rounded-3xl p-4 md:p-6 lg:p-8 overflow-visible", isDark ? "border-white/5 bg-white/[0.02]" : "border-slate-200 bg-slate-50")}>
+          <div className={cn("relative flex flex-col items-center justify-center border rounded-3xl p-4 md:p-6 lg:p-8 overflow-visible", isDark ? "border-slate-700/80 bg-[#080d1a]/80 ring-1 ring-white/5" : "border-slate-200 bg-slate-50")}>
             {/* Ambient Background Glow */}
             <div 
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] md:w-[450px] md:h-[450px] pointer-events-none transition-all duration-1000"
@@ -206,7 +206,7 @@ export function ProvisioningVisualizer({ logs, stats, title = "PROVISIONING", ic
             {/* Stats Grid inside the visualizer box */}
             <div className="w-full mt-20 grid grid-cols-2 gap-3 z-10">
                {stats.map((stat, idx) => (
-                  <div key={idx} className={cn("border rounded-xl p-3 flex flex-col items-center justify-center text-center backdrop-blur-md transition-colors", isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-white border-slate-200 hover:border-cyan-300")}>
+                  <div key={idx} className={cn("border rounded-xl p-3 flex flex-col items-center justify-center text-center backdrop-blur-md transition-colors", isDark ? "bg-[#0d1629] border-slate-700/80 hover:border-cyan-400/50 hover:bg-[#111f38] shadow-md" : "bg-white border-slate-200 hover:border-cyan-300")}>
                      {getStatIcon(stat.label)}
                      <span className={cn("font-bold text-base md:text-lg leading-tight", isDark ? "text-white" : "text-slate-900")}>{stat.value}</span>
                      <span className={cn("text-[9px] font-bold uppercase tracking-widest mt-1.5 whitespace-nowrap", isDark ? "text-cyan-200/50" : "text-slate-500")}>{stat.label}</span>

@@ -332,7 +332,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
         {/* Table of Contents */}
         {toc.length > 0 && (
-          <details className={cn("group backdrop-blur-xl border border-l-4 p-5 sm:p-6 rounded-2xl rounded-tr-[2rem] rounded-bl-[2rem] mb-12 shadow-lg w-full max-w-full min-w-0 transition-all duration-300", isDark ? "bg-gradient-to-br from-white/[0.08] to-white/[0.02] border-white/10 border-l-cyan-500/50" : "bg-white border-black/5 border-l-cyan-500")} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+          <details className={cn("group backdrop-blur-xl border border-l-4 p-5 sm:p-6 rounded-2xl rounded-tr-[2rem] rounded-bl-[2rem] mb-12 shadow-xl w-full max-w-full min-w-0 transition-all duration-300", isDark ? "bg-[#0d1629] border-slate-700/80 border-l-cyan-400 ring-1 ring-white/5 shadow-black/40" : "bg-white border-black/5 border-l-cyan-500")} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             <summary className="text-lg font-bold flex items-center cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none outline-none">
               <div className={cn("flex items-center gap-2 flex-1", isDark ? "text-white" : "text-slate-900")}>
                 <span className="w-1.5 h-6 bg-cyan-500 rounded-full"></span>
@@ -344,7 +344,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                 </svg>
               </span>
             </summary>
-            <div className={cn("mt-5 pt-4 border-t", isDark ? "border-white/5" : "border-black/5")}>
+            <div className={cn("mt-5 pt-4 border-t", isDark ? "border-slate-700/80" : "border-black/5")}>
               <ul className="space-y-3">
                 {toc.map((heading, idx) => (
                   <li key={idx} className={heading.level === 3 ? "ml-4" : ""}>
@@ -418,7 +418,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
         </div>
 
         {/* Author Bio Box */}
-        <div className={cn("mt-16 backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-6 sm:p-10 border border-l-4 flex flex-col-reverse md:flex-row items-center md:items-start gap-6 md:gap-8 relative shadow-xl w-full", isDark ? "bg-gradient-to-br from-[#0b1120]/95 to-[#070b14]/95 border-white/5 border-l-cyan-500/30" : "bg-white border-black/5 border-l-cyan-500")}>
+        <div className={cn("mt-16 backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-6 sm:p-10 border border-l-4 flex flex-col-reverse md:flex-row items-center md:items-start gap-6 md:gap-8 relative shadow-xl shadow-black/40 w-full", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 border-l-cyan-400 ring-1 ring-white/5" : "bg-white border-black/5 border-l-cyan-500")}>
           <div className="flex-1 flex flex-col justify-center w-full">
             <h3 className={cn("text-xl font-bold mb-3 drop-shadow-sm", isDark ? "bg-gradient-to-br from-cyan-400 to-cyan-200 bg-clip-text text-transparent" : "text-slate-900")}>{post.author?.name || post.adminName || "Admin"}</h3>
             <p className={cn("text-[15px] mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
@@ -486,7 +486,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
               </div>
             ) : (
               recentPosts.map((recent) => (
-                <Link key={recent.id} href={`/blog/${recent.slug}`} className={cn("group flex flex-col backdrop-blur-md border rounded-3xl overflow-hidden transition-colors transform-gpu duration-300 shadow-xl hover:-translate-y-2 relative", isDark ? "bg-gradient-to-br from-[#0a1f33]/60 to-[#011627]/90 border-white/5 hover:border-cyan-500/30 hover:shadow-2xl hover:shadow-cyan-900/20" : "bg-white border-black/5 hover:border-cyan-500/40 hover:shadow-2xl")}>
+                <Link key={recent.id} href={`/blog/${recent.slug}`} className={cn("group flex flex-col backdrop-blur-md border rounded-3xl overflow-hidden transition-colors transform-gpu duration-300 shadow-xl hover:-translate-y-2 relative", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border-black/5 hover:border-cyan-500/40 hover:shadow-2xl")}>
                   {/* Image Section with Fade */}
                   <div className={cn("w-full h-56 sm:h-64 relative overflow-hidden", isDark ? "bg-gradient-to-br from-[#0a1f33] to-[#011627]" : "bg-slate-100")}>
                     {recent.image ? (
@@ -495,7 +495,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                       <div className="w-full h-full flex items-center justify-center text-cyan-500/30 group-hover:text-cyan-500/50 transition-colors text-6xl font-black">{recent.title[0]}</div>
                     )}
                     {/* Overlay Gradient on Image */}
-                    <div className={cn("absolute inset-0 pointer-events-none z-10 opacity-90", isDark ? "bg-gradient-to-b from-transparent via-transparent to-[#011627]" : "bg-gradient-to-b from-transparent via-transparent to-white")}></div>
+                    <div className={cn("absolute inset-0 pointer-events-none z-10 opacity-90", isDark ? "bg-gradient-to-b from-transparent via-transparent to-[#0d1629]" : "bg-gradient-to-b from-transparent via-transparent to-white")}></div>
 
                     {/* Category Badge */}
                     <div className={cn("absolute top-5 left-5 px-3.5 py-1.5 backdrop-blur-md rounded-xl border text-[11px] font-bold tracking-widest uppercase z-20 shadow-lg", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white/90 border-black/10 text-slate-900")}>
@@ -506,7 +506,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                   {/* Content Section */}
                   <div className="px-6 pb-8 sm:px-8 sm:pb-8 flex flex-col flex-1 relative z-20 -mt-10">
                     {/* Meta Info */}
-                    <div className={cn("flex items-center gap-4 text-[13px] font-semibold mb-4 w-max px-4 py-1.5 rounded-full border backdrop-blur-sm", isDark ? "text-cyan-400/80 bg-[#0a1f33]/60 border-cyan-500/10" : "text-cyan-700 bg-white border-black/10 shadow-sm")}>
+                    <div className={cn("flex items-center gap-4 text-[13px] font-semibold mb-4 w-max px-4 py-1.5 rounded-full border backdrop-blur-sm", isDark ? "text-cyan-400/80 bg-[#0d1629]/90 border-slate-700" : "text-cyan-700 bg-white border-black/10 shadow-sm")}>
                       <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(recent.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       <span className={cn("w-1 h-1 rounded-full", isDark ? "bg-cyan-500/30" : "bg-black/20")}></span>
                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {recent.readTime || 5} min</span>
@@ -546,7 +546,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
           <div className="space-y-6">
             {post.comments?.map((comment: any) => (
-              <div key={comment.id} className={cn("flex flex-col mb-4 border p-5 sm:p-6 rounded-2xl transition-all shadow-sm", isDark ? "bg-gradient-to-br from-[#0a1f33]/40 to-transparent border-white/5 hover:border-white/10" : "bg-white border-black/5 hover:border-black/10")}>
+              <div key={comment.id} className={cn("flex flex-col mb-4 border p-5 sm:p-6 rounded-2xl transition-all shadow-md", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/40 shadow-black/30" : "bg-white border-black/5 hover:border-black/10")}>
                 <div className="flex gap-4 sm:gap-5">
                   {/* Avatar */}
                   <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center font-bold text-sm shrink-0 relative overflow-hidden", isDark ? "bg-gradient-to-br from-[#0a1f33] to-[#011627] border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-black/10 text-cyan-600")}>

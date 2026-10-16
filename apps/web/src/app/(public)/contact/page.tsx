@@ -145,7 +145,7 @@ export default function ContactPage() {
         className={cn(
           "w-full max-w-6xl rounded-[40px] p-6 sm:p-10 lg:p-16 relative overflow-hidden flex flex-col lg:flex-row gap-12 lg:gap-16 shadow-2xl border-2 transition-all duration-300",
           isDark
-            ? "bg-[#0b1322] border-slate-800 shadow-[0_15px_60px_rgba(0,0,0,0.6)]"
+            ? "bg-[#0b1424] border-slate-700/80 shadow-[0_15px_60px_rgba(0,0,0,0.6)] ring-1 ring-white/5"
             : "bg-white border-slate-200 shadow-xl"
         )}
       >
@@ -167,7 +167,7 @@ export default function ContactPage() {
             <TiltCard intensity={5} className={cn(
               "flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group relative overflow-hidden",
               isDark
-                ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40 shadow-md"
+                ? "bg-[#0e172a] border-slate-700/80 hover:border-cyan-500/50 hover:bg-[#121f38] shadow-md shadow-black/40 ring-1 ring-white/5"
                 : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm hover:shadow-md"
             )}>
               {isDark && <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
@@ -191,7 +191,7 @@ export default function ContactPage() {
             <TiltCard intensity={5} className={cn(
               "flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group relative overflow-hidden",
               isDark
-                ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40 shadow-md"
+                ? "bg-[#0e172a] border-slate-700/80 hover:border-cyan-500/50 hover:bg-[#121f38] shadow-md shadow-black/40 ring-1 ring-white/5"
                 : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm hover:shadow-md"
             )}>
               {isDark && <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
@@ -215,7 +215,7 @@ export default function ContactPage() {
             <TiltCard intensity={5} className={cn(
               "flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group relative overflow-hidden",
               isDark
-                ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40 shadow-md"
+                ? "bg-[#0e172a] border-slate-700/80 hover:border-cyan-500/50 hover:bg-[#121f38] shadow-md shadow-black/40 ring-1 ring-white/5"
                 : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm hover:shadow-md"
             )}>
               {isDark && <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
@@ -242,7 +242,7 @@ export default function ContactPage() {
           <div className={cn(
             "rounded-[32px] p-6 sm:p-10 backdrop-blur-md shadow-2xl relative overflow-hidden border",
             isDark
-              ? "bg-[#060b14] border-slate-800"
+              ? "bg-[#0e172a] border-slate-700/80 shadow-2xl shadow-black/50 ring-1 ring-white/5"
               : "bg-slate-50 border-slate-200"
           )}>
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />

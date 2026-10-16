@@ -241,7 +241,7 @@ function BlogContent() {
           <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
         </div>
       ) : posts.length === 0 ? (
-        <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm", isDark ? "bg-cyan-950/30 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+        <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5" : "bg-cyan-50 border-cyan-200")}>
           <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border relative", isDark ? "bg-gradient-to-br from-cyan-500/10 via-cyan-500/10 to-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-300")}>
             <svg width="0" height="0" className="absolute">
               <linearGradient id="icon-gradient-blog-1" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
@@ -256,7 +256,7 @@ function BlogContent() {
           <p className={isDark ? "text-white/50 max-w-sm mx-auto" : "text-slate-500 max-w-sm mx-auto"}>Blog posts will appear here once they are published.</p>
         </div>
       ) : filteredPosts.length === 0 ? (
-        <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm", isDark ? "bg-cyan-950/30 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+        <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5" : "bg-cyan-50 border-cyan-200")}>
           <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border relative", isDark ? "bg-gradient-to-br from-cyan-500/10 via-cyan-500/10 to-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-300")}>
             <svg width="0" height="0" className="absolute">
               <linearGradient id="icon-gradient-blog-2" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
@@ -276,8 +276,8 @@ function BlogContent() {
           {heroPost && (
             <motion.div variants={item} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="mb-12">
               <div className={cn(
-                "border rounded-[32px] overflow-hidden group hover:border-cyan-500/30 transition-all duration-500 flex flex-col md:flex-row relative shadow-2xl",
-                isDark ? "bg-gradient-to-b from-white/[0.04] to-transparent border-white/10" : "bg-white border-black/5 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
+                "border rounded-[32px] overflow-hidden group hover:border-cyan-500/50 transition-all duration-500 flex flex-col md:flex-row relative shadow-2xl",
+                isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-black/5 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
               )}>
                 <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500", isDark ? "bg-cyan-500/5" : "bg-cyan-500/5")}></div>
                 <div className="p-6 sm:p-8 md:p-10 lg:p-12 md:w-1/2 flex flex-col justify-center relative z-10 order-2 md:order-1">
@@ -334,8 +334,8 @@ function BlogContent() {
                     <div className="w-full h-full flex items-center justify-center text-zinc-600 font-mono">No Image Available</div>
                   )}
                   {/* Subtle gradient overlay to blend image with card background */}
-                  <div className={cn("absolute inset-0 hidden md:block", isDark ? "bg-gradient-to-r from-[#0a1f33] via-[#0a1f33]/40 to-transparent" : "bg-gradient-to-r from-white via-white/40 to-transparent")}></div>
-                  <div className={cn("absolute inset-0 md:hidden block", isDark ? "bg-gradient-to-t from-[#0a1f33] via-transparent to-transparent" : "bg-gradient-to-t from-white via-transparent to-transparent")}></div>
+                  <div className={cn("absolute inset-0 hidden md:block", isDark ? "bg-gradient-to-r from-[#0d1629] via-[#0d1629]/40 to-transparent" : "bg-gradient-to-r from-white via-white/40 to-transparent")}></div>
+                  <div className={cn("absolute inset-0 md:hidden block", isDark ? "bg-gradient-to-t from-[#0d1629] via-transparent to-transparent" : "bg-gradient-to-t from-white via-transparent to-transparent")}></div>
                 </Link>
               </div>
             </motion.div>
@@ -349,9 +349,9 @@ function BlogContent() {
                   <TiltCard 
                     intensity={5}
                     className={cn(
-                      "border rounded-3xl group transition-all duration-500 overflow-hidden flex flex-col h-full relative",
+                      "border rounded-3xl group transition-all duration-500 overflow-hidden flex flex-col h-full relative shadow-xl",
                       isDark 
-                        ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]" 
+                        ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" 
                         : "bg-white border-black/5 hover:border-cyan-500/40 hover:shadow-xl"
                     )}
                   >
