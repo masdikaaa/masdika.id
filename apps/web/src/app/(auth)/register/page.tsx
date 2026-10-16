@@ -420,7 +420,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Full Name</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <div className="pl-4 pr-3 flex items-center justify-center">
                             <User className={cn("w-4 h-4", iconClass)} />
@@ -440,7 +440,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Email Address</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <div className="pl-4 pr-3 flex items-center justify-center">
                             <Mail className={cn("w-4 h-4", iconClass)} />
@@ -464,7 +464,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Password</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <div className="pl-4 pr-3 flex items-center justify-center">
                             <Lock className={cn("w-4 h-4", iconClass)} />
@@ -498,7 +498,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Confirm Password</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <div className="pl-4 pr-3 flex items-center justify-center">
                             <Lock className={cn("w-4 h-4", iconClass)} />
@@ -580,7 +580,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Phone Number</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <div className="pl-4 pr-3 flex items-center justify-center">
                             <Phone className={cn("w-4 h-4", iconClass)} />
@@ -600,7 +600,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Company Name (Optional)</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <div className="pl-4 pr-3 flex items-center justify-center">
                             <Building2 className={cn("w-4 h-4", iconClass)} />
@@ -621,7 +621,7 @@ export default function RegisterPage() {
                   <div className="space-y-1.5">
                     <label className={labelClass}>Street Address</label>
                     <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                       <div className={inputWrapperBase}>
                         <div className="pl-4 pr-3 flex items-center justify-center">
                           <MapPin className={cn("w-4 h-4", iconClass)} />
@@ -642,7 +642,7 @@ export default function RegisterPage() {
                   <div className="space-y-1.5">
                     <label className={labelClass}>Address Line 2 (Optional)</label>
                     <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                       <div className={inputWrapperBase}>
                         <div className="pl-4 pr-3 flex items-center justify-center">
                           <MapPin className={cn("w-4 h-4", isDark ? "text-zinc-600" : "text-slate-300")} />
@@ -663,7 +663,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>City</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <input
                             type="text"
@@ -680,7 +680,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>State / Province</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <input
                             type="text"
@@ -700,7 +700,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Postal Code</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <input
                             type="text"
@@ -717,7 +717,7 @@ export default function RegisterPage() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Country</label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                         <div className={inputWrapperBase}>
                           <select
                             value={country}
@@ -832,7 +832,7 @@ export default function RegisterPage() {
                   <div className="space-y-2">
                     <label className={labelClass}>One-Time Password</label>
                     <div className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                       <div className={inputWrapperBase}>
                         <div className="pl-4 pr-3 flex items-center justify-center">
                           <Lock className={cn("w-4 h-4", iconClass)} />

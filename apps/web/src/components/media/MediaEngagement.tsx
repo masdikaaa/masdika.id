@@ -624,7 +624,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                 <span className="w-6 font-medium text-right">{level}★</span>
                 <div className={cn("flex-1 h-2 rounded-full overflow-hidden", isDark ? "bg-white/5" : "bg-slate-100")}>
                   <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all duration-500"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>

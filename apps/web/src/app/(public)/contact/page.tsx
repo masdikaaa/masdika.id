@@ -310,7 +310,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={loading || otp.length !== 6}
-                    className="w-full relative group overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-xl py-4 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                    className="w-full relative group overflow-hidden bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl py-4 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     <div className="relative flex items-center justify-center gap-2 text-white font-bold tracking-wide">
                       {loading ? (

@@ -225,7 +225,7 @@ export default function LoginPage() {
                 <div className="space-y-1.5">
                   <label className={labelClass}>Enter your email address</label>
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                     <div className={inputWrapper}>
                       <div className="pl-4 pr-3 flex items-center justify-center">
                         <Mail className={cn("w-4 h-4", iconClass)} />
@@ -259,7 +259,7 @@ export default function LoginPage() {
                     </Link>
                   </div>
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                     <div className={inputWrapper}>
                       <div className="pl-4 pr-3 flex items-center justify-center">
                         <Lock className={cn("w-4 h-4", iconClass)} />
@@ -322,7 +322,7 @@ export default function LoginPage() {
                 <div className="space-y-3 py-2">
                   <label className={labelClass}>Verification Code</label>
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                     <div className={inputWrapper}>
                       <div className="pl-4 pr-3 flex items-center justify-center">
                         <Lock className={cn("w-4 h-4", iconClass)} />

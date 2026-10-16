@@ -139,7 +139,7 @@ function ResetPasswordForm() {
                 New Password
               </label>
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                 <div className={cn("relative flex items-center border rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-1", isDark ? "bg-[#0a1624] border-white/5 focus-within:border-cyan-500/30 focus-within:bg-[#0c1b2b] focus-within:ring-cyan-500/30 shadow-inner" : "bg-white border-slate-200 focus-within:border-cyan-500 focus-within:ring-cyan-500 shadow-sm")}>
                   <div className="pl-4 pr-3 flex items-center justify-center">
                     <Lock className={cn("w-5 h-5 transition-colors", isDark ? "text-zinc-500 group-focus-within:text-cyan-400" : "text-slate-400 group-focus-within:text-cyan-600")} />
@@ -168,7 +168,7 @@ function ResetPasswordForm() {
                 Confirm Password
               </label>
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                 <div className={cn("relative flex items-center border rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-1", isDark ? "bg-[#0a1624] border-white/5 focus-within:border-cyan-500/30 focus-within:bg-[#0c1b2b] focus-within:ring-cyan-500/30 shadow-inner" : "bg-white border-slate-200 focus-within:border-cyan-500 focus-within:ring-cyan-500 shadow-sm")}>
                   <div className="pl-4 pr-3 flex items-center justify-center">
                     <Lock className={cn("w-5 h-5 transition-colors", isDark ? "text-zinc-500 group-focus-within:text-cyan-400" : "text-slate-400 group-focus-within:text-cyan-600")} />

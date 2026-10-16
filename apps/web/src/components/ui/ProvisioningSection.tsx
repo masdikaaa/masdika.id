@@ -36,7 +36,7 @@ export function ProvisioningSection({
       {/* Background elements */}
       {isDark && (
         <>
-          <div className="absolute inset-0 bg-[#06101f] border-y border-white/5" />
+          <div className="absolute inset-0 bg-[#050b14]/80 border-y border-white/5" />
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
         </>
       )}
@@ -51,7 +51,12 @@ export function ProvisioningSection({
           {/* Left Column: Content */}
           <FadeIn direction="right" delay={0.1}>
             <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-800/80 bg-cyan-950/30 text-cyan-400 text-[10px] font-black tracking-widest uppercase mb-6 shadow-sm">
+              <div className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-6 shadow-sm",
+                isDark
+                  ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400"
+                  : "border-cyan-200 bg-cyan-50 text-cyan-700"
+              )}>
                 {subtitle}
               </div>
               
@@ -59,7 +64,12 @@ export function ProvisioningSection({
                 {title.split(', ').map((text, i) => (
                   <span key={i}>
                     {i === 1 ? (
-                      <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">{text}</span>
+                      <span className={cn(
+                        "bg-clip-text text-transparent bg-gradient-to-r",
+                        isDark ? "from-cyan-400 to-cyan-200" : "from-cyan-600 to-cyan-400"
+                      )}>
+                        {text}
+                      </span>
                     ) : (
                       text + (title.includes(',') && i === 0 ? ',' : '')
                     )}
@@ -74,7 +84,11 @@ export function ProvisioningSection({
               
               <Link
                 href={buttonHref}
-                className="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-cyan-900/20"
+                className={cn(
+                  "inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all shadow-lg",
+                  "bg-cyan-600 hover:bg-cyan-500 text-white",
+                  isDark ? "shadow-[0_0_20px_rgba(6,182,212,0.25)] hover:shadow-[0_0_30px_rgba(6,182,212,0.4)]" : "shadow-md hover:shadow-lg"
+                )}
               >
                 {buttonText}
                 <ArrowRight className="w-5 h-5" />

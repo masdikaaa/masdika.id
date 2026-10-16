@@ -263,7 +263,7 @@ export default function LookingGlassPage() {
 
                 {/* Terminal Output */}
                 <div className="relative group mt-2">
-                  <div className={cn("absolute inset-0 blur-xl opacity-0 transition-opacity duration-500 rounded-xl pointer-events-none", isDark ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 group-hover:opacity-100" : "")} />
+                  <div className={cn("absolute inset-0 blur-xl opacity-0 transition-opacity duration-500 rounded-xl pointer-events-none", isDark ? "bg-cyan-500/15 group-hover:opacity-100" : "")} />
                   <div 
                     ref={terminalRef}
                     className={cn("relative border rounded-xl p-3 sm:p-5 h-[300px] sm:h-[350px] overflow-y-auto overflow-x-hidden font-mono text-[10px] sm:text-xs md:text-sm shadow-inner", isDark ? "bg-black border-white/10 text-green-400" : "bg-slate-800 border-slate-700 text-green-400")}
