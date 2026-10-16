@@ -329,9 +329,19 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
 
   // ── Private ──────────────────────────────────────────────────────────────────
   if (status === "private") return (
-    <div className={cn("min-h-screen flex items-center justify-center p-6 relative overflow-hidden", isDark ? "bg-[#011627]" : "bg-slate-50")}>
-      {/* Background ambient cyber glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <div className={cn("min-h-screen flex items-center justify-center p-6 relative overflow-hidden", isDark ? "bg-[#050B14]" : "bg-[#f8fafb]")}>
+      {/* Subtle Grid Pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none" 
+        style={{
+          opacity: isDark ? 0.07 : 0.05,
+          backgroundImage: `
+            linear-gradient(to right, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px),
+            linear-gradient(to bottom, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }}
+      />
 
       <div className={cn("text-center max-w-md w-full mx-auto p-8 md:p-10 rounded-3xl border backdrop-blur-xl shadow-2xl transition-all relative z-10", isDark ? "bg-[#0A0E1A]/90 border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.12)]" : "bg-white border-slate-200 shadow-xl")}>
         <div className={cn(

@@ -6,11 +6,19 @@ import { ArrowLeft, Home, Zap } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#011627] flex items-center justify-center relative overflow-hidden px-6 py-12 md:py-20">
-      {/* Background Elements */}
-      <div className="absolute top-[10%] left-[20%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-cyan-500/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[10%] right-[20%] w-[350px] h-[350px] md:w-[600px] md:h-[600px] bg-blue-600/10 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none" />
+    <div className="min-h-screen bg-[#050B14] flex items-center justify-center relative overflow-hidden px-6 py-12 md:py-20">
+      {/* Subtle Grid Pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none" 
+        style={{
+          opacity: 0.07,
+          backgroundImage: `
+            linear-gradient(to right, #ffffff 1px, transparent 1px),
+            linear-gradient(to bottom, #ffffff 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }}
+      />
 
       <div className="max-w-4xl w-full relative z-10 flex flex-col items-center text-center">
         

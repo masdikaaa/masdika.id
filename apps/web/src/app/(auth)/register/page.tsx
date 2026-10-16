@@ -304,41 +304,21 @@ export default function RegisterPage() {
         isDark ? "text-white" : "text-slate-900"
       )}
     >
-      {/* Lightweight, elegant ambient background inspired by Reference Image 1 (zero CPU overhead) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div
-          className={cn(
-            "absolute inset-0 transition-colors duration-500",
-            isDark
-              ? "bg-[#030712] bg-gradient-to-br from-[#020b17] via-[#051326] to-[#01060e]"
-              : "bg-[#f0faf9] bg-gradient-to-br from-[#d4f8f4]/60 via-[#e2f3fc]/70 to-[#dff3f9]/50"
-          )}
-        />
-        <div
-          className={cn(
-            "absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full blur-[140px] pointer-events-none",
-            isDark ? "bg-cyan-500/10" : "bg-cyan-300/35"
-          )}
-        />
-        <div
-          className={cn(
-            "absolute -bottom-32 -right-32 w-[580px] h-[580px] rounded-full blur-[150px] pointer-events-none",
-            isDark ? "bg-blue-600/10" : "bg-blue-300/30"
-          )}
-        />
-        <div
-          className={cn(
-            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none",
-            isDark ? "bg-cyan-600/5" : "bg-teal-200/25"
-          )}
-        />
-        <div
-          className={cn(
-            "absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)] pointer-events-none",
-            isDark
-              ? "bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:48px_48px]"
-              : "bg-[linear-gradient(rgba(6,182,212,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.06)_1px,transparent_1px)] bg-[size:48px_48px]"
-          )}
+      {/* Clean ambient background with subtle grid lines */}
+      <div 
+        className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
+        style={{ backgroundColor: isDark ? "#050B14" : "#f8fafb" }}
+      >
+        <div 
+          className="absolute inset-0 transition-opacity duration-500" 
+          style={{
+            opacity: isDark ? 0.07 : 0.05,
+            backgroundImage: `
+              linear-gradient(to right, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px),
+              linear-gradient(to bottom, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px'
+          }}
         />
       </div>
 
