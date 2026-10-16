@@ -158,7 +158,7 @@ export default function LoginPage() {
                 onClick={toggleTheme}
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
                 className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm mr-2.5 sm:mr-0",
+                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm mr-[29px] sm:mr-0",
                   isDark
                     ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
                     : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
