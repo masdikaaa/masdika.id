@@ -147,7 +147,7 @@ export default function ServicesPage() {
               <TiltCard intensity={5} className={cn(
                 "group relative backdrop-blur-xl rounded-tl-[3rem] rounded-br-[3rem] rounded-tr-xl rounded-bl-xl p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 border transition-all duration-500 overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.7)]",
                 isDark 
-                  ? "bg-gradient-to-br from-[#0b1120]/95 to-[#070b14]/95 hover:from-[#0f1a2e]/95 hover:to-[#070b14]/95 border-white/5 border-t-2 border-l-2 border-t-cyan-500/10 border-l-cyan-500/10 hover:border-t-cyan-400 hover:border-l-cyan-400"
+                  ? "bg-gradient-to-br from-[#0b1120]/95 to-[#070b14]/95 hover:from-[#0f1a2e]/95 hover:to-[#070b14]/95 border-slate-800 border-t-2 border-l-2 border-t-cyan-500/10 border-l-cyan-500/10 hover:border-t-cyan-400 hover:border-l-cyan-400"
                   : "bg-white border-black/5 border-t-2 border-l-2 border-t-cyan-500/30 border-l-cyan-500/30 hover:border-t-cyan-500 hover:border-l-cyan-500 hover:shadow-xl"
               )}>
                 {/* Background Glow on Hover */}
@@ -246,7 +246,7 @@ export default function ServicesPage() {
                 <TiltCard intensity={10} className={cn(
                   "relative h-full backdrop-blur-xl rounded-2xl p-8 flex flex-col border transition-all duration-500 overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] border-b-[6px] hover:-translate-y-2 group",
                   isDark 
-                    ? "bg-gradient-to-b from-[#0f172a]/95 to-[#050914]/95 border-white/5 border-b-cyan-500/20 hover:border-b-cyan-400 hover:border-t-cyan-500/30 hover:border-x-cyan-500/30"
+                    ? "bg-gradient-to-b from-[#0f172a]/95 to-[#050914]/95 border-slate-800 border-b-cyan-500/20 hover:border-b-cyan-400 hover:border-t-cyan-500/30 hover:border-x-cyan-500/30"
                     : "bg-white border-black/5 border-b-cyan-500/30 hover:border-b-cyan-500 hover:shadow-xl hover:border-black/10"
                 )}>
                   {/* Background Glow on Hover */}

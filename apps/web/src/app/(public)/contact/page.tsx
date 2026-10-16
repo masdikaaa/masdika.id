@@ -104,7 +104,7 @@ export default function ContactPage() {
   const inputClass = cn(
     "w-full rounded-xl px-5 py-4 transition-all duration-300 focus:outline-none focus:ring-1",
     isDark
-      ? "bg-black/20 border border-white/5 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:bg-cyan-500/[0.02] focus:ring-cyan-500/50"
+      ? "bg-[#050b14] border border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500/50 focus:bg-cyan-500/[0.02] focus:ring-cyan-500/50"
       : "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-400 focus:ring-cyan-300 shadow-sm"
   );
 
@@ -143,22 +143,12 @@ export default function ContactPage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className={cn(
-          "w-full max-w-6xl backdrop-blur-md rounded-[40px] p-6 sm:p-10 lg:p-16 relative overflow-hidden flex flex-col lg:flex-row gap-12 lg:gap-16 shadow-2xl",
+          "w-full max-w-6xl rounded-[40px] p-6 sm:p-10 lg:p-16 relative overflow-hidden flex flex-col lg:flex-row gap-12 lg:gap-16 shadow-2xl border-2 transition-all duration-300",
           isDark
-            ? "bg-zinc-900/30 border border-white/5"
-            : "bg-white border border-slate-200 shadow-xl"
+            ? "bg-[#0b1322] border-slate-800 shadow-[0_15px_60px_rgba(0,0,0,0.6)]"
+            : "bg-white border-slate-200 shadow-xl"
         )}
       >
-        {/* Glow blobs - only in dark mode */}
-        {isDark && (
-          <>
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-cyan-500/20 blur-[120px] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/4" />
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-600/20 blur-[100px] rounded-full pointer-events-none translate-x-1/4 translate-y-1/4" />
-          </>
-        )}
-        {!isDark && (
-          <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-cyan-100/40 blur-[100px] rounded-full pointer-events-none -translate-x-1/3 -translate-y-1/4" />
-        )}
 
         {/* Left Content */}
         <div className="flex-1 relative z-10 flex flex-col justify-center lg:pr-10">
@@ -177,7 +167,7 @@ export default function ContactPage() {
             <TiltCard intensity={5} className={cn(
               "flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group relative overflow-hidden",
               isDark
-                ? "bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 hover:border-cyan-500/30"
+                ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40 shadow-md"
                 : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm hover:shadow-md"
             )}>
               {isDark && <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
@@ -201,7 +191,7 @@ export default function ContactPage() {
             <TiltCard intensity={5} className={cn(
               "flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group relative overflow-hidden",
               isDark
-                ? "bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 hover:border-cyan-500/30"
+                ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40 shadow-md"
                 : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm hover:shadow-md"
             )}>
               {isDark && <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
@@ -225,7 +215,7 @@ export default function ContactPage() {
             <TiltCard intensity={5} className={cn(
               "flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group relative overflow-hidden",
               isDark
-                ? "bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 hover:border-cyan-500/30"
+                ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40 shadow-md"
                 : "bg-white border-slate-200 hover:border-cyan-300 shadow-sm hover:shadow-md"
             )}>
               {isDark && <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
@@ -252,7 +242,7 @@ export default function ContactPage() {
           <div className={cn(
             "rounded-[32px] p-6 sm:p-10 backdrop-blur-md shadow-2xl relative overflow-hidden border",
             isDark
-              ? "bg-cyan-950/30 border-cyan-500/10"
+              ? "bg-[#060b14] border-slate-800"
               : "bg-slate-50 border-slate-200"
           )}>
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />

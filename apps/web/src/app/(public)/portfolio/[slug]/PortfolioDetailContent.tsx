@@ -104,7 +104,7 @@ export function PortfolioDetailContent({
         <div className="lg:col-span-8 flex flex-col gap-12">
           
           {project.content && (
-            <section className={cn("p-8 md:p-10 rounded-3xl backdrop-blur-sm relative overflow-hidden group transition-colors border", isDark ? "bg-white/[0.02] border-white/5 hover:border-white/10" : "bg-white border-black/5 hover:border-cyan-500/30 hover:shadow-xl")}>
+            <section className={cn("p-8 md:p-10 rounded-3xl relative overflow-hidden group transition-all border", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/30 shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 hover:shadow-xl")}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/10 transition-colors duration-500" />
               <h2 className={cn("text-3xl font-black tracking-tight mb-6", isDark ? "text-white" : "text-slate-900")}>Project Overview</h2>
               <div className={`${proseClass} relative z-10`} dangerouslySetInnerHTML={{ __html: renderMarkdown(project.content) }} />
@@ -112,7 +112,7 @@ export function PortfolioDetailContent({
           )}
           
           {project.challenge && (
-            <section className={cn("p-8 md:p-10 rounded-3xl backdrop-blur-sm relative overflow-hidden group transition-colors border", isDark ? "bg-white/[0.02] border-white/5 hover:border-white/10" : "bg-white border-black/5 hover:border-cyan-500/30 hover:shadow-xl")}>
+            <section className={cn("p-8 md:p-10 rounded-3xl relative overflow-hidden group transition-all border", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/30 shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 hover:shadow-xl")}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/10 transition-colors duration-500" />
               <h2 className={cn("text-3xl font-black tracking-tight mb-6", isDark ? "text-white" : "text-slate-900")}>The Challenge</h2>
               <div className={`${proseClass} relative z-10`} dangerouslySetInnerHTML={{ __html: renderMarkdown(project.challenge) }} />
@@ -120,7 +120,7 @@ export function PortfolioDetailContent({
           )}
 
           {project.solution && (
-            <section className={cn("p-8 md:p-10 rounded-3xl backdrop-blur-sm relative overflow-hidden group transition-colors border", isDark ? "bg-white/[0.02] border-white/5 hover:border-white/10" : "bg-white border-black/5 hover:border-cyan-500/30 hover:shadow-xl")}>
+            <section className={cn("p-8 md:p-10 rounded-3xl relative overflow-hidden group transition-all border", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/30 shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 hover:shadow-xl")}>
                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/10 transition-colors duration-500" />
               <h2 className={cn("text-3xl font-black tracking-tight mb-6", isDark ? "text-white" : "text-slate-900")}>The Solution</h2>
               <div className={`${proseClass} relative z-10`} dangerouslySetInnerHTML={{ __html: renderMarkdown(project.solution) }} />
@@ -130,12 +130,12 @@ export function PortfolioDetailContent({
           {project.testimonial && (
             <div className="relative my-10 rounded-3xl overflow-hidden group hover:scale-[1.01] transition-transform duration-500 shadow-xl">
               {/* Premium Background */}
-              <div className={cn("absolute inset-0 backdrop-blur-md", isDark ? "bg-gradient-to-br from-[#050B14]/80 via-cyan-900/10 to-cyan-900/10" : "bg-gradient-to-br from-cyan-50 via-white to-cyan-50/50")} />
+              <div className={cn("absolute inset-0 backdrop-blur-md", isDark ? "bg-gradient-to-br from-[#0b1120] to-[#070d18]" : "bg-gradient-to-br from-cyan-50 via-white to-cyan-50/50")} />
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
               
               {/* Elegant Border */}
-              <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-500", isDark ? "border-white/5 group-hover:border-cyan-500/30" : "border-black/5 group-hover:border-cyan-500/30")} />
+              <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-500", isDark ? "border-slate-800 group-hover:border-cyan-500/30" : "border-slate-200 group-hover:border-cyan-500/30")} />
               
               {/* Top Accent Line */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -200,7 +200,7 @@ export function PortfolioDetailContent({
 
         {/* Sidebar */}
         <div className="lg:col-span-4">
-          <div className={cn("sticky top-32 p-8 rounded-3xl backdrop-blur-sm relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-black/5 shadow-xl")}>
+          <div className={cn("sticky top-32 p-8 rounded-3xl relative overflow-hidden border", isDark ? "bg-[#0b1120] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-xl")}>
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl" />
             <h3 className={cn("text-xl font-black mb-8 tracking-tight flex items-center gap-3 relative z-10", isDark ? "text-white" : "text-slate-900")}>
               <span className={cn("w-8 h-8 rounded-lg flex items-center justify-center border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>

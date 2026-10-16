@@ -1094,19 +1094,18 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={{ duration: 1, ease: "easeOut" }}
             className={cn(
-              "relative rounded-3xl md:rounded-[3rem] overflow-hidden backdrop-blur-sm px-6 py-12 sm:p-10 md:p-16 lg:p-20 text-center shadow-2xl group",
-              isDark ? "bg-[#050B14]/80 border border-white/5" : "bg-white/80 border border-black/5"
+              "relative rounded-3xl md:rounded-[3rem] overflow-hidden px-6 py-12 sm:p-10 md:p-16 lg:p-20 text-center shadow-2xl group border-2 transition-all duration-300",
+              isDark ? "bg-[#0b1322] border-slate-800 hover:border-cyan-500/40 shadow-[0_15px_60px_rgba(0,0,0,0.6)]" : "bg-white border-slate-200 shadow-2xl"
             )}
           >
-            {/* Animated Gradient Border top */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50 group-hover:opacity-100 group-hover:scale-x-110 transition-all duration-1000" />
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-0 group-hover:opacity-50 blur-[4px] transition-all duration-1000" />
-
-            {/* Huge Center Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/20 blur-[150px] rounded-[100%] pointer-events-none group-hover:bg-cyan-500/30 transition-all duration-1000" />
+            {/* Top Cyan Accent Line */}
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-80" />
 
             <div className="relative z-10">
-              <div className={cn("inline-flex items-center gap-3 px-6 py-2.5 rounded-full border text-sm font-bold tracking-widest uppercase mb-10 shadow-xl backdrop-blur-md transition-colors", isDark ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-slate-900/5 border-slate-900/10 text-slate-900 hover:bg-slate-900/10")}>
+              <div className={cn(
+                "inline-flex items-center gap-3 px-6 py-2.5 rounded-full border text-sm font-bold tracking-widest uppercase mb-10 shadow-lg transition-colors",
+                isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+              )}>
                 <span className="relative flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
@@ -1115,20 +1114,20 @@ export default function HomePage() {
               </div>
 
               <h2 className={cn(
-                "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-6 tracking-tight leading-[1.15] text-transparent bg-clip-text drop-shadow-xl",
-                isDark ? "bg-gradient-to-b from-white via-zinc-100 to-zinc-600" : "bg-gradient-to-b from-slate-900 via-slate-800 to-slate-500"
+                "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-6 tracking-tight leading-[1.15] drop-shadow-md",
+                isDark ? "text-white" : "text-slate-900"
               )}>
                 Ready to Scale Your<br />Infrastructure?
               </h2>
 
-              <p className="text-zinc-400 text-base md:text-lg lg:text-xl mb-8 md:mb-10 max-w-3xl mx-auto font-medium leading-relaxed px-2">
+              <p className={cn("text-base md:text-lg lg:text-xl mb-8 md:mb-10 max-w-3xl mx-auto font-medium leading-relaxed px-2", isDark ? "text-zinc-300" : "text-slate-600")}>
                 Elevate your digital presence with enterprise-grade cloud architectures, zero-downtime migrations, and bulletproof security.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-5">
                 <Link
                   href="/contact"
-                  className={cn("inline-flex items-center justify-center px-8 py-4 rounded-xl font-bold transition-all gap-2 w-full sm:w-auto", isDark ? "bg-cyan-600 text-white hover:bg-cyan-500" : "bg-cyan-600 text-white hover:bg-cyan-700")}
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl font-bold transition-all gap-2 w-full sm:w-auto bg-cyan-600 text-white hover:bg-cyan-500 shadow-md hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
                 >
                   Let's Talk
                   <ArrowRight className="w-5 h-5" />
@@ -1136,7 +1135,10 @@ export default function HomePage() {
 
                 <Link
                   href="/services"
-                  className={cn("inline-flex items-center justify-center px-8 py-4 md:px-10 md:py-4 rounded-2xl border font-bold transition-all duration-300 gap-2 transform hover:-translate-y-1 w-full sm:w-auto text-base md:hover:scale-105", isDark ? "bg-transparent border-white/20 text-white hover:bg-white/5 hover:border-white/40" : "bg-transparent border-slate-900/20 text-slate-900 hover:bg-slate-900/5 hover:border-slate-900/40")}
+                  className={cn(
+                    "inline-flex items-center justify-center px-8 py-4 md:px-10 md:py-4 rounded-xl border font-bold transition-all duration-300 gap-2 transform hover:-translate-y-1 w-full sm:w-auto text-base",
+                    isDark ? "bg-slate-800/80 border-slate-700 text-white hover:bg-slate-800 hover:border-cyan-500/40 shadow-sm" : "bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200 shadow-sm"
+                  )}
                 >
                   <span className="tracking-wide">View Pricing</span>
                 </Link>

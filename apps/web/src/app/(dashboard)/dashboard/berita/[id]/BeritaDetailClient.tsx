@@ -33,30 +33,30 @@ export default function BeritaDetailClient({ berita, contentHtml, isStructured }
         </Link>
       </div>
 
-      <div className={cn("border rounded-3xl shadow-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-3xl shadow-lg overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
         
-        <div className={cn("p-6 md:p-8 border-b", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-100 bg-slate-50/50")}>
-          <h1 className={cn("text-xl md:text-2xl font-bold mb-6", isDark ? "text-cyan-400" : "text-cyan-600")}>
+        <div className={cn("p-6 md:p-8 border-b", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-100 bg-white")}>
+          <h1 className={cn("text-xl md:text-2xl font-bold mb-4", isDark ? "text-cyan-400" : "text-cyan-600")}>
             {berita.title}
           </h1>
           
-          <div className={cn("prose max-w-none w-full [&_table]:min-w-[500px] md:[&_table]:min-w-full", isDark ? "prose-invert text-zinc-300" : "text-slate-700")}>
+          <div className={cn("prose max-w-none w-full [&_table]:min-w-[500px] md:[&_table]:min-w-full prose-p:my-2.5 prose-p:leading-relaxed prose-table:my-4", isDark ? "prose-invert text-zinc-300" : "text-slate-700")}>
             {isStructured ? (
               <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
             ) : (
               <div 
                 dangerouslySetInnerHTML={{ __html: contentHtml }} 
-                className="space-y-4"
+                className="space-y-3"
               />
             )}
           </div>
           
-          <div className={cn("mt-12 pt-6 border-t text-sm font-bold", isDark ? "border-slate-800 text-zinc-500" : "border-slate-100 text-slate-400")}>
+          <div className={cn("mt-8 pt-4 border-t text-xs font-semibold", isDark ? "border-slate-800 text-zinc-500" : "border-slate-100 text-slate-400")}>
             {format(new Date(berita.createdAt), "yyyy-MM-dd HH:mm:ss")}
           </div>
         </div>
 
-        <div className={cn("p-6", isDark ? "bg-[#060b14]" : "bg-slate-50")}>
+        <div className={cn("p-4 sm:p-6", isDark ? "bg-[#080f1a]" : "bg-slate-50/80")}>
           <Link 
             href="/dashboard/berita" 
             className={cn("transition-colors font-medium text-sm flex items-center gap-1 w-fit", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700")}

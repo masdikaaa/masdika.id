@@ -70,7 +70,7 @@ export default function ResumePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className={cn("md:col-span-2 lg:col-span-3 relative rounded-[2.5rem] border backdrop-blur-sm p-8 lg:p-12 overflow-hidden group transition-colors transform-gpu duration-500", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30 hover:bg-white/[0.04] shadow-[0_0_50px_rgba(0,0,0,0.5)]" : "bg-white/80 border-black/5 hover:border-cyan-500/20 hover:bg-white shadow-xl")}
+              className={cn("md:col-span-2 lg:col-span-3 relative rounded-[2.5rem] border p-8 lg:p-12 overflow-hidden group transition-all transform-gpu duration-500", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/40 hover:bg-[#0e172a] shadow-2xl" : "bg-white border-slate-200 hover:border-cyan-500/30 shadow-lg hover:shadow-xl")}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-cyan-600/5 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px]" />
@@ -114,7 +114,7 @@ export default function ResumePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              className={cn("md:col-span-1 lg:col-span-1 relative rounded-[2.5rem] border backdrop-blur-sm overflow-hidden group transition-colors transform-gpu duration-500 flex flex-col items-center justify-center text-center p-8", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30 hover:bg-white/[0.04] shadow-[0_0_50px_rgba(0,0,0,0.5)]" : "bg-white/80 border-black/5 hover:border-cyan-500/20 hover:bg-white shadow-xl")}
+              className={cn("md:col-span-1 lg:col-span-1 relative rounded-[2.5rem] border overflow-hidden group transition-all transform-gpu duration-500 flex flex-col items-center justify-center text-center p-8", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/40 hover:bg-[#0e172a] shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 shadow-md hover:shadow-xl")}
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-cyan-500/20 rounded-full blur-[60px] group-hover:bg-cyan-500/20 transition-colors duration-700" />
               <div className="relative z-10">
@@ -129,7 +129,7 @@ export default function ResumePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-              className={cn("md:col-span-1 lg:col-span-2 relative rounded-[2.5rem] border backdrop-blur-sm p-10 hover:-translate-y-2 transition-colors transform-gpu duration-500 group overflow-hidden", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30 hover:bg-white/[0.04] shadow-[0_0_50px_rgba(0,0,0,0.5)]" : "bg-white/80 border-black/5 hover:border-cyan-500/20 hover:bg-white shadow-xl")}
+              className={cn("md:col-span-1 lg:col-span-2 relative rounded-[2.5rem] border p-10 hover:-translate-y-2 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/40 hover:bg-[#0e172a] shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 shadow-md hover:shadow-xl")}
             >
               <div className="absolute top-0 right-0 w-40 h-40 bg-cyan-500/10 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
@@ -149,7 +149,7 @@ export default function ResumePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-              className={cn("md:col-span-1 lg:col-span-1 relative rounded-[2.5rem] border backdrop-blur-sm p-10 hover:-translate-y-2 transition-colors transform-gpu duration-500 group overflow-hidden", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30 hover:bg-white/[0.04] shadow-[0_0_50px_rgba(0,0,0,0.5)]" : "bg-white/80 border-black/5 hover:border-cyan-500/20 hover:bg-white shadow-xl")}
+              className={cn("md:col-span-1 lg:col-span-1 relative rounded-[2.5rem] border p-10 hover:-translate-y-2 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/40 hover:bg-[#0e172a] shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 shadow-md hover:shadow-xl")}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
@@ -169,7 +169,7 @@ export default function ResumePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-              className={cn("md:col-span-1 lg:col-span-1 relative rounded-[2.5rem] border backdrop-blur-sm p-8 flex items-center justify-between gap-4 hover:-translate-y-2 transition-colors transform-gpu duration-500 group overflow-hidden", isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30 hover:bg-white/[0.04] shadow-[0_0_50px_rgba(0,0,0,0.5)]" : "bg-white/80 border-black/5 hover:border-cyan-500/20 hover:bg-white shadow-xl")}
+              className={cn("md:col-span-1 lg:col-span-1 relative rounded-[2.5rem] border p-8 flex items-center justify-between gap-4 hover:-translate-y-2 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-[#0b1120] border-slate-800 hover:border-cyan-500/40 hover:bg-[#0e172a] shadow-xl" : "bg-white border-slate-200 hover:border-cyan-500/30 shadow-md hover:shadow-xl")}
             >
               <div className="absolute top-1/2 right-10 -translate-y-1/2 w-24 h-24 bg-cyan-500/20 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
@@ -233,7 +233,7 @@ export default function ResumePage() {
                 ) : (
                   experiences.map((item, i) => (
                     <FadeIn delay={i * 0.1} direction="up" key={i}>
-                      <TiltCard intensity={8} className={cn("relative backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-8 border-l-4 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-gradient-to-br from-[#0b1120]/90 to-[#070b14]/90 border-white/5 border-l-cyan-500/30 hover:border-l-cyan-400 hover:bg-gradient-to-br hover:from-[#0f1926]/90 hover:to-[#0b1120]/90 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.4)]" : "bg-white border-black/5 border-l-cyan-500/50 hover:border-l-cyan-500 hover:bg-slate-50 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)]")}>
+                      <TiltCard intensity={8} className={cn("relative backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-8 border-l-4 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-gradient-to-br from-[#0b1120]/90 to-[#070b14]/90 border-slate-800 border-l-cyan-500/30 hover:border-l-cyan-400 hover:bg-gradient-to-br hover:from-[#0f1926]/90 hover:to-[#0b1120]/90 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.4)]" : "bg-white border-black/5 border-l-cyan-500/50 hover:border-l-cyan-500 hover:bg-slate-50 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)]")}>
                         <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="relative z-10">
                           <div className="flex items-center gap-3 mb-5">
@@ -267,7 +267,7 @@ export default function ResumePage() {
                 ) : (
                   educations.map((item, i) => (
                     <FadeIn delay={i * 0.1} direction="up" key={i}>
-                      <TiltCard intensity={8} className={cn("relative backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-8 border-l-4 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-gradient-to-br from-[#0b1120]/90 to-[#070b14]/90 border-white/5 border-l-cyan-500/30 hover:border-l-cyan-400 hover:bg-gradient-to-br hover:from-[#0f1926]/90 hover:to-[#0b1120]/90 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.4)]" : "bg-white border-black/5 border-l-cyan-500/50 hover:border-l-cyan-500 hover:bg-slate-50 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)]")}>
+                      <TiltCard intensity={8} className={cn("relative backdrop-blur-xl rounded-2xl rounded-tr-[3rem] rounded-bl-[3rem] p-8 border-l-4 transition-all transform-gpu duration-500 group overflow-hidden", isDark ? "bg-gradient-to-br from-[#0b1120]/90 to-[#070b14]/90 border-slate-800 border-l-cyan-500/30 hover:border-l-cyan-400 hover:bg-gradient-to-br hover:from-[#0f1926]/90 hover:to-[#0b1120]/90 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.4)]" : "bg-white border-black/5 border-l-cyan-500/50 hover:border-l-cyan-500 hover:bg-slate-50 hover:border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)]")}>
                         <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="relative z-10">
                           <div className="flex items-center gap-3 mb-5">

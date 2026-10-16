@@ -200,10 +200,8 @@ export default function AdminAnnouncementsPage() {
         if (!isLegacyHtml) {
           if (formData.type === 'MAINTENANCE') {
             finalContent = `<!-- state:${JSON.stringify(structuredData)} -->
-<p>Salam,</p>
-<br/>
+<p>Dear Customer,</p>
 <p>${(structuredData.maintenanceDesc || '').replace(/\\n/g, '<br/>')}</p>
-<br/>
 <table>
   <thead>
     <tr>
@@ -226,7 +224,6 @@ export default function AdminAnnouncementsPage() {
     </tr>
   </tbody>
 </table>
-<br/>
 <p>Demikian informasi ini kami sampaikan. Jika ada pertanyaan, jangan ragu menghubungi tim support kami.</p>
 <p>Terima kasih,</p>`;
           } else {
@@ -293,7 +290,7 @@ export default function AdminAnnouncementsPage() {
         let desc = content.replace(/<table[\s\S]*?<\/table>/gi, ''); // remove table
         desc = desc.replace(/<br\s*\/?>/gi, '\n'); // br to newline
         desc = desc.replace(/<[^>]+>/g, ''); // strip tags
-        desc = desc.replace(/Salam,\s*\n\s*/i, ''); // remove "Salam,"
+        desc = desc.replace(/(?:Salam|Dear Customer),\s*\n\s*/i, ''); // remove greeting
         desc = desc.replace(/Demikian informasi[\s\S]*$/i, ''); // remove closing
 
         let maintenanceImpact = 'Mungkin terjadi interupsi layanan';

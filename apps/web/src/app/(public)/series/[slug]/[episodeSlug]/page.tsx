@@ -206,7 +206,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
 
         {/* Table of Contents */}
         {toc.length > 0 && (
-          <details className={cn("backdrop-blur-sm border p-5 rounded-2xl mb-10 group", isDark ? "bg-[#011627]/40 border-white/[0.08]" : "bg-white border-black/5 shadow-sm")}>
+          <details className={cn("backdrop-blur-sm border p-5 rounded-2xl mb-10 group shadow-md", isDark ? "bg-[#0b1120] border-slate-800" : "bg-white border-black/5 shadow-sm")}>
             <summary className={cn("text-base font-bold flex items-center gap-2 cursor-pointer list-none select-none outline-none", isDark ? "text-white" : "text-slate-900")}>
               <span className="w-1.5 h-5 bg-cyan-500 rounded-full" />
               Table of Contents
@@ -214,7 +214,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </span>
             </summary>
-            <ul className={cn("mt-4 pt-4 border-t space-y-2", isDark ? "border-white/5" : "border-black/5")}>
+            <ul className={cn("mt-4 pt-4 border-t space-y-2", isDark ? "border-slate-800" : "border-black/5")}>
               {toc.map((h, i) => (
                 <li key={i} className={h.level === 3 ? "ml-4" : ""}>
                   <a href={`#${h.id}`} className={cn("text-sm transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}>{h.text}</a>
@@ -230,10 +230,10 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
         </article>
 
         {/* Prev / Next Navigation */}
-        <div className={cn("mt-16 pt-10 border-t grid grid-cols-1 sm:grid-cols-2 gap-4", isDark ? "border-white/[0.06]" : "border-black/5")}>
+        <div className={cn("mt-16 pt-10 border-t grid grid-cols-1 sm:grid-cols-2 gap-4", isDark ? "border-slate-800" : "border-black/5")}>
           {prev ? (
             <Link href={`/series/${slug}/${prev.slug}`}
-              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5", isDark ? "bg-white/[0.06] hover:bg-white/[0.10] border-white/20 hover:border-cyan-500/40" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
+              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5", isDark ? "bg-[#0b1120] hover:bg-[#0f192d] border-slate-800 hover:border-cyan-500/40 shadow-md" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
               <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <ChevronLeft className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>
@@ -245,7 +245,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
           ) : <div />}
           {next && (
             <Link href={`/series/${slug}/${next.slug}`}
-              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 sm:flex-row-reverse sm:text-right", isDark ? "bg-white/[0.06] hover:bg-white/[0.10] border-white/20 hover:border-cyan-500/40" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
+              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 sm:flex-row-reverse sm:text-right", isDark ? "bg-[#0b1120] hover:bg-[#0f192d] border-slate-800 hover:border-cyan-500/40 shadow-md" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
               <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <ChevronRight className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>

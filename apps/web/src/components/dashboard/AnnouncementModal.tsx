@@ -130,7 +130,13 @@ export function AnnouncementModal() {
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                 <div 
                   className={`text-slate-300 mb-6 text-xs md:text-sm leading-relaxed prose prose-invert max-w-none text-center prose-p:my-1 prose-ul:my-1 prose-ul:inline-block prose-ul:text-left prose-li:my-0 mx-auto [&>a]:${styles.link.split(' ')[0]} [&>a]:font-semibold [&>a]:underline hover:[&>a]:${styles.link.split(' ')[1]}`}
-                  dangerouslySetInnerHTML={{ __html: announcement.content }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: (announcement.content || '')
+                      .replace(/<p>\s*Salam,\s*<\/p>/gi, '<p>Dear Customer,</p>')
+                      .replace(/\bSalam,\b/g, 'Dear Customer,')
+                      .replace(/(<\/p>)\s*<br\s*\/?>+/gi, '$1')
+                      .replace(/<br\s*\/?>+\s*(<p>)/gi, '$1')
+                  }}
                 />
               </div>
               

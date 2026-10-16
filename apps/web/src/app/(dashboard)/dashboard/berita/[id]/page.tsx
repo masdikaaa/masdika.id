@@ -52,8 +52,17 @@ export default async function BeritaDetailPage({ params }: { params: Promise<{ i
   // Check if content is structured HTML (like from the admin panel)
   const isStructured = berita.content.includes("<!-- state:");
 
+  // Normalize greeting to "Dear Customer," and strip redundant <br/> causing excessive gaps
+  const normalizedContent = berita.content
+    .replace(/<p>\s*Salam,\s*<\/p>/gi, '<p>Dear Customer,</p>')
+    .replace(/\bSalam,\b/g, 'Dear Customer,')
+    .replace(/(<\/p>)\s*<br\s*\/?>+/gi, '$1')
+    .replace(/<br\s*\/?>+\s*(<p>)/gi, '$1')
+    .replace(/(<\/table>)\s*<br\s*\/?>+/gi, '$1')
+    .replace(/<br\s*\/?>+\s*(<table)/gi, '$1');
+
   // Wrap tables with a responsive scroll container and linkify plain URLs
-  const contentWithResponsiveTables = linkifyHtml(berita.content)
+  const contentWithResponsiveTables = linkifyHtml(normalizedContent)
     .replace(/<table/gi, '<div class="w-full overflow-x-auto custom-scrollbar pb-2"><table')
     .replace(/<\/table>/gi, '</table></div>');
 

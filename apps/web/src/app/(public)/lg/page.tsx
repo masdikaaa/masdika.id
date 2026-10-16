@@ -116,7 +116,7 @@ export default function LookingGlassPage() {
             {/* Info Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {/* Server Info */}
-              <div className={cn("sm:col-span-2 xl:col-span-1 border rounded-2xl p-6 flex flex-col justify-center", isDark ? "bg-[#0b1120] border-white/5 shadow-xl" : "bg-white border-black/5 shadow-sm hover:shadow-md transition-shadow")}>
+              <div className={cn("sm:col-span-2 xl:col-span-1 border rounded-2xl p-6 flex flex-col justify-center", isDark ? "bg-[#0b1120] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow")}>
                 <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-600")}>
                   <Server className="w-4 h-4" /> Server Info
                 </h3>
@@ -151,7 +151,7 @@ export default function LookingGlassPage() {
               </div>
 
               {/* Your IP Address */}
-              <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col items-center justify-center text-center", isDark ? "bg-[#0b1120] border-white/5 shadow-xl" : "bg-white border-black/5 shadow-sm hover:shadow-md transition-shadow")}>
+              <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col items-center justify-center text-center", isDark ? "bg-[#0b1120] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow")}>
                 <p className={cn("text-sm font-bold mb-2 tracking-widest uppercase", isDark ? "text-zinc-500" : "text-slate-500")}>Your IP Address</p>
                 <div className="flex items-center justify-center gap-2 w-full min-w-0">
                   <p className={cn("text-lg sm:text-xl font-mono font-bold truncate", isDark ? "text-cyan-400" : "text-cyan-600")}>{clientIp}</p>
@@ -164,7 +164,7 @@ export default function LookingGlassPage() {
               </div>
                 
               {/* Test Files */}
-              <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col justify-center", isDark ? "bg-[#0b1120] border-white/5 shadow-xl" : "bg-white border-black/5 shadow-sm hover:shadow-md transition-shadow")}>
+              <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col justify-center", isDark ? "bg-[#0b1120] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow")}>
                 <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-600")}>
                   <Download className="w-4 h-4" /> Test Files
                 </h3>
@@ -183,8 +183,8 @@ export default function LookingGlassPage() {
             </div>
 
             {/* Network Test Module */}
-            <div className={cn("border rounded-2xl p-1", isDark ? "bg-[#0b1120] border-white/5 shadow-xl" : "bg-white border-black/5 shadow-sm")}>
-              <div className={cn("rounded-xl p-4 sm:p-6 border", isDark ? "bg-[#050b14] border-white/5" : "bg-slate-50 border-black/5")}>
+            <div className={cn("border rounded-2xl p-1", isDark ? "bg-[#0b1120] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-sm")}>
+              <div className={cn("rounded-xl p-4 sm:p-6 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <h3 className={cn("text-base sm:text-lg font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Network Test
                 </h3>
@@ -276,8 +276,8 @@ export default function LookingGlassPage() {
 
           {/* Sidebar (Right) */}
           <div className="lg:col-span-4">
-            <div className={cn("border rounded-2xl p-6 sticky top-32", isDark ? "bg-[#0b1120] border-white/5 shadow-xl" : "bg-white border-black/5 shadow-sm")}>
-              <h3 className={cn("text-lg font-bold mb-6 border-b pb-4", isDark ? "text-white border-white/5" : "text-slate-900 border-black/5")}>Product Information</h3>
+            <div className={cn("border rounded-2xl p-6 sticky top-32", isDark ? "bg-[#0b1120] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-sm")}>
+              <h3 className={cn("text-lg font-bold mb-6 border-b pb-4", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>Product Information</h3>
               <div className="space-y-2">
                 {productLinks.map((product, idx) => (
                   <Link 
