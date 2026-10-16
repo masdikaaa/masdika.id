@@ -181,8 +181,8 @@ export default function LoginPage() {
             </div>
 
             {/* Mobile Character Avatar (Only on small screens where right panel is hidden) */}
-            <div className="lg:hidden flex items-center gap-3.5 p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20">
-              <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-1">
+            <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full overflow-hidden">
+              <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-0.5">
                 <Image
                   src="/images/auth/login.png"
                   alt="Masdika Assistant"
@@ -192,9 +192,9 @@ export default function LoginPage() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div>
-                <p className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-800")}>Welcome back!</p>
-                <p className={cn("text-[11px]", isDark ? "text-zinc-400" : "text-slate-500")}>Masdika Cloud Platform is ready.</p>
+              <div className="min-w-0 flex-1">
+                <p className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-800")}>Welcome back!</p>
+                <p className={cn("text-[11px] leading-tight", isDark ? "text-zinc-400" : "text-slate-500")}>Masdika Cloud Platform is ready.</p>
               </div>
             </div>
 
