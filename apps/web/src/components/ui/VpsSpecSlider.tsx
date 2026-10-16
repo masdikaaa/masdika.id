@@ -104,19 +104,19 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
   // Toggle button styles
   const toggleContainerClass = cn(
     "flex rounded-lg p-0.5 border",
-    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+    isDark ? "bg-cyan-950/40 border-cyan-500/20" : "bg-slate-100 border-slate-200"
   );
   const toggleActiveClass = isDark
-    ? "bg-slate-600 text-white"
+    ? "bg-cyan-600 text-white shadow-sm"
     : "bg-white text-slate-900 shadow-sm border border-slate-200";
   const toggleInactiveClass = isDark
-    ? "text-zinc-500 hover:text-white"
+    ? "text-zinc-400 hover:text-white"
     : "text-slate-500 hover:text-slate-700";
 
   return (
     <div className={cn(
-      "backdrop-blur-md border rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0",
-      isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200 shadow-lg"
+      "backdrop-blur-md border rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0 transition-all",
+      isDark ? "bg-[#0b1120] border-cyan-500/25 shadow-[0_8px_30px_rgba(6,182,212,0.1)]" : "bg-white border-cyan-200 shadow-xl"
     )}>
       <div className={cn(
         "absolute top-0 right-0 w-96 h-96 blur-[100px] rounded-full mix-blend-screen pointer-events-none",

@@ -29,7 +29,14 @@ const VPS_TERMINAL_STATS = [
   { value: "Any", label: "OPEN PORTS" },
 ];
 
-
+const SUPPORTED_OPERATING_SYSTEMS = [
+  { name: "AlmaLinux", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg" },
+  { name: "Alpine Linux", icon: "https://cdn.simpleicons.org/alpinelinux/0D597F" },
+  { name: "Debian", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/debian/debian-original.svg" },
+  { name: "FreeBSD", icon: "https://cdn.simpleicons.org/freebsd/AB2B28" },
+  { name: "Ubuntu", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ubuntu/ubuntu-original.svg" },
+  { name: "Windows Server", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows8/windows8-original.svg" },
+];
 
 const VPS_FAQS = [
   {
@@ -110,7 +117,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               <MagneticButton intensity={15} className="w-full sm:w-auto flex">
                 <Link
                   href="#features"
-                  className={cn("px-8 py-4 border font-bold rounded-xl transition-all flex items-center justify-center w-full", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-900")}
+                  className={cn("px-8 py-4 border font-bold rounded-xl transition-all flex items-center justify-center w-full", isDark ? "bg-cyan-500/5 hover:bg-cyan-500/10 border-cyan-500/30 text-white" : "bg-white hover:bg-slate-50 border-cyan-200 text-slate-900")}
                 >
                   Explore Features
                 </Link>
@@ -127,7 +134,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                 { icon: CheckCircle2, title: "Proven Reliability", sub: "Trusted by Developers" },
                 { icon: Activity, title: "24/7 Support", sub: "Expert Assistance" },
               ].map((b, i) => (
-                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm")}>
+                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-cyan-500/5 border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
                   <b.icon className={cn("w-6 h-6 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   <div className="text-left">
                     <span className={cn("font-bold text-sm leading-tight block", isDark ? "text-white" : "text-slate-900")}>{b.title}</span>
@@ -176,21 +183,21 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:gap-6">
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/40 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">40</div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Physical Cores</div>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/30 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/40 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Threads</div>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <HardDrive className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>SSD / HDD</div>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/30 transition-colors shadow-xl", isDark ? "bg-[#0b1120]/80 border-white/10" : "bg-white border-slate-200")}>
+                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/40 transition-colors shadow-xl", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
                   <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <MapPin className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
@@ -274,32 +281,25 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               <h2 className={cn("text-3xl md:text-4xl font-black  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>Available Operating Systems</h2>
               <p className={cn(" font-medium text-lg".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Deploy your instance with your preferred OS in seconds.</p>
             </div>
-            <div className={cn("relative overflow-hidden flex w-full backdrop-blur-sm border rounded-[2rem] p-6 shadow-2xl group [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200")}>
+            <div className={cn(
+              "relative overflow-hidden flex w-full backdrop-blur-md border rounded-[2rem] p-6 shadow-2xl group [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] transition-all",
+              isDark 
+                ? "bg-cyan-500/5 border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.1)]" 
+                : "bg-white border-cyan-200 shadow-md"
+            )}>
               <div className="flex whitespace-nowrap animate-marquee shrink-0 items-center gap-12 sm:gap-20 min-w-full pr-12 sm:pr-20 group-hover:[animation-play-state:paused]">
-                {[
-                  { name: "AlmaLinux", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg" },
-                  { name: "CloudLinux OS", icon: "https://cdn.worldvectorlogo.com/logos/cloudlinux.svg" },
-                  { name: "Debian", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/debian/debian-original.svg" },
-                  { name: "Ubuntu", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ubuntu/ubuntu-original.svg" },
-                  { name: "Windows Server", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows8/windows8-original.svg" },
-                ].map((os, idx) => (
+                {SUPPORTED_OPERATING_SYSTEMS.map((os, idx) => (
                   <div key={`os-1-${idx}`} className="flex items-center gap-3 md:gap-4 transition-transform duration-300 cursor-default">
                     <img referrerPolicy="no-referrer" src={os.icon} alt={os.name} className="h-8 w-8 md:h-10 md:w-10" loading="lazy" decoding="async" />
-                    <span className={cn(" font-bold text-lg md:text-2xl tracking-tight".trim(), isDark ? "text-white" : "text-slate-900")}>{os.name}</span>
+                    <span className={cn("font-bold text-lg md:text-2xl tracking-tight", isDark ? "text-white" : "text-slate-900")}>{os.name}</span>
                   </div>
                 ))}
               </div>
               <div className="flex whitespace-nowrap animate-marquee shrink-0 items-center gap-12 sm:gap-20 min-w-full pr-12 sm:pr-20 group-hover:[animation-play-state:paused]" aria-hidden="true">
-                {[
-                  { name: "AlmaLinux", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg" },
-                  { name: "CloudLinux OS", icon: "https://cdn.worldvectorlogo.com/logos/cloudlinux.svg" },
-                  { name: "Debian", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/debian/debian-original.svg" },
-                  { name: "Ubuntu", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ubuntu/ubuntu-original.svg" },
-                  { name: "Windows Server", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows8/windows8-original.svg" },
-                ].map((os, idx) => (
+                {SUPPORTED_OPERATING_SYSTEMS.map((os, idx) => (
                   <div key={`os-2-${idx}`} className="flex items-center gap-3 md:gap-4 transition-transform duration-300 cursor-default">
                     <img referrerPolicy="no-referrer" src={os.icon} alt={os.name} className="h-8 w-8 md:h-10 md:w-10" loading="lazy" decoding="async" />
-                    <span className={cn(" font-bold text-lg md:text-2xl tracking-tight".trim(), isDark ? "text-white" : "text-slate-900")}>{os.name}</span>
+                    <span className={cn("font-bold text-lg md:text-2xl tracking-tight", isDark ? "text-white" : "text-slate-900")}>{os.name}</span>
                   </div>
                 ))}
               </div>
@@ -325,7 +325,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                 { icon: Globe, title: "High-Traffic Web Hosting", desc: "Host your Next.js, Laravel, or WordPress applications. With dedicated resources, your sites stay fast and responsive." },
                 { icon: Database, title: "Database Clusters", desc: "Run MySQL, PostgreSQL, or Redis with confidence. Our enterprise-grade SSD storage ensures high IOPS for database-heavy workloads." }
               ].map((srv, idx) => (
-                <TiltCard key={idx} intensity={5} className={cn("backdrop-blur-md p-8 md:p-10 rounded-3xl border hover:border-cyan-500/30 transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl group", isDark ? "bg-[#0b1120]/80 border-white/10 hover:bg-[#0f1926]" : "bg-white border-slate-200 hover:border-cyan-300 hover:shadow-md")}>
+                <TiltCard key={idx} intensity={5} className={cn("backdrop-blur-md p-8 md:p-10 rounded-3xl border hover:border-cyan-500/40 transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl group", isDark ? "bg-[#0b1120] border-cyan-500/20 hover:bg-cyan-950/30" : "bg-white border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
                   <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                     <srv.icon className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
@@ -359,7 +359,12 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                 { icon: Activity, title: "High-Speed Networking", desc: "Experience ultra-low latency and blazing fast throughput across our local datacenter." }
               ].map((feat, i) => (
                 <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
-                  <div className={cn("backdrop-blur-sm border p-8 rounded-3xl hover:bg-white/10 transition-colors flex flex-col shadow-xl h-full group aspect-square", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200 hover:border-cyan-200 hover:shadow-md")}>
+                  <div className={cn(
+                    "backdrop-blur-sm border p-8 rounded-3xl transition-all flex flex-col shadow-xl h-full group aspect-square",
+                    isDark 
+                      ? "bg-cyan-500/5 border-cyan-500/30 hover:border-cyan-400/50 hover:bg-cyan-500/10" 
+                      : "bg-white border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md"
+                  )}>
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform">
                       <feat.icon className="w-6 h-6 text-white" />
                     </div>
@@ -396,7 +401,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                 { step: "03", title: "Deploy Instantly", desc: "Your high-performance cloud instance will be provisioned and ready to use in less than 60 seconds." }
               ].map((item, i) => (
                 <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border  p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120]/80 backdrop-blur-md border border-white/10 shadow-xl" : "bg-white border border-black/5 shadow-xl")}>
+                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0b1120] border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
 
                     {/* Animated Step Circle */}
                     <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#0b1120] border-cyan-900/50" : "bg-white border-cyan-200")}>
