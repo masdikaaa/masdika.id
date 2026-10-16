@@ -838,12 +838,12 @@ export default function HomePage() {
 
           {portfolioProjects.length === 0 ? (
             <div className={cn(
-              "text-center py-20 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm",
-              isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-black/5"
+              "text-center py-20 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl",
+              isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200"
             )}>
               <div className={cn(
                 "w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 border",
-                isDark ? "bg-white/5 border-white/10" : "bg-white border-black/5 shadow-sm"
+                isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200 shadow-sm"
               )}>
                 <FolderOpen className={cn("w-10 h-10", isDark ? "text-zinc-500" : "text-slate-400")} />
               </div>
@@ -911,11 +911,11 @@ export default function HomePage() {
 
           <div className="relative w-full overflow-hidden flex">
             {/* Left fade gradient */}
-            <div className={cn("absolute top-0 left-0 w-20 md:w-40 h-full z-10 pointer-events-none", isDark ? "bg-gradient-to-r from-[#050B14] to-transparent" : "bg-gradient-to-r from-white to-transparent")} />
+            <div className={cn("absolute top-0 left-0 w-12 md:w-24 h-full z-10 pointer-events-none", isDark ? "bg-gradient-to-r from-[#050B14] to-transparent" : "bg-gradient-to-r from-white to-transparent")} />
 
             <div
               ref={scrollRef}
-              className={`flex gap-6 md:gap-8 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+              className={`flex gap-6 md:gap-8 px-6 md:px-10 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={handleMouseUpOrLeave}
               onTouchStart={() => setIsPaused(true)}
@@ -928,19 +928,29 @@ export default function HomePage() {
                 <div
                   key={idx}
                   className={cn(
-                    "backdrop-blur-sm p-8 md:p-10 rounded-3xl border relative w-[85vw] sm:w-[450px] min-w-[85vw] sm:min-w-[450px] flex-shrink-0 transition-colors flex flex-col shadow-xl",
-                    isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-white border-black/5 hover:bg-slate-50"
+                    "p-8 md:p-10 rounded-3xl border relative w-[85vw] sm:w-[450px] min-w-[85vw] sm:min-w-[450px] flex-shrink-0 transition-all duration-300 flex flex-col shadow-2xl",
+                    isDark 
+                      ? "bg-[#0b1120] border-white/10 hover:border-cyan-500/30 hover:bg-[#0e172a] shadow-[0_4px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]" 
+                      : "bg-white border-slate-200 hover:border-cyan-500/30 hover:bg-slate-50/50 shadow-lg hover:shadow-xl"
                   )}
                 >
                   <div className="flex gap-1.5 mb-8">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-5 h-5 ${i < (testi.rating || 5) ? 'text-cyan-400 fill-cyan-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]' : 'text-white/10'}`} />
+                      <Star
+                        key={i}
+                        className={cn(
+                          "w-5 h-5",
+                          i < (testi.rating || 5)
+                            ? (isDark ? "text-cyan-400 fill-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.35)]" : "text-cyan-600 fill-cyan-600")
+                            : (isDark ? "text-white/10 fill-transparent" : "text-slate-200 fill-transparent")
+                        )}
+                      />
                     ))}
                   </div>
                   <p className={cn("text-lg md:text-xl font-medium mb-10 leading-relaxed flex-1", isDark ? "text-zinc-300" : "text-slate-700")}>"{testi.text}"</p>
-                  <div className={cn("flex items-center gap-4 pt-6 mt-auto border-t", isDark ? "border-white/10" : "border-black/5")}>
+                  <div className={cn("flex items-center gap-4 pt-6 mt-auto border-t", isDark ? "border-white/10" : "border-slate-200")}>
                     {testi.image ? (
-                      <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-black/40 flex-shrink-0">
+                      <div className={cn("w-14 h-14 rounded-full overflow-hidden border flex-shrink-0 shadow-inner", isDark ? "border-white/10 bg-[#050B14]" : "border-slate-200 bg-slate-100")}>
                         <img referrerPolicy="no-referrer" src={testi.image} alt={testi.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       </div>
                     ) : (
@@ -957,7 +967,7 @@ export default function HomePage() {
               ))}
             </div>
             {/* Right fade gradient */}
-            <div className={cn("absolute top-0 right-0 w-20 md:w-40 h-full z-10 pointer-events-none", isDark ? "bg-gradient-to-l from-[#050B14] to-transparent" : "bg-gradient-to-l from-white to-transparent")} />
+            <div className={cn("absolute top-0 right-0 w-12 md:w-24 h-full z-10 pointer-events-none", isDark ? "bg-gradient-to-l from-[#050B14] to-transparent" : "bg-gradient-to-l from-white to-transparent")} />
           </div>
         </div>
       </section>
@@ -989,8 +999,8 @@ export default function HomePage() {
 
           {latestPosts.length === 0 ? (
             <div className={cn(
-              "text-center py-20 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm",
-              isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-black/5"
+              "text-center py-20 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl",
+              isDark ? "bg-[#0b1120] border-white/10" : "bg-white border-slate-200"
             )}>
               <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No posts yet</h3>
               <p className={cn("max-w-sm mx-auto font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Articles will appear here once published.</p>
