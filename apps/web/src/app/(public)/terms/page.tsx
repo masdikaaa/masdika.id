@@ -10,10 +10,10 @@ export default function TermsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   return (
-    <div className={cn("min-h-screen pt-24 md:pt-32 pb-20 overflow-hidden relative", isDark ? "text-white bg-transparent" : "text-slate-900 bg-[#f8fafb]")}>
+    <div className={cn("min-h-screen pt-24 md:pt-32 pb-20 overflow-hidden relative bg-transparent", isDark ? "text-white" : "text-slate-900")}>
       {/* Cinematic background effects */}
-      <div className={cn("absolute top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[120px] pointer-events-none", isDark ? "bg-cyan-500/10 mix-blend-screen" : "bg-cyan-500/10 mix-blend-normal opacity-40")} />
-      <div className={cn("absolute bottom-[20%] right-[0%] w-[40%] h-[40%] rounded-full blur-[120px] pointer-events-none", isDark ? "bg-cyan-600/10 mix-blend-screen" : "bg-cyan-600/10 mix-blend-normal opacity-40")} />
+
+
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         

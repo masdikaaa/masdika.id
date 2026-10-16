@@ -163,30 +163,14 @@ Consistent badge pill used across all sections to label a section category:
 
 ## 7. Page Background Patterns
 
-All public service pages use the same layered background system to ensure visual consistency:
+All public pages inherit their background directly from `PremiumBackground` in `PublicLayout`. This guarantees 100% visual consistency between Dark Mode and Light Mode without blotchy white/light blur spots.
 
-### Dark Mode Backgrounds
-```tsx
-{/* Base gradient */}
-<div className={cn("absolute inset-0 -z-20", isDark ? "bg-gradient-to-b from-[#050B14] via-[#09152a]/50 to-[#050B14]" : "bg-transparent")} />
-
-{/* Grid pattern */}
-<div className={cn(
-  "absolute inset-0 bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 -z-10",
-  isDark
-    ? "bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)]"
-    : "bg-[linear-gradient(to_right,#475569_1px,transparent_1px),linear-gradient(to_bottom,#475569_1px,transparent_1px)]"
-)} />
-
-{/* Ambient glow blobs */}
-<div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-  <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
-  <div className="absolute top-[40%] right-[-10%] w-[30%] h-[30%] bg-cyan-500/10 rounded-full blur-[120px]" />
-</div>
-```
-
-> [!IMPORTANT]
-> Never hardcode dark-only backgrounds like `bg-[#050B14]` directly. Always wrap them in `isDark ?` checks so Light Mode renders cleanly with `bg-transparent`.
+### Standard Rule: Clean Background & Grid Lines Only
+- **NO Ambient Blur Blobs:** Do not add blur circles/aurora glows (`blur-[120px]`, `rounded-full bg-cyan-500/10`) to page backgrounds.
+- **NO Radial Gradient Masks:** Do not mask grid patterns with radial gradients or spotlights (`[mask-image:radial-gradient(...)]`).
+- **NO Vertical Gradient Highlights:** Do not use `via-[#09152a]/50` or similar light washes on background containers.
+- **Pure Grid:** The background must exclusively consist of the solid theme background (`#050B14` in Dark Mode, `#f8fafb` in Light Mode) with clean, subtle grid lines (`40px 40px`).
+- Page components must keep their root container `bg-transparent` so the unified `PremiumBackground` shines through consistently across all pages.
 
 ---
 

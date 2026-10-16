@@ -53,18 +53,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
   const isDark = theme === "dark";
 
   return (
-    <div className={cn("pt-24 md:pt-32 pb-20 px-4  selection:bg-cyan-500/30 font-sans overflow-hidden relative min-h-screen bg-transparent".trim(), isDark ? "text-white" : "text-slate-900")}>
-      {/* Background Gradients */}
-      <div className={cn("absolute inset-0 -z-20", isDark ? "bg-gradient-to-b from-[#050B14] via-[#09152a]/50 to-[#050B14]" : "bg-transparent")} />
-
-      {/* Grid Pattern Background */}
-      <div className={cn("absolute inset-0 bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 -z-10", isDark ? "bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)]" : "bg-[linear-gradient(to_right,#475569_1px,transparent_1px),linear-gradient(to_bottom,#475569_1px,transparent_1px)]")} />
-
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]"></div>
-        <div className="absolute top-[40%] right-[-10%] w-[30%] h-[30%] bg-cyan-500/10 rounded-full blur-[120px]"></div>
-      </div>
-
+    <div className={cn("pt-24 md:pt-32 pb-20 px-4 selection:bg-cyan-500/30 font-sans overflow-hidden relative min-h-screen bg-transparent", isDark ? "text-white" : "text-slate-900")}>
       <main className="relative z-10 max-w-[1400px] mx-auto">
         {/* Hero Section */}
         <section className="pt-10 pb-8 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
