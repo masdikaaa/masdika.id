@@ -335,8 +335,8 @@ export default function RegisterPage() {
         )}
       >
         {/* LEFT COLUMN: Form */}
-        <div className="lg:col-span-7 p-6 pt-8 sm:p-10 lg:p-10 xl:p-12 flex flex-col justify-between relative z-10">
-          <div>
+        <div className="lg:col-span-7 w-full min-w-0 max-w-full p-6 pt-8 sm:p-10 lg:p-10 xl:p-12 flex flex-col justify-between relative z-10 overflow-hidden">
+          <div className="w-full min-w-0">
             {/* Top Brand Header & Theme Toggle */}
             <div className="flex items-center justify-between mb-6 pt-1">
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
@@ -351,7 +351,7 @@ export default function RegisterPage() {
                 onClick={toggleTheme}
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
                 className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm mr-[29px] sm:mr-0",
+                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
                   isDark
                     ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
                     : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
@@ -374,7 +374,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Mobile Character Avatar (Only on small screens where right panel is hidden) */}
-            <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-5 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full overflow-hidden">
+            <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-5 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full min-w-0 overflow-hidden">
               <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-0.5">
                 <Image
                   src="/images/auth/register.png"
@@ -387,12 +387,12 @@ export default function RegisterPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-800")}>Welcome to Masdika!</p>
-                <p className={cn("text-[11px] leading-tight", isDark ? "text-zinc-400" : "text-slate-500")}>Fast setup for Cloud VPS & API Hub.</p>
+                <p className={cn("text-[11px] leading-tight truncate sm:whitespace-normal", isDark ? "text-zinc-400" : "text-slate-500")}>Fast setup for Cloud VPS & API Hub.</p>
               </div>
             </div>
 
             {/* Scrollable Form Body Container with generous spacing from scrollbar */}
-            <div className="max-h-[66vh] overflow-y-auto pr-4 sm:pr-6 auth-scrollbar">
+            <div className="max-h-[66vh] overflow-y-auto overflow-x-hidden pr-2 sm:pr-4 auth-scrollbar w-full min-w-0">
               {step === "form" ? (
                 <form onSubmit={handleRegister} className="space-y-4">
                   {/* Row 1: Name + Email */}
@@ -734,15 +734,17 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Turnstile */}
-                  <div className="flex justify-center pt-1 w-full">
+                  <div className="flex justify-center pt-1 w-full min-w-0 overflow-hidden">
                     {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                      <Turnstile
-                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                        onSuccess={(token) => setTurnstileToken(token)}
-                        options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
-                        className="w-full"
-                        style={{ width: "100%" }}
-                      />
+                      <div className="w-full max-w-full overflow-hidden flex justify-center">
+                        <Turnstile
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                          onSuccess={(token) => setTurnstileToken(token)}
+                          options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
+                          className="w-full max-w-full"
+                          style={{ width: "100%", maxWidth: "100%" }}
+                        />
+                      </div>
                     )}
                   </div>
 

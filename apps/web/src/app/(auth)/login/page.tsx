@@ -142,8 +142,8 @@ export default function LoginPage() {
         )}
       >
         {/* LEFT COLUMN: Form */}
-        <div className="lg:col-span-6 p-6 pt-8 sm:p-12 lg:p-12 xl:p-14 flex flex-col justify-between relative z-10">
-          <div>
+        <div className="lg:col-span-6 w-full min-w-0 max-w-full p-6 pt-8 sm:p-12 lg:p-12 xl:p-14 flex flex-col justify-between relative z-10 overflow-hidden">
+          <div className="w-full min-w-0">
             {/* Top Brand Header & Theme Toggle */}
             <div className="flex items-center justify-between mb-6 sm:mb-8 pt-1">
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
@@ -158,7 +158,7 @@ export default function LoginPage() {
                 onClick={toggleTheme}
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
                 className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm mr-[29px] sm:mr-0",
+                  "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm",
                   isDark
                     ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
                     : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
@@ -181,7 +181,7 @@ export default function LoginPage() {
             </div>
 
             {/* Mobile Character Avatar (Only on small screens where right panel is hidden) */}
-            <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full overflow-hidden">
+            <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full min-w-0 overflow-hidden">
               <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-0.5">
                 <Image
                   src="/images/auth/login.png"
@@ -194,12 +194,12 @@ export default function LoginPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-800")}>Welcome back!</p>
-                <p className={cn("text-[11px] leading-tight", isDark ? "text-zinc-400" : "text-slate-500")}>Masdika Cloud Platform is ready.</p>
+                <p className={cn("text-[11px] leading-tight truncate sm:whitespace-normal", isDark ? "text-zinc-400" : "text-slate-500")}>Masdika Cloud Platform is ready.</p>
               </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4 w-full min-w-0">
               <div className={show2FA ? "hidden" : "space-y-4"}>
                 {/* Email */}
                 <div className="space-y-1.5">
@@ -325,15 +325,17 @@ export default function LoginPage() {
               )}
 
               {/* Turnstile */}
-              <div className="pt-1 w-full flex justify-center">
+              <div className="pt-1 w-full min-w-0 overflow-hidden flex justify-center">
                 {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                  <Turnstile
-                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                    onSuccess={(token) => setTurnstileToken(token)}
-                    options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
-                    className="w-full"
-                    style={{ width: "100%" }}
-                  />
+                  <div className="w-full max-w-full overflow-hidden flex justify-center">
+                    <Turnstile
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                      onSuccess={(token) => setTurnstileToken(token)}
+                      options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
+                      className="w-full max-w-full"
+                      style={{ width: "100%", maxWidth: "100%" }}
+                    />
+                  </div>
                 )}
               </div>
 
