@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import VpsClient from "./VpsClient";
+import { getCachedData } from "@/lib/cache";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Cloud VPS - High Performance Compute",
@@ -13,15 +14,19 @@ export const metadata: Metadata = {
 };
 
 export default async function VpsLandingPage() {
-  const pricingData = await prisma.vpsPricing.findMany();
+  const { pricing, isVpsEnabled } = await getCachedData('pricing:vps_page', 300, async () => {
+    const pricingData = await prisma.vpsPricing.findMany();
+    const map = pricingData.reduce((acc, curr) => {
+      acc[curr.key] = curr.pricePerHour;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const pricing = pricingData.reduce((acc, curr) => {
-    acc[curr.key] = curr.pricePerHour;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const vpsEnabledSetting = await prisma.setting.findUnique({ where: { key: 'vps_enabled' } });
-  const isVpsEnabled = vpsEnabledSetting?.value !== 'false';
+    const vpsEnabledSetting = await prisma.setting.findUnique({ where: { key: 'vps_enabled' } });
+    return {
+      pricing: map,
+      isVpsEnabled: vpsEnabledSetting?.value !== 'false',
+    };
+  });
 
   const safePricing = {
     vcpu: pricing.vcpu || 100,

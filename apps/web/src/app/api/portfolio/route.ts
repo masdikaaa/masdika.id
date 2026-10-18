@@ -1,49 +1,45 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { unstable_cache } from 'next/cache';
+import { getCachedData } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
-const getCachedProjects = unstable_cache(
-  async (category: string | null) => {
-    return prisma.project.findMany({
-      where: {
-        status: 'COMPLETED',
-        ...(category && category !== 'All' ? { category: { name: category } } : {})
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        image: true,
-        description: true,
-        techStack: true,
-        projectUrl: true,
-        client: true,
-        category: {
-          select: {
-            id: true,
-            name: true
-          }
+const fetchProjects = (category: string | null) =>
+  prisma.project.findMany({
+    where: {
+      status: 'COMPLETED',
+      ...(category && category !== 'All' ? { category: { name: category } } : {})
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      image: true,
+      description: true,
+      techStack: true,
+      projectUrl: true,
+      client: true,
+      category: {
+        select: {
+          id: true,
+          name: true
         }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-  },
-  ['portfolio-list'],
-  { revalidate: 60, tags: ['portfolio'] }
-);
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
+    const cacheKey = `portfolio:list:${category || 'all'}`;
 
-    const projects = await getCachedProjects(category);
+    const projects = await getCachedData(cacheKey, 300, () => fetchProjects(category));
 
     return NextResponse.json(projects, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     });
   } catch (error) {

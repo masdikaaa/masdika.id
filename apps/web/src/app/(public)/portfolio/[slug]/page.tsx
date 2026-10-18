@@ -1,19 +1,25 @@
 import { prisma } from "@/lib/prisma";
+import { getCachedData } from "@/lib/cache";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { PortfolioDetailContent } from "./PortfolioDetailContent";
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   
   try {
-    const project = await prisma.project.findUnique({ 
-      where: { slug } 
+    const project = await getCachedData(`portfolio:${slug}`, 300, async () => {
+      return prisma.project.findUnique({ 
+        where: { slug },
+        include: { category: true }
+      });
     });
     
     if (!project) return { title: "Not Found" };
     
-    const cleanDescription = project.description.replace(/\r?\n|\r/g, ' ').trim();
+    const cleanDescription = (project.description || '').replace(/\r?\n|\r/g, ' ').trim();
     const metaDescription = cleanDescription.length > 160 ? cleanDescription.substring(0, 160) + "..." : cleanDescription;
 
     return {
@@ -38,9 +44,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PortfolioDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   
-  const project = await prisma.project.findUnique({
-    where: { slug },
-    include: { category: true }
+  const project = await getCachedData(`portfolio:${slug}`, 300, async () => {
+    return prisma.project.findUnique({
+      where: { slug },
+      include: { category: true }
+    });
   });
 
   if (!project) {

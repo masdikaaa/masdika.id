@@ -19,15 +19,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import { unstable_cache } from 'next/cache';
+import { getCachedData } from '@/lib/cache';
 
-const getCachedMetaDescription = unstable_cache(
-  async () => {
-    return prisma.setting.findUnique({ where: { key: 'meta_description' } });
-  },
-  ['meta-description'],
-  { revalidate: 3600, tags: ['settings'] }
-);
+const getCachedMetaDescription = () =>
+  getCachedData('setting:meta_description', 3600, () =>
+    prisma.setting.findUnique({ where: { key: 'meta_description' } })
+  );
 
 export async function generateMetadata(): Promise<Metadata> {
   let description = "Portfolio of Masdika, Cloud Engineer, DevOps Engineer, and System Administrator based in Sidoarjo, Indonesia.";

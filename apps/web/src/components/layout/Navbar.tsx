@@ -302,7 +302,7 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
         isOpen
           ? "bg-[var(--surface)] shadow-lg border-b border-[var(--border-primary)]"
           : scrolled
-            ? "bg-[var(--surface)]/95 backdrop-blur-md shadow-sm border-b border-[var(--border-subtle)]"
+            ? "bg-[var(--navbar-bg)] backdrop-blur-md shadow-sm border-b border-[var(--border-subtle)]"
             : "bg-transparent",
         scrolled ? "py-3" : "py-5"
       )}

@@ -1,36 +1,37 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { unstable_cache } from 'next/cache';
+import { getCachedData } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
-const getCachedOpportunities = unstable_cache(
-  async (type: string | null) => {
-    const whereClause: any = {
-      status: 'PUBLISHED'
-    };
+const fetchOpportunities = (type: string | null) => {
+  const whereClause: any = {
+    status: 'PUBLISHED'
+  };
 
-    if (type) {
-      whereClause.type = type;
-    }
+  if (type) {
+    whereClause.type = type;
+  }
 
-    return prisma.opportunity.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' }
-    });
-  },
-  ['opportunities-list'],
-  { revalidate: 60, tags: ['opportunities'] }
-);
+  return prisma.opportunity.findMany({
+    where: whereClause,
+    orderBy: { createdAt: 'desc' }
+  });
+};
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');
+    const cacheKey = `opportunities:list:${type || 'all'}`;
 
-    const opportunities = await getCachedOpportunities(type);
+    const opportunities = await getCachedData(cacheKey, 300, () => fetchOpportunities(type));
     
-    return NextResponse.json(opportunities);
+    return NextResponse.json(opportunities, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
   } catch (error) {
     console.error('Error fetching opportunities:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

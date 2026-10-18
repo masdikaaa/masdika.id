@@ -1,39 +1,37 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { unstable_cache } from 'next/cache';
+import { getCachedData } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
-const getCachedSeries = unstable_cache(
-  async () => {
-    return prisma.series.findMany({
-      where: { published: true },
-      // Only select fields needed for the listing card — skip large TEXT fields
-      select: {
-        id:          true,
-        slug:        true,
-        title:       true,
-        description: true,
-        image:       true,
-        level:       true,
-        tags:        true,
-        createdAt:   true,
-        episodes: {
-          where:  { published: true },
-          select: { id: true },        // count only
-        },
+const fetchSeries = () =>
+  prisma.series.findMany({
+    where: { published: true },
+    select: {
+      id:          true,
+      slug:        true,
+      title:       true,
+      description: true,
+      image:       true,
+      level:       true,
+      tags:        true,
+      createdAt:   true,
+      episodes: {
+        where:  { published: true },
+        select: { id: true },
       },
-      orderBy: { createdAt: 'desc' },
-    });
-  },
-  ['series-list'],
-  { revalidate: 60, tags: ['series'] }
-);
+    },
+    orderBy: { createdAt: 'desc' },
+  });
 
 export async function GET() {
   try {
-    const series = await getCachedSeries();
-    return NextResponse.json(series);
+    const series = await getCachedData('series:list', 300, fetchSeries);
+    return NextResponse.json(series, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
   } catch (error) {
     console.error('Error fetching series:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

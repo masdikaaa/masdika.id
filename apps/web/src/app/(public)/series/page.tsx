@@ -2,15 +2,16 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import SeriesClient, { SeriesItem } from "./SeriesClient";
+import { getCachedData } from "@/lib/cache";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Learning Series",
   description: "Structured learning series covering networking, cloud infrastructure, DevOps, and Linux systems.",
 };
 
-async function getSeries(): Promise<SeriesItem[]> {
+async function fetchSeries(): Promise<SeriesItem[]> {
   try {
     const seriesList = await prisma.series.findMany({
       where: { published: true },
@@ -33,6 +34,10 @@ async function getSeries(): Promise<SeriesItem[]> {
     console.error("Error fetching learning series:", error);
     return [];
   }
+}
+
+async function getSeries(): Promise<SeriesItem[]> {
+  return getCachedData('series:series_page', 300, fetchSeries);
 }
 
 export default async function SeriesPage() {

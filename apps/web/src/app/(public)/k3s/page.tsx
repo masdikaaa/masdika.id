@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import K3sClient from "./K3sClient";
+import { getCachedData } from "@/lib/cache";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Managed Kubernetes (K3s) - High Availability Clusters",
@@ -13,15 +14,19 @@ export const metadata: Metadata = {
 };
 
 export default async function K3sLandingPage() {
-  const pricingData = await prisma.vpsPricing.findMany();
+  const { pricing, isK3sEnabled } = await getCachedData('pricing:k3s_page', 300, async () => {
+    const pricingData = await prisma.vpsPricing.findMany();
+    const map = pricingData.reduce((acc, curr) => {
+      acc[curr.key] = curr.pricePerHour;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const pricing = pricingData.reduce((acc, curr) => {
-    acc[curr.key] = curr.pricePerHour;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const k3sEnabledSetting = await prisma.setting.findUnique({ where: { key: 'k3s_enabled' } });
-  const isK3sEnabled = k3sEnabledSetting?.value !== 'false';
+    const k3sEnabledSetting = await prisma.setting.findUnique({ where: { key: 'k3s_enabled' } });
+    return {
+      pricing: map,
+      isK3sEnabled: k3sEnabledSetting?.value !== 'false',
+    };
+  });
 
   const safePricing = {
     vcpu: pricing.vcpu || 100,

@@ -153,7 +153,7 @@ function EngineeringRolesScroller({ roles, fallbackRole }: { roles: string[]; fa
 
   return (
     <div 
-      className="relative group/roles min-w-0 max-w-full overflow-hidden select-none"
+      className="relative group/roles min-w-0 max-w-full w-full overflow-hidden select-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -249,7 +249,7 @@ export function PortfolioDetailContent({
     : "Completed";
 
   return (
-    <div className="pt-24 md:pt-32 pb-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div className="pt-24 md:pt-32 pb-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       
       {/* Back Navigation Bar */}
       <div className="mb-6 md:mb-8 flex items-center justify-between">
@@ -271,61 +271,63 @@ export function PortfolioDetailContent({
       </div>
 
       {/* Hero Header */}
-      <header className="mb-10 md:mb-16 relative">
-        <div className="text-center max-w-4xl mx-auto relative z-10">
+      <header className="mb-8 sm:mb-10 md:mb-16 relative w-full min-w-0">
+        <div className="text-center max-w-4xl mx-auto relative z-10 w-full min-w-0">
           <div className="mb-4 sm:mb-6 flex justify-center">
-            <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase tracking-wider">
+            <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase tracking-wider text-[11px] sm:text-xs">
               {project.category?.name || "FEATURED CASE STUDY"}
             </Badge>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-black tracking-tight leading-[1.08] text-[var(--text-primary)] mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-[64px] font-black tracking-tight leading-[1.15] sm:leading-[1.08] text-[var(--text-primary)] mb-4 sm:mb-6 break-words px-2 sm:px-0">
             {project.title.includes(" - ") ? (
               <>
-                {project.title.split(" - ")[0]} <br />
-                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                <span className="inline-block break-words">{project.title.split(" - ")[0]}</span>{" "}
+                <br className="hidden sm:inline" />
+                <span className="inline-block sm:block bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent break-words">
                   {project.title.split(" - ").slice(1).join(" - ")}
                 </span>
               </>
             ) : project.title.includes(" – ") ? (
               <>
-                {project.title.split(" – ")[0]} <br />
-                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                <span className="inline-block break-words">{project.title.split(" – ")[0]}</span>{" "}
+                <br className="hidden sm:inline" />
+                <span className="inline-block sm:block bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent break-words">
                   {project.title.split(" – ").slice(1).join(" – ")}
                 </span>
               </>
             ) : (
-              project.title
+              <span className="break-words">{project.title}</span>
             )}
           </h1>
 
           {project.description && (
-            <p className="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] font-normal leading-relaxed max-w-2xl mx-auto mb-8 sm:mb-10">
+            <p className="text-sm sm:text-base md:text-lg text-[var(--text-secondary)] font-normal leading-relaxed max-w-2xl mx-auto mb-6 sm:mb-10 break-words px-2 sm:px-0">
               {project.description}
             </p>
           )}
 
           {/* Responsive Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-xs sm:max-w-none mx-auto px-2 sm:px-0">
             {project.projectUrl && (
               <Button
                 variant="primary"
-                size="lg"
+                size="md"
                 href={project.projectUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 rightIcon={<ExternalLink className="w-4 h-4" />}
-                className="w-full sm:w-auto justify-center min-w-[170px]"
+                className="w-full sm:w-auto justify-center text-sm py-2.5 sm:py-3 font-semibold"
               >
                 Launch Live Preview
               </Button>
             )}
             <Button
               variant="secondary"
-              size="lg"
+              size="md"
               href="/contact"
               rightIcon={<ArrowRight className="w-4 h-4" />}
-              className="w-full sm:w-auto justify-center min-w-[170px]"
+              className="w-full sm:w-auto justify-center text-sm py-2.5 sm:py-3 font-semibold"
             >
               Discuss Similar Project
             </Button>
@@ -333,35 +335,35 @@ export function PortfolioDetailContent({
         </div>
 
         {/* Specs Capsule Ribbon (Client, Timeline, Roles) */}
-        <div className="max-w-4xl mx-auto mt-8 md:mt-10 relative z-10">
-          <div className="p-2 sm:p-2.5 rounded-2xl md:rounded-full border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 md:divide-x divide-[var(--border-primary)] px-3 sm:px-6">
+        <div className="w-full max-w-4xl mx-auto mt-6 sm:mt-8 md:mt-10 relative z-10 min-w-0">
+          <div className="p-3 sm:p-2.5 rounded-2xl md:rounded-full border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm w-full min-w-0">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-0 md:divide-x divide-[var(--border-primary)] px-2 sm:px-6 w-full min-w-0">
               
               {/* 1. Client */}
-              <div className="flex items-center gap-3 w-full md:w-auto md:pr-6 shrink-0">
+              <div className="flex items-center gap-3 w-full md:w-auto md:pr-6 min-w-0">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
                   <Building2 className="w-4 h-4" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block leading-tight">
                     Client
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] whitespace-nowrap">
+                  <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] truncate block">
                     {project.client || "Personal Project"}
                   </span>
                 </div>
               </div>
 
               {/* 2. Timeline */}
-              <div className="flex items-center gap-3 w-full md:w-auto md:px-6 shrink-0">
+              <div className="flex items-center gap-3 w-full md:w-auto md:px-6 min-w-0">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
                   <Calendar className="w-4 h-4" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block leading-tight">
                     Timeline
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] whitespace-nowrap">
+                  <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] truncate block">
                     {cleanTimeline}
                   </span>
                 </div>
@@ -372,7 +374,7 @@ export function PortfolioDetailContent({
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
                   <Briefcase className="w-4 h-4" />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 overflow-hidden">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block leading-tight mb-0.5">
                     Engineering Roles
                   </span>
@@ -391,7 +393,7 @@ export function PortfolioDetailContent({
           <ImageZoom src={project.image} alt={project.title} variant="hero" />
         </div>
       ) : (
-        <div className="h-[240px] sm:h-[320px] w-full rounded-2xl overflow-hidden relative flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface)] mb-8 md:mb-12">
+        <div className="h-[200px] sm:h-[320px] w-full rounded-2xl overflow-hidden relative flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface)] mb-8 md:mb-12">
           <span className="text-slate-400 dark:text-zinc-500 font-mono text-xs">No Preview Image Available</span>
         </div>
       )}
@@ -400,7 +402,7 @@ export function PortfolioDetailContent({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10">
         
         {/* Left Column (8 Cols) */}
-        <div className="lg:col-span-8 flex flex-col gap-6 sm:gap-7 md:gap-8">
+        <div className="lg:col-span-8 flex flex-col gap-6 sm:gap-7 md:gap-8 min-w-0">
           
           {/* Project Overview */}
           {project.content && (
@@ -503,7 +505,7 @@ export function PortfolioDetailContent({
         </div>
 
         {/* Sidebar Column (4 Cols) */}
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 min-w-0">
           <div className="sticky top-28 space-y-5">
             <div className="p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm">
               <div className="flex items-center justify-between gap-3 mb-5">

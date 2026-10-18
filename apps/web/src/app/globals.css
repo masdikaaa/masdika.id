@@ -67,33 +67,33 @@ html.light {
 }
 
 html.dark {
-  --background: #011627;
+  --background: #030712;
   --foreground: #ededed;
-  --surface: #050B14;
-  --surface-secondary: #0b1120;
-  --surface-elevated: rgba(255, 255, 255, 0.02);
+  --surface: #080e1e;
+  --surface-secondary: #0d172e;
+  --surface-elevated: rgba(255, 255, 255, 0.03);
   --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --border-primary: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.02);
-  --glass-border: rgba(6, 182, 212, 0.1);
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(6, 182, 212, 0.2);
-  --card-shadow: rgba(0, 0, 0, 0.3);
-  --navbar-bg: rgba(5, 11, 20, 0.95);
-  --navbar-bg-solid: #050B14;
-  --scrollbar-track: rgba(1, 22, 39, 0.5);
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-primary: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --glass-bg: rgba(8, 14, 30, 0.7);
+  --glass-border: rgba(6, 182, 212, 0.15);
+  --card-bg: #080e1e;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: rgba(0, 0, 0, 0.4);
+  --navbar-bg: rgba(4, 7, 20, 0.85);
+  --navbar-bg-solid: #040714;
+  --scrollbar-track: rgba(3, 7, 18, 0.5);
   --scrollbar-thumb: rgba(34, 211, 238, 0.2);
   --scrollbar-thumb-hover: rgba(34, 211, 238, 0.5);
   --selection-bg: rgba(6, 182, 212, 0.3);
-  --footer-bg: #011627;
-  --premium-bg: #050B14;
-  --vignette-color: #050B14;
-  --glow-color: rgba(6, 182, 212, 0.2);
-  --input-bg: rgba(0, 0, 0, 0.4);
-  --newsletter-bg: #0b1120;
+  --footer-bg: #030712;
+  --premium-bg: #030712;
+  --vignette-color: #030712;
+  --glow-color: rgba(6, 182, 212, 0.15);
+  --input-bg: rgba(8, 14, 30, 0.8);
+  --newsletter-bg: #080e1e;
 }
 
 @plugin "@tailwindcss/typography";
@@ -949,6 +949,29 @@ html.light .portfolio-content strong {
 
 html.light .portfolio-content a {
   color: #0891b2 !important;
+}
+
+.portfolio-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 0.75rem;
+}
+
+.portfolio-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+}
+
+.portfolio-content table {
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+.portfolio-content * {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 

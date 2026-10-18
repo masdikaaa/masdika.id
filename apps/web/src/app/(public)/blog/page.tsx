@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { BlogContent, BlogPostItem } from "./BlogContent";
+import { getCachedData } from "@/lib/cache";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
-async function getPosts(): Promise<BlogPostItem[]> {
+async function fetchPosts(): Promise<BlogPostItem[]> {
   try {
     const posts = await prisma.blogPost.findMany({
       where: { published: true },
@@ -47,6 +48,10 @@ async function getPosts(): Promise<BlogPostItem[]> {
     console.error("Error fetching blog posts for page:", error);
     return [];
   }
+}
+
+async function getPosts(): Promise<BlogPostItem[]> {
+  return getCachedData('posts:blog_page', 300, fetchPosts);
 }
 
 export default async function BlogPage() {

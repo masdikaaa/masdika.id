@@ -342,8 +342,8 @@ export default function HomePage() {
               className="relative flex items-center justify-center mt-10 lg:mt-0"
             >
               <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] h-[440px] sm:h-[500px] lg:h-[600px] mx-auto flex items-end justify-center">
-                {/* Subtle ambient depth bloom behind avatar */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+                {/* Subtle ambient depth bloom behind avatar — multi-tonal cyan/sky/violet matching Gambar 1 */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-400/20 via-sky-400/25 to-violet-400/20 dark:from-cyan-400/25 dark:via-sky-500/30 dark:to-purple-500/25 rounded-full blur-3xl pointer-events-none -z-0" />
 
                 {/* Hero Character with progressive blur and gradient mask fade */}
                 <div
@@ -381,7 +381,7 @@ export default function HomePage() {
                       "flex absolute z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
                       pos,
                       anim,
-                      "bg-white/45 dark:bg-[#061e33]/55 backdrop-blur-md border border-white/60 dark:border-cyan-500/30",
+                      "bg-white/45 dark:bg-[#080e1e]/85 backdrop-blur-xl border border-white/60 dark:border-cyan-500/30",
                       "shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)]",
                       "hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default"
                     )}

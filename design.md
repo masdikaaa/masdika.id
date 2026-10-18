@@ -11,7 +11,7 @@
    - Semua halaman publik (Home `/`, Services `/services`, Portfolio `/portfolio`, Resume `/resume`, dll.) harus berbagi gaya visual, ukuran font, padding, dan komponen yang identik.
 2. **Harmonisasi Tema Netral (Light & Dark):**
    - Mode Terang (*Light*): Menggunakan kanvas abu-abu sangat muda bersih (`#f8fafb`), kartu putih (`#ffffff`), dan teks primer slate gelap (`#0f172a`).
-   - Mode Gelap (*Dark*): Menggunakan obsidian charcoal netral (`#050B14` atau `#121316`), bukan warna biru/navy jenuh seperti `#0e172a` atau `#0a1324`.
+   - Mode Gelap (*Dark*): Menggunakan obsidian slate-950 (`#030712`) dengan kartu midnight-sapphire konsisten (`#080e1e`) dan permukaan sekunder (`#0d172e`), harmonis dengan logo Cyan (`#00ECFE`) & Royal Blue (`#2A84FD`).
 3. **Aksen Brand Cyan:**
    - Warna aksen utama adalah Cyan (`#00d2ff` / `text-cyan-600 dark:text-cyan-400`). Digunakan untuk tombol utama, indikator aktif, ikon aksen, dan border interaktif saat di-hover (`hover:border-cyan-500/40`).
 
@@ -54,16 +54,19 @@ Semua komponen harus mengonsumsi variabel CSS yang ditentukan dalam [`globals.cs
   - Dark Mode: `#71717a` (Zinc 500)
 - **Latar Halaman (`--background`):**
   - Light Mode: `#f8fafb`
-  - Dark Mode: `#011627`
+  - Dark Mode: `#030712`
 - **Permukaan Kartu Standar (`--surface`):**
   - Light Mode: `#ffffff`
-  - Dark Mode: `#050B14`
+  - Dark Mode: `#080e1e`
+- **Permukaan Sekunder (`--surface-secondary`):**
+  - Light Mode: `#f1f5f9`
+  - Dark Mode: `#0d172e`
 - **Kartu Elevated / Floating Badges:**
   - Light: `bg-white/95 border border-slate-200/80 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)]`
-  - Dark: `dark:bg-[#061e33]/85 backdrop-blur-xl border border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)]` (Frosted Midnight Navy Glass, harmonis dengan kanvas `#011627`)
+  - Dark: `dark:bg-[#080e1e]/85 backdrop-blur-xl border border-cyan-500/25 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)]`
 - **Border Standar (`--border-primary`):**
   - Light Mode: `rgba(0, 0, 0, 0.08)`
-  - Dark Mode: `rgba(255, 255, 255, 0.1)`
+  - Dark Mode: `rgba(255, 255, 255, 0.08)`
 
 ### 3.2 Icon Box Standar
 Kotak pembungkus ikon di kartu dan seksi harus menggunakan rasio kontras berikut:
@@ -125,7 +128,7 @@ Hero section di setiap halaman (Home, Services, Portfolio, Resume) mengikuti str
 - **Background & Border:**
   `border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200`
   atau untuk kartu melayang (floating badges):
-  `bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)]`
+  `bg-white/95 dark:bg-[#080e1e]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/25 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)]`
 - **Dilarang Keras:** Menambahkan gradien navy (`from-[#0e172a] to-[#0a1324]`), sudut asimetris ekstrem (`rounded-tl-[3rem]`), atau bayangan gelap pekat tak beraturan.
 
 ---

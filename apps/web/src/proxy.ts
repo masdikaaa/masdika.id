@@ -202,6 +202,15 @@ export default function proxy(request: NextRequest) {
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   response.headers.set('X-XSS-Protection', '1; mode=block');
 
+  // 4. Disable client browser caching for HTML routes & dynamic APIs
+  // Ensures browser always loads the latest UI without getting stuck on old cached pages.
+  // Data caching is handled on the server via Redis.
+  if (!pathname.startsWith('/uploads/')) {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+  }
+
   return response;
 }
 
