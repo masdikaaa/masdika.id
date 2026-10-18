@@ -4,9 +4,11 @@ import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 
 /**
- * Atmospheric background replacing boilerplate grid lines with
- * soft, modern, diffused ambient blooms inspired by the reference design.
- * Features ultra-smooth gradient diffusion without harsh lines or AI-slop grids.
+ * Atmospheric background using pure radial-gradient overlays instead of
+ * massive blur() filters. The blur-[140px] + 850px div approach was causing
+ * the browser to composite enormous offscreen layers — extremely expensive
+ * on GPU memory (100-300MB per blur layer). Radial gradients achieve the
+ * same soft-glow effect at near-zero GPU cost.
  */
 export function PremiumBackground() {
   const { theme } = useTheme();
@@ -20,34 +22,34 @@ export function PremiumBackground() {
         isDark ? "bg-[#050811]" : "bg-[#f8fafd]"
       )}
     >
-      {/* Primary Ambient Aura (Top Right) */}
+      {/* Primary Ambient Aura (Top Right) — radial gradient instead of blur */}
       <div
-        className={cn(
-          "absolute -top-32 -right-24 sm:-top-48 sm:-right-32 w-[550px] h-[550px] sm:w-[850px] sm:h-[850px] rounded-full transition-all duration-700 pointer-events-none transform-gpu",
-          isDark
-            ? "bg-gradient-to-br from-cyan-500/15 via-blue-600/10 to-transparent blur-[140px]"
-            : "bg-gradient-to-br from-violet-300/40 via-sky-200/40 to-cyan-100/30 blur-[130px]"
-        )}
+        className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+        style={{
+          background: isDark
+            ? "radial-gradient(ellipse 70% 60% at 85% 10%, rgba(6,182,212,0.15) 0%, rgba(37,99,235,0.08) 40%, transparent 70%)"
+            : "radial-gradient(ellipse 70% 60% at 85% 10%, rgba(139,92,246,0.18) 0%, rgba(56,189,248,0.12) 40%, rgba(6,182,212,0.06) 60%, transparent 75%)",
+        }}
       />
 
-      {/* Secondary Ambient Aura (Middle / Left) */}
+      {/* Secondary Ambient Aura (Middle / Left) — radial gradient instead of blur */}
       <div
-        className={cn(
-          "absolute top-[28%] -left-36 sm:-left-48 w-[450px] h-[450px] sm:w-[750px] sm:h-[750px] rounded-full transition-all duration-700 pointer-events-none transform-gpu",
-          isDark
-            ? "bg-gradient-to-tr from-cyan-600/10 via-indigo-900/15 to-transparent blur-[150px]"
-            : "bg-gradient-to-tr from-sky-200/40 via-indigo-100/35 to-transparent blur-[130px]"
-        )}
+        className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+        style={{
+          background: isDark
+            ? "radial-gradient(ellipse 60% 50% at 10% 40%, rgba(6,182,212,0.10) 0%, rgba(67,56,202,0.08) 45%, transparent 70%)"
+            : "radial-gradient(ellipse 60% 50% at 10% 40%, rgba(56,189,248,0.15) 0%, rgba(99,102,241,0.08) 45%, transparent 70%)",
+        }}
       />
 
-      {/* Tertiary Soft Horizon Glow (Lower Page Bloom) */}
+      {/* Tertiary Soft Horizon Glow (Lower Page Bloom) — radial gradient instead of blur */}
       <div
-        className={cn(
-          "absolute top-[68%] -right-20 sm:-right-32 w-[500px] h-[500px] sm:w-[800px] sm:h-[800px] rounded-full transition-all duration-700 pointer-events-none transform-gpu",
-          isDark
-            ? "bg-gradient-to-tl from-cyan-500/10 via-blue-950/20 to-transparent blur-[160px]"
-            : "bg-gradient-to-tl from-purple-200/30 via-cyan-100/25 to-transparent blur-[140px]"
-        )}
+        className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+        style={{
+          background: isDark
+            ? "radial-gradient(ellipse 65% 50% at 80% 75%, rgba(6,182,212,0.08) 0%, rgba(30,58,138,0.10) 45%, transparent 70%)"
+            : "radial-gradient(ellipse 65% 50% at 80% 75%, rgba(168,85,247,0.10) 0%, rgba(6,182,212,0.06) 45%, transparent 70%)",
+        }}
       />
 
       {/* Subtle organic light wash overlay for seamless depth blending */}

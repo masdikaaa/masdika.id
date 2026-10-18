@@ -100,8 +100,13 @@ export function ProvisioningSection({
 
           {/* Right Column: Visualizer */}
           <FadeIn direction="left" delay={0.2} className="relative">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
+            {/* Ambient Background Glow — radial gradient instead of expensive blur filter */}
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full pointer-events-none"
+              style={{
+                background: "radial-gradient(circle at 50% 50%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.04) 45%, transparent 70%)"
+              }}
+            />
             
             <ProvisioningLiveVisualizer
               logs={logs}

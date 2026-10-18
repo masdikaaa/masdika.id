@@ -1,9 +1,14 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+/**
+ * Lightweight page transition using CSS-only opacity fade.
+ * Removed AnimatePresence + motion.div wrapper which added significant
+ * JS overhead (layout measurement, FLIP animations, exit tracking).
+ * The CSS transition achieves the same visual effect at near-zero cost.
+ */
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const prevPathname = useRef<string | null>(null);
@@ -19,17 +24,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <AnimatePresence mode="popLayout" initial={false}>
-      <motion.div
-        key={pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transitionEnd: { transform: "none" } }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className="flex flex-col min-h-[calc(100vh-64px)] w-full max-w-full"
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div
+      key={pathname}
+      className="flex flex-col min-h-[calc(100vh-64px)] w-full max-w-full page-fade-in"
+    >
+      {children}
+    </div>
   );
 }

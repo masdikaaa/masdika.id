@@ -134,9 +134,9 @@ export default async function RootLayout({
             {children}
           </main>
           <AIChatWrapper />
-          <Toaster 
-            theme="dark" 
-            position="top-right" 
+          <Toaster
+            theme="dark"
+            position="top-right"
             richColors
             toastOptions={{
               style: {

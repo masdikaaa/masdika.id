@@ -21,13 +21,23 @@ const nextConfig: NextConfig = {
     },
     // proxyClientMaxBodySize replaces middlewareClientMaxBodySize to configure max body size for Next.js API route bodies in App Router.
     proxyClientMaxBodySize: "10gb",
-    optimizePackageImports: ["lucide-react", "framer-motion"],
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "react-icons",
+      "date-fns",
+      "recharts",
+      "sonner",
+      "react-syntax-highlighter",
+    ],
   },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**" },
       { protocol: "http", hostname: "**" },
     ],
+    // Minimize image format negotiation
+    formats: ["image/webp", "image/avif"],
   },
   async rewrites() {
     return [
