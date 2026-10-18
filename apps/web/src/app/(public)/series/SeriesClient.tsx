@@ -386,7 +386,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                     {/* Thumbnail Cover */}
                     <Link
                       href={`/series/${s.slug}`}
-                      className="aspect-[16/10] relative overflow-hidden bg-slate-900 block cursor-pointer"
+                      className="aspect-[16/10] relative overflow-hidden bg-[var(--surface-secondary)] block cursor-pointer"
                     >
                       {s.image ? (
                         <Image

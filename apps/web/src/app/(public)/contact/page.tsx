@@ -121,7 +121,7 @@ export default function ContactPage() {
   const inputClass = cn(
     "w-full rounded-xl px-4 sm:px-5 py-3.5 transition-all duration-200 text-sm focus:outline-none focus:ring-1",
     isDark
-      ? "bg-[#050b14] border border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-cyan-400/30"
+      ? "bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-white placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-cyan-400/30"
       : "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-300 shadow-sm"
   );
 
@@ -304,7 +304,7 @@ export default function ContactPage() {
           <div className={cn(
             "w-full rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 lg:p-14 relative overflow-hidden border transition-all duration-300",
             isDark
-              ? "bg-[#050b14] border-white/10 shadow-2xl shadow-black/80"
+              ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-2xl shadow-black/80"
               : "bg-white border-slate-200/90 shadow-xl"
           )}>
             {/* Top ambient highlight line */}
@@ -333,7 +333,7 @@ export default function ContactPage() {
                     <TiltCard intensity={4} className={cn(
                       "flex items-center gap-4 sm:gap-5 p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 group relative overflow-hidden",
                       isDark
-                        ? "bg-[#011627] border-white/10 hover:border-cyan-500/40 hover:bg-[#031d33]"
+                        ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] hover:border-cyan-500/40 hover:bg-[#111f38]"
                         : "bg-slate-50 border-slate-200/90 hover:border-cyan-300 hover:bg-cyan-50/40 shadow-sm"
                     )}>
                       <div className={cn(
@@ -361,7 +361,7 @@ export default function ContactPage() {
                     <TiltCard intensity={4} className={cn(
                       "flex items-center gap-4 sm:gap-5 p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 group relative overflow-hidden",
                       isDark
-                        ? "bg-[#011627] border-white/10 hover:border-cyan-500/40 hover:bg-[#031d33]"
+                        ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] hover:border-cyan-500/40 hover:bg-[#111f38]"
                         : "bg-slate-50 border-slate-200/90 hover:border-cyan-300 hover:bg-cyan-50/40 shadow-sm"
                     )}>
                       <div className={cn(
@@ -391,7 +391,7 @@ export default function ContactPage() {
                     <TiltCard intensity={4} className={cn(
                       "flex items-center gap-4 sm:gap-5 p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 group relative overflow-hidden",
                       isDark
-                        ? "bg-[#011627] border-white/10 hover:border-cyan-500/40 hover:bg-[#031d33]"
+                        ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] hover:border-cyan-500/40 hover:bg-[#111f38]"
                         : "bg-slate-50 border-slate-200/90 hover:border-cyan-300 hover:bg-cyan-50/40 shadow-sm"
                     )}>
                       <div className={cn(
@@ -425,7 +425,7 @@ export default function ContactPage() {
                 <div className={cn(
                   "rounded-3xl p-6 sm:p-8 relative overflow-hidden border transition-all duration-300",
                   isDark
-                    ? "bg-[#011627] border-white/10 shadow-xl"
+                    ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] shadow-xl"
                     : "bg-slate-50/80 border-slate-200"
                 )}>
                   <div className="mb-6">

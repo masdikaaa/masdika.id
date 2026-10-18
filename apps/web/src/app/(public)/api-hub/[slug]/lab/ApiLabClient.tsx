@@ -297,13 +297,13 @@ export default function ApiLabClient({ project }: { project: any }) {
                         <>
                           <button
                             onClick={() => setShowKeyDropdown(v => !v)}
-                            className={cn("w-full sm:w-auto flex items-center gap-2 border px-4 py-2 rounded-lg text-xs font-mono transition-colors", isDark ? "bg-[#011627] border-white/10 text-cyan-400 hover:border-cyan-500/40" : "bg-cyan-50 border-cyan-200 text-cyan-700 hover:border-cyan-400")}
+                            className={cn("w-full sm:w-auto flex items-center gap-2 border px-4 py-2 rounded-lg text-xs font-mono transition-colors", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] text-cyan-400 hover:border-cyan-500/40" : "bg-cyan-50 border-cyan-200 text-cyan-700 hover:border-cyan-400")}
                           >
                             <span className="truncate max-w-[180px]">{apiKey}</span>
                             <svg className={`w-4 h-4 shrink-0 transition-transform ${showKeyDropdown ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
                           </button>
                           {showKeyDropdown && (
-                            <div className={cn("absolute top-full right-0 mt-2 z-50 border rounded-xl shadow-2xl overflow-hidden min-w-[280px]", isDark ? "bg-[#0a1929] border-white/10" : "bg-white border-slate-200")}>
+                            <div className={cn("absolute top-full right-0 mt-2 z-50 border rounded-xl shadow-2xl overflow-hidden min-w-[280px]", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                               {userKeys.map((k, i) => (
                                 <button
                                   key={k.id}
@@ -319,7 +319,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                           )}
                         </>
                       ) : (
-                        <div className={cn("border px-4 py-2 rounded-lg text-xs font-mono truncate max-w-xs shadow-inner", isDark ? "bg-[#011627] border-white/10 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <div className={cn("border px-4 py-2 rounded-lg text-xs font-mono truncate max-w-xs shadow-inner", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                           {apiKey}
                         </div>
                       )}
@@ -336,8 +336,8 @@ export default function ApiLabClient({ project }: { project: any }) {
               </div>
 
               {/* Endpoint Area */}
-              <div className={cn("rounded-2xl overflow-hidden shadow-2xl border", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
-                <div className={cn("px-5 py-3 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[#161b22] border-white/5" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("rounded-2xl overflow-hidden shadow-2xl border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                <div className={cn("px-5 py-3 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center gap-3">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -449,8 +449,8 @@ export default function ApiLabClient({ project }: { project: any }) {
                       </label>
                     </div>
                   ) : (
-                    <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
-                      <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#161b22] border-white/5" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                      <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                         <div className="flex gap-2 w-16">
                           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
@@ -473,8 +473,8 @@ export default function ApiLabClient({ project }: { project: any }) {
               )}
 
               {selectedMethod === "GET" && project.slug === "cdn" && (
-                <div className={cn("rounded-xl overflow-hidden shadow-2xl border mt-4", isDark ? "bg-[#0d1117] border-white/5" : "bg-white border-black/5")}>
-                  <div className={cn("px-4 py-3 flex items-center justify-between", isDark ? "bg-[#161b22]" : "bg-slate-50 border-b border-slate-200")}>
+                <div className={cn("rounded-xl overflow-hidden shadow-2xl border mt-4", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                  <div className={cn("px-4 py-3 flex items-center justify-between", isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-b border-slate-200")}>
                     <span className={cn("text-xs font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>Query Parameter</span>
                   </div>
                   <div className="p-5 flex flex-col gap-2">
@@ -496,8 +496,8 @@ export default function ApiLabClient({ project }: { project: any }) {
               )}
 
               {/* Response Area */}
-              <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6 relative", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
-                <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#161b22] border-white/5" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6 relative", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center gap-3">
                     <Terminal className="w-4 h-4 text-cyan-500" />
                     <span className={cn("text-xs font-mono tracking-wider", isDark ? "text-zinc-300" : "text-slate-600")}>Response</span>
@@ -519,7 +519,7 @@ export default function ApiLabClient({ project }: { project: any }) {
 
                 <div className={cn("relative min-h-[250px] max-h-[500px] flex flex-col w-full", isDark ? "bg-black/20" : "bg-slate-50")}>
                   {isTesting ? (
-                    <div className={cn("absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-10", isDark ? "bg-[#0d1117]/80" : "bg-white/80")}>
+                    <div className={cn("absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-10", isDark ? "bg-[var(--surface)]/80" : "bg-white/80")}>
                       <div className="relative">
                         <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -705,9 +705,9 @@ export default function ApiLabClient({ project }: { project: any }) {
                         <p className={cn("text-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>{snippet.desc}</p>
                       </div>
 
-                      <div className={cn("rounded-xl overflow-hidden border shadow-2xl", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
+                      <div className={cn("rounded-xl overflow-hidden border shadow-2xl", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
                         {/* Tab Style Header */}
-                        <div className={cn("flex items-end justify-between px-4 pt-3 border-b", isDark ? "bg-[#161b22] border-[#30363d]" : "bg-slate-50 border-slate-200")}>
+                        <div className={cn("flex items-end justify-between px-4 pt-3 border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                           <div className="flex items-end min-w-0 flex-1 mr-4">
                             {/* macOS buttons */}
                             <div className="flex items-center gap-2 mb-3 mr-6 shrink-0">
@@ -717,7 +717,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                             </div>
 
                             {/* The Tab */}
-                            <div className={cn("flex items-center gap-2 px-4 h-9 rounded-t-lg border-x border-t min-w-0", isDark ? "bg-[#0d1117] border-[#30363d] shadow-[0_-2px_10px_rgba(0,0,0,0.2)]" : "bg-white border-slate-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]")}>
+                            <div className={cn("flex items-center gap-2 px-4 h-9 rounded-t-lg border-x border-t min-w-0", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-[0_-2px_10px_rgba(0,0,0,0.2)]" : "bg-white border-slate-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]")}>
                               <img referrerPolicy="no-referrer" src={snippet.icon} className="w-4 h-4 object-contain shrink-0" alt={snippet.name} loading="lazy" decoding="async" />
                               <span className={cn("text-sm font-semibold tracking-wide truncate leading-none", isDark ? "text-white" : "text-slate-900")}>
                                 {snippet.name}
@@ -737,7 +737,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                         </div>
 
                         {/* Code Content */}
-                        <div className={cn("overflow-x-auto hide-scrollbar", isDark ? "bg-[#0d1117]" : "bg-white")}>
+                        <div className={cn("overflow-x-auto hide-scrollbar", isDark ? "bg-[var(--surface)]" : "bg-white")}>
                           <SyntaxHighlighter
                             language={snippet.lang}
                             style={isDark ? vscDarkPlus : oneLight}
@@ -759,9 +759,9 @@ export default function ApiLabClient({ project }: { project: any }) {
                   <p className="mb-4">Send a <em>request</em> <strong>GET</strong> to the following URL to download or view the file.</p>
 
                   {/* GET Endpoint Code Block */}
-                  <div className={cn("rounded-xl overflow-hidden shadow-2xl mb-8 border", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
+                  <div className={cn("rounded-xl overflow-hidden shadow-2xl mb-8 border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
                     {/* Header */}
-                    <div className={cn("flex items-center justify-between px-3 py-2 border-b", isDark ? "bg-[#161b22] border-[#30363d]" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("flex items-center justify-between px-3 py-2 border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                       <div className="flex items-center gap-1.5 ml-1">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
                         <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
@@ -783,7 +783,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                     </div>
 
                     {/* Code Content */}
-                    <div className={cn("overflow-x-auto hide-scrollbar", isDark ? "bg-[#0d1117]" : "bg-white")}>
+                    <div className={cn("overflow-x-auto hide-scrollbar", isDark ? "bg-[var(--surface)]" : "bg-white")}>
                       <SyntaxHighlighter
                         language="bash"
                         style={isDark ? vscDarkPlus : oneLight}

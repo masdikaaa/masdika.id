@@ -574,7 +574,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                       {/* Right: Cover Image */}
                       <Link
                         href={`/blog/${heroPost.slug}`}
-                        className="lg:col-span-5 relative min-h-[240px] sm:min-h-[300px] lg:min-h-full overflow-hidden bg-slate-900 block order-1 lg:order-2 cursor-pointer"
+                        className="lg:col-span-5 relative min-h-[240px] sm:min-h-[300px] lg:min-h-full overflow-hidden bg-[var(--surface-secondary)] block order-1 lg:order-2 cursor-pointer"
                       >
                         {heroPost.image ? (
                           <Image
@@ -617,7 +617,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                         {/* Thumbnail Cover */}
                         <Link
                           href={`/blog/${post.slug}`}
-                          className="aspect-[16/10] relative overflow-hidden bg-slate-900 block cursor-pointer"
+                          className="aspect-[16/10] relative overflow-hidden bg-[var(--surface-secondary)] block cursor-pointer"
                         >
                           {post.image ? (
                             <Image
@@ -638,7 +638,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                           {/* Category Badge Floating on Image */}
                           {post.category?.name && (
                             <div className="absolute top-3.5 left-3.5 z-10">
-                              <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white/95 dark:bg-[#050B14]/90 text-cyan-700 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-500/30 backdrop-blur-md shadow-md">
+                              <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white/95 dark:bg-[var(--surface)]/90 text-cyan-700 dark:text-cyan-400 border border-cyan-200/50 dark:border-cyan-500/30 backdrop-blur-md shadow-md">
                                 {post.category.name}
                               </span>
                             </div>

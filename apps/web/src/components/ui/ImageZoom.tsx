@@ -100,7 +100,7 @@ export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoom
       <>
         {/* Hero style thumbnail */}
         <div
-          className="w-full rounded-3xl bg-[#050B14] border border-white/5 overflow-hidden relative group cursor-zoom-in"
+          className="w-full rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] overflow-hidden relative group cursor-zoom-in"
           onClick={() => setIsOpen(true)}
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-transparent to-cyan-500/20 z-10 pointer-events-none" />
@@ -127,7 +127,7 @@ export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoom
   return (
     <>
       <div
-        className="w-full rounded-3xl overflow-hidden mb-10 border border-white/5 relative cursor-zoom-in group bg-[#011627]/50"
+        className="w-full rounded-3xl overflow-hidden mb-10 border border-[var(--border-primary)] relative cursor-zoom-in group bg-[var(--surface)]"
         onClick={() => setIsOpen(true)}
       >
         <img referrerPolicy="no-referrer"           src={src}
@@ -135,7 +135,7 @@ export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoom
           className="w-full h-auto max-h-[400px] sm:max-h-[500px] object-cover group-hover:scale-105 transition-transform duration-500"
         loading="lazy" decoding="async" />
         {hintText && <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#011627] via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-60" />
         <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${hintText ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
           <div className={`bg-black/50 backdrop-blur-md ${hintText ? 'py-1.5 px-3 sm:py-2.5 sm:px-5 border border-white/10 group-hover:border-white/30 group-hover:bg-black/60 shadow-xl' : 'p-2.5 sm:p-3'} rounded-full text-white flex items-center gap-1.5 sm:gap-2 transition-all`}>
             <ZoomIn className="w-4 h-4 sm:w-6 sm:h-6" />

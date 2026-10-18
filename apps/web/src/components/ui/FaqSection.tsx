@@ -27,7 +27,7 @@ export function FaqSection({ faqs }: FaqSectionProps) {
 
         <div className="space-y-6">
           {faqs.map((faq, i) => (
-            <details key={i} className={cn("group rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-xl transition-colors", isDark ? "bg-[#0d1629] backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 ring-1 ring-white/5 shadow-black/40" : "bg-white border border-cyan-200 hover:border-cyan-400 shadow-sm")}>
+            <details key={i} className={cn("group rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-xl transition-colors", isDark ? "bg-[var(--surface)] backdrop-blur-md border border-[var(--border-primary)] hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-cyan-200 hover:border-cyan-400 shadow-sm")}>
               <summary className={cn("flex items-center justify-between gap-4 p-5 sm:p-8 font-bold text-base sm:text-lg md:text-xl select-none list-none group-open:text-cyan-400 transition-colors [&::-webkit-details-marker]:hidden", isDark ? "text-white" : "text-slate-900")}>
                 <span className="flex-1 leading-snug">{faq.q}</span>
                 <div className={cn("shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 group-open:bg-cyan-500/20 group-open:border-cyan-500/40" : "bg-cyan-50 border-cyan-200 group-open:bg-cyan-100 group-open:border-cyan-300")}>

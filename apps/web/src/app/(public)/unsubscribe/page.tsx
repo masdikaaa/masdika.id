@@ -52,7 +52,7 @@ function UnsubscribeForm() {
           onChange={e => setEmail(e.target.value)}
           required
           placeholder="your@email.com"
-          className="w-full px-5 py-4 bg-[#080d1a] border border-slate-700/80 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+          className="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
         />
       </div>
       <button 
@@ -88,7 +88,7 @@ export default function UnsubscribePage() {
           We're sorry to see you go. Enter your email below to unsubscribe from our newsletter updates.
         </p>
         
-        <div className="max-w-md mx-auto text-left bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/40">
+        <div className="max-w-md mx-auto text-left bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/40">
           <Suspense fallback={<div className="text-center text-zinc-500 py-10">Loading...</div>}>
             <UnsubscribeForm />
           </Suspense>

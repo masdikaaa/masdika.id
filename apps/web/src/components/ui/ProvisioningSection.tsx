@@ -41,7 +41,7 @@ export function ProvisioningSection({
       {/* Background elements */}
       {isDark && (
         <>
-          <div className="absolute inset-0 bg-[#050b14]/80 border-y border-white/5" />
+          <div className="absolute inset-0 bg-[var(--surface)]/80 border-y border-[var(--border-primary)]" />
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
         </>
       )}

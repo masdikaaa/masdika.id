@@ -72,7 +72,7 @@ export function ProvisioningLiveVisualizer({
     <div
       className={cn(
         "w-full rounded-3xl overflow-hidden relative border shadow-2xl transition-all duration-300",
-        isDark ? "bg-[#050b14] border-white/10" : "bg-white border-slate-200/90 shadow-xl"
+        isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200/90 shadow-xl"
       )}
     >
       {/* Top Gradient Progress Bar */}
@@ -166,10 +166,10 @@ export function ProvisioningLiveVisualizer({
                           : "bg-cyan-50 border-cyan-500 text-cyan-600"
                         : isActive
                           ? isDark
-                            ? "bg-[#050b14] border-cyan-400 text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.5)]"
+                            ? "bg-[var(--surface)] border-cyan-400 text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.5)]"
                             : "bg-white border-cyan-500 text-cyan-600 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                           : isDark
-                            ? "bg-[#050b14] border-white/10 text-zinc-600"
+                            ? "bg-[var(--surface)] border-[var(--border-primary)] text-zinc-600"
                             : "bg-white border-slate-200 text-slate-300"
                     )}
                   >
@@ -238,7 +238,7 @@ export function ProvisioningLiveVisualizer({
                       className={cn(
                         "mt-1.5 flex items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl font-mono text-xs sm:text-[13px] border transition-colors",
                         isDark
-                          ? "bg-[#011627] border-cyan-500/30 text-emerald-400"
+                          ? "bg-[var(--surface-secondary)] border-cyan-500/30 text-emerald-400"
                           : "bg-slate-900 border-slate-800 text-emerald-400"
                       )}
                     >

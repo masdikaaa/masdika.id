@@ -832,10 +832,10 @@ export function AIChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={cn("fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-32px)] sm:w-96 h-[560px] max-h-[85vh] sm:max-h-[90vh] backdrop-blur-md border rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/60" : "bg-white border-slate-200")}
+            className={cn("fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-32px)] sm:w-96 h-[560px] max-h-[85vh] sm:max-h-[90vh] backdrop-blur-md border rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-black/60" : "bg-white border-slate-200")}
           >
             {/* Header */}
-            <div className={cn("flex items-center justify-between p-4 border-b", isDark ? "border-slate-700/80 bg-[#080d1a]" : "border-slate-200 bg-white")}>
+            <div className={cn("flex items-center justify-between p-4 border-b", isDark ? "border-[var(--border-primary)] bg-[var(--surface-secondary)]" : "border-slate-200 bg-white")}>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-[#0F3B4A] border-[1.5px] border-cyan-400 flex items-center justify-center text-cyan-400 shadow-[2px_2px_0_#22d3ee]">
                   <Bot size={18} strokeWidth={2.5} />
@@ -953,7 +953,7 @@ export function AIChat() {
                               value={digit}
                               onChange={(e) => handleOtpChange(idx, e.target.value)}
                               onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                              className={cn("w-10 h-12 sm:w-12 sm:h-14 border rounded-lg text-center text-xl font-bold text-cyan-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[#0d1117] border-cyan-500/20" : "bg-white border-slate-200")}
+                              className={cn("w-10 h-12 sm:w-12 sm:h-14 border rounded-lg text-center text-xl font-bold text-cyan-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[var(--surface-secondary)] border-cyan-500/20" : "bg-white border-slate-200")}
                             />
                           ))}
                         </div>
@@ -1041,7 +1041,7 @@ export function AIChat() {
                               onChange={(e) => { setRegName(e.target.value); if (regErrors.name) setRegErrors(p => ({...p, name: undefined})); }}
                               placeholder="Full Name"
                               maxLength={100}
-                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[#0d1117] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.name ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
+                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.name ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
                             />
                           </div>
                           {regErrors.name && <p className="text-xs text-red-400 mt-1 pl-1">{regErrors.name}</p>}
@@ -1057,7 +1057,7 @@ export function AIChat() {
                               onChange={(e) => { setRegEmail(e.target.value); if (regErrors.email) setRegErrors(p => ({...p, email: undefined})); }}
                               placeholder="Active Email"
                               maxLength={254}
-                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[#0d1117] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.email ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
+                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.email ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
                             />
                           </div>
                           {regErrors.email && <p className="text-xs text-red-400 mt-1 pl-1">{regErrors.email}</p>}
@@ -1073,7 +1073,7 @@ export function AIChat() {
                               onChange={(e) => { setRegPhone(e.target.value); if (regErrors.phone) setRegErrors(p => ({...p, phone: undefined})); }}
                               placeholder="WhatsApp No. (08xx)"
                               maxLength={15}
-                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[#0d1117] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.phone ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
+                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.phone ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
                             />
                           </div>
                           {regErrors.phone && <p className="text-xs text-red-400 mt-1 pl-1">{regErrors.phone}</p>}
@@ -1160,12 +1160,12 @@ export function AIChat() {
                             </div>
                           ) : msg.content ? (
                             <div
-                              className={cn("p-3 rounded-2xl text-sm rounded-tl-none prose prose-sm max-w-none min-w-0 overflow-x-auto", isDark ? "bg-[#080d1a] border border-slate-700/80 text-gray-200 prose-invert" : "bg-slate-100 text-slate-800")}
+                              className={cn("p-3 rounded-2xl text-sm rounded-tl-none prose prose-sm max-w-none min-w-0 overflow-x-auto", isDark ? "bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-gray-200 prose-invert" : "bg-slate-100 text-slate-800")}
                               dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
                             />
                           ) : (
                             // Empty placeholder while streaming starts
-                            <div className={cn("p-3 rounded-2xl text-sm rounded-tl-none italic", isDark ? "bg-[#011627] border border-cyan-500/20 text-gray-500" : "bg-slate-100 text-slate-400")}>
+                            <div className={cn("p-3 rounded-2xl text-sm rounded-tl-none italic", isDark ? "bg-[var(--surface-secondary)] border border-cyan-500/20 text-gray-500" : "bg-slate-100 text-slate-400")}>
                               <Loader2 size={14} className="animate-spin text-cyan-400 inline mr-2" />
                               Typing...
                             </div>
@@ -1180,7 +1180,7 @@ export function AIChat() {
                         <div className={cn("flex-shrink-0 w-6 h-6 mt-1 rounded-full flex items-center justify-center border", isDark ? "bg-[#0F3B4A] border-cyan-400" : "bg-cyan-50 border-cyan-500")}>
                           <Bot size={12} className="text-cyan-400" strokeWidth={2.5} />
                         </div>
-                        <div className={cn("p-3 rounded-2xl rounded-tl-none text-sm flex items-center gap-2", isDark ? "bg-[#011627] border border-cyan-500/20 text-gray-200" : "bg-slate-100 text-slate-700")}>
+                        <div className={cn("p-3 rounded-2xl rounded-tl-none text-sm flex items-center gap-2", isDark ? "bg-[var(--surface-secondary)] border border-cyan-500/20 text-gray-200" : "bg-slate-100 text-slate-700")}>
                           <Loader2 size={14} className="animate-spin text-cyan-400" />
                           Please Wait...
                         </div>
@@ -1191,7 +1191,7 @@ export function AIChat() {
                 </div>
 
                 {/* Input Area */}
-                <div className={cn("p-3 border-t backdrop-blur-sm", isDark ? "border-slate-700/80 bg-[#080d1a]" : "border-slate-200 bg-white")}>
+                <div className={cn("p-3 border-t backdrop-blur-sm", isDark ? "border-[var(--border-primary)] bg-[var(--surface-secondary)]" : "border-slate-200 bg-white")}>
                   {inputWarning && (
                     <div className="flex items-center gap-1.5 mb-2 px-1 text-xs text-cyan-400">
                       <AlertTriangle size={12} />
@@ -1212,7 +1212,7 @@ export function AIChat() {
                       }}
                       placeholder="Type a message..."
                       maxLength={MAX_INPUT_LENGTH}
-                      className={cn("w-full border rounded-full py-2 pl-4 pr-20 text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[#0d1629] border-slate-700/80 text-white placeholder-gray-500" : "bg-slate-100 border-slate-200 text-slate-900 placeholder-slate-400")}
+                      className={cn("w-full border rounded-full py-2 pl-4 pr-20 text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] text-white placeholder-gray-500" : "bg-slate-100 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                     <div className="absolute right-2 flex items-center gap-1">
                       <button

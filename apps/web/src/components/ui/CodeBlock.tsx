@@ -99,9 +99,9 @@ export function CodeBlock({
   // Syntax highlighting is now handled by react-syntax-highlighter
 
   return (
-    <div className="rounded-xl overflow-hidden bg-[#0d1117] border border-white/10 shadow-2xl my-8">
+    <div className="rounded-xl overflow-hidden bg-[var(--surface)] border border-[var(--border-primary)] shadow-2xl my-8">
       {/* Tab Style Header like the screenshot */}
-      <div className="flex items-end justify-between px-4 pt-3 bg-[#161b22] border-b border-[#30363d]">
+      <div className="flex items-end justify-between px-4 pt-3 bg-[var(--surface-secondary)] border-b border-[var(--border-primary)]">
         <div className="flex items-center min-w-0 flex-1 mr-4">
           {/* macOS buttons */}
           <div className="flex gap-2 pb-3 mr-6 shrink-0">
@@ -111,7 +111,7 @@ export function CodeBlock({
           </div>
           
           {/* The Tab */}
-          <div className="flex items-center gap-2 bg-[#0d1117] px-4 py-2.5 rounded-t-lg border-x border-t border-[#30363d] shadow-[0_-2px_10px_rgba(0,0,0,0.2)] min-w-0">
+          <div className="flex items-center gap-2 bg-[var(--surface)] px-4 py-2.5 rounded-t-lg border-x border-t border-[var(--border-primary)] shadow-[0_-2px_10px_rgba(0,0,0,0.2)] min-w-0">
             <div className="shrink-0">{getLanguageIcon()}</div>
             <span className="text-sm font-semibold text-white tracking-wide truncate">
               {title || language}
@@ -129,7 +129,7 @@ export function CodeBlock({
       </div>
 
       {/* Code Content */}
-      <div className="bg-[#0d1117] overflow-x-auto hide-scrollbar">
+      <div className="bg-[var(--surface)] overflow-x-auto hide-scrollbar">
         <SyntaxHighlighter
           language={language.toLowerCase() === 'sh' ? 'bash' : (language.toLowerCase() === 'yml' ? 'yaml' : language.toLowerCase())}
           style={vscDarkPlus}

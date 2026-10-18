@@ -333,7 +333,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
         {/* Table of Contents */}
         {toc.length > 0 && (
-          <details className={cn("group backdrop-blur-xl border border-l-4 p-5 sm:p-6 rounded-2xl rounded-tr-[2rem] rounded-bl-[2rem] mb-12 shadow-xl w-full max-w-full min-w-0 transition-all duration-300", isDark ? "bg-[#0d1629] border-slate-700/80 border-l-cyan-400 ring-1 ring-white/5 shadow-black/40" : "bg-white border-black/5 border-l-cyan-500")} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+          <details className={cn("group backdrop-blur-xl border border-l-4 p-5 sm:p-6 rounded-2xl rounded-tr-[2rem] rounded-bl-[2rem] mb-12 shadow-xl w-full max-w-full min-w-0 transition-all duration-300", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] border-l-cyan-400 shadow-black/40" : "bg-white border-black/5 border-l-cyan-500")} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             <summary className="text-lg font-bold flex items-center cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none outline-none">
               <div className={cn("flex items-center gap-2 flex-1", isDark ? "text-white" : "text-slate-900")}>
                 <span className="w-1.5 h-6 bg-cyan-500 rounded-full"></span>
@@ -487,16 +487,16 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
               </div>
             ) : (
               recentPosts.map((recent) => (
-                <Link key={recent.id} href={`/blog/${recent.slug}`} className={cn("group flex flex-col backdrop-blur-md border rounded-3xl overflow-hidden transition-colors transform-gpu duration-300 shadow-xl hover:-translate-y-2 relative", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border-black/5 hover:border-cyan-500/40 hover:shadow-2xl")}>
+                <Link key={recent.id} href={`/blog/${recent.slug}`} className={cn("group flex flex-col backdrop-blur-md border rounded-3xl overflow-hidden transition-colors transform-gpu duration-300 shadow-xl hover:-translate-y-2 relative", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] hover:border-cyan-500/50 hover:bg-[#0d172e] shadow-black/40" : "bg-white border-black/5 hover:border-cyan-500/40 hover:shadow-2xl")}>
                   {/* Image Section with Fade */}
-                  <div className={cn("w-full h-56 sm:h-64 relative overflow-hidden", isDark ? "bg-gradient-to-br from-[#0a1f33] to-[#011627]" : "bg-slate-100")}>
+                  <div className={cn("w-full h-56 sm:h-64 relative overflow-hidden", isDark ? "bg-gradient-to-br from-[#0d172e] to-[#080e1e]" : "bg-slate-100")}>
                     {recent.image ? (
                       <img referrerPolicy="no-referrer" src={recent.image} alt={recent.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" draggable={false} loading="lazy" decoding="async" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-cyan-500/30 group-hover:text-cyan-500/50 transition-colors text-6xl font-black">{recent.title[0]}</div>
                     )}
                     {/* Overlay Gradient on Image */}
-                    <div className={cn("absolute inset-0 pointer-events-none z-10 opacity-90", isDark ? "bg-gradient-to-b from-transparent via-transparent to-[#0d1629]" : "bg-gradient-to-b from-transparent via-transparent to-white")}></div>
+                    <div className={cn("absolute inset-0 pointer-events-none z-10 opacity-90", isDark ? "bg-gradient-to-b from-transparent via-transparent to-[#080e1e]" : "bg-gradient-to-b from-transparent via-transparent to-white")}></div>
 
                     {/* Category Badge */}
                     <div className={cn("absolute top-5 left-5 px-3.5 py-1.5 backdrop-blur-md rounded-xl border text-[11px] font-bold tracking-widest uppercase z-20 shadow-lg", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white/90 border-black/10 text-slate-900")}>
@@ -507,7 +507,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                   {/* Content Section */}
                   <div className="px-6 pb-8 sm:px-8 sm:pb-8 flex flex-col flex-1 relative z-20 -mt-10">
                     {/* Meta Info */}
-                    <div className={cn("flex items-center gap-4 text-[13px] font-semibold mb-4 w-max px-4 py-1.5 rounded-full border backdrop-blur-sm", isDark ? "text-cyan-400/80 bg-[#0d1629]/90 border-slate-700" : "text-cyan-700 bg-white border-black/10 shadow-sm")}>
+                    <div className={cn("flex items-center gap-4 text-[13px] font-semibold mb-4 w-max px-4 py-1.5 rounded-full border backdrop-blur-sm", isDark ? "text-cyan-400/80 bg-[var(--surface)]/90 border-[var(--border-primary)]" : "text-cyan-700 bg-white border-black/10 shadow-sm")}>
                       <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(recent.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       <span className={cn("w-1 h-1 rounded-full", isDark ? "bg-cyan-500/30" : "bg-black/20")}></span>
                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {recent.readTime || 5} min</span>
@@ -547,10 +547,10 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
           <div className="space-y-6">
             {post.comments?.map((comment: any) => (
-              <div key={comment.id} className={cn("flex flex-col mb-4 border p-5 sm:p-6 rounded-2xl transition-all shadow-md", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/40 shadow-black/30" : "bg-white border-black/5 hover:border-black/10")}>
+              <div key={comment.id} className={cn("flex flex-col mb-4 border p-5 sm:p-6 rounded-2xl transition-all shadow-md", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] hover:border-cyan-500/40 shadow-black/30" : "bg-white border-black/5 hover:border-black/10")}>
                 <div className="flex gap-4 sm:gap-5">
                   {/* Avatar */}
-                  <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center font-bold text-sm shrink-0 relative overflow-hidden", isDark ? "bg-gradient-to-br from-[#0a1f33] to-[#011627] border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-black/10 text-cyan-600")}>
+                  <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center font-bold text-sm shrink-0 relative overflow-hidden", isDark ? "bg-gradient-to-br from-[#0d172e] to-[#080e1e] border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-black/10 text-cyan-600")}>
                     <span className="relative z-0">{comment.name[0].toUpperCase()}</span>
                     {comment.gravatar && (
                       <img referrerPolicy="no-referrer" 
@@ -609,7 +609,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                         {comment.replies.map((reply: any) => (
                           <div key={reply.id} className="flex gap-3 sm:gap-4 group relative">
                             {/* Reply Avatar */}
-                            <div className={cn("w-8 h-8 rounded-full border flex items-center justify-center font-bold text-[11px] shrink-0 overflow-hidden relative", isDark ? "bg-gradient-to-br from-[#0a1f33] to-[#011627] border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-black/10 text-cyan-600")}>
+                            <div className={cn("w-8 h-8 rounded-full border flex items-center justify-center font-bold text-[11px] shrink-0 overflow-hidden relative", isDark ? "bg-gradient-to-br from-[#0d172e] to-[#080e1e] border-cyan-500/30 text-cyan-400" : "bg-slate-100 border-black/10 text-cyan-600")}>
                               {reply.isAdmin && post.adminImage ? (
                                 <img referrerPolicy="no-referrer" src={post.adminImage} alt="Admin" className="absolute inset-0 w-full h-full object-cover z-10" loading="lazy" decoding="async" />
                               ) : (

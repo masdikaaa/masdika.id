@@ -80,7 +80,7 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ slug: s
 
           {/* Series Header */}
           <div className={cn("relative rounded-3xl overflow-hidden mb-10 border", isDark ? "shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-white/[0.08]" : "border-black/5 bg-white shadow-xl")}>
-            <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-[#011627]/40" : "bg-slate-50")} />
+            <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-[var(--surface)]" : "bg-slate-50")} />
             <div className={cn("absolute -top-10 -left-10 w-56 h-56 rounded-full blur-3xl pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
             <div className={cn("absolute -bottom-10 -right-10 w-56 h-56 rounded-full blur-3xl pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
             <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
@@ -88,7 +88,7 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ slug: s
             <div className="relative z-10 flex flex-col md:flex-row gap-6 p-8">
               {/* NOTE: Recommended image size is 1730x909 pixels to prevent cropping */}
               {series.image && (
-                <div className={cn("w-full md:w-64 aspect-[1730/909] rounded-2xl overflow-hidden shrink-0 border", isDark ? "border-white/10 bg-black/30" : "border-black/5 bg-slate-100")}>
+                <div className={cn("w-full md:w-64 aspect-[1730/909] rounded-2xl overflow-hidden shrink-0 border", isDark ? "border-[var(--border-primary)] bg-[var(--surface-secondary)]" : "border-black/5 bg-slate-100")}>
                   <img referrerPolicy="no-referrer" src={series.image} alt={series.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 </div>
               )}
@@ -123,12 +123,12 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ slug: s
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.04 }}>
                 <Link href={`/series/${slug}/${ep.slug}`}
-                  className={cn("group relative flex flex-col sm:flex-row items-stretch gap-5 rounded-2xl overflow-hidden p-4 sm:p-5 hover:-translate-y-0.5 transition-all duration-200 border", isDark ? "border-white/[0.10] hover:border-cyan-500/30" : "border-black/5 hover:border-cyan-500/40 bg-white shadow-sm hover:shadow-md")}>
+                  className={cn("group relative flex flex-col sm:flex-row items-stretch gap-5 rounded-2xl overflow-hidden p-4 sm:p-5 hover:-translate-y-0.5 transition-all duration-200 border", isDark ? "border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/30" : "border-black/5 hover:border-cyan-500/40 bg-white shadow-sm hover:shadow-md")}>
                   <div className={cn("absolute inset-0 transition-colors pointer-events-none", isDark ? "bg-white/[0.04] group-hover:bg-white/[0.07]" : "bg-slate-50/0 group-hover:bg-slate-50/50")} />
 
                   {/* Thumbnail */}
                   {/* NOTE: Recommended image size is 1730x909 pixels to prevent cropping */}
-                  <div className={cn("relative z-10 w-full sm:w-56 md:w-64 lg:w-72 aspect-[1730/909] sm:aspect-auto sm:min-h-[140px] rounded-xl overflow-hidden shrink-0 border flex items-center justify-center", isDark ? "border-white/10 bg-black/30" : "border-black/5 bg-slate-100")}>
+                  <div className={cn("relative z-10 w-full sm:w-56 md:w-64 lg:w-72 aspect-[1730/909] sm:aspect-auto sm:min-h-[140px] rounded-xl overflow-hidden shrink-0 border flex items-center justify-center", isDark ? "border-[var(--border-primary)] bg-[var(--surface-secondary)]" : "border-black/5 bg-slate-100")}>
                     {ep.image ? (
                       <img referrerPolicy="no-referrer" src={ep.image} alt={ep.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
                     ) : (
