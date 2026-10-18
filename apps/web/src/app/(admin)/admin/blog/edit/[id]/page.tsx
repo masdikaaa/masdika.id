@@ -412,7 +412,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                   placeholder="New category name..."
-                  className={cn("flex-1 px-4 py-2.5 bg-black/40 border border-cyan-500/20 rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0A0B1A] border-cyan-500/20 text-white" : "bg-white border-slate-300 text-slate-900")}
                   autoFocus
                 />
                 <button onClick={handleAddCategory} className={cn("px-4 py-2.5 bg-cyan-500 font-bold rounded-xl text-sm hover:bg-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
@@ -425,15 +425,16 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           <div className="space-y-2">
             <label className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Tags</label>
             <div className="flex flex-col gap-2">
-              <div className={cn("flex flex-wrap gap-2 p-2 pr-12 min-h-[52px] max-h-32 overflow-y-auto bg-black/40 border rounded-xl focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500/50 transition-all relative", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")}>
+              <div className={cn("flex flex-wrap gap-2 p-2 pr-12 min-h-[52px] max-h-32 overflow-y-auto border rounded-xl focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500/50 transition-all relative", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")}>
                 {tags.map(tag => (
                   <div
                     key={tag.id}
-                    className={`flex items-center gap-1 pl-3 pr-1 py-1 text-sm rounded-lg transition-colors border cursor-pointer ${
-                      selectedTags.includes(tag.id) 
-                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300' 
-                        : 'bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
-                    }`}
+                    className={cn(
+                      "flex items-center gap-1 pl-3 pr-1 py-1 text-sm rounded-lg transition-colors border cursor-pointer",
+                      selectedTags.includes(tag.id)
+                        ? (isDark ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-300" : "bg-cyan-100 border-cyan-300 text-cyan-800 font-medium")
+                        : (isDark ? "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200")
+                    )}
                     onClick={() => {
                       setSelectedTags(prev => 
                         prev.includes(tag.id) ? prev.filter(id => id !== tag.id) : [...prev, tag.id]
@@ -446,7 +447,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                         e.stopPropagation();
                         setDeleteTarget({ type: 'tag', id: tag.id });
                       }}
-                      className={cn("p-1 hover:bg-red-500/20 hover: rounded-md transition-colors ml-1", isDark ? "text-red-400" : "text-red-700")}
+                      className={cn("p-1 hover:bg-red-500/20 rounded-md transition-colors ml-1", isDark ? "text-red-400" : "text-red-700")}
                       title="Delete tag"
                     >
                       <X className="w-3 h-3" />
@@ -472,7 +473,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => setNewTagName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                     placeholder="New tag name..."
-                    className={cn("flex-1 px-4 py-2.5 bg-black/40 border border-cyan-500/20 rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "text-white" : "text-slate-900")}
+                    className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0A0B1A] border-cyan-500/20 text-white" : "bg-white border-slate-300 text-slate-900")}
                     autoFocus
                   />
                   <button onClick={handleAddTag} className={cn("px-4 py-2.5 bg-cyan-500 font-bold rounded-xl text-sm hover:bg-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
@@ -495,7 +496,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
             onChange={handleChange}
             rows={2}
             placeholder="A brief summary of what this article is about..." 
-            className={cn("w-full px-5 py-3.5 bg-black/40 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all resize-none", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")} 
+            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all resize-none", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")} 
           />
         </div>
 
@@ -505,7 +506,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
             <label className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Content (Markdown)</label>
             <button
               onClick={() => setPreview(!preview)}
-              className={cn("flex items-center gap-1.5 text-xs font-medium hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10", isDark ? "text-zinc-400" : "text-slate-500")}
+              className={cn("flex items-center gap-1.5 text-xs font-medium transition-colors px-3 py-1.5 rounded-lg", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
             >
               {preview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               {preview ? "Edit" : "Preview"}
@@ -513,7 +514,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           </div>
 
           {preview ? (
-            <div className={cn("bg-black/40 border rounded-xl p-5", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("border rounded-xl p-5", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <MarkdownPreview content={formData.content} />
             </div>
           ) : (
@@ -597,7 +598,7 @@ function MarkdownPreview({ content }: { content: string }) {
   const parts = content.split(/```/);
 
   return (
-    <div className={cn("w-full min-h-[400px] px-5 py-4 bg-black/40 border rounded-b-xl prose prose-invert prose-sm max-w-none overflow-y-auto font-sans", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
+    <div className={cn("w-full min-h-[400px] px-5 py-4 border rounded-b-xl prose prose-sm max-w-none overflow-y-auto font-sans", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300 prose-invert" : "bg-white border-slate-200 text-slate-700")}>
       {parts.map((part, index) => {
         if (index % 2 === 1) {
           // This is a code block

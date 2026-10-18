@@ -275,7 +275,7 @@ export default function AdminPlansPage() {
         <div className="relative w-full sm:w-64">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={cn("w-full flex items-center justify-between bg-[#0f172a] border text-sm font-semibold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer transition-all hover:bg-white/5", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+            className={cn("w-full flex items-center justify-between border text-sm font-semibold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C] hover:bg-white/5" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50 hover:bg-slate-50")}
           >
             <span>{activeTab === "ALL" ? "All Services" : activeTab.replace('_', ' ')}</span>
             <ChevronDown className={cn("w-4 h-4 transition-transform", isDropdownOpen ? "rotate-180" : "", isDark ? "text-zinc-400" : "text-slate-500")} />
@@ -284,7 +284,7 @@ export default function AdminPlansPage() {
           {isDropdownOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
-              <div className={cn("absolute z-50 w-full mt-2 bg-[#0f172a] border rounded-xl overflow-hidden py-1", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("absolute z-50 w-full mt-2 border rounded-xl overflow-hidden py-1 shadow-xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
                 <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                   {services.map((service) => (
                     <button
@@ -305,7 +305,7 @@ export default function AdminPlansPage() {
           )}
         </div>
       </div>
-      <div className={cn("bg-[#0f172a] border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
             <thead className={cn("text-xs uppercase border-b", isDark ? "text-zinc-500 bg-[#0A0B1A]/50 border-white/5" : "text-slate-500 bg-white border-slate-200")}>
@@ -404,13 +404,13 @@ export default function AdminPlansPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             
-            <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 bg-[#0f172a]/95 backdrop-blur z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 backdrop-blur z-10", isDark ? "bg-[#0f172a]/95 border-white/5" : "bg-white/95 border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
                 {editingPlan ? "Edit Plan" : "Create New Plan"}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className={cn("hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={() => setIsModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -578,7 +578,7 @@ export default function AdminPlansPage() {
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setDeleteConfirmId(null)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-md p-6 overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
@@ -593,7 +593,7 @@ export default function AdminPlansPage() {
                   type="button"
                   onClick={() => setDeleteConfirmId(null)}
                   disabled={isDeleting}
-                  className={cn("flex-1 py-2.5 rounded-xl font-medium hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50", isDark ? "text-zinc-300" : "text-slate-600")}
+                  className={cn("flex-1 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50", isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
@@ -601,7 +601,7 @@ export default function AdminPlansPage() {
                   type="button"
                   onClick={executeDelete}
                   disabled={isDeleting}
-                  className={cn("flex-1 py-2.5 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-all flex justify-center items-center gap-2")}
+                  className="flex-1 py-2.5 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-all flex justify-center items-center gap-2"
                 >
                   {isDeleting ? (
                     <>
@@ -618,7 +618,7 @@ export default function AdminPlansPage() {
       {isBulkDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsBulkDeleteModalOpen(false)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-md p-6 overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
@@ -633,7 +633,7 @@ export default function AdminPlansPage() {
                   type="button"
                   onClick={() => setIsBulkDeleteModalOpen(false)}
                   disabled={isDeleting}
-                  className={cn("flex-1 py-2.5 rounded-xl font-medium hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50", isDark ? "text-zinc-300" : "text-slate-600")}
+                  className={cn("flex-1 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50", isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>

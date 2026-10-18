@@ -842,7 +842,7 @@ export default function CloudflaredPage() {
         {showAddConnector && (
           <div className="fixed inset-0 z-[100] flex justify-end bg-black/60  animate-in fade-in duration-200">
             <div className="absolute inset-0" onClick={() => setShowAddConnector(false)}></div>
-            <div className={cn("relative w-full max-w-md bg-[#0f172a] h-full shadow-md border-l flex flex-col animate-in slide-in-from-right-full duration-300", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("relative w-full max-w-md h-full shadow-2xl border-l flex flex-col animate-in slide-in-from-right-full duration-300", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
               <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/10" : "border-slate-200")}>
                 <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Install and run a connector</h3>
                 <button onClick={() => setShowAddConnector(false)} className={cn("p-2 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white bg-white/5" : "text-slate-500 hover:text-slate-900 bg-slate-100")}><XCircle className="w-5 h-5" /></button>
@@ -1510,8 +1510,8 @@ export default function CloudflaredPage() {
 
       {/* ==================== DELETE DOMAIN MODAL ==================== */}
       {deleteDomainModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60  p-4 animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-2xl p-6 w-full max-w-md shadow-md animate-in zoom-in-95 duration-200", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+          <div className={cn("border rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-6 h-6 text-red-500" />
@@ -1526,9 +1526,9 @@ export default function CloudflaredPage() {
             </p>
             <div className="flex items-center justify-end gap-3">
               <button onClick={() => setDeleteDomainModal(null)} disabled={deleteDomainLoading}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold bg-white/5 hover:bg-white/10 transition-colors", isDark ? "text-zinc-300" : "text-slate-500")}>Cancel</button>
+                className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors", isDark ? "text-zinc-300 bg-white/5 hover:bg-white/10" : "text-slate-600 bg-slate-100 hover:bg-slate-200")}>Cancel</button>
               <button onClick={handleDeleteDomain} disabled={deleteDomainLoading}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2">
                 {deleteDomainLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 {deleteDomainLoading ? "Removing..." : "Yes, Remove"}
               </button>
@@ -1539,8 +1539,8 @@ export default function CloudflaredPage() {
 
       {/* ==================== DELETE TUNNEL MODAL ==================== */}
       {deleteTunnelModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60  p-4 animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-2xl p-6 w-full max-w-md shadow-md animate-in zoom-in-95 duration-200", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+          <div className={cn("border rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-6 h-6 text-red-500" />
@@ -1555,9 +1555,9 @@ export default function CloudflaredPage() {
             </p>
             <div className="flex items-center justify-end gap-3">
               <button onClick={() => setDeleteTunnelModal(null)} disabled={deleteTunnelLoading}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold bg-white/5 hover:bg-white/10 transition-colors", isDark ? "text-zinc-300" : "text-slate-500")}>Cancel</button>
+                className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors", isDark ? "text-zinc-300 bg-white/5 hover:bg-white/10" : "text-slate-600 bg-slate-100 hover:bg-slate-200")}>Cancel</button>
               <button onClick={handleDeleteTunnel} disabled={deleteTunnelLoading}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2">
                 {deleteTunnelLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 {deleteTunnelLoading ? "Deleting..." : "Yes, Delete"}
               </button>

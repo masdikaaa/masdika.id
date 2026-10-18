@@ -847,8 +847,7 @@ export default function K3sDetailPage() {
 
                 <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-3 sm:gap-4 relative z-10 w-full xl:w-auto">
                   <div className="w-14 h-14 rounded-2xl border border-cyan-500/20 flex items-center justify-center shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img referrerPolicy="no-referrer" src="https://cdn.simpleicons.org/kubernetes/06b6d4" alt="Kubernetes" className="w-7 h-7" loading="lazy" decoding="async" />
+                    <SiKubernetes className={cn("w-7 h-7", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h1 className={cn("text-2xl font-bold tracking-tight break-all", isDark ? "text-white" : "text-slate-900")}>{cluster.name}</h1>

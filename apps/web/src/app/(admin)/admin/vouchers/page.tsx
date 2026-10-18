@@ -695,7 +695,7 @@ export default function AdminVouchersPage() {
           <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-md overflow-hidden", isDark ? "border-white/10" : "border-slate-200")}>
             <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingVoucherId ? "Edit Voucher" : "Create Voucher"}</h2>
-              <button onClick={closeVoucherModal} className={cn("hover:text-white", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={closeVoucherModal} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -778,7 +778,7 @@ export default function AdminVouchersPage() {
           <div className={cn("border rounded-2xl ", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200", "w-full max-w-md overflow-hidden my-8", isDark ? "border-white/10" : "border-slate-200")}>
             <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingPromoId ? "Edit Promo" : "Create Promo"}</h2>
-              <button onClick={() => setIsPromoModalOpen(false)} className={cn("hover:text-white", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={() => setIsPromoModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
             </div>

@@ -1,311 +1,449 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, Scale, Info, CheckCircle, AlertTriangle, ChevronLeft } from "lucide-react";
-import { useTheme } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { ShieldCheck, Scale, Info, CheckCircle, AlertTriangle, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 
 export default function TermsPage() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   return (
-    <div className={cn("min-h-screen pt-24 md:pt-32 pb-20 overflow-hidden relative bg-transparent", isDark ? "text-white" : "text-slate-900")}>
-      {/* Cinematic background effects */}
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
+        {/* ── 0. HERO (Identik Patokan Events, Vacancies & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
+            {/* Left – Text & Actions */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
+              {/* Status pill using shared Badge */}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  LEGAL COMPLIANCE &amp; TERMS
+                </Badge>
+              </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Header - Centered like Managed DB */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="pt-10 pb-16 text-center"
-        >
-          <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.15)]" : "text-cyan-700 bg-cyan-50 border border-cyan-200 shadow-sm")}>
-            LEGAL INFO
-          </span>
-          
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.1]">
-            Terms & <br className="hidden sm:block" /><span className={cn("bg-gradient-to-r bg-clip-text text-transparent drop-shadow-sm", isDark ? "from-cyan-400 to-cyan-200" : "from-cyan-600 to-cyan-400")}>Conditions</span>
-          </h1>
-          
-          <p className={cn("text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
-            Please read these terms carefully before using our services. By using our services, you agree to be bound by these terms and conditions.
-          </p>
-          
-          <div className={cn("inline-flex items-center justify-center gap-3 text-sm font-bold px-6 py-3 rounded-full border transition-colors shadow-sm", isDark ? "bg-cyan-950/50 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
-            Last Updated: June 12, 2026
+              {/* Headline H1 (Ukuran sama persis Home Page) */}
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Enterprise Terms <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  &amp; Service Conditions.
+                </span>
+              </h1>
+
+              {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Please review these governing terms and Acceptable Use Policies carefully before provisioning or deploying workloads on Masdika infrastructure.
+              </p>
+
+              {/* Action Buttons (size="lg" sama persis Home Page) */}
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="#terms-content"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  View Terms of Service
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/contact"
+                  leftIcon={<Scale className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  Legal Inquiries
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Right – Hero Avatar (term-condition.webp) with Floating Badges */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[560px] xl:max-w-[600px] h-[400px] sm:h-[460px] lg:h-[500px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[320px] sm:w-[460px] sm:h-[380px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (Fair Use Terms) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Scale className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Legal Framework
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      Fair Use Terms
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 2: Top-Right (Governed SLAs) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Service Standards
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      Governed SLAs
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Zero Hidden Fees) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Info className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Transparency
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      Zero Hidden Fees
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (Compliant Hosting) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Data Protection
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      Compliant Hosting
+                    </div>
+                  </div>
+                </div>
+
+                {/* Karakter term-condition.webp utuh, proporsional & konsisten dengan halaman lain */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/term-condition.webp"
+                    alt="Masdika – Terms and Conditions"
+                    width={1536}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </section>
 
-        <div className={cn("w-full h-px bg-gradient-to-r from-transparent to-transparent mb-16", isDark ? "via-white/10" : "via-black/10")} />
-
-        {/* Content */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="space-y-16"
-        >
-          <div className="space-y-16 relative z-10">
-              {/* Section 1 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <ShieldCheck className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>1. Acceptance of Terms</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    By accessing and using this website, you accept and agree to be bound by the terms and provision of this agreement. In addition, when using this website's particular services, you shall be subject to any posted guidelines or rules applicable to such services. Any participation in this service will constitute acceptance of this agreement. If you do not agree to abide by the above, please do not use this service.
-                  </p>
-                </div>
-              </div>
-
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-
-              {/* Section 2 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <Scale className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>2. Use License</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13 space-y-4", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    Permission is granted to temporarily download one copy of the materials (information or software) on Masdika's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
-                  </p>
-                  <ul className={cn("list-disc pl-5 space-y-2", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    <li>Modify or copy the materials;</li>
-                    <li>Use the materials for any commercial purpose, or for any public display (commercial or non-commercial);</li>
-                    <li>Attempt to decompile or reverse engineer any software contained on the website;</li>
-                    <li>Remove any copyright or other proprietary notations from the materials;</li>
-                    <li>Transfer the materials to another person or "mirror" the materials on any other server.</li>
-                  </ul>
-                  <p className="leading-relaxed">
-                    This license shall automatically terminate if you violate any of these restrictions and may be terminated by Masdika at any time.
-                  </p>
-                </div>
-              </div>
-
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-
-              {/* Section 3 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <CheckCircle className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>3. User Responsibilities</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    As a user of our services, you agree to use our platform responsibly. You must not use our website in any way that causes, or may cause, damage to the website or impairment of the availability or accessibility of the website. You must not use our website to copy, store, host, transmit, send, use, publish or distribute any material which consists of (or is linked to) any spyware, computer virus, Trojan horse, worm, keystroke logger, rootkit or other malicious computer software.
-                  </p>
-                </div>
-              </div>
-
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-
-              {/* Section 4 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <AlertTriangle className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>4. Limitations</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    In no event shall Masdika or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Masdika's website, even if Masdika or a Masdika authorized representative has been notified orally or in writing of the possibility of such damage.
-                  </p>
-                </div>
-              </div>
-
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-
-              {/* Section 5 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <Info className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>5. Disclaimer</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    The materials on Masdika's website are provided on an 'as is' basis. Masdika makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
-                  </p>
-                </div>
-              </div>
-
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-              
-              {/* Section 6 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <AlertTriangle className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>6. Refund Policy (All Payments are Final)</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    <strong>All sales and payments are strictly final (No Refunds).</strong> We do not offer refunds, partial or in full, under any circumstances for any of our services (including but not limited to VPS, Managed K3s, File CDN, and API Hub). Please ensure you have read the rules carefully and reviewed your order before making a payment.
-                  </p>
-                </div>
-              </div>
-
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-              
-              {/* Section 7 */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <AlertTriangle className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>7. Prohibited Activities</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13 space-y-4", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <p className="leading-relaxed">
-                    Users are strictly prohibited from using our VPS or server services for the following activities. Violation of these rules will result in <strong>unilateral service termination (suspend/terminate) without any refund</strong>:
-                  </p>
-                  <ul className={cn("list-disc pl-5 space-y-2", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    <li><strong className="text-white">VPN / Proxy / Tunnels:</strong> Installing VPNs, Proxies, or Mikrotik CHR on regular VPS is prohibited. We provide specialized packages for such requirements.</li>
-                    <li><strong className="text-white">Crypto Mining:</strong> Cryptocurrency mining of any kind that causes abnormal CPU load is strictly prohibited.</li>
-                    <li><strong className="text-white">Malware & Phishing:</strong> Distributing malware, viruses, trojans, or creating phishing and scam sites is strictly forbidden.</li>
-                    <li><strong className="text-white">DDoS & Hacking:</strong> Using our servers to launch DDoS attacks, port scanning, bruteforcing, or any hacking activities is prohibited.</li>
-                    <li><strong className="text-white">Spamming:</strong> Sending spam emails or illegal mass mailing is strictly forbidden.</li>
-                  </ul>
-                  <p className={cn("leading-relaxed font-bold mt-4", isDark ? "text-red-400" : "text-red-600")}>
-                    Please read these rules carefully. By using our services, you fully agree to this policy.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Section 8 */}
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-              <div>
-                <div className="flex items-center gap-3 mb-4 mt-8">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <ShieldCheck className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>8. Acceptable Use Policy (AUP)</h2>
-                </div>
-                <div className="prose prose-invert prose-cyan max-w-none text-zinc-300 ml-13 space-y-6">
-                  <p className="leading-relaxed">
-                    This policy governs the usage rules for Masdika facilities included in the services used by our customers.
-                  </p>
-                  
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Content & Websites</h3>
-                    <p className="mb-2">Customers are prohibited from hosting content or websites that are related to or feature:</p>
-                    <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-                      <li>Pornography, gambling, racism, insults, and violations of public decency.</li>
-                      <li>Materials that may provoke conflict, unrest, or terror.</li>
-                      <li>Copyrighted materials used without the owner's permission.</li>
-                      <li>Ponzi schemes, pyramid schemes, fraud, and phishing.</li>
-                      <li>Online sale of drugs without valid authorization or contrary to FDA/BPOM regulations.</li>
-                      <li>Any other materials that violate Indonesian or International laws.</li>
-                      <li>Materials prohibited by ISPs or Datacenters.</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Email Facilities Usage</h3>
-                    <p className="mb-2">Customers are prohibited from using email facilities on our servers/VPS to:</p>
-                    <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-                      <li>Send SPAM and/or Unsolicited Mail, or intentionally receive such emails.</li>
-                      <li>Send mass emails for any reason and/or conduct mail bombing.</li>
-                      <li>Send materials prohibited under the "Content & Websites" section.</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Resource Usage (CPU/RAM/Storage)</h3>
-                    <p className="mb-2">
-                      Resource usage on VPS/K3s services must not be extremely excessive to the point of disrupting node stability (except for Dedicated packages). If usage exceeds reasonable limits and continuously disrupts other customers, the system reserves the right to throttle network speeds or temporarily shut down the instance.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 9 */}
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-              <div>
-                <div className="flex items-center gap-3 mb-4 mt-8">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <Scale className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>9. Sanctions for Violations</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <ul className={cn("list-disc pl-5 space-y-2", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    <li>Masdika reserves the right to <strong>permanently suspend and/or terminate the customer's service</strong> for any AUP violations, with or without prior notice.</li>
-                    <li>Masdika reserves the right to terminate services with no guarantee of a refund (No Refund).</li>
-                    <li>If the violation is considered minor, Masdika may opt to send a warning via email first.</li>
-                    <li>Masdika reserves the right to impose fines or report to the authorities any customer who intentionally commits criminal or illegal acts.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Section 10 */}
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-              <div>
-                <div className="flex items-center gap-3 mb-4 mt-8">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <CheckCircle className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>10. Abuse Handling & Reporting</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13 space-y-4", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Phishing / Scam / Malware / Fraud</h3>
-                    <p className="mb-2">
-                      Upon receiving a valid report regarding such content, Masdika will investigate and reserves the right to immediately suspend/terminate all related services without the client's consent to protect network integrity.
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">DMCA / Copyright</h3>
-                    <p className="mb-2">
-                      Masdika acknowledges DMCA and reserves the right to respond to copyright infringement claims. Valid reports may result in access suspension to the respective services until the client addresses the complaint.
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Abuse Contact</h3>
-                    <p className="mb-2">
-                      To report any form of abuse, you can contact our team via the Support Ticket system in the dashboard or reach out to our official email at <strong><a href="mailto:abuse@masdika.id" className={cn("underline underline-offset-4", isDark ? "text-cyan-400 hover:text-cyan-300 decoration-cyan-400/30" : "text-cyan-700 hover:text-cyan-800 decoration-cyan-700/30")}>abuse@masdika.id</a></strong>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 11 */}
-              <div className={cn("w-full h-px", isDark ? "bg-cyan-950/30" : "bg-slate-200")} />
-              <div>
-                <div className="flex items-center gap-3 mb-4 mt-8">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <Info className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>11. Disclaimer</h2>
-                </div>
-                <div className={cn("prose max-w-none ml-13", isDark ? "prose-invert prose-cyan text-zinc-300" : "prose-cyan text-slate-700")}>
-                  <ul className={cn("list-disc pl-5 space-y-2", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    <li>Masdika reserves the right to change its policies at any time without prior notice. Users are expected to review this page periodically.</li>
-                    <li>Masdika is not responsible for any emails or content uploaded or hosted on the Customer's services.</li>
-                    <li>Masdika can and will provide user information to authorities or law enforcement when required, in accordance with applicable laws. The services provided by Masdika may only be used for lawful purposes.</li>
-                  </ul>
-                </div>
-              </div>
-              
+        {/* ── 1. CONTENT (Document details) ────────── */}
+        <div id="terms-content" className="max-w-4xl mx-auto pt-8 sm:pt-12 scroll-mt-28">
+          
+          <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-8 sm:mb-10 pb-4 border-b border-[var(--border-primary)]">
+            <div className="inline-flex items-center gap-2 sm:gap-2.5 text-xs sm:text-sm font-mono font-semibold text-[var(--text-secondary)] whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shrink-0" />
+              <span>Last Updated: June 12, 2026</span>
             </div>
-        </motion.div>
+            <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 whitespace-nowrap shrink-0">
+              V4.0 LEGAL
+            </span>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-6 sm:space-y-8 relative z-10"
+          >
+            {/* Section 1 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  1. Acceptance of Terms
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  By accessing and using this website, you accept and agree to be bound by the terms and provision of this agreement. In addition, when using this website&apos;s particular services, you shall be subject to any posted guidelines or rules applicable to such services. Any participation in this service will constitute acceptance of this agreement. If you do not agree to abide by the above, please do not use this service.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 2 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <Scale className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  2. Use License
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  Permission is granted to temporarily download one copy of the materials (information or software) on Masdika&apos;s website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5 text-[var(--text-secondary)]">
+                  <li>Modify or copy the materials;</li>
+                  <li>Use the materials for any commercial purpose, or for any public display (commercial or non-commercial);</li>
+                  <li>Attempt to decompile or reverse engineer any software contained on the website;</li>
+                  <li>Remove any copyright or other proprietary notations from the materials;</li>
+                  <li>Transfer the materials to another person or &quot;mirror&quot; the materials on any other server.</li>
+                </ul>
+                <p>
+                  This license shall automatically terminate if you violate any of these restrictions and may be terminated by Masdika at any time.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 3 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  3. User Responsibilities
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  As a user of our services, you agree to use our platform responsibly. You must not use our website in any way that causes, or may cause, damage to the website or impairment of the availability or accessibility of the website. You must not use our website to copy, store, host, transmit, send, use, publish or distribute any material which consists of (or is linked to) any spyware, computer virus, Trojan horse, worm, keystroke logger, rootkit or other malicious computer software.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 4 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  4. Limitations
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  In no event shall Masdika or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Masdika&apos;s website, even if Masdika or a Masdika authorized representative has been notified orally or in writing of the possibility of such damage.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 5 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  5. Disclaimer
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  The materials on Masdika&apos;s website are provided on an &apos;as is&apos; basis. Masdika makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 6 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  6. Refund Policy (All Payments are Final)
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  <strong className="text-[var(--text-primary)] font-bold">All sales and payments are strictly final (No Refunds).</strong> We do not offer refunds, partial or in full, under any circumstances for any of our services (including but not limited to VPS, Managed K3s, File CDN, and API Hub). Please ensure you have read the rules carefully and reviewed your order before making a payment.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 7 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  7. Prohibited Activities
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  Users are strictly prohibited from using our VPS or server services for the following activities. Violation of these rules will result in <strong className="text-[var(--text-primary)] font-bold">unilateral service termination (suspend/terminate) without any refund</strong>:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5 text-[var(--text-secondary)]">
+                  <li><strong className="text-[var(--text-primary)] font-bold">VPN / Proxy / Tunnels:</strong> Installing VPNs, Proxies, or Mikrotik CHR on regular VPS is prohibited. We provide specialized packages for such requirements.</li>
+                  <li><strong className="text-[var(--text-primary)] font-bold">Crypto Mining:</strong> Cryptocurrency mining of any kind that causes abnormal CPU load is strictly prohibited.</li>
+                  <li><strong className="text-[var(--text-primary)] font-bold">Malware &amp; Phishing:</strong> Distributing malware, viruses, trojans, or creating phishing and scam sites is strictly forbidden.</li>
+                  <li><strong className="text-[var(--text-primary)] font-bold">DDoS &amp; Hacking:</strong> Using our servers to launch DDoS attacks, port scanning, bruteforcing, or any hacking activities is prohibited.</li>
+                  <li><strong className="text-[var(--text-primary)] font-bold">Spamming:</strong> Sending spam emails or illegal mass mailing is strictly forbidden.</li>
+                </ul>
+                <p className="font-bold mt-2 text-rose-500 dark:text-rose-400">
+                  Please read these rules carefully. By using our services, you fully agree to this policy.
+                </p>
+              </div>
+            </div>
+            
+            {/* Section 8 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  8. Acceptable Use Policy (AUP)
+                </h2>
+              </div>
+              <div className="space-y-4 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <p>
+                  This policy governs the usage rules for Masdika facilities included in the services used by our customers.
+                </p>
+                
+                <div className="space-y-1.5 pt-1">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">Content &amp; Websites</h3>
+                  <p>Customers are prohibited from hosting content or websites that are related to or feature:</p>
+                  <ul className="list-disc pl-5 space-y-1 text-[var(--text-secondary)]">
+                    <li>Pornography, gambling, racism, insults, and violations of public decency.</li>
+                    <li>Materials that may provoke conflict, unrest, or terror.</li>
+                    <li>Copyrighted materials used without the owner&apos;s permission.</li>
+                    <li>Ponzi schemes, pyramid schemes, fraud, and phishing.</li>
+                    <li>Online sale of drugs without valid authorization or contrary to FDA/BPOM regulations.</li>
+                    <li>Any other materials that violate Indonesian or International laws.</li>
+                    <li>Materials prohibited by ISPs or Datacenters.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">Email Facilities Usage</h3>
+                  <p>Customers are prohibited from using email facilities on our servers/VPS to:</p>
+                  <ul className="list-disc pl-5 space-y-1 text-[var(--text-secondary)]">
+                    <li>Send SPAM and/or Unsolicited Mail, or intentionally receive such emails.</li>
+                    <li>Send mass emails for any reason and/or conduct mail bombing.</li>
+                    <li>Send materials prohibited under the &quot;Content &amp; Websites&quot; section.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">Resource Usage (CPU/RAM/Storage)</h3>
+                  <p>
+                    Resource usage on VPS/K3s services must not be extremely excessive to the point of disrupting node stability (except for Dedicated packages). If usage exceeds reasonable limits and continuously disrupts other customers, the system reserves the right to throttle network speeds or temporarily shut down the instance.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 9 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <Scale className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  9. Sanctions for Violations
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <ul className="list-disc pl-5 space-y-1.5 text-[var(--text-secondary)]">
+                  <li>Masdika reserves the right to <strong className="text-[var(--text-primary)] font-bold">permanently suspend and/or terminate the customer&apos;s service</strong> for any AUP violations, with or without prior notice.</li>
+                  <li>Masdika reserves the right to terminate services with no guarantee of a refund (No Refund).</li>
+                  <li>If the violation is considered minor, Masdika may opt to send a warning via email first.</li>
+                  <li>Masdika reserves the right to impose fines or report to the authorities any customer who intentionally commits criminal or illegal acts.</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Section 10 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  10. Abuse Handling &amp; Reporting
+                </h2>
+              </div>
+              <div className="space-y-4 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <div className="space-y-1.5">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">Phishing / Scam / Malware / Fraud</h3>
+                  <p>
+                    Upon receiving a valid report regarding such content, Masdika will investigate and reserves the right to immediately suspend/terminate all related services without the client&apos;s consent to protect network integrity.
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">DMCA / Copyright</h3>
+                  <p>
+                    Masdika acknowledges DMCA and reserves the right to respond to copyright infringement claims. Valid reports may result in access suspension to the respective services until the client addresses the complaint.
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">Abuse Contact</h3>
+                  <p>
+                    To report any form of abuse, you can contact our team via the Support Ticket system in the dashboard or reach out to our official email at <strong><a href="mailto:abuse@masdika.id" className="text-cyan-600 dark:text-cyan-400 underline underline-offset-4 hover:text-cyan-500 transition-colors">abuse@masdika.id</a></strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 11 */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                  11. Disclaimer
+                </h2>
+              </div>
+              <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
+                <ul className="list-disc pl-5 space-y-1.5 text-[var(--text-secondary)]">
+                  <li>Masdika reserves the right to change its policies at any time without prior notice. Users are expected to review this page periodically.</li>
+                  <li>Masdika is not responsible for any emails or content uploaded or hosted on the Customer&apos;s services.</li>
+                  <li>Masdika can and will provide user information to authorities or law enforcement when required, in accordance with applicable laws. The services provided by Masdika may only be used for lawful purposes.</li>
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

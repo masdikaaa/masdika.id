@@ -332,10 +332,10 @@ export default function AdminTestimonialsPage() {
                     <td className="px-6 py-4 font-medium whitespace-nowrap">{new Date(t.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEditModal(t)} className={cn("p-2 rounded-lg bg-cyan-500/10 hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")} title="Edit">
+                        <button onClick={() => openEditModal(t)} className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "bg-cyan-500/10 hover:bg-cyan-500 hover:text-white text-cyan-400" : "bg-cyan-50 hover:bg-cyan-500 hover:text-white text-cyan-700")} title="Edit">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => setDeleteId(t.id)} className={cn("p-2 rounded-lg bg-red-500/10 hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20", isDark ? "text-red-400" : "text-red-700")} title="Delete">
+                        <button onClick={() => setDeleteId(t.id)} className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400" : "bg-red-50 hover:bg-red-500 hover:text-white text-red-700")} title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -391,7 +391,7 @@ export default function AdminTestimonialsPage() {
             >
               <button
                 onClick={() => setShowAddModal(false)}
-                className={cn("absolute top-4 right-4 p-2 hover:text-white rounded-full hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("absolute top-4 right-4 p-2 rounded-full transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
               >
                 <X className="w-5 h-5" />
               </button>

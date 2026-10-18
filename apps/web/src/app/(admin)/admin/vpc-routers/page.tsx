@@ -259,7 +259,7 @@ export default function VpcRoutersPage() {
               </h3>
               <button
                 onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
-                className={cn("p-2 hover:text-white rounded-lg hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("p-2 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -341,7 +341,7 @@ export default function VpcRoutersPage() {
                         setShowPassword(!showPassword);
                       }
                     }}
-                    className={cn("absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:text-white transition-colors outline-none border-none bg-transparent", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("absolute right-3 top-1/2 -translate-y-1/2 p-1 transition-colors outline-none border-none bg-transparent", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>

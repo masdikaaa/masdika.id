@@ -2122,13 +2122,11 @@ export default function VpsManagementPage() {
             </div>
           )}
         </div>
-      )}
-
-      {/* Suspend Modal */}
+      )}      {/* Suspend VPS Modal */}
       {showSuspendModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border border-orange-500/20 w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a]" : "bg-white border-slate-200")}>
-            <button onClick={() => setShowSuspendModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
+          <div className={cn("border border-orange-500/20 w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0f172a]" : "bg-white border-slate-200")}>
+            <button onClick={() => setShowSuspendModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className="flex items-center gap-3 mb-4 text-orange-500">
               <AlertTriangle className="w-8 h-8" />
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Suspend VPS</h2>
@@ -2144,8 +2142,8 @@ export default function VpsManagementPage() {
               />
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowSuspendModal(null)} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={() => handleVpsAction(showSuspendModal.id, "suspend", suspendReason)} className={cn("bg-orange-500 hover:bg-orange-600 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Confirm Suspend</button>
+              <button onClick={() => setShowSuspendModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => handleVpsAction(showSuspendModal.id, "suspend", suspendReason)} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-medium transition-colors">Confirm Suspend</button>
             </div>
           </div>
         </div>
@@ -2180,19 +2178,19 @@ export default function VpsManagementPage() {
       {/* Delete Pool Modal */}
       {showDeletePoolModal !== null && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
-            <button onClick={() => setShowDeletePoolModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
+            <button onClick={() => setShowDeletePoolModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-500" : "text-red-700")}>
               <Trash2 className="w-8 h-8" />
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Delete IP Pool</h2>
             </div>
             <div className={cn("border rounded-xl p-4 mb-6", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
               <p className={cn("text-sm font-medium mb-1", isDark ? "text-red-400" : "text-red-700")}>WARNING</p>
-              <p className="text-red-300/80 text-xs">Are you sure you want to delete this IP pool? All available IPs from this pool will be removed from the system. Assigned IPs will remain on the VPS but their pool association will be lost.</p>
+              <p className={cn("text-xs", isDark ? "text-red-300/80" : "text-red-800/80")}>Are you sure you want to delete this IP pool? All available IPs from this pool will be removed from the system. Assigned IPs will remain on the VPS but their pool association will be lost.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeletePoolModal(null)} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={() => handleDeletePool(showDeletePoolModal)} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Delete</button>
+              <button onClick={() => setShowDeletePoolModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => handleDeletePool(showDeletePoolModal)} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors">Delete</button>
             </div>
           </div>
         </div>
@@ -2201,19 +2199,19 @@ export default function VpsManagementPage() {
       {/* Bulk Delete Pool Modal */}
       {showBulkDeletePoolModal.length > 0 && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
-            <button onClick={() => setShowBulkDeletePoolModal([])} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
+            <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-500" : "text-red-700")}>
               <Trash2 className="w-8 h-8" />
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Bulk Delete IP Pools</h2>
             </div>
             <div className={cn("border rounded-xl p-4 mb-6", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
               <p className={cn("text-sm font-medium mb-1", isDark ? "text-red-400" : "text-red-700")}>WARNING</p>
-              <p className="text-red-300/80 text-xs">You are about to delete <strong>{showBulkDeletePoolModal.length} selected IP pools</strong>. All available IPs from these pools will be removed from the system.</p>
+              <p className={cn("text-xs", isDark ? "text-red-300/80" : "text-red-800/80")}>You are about to delete <strong>{showBulkDeletePoolModal.length} selected IP pools</strong>. All available IPs from these pools will be removed from the system.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={handleBulkDeletePools} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Delete All</button>
+              <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("px-5 py-2.5 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={handleBulkDeletePools} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors">Delete All</button>
             </div>
           </div>
         </div>
@@ -2222,19 +2220,19 @@ export default function VpsManagementPage() {
       {/* Delete Plan Modal */}
       {showDeletePlanModal !== null && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
-            <button onClick={() => setShowDeletePlanModal(null)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0f172a] border-red-500/30" : "bg-white border-red-500/30")}>
+            <button onClick={() => setShowDeletePlanModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-500" : "text-red-700")}>
               <Trash2 className="w-8 h-8" />
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Delete Fixed Plan</h2>
             </div>
             <div className={cn("border rounded-xl p-4 mb-6", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
               <p className={cn("text-sm font-medium mb-1", isDark ? "text-red-400" : "text-red-700")}>WARNING</p>
-              <p className="text-red-300/80 text-xs">Are you sure you want to delete this plan? This action cannot be undone.</p>
+              <p className={cn("text-xs", isDark ? "text-red-300/80" : "text-red-800/80")}>Are you sure you want to delete this plan? This action cannot be undone.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeletePlanModal(null)} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-              <button onClick={() => handleDeletePlan(showDeletePlanModal)} className={cn("bg-red-600 hover:bg-red-700 px-6 py-2.5 rounded-xl font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Delete</button>
+              <button onClick={() => setShowDeletePlanModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => handleDeletePlan(showDeletePlanModal)} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors">Delete</button>
             </div>
           </div>
         </div>
@@ -2245,7 +2243,7 @@ export default function VpsManagementPage() {
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
           <div className={cn("border w-full max-w-3xl rounded-3xl relative flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-6 border-b", isDark ? "border-white/10" : "border-slate-200")}>
-              <button onClick={() => setShowIpModal(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
+              <button onClick={() => setShowIpModal(null)} className={cn("absolute top-6 right-6 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
               <div className="flex items-center gap-3">
                 <Globe className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 <div>
@@ -2433,8 +2431,8 @@ export default function VpsManagementPage() {
       {/* Reset Password Modal */}
       {showResetPasswordModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative", isDark ? "bg-[#0f172a] border-cyan-500/30" : "bg-white border-cyan-500/30")}>
-            <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><XCircle className="w-6 h-6" /></button>
+          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0f172a] border-cyan-500/30" : "bg-white border-cyan-500/30")}>
+            <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-cyan-500" : "text-cyan-700")}>
               <Key className="w-8 h-8" />
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Reset Password</h2>
@@ -2467,7 +2465,7 @@ export default function VpsManagementPage() {
               )}
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
+              <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className={cn("px-5 py-2.5 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}>Cancel</button>
               <button
                 onClick={() => handleResetPassword(showResetPasswordModal.id, newPassword)}
                 disabled={actionLoading === showResetPasswordModal.id || !newPassword || newPassword.length < 8 || newPassword !== confirmPassword}

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { Pagination } from "@/components/ui/Pagination";
+import { SiKubernetes } from "react-icons/si";
 
 export default function K3sListPage() {
   const { theme } = useTheme();
@@ -73,7 +74,7 @@ export default function K3sListPage() {
       {clusters.length === 0 ? (
         <div className={cn("border rounded-3xl p-12 text-center shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
           <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-slate-800/50" : "bg-slate-100")}>
-            <img referrerPolicy="no-referrer" src="https://cdn.simpleicons.org/kubernetes/71717a" alt="Kubernetes" className="w-10 h-10 transform rotate-6" loading="lazy" decoding="async" />
+            <SiKubernetes className="w-10 h-10 text-zinc-500 transform rotate-6" />
           </div>
           <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Clusters Found</h3>
           <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any Kubernetes clusters deployed yet. Deploy your first cluster to get started with container orchestration.</p>
@@ -91,7 +92,7 @@ export default function K3sListPage() {
                 <div className="relative z-10 flex justify-between items-start mb-6">
                   <div className="flex items-center gap-4">
                     <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-100 shadow-sm")}>
-                      <img referrerPolicy="no-referrer" src="https://cdn.simpleicons.org/kubernetes/06b6d4" alt="Kubernetes" className="w-8 h-8" loading="lazy" decoding="async" />
+                      <SiKubernetes className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     </div>
                     <div>
                       <h3 className={cn("text-xl font-bold transition-colors tracking-tight", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{cluster.name}</h3>

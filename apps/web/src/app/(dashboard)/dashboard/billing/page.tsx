@@ -584,7 +584,7 @@ export default function CustomerBillingPage() {
                             href={invoice.paymentUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500 hover:text-white transition-all whitespace-nowrap shadow-sm"
+                            className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap shadow-sm border hover:bg-cyan-500 hover:text-white", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border-cyan-200")}
                           >
                             Pay TopUp <ExternalLink className="w-3 h-3" />
                           </a>

@@ -371,7 +371,7 @@ export default function AdminTicketsClient() {
                 <Trash2 className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-700")} />
                 Delete Tickets
               </h3>
-              <button onClick={() => setShowBulkDeleteModal(false)} disabled={isBulkDeleting} className={cn("hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={() => setShowBulkDeleteModal(false)} disabled={isBulkDeleting} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -384,14 +384,14 @@ export default function AdminTicketsClient() {
                   type="button"
                   onClick={() => setShowBulkDeleteModal(false)}
                   disabled={isBulkDeleting}
-                  className={cn("px-4 py-2 text-sm font-semibold hover:text-white hover:bg-white/10 rounded-xl transition-colors disabled:opacity-50", isDark ? "text-zinc-300" : "text-slate-600")}
+                  className={cn("px-4 py-2 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50", isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBulkDelete}
                   disabled={isBulkDeleting}
-                  className={cn("px-6 py-2 text-sm font-bold bg-red-500 hover:bg-red-600 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                  className="px-6 py-2 text-sm font-bold bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {isBulkDeleting ? 'Deleting...' : 'Delete Permanently'}
                 </button>
@@ -404,7 +404,7 @@ export default function AdminTicketsClient() {
       {/* New Ticket Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-3xl w-full max-w-2xl overflow-hidden relative max-h-[90vh] flex flex-col", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-3xl w-full max-w-2xl overflow-hidden relative max-h-[90vh] flex flex-col shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-4 md:p-6 border-b flex justify-between items-start md:items-center relative z-10 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div className="flex-1 pr-4">
                 <h3 className={cn("text-lg md:text-xl font-bold flex items-start md:items-center gap-3", isDark ? "text-white" : "text-slate-900")}>

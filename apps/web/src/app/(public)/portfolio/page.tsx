@@ -18,7 +18,8 @@ import {
   Layers,
   Terminal,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Building2
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { TiltCard } from "@/components/animations/TiltCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { TechIcon } from "@/components/ui/TechIcon";
 
 const item = {
   hidden: { opacity: 0, y: 20 },
@@ -54,10 +56,16 @@ export default function PortfolioPage() {
   }, []);
 
   const categories = ["All", ...new Set(projects.map(p => p.category?.name || "Uncategorized"))];
-  const FILTERS = categories.map(cat => ({
-    name: cat as string,
-    icon: cat === 'All' ? Grid : (cat === 'Kubernetes' ? Server : (cat === 'DevOps' ? Activity : Cloud))
-  }));
+  const FILTERS = categories.map(cat => {
+    const lower = cat.toLowerCase();
+    let Icon = Cloud;
+    if (cat === 'All') Icon = Grid;
+    else if (lower.includes('kuber')) Icon = Server;
+    else if (lower.includes('devops') || lower.includes('ci')) Icon = Activity;
+    else if (lower.includes('web') || lower.includes('app')) Icon = Layers;
+    else if (lower.includes('data') || lower.includes('db')) Icon = Database;
+    return { name: cat as string, icon: Icon };
+  });
 
   const filteredProjects = activeFilter === "All"
     ? projects
@@ -133,16 +141,16 @@ export default function PortfolioPage() {
 
                 {/* Floating Card 1: Top-Left (Cloud Architect) */}
                 <div
-                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
                 >
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
                     <Cloud className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
                       AWS &amp; GCP
                     </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
                       Cloud Architect
                     </div>
                   </div>
@@ -150,16 +158,16 @@ export default function PortfolioPage() {
 
                 {/* Floating Card 2: Top-Right (Multi-Node Clusters) */}
                 <div
-                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
                 >
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
                     <Database className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
                       High Availability
                     </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
                       Multi-Node
                     </div>
                   </div>
@@ -167,16 +175,16 @@ export default function PortfolioPage() {
 
                 {/* Floating Card 3: Bottom-Left (Zero-Downtime Deploy) */}
                 <div
-                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
                 >
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
                     <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
                       GitOps CI/CD
                     </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
                       Zero Downtime
                     </div>
                   </div>
@@ -184,16 +192,16 @@ export default function PortfolioPage() {
 
                 {/* Floating Card 4: Bottom-Right (Kubernetes) */}
                 <div
-                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2.5 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2.5 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
                 >
                   <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
                     <SiKubernetes className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
                       Kubernetes
                     </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
                       Orchestration
                     </div>
                   </div>
@@ -238,32 +246,34 @@ export default function PortfolioPage() {
             </p>
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Pills Segment Bar */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12"
+            className="flex justify-center mb-12"
           >
-            {FILTERS.map((filter) => {
-              const isActive = activeFilter === filter.name;
-              return (
-                <button
-                  key={filter.name}
-                  onClick={() => setActiveFilter(filter.name)}
-                  className={cn(
-                    "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500",
-                    isActive
-                      ? "bg-cyan-500 text-slate-950 shadow-sm font-bold"
-                      : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-primary)] hover:border-cyan-500/40 hover:text-[var(--text-primary)]"
-                  )}
-                >
-                  <filter.icon className={cn("w-4 h-4", isActive ? "text-slate-950" : "text-cyan-600 dark:text-cyan-400")} />
-                  <span>{filter.name}</span>
-                </button>
-              );
-            })}
+            <div className="inline-flex flex-wrap items-center justify-center p-1.5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm gap-1.5 max-w-full">
+              {FILTERS.map((filter) => {
+                const isActive = activeFilter === filter.name;
+                return (
+                  <button
+                    key={filter.name}
+                    onClick={() => setActiveFilter(filter.name)}
+                    className={cn(
+                      "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 whitespace-nowrap",
+                      isActive
+                        ? "bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
+                    )}
+                  >
+                    <filter.icon className={cn("w-4 h-4 shrink-0", isActive ? "text-slate-950" : "text-cyan-600 dark:text-cyan-400")} />
+                    <span>{filter.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </motion.div>
 
           {/* Projects Grid */}
@@ -285,12 +295,13 @@ export default function PortfolioPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {currentProjects.map((project, index) => {
-                  const techList = project.techStack ? project.techStack.split(',').map((t: string) => t.trim()) : [];
+                  const techList = project.techStack ? project.techStack.split(',').map((t: string) => t.trim()).filter(Boolean) : [];
                   return (
                     <FadeIn key={project.id} delay={index * 0.08} direction="up" className="h-full">
-                      <TiltCard intensity={4} className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 h-full border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 hover:shadow-xl shadow-sm">
+                      <div className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 h-full border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 hover:shadow-xl shadow-sm">
+                        
                         {/* Image Section */}
-                        <div className="relative h-48 sm:h-52 overflow-hidden bg-[var(--surface-secondary)]">
+                        <Link href={`/portfolio/${project.slug}`} className="block relative aspect-[16/10] overflow-hidden bg-[var(--surface-secondary)] group/img">
                           {project.image ? (
                             <Image
                               referrerPolicy="no-referrer"
@@ -299,66 +310,79 @@ export default function PortfolioPage() {
                               fill
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               unoptimized={true}
-                              className="object-cover transition-transform duration-700 group-hover:scale-105"
+                              className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-105"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center font-bold uppercase tracking-widest text-xs text-[var(--text-muted)]">
+                            <div className="w-full h-full flex items-center justify-center font-mono text-xs text-[var(--text-muted)]">
                               No Image Available
                             </div>
                           )}
 
-                          {/* Gradient fade layer */}
+                          {/* Soft bottom gradient fade */}
                           <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-transparent to-transparent opacity-80" />
 
                           {/* Category Badge */}
                           {project.category?.name && (
-                            <div className="absolute top-4 left-4 z-10">
-                              <span className="backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/60 border border-white/20 text-white">
+                            <div className="absolute top-3.5 left-3.5 z-10">
+                              <Badge variant="brand" size="sm" className="shadow-sm backdrop-blur-md bg-white/90 dark:bg-[#061e33]/90">
                                 {project.category.name}
-                              </span>
+                              </Badge>
                             </div>
                           )}
-                        </div>
+                        </Link>
 
                         {/* Content Section */}
                         <div className="flex-1 p-6 flex flex-col">
                           {/* Tech Stack Chips */}
                           {techList.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mb-3">
+                            <div className="flex flex-wrap gap-1.5 mb-3.5">
                               {techList.slice(0, 4).map((tech: string, i: number) => (
-                                <span key={i} className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400">
-                                  {tech}
+                                <span 
+                                  key={i} 
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 transition-colors"
+                                >
+                                  <TechIcon tech={tech} size={13} />
+                                  <span>{tech}</span>
                                 </span>
                               ))}
+                              {techList.length > 4 && (
+                                <span className="inline-flex items-center px-2 py-1 text-[10px] font-bold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-muted)]">
+                                  +{techList.length - 4}
+                                </span>
+                              )}
                             </div>
                           )}
 
-                          <Link href={`/portfolio/${project.slug}`} className="group/link focus:outline-none">
-                            <h3 className="text-xl font-bold mb-2 transition-colors line-clamp-2 leading-snug text-[var(--text-primary)] group-hover/link:text-cyan-600 dark:group-hover/link:text-cyan-400">
+                          <Link href={`/portfolio/${project.slug}`} className="group/link focus:outline-none mb-2">
+                            <h3 className="text-lg sm:text-xl font-bold transition-colors line-clamp-1 leading-snug text-[var(--text-primary)] group-hover/link:text-cyan-600 dark:group-hover/link:text-cyan-400">
                               {project.title}
                             </h3>
                           </Link>
 
-                          <p className="text-sm leading-relaxed mb-6 flex-1 text-[var(--text-secondary)] line-clamp-3">
+                          <p className="text-sm leading-relaxed mb-6 flex-1 text-[var(--text-secondary)] line-clamp-2">
                             {project.description || "Discover the full case study including architectural decisions, challenges faced, and the technology stack used."}
                           </p>
 
                           {/* Bottom Section */}
-                          <div className="mt-auto pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
-                            <span className="text-xs font-medium text-[var(--text-muted)]">
-                              {project.client ? `Client: ${project.client}` : 'Case Study'}
-                            </span>
+                          <div className="mt-auto pt-4 border-t border-[var(--border-primary)] flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                              <Building2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                              <span className="truncate max-w-[130px] sm:max-w-[160px] font-medium">
+                                {project.client || "Personal Project"}
+                              </span>
+                            </div>
 
                             <Link
                               href={`/portfolio/${project.slug}`}
-                              className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"
+                              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-cyan-600 dark:text-cyan-400 group-hover:text-cyan-500 transition-colors"
                             >
-                              View Case Study
+                              <span>View Case Study</span>
                               <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
                             </Link>
                           </div>
                         </div>
-                      </TiltCard>
+
+                      </div>
                     </FadeIn>
                   );
                 })}
@@ -466,7 +490,11 @@ export default function PortfolioPage() {
               >
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 group-hover:scale-110 transition-transform duration-300">
-                    <format.icon className="w-7 h-7" strokeWidth={1.75} />
+                    {format.icon === SiKubernetes ? (
+                      <format.icon className="w-7 h-7" />
+                    ) : (
+                      <format.icon className="w-7 h-7" strokeWidth={1.75} />
+                    )}
                   </div>
                   <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">
                     {format.title}

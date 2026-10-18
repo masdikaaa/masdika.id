@@ -63,7 +63,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   ) => {
     const isLinkVariant = variant === "link";
     const baseClasses = cn(
-      "inline-flex items-center justify-center font-medium transition-all duration-200 select-none",
+      "inline-flex items-center justify-center font-medium transition-all duration-200 select-none whitespace-nowrap",
       "focus-visible:outline-none",
       "active:scale-[0.98]",
       "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed",
@@ -82,9 +82,9 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
     const content = (
       <>
         {loading && <Loader2 className={cn("w-4 h-4 animate-spin shrink-0", iconColorClass)} aria-hidden="true" />}
-        {!loading && leftIcon && <span className={cn("shrink-0 flex items-center justify-center", iconColorClass)}>{leftIcon}</span>}
-        <span>{children}</span>
-        {!loading && rightIcon && <span className={cn("shrink-0 flex items-center justify-center", iconColorClass)}>{rightIcon}</span>}
+        {!loading && leftIcon && <span className={cn("shrink-0 inline-flex items-center justify-center", iconColorClass)}>{leftIcon}</span>}
+        <span className="inline-flex items-center gap-2">{children}</span>
+        {!loading && rightIcon && <span className={cn("shrink-0 inline-flex items-center justify-center", iconColorClass)}>{rightIcon}</span>}
       </>
     );
 

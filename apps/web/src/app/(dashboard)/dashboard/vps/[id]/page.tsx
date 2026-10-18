@@ -1834,8 +1834,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       className={cn(
                         "px-4 py-3 text-sm font-medium rounded-xl text-left transition-colors",
                         settingsMenu === item.id
-                          ? "bg-white/10 text-white"
-                          : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                          ? (isDark ? "bg-white/10 text-white font-semibold" : "bg-slate-200 text-slate-900 font-bold")
+                          : (isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
                       )}
                     >
                       {item.label}
@@ -3379,7 +3379,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </h3>
               <button
                 onClick={() => setShowFirewallModal(false)}
-                className={cn("p-2  hover:text-white rounded-lg hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("p-2 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3387,7 +3387,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
             <form onSubmit={handleSaveFirewallRule} className="p-6 space-y-4 overflow-y-auto">
               <div className="space-y-2">
-                <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Direction / Type</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Direction / Type</label>
                 <Select
                   value={ruleType}
                   onChange={setRuleType}
@@ -3396,12 +3396,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     { value: "out", label: "Outbound (Outgoing Traffic)" }
                   ]}
                   placeholder="Select Direction"
-                  className={cn("w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm  hover:border-cyan-500/50 focus:border-cyan-500 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm transition-colors", isDark ? "bg-black/40 border-white/10 text-white hover:border-cyan-500/50" : "bg-white border-slate-300 text-slate-900 hover:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Protocol</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Protocol</label>
                 <Select
                   value={ruleProto}
                   onChange={setRuleProto}
@@ -3412,40 +3412,40 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     { value: "", label: "ALL" }
                   ]}
                   placeholder="Select Protocol"
-                  className={cn("w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm  hover:border-cyan-500/50 focus:border-cyan-500 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm transition-colors", isDark ? "bg-black/40 border-white/10 text-white hover:border-cyan-500/50" : "bg-white border-slate-300 text-slate-900 hover:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Port Range</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Port Range</label>
                 <input
                   type="text"
                   value={rulePort}
                   onChange={(e) => setRulePort(e.target.value)}
                   placeholder="e.g. 22, 80, 443, 8000:9000 (leave blank for ALL)"
-                  className={cn("w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm  focus:outline-none focus:border-cyan-500", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Source IP / CIDR</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Source IP / CIDR</label>
                 <input
                   type="text"
                   value={ruleSource}
                   onChange={(e) => setRuleSource(e.target.value)}
                   placeholder="e.g. 192.168.1.1 or 10.0.0.0/24 (leave blank for 0.0.0.0/0)"
-                  className={cn("w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm  focus:outline-none focus:border-cyan-500", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Description</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Description</label>
                 <input
                   type="text"
                   value={ruleComment}
                   onChange={(e) => setRuleComment(e.target.value)}
                   placeholder="e.g. Allow SSH from Home"
-                  className={cn("w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm  focus:outline-none focus:border-cyan-500", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500")}
                 />
               </div>
 

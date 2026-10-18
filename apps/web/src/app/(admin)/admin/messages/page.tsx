@@ -153,7 +153,7 @@ export default function AdminMessagesPage() {
               <p className={cn("leading-relaxed italic relative z-10 text-base", isDark ? "text-zinc-200" : "text-slate-700")}>"{commentText}"</p>
             </div>
             <div className="flex items-center gap-2 text-xs text-zinc-500">
-               <span className={cn("bg-black/30 px-2 py-1 rounded font-mono border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>IP: {ip}</span>
+               <span className={cn("px-2 py-1 rounded font-mono border", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
             </div>
           </div>
         );

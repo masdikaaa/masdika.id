@@ -826,6 +826,107 @@ mark,
   font-weight: 600 !important;
 }
 
+/* Portfolio Detail Markdown / Rich Text Content (consistent typography & soft contrast) */
+.portfolio-content {
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.7;
+}
+
+.portfolio-content p {
+  line-height: 1.7;
+  margin-bottom: 0.875rem;
+}
+
+.portfolio-content p:last-child {
+  margin-bottom: 0;
+}
+
+.portfolio-content h1,
+.portfolio-content h2,
+.portfolio-content h3 {
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.portfolio-content h1 {
+  font-size: 1.25rem;
+}
+
+.portfolio-content h2 {
+  font-size: 1.125rem;
+}
+
+.portfolio-content h3 {
+  font-size: 1rem;
+}
+
+.portfolio-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.portfolio-content ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.portfolio-content li {
+  margin-bottom: 0.25rem;
+}
+
+.portfolio-content strong {
+  font-weight: 600;
+}
+
+.portfolio-content a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+
+/* Dark mode theme colors - Soft silver like Gambar 1, NO harsh #ffffff */
+html.dark .portfolio-content,
+html.dark .portfolio-content p,
+html.dark .portfolio-content li {
+  color: #a1a1aa !important; /* Zinc 400 - exact match to Gambar 1 */
+}
+
+html.dark .portfolio-content h1,
+html.dark .portfolio-content h2,
+html.dark .portfolio-content h3,
+html.dark .portfolio-content strong {
+  color: #e4e4e7 !important; /* Zinc 200 - refined off-white, not harsh #ffffff */
+}
+
+html.dark .portfolio-content a {
+  color: #22d3ee !important;
+}
+
+/* Light mode theme colors - Soft slate, NO harsh pitch black #000000 */
+html.light .portfolio-content,
+html.light .portfolio-content p,
+html.light .portfolio-content li {
+  color: #475569 !important; /* Slate 600 */
+}
+
+html.light .portfolio-content h1,
+html.light .portfolio-content h2,
+html.light .portfolio-content h3,
+html.light .portfolio-content strong {
+  color: #1e293b !important; /* Slate 800 - soft charcoal, not harsh #000000 */
+}
+
+html.light .portfolio-content a {
+  color: #0891b2 !important;
+}
+
+
 
 
 

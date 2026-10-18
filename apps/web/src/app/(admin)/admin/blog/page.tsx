@@ -183,7 +183,7 @@ export default function AdminBlogPage() {
         
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-[10px] text-zinc-500 uppercase bg-black/40 border-b tracking-wider font-bold", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <thead className={cn("text-[10px] uppercase border-b tracking-wider font-bold", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-500")}>
               <tr>
                 <th className="px-6 py-4 w-10 whitespace-nowrap"></th>
                 <th className="px-6 py-4 whitespace-nowrap">Article Title</th>
@@ -219,13 +219,13 @@ export default function AdminBlogPage() {
                 </tr>
               ) : (
                 paginatedArticles.map((article) => (
-                  <tr key={article.id} className="hover:bg-white/[0.03] transition-colors group">
+                  <tr key={article.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.03]" : "hover:bg-slate-50")}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button onClick={() => toggleSelect(article.id)} className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(article.id) ? 'bg-cyan-500 border-cyan-500' : 'border-zinc-600 hover:border-cyan-400'}`}>
+                      <button onClick={() => toggleSelect(article.id)} className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(article.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? 'border-zinc-600 hover:border-cyan-400' : 'border-slate-300 hover:border-cyan-600'}`}>
                         {selectedIds.includes(article.id) && <Check className="w-3 h-3 text-slate-900 font-bold" strokeWidth={3} />}
                       </button>
                     </td>
-                    <td className={cn("px-6 py-4 font-bold group-hover:text-cyan-400 transition-colors whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                    <td className={cn("px-6 py-4 font-bold transition-colors whitespace-nowrap", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700")}>
                       <Link href={`/admin/blog/edit/${article.id}`}>{article.title}</Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -239,7 +239,7 @@ export default function AdminBlogPage() {
                           <CheckCircle className="w-3 h-3" /> Published
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-amber-500/10 border border-amber-500/20", isDark ? "text-amber-400" : "text-amber-700")}>
                           <Edit2 className="w-3 h-3" /> Draft
                         </span>
                       )}
@@ -247,13 +247,13 @@ export default function AdminBlogPage() {
                     <td className={cn("px-6 py-4 whitespace-nowrap font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{new Date(article.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
-                        <Link href={`/blog/${article.slug}`} target="_blank" className={cn("p-2 rounded-lg hover:text-white hover:bg-white/10 transition-colors border border-transparent hover:border-white/10", isDark ? "text-zinc-400" : "text-slate-500")} title="View Public">
+                        <Link href={`/blog/${article.slug}`} target="_blank" className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "hover:text-white hover:bg-white/10 hover:border-white/10 text-zinc-400" : "hover:text-slate-900 hover:bg-slate-100 hover:border-slate-200 text-slate-500")} title="View Public">
                           <ExternalLink className="w-4 h-4" />
                         </Link>
-                        <Link href={`/admin/blog/edit/${article.id}`} className={cn("p-2 bg-cyan-500/10 rounded-lg hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")} title="Edit">
+                        <Link href={`/admin/blog/edit/${article.id}`} className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "bg-cyan-500/10 hover:bg-cyan-500 hover:text-white text-cyan-400" : "bg-cyan-50 hover:bg-cyan-500 hover:text-white text-cyan-700")} title="Edit">
                           <Edit2 className="w-4 h-4" />
                         </Link>
-                        <button onClick={() => setDeleteId(article.id)} className={cn("p-2 bg-red-500/10 rounded-lg hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20", isDark ? "text-red-400" : "text-red-700")} title="Delete">
+                        <button onClick={() => setDeleteId(article.id)} className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400" : "bg-red-50 hover:bg-red-500 hover:text-white text-red-700")} title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

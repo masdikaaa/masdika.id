@@ -138,7 +138,7 @@ export default function DashboardOverview() {
       <div className={cn("grid gap-6", activeBanners.length > 0 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1")}>
         {/* Promo Banner */}
         {activeBanners.length > 0 && (
-          <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl shadow-sm group aspect-[2/1] w-full border bg-[#0b1322]", isDark ? "border-slate-800" : "border-slate-200")}>
+          <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl shadow-sm group aspect-[2/1] w-full border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-100 border-slate-200")}>
             {activeBanners.map((banner, idx) => (
               <Link 
                 key={banner.id} 
@@ -378,7 +378,7 @@ export default function DashboardOverview() {
 
             {vpsList.length > 3 && (
               <div className={cn("mt-2 pt-6 border-t", isDark ? "border-slate-800" : "border-slate-100")}>
-                <Pagination currentPage={vpsPage} totalPages={Math.ceil(vpsList.length / 3)} onPageChange={setBeritaPage} />
+                <Pagination currentPage={vpsPage} totalPages={Math.ceil(vpsList.length / 3)} onPageChange={setVpsPage} />
               </div>
             )}
           </div>

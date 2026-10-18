@@ -1,18 +1,35 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Server, Globe, Download, Activity, CheckCircle2, ChevronRight, Play, Terminal, Code2, UploadCloud, Link2, FlaskConical, Copy, Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { 
+  Server, 
+  Globe, 
+  Download, 
+  Activity, 
+  ChevronRight, 
+  Play, 
+  Terminal, 
+  Code2, 
+  UploadCloud, 
+  Link2, 
+  FlaskConical, 
+  Copy, 
+  Check, 
+  Zap, 
+  ArrowRight,
+  ShieldCheck,
+  Radio,
+  Cpu
+} from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
-import { FadeIn } from "@/components/animations/FadeIn";
-import { useTheme } from "@/components/ThemeProvider";
+import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 export default function LookingGlassPage() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [testType, setTestType] = useState<"ping" | "mtr" | "traceroute">("ping");
   const [host, setHost] = useState("");
   const [output, setOutput] = useState("");
@@ -20,11 +37,19 @@ export default function LookingGlassPage() {
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const [copiedIp, setCopiedIp] = useState<string | null>(null);
+  const [copiedOutput, setCopiedOutput] = useState(false);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedIp(text);
     setTimeout(() => setCopiedIp(null), 2000);
+  };
+
+  const handleCopyOutput = () => {
+    if (!output) return;
+    navigator.clipboard.writeText(output);
+    setCopiedOutput(true);
+    setTimeout(() => setCopiedOutput(false), 2000);
   };
 
   const [clientIp, setClientIp] = useState("Loading...");
@@ -75,12 +100,12 @@ export default function LookingGlassPage() {
   };
 
   const productLinks = [
-    { title: "API Hub", desc: "Discover and test public REST APIs for your projects.", path: "/dashboard/api-lab", icon: FlaskConical },
-    { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/dashboard/cdn", icon: UploadCloud },
-    { title: "URL Shortener", desc: "Create premium short links with custom aliases.", path: "/dashboard/shortener", icon: Link2 },
-    { title: "Cloud VPS", desc: "High-performance virtual private servers with high-speed storage.", path: "/dashboard/vps", icon: Terminal },
-    { title: "Kubernetes (K3s)", desc: "Lightweight, fully managed Kubernetes clusters.", path: "/dashboard/k3s", icon: SiKubernetes },
-    { title: "Reseller API", desc: "Integrate our services into your own platform programmatically.", path: "/dashboard/reseller-api", icon: Code2 },
+    { title: "API Hub", desc: "Discover and test public REST APIs for your projects.", path: "/api-hub", icon: FlaskConical },
+    { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/file-cdn", icon: UploadCloud },
+    { title: "URL Shortener", desc: "Create premium short links with custom aliases.", path: "/shortener", icon: Link2 },
+    { title: "Cloud VPS", desc: "High-performance virtual private servers with NVMe.", path: "/vps", icon: Terminal },
+    { title: "Kubernetes (K3s)", desc: "Lightweight, fully managed Kubernetes clusters.", path: "/k3s", icon: SiKubernetes },
+    { title: "Reseller API", desc: "Integrate our cloud provisioning programmatically.", path: "/reseller-api", icon: Code2 },
   ];
 
   const testFiles = [
@@ -90,116 +115,360 @@ export default function LookingGlassPage() {
     { size: "1000MB", val: 1000 },
   ];
 
+  const peeringLocations = [
+    { name: "OpenIXP (Jakarta)", type: "Direct Peering", latency: "< 8ms", status: "Active" },
+    { name: "CDIX (Surabaya)", type: "Local Peering", latency: "< 1ms", status: "Active" },
+    { name: "IIX (APJII)", type: "National IXP", latency: "< 6ms", status: "Active" },
+    { name: "Equinix SG1", type: "Tier-1 Transit", latency: "< 18ms", status: "Active" },
+  ];
+
   return (
-    <div className={cn("pt-24 md:pt-32 pb-20 px-4 font-sans overflow-hidden relative min-h-screen bg-transparent", isDark ? "text-white selection:bg-cyan-500/30" : "text-slate-900 selection:bg-cyan-100")}>
-      <main className="relative z-10 max-w-[1400px] mx-auto">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 font-sans">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
         
-        {/* Hero Section */}
-        <section className="pt-10 pb-20 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
-          <FadeIn direction="up">
-            <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-              MASDIKA ROUTEGLASS
-            </div>
-            <h1 className={cn("text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[1.1]", isDark ? "text-white" : "text-slate-900")}>
-              Network Routing & <br className="hidden md:block" />
-              <span className={cn("bg-gradient-to-r bg-clip-text text-transparent", isDark ? "from-cyan-400 to-cyan-200" : "from-cyan-600 to-cyan-400")}>Looking Glass</span>
-            </h1>
-            <p className={cn("text-lg md:text-xl mb-12 max-w-3xl mx-auto leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Check our server network latency, routing paths, and download performance in real-time from our Sidoarjo data center.
-            </p>
-          </FadeIn>
+        {/* ── 0. HERO (Identik Patokan SLA, Terms, Privacy, Events, Vacancies & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+
+            {/* Left – Text & Actions */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
+              {/* Status pill using shared Badge */}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
+                  NETWORK ROUTEGLASS &amp; BGP
+                </Badge>
+              </div>
+
+              {/* Headline H1 (Ukuran sama persis Home Page, SLA, Privacy, Terms) */}
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Network Routing &amp; <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  Looking Glass.
+                </span>
+              </h1>
+
+              {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Inspect our global routing paths, test live BGP latency, and benchmark real-time download performance directly from our Sidoarjo Edge Datacenter.
+              </p>
+
+              {/* Action Buttons (size="lg" sama persis Home Page) */}
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="#lg-tools"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Run Diagnostics
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="https://bgp.he.net/AS63859"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  leftIcon={<Globe className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  AS63859 BGP Peering
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Right – Hero Avatar (looking-glass.webp) with Floating Badges */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[560px] xl:max-w-[600px] h-[400px] sm:h-[460px] lg:h-[500px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[320px] sm:w-[460px] sm:h-[380px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (Direct JX Edge) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Direct JX Edge
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      &lt; 1ms Latency
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 2: Top-Right (BGP Peering) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Globe className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      BGP Peering
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      AS63859 Direct
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Backbone Uplink) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Zap className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Backbone Uplink
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      10 Gbps Redundant
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (Datacenter PoP) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Server className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
+                      Datacenter PoP
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
+                      Sidoarjo, ID
+                    </div>
+                  </div>
+                </div>
+
+                {/* Karakter looking-glass.webp utuh, proporsional & konsisten dengan halaman lain */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/looking-glass.webp"
+                    alt="Masdika – Network Routing & Looking Glass"
+                    width={1536}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 sm:px-6">
-          {/* Main Content (Left) */}
-          <div className="lg:col-span-8 space-y-8">
+        {/* ── 1. DIAGNOSTICS & TELEMETRY SUITE ──────────────────── */}
+        <section id="lg-tools" className="scroll-mt-28 pt-8 sm:pt-12 mb-20">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              LIVE NETWORK TELEMETRY
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-[1.15] mb-4">
+              Real-Time Edge Diagnostic Suite
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] font-normal leading-relaxed">
+              Execute live ICMP ping tests, trace BGP routing hops, and benchmark file throughput directly from our primary Sidoarjo, ID edge router.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Info Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {/* Server Info */}
-              <div className={cn("sm:col-span-2 xl:col-span-1 border rounded-2xl p-6 flex flex-col justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow")}>
-                <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                  <Server className="w-4 h-4" /> Server Info
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Location:</span>
-                    <span className={cn("text-right truncate", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>Sidoarjo</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>ASN:</span>
-                    <a href="https://bgp.he.net/AS63859" target="_blank" rel="noopener noreferrer" className={cn("text-right transition-colors border-b border-dashed", isDark ? "text-zinc-300 border-zinc-600 hover:text-cyan-400 hover:border-cyan-400" : "text-slate-700 border-slate-300 hover:text-cyan-600 hover:border-cyan-600 font-medium")}>AS63859</a>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Test IPv4:</span>
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-right font-mono text-sm", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>45.198.149.134</span>
-                      <button onClick={() => handleCopy("45.198.149.134")} className={cn("p-1.5 rounded-md opacity-100 transition-all shrink-0", isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-black/5 text-slate-400")} title="Copy IP">
-                        {copiedIp === "45.198.149.134" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
+            {/* Left 8 Cols – Info Cards + Interactive Diagnostic Terminal */}
+            <div className="lg:col-span-8 space-y-8">
+              
+              {/* Quick Info Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                
+                {/* 1. Server Info */}
+                <div className="sm:col-span-2 xl:col-span-1 bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                        <Server className="w-4 h-4" />
+                      </div>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                        Core Node Info
+                      </h3>
+                    </div>
+
+                    <div className="space-y-3 text-xs sm:text-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">Location:</span>
+                        <span className="text-right font-bold text-[var(--text-primary)] truncate">Sidoarjo, ID</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">ASN:</span>
+                        <a 
+                          href="https://bgp.he.net/AS63859" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-right font-mono font-bold text-cyan-600 dark:text-cyan-400 hover:underline transition-colors"
+                        >
+                          AS63859
+                        </a>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">Test IPv4:</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-xs font-bold text-[var(--text-primary)]">45.198.149.134</span>
+                          <button 
+                            onClick={() => handleCopy("45.198.149.134")} 
+                            className="p-1 rounded-md text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0" 
+                            title="Copy IPv4"
+                          >
+                            {copiedIp === "45.198.149.134" ? <Check className="w-3.5 h-3.5 text-cyan-500" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">Test IPv6:</span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-mono text-[11px] font-bold text-[var(--text-primary)] truncate max-w-[130px] sm:max-w-none">2402:8780:1600::237</span>
+                          <button 
+                            onClick={() => handleCopy("2402:8780:1600::237:8000:e4")} 
+                            className="p-1 rounded-md text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0" 
+                            title="Copy IPv6"
+                          >
+                            {copiedIp === "2402:8780:1600::237:8000:e4" ? <Check className="w-3.5 h-3.5 text-cyan-500" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Test IPv6:</span>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className={cn("text-right font-mono text-xs sm:text-sm truncate", isDark ? "text-zinc-300" : "text-slate-700 font-medium")}>2402:8780:1600::237:8000:e4</span>
-                      <button onClick={() => handleCopy("2402:8780:1600::237:8000:e4")} className={cn("p-1.5 rounded-md opacity-100 transition-all shrink-0", isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-black/5 text-slate-400")} title="Copy IPv6">
-                        {copiedIp === "2402:8780:1600::237:8000:e4" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
+                </div>
+
+                {/* 2. Client IP Address */}
+                <div className="sm:col-span-1 bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all flex flex-col justify-between text-center">
+                  <div>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                        <Radio className="w-4 h-4" />
+                      </div>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                        Your Connection IP
+                      </h3>
+                    </div>
+
+                    <div className="my-3 flex items-center justify-center gap-2">
+                      <p className="text-lg sm:text-xl font-mono font-black text-cyan-600 dark:text-cyan-400 tracking-tight truncate">
+                        {clientIp}
+                      </p>
+                      {clientIp !== "Loading..." && clientIp !== "Unknown" && (
+                        <button 
+                          onClick={() => handleCopy(clientIp)} 
+                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0" 
+                          title="Copy Your IP"
+                        >
+                          {copiedIp === clientIp ? <Check className="w-4 h-4 text-cyan-500" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    Detected via real-time client TCP handshake.
+                  </p>
+                </div>
+                  
+                {/* 3. Download Benchmark Files */}
+                <div className="sm:col-span-1 bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                        <Download className="w-4 h-4" />
+                      </div>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                        Speedtest Files
+                      </h3>
+                    </div>
+
+                    <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
+                      Benchmark direct download throughput:
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {testFiles.map((file) => (
+                        <a
+                          key={file.size}
+                          href={`/api/lg/test-file?size=${file.val}`}
+                          className="py-2 px-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-cyan-500/10 text-[var(--text-primary)] hover:text-cyan-600 dark:hover:text-cyan-400 border border-[var(--border-subtle)] hover:border-cyan-500/30 text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm group"
+                        >
+                          <Download className="w-3 h-3 text-[var(--text-muted)] group-hover:text-cyan-500 transition-colors" />
+                          <span>{file.size}</span>
+                        </a>
+                      ))}
                     </div>
                   </div>
                 </div>
+
               </div>
 
-              {/* Your IP Address */}
-              <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col items-center justify-center text-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow")}>
-                <p className={cn("text-sm font-bold mb-2 tracking-widest uppercase", isDark ? "text-zinc-500" : "text-slate-500")}>Your IP Address</p>
-                <div className="flex items-center justify-center gap-2 w-full min-w-0">
-                  <p className={cn("text-lg sm:text-xl font-mono font-bold truncate", isDark ? "text-cyan-400" : "text-cyan-600")}>{clientIp}</p>
-                  {clientIp !== "Loading..." && clientIp !== "Unknown" && (
-                    <button onClick={() => handleCopy(clientIp)} className={cn("p-1.5 rounded-md opacity-100 transition-all shrink-0", isDark ? "hover:bg-white/10 text-cyan-400" : "hover:bg-black/5 text-cyan-600")} title="Copy Your IP">
-                      {copiedIp === clientIp ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  )}
-                </div>
-              </div>
+              {/* Network Test Terminal Module */}
+              <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
                 
-              {/* Test Files */}
-              <div className={cn("sm:col-span-1 border rounded-2xl p-6 flex flex-col justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow")}>
-                <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                  <Download className="w-4 h-4" /> Test Files
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {testFiles.map((file) => (
-                    <a
-                      key={file.size}
-                      href={`/api/lg/test-file?size=${file.val}`}
-                      className={cn("text-xs border py-2.5 rounded-xl transition-all flex items-center justify-center font-bold", isDark ? "bg-cyan-950/30 hover:bg-cyan-900/50 text-cyan-400 border-cyan-500/20 shadow-sm" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}
-                    >
-                      {file.size}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
+                {/* Module Header with Live Status Indicator */}
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-primary)] pb-5">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                      <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
+                        Interactive Diagnostic Probe
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+                        Test ICMP ping reachability, traceroute hops, and MTR telemetry.
+                      </p>
+                    </div>
+                  </div>
 
-            {/* Network Test Module */}
-            <div className={cn("border rounded-2xl p-1", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "bg-white border-slate-200 shadow-sm")}>
-              <div className={cn("rounded-xl p-4 sm:p-6 border", isDark ? "bg-[#091122] border-slate-700/60" : "bg-slate-50 border-slate-200")}>
-                <h3 className={cn("text-base sm:text-lg font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                  <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Network Test
-                </h3>
+                  {/* Status Indicator */}
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)]">
+                    <span className={cn("w-2 h-2 rounded-full", isRunning ? "bg-cyan-400 animate-pulse" : output ? "bg-cyan-400" : "bg-slate-400")} />
+                    <span>{isRunning ? "DIAGNOSTIC IN PROGRESS" : output ? "COMMAND COMPLETED" : "AWAITING TARGET"}</span>
+                  </div>
+                </div>
                 
-                {/* Test Tabs */}
-                <div className={cn("grid grid-cols-3 gap-1 rounded-lg p-1 mb-4 sm:mb-6 border", isDark ? "bg-black/40 border-white/5" : "bg-white border-black/5 shadow-inner")}>
+                {/* Protocol Tabs (Ping, MTR, Traceroute) */}
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] max-w-md">
                   {(["ping", "mtr", "traceroute"] as const).map((type) => (
                     <button
                       key={type}
                       onClick={() => setTestType(type)}
-                      className={cn("py-2 sm:py-2.5 text-[10px] sm:text-sm font-semibold rounded-md uppercase tracking-wider transition-all truncate px-1", 
+                      className={cn(
+                        "flex-1 py-2 text-xs font-mono font-bold rounded-lg uppercase tracking-wider transition-all text-center",
                         testType === type 
-                          ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm"
-                          : (isDark ? "text-zinc-400 hover:text-zinc-200 hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
+                          ? "bg-[var(--surface)] text-cyan-600 dark:text-cyan-400 shadow-sm border border-[var(--border-primary)]"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium"
                       )}
                     >
                       {type}
@@ -207,19 +476,19 @@ export default function LookingGlassPage() {
                   ))}
                 </div>
 
-                {/* Input Area */}
-                <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
+                {/* Target Input and Action Button */}
+                <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-                      <Globe className={cn("w-4 h-4", isDark ? "text-zinc-500" : "text-slate-400")} />
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Globe className="w-4 h-4 text-[var(--text-muted)]" />
                     </div>
                     <input 
                       type="text" 
                       value={host}
                       onChange={(e) => setHost(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleRunTest()}
-                      placeholder="IP address or hostname"
-                      className={cn("w-full border rounded-xl py-2.5 sm:py-3 pl-10 pr-4 text-sm sm:text-base focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-500/50" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 shadow-sm")}
+                      placeholder="e.g. 1.1.1.1, google.com, or your IP"
+                      className="w-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl py-3 pl-10 pr-4 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
                       disabled={isRunning}
                     />
                   </div>
@@ -229,78 +498,139 @@ export default function LookingGlassPage() {
                     loading={isRunning}
                     variant="primary"
                     size="md"
-                    leftIcon={<Play className="w-4 h-4" />}
-                    className="w-full sm:w-auto shrink-0"
+                    leftIcon={<Play className="w-4 h-4 fill-current" />}
+                    className="w-full sm:w-auto shrink-0 font-mono font-bold"
                   >
                     Run Test
                   </Button>
                 </div>
 
-                {/* Status Indicator */}
-                <div className="flex items-center gap-2 mb-4 flex-wrap">
-                  <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border", 
-                    isRunning 
-                      ? (isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200')
-                      : output 
-                        ? (isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200')
-                        : (isDark ? 'bg-zinc-500/10 text-zinc-400 border-white/5' : 'bg-slate-50 text-slate-500 border-black/10')
-                  )}>
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    {isRunning ? "Testing in progress..." : output ? "Ready." : "Awaiting input..."}
-                  </div>
-                </div>
+                {/* Developer Terminal Box */}
+                <div 
+                  className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-transparent shadow-2xl"
+                  style={{ backgroundColor: "#060d19" }}
+                >
+                  {/* Terminal Header Bar */}
+                  <div 
+                    className="flex items-center justify-between px-4 py-3 border-b border-slate-800/40 text-xs font-mono select-none"
+                    style={{ backgroundColor: "#0c1425" }}
+                  >
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
+                      <span className="ml-2 text-slate-200 font-mono font-medium text-xs sm:text-sm tracking-tight truncate">
+                        masdika@sidoarjo-edge:~$ {testType} {host ? host : "8.8.8.8"}
+                      </span>
+                    </div>
 
-                {/* Terminal Output */}
-                <div className="relative group mt-2">
-                  <div className={cn("absolute inset-0 blur-xl opacity-0 transition-opacity duration-500 rounded-xl pointer-events-none", isDark ? "bg-cyan-500/15 group-hover:opacity-100" : "")} />
+                    {output && (
+                      <button
+                        onClick={handleCopyOutput}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-semibold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 hover:bg-cyan-900/40 transition-colors"
+                      >
+                        {copiedOutput ? <Check className="w-3.5 h-3.5 text-cyan-300" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedOutput ? "Copied" : "Copy Output"}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Terminal Content Screen */}
                   <div 
                     ref={terminalRef}
-                    className={cn("relative border rounded-xl p-3 sm:p-5 h-[300px] sm:h-[350px] overflow-y-auto overflow-x-hidden font-mono text-[10px] sm:text-xs md:text-sm shadow-inner", isDark ? "bg-black border-white/10 text-green-400" : "bg-slate-800 border-slate-700 text-green-400")}
+                    className="p-5 sm:p-6 h-[340px] sm:h-[400px] overflow-y-auto overflow-x-hidden font-mono text-[13px] sm:text-sm text-slate-100 leading-[1.7] selection:bg-cyan-500/30 custom-scrollbar"
                   >
                     {!output && (
-                      <div className={cn(isDark ? "text-zinc-600" : "text-slate-400")}>
-                        <p># RouteGlass Terminal initialized.</p>
-                        <p># Example: ping 8.8.8.8</p>
-                        <p># Select a test type above and enter an IP address.</p>
-                        <p className="mt-4 animate-pulse">_</p>
+                      <div className="space-y-2 text-slate-400 font-mono">
+                        <p className="text-cyan-400 font-bold"># Masdika Looking Glass Telemetry v2.4 (AS63859)</p>
+                        <p># Edge Router Location: Sidoarjo Datacenter, East Java, Indonesia</p>
+                        <p># Enter a remote IP or domain above and click &quot;Run Test&quot;.</p>
+                        <p className="text-cyan-300 mt-4">$ _</p>
                       </div>
                     )}
-                    <pre className="whitespace-pre-wrap break-all sm:break-words leading-relaxed">{output}</pre>
-                    {isRunning && <span className="animate-pulse inline-block w-2 h-3 sm:h-4 bg-green-400 ml-1 translate-y-1"></span>}
+                    <pre className="whitespace-pre-wrap break-all sm:break-words text-slate-100 font-mono leading-relaxed">{output}</pre>
+                    {isRunning && <span className="animate-pulse inline-block w-2 h-4 bg-cyan-400 ml-1 translate-y-0.5" />}
                   </div>
                 </div>
                 
               </div>
             </div>
-          </div>
 
-          {/* Sidebar (Right) */}
-          <div className="lg:col-span-4">
-            <div className={cn("border rounded-2xl p-6 sticky top-32", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "bg-white border-slate-200 shadow-sm")}>
-              <h3 className={cn("text-lg font-bold mb-6 border-b pb-4", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>Product Information</h3>
-              <div className="space-y-2">
-                {productLinks.map((product, idx) => (
-                  <Link 
-                    key={idx}
-                    href={product.path}
-                    className={cn("group flex items-center justify-between p-3 rounded-xl border transition-all", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn("w-8 h-8 rounded-lg border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-                        <product.icon className="w-4 h-4" />
+            {/* Right 4 Cols – Sticky Sidebar (Product Ecosystem & Direct Peering) */}
+            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+              
+              {/* Product Ecosystem Card */}
+              <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center gap-2.5 border-b border-[var(--border-primary)] pb-4 mb-4">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                    <Cpu className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                    Masdika Cloud Products
+                  </h3>
+                </div>
+
+                <div className="space-y-1.5">
+                  {productLinks.map((product, idx) => (
+                    <Link 
+                      key={idx}
+                      href={product.path}
+                      className="group flex items-center justify-between p-2.5 rounded-xl border border-transparent hover:border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)] transition-all"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg border border-cyan-200/80 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <product.icon className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                            {product.title}
+                          </h4>
+                          <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                            {product.desc}
+                          </p>
+                        </div>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Direct Peering & Upstream Telemetry Card */}
+              <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center gap-2.5 border-b border-[var(--border-primary)] pb-4 mb-4">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                    IXP &amp; Upstream Telemetry
+                  </h3>
+                </div>
+
+                <div className="space-y-3">
+                  {peeringLocations.map((loc) => (
+                    <div key={loc.name} className="flex items-center justify-between text-xs">
                       <div>
-                        <h4 className={cn("text-sm font-bold transition-colors", isDark ? "text-zinc-200 group-hover:text-cyan-400" : "text-slate-700 group-hover:text-cyan-600")}>{product.title}</h4>
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>{product.desc}</p>
+                        <div className="font-semibold text-[var(--text-primary)]">{loc.name}</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">{loc.type}</div>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">{loc.latency}</span>
+                        <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-semibold flex items-center justify-end gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block" />
+                          <span>{loc.status}</span>
+                        </div>
                       </div>
                     </div>
-                    <ChevronRight className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-600 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")} />
-                  </Link>
-                ))}
+                  ))}
+                </div>
               </div>
+
             </div>
+
           </div>
-        </div>
+        </section>
+
       </main>
     </div>
   );

@@ -688,14 +688,14 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   type="button"
                   onClick={() => setShowMergeModal(false)}
                   disabled={isMerging}
-                  className={cn("w-full sm:w-auto px-5 py-3 text-sm font-semibold hover:text-white hover:bg-white/10 rounded-xl transition-colors disabled:opacity-50", isDark ? "text-zinc-300" : "text-slate-600")}
+                  className={cn("w-full sm:w-auto px-5 py-3 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50", isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isMerging || !mergeTarget}
-                  className={cn("w-full sm:w-auto px-6 py-3 text-sm font-bold bg-purple-500 hover:bg-purple-600 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center", isDark ? "text-white" : "text-slate-900")}
+                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center"
                 >
                   {isMerging ? 'Merging...' : 'Merge Ticket'}
                 </button>

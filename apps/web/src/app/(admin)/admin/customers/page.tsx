@@ -270,7 +270,7 @@ export default function AdminCustomersPage() {
               <button
                 onClick={() => setShowBulkDeleteModal(true)}
                 disabled={isBulkDeleting}
-                className={cn("flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 font-semibold py-2 px-4 rounded-xl transition-all disabled:opacity-50 text-sm", isDark ? "text-white" : "text-slate-900")}
+                className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 font-semibold py-2 px-4 rounded-xl transition-all disabled:opacity-50 text-sm text-white"
               >
                 <Trash2 className="w-4 h-4" />
                 Destroy Selected ({selectedUsers.length})
@@ -432,7 +432,7 @@ export default function AdminCustomersPage() {
       {editBalanceUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isUpdatingBalance && setEditBalanceUser(null)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-sm overflow-hidden p-6", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <h2 className={cn("text-xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Edit Balance</h2>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{editBalanceUser.name}</span></p>
             <div className="mb-6">
@@ -452,14 +452,14 @@ export default function AdminCustomersPage() {
               <button
                 onClick={() => setEditBalanceUser(null)}
                 disabled={isUpdatingBalance}
-                className={cn("px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}
+                className={cn("px-4 py-2 rounded-xl transition-colors", isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateBalance}
                 disabled={isUpdatingBalance}
-                className={cn("px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 font-semibold transition-colors disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                className={cn("px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 font-bold transition-colors disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
               >
                 {isUpdatingBalance ? "Saving..." : "Save Balance"}
               </button>
@@ -471,7 +471,7 @@ export default function AdminCustomersPage() {
       {suspendUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isSuspending && setSuspendUser(null)} />
-          <div className={cn("relative bg-[#0f172a] border rounded-2xl w-full max-w-sm overflow-hidden p-6", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <h2 className={cn("text-xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{suspendUser.isSuspended ? "Unsuspend User" : "Suspend User"}</h2>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{suspendUser.name}</span></p>
             
@@ -503,7 +503,7 @@ export default function AdminCustomersPage() {
                   setSuspendReason("");
                 }}
                 disabled={isSuspending}
-                className={cn("px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}
+                className={cn("px-4 py-2 rounded-xl transition-colors", isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -522,7 +522,7 @@ export default function AdminCustomersPage() {
       {/* View Referrals Modal */}
       {referralsUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             {/* Header */}
             <div className={cn("p-4 sm:p-6 border-b flex items-start justify-between gap-3 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div className="min-w-0">
@@ -532,7 +532,7 @@ export default function AdminCustomersPage() {
                 </h3>
                 <p className={cn("text-sm mt-1 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{referralsUser.email}</p>
               </div>
-              <button onClick={() => { setReferralsUser(null); setReferralsData(null); }} className={cn("p-2 hover:bg-white/5 rounded-lg transition-colors hover:text-white shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={() => { setReferralsUser(null); setReferralsData(null); }} className={cn("p-2 rounded-lg transition-colors shrink-0", isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -547,15 +547,15 @@ export default function AdminCustomersPage() {
               ) : referralsData ? (
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className={cn("bg-white/5 border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-slate-50 border-slate-200")}>
                       <p className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Referrals</p>
                       <p className={cn("text-xl sm:text-2xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>{referralsData.totalReferrals}</p>
                     </div>
-                    <div className={cn("bg-white/5 border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-slate-50 border-slate-200")}>
                       <p className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Earned</p>
                       <p className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-emerald-400" : "text-emerald-700")}>{formatRupiah(referralsData.totalEarned)}</p>
                     </div>
-                    <div className={cn("bg-white/5 border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-slate-50 border-slate-200")}>
                       <p className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Current Balance</p>
                       <p className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(referralsData.affiliateBalance)}</p>
                     </div>
@@ -564,7 +564,7 @@ export default function AdminCustomersPage() {
                   <div>
                     <h4 className={cn("text-base sm:text-lg font-semibold mb-3", isDark ? "text-white" : "text-slate-900")}>Referred Users ({referralsData.referredUsers?.length || 0})</h4>
                     {referralsData.referredUsers?.length > 0 ? (
-                      <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#1e293b] border-white/5" : "bg-slate-100 border-slate-200")}>
+                      <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#1e293b] border-white/5" : "bg-slate-50 border-slate-200")}>
                         <div className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
                           {referralsData.referredUsers.map((ru: any) => (
                             <div key={ru.id} className="p-3 sm:p-4 flex items-center justify-between gap-3 hover:bg-white/[0.02]">
@@ -591,7 +591,7 @@ export default function AdminCustomersPage() {
             </div>
 
             {/* Footer */}
-            <div className={cn("p-4 sm:p-6 border-t bg-[#0f172a] shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("p-4 sm:p-6 border-t shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <p className={cn("text-xs text-center sm:text-left", isDark ? "text-zinc-500" : "text-slate-500")}>
                   Resetting will wipe earnings, balance, and detach all referred users.
@@ -599,7 +599,7 @@ export default function AdminCustomersPage() {
                 <button 
                   onClick={() => setShowResetConfirmModal(true)}
                   disabled={isResettingReferrals || loadingReferrals}
-                  className={cn("w-full sm:w-auto bg-red-500 hover:bg-red-600 px-5 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 text-sm whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}
+                  className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
                 >
                   {isResettingReferrals ? "Resetting..." : "Wipe & Reset Referrals"}
                 </button>

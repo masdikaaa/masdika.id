@@ -4,6 +4,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { SiKubernetes } from "react-icons/si";
 
 export default function K3sManagement() {
   const { theme } = useTheme();
@@ -101,11 +102,11 @@ export default function K3sManagement() {
         </div>
       </div>
 
-      <div className={cn("bg-[#0f172a] border rounded-2xl overflow-hidden relative", isDark ? "border-white/10" : "border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative shadow-sm", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className={cn("bg-white/5 border-b", isDark ? "border-white/10" : "border-slate-200")}>
+              <tr className={cn("border-b", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
                 <th className="p-4 w-10">
                   <button
                     onClick={toggleSelectAll}
@@ -113,7 +114,7 @@ export default function K3sManagement() {
                       "w-5 h-5 rounded flex items-center justify-center transition-colors",
                       selectedClusters.length > 0
                         ? "bg-cyan-500 text-[#0f172a]"
-                        : "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50"
+                        : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                     )}
                   >
                     <CheckCircle className="w-4 h-4 stroke-[2.5]" />
@@ -128,7 +129,7 @@ export default function K3sManagement() {
                 <th className={cn("p-4 text-sm font-semibold text-right whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className={cn("divide-y", isDark ? "divide-white/10" : "divide-slate-200")}>
               {clusters.map((cluster) => (
                 <tr key={cluster.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
                   <td className="p-4">
@@ -138,7 +139,7 @@ export default function K3sManagement() {
                         "w-5 h-5 rounded flex items-center justify-center transition-colors",
                         selectedClusters.includes(cluster.id)
                           ? "bg-cyan-500 text-[#0f172a]"
-                          : "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50"
+                          : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                       )}
                     >
                       <CheckCircle className="w-4 h-4 stroke-[2.5]" />
@@ -147,7 +148,7 @@ export default function K3sManagement() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                        <img referrerPolicy="no-referrer" src="https://cdn.simpleicons.org/kubernetes/06b6d4" alt="Kubernetes" className="w-6 h-6" loading="lazy" decoding="async" />
+                        <SiKubernetes className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} />
                       </div>
                       <div>
                         <div className={cn("font-bold whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>{cluster.name}</div>

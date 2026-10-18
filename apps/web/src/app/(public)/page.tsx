@@ -378,7 +378,7 @@ export default function HomePage() {
                   <div
                     key={i}
                     className={cn(
-                      "flex absolute z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[145px] sm:max-w-none",
+                      "flex absolute z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
                       pos,
                       anim,
                       "bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30",
@@ -389,9 +389,9 @@ export default function HomePage() {
                     <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
                       <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                     </div>
-                    <div>
-                      <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">{label}</div>
-                      <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">{value}</div>
+                    <div className="min-w-0">
+                      <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">{label}</div>
+                      <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 truncate max-w-[115px] sm:max-w-none">{value}</div>
                     </div>
                   </div>
                 ))}

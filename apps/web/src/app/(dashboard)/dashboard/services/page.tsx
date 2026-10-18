@@ -509,7 +509,7 @@ export default function MyServicesPage() {
       {terminateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
           <div className={cn("border w-full max-w-sm rounded-3xl p-6 shadow-xl relative", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-            <button onClick={() => setTerminateModal(null)} className={cn("absolute top-4 right-4 hover:text-white transition-colors", isDark ? "text-zinc-500" : "text-slate-400")}>
+            <button onClick={() => setTerminateModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
               <XCircle className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-3 mb-4">
@@ -529,7 +529,7 @@ export default function MyServicesPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setTerminateModal(null)}
-                className={cn("px-4 py-2.5 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium", isDark ? "text-zinc-400 border-slate-700" : "text-slate-600 border-slate-200")}
+                className={cn("px-4 py-2.5 rounded-lg border transition-colors text-sm font-medium", isDark ? "text-zinc-400 border-slate-700 hover:bg-slate-800" : "text-slate-600 border-slate-200 hover:bg-slate-100")}
                 disabled={terminateLoading}
               >
                 Cancel

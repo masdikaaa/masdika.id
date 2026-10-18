@@ -682,7 +682,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
                 Suspend {suspendTarget.label}
               </h3>
-              <button onClick={() => setSuspendModalOpen(false)} className={cn("hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={() => setSuspendModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <XCircle className="w-5 h-5" />
               </button>
             </div>
@@ -706,7 +706,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <button 
                 onClick={() => executeSuspend(suspendTarget.serviceType, suspendTarget.id, true, suspendReason, suspendTarget.label)}
                 disabled={isSuspending || !suspendReason.trim()}
-                className={cn("px-4 py-2 text-sm font-medium bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                className="px-4 py-2 text-sm font-medium bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {isSuspending ? (
                   <><div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> Suspending...</>
@@ -779,7 +779,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
           <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
             <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-white/10" : "border-slate-200")}>
               <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Create Custom Service</h3>
-              <button onClick={() => setCreateCustomServiceModal(false)} className={cn("hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={() => setCreateCustomServiceModal(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <XCircle className="w-5 h-5" />
               </button>
             </div>
@@ -841,7 +841,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                       type="date"
                       value={csForm.expiresAt}
                       onChange={(e) => setCsForm({...csForm, expiresAt: e.target.value})}
-                      className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all [color-scheme:dark]", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                      className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C] [color-scheme:dark]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50 [color-scheme:light]")}
                     />
                   </div>
                 </div>

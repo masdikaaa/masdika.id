@@ -195,7 +195,7 @@ export default function CategoriesPage() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className="flex items-center justify-between p-4 sm:px-6 hover:bg-white/[0.03] transition-colors group"
+                className={cn("flex items-center justify-between p-4 sm:px-6 transition-colors group", isDark ? "hover:bg-white/[0.03]" : "hover:bg-slate-50")}
               >
                 {editingId === cat.id ? (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
@@ -209,7 +209,7 @@ export default function CategoriesPage() {
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cat.id)}
                       autoFocus
                       placeholder="Name"
-                      className={cn("flex-1 px-4 py-2 bg-black/40 border border-cyan-500/50 rounded-lg focus:outline-none focus:border-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                      className={cn("flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-cyan-400 transition-colors", isDark ? "bg-[#0A0B1A] border-cyan-500/50 text-white" : "bg-white border-slate-300 text-slate-900")}
                     />
                     <input
                       type="text"
@@ -217,13 +217,13 @@ export default function CategoriesPage() {
                       onChange={(e) => setEditingSlug(generateSlug(e.target.value))}
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cat.id)}
                       placeholder="Slug"
-                      className={cn("flex-1 px-4 py-2 bg-black/40 border border-cyan-500/50 rounded-lg focus:outline-none focus:border-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                      className={cn("flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-cyan-400 transition-colors", isDark ? "bg-[#0A0B1A] border-cyan-500/50 text-white" : "bg-white border-slate-300 text-slate-900")}
                     />
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       <button onClick={() => handleUpdate(cat.id)} className={cn("p-2.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 transition-colors flex-1 sm:flex-none flex justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         <Check className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setEditingId(null)} className={cn("p-2.5 rounded-lg hover:bg-white/10 transition-colors flex-1 sm:flex-none flex justify-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <button onClick={() => setEditingId(null)} className={cn("p-2.5 rounded-lg transition-colors flex-1 sm:flex-none flex justify-center", isDark ? "text-zinc-400 hover:bg-white/10" : "text-slate-500 hover:bg-slate-100")}>
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -235,7 +235,7 @@ export default function CategoriesPage() {
                         <Tag className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       </div>
                       <div className="min-w-0">
-                        <span className={cn("font-bold block truncate group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{cat.name}</span>
+                        <span className={cn("font-bold block truncate transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700")}>{cat.name}</span>
                         <span className="text-xs text-zinc-500 block truncate">/{cat.slug}</span>
                       </div>
                       <span className={cn("hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border ml-auto mr-4 whitespace-nowrap", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
@@ -245,13 +245,13 @@ export default function CategoriesPage() {
                     <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
                       <button 
                         onClick={() => { setEditingId(cat.id); setEditingName(cat.name || ""); setEditingSlug(cat.slug || ""); }}
-                        className={cn("p-2 rounded-lg border border-transparent hover:border-white/10 hover:text-white transition-all", isDark ? "text-zinc-400" : "text-slate-500")}
+                        className={cn("p-2 rounded-lg border border-transparent transition-all", isDark ? "text-zinc-400 hover:border-white/10 hover:text-white hover:bg-white/10" : "text-slate-500 hover:border-slate-200 hover:text-slate-900 hover:bg-slate-100")}
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => setDeleteId(cat.id)}
-                        className={cn("p-2 rounded-lg bg-red-500/10 border border-transparent hover:border-red-500/20 hover:text-white transition-all", isDark ? "text-red-400" : "text-red-700")}
+                        className={cn("p-2 rounded-lg border border-transparent transition-all", isDark ? "bg-red-500/10 hover:border-red-500/20 hover:text-red-400 hover:bg-red-500/20 text-red-400" : "bg-red-50 hover:bg-red-500 hover:text-white text-red-700")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

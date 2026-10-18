@@ -408,8 +408,8 @@ export default function DashboardLayoutClient({
 
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex flex-col items-end">
-                <span className="text-sm font-medium text-white">{userName}</span>
-                <span className="text-xs text-zinc-400">{userEmail}</span>
+                <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{userName}</span>
+                <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>{userEmail}</span>
               </div>
               <Link href="/dashboard/settings" className="w-10 h-10 rounded-full shrink-0 hover:scale-105 transition-transform cursor-pointer">
                 <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center overflow-hidden border border-white/20">

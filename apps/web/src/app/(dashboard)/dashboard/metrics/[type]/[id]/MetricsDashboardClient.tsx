@@ -80,8 +80,8 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className={cn("bg-black/90 border p-3 rounded-lg shadow-sm", isDark ? "border-white/10" : "border-slate-200")}>
-          <p className="text-white/70 text-xs mb-2">{label}</p>
+        <div className={cn("border p-3 rounded-lg shadow-md", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200")}>
+          <p className={cn("text-xs mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
               {entry.name}: {entry.value} {entry.unit}
@@ -120,7 +120,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
           </div>
         ) : metricsData.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-white/40 text-sm">No data available. Try adjusting the timeframe.</span>
+            <span className={cn("text-sm", isDark ? "text-zinc-500" : "text-slate-400")}>No data available. Try adjusting the timeframe.</span>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -137,11 +137,11 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
                   </linearGradient>
                 )}
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-              <XAxis dataKey="time" stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} minTickGap={30} />
-              <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} width={90} tickFormatter={(val) => `${val} ${unit}`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#334155" : "#e2e8f0"} vertical={false} />
+              <XAxis dataKey="time" stroke={isDark ? "#334155" : "#cbd5e1"} tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 11 }} minTickGap={30} />
+              <YAxis stroke={isDark ? "#334155" : "#cbd5e1"} tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 11 }} width={90} tickFormatter={(val) => `${val} ${unit}`} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }} 
+                contentStyle={{ backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#e2e8f0', borderRadius: '8px', color: isDark ? '#fff' : '#0f172a', fontSize: '12px' }} 
               />
               <Area type="monotone" dataKey={dataKey1} stroke={color1} strokeWidth={2} fillOpacity={1} fill={`url(#color${dataKey1})`} unit={unit} name={dataKey1 === 'cpu' ? 'CPU' : dataKey1 === 'memory' ? 'Memory' : dataKey1 === 'netin' ? 'Download' : 'Read'} />
               {dataKey2 && color2 && (
@@ -186,7 +186,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
             <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Real-time and historical resource telemetry for your instances.</p>
           </div>
 
-          <div className={cn("flex items-center gap-2 bg-white/5 p-1 rounded-xl border", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("flex items-center gap-2 p-1 rounded-xl border", isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200")}>
             {[
               { id: "hour", label: "1H" },
               { id: "day", label: "1D" },
@@ -196,10 +196,11 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
               <button
                 key={tf.id}
                 onClick={() => setTimeframe(tf.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${timeframe === tf.id
-                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                    : "text-white/60 hover:text-white hover:bg-white/5 border border-transparent"
-                  }`}
+                className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  timeframe === tf.id
+                    ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-white text-cyan-700 border border-slate-200 shadow-sm font-bold")
+                    : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200 border border-transparent")
+                )}
               >
                 {tf.label}
               </button>
@@ -208,7 +209,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
             <button
               onClick={fetchMetrics}
               disabled={loading}
-              className="px-3 py-2 text-white/60 hover:text-white transition-colors ml-2"
+              className={cn("px-3 py-2 transition-colors ml-2", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
             </button>

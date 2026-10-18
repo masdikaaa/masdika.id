@@ -177,7 +177,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex h-[100dvh] bg-background relative overflow-hidden selection:bg-cyan-500/30 text-zinc-100">
+    <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#050B14] text-zinc-100" : "bg-[#f8fafb] text-slate-900")}>
 
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -286,21 +286,21 @@ export default function AdminLayout({
 
               {/* Search Results Dropdown */}
               {isSearchFocused && searchQuery.trim() !== "" && (
-                <div className={cn("absolute top-full mt-2 w-full bg-slate-900/95 backdrop-blur-sm border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200", isDark ? "border-white/10" : "border-slate-200")}>
+                <div className={cn("absolute top-full mt-2 w-full backdrop-blur-sm border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50", isDark ? "bg-slate-900/95 border-white/10" : "bg-white border-slate-200 shadow-xl")}>
                   <div className="max-h-64 overflow-y-auto p-2">
                     {searchResults.length > 0 ? (
                       searchResults.map(link => (
                         <Link
                           key={link.name}
                           href={link.href}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group"
+                          className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-100")}
                         >
                           <link.icon className={cn("w-4 h-4", link.color)} />
-                          <span className="text-sm font-medium text-zinc-200 group-hover:text-white">{link.name}</span>
+                          <span className={cn("text-sm font-medium", isDark ? "text-zinc-200 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900")}>{link.name}</span>
                         </Link>
                       ))
                     ) : (
-                      <div className="p-4 text-center text-sm text-zinc-500">
+                      <div className={cn("p-4 text-center text-sm", isDark ? "text-zinc-500" : "text-slate-500")}>
                         No results found for &quot;{searchQuery}&quot;
                       </div>
                     )}
@@ -315,10 +315,10 @@ export default function AdminLayout({
               <button onClick={() => setTheme(isDark ? 'light' : 'dark')} aria-label="Toggle Theme" className={cn("transition-colors relative group outline-none", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
                 {isDark ? <Sun className="w-5 h-5 transition-transform group-hover:rotate-12" /> : <Moon className="w-5 h-5 transition-transform group-hover:-rotate-12" />}
               </button>
-              <button onClick={toggleNotifications} aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`} className={cn("hover:text-white transition-colors relative group outline-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={toggleNotifications} aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`} className={cn("transition-colors relative group outline-none", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <Bell className={cn("w-5 h-5 transition-transform", showNotifications ? "animate-ring" : "group-hover:rotate-12")} aria-hidden="true" />
                 {unreadCount > 0 && (
-                  <span aria-live="polite" className={cn("absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[10px] font-bold flex items-center justify-center border-2 border-background", isDark ? "text-white" : "text-slate-900")}>
+                  <span aria-live="polite" className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center border-2 border-background">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -328,8 +328,8 @@ export default function AdminLayout({
               {showNotifications && (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
-                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-slate-900/95 backdrop-blur-sm border rounded-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "border-white/10" : "border-slate-200")}>
-                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 backdrop-blur-sm border rounded-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-slate-900/95 border-white/10" : "bg-white border-slate-200 shadow-xl")}>
+                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-100")}>
                       <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">
                         {notifications.length > 0 && (
@@ -340,7 +340,7 @@ export default function AdminLayout({
                             Mark all as read
                           </button>
                         )}
-                        <Link href="/admin/notifications" onClick={() => setShowNotifications(false)} className={cn("text-xs hover:text-white", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        <Link href="/admin/notifications" onClick={() => setShowNotifications(false)} className={cn("text-xs", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                           View All
                         </Link>
                       </div>
@@ -356,7 +356,7 @@ export default function AdminLayout({
                             key={notif.id}
                             href={notif.link || `/admin/messages`}
                             onClick={() => setShowNotifications(false)}
-                            className={cn("block p-4 border-b transition-colors", isDark ? "bg-[#0A0B1A]/50 border-white/5 hover:bg-white/5" : "bg-white border-slate-200 hover:bg-slate-50")}
+                            className={cn("block p-4 border-b transition-colors", isDark ? "bg-[#0A0B1A]/50 border-white/5 hover:bg-white/5" : "bg-white border-slate-100 hover:bg-slate-50")}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className={cn("font-semibold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{notif.subject || 'No Subject'}</div>
@@ -406,7 +406,7 @@ export default function AdminLayout({
                 <div className={cn("text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>{profileData.name}</div>
                 <div className={cn("text-xs", isDark ? "text-zinc-300" : "text-slate-600")}>Super Admin</div>
               </div>
-              <div className={cn("w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-bold overflow-hidden border", isDark ? "text-white border-white/10" : "text-slate-900 border-slate-200")}>
+              <div className={cn("w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-bold text-white overflow-hidden border", isDark ? "border-white/10" : "border-slate-200")}>
                 {profileData.image ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img referrerPolicy="no-referrer" src={profileData.image} alt={`${profileData.name} profile picture`} className="w-full h-full object-cover" loading="lazy" decoding="async" />

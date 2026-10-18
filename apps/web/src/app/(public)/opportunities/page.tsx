@@ -74,8 +74,11 @@ export default async function OpportunitiesPage() {
             <span className="text-cyan-500 font-bold tracking-[0.2em] text-xs mb-4 block">
               Discover Opportunities
             </span>
-            <h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight leading-[1.2] md:leading-tight">
-              Events & <br className="hidden sm:block" /><span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent">Opportunities</span>
+            <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-6 text-[var(--text-primary)]">
+              Events &amp; <br />
+              <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                Opportunities.
+              </span>
             </h1>
             <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
               Discover the latest events, tech webinars, and job vacancies. Curated and shared to help you grow your career and network.

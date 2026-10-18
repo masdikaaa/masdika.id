@@ -96,7 +96,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className={cn("bg-[#0f172a] border rounded-2xl w-full max-w-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}>
+      <div className={cn("border rounded-2xl w-full max-w-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
         <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
           <div className="flex items-center gap-3">
             <div className={cn("w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -107,7 +107,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Assign an existing Proxmox VM to a client.</p>
             </div>
           </div>
-          <button onClick={onClose} className={cn("p-2 hover:bg-white/5 rounded-xl transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <button onClick={onClose} className={cn("p-2 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900")}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -264,7 +264,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
           <button
             type="button"
             onClick={onClose}
-            className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+            className={cn("px-5 py-2.5 rounded-xl transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
           >
             Cancel
           </button>
@@ -272,7 +272,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
             form="import-vps-form"
             type="submit"
             disabled={loading}
-            className={cn("flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 px-6 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+            className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white px-6 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50"
           >
             {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {loading ? "Importing..." : "Import VPS"}

@@ -90,7 +90,7 @@ export default function AdminDashboard() {
                  {/* Visual Mock of the Donut Chart from the reference */}
                  <div className="relative w-40 h-40">
                    <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90 overflow-visible">
-                     <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1E293B" strokeWidth="12" />
+                     <circle cx="50" cy="50" r="40" fill="transparent" stroke={isDark ? "#1E293B" : "#e2e8f0"} strokeWidth="12" />
                      {/* cyan segment */}
                      <circle cx="50" cy="50" r="40" fill="transparent" stroke="#22d3ee" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="60" />
                      {/* purple segment */}
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
                   </div>
                 </Link>
 
-                <div className={cn("space-y-3 pt-6 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                <div className={cn("space-y-3 pt-6 border-t", isDark ? "border-white/5" : "border-slate-200")}>
                   <Link href="/admin/portfolio/edit/new" className={cn("w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors border group/link", isDark ? "bg-[#0A0B1A]/50 hover:bg-[#11162C] border-white/5" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
                     <div className="flex items-center gap-3">
                       <FolderGit2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
