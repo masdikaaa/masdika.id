@@ -4,25 +4,40 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Grid, Server, Activity, Cloud, Network, Database, ExternalLink, FolderOpen, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
+import {
+  Grid,
+  Server,
+  Activity,
+  Cloud,
+  Database,
+  ChevronLeft,
+  ChevronRight,
+  FolderOpen,
+  ArrowRight,
+  Briefcase,
+  Layers,
+  Terminal,
+  ShieldCheck,
+  CheckCircle2
+} from "lucide-react";
+import { SiKubernetes } from "react-icons/si";
 import { cn } from "@/lib/utils";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { TiltCard } from "@/components/animations/TiltCard";
-import { MagneticButton } from "@/components/animations/MagneticButton";
-import { useTheme } from "@/components/ThemeProvider";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
-const ICONS: Record<string, any> = {
-  Grid, Server, Activity, Cloud, Network, Database
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
 };
 
 export default function PortfolioPage() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [activeFilter, setActiveFilter] = useState("All");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -54,193 +69,449 @@ export default function PortfolioPage() {
   const currentProjects = filteredProjects.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 bg-transparent relative">
-
-
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center max-w-3xl mx-auto mb-16 pt-10 relative z-10"
-        >
-          <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}>
-            Latest Portfolio
-          </span>
-          <h1 className={cn("text-4xl sm:text-5xl md:text-7xl font-black mb-6 tracking-tight leading-[1.1]", isDark ? "text-white" : "text-slate-900")}>
-            Featured <br className="hidden sm:block" />
-            <span className={cn("bg-clip-text text-transparent drop-shadow-sm", isDark ? "bg-gradient-to-r from-cyan-400 to-cyan-400" : "bg-gradient-to-r from-cyan-600 to-cyan-400")}>Case Studies</span>
-          </h1>
-          <p className={cn("text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
-            A showcase of architectural deployments, cloud migrations, and scalable solutions that drive digital transformation.
-          </p>
-        </motion.div>
 
-        {/* Filter Pills */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-16 relative z-10"
-        >
-          {FILTERS.map((filter) => (
-            <MagneticButton key={filter.name} intensity={10}>
-              <button
-                onClick={() => setActiveFilter(filter.name)}
-                className={cn(
-                  "px-8 py-4 rounded-xl font-bold transition-all flex items-center gap-2 w-fit shrink-0 backdrop-blur-md",
-                  activeFilter === filter.name
-                    ? (isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white")
-                    : (isDark 
-                        ? "bg-white/5 text-zinc-400 border border-white/10 hover:text-white hover:bg-white/10 hover:border-white/20" 
-                        : "bg-slate-900/5 text-slate-600 border border-slate-900/10 hover:text-slate-900 hover:bg-slate-900/10 hover:border-slate-900/20")
-                )}
-              >
-                <filter.icon className="w-5 h-5" />
-                {filter.name}
-              </button>
-            </MagneticButton>
-          ))}
-        </motion.div>
+        {/* ── 0. HERO (Identik Patokan Events & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-        {/* Projects Grid */}
-        <div className="relative z-10">
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin shadow-[0_0_20px_rgba(6,182,212,0.5)]"></div>
-            </div>
-          ) : filteredProjects.length === 0 ? (
-            <div className={cn("text-center py-24 px-6 sm:px-8 rounded-3xl backdrop-blur-sm shadow-2xl border", isDark ? "bg-white/5 border-white/10" : "bg-white border-black/5")}>
-              <div className={cn("w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 border", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-black/5")}>
-                <FolderOpen className="w-10 h-10 text-zinc-500" />
-              </div>
-              <h3 className={cn("text-3xl font-black mb-3 tracking-tight", isDark ? "text-white" : "text-slate-900")}>No projects found</h3>
-              <p className={cn("max-w-md mx-auto font-medium text-lg", isDark ? "text-zinc-400" : "text-slate-600")}>Check back later or select a different category to explore my work.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentProjects.map((project, index) => {
-                const techList = project.techStack ? project.techStack.split(',').map((t: string) => t.trim()) : [];
-                return (
-                  <FadeIn key={project.id} delay={index * 0.1} direction="up" className="h-full">
-                    <TiltCard intensity={5} className={cn("group flex flex-col rounded-[24px] overflow-hidden transition-all duration-300 h-full shadow-xl border", isDark ? "bg-[#0d1629] border-slate-700/80 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40 ring-1 ring-white/5" : "bg-white border-slate-200 hover:border-cyan-500/40 hover:shadow-xl")}>
-                      {/* Image Section */}
-                      <div className={cn("relative h-48 sm:h-56 overflow-hidden", isDark ? "bg-black/40" : "bg-slate-100")}>
-                        {project.image ? (
-                          <Image referrerPolicy="no-referrer"                             src={project.image}
-                            alt={project.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            unoptimized={true}
-                            className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
-                          />
-                        ) : (
-                          <div className={cn("w-full h-full flex items-center justify-center font-bold uppercase tracking-widest text-sm", isDark ? "bg-[#111827] text-zinc-700" : "bg-slate-200 text-slate-400")}>No Image</div>
-                        )}
-
-                        {/* Gradient Overlay for subtle fade at bottom */}
-                        <div className={cn("absolute inset-0 bg-gradient-to-t via-transparent to-transparent opacity-80", isDark ? "from-[#0b1120]" : "from-white")} />
-
-                        {/* Category Badge */}
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className={cn("backdrop-blur-md border px-3 py-1.5 rounded-full font-medium text-[11px]", isDark ? "bg-black/60 border-white/10 text-zinc-300" : "bg-white/80 border-black/10 text-slate-700 shadow-sm")}>
-                            {project.category?.name || "Web Apps"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Content Section */}
-                      <div className={cn("flex-1 p-6 flex flex-col relative bg-gradient-to-b from-transparent", isDark ? "to-[#050b14]/50" : "to-slate-50/50")}>
-                        {/* Tech Stack */}
-                        {techList.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {techList.slice(0, 3).map((tech: string, i: number) => (
-                              <span key={i} className={cn("px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border rounded-md", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border-cyan-200")}>
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        <Link href={`/portfolio/${project.slug}`} className="group/link">
-                          <h3 className={cn("text-xl sm:text-2xl font-bold mb-3 transition-colors line-clamp-2 leading-snug", isDark ? "text-white group-hover/link:text-cyan-400" : "text-slate-900 group-hover/link:text-cyan-600")}>
-                            {project.title}
-                          </h3>
-                        </Link>
-
-                        <p className={cn("text-sm leading-relaxed mb-6 flex-1 min-h-[4.5rem]", isDark ? "text-zinc-400" : "text-slate-600")}>
-                          {(() => {
-                            const desc = project.description || "Discover the full case study including architectural decisions, challenges faced, and the technology stack used.";
-                            return desc.length > 90 ? desc.substring(0, 90) + '...' : desc;
-                          })()}
-                        </p>
-
-                        {/* Bottom Section */}
-                        <div className={cn("mt-auto pt-5 border-t flex items-center justify-between", isDark ? "border-white/5" : "border-black/5")}>
-                          <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            {project.client ? `Client: ${project.client}` : 'Case Study'}
-                          </span>
-
-                          <Link
-                            href={`/portfolio/${project.slug}`}
-                            className={cn("flex items-center gap-1.5 text-sm font-bold transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}
-                          >
-                            Read More
-                            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                          </Link>
-                        </div>
-                      </div>
-                    </TiltCard>
-                  </FadeIn>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Pagination Controls */}
-          {!loading && totalPages > 1 && (
+            {/* Left – Text & Actions */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
-              className="flex justify-center items-center gap-3 mt-20"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
             >
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className={cn("p-3 rounded-xl backdrop-blur-md border disabled:opacity-50 disabled:cursor-not-allowed transition-colors transform-gpu shadow-sm", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-white border-black/10 hover:bg-slate-50 text-slate-900")}
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
-              <div className="flex gap-2">
-                {Array.from({ length: totalPages }).map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentPage(idx + 1)}
-                    className={cn(
-                      "w-12 h-12 rounded-xl font-bold text-lg transition-all flex items-center justify-center border",
-                      currentPage === idx + 1
-                        ? (isDark ? "bg-gradient-to-r from-cyan-500 to-cyan-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] border-transparent" : "bg-gradient-to-r from-cyan-600 to-cyan-700 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] border-transparent")
-                        : (isDark ? "bg-white/5 backdrop-blur-md border-white/10 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-white backdrop-blur-md border-black/10 text-slate-600 hover:text-slate-900 hover:bg-slate-50")
-                    )}
-                  >
-                    {idx + 1}
-                  </button>
-                ))}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  FEATURED CASE STUDIES &amp; ARCHITECTURES
+                </Badge>
               </div>
 
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className={cn("p-3 rounded-xl backdrop-blur-md border disabled:opacity-50 disabled:cursor-not-allowed transition-colors transform-gpu shadow-sm", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-white border-black/10 hover:bg-slate-50 text-slate-900")}
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Engineering Scalable <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  Architectures &amp; Cloud.
+                </span>
+              </h1>
+
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                A comprehensive showcase of architectural deployments, cloud migrations, high-availability clusters, and automated CI/CD pipelines engineered to drive operational excellence.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="#projects-grid"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Explore Case Studies
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/contact"
+                  leftIcon={<Briefcase className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  Consult Architecture
+                </Button>
+              </div>
             </motion.div>
-          )}
-        </div>
+
+            {/* Right – Hero Avatar (portofolio.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[300px] sm:w-[440px] sm:h-[360px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (Cloud Architect) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Cloud className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      AWS &amp; GCP
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Cloud Architect
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 2: Top-Right (Multi-Node Clusters) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Database className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      High Availability
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Multi-Node
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Zero-Downtime Deploy) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      GitOps CI/CD
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Zero Downtime
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (Kubernetes) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2.5 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <SiKubernetes className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Kubernetes
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Orchestration
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mascot Character with smooth bottom mask fade */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/portofolio.webp"
+                    alt="Masdika – Portfolio Works"
+                    width={1024}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+        </section>
+
+        {/* ── 1. FILTER TABS & PROJECTS GRID ───────────────────────────── */}
+        <section id="projects-grid" className="py-16 lg:py-24 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              PORTFOLIO REPOSITORY
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Selected Works &amp; Systems
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl mx-auto">
+              Browse verified deployments, system architectures, and client projects across various engineering domains.
+            </p>
+          </div>
+
+          {/* Filter Pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-12"
+          >
+            {FILTERS.map((filter) => {
+              const isActive = activeFilter === filter.name;
+              return (
+                <button
+                  key={filter.name}
+                  onClick={() => setActiveFilter(filter.name)}
+                  className={cn(
+                    "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500",
+                    isActive
+                      ? "bg-cyan-500 text-slate-950 shadow-sm font-bold"
+                      : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-primary)] hover:border-cyan-500/40 hover:text-[var(--text-primary)]"
+                  )}
+                >
+                  <filter.icon className={cn("w-4 h-4", isActive ? "text-slate-950" : "text-cyan-600 dark:text-cyan-400")} />
+                  <span>{filter.name}</span>
+                </button>
+              );
+            })}
+          </motion.div>
+
+          {/* Projects Grid */}
+          <div>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
+              </div>
+            ) : filteredProjects.length === 0 ? (
+              <div className="text-center py-24 px-6 sm:px-8 rounded-2xl border border-dashed border-[var(--border-primary)] bg-[var(--surface)]">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400">
+                  <FolderOpen className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2 text-[var(--text-primary)]">No projects found</h3>
+                <p className="max-w-md mx-auto text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Check back later or select a different category to explore my work.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                {currentProjects.map((project, index) => {
+                  const techList = project.techStack ? project.techStack.split(',').map((t: string) => t.trim()) : [];
+                  return (
+                    <FadeIn key={project.id} delay={index * 0.08} direction="up" className="h-full">
+                      <TiltCard intensity={4} className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 h-full border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 hover:shadow-xl shadow-sm">
+                        {/* Image Section */}
+                        <div className="relative h-48 sm:h-52 overflow-hidden bg-[var(--surface-secondary)]">
+                          {project.image ? (
+                            <Image
+                              referrerPolicy="no-referrer"
+                              src={project.image}
+                              alt={project.title}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              unoptimized={true}
+                              className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center font-bold uppercase tracking-widest text-xs text-[var(--text-muted)]">
+                              No Image Available
+                            </div>
+                          )}
+
+                          {/* Gradient fade layer */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-transparent to-transparent opacity-80" />
+
+                          {/* Category Badge */}
+                          {project.category?.name && (
+                            <div className="absolute top-4 left-4 z-10">
+                              <span className="backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/60 border border-white/20 text-white">
+                                {project.category.name}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="flex-1 p-6 flex flex-col">
+                          {/* Tech Stack Chips */}
+                          {techList.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              {techList.slice(0, 4).map((tech: string, i: number) => (
+                                <span key={i} className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400">
+                                  {tech}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          <Link href={`/portfolio/${project.slug}`} className="group/link focus:outline-none">
+                            <h3 className="text-xl font-bold mb-2 transition-colors line-clamp-2 leading-snug text-[var(--text-primary)] group-hover/link:text-cyan-600 dark:group-hover/link:text-cyan-400">
+                              {project.title}
+                            </h3>
+                          </Link>
+
+                          <p className="text-sm leading-relaxed mb-6 flex-1 text-[var(--text-secondary)] line-clamp-3">
+                            {project.description || "Discover the full case study including architectural decisions, challenges faced, and the technology stack used."}
+                          </p>
+
+                          {/* Bottom Section */}
+                          <div className="mt-auto pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
+                            <span className="text-xs font-medium text-[var(--text-muted)]">
+                              {project.client ? `Client: ${project.client}` : 'Case Study'}
+                            </span>
+
+                            <Link
+                              href={`/portfolio/${project.slug}`}
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"
+                            >
+                              View Case Study
+                              <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                          </div>
+                        </div>
+                      </TiltCard>
+                    </FadeIn>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {!loading && totalPages > 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="flex justify-center items-center gap-2 mt-16"
+              >
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] disabled:opacity-40 disabled:cursor-not-allowed hover:border-cyan-500/40 transition-colors"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                <div className="flex gap-1.5">
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentPage(idx + 1)}
+                      className={cn(
+                        "w-10 h-10 rounded-xl font-bold text-sm transition-all flex items-center justify-center border",
+                        currentPage === idx + 1
+                          ? "bg-cyan-500 text-slate-950 font-bold border-cyan-500 shadow-sm"
+                          : "bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
+                      )}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] disabled:opacity-40 disabled:cursor-not-allowed hover:border-cyan-500/40 transition-colors"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </motion.div>
+            )}
+          </div>
+        </section>
+
+        {/* ── 2. ENGINEERING HIGHLIGHTS SECTION (Format identik Session Formats di Events) ────────── */}
+        <section className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
+            <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
+              Architectural Domains
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-5 leading-[1.15]">
+              Core Engineering Focus
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Every production system is engineered following modern cloud-native standards, high availability, and operational resilience.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                icon: Cloud,
+                title: "Cloud Infrastructure",
+                desc: "Resilient multi-region architectures across AWS, GCP, and bare-metal environments."
+              },
+              {
+                icon: SiKubernetes,
+                title: "Kubernetes & GitOps",
+                desc: "Production container orchestration with automated scaling and declarative ArgoCD sync."
+              },
+              {
+                icon: Activity,
+                title: "CI/CD Automation",
+                desc: "Zero-downtime deployment pipelines, automated security scanning, and declarative IaC."
+              },
+              {
+                icon: Database,
+                title: "High Availability",
+                desc: "Distributed database replication, automated failover routing, and disaster recovery."
+              }
+            ].map((format, idx) => (
+              <motion.div
+                key={idx}
+                variants={item}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
+                className="h-full"
+              >
+                <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 group-hover:scale-110 transition-transform duration-300">
+                    <format.icon className="w-7 h-7" strokeWidth={1.75} />
+                  </div>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">
+                    {format.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    {format.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 3. CALL TO ACTION (Identik Patokan Events) ──────────────────────── */}
+        <section className="pt-8 pb-12">
+          <div className="rounded-3xl bg-gradient-to-b from-cyan-500/5 to-transparent dark:from-cyan-500/10 dark:to-transparent border border-cyan-500/20 p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden">
+            <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
+              ENGINEERING &amp; COLLABORATION
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight mb-4">
+              Have a Mission-Critical Architecture to Build?
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
+              Whether you are scaling high-concurrency systems, architecting Kubernetes clusters, or migrating to multi-cloud, let&apos;s engineer your success.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Button
+                variant="primary"
+                size="lg"
+                href="/contact"
+                rightIcon={<ArrowRight className="w-5 h-5" />}
+              >
+                Start a Project
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
+                href="/skills"
+              >
+                View Skills &amp; Stack
+              </Button>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   );

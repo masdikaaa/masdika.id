@@ -201,7 +201,7 @@ export default function ReserveNewIpPage() {
             <button
               onClick={handleReserve}
               disabled={isReserving || availableIps.length === 0}
-              className={cn("w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0", "shadow-sm")}
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {isReserving ? (
                 <>

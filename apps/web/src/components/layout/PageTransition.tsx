@@ -19,13 +19,13 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
         className="flex flex-col min-h-[calc(100vh-64px)] w-full max-w-full"
       >
         {children}

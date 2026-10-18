@@ -77,7 +77,7 @@ export function ConfirmModal({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className={`flex-1 py-3 font-semibold rounded-xl transition-colors border disabled:opacity-50 text-sm ${
+                className={`flex-1 py-2.5 font-semibold rounded-lg transition-colors border disabled:opacity-50 text-sm ${
                   isDark
                     ? "bg-[#060b14] hover:bg-slate-800 text-slate-300 border-slate-800"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
@@ -89,16 +89,16 @@ export function ConfirmModal({
               <button
                 onClick={onConfirm}
                 disabled={isLoading}
- className={`flex-1 py-3 font-semibold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 text-sm ${
+                className={`flex-1 py-2.5 font-semibold rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 text-sm ${
                   variant === "danger"
                     ? "bg-red-600 hover:bg-red-700 text-white"
                     : variant === "warning"
                     ? "bg-amber-600 hover:bg-amber-700 text-white"
-                    : "bg-cyan-600 hover:bg-cyan-700 text-white"
+                    : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold"
                 }`}
               >
                 {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className={`w-5 h-5 border-2 ${variant === "danger" || variant === "warning" ? "border-white" : "border-slate-950"} border-t-transparent rounded-full animate-spin`} />
                 ) : (
                   confirmText
                 )}

@@ -2422,10 +2422,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => setThrottleModalVps(null)}
                 disabled={actionLoading}
-                className={cn(
-                  "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all active:scale-95",
-                  isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
-                )}
+                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -2440,11 +2437,7 @@ export default function AdminResourceFindingPage() {
                   handleVpsAction(throttleModalVps.id, "throttle", undefined, rateNum);
                 }}
                 disabled={actionLoading}
-                className={cn(
-                  "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95",
-                  "bg-cyan-600 hover:bg-cyan-500",
-                  isDark && ""
-                )}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Apply Rate Limit</span>

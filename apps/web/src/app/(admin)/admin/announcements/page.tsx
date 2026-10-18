@@ -417,7 +417,7 @@ export default function AdminAnnouncementsPage() {
               Delete Selected ({selectedIds.length})
             </button>
           )}
-          <button onClick={() => openModal()} className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={() => openModal()} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
             <Plus className="w-4 h-4" /> {activeTab === 'banner' ? 'Create Banner' : 'Create Announcement'}
           </button>
         </div>
@@ -859,7 +859,7 @@ export default function AdminAnnouncementsPage() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className={cn("w-full sm:w-auto px-4 py-2 hover:bg-white/10 rounded-xl text-sm font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -867,7 +867,7 @@ export default function AdminAnnouncementsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={cn("w-full sm:w-auto px-4 py-2 bg-cyan-500 hover:bg-cyan-600 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 min-w-[120px] justify-center", isDark ? "text-white" : "text-slate-900")}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 min-w-[120px] justify-center"
                 >
                   {isSubmitting ? (
                     <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} />

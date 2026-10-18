@@ -483,7 +483,7 @@ export default function IncidentsClient() {
                   setReportModalItem(null);
                 }}
                 disabled={loading || !data?.incidents?.length}
-                className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 <Printer className="w-4 h-4" />
                 <span>Official Report</span>
@@ -758,12 +758,7 @@ export default function IncidentsClient() {
                       href={`/dashboard/tickets/new?service=VPS&subject=${encodeURIComponent(
                         `Request Unthrottle for VMID ${vps.vmid} (${vps.hostname})`
                       )}`}
-                      className={cn(
-                        "inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-bold shrink-0 text-xs border transition-all w-full sm:w-auto shadow-sm",
-                        isDark
-                          ? "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/30"
-                          : "bg-cyan-600 hover:bg-cyan-500 text-white border-transparent"
-                      )}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-semibold shrink-0 text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all w-full sm:w-auto"
                     >
                       <span>Request Unthrottle</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -1402,7 +1397,7 @@ export default function IncidentsClient() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-md transition-all active:scale-95 print-include"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all print-include"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print / PDF</span>
@@ -1896,15 +1891,15 @@ export default function IncidentsClient() {
                   setIsFleetReport(false);
                 }}
                 className={cn(
-                  "w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-colors text-center",
-                  isDark ? "border-white/10 hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                  "w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-medium border transition-colors text-center",
+                  isDark ? "border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white" : "border-slate-200 hover:bg-slate-100 text-slate-700"
                 )}
               >
                 Close
               </button>
               <button
                 onClick={handlePrint}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-md transition-all active:scale-95 print-include"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all print-include"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Document</span>

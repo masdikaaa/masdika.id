@@ -821,9 +821,9 @@ function CheckoutContent() {
                   onClick={handleCheckout}
                   disabled={isProcessing || !selectedPlanId || !selectedPaymentMethod || !isTermsAccepted}
                   className={cn(
-                    "w-full py-3 px-5 rounded-xl text-sm font-bold flex items-center justify-center gap-2.5 transition-all relative z-10",
+                    "w-full py-3 px-5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2.5 transition-all relative z-10 shadow-sm",
                     !isProcessing && selectedPlanId && selectedPaymentMethod && isTermsAccepted
-                      ? "bg-cyan-600 hover:bg-cyan-700 active:scale-[0.99] text-white shadow-sm cursor-pointer"
+                      ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
                       : isDark
                         ? "bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed"
                         : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed shadow-none"

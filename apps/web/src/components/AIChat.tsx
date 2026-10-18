@@ -900,7 +900,7 @@ export function AIChat() {
                     <p className={cn("text-[10px] text-center", isDark ? "text-zinc-500" : "text-slate-400")}>A transcript will be sent to your email</p>
                     <div className="flex gap-2">
                       <button onClick={() => setShowConfirmEnd(false)} className={cn("flex-1 py-1.5 px-2 rounded-lg text-xs transition-colors border font-medium", isDark ? "bg-white/5 hover:bg-white/10 text-zinc-300 border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}>Cancel</button>
-                      <button onClick={handleEndChat} disabled={isEnding} className="flex-1 py-1.5 px-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-[#011627] text-xs transition-colors font-medium shadow-lg shadow-cyan-500/20 disabled:opacity-50">
+                      <button onClick={handleEndChat} disabled={isEnding} className="flex-1 py-1.5 px-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs transition-colors font-semibold disabled:opacity-50">
                         {isEnding ? 'Ending...' : 'End'}
                       </button>
                     </div>
@@ -973,7 +973,7 @@ export function AIChat() {
                         <button
                           onClick={handleVerify}
                           disabled={isVerifying || verificationOtp.length !== 6}
-                          className="relative w-full h-[46px] cursor-pointer bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white font-bold text-base rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden"
+                          className="relative w-full h-[46px] cursor-pointer bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden"
                         >
                           <AnimatePresence>
                             {isVerifying ? (
@@ -1082,7 +1082,7 @@ export function AIChat() {
                         <button
                           onClick={handleRegister}
                           disabled={isRegistering}
-                          className="relative w-full h-[46px] cursor-pointer bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white font-bold text-base rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden mt-1"
+                          className="relative w-full h-[46px] cursor-pointer bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden mt-1"
                         >
                           <AnimatePresence>
                             {isRegistering ? (

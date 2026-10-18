@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, CalendarDays, Briefcase, Video, Inbox, ArrowRight, Search } from "lucide-react";
+import { Calendar, CalendarDays, Briefcase, Video, Inbox, ArrowRight, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Opportunity } from "@prisma/client";
@@ -13,10 +13,12 @@ interface OpportunityGridProps {
   emptyType?: 'EVENT' | 'JOBS' | 'ALL';
 }
 
+const ITEMS_PER_PAGE = 6;
+
 export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: OpportunityGridProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredOpportunities = useMemo(() => {
@@ -29,21 +31,30 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
     );
   }, [opportunities, searchQuery]);
 
-  // Reset visible count when search changes
+  // Reset to first page when search changes
   useEffect(() => {
-    const t = setTimeout(() => {
-      setVisibleCount(6);
-    }, 0);
-    return () => clearTimeout(t);
+    setCurrentPage(1);
   }, [searchQuery]);
+
+  const totalPages = Math.ceil(filteredOpportunities.length / ITEMS_PER_PAGE);
+
+  const paginatedOpportunities = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredOpportunities.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredOpportunities, currentPage]);
 
   if (opportunities.length === 0) {
     const EmptyIcon = emptyType === 'JOBS' ? Briefcase : emptyType === 'EVENT' ? CalendarDays : Inbox;
+    const emptyTitle = emptyType === 'JOBS' ? "No vacancies found" : emptyType === 'EVENT' ? "No events scheduled" : "No items found";
+    const emptyDesc = emptyType === 'JOBS' 
+      ? "There are currently no active job vacancies. Please check back soon or submit a role."
+      : "There are currently no sessions published in this category.";
+
     return (
-      <div className={cn("text-center py-20 px-6 sm:px-10 mx-4 sm:mx-0 rounded-3xl border shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
-        <EmptyIcon className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-cyan-400/40" : "text-cyan-600/40")} />
-        <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No items found</h3>
-        <p className={isDark ? "text-white/40" : "text-slate-500"}>There are currently no items published in this category.</p>
+      <div className="text-center py-20 px-6 sm:px-10 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]">
+        <EmptyIcon className="w-12 h-12 mx-auto mb-4 text-cyan-600/60 dark:text-cyan-400/60" />
+        <h3 className="text-xl font-bold mb-2 text-[var(--text-primary)]">{emptyTitle}</h3>
+        <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">{emptyDesc}</p>
       </div>
     );
   }
@@ -63,147 +74,199 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
     return `/opportunities/${item.slug || item.id}`;
   };
 
+  const searchPlaceholder = emptyType === 'JOBS'
+    ? "Search jobs, roles, or tech stack..."
+    : "Search events, webinars, or workshops...";
+
   return (
     <div className="mb-24">
       {/* Search Bar */}
       <div className="max-w-2xl mx-auto mb-12">
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-            <Search className="h-5 w-5 text-zinc-400 group-focus-within:text-cyan-400 transition-colors" />
+            <Search className="h-5 w-5 text-[var(--text-muted)] group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-400 transition-colors" />
           </div>
           <input
             type="text"
-            placeholder="Search events, webinars, or jobs..."
+            placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn(
-              "w-full border rounded-2xl py-3.5 pl-12 pr-4 focus:outline-none focus:ring-4 transition-all backdrop-blur-sm",
-              isDark 
-                ? "bg-[#0d1629] border-slate-700/80 focus:border-cyan-500/50 text-white placeholder:text-zinc-500 focus:ring-cyan-500/20" 
-                : "bg-white border-black/10 focus:border-cyan-500 text-slate-900 placeholder:text-slate-400 focus:ring-cyan-500/20 shadow-sm"
-            )}
+            className="w-full border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all text-sm sm:text-base"
           />
         </div>
       </div>
 
-      {filteredOpportunities.length === 0 && searchQuery.trim() !== "" ? (
-        <div className={cn("text-center py-16 px-6 rounded-3xl border backdrop-blur-sm shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-black/10 shadow-sm")}>
-          <Search className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-zinc-500" : "text-slate-300")} />
-          <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No results found</h3>
-          <p className={cn("max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>We couldn't find anything matching "{searchQuery}". Try adjusting your search.</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredOpportunities.slice(0, visibleCount).map((item, idx) => (
-              <motion.div 
-                key={item.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: (idx % 6) * 0.1, ease: "easeOut" }}
-                style={{ willChange: "transform, opacity" }}
-              >
-                {/* Entire card is a link */}
-            <Link href={getHref(item)} className="group relative rounded-tl-2xl rounded-tr-[3rem] rounded-br-2xl rounded-bl-[3rem] overflow-hidden flex flex-col hover:-translate-y-2 transition-all transform-gpu duration-500 h-full shadow-xl shadow-black/40">
-              {/* Glass base */}
-              <div className={cn("absolute inset-0 backdrop-blur-xl transition-colors", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] group-hover:from-[#111f38] group-hover:to-[#0d1629]" : "bg-white group-hover:bg-slate-50")} />
-              {/* Blobs on hover */}
-              <div className={cn("absolute -top-10 -left-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
-              <div className={cn("absolute -bottom-10 -right-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
-              {/* Shine */}
-              <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
-              {/* Border */}
-              <div className={cn("absolute inset-0 rounded-tl-2xl rounded-tr-[3rem] rounded-br-2xl rounded-bl-[3rem] border border-l-4 transition-all duration-500 pointer-events-none", isDark ? "border-slate-700/80 border-l-cyan-400 group-hover:border-l-cyan-300 group-hover:border-cyan-500/50 ring-1 ring-white/5" : "border-black/5 border-l-cyan-500/40 group-hover:border-l-cyan-500 group-hover:border-cyan-500/20")} />
+            {filteredOpportunities.length === 0 && searchQuery.trim() !== "" ? (
+              <div className="text-center py-16 px-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
+                <Search className="w-12 h-12 mx-auto mb-4 text-[var(--text-muted)]" />
+                <h3 className="text-xl font-bold mb-2 text-[var(--text-primary)]">No results found</h3>
+                <p className="max-w-sm mx-auto text-sm text-[var(--text-secondary)]">We couldn&apos;t find anything matching &quot;{searchQuery}&quot;. Try searching with different keywords.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedOpportunities.map((item, idx) => (
+                    <motion.div 
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: (idx % 6) * 0.08, ease: "easeOut" }}
+                      className="h-full"
+                    >
+                      {/* Entire card is a link with clean design system styling */}
+                      <Link 
+                        href={getHref(item)} 
+                        className="group relative rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 hover:-translate-y-1 transition-all duration-200 overflow-hidden flex flex-col h-full"
+                      >
+                        {/* Image header */}
+                        <div className="relative z-10 h-48 w-full shrink-0 overflow-hidden bg-[var(--surface-secondary)] border-b border-[var(--border-primary)]">
+                          {item.image ? (
+                            <img 
+                              referrerPolicy="no-referrer" 
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy" 
+                              decoding="async" 
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-16 h-16 rounded-xl flex items-center justify-center border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
+                                {(() => {
+                                  const Icon = item.type === 'JOBS' ? Briefcase : item.type === 'WEBINAR' ? Video : Calendar;
+                                  return <Icon className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />;
+                                })()}
+                              </div>
+                            </div>
+                          )}
 
-              {/* Image */}
-              <div className="relative z-10 h-48 w-full shrink-0 overflow-hidden">
-                {item.image ? (
-                  <img referrerPolicy="no-referrer" src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy" decoding="async" />
-                ) : (
-                  <div className={cn("w-full h-full flex items-center justify-center", isDark ? "bg-white/[0.02]" : "bg-slate-50")}>
-                    <svg width="0" height="0" className="absolute">
-                      <linearGradient id={`icon-grad-${item.id}`} x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#22d3ee" offset="0%" />
-                        <stop stopColor="#06b6d4" offset="50%" />
-                        <stop stopColor="#0891b2" offset="100%" />
-                      </linearGradient>
-                    </svg>
-                    <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center border", isDark ? "bg-gradient-to-br from-cyan-500/10 via-cyan-500/10 to-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                      {(() => {
-                        const Icon = item.type === 'JOBS' ? Briefcase : item.type === 'WEBINAR' ? Video : Calendar;
-                        return <Icon className="w-10 h-10" style={{ stroke: isDark ? `url(#icon-grad-${item.id})` : "#0284c7" }} />;
-                      })()}
+                          {/* Badges */}
+                          <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/90 dark:bg-[#121316]/90 text-cyan-700 dark:text-cyan-400 border border-cyan-200/60 dark:border-cyan-500/30 backdrop-blur-md shadow-sm">
+                              {getTypeIcon(item.type)}
+                              {item.type}
+                            </span>
+                            
+                            {item.isNew && (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-sm">
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="relative z-10 p-6 flex flex-col flex-grow">
+                          <h3 className="text-base sm:text-lg font-bold mb-2 text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors line-clamp-2">
+                            {item.title}
+                          </h3>
+
+                          {item.description && (
+                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 line-clamp-3">
+                              {item.description}
+                            </p>
+                          )}
+
+                          <div className="flex-grow" />
+
+                          {/* Footer */}
+                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-[var(--border-primary)]">
+                            <div className="text-xs text-[var(--text-muted)] font-medium">
+                              {new Date(item.createdAt).toLocaleDateString('en-GB')}
+                            </div>
+
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-600 dark:text-cyan-400 group-hover:underline">
+                              Read Details
+                              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Premium Numeric Pagination */}
+                {totalPages > 1 && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-[var(--border-primary)]"
+                  >
+                    {/* Counter / Info */}
+                    <div className="text-sm font-medium text-[var(--text-secondary)]">
+                      Showing{" "}
+                      <span className="font-bold text-[var(--text-primary)]">
+                        {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+                      </span>{" "}
+                      to{" "}
+                      <span className="font-bold text-[var(--text-primary)]">
+                        {Math.min(currentPage * ITEMS_PER_PAGE, filteredOpportunities.length)}
+                      </span>{" "}
+                      of{" "}
+                      <span className="font-bold text-[var(--text-primary)]">
+                        {filteredOpportunities.length}
+                      </span>{" "}
+                      {emptyType === 'JOBS' ? 'vacancies' : emptyType === 'EVENT' ? 'events' : 'items'}
                     </div>
-                  </div>
+
+                    {/* Page buttons */}
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <button
+                        onClick={() => {
+                          setCurrentPage(p => Math.max(1, p - 1));
+                          document.getElementById('vacancies-grid')?.scrollIntoView({ behavior: 'smooth' });
+                          document.getElementById('events-grid')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        disabled={currentPage === 1}
+                        className="p-2 sm:p-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed hover:border-cyan-500/40 transition-colors"
+                        aria-label="Previous page"
+                      >
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+
+                      <div className="flex items-center gap-1 sm:gap-1.5">
+                        {Array.from({ length: totalPages }).map((_, idx) => {
+                          const pageNum = idx + 1;
+                          const isActive = currentPage === pageNum;
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setCurrentPage(pageNum);
+                                document.getElementById('vacancies-grid')?.scrollIntoView({ behavior: 'smooth' });
+                                document.getElementById('events-grid')?.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className={cn(
+                                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center border",
+                                isActive
+                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400 shadow-md shadow-cyan-400/20 scale-105"
+                                  : "bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
+                              )}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setCurrentPage(p => Math.min(totalPages, p + 1));
+                          document.getElementById('vacancies-grid')?.scrollIntoView({ behavior: 'smooth' });
+                          document.getElementById('events-grid')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        disabled={currentPage === totalPages}
+                        className="p-2 sm:p-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed hover:border-cyan-500/40 transition-colors"
+                        aria-label="Next page"
+                      >
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  </motion.div>
                 )}
-                {/* Badges */}
-                <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center gap-2">
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md", 
-                    isDark ? "text-cyan-400 bg-black/70 border border-cyan-500/30" : "text-cyan-600 bg-white/90 border border-cyan-100 shadow-sm"
-                  )}>
-                    {getTypeIcon(item.type)}
-                    {item.type}
-                  </span>
-                  
-                  {item.isNew && (
-                    <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md", isDark ? "text-cyan-400 bg-black/70 border border-cyan-500/30" : "text-cyan-600 bg-white/90 border border-cyan-100 shadow-sm")}>
-                      NEW
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="relative z-10 p-6 flex flex-col flex-grow overflow-hidden">
-                <h3 className={cn("text-xl font-bold mb-3 transition-colors line-clamp-2", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>
-                  {item.title}
-                </h3>
-
-                {item.description && (
-                  <p className={cn("text-sm mb-6 line-clamp-3", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    {item.description}
-                  </p>
-                )}
-
-                <div className="flex-grow" />
-
-                {/* Footer */}
-                <div className={cn("flex items-center justify-between mt-auto pt-4 border-t", isDark ? "border-slate-700/80" : "border-black/5")}>
-                  <div className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
-                    {new Date(item.createdAt).toLocaleDateString('en-GB')}
-                  </div>
-
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-xs font-bold transition-all duration-200",
-                    isDark 
-                      ? "bg-cyan-500/10 group-hover:bg-cyan-500 border-cyan-500/20 group-hover:border-cyan-500 text-cyan-400 group-hover:text-[#011627]" 
-                      : "bg-cyan-50 group-hover:bg-cyan-600 border-cyan-200 group-hover:border-cyan-600 text-cyan-600 group-hover:text-white shadow-sm"
-                  )}>
-                    Read More
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </span>
-                </div>
-              </div>
-              </Link>
-              </motion.div>
-            ))}
-          </div>
-
-          {visibleCount < filteredOpportunities.length && (
-            <div className="mt-12 flex justify-center">
-              <button
-                onClick={() => setVisibleCount(prev => prev + 6)}
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-cyan-600 text-white font-bold hover:bg-cyan-500 transition-all gap-2 w-fit shrink-0"
-              >
-                Load More
-              </button>
-            </div>
-          )}
         </>
       )}
     </div>

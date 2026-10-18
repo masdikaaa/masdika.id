@@ -171,7 +171,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
         <button 
           onClick={handleSubmit}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm transition-all disabled:opacity-50"
         >
           {saving ? 'Saving...' : <><Save className="w-4 h-4" /> Save</>}
         </button>

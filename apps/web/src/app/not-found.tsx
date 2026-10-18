@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Home, Zap } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export default function NotFound() {
   return (
@@ -109,21 +110,25 @@ export default function NotFound() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link 
-              href="/" 
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-all duration-300 gap-3 group shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+            <Button
+              variant="primary"
+              size="lg"
+              href="/"
+              leftIcon={<Home className="w-5 h-5" />}
+              className="w-full sm:w-auto"
             >
-              <Home className="w-5 h-5" />
               Back to Homepage
-            </Link>
+            </Button>
             
-            <button 
+            <Button
+              variant="secondary"
+              size="lg"
               onClick={() => window.history.back()}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-full border border-cyan-500/30 bg-[#0a1f33] text-cyan-400 font-bold hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300 gap-3 group"
+              leftIcon={<ArrowLeft className="w-5 h-5" />}
+              className="w-full sm:w-auto"
             >
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               Go Back
-            </button>
+            </Button>
           </div>
         </motion.div>
       </div>

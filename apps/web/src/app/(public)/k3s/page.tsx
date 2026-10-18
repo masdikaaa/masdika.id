@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import K3sClient from "./K3sClient";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Managed Kubernetes (K3s) - High Availability Clusters",
   description: "Deploy lightweight, highly available managed Kubernetes clusters in seconds. We handle the control plane so you can focus on your apps.",

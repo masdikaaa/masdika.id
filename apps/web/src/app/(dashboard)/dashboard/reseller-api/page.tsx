@@ -175,26 +175,26 @@ export default function ResellerApiPage() {
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-3">
-              <Link href="/dashboard/billing" className={cn("w-full sm:w-auto border px-5 py-3.5 rounded-2xl font-medium transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
-                <Wallet className="w-5 h-5 text-cyan-500" />
+              <Link href="/dashboard/billing" className={cn("w-full sm:w-auto border px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
+                <Wallet className="w-4 h-4 text-cyan-500" />
                 Top Up Saldo
               </Link>
-              <Link href="/dashboard/reseller-api/docs" className={cn("w-full sm:w-auto border px-5 py-3.5 rounded-2xl font-medium transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
-                <BookOpen className="w-5 h-5 text-cyan-500" />
+              <Link href="/dashboard/reseller-api/docs" className={cn("w-full sm:w-auto border px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
+                <BookOpen className="w-4 h-4 text-cyan-500" />
                 Documentation
               </Link>
               <button
                 onClick={handleGenerateKey}
                 disabled={generating || balance < 50000 || keys.length > 0}
                 className={cn(
-                  "w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shrink-0",
+                  "w-full sm:w-auto px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shrink-0 shadow-sm",
                   balance >= 50000 && keys.length === 0
-                    ? isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white hover:-translate-y-0.5"
+                    ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                     : "bg-slate-500/20 text-slate-400 cursor-not-allowed opacity-50"
                 )}
                 title={keys.length > 0 ? "You already have an active API Key." : ""}
               >
-                {generating ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+                {generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 Generate API Key
               </button>
             </div>
@@ -316,7 +316,7 @@ export default function ResellerApiPage() {
               <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 You need to generate an API key to start using the Masdika Developer API endpoints.
               </p>
-              <button onClick={handleGenerateKey} disabled={generating || balance < 50000} className={cn("inline-block font-bold py-3.5 px-8 rounded-2xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <button onClick={handleGenerateKey} disabled={generating || balance < 50000} className="inline-block font-semibold text-sm py-2.5 px-6 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 Generate Key Now
               </button>
             </div>

@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import CommunityClient from "./CommunityClient";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'Developer Community',
   description: 'Join developer communities on WhatsApp and Telegram to discuss, learn, and grow together.',

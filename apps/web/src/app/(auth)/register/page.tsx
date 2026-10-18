@@ -377,7 +377,7 @@ export default function RegisterPage() {
             <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-5 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full min-w-0 overflow-hidden">
               <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-0.5">
                 <Image
-                  src="/images/auth/register.png"
+                  src="/images/auth/register.webp"
                   alt="Masdika Registration Assistant"
                   width={48}
                   height={48}
@@ -750,7 +750,7 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl py-3.5 px-6 font-bold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2 shadow-sm hover:shadow-[0_0_20px_rgba(8,145,178,0.3)] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                    className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg py-3 px-6 font-semibold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {loading ? (
                       <>
@@ -866,7 +866,7 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl py-3.5 px-6 font-bold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4 shadow-sm hover:shadow-[0_0_20px_rgba(8,145,178,0.3)] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                    className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg py-3 px-6 font-semibold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {loading ? (
                       <>
@@ -1055,7 +1055,7 @@ export default function RegisterPage() {
               className="relative z-10 flex flex-col items-center"
             >
               <Image
-                src="/images/auth/register.png"
+                src="/images/auth/register.webp"
                 alt="Masdika Assistant"
                 width={380}
                 height={500}

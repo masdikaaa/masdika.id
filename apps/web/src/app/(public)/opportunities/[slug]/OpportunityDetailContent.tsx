@@ -2,6 +2,7 @@
 
 import { Calendar, Briefcase, Video, ExternalLink, ChevronLeft, Clock } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
+import { Button } from "@/components/ui/Button";
 import { ImageZoom } from "@/components/ui/ImageZoom";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
@@ -128,15 +129,17 @@ export function OpportunityDetailContent({ opportunity }: { opportunity: Opportu
                 Click the button to view the external registration or application page.
               </p>
             </div>
-            <a
+            <Button
+              variant="primary"
+              size="lg"
               href={opportunity.link}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn("inline-flex items-center justify-center px-8 py-4 rounded-xl font-bold transition-all gap-2 w-full sm:w-auto shrink-0", isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-md")}
+              leftIcon={<ExternalLink className="w-5 h-5" />}
+              className="w-full sm:w-auto shrink-0"
             >
-              <ExternalLink className="w-5 h-5" />
               Apply / Register Now
-            </a>
+            </Button>
           </div>
         )}
       </AnimatedSection>

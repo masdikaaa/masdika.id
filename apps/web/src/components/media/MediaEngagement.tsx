@@ -774,7 +774,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                 <button
                   type="submit"
                   disabled={isSendingOtp}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-[#011627] font-semibold text-xs sm:text-sm whitespace-nowrap shrink-0 transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] cursor-pointer active:scale-95 self-end sm:self-auto"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 font-semibold text-xs sm:text-sm whitespace-nowrap shrink-0 transition-all shadow-sm cursor-pointer self-end sm:self-auto"
                 >
                   {isSendingOtp ? (
                     <>
@@ -1145,7 +1145,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                   <button
                     type="submit"
                     disabled={isSubmittingComment || otpDigits.join("").length !== 6}
-                    className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 text-[#011627] font-bold text-xs sm:text-sm transition-all shadow-[0_0_20px_rgba(6,182,212,0.35)] cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-40 text-slate-950 font-semibold text-xs sm:text-sm transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
                   >
                     {isSubmittingComment ? (
                       <>

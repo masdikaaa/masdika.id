@@ -597,7 +597,7 @@ export default function K3sDetailPage() {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-                  className={cn("px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-white/5 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
@@ -607,10 +607,10 @@ export default function K3sDetailPage() {
                     confirmModal.onConfirm();
                   }}
                   className={cn(
-                    "px-5 py-2.5 text-white font-bold rounded-xl shadow-lg transition-all",
-                    confirmModal.actionType === "danger" ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-red-500/20" :
-                      confirmModal.actionType === "warning" ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 shadow-orange-500/20" :
-                        "bg-cyan-600 hover:bg-cyan-700 shadow-sm"
+                    "px-5 py-2.5 font-semibold text-sm rounded-lg shadow-sm transition-all",
+                    confirmModal.actionType === "danger" ? "bg-red-500 hover:bg-red-600 text-white" :
+                      confirmModal.actionType === "warning" ? "bg-amber-500 hover:bg-amber-600 text-white" :
+                        "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                   )}
                 >
                   Confirm
@@ -921,9 +921,7 @@ export default function K3sDetailPage() {
                           onClick={() => openConsole(master.id)}
                           disabled={isTerminated}
                           title="Open Console"
-                          className={cn("p-2.5 rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
-                            isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold" : "bg-cyan-600 hover:bg-cyan-700 text-white font-bold"
-                          )}
+                          className="p-2.5 rounded-lg transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold"
                         >
                           <Terminal className="w-4 h-4" />
                         </button>
@@ -1478,7 +1476,7 @@ export default function K3sDetailPage() {
                           <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Cluster Name</label>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <input type="text" value={editClusterName} onChange={(e) => setEditClusterName(e.target.value)} className={cn("flex-1 w-full bg-white/5 border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all min-w-0", isDark ? "border-white/10 text-white" : "border-slate-200 text-slate-900")} />
-                            <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className={cn("px-5 py-2.5 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                            <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className="px-5 py-2.5 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 font-semibold rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 text-sm">
                               {isSavingName && <RefreshCw className="w-4 h-4 animate-spin shrink-0" />}
                               Save
                             </button>

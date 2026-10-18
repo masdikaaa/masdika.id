@@ -1207,7 +1207,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             </p>
             <button
               onClick={() => router.push("/dashboard/billing")}
-              className="px-6 py-3 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 font-bold rounded-xl transition-all shadow-md text-white"
+              className="px-5 py-2.5 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm text-slate-950 text-sm"
             >
               Lihat Tagihan
             </button>
@@ -1351,7 +1351,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("reboot")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
                   isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20" : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
                 )}
                 title="Restart"
@@ -1360,9 +1360,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("console")} disabled={actionLoading || vps.status === 'TERMINATED' || vps.status === 'SUSPENDED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold",
-                  isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950" : "bg-cyan-600 hover:bg-cyan-700 text-white"
-                )}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                 title="NoVNC Console"
               >
                 <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Console</span>
@@ -1677,7 +1675,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         setEditingRule(null);
                         setShowFirewallModal(true);
                       }}
-                      className={cn("px-4 py-2 bg-cyan-500 hover:bg-cyan-600  rounded-xl text-sm font-medium transition-all flex items-center gap-2 text-white")}
+                      className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-slate-950 shadow-sm"
                     >
                       <Plus className="w-4 h-4" /> Add Rule
                     </button>
@@ -1867,7 +1865,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           type="submit"
                           disabled={actionLoading || isSavingSettings}
-                          className={cn("w-full sm:w-auto px-6 py-3 bg-cyan-600 hover:bg-cyan-700  font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 text-white")}
+                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingSettings ? "Saving..." : "Change Hostname"}
                         </button>
@@ -1924,7 +1922,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           type="submit"
                           disabled={actionLoading || isSavingSettings || passwordInput.length < 8 || passwordInput !== passwordConfirmInput}
-                          className={cn("w-full sm:w-auto px-6 py-3 bg-cyan-600 hover:bg-cyan-700  font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 text-white")}
+                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingSettings ? "Saving..." : "Change Password"}
                         </button>
@@ -1973,7 +1971,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           type="submit"
                           disabled={actionLoading || isSavingSettings}
-                          className={cn("w-full sm:w-auto px-6 py-3 bg-cyan-600 hover:bg-cyan-700  font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 text-white")}
+                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingSettings ? "Saving..." : "Change SSH Key"}
                         </button>
@@ -2262,7 +2260,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       <button
                         onClick={handleUpgradeSpecs}
                         disabled={isUpgrading || balance < upgradeCostNow || vps.status === 'SUSPENDED' || (upgradeCores === vps.cpuCores && upgradeRam === vps.ramGb && upgradeDisk === vps.diskGb && upgradeBackup === (vps.backupGb || 0) && addIpv4Count === 0 && addIpv6Count === 0)}
-                        className={cn("px-8 py-3 bg-cyan-500 hover:bg-cyan-400 font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2", isDark ? "text-slate-950" : "text-white bg-cyan-600 hover:bg-cyan-700")}
+                        className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-slate-950 text-sm"
                       >
                         {isUpgrading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Activity className="w-5 h-5" />}
                         {isUpgrading ? "Upgrading..." : "Confirm Upgrade"}
@@ -2382,7 +2380,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <button
                               type="submit"
                               disabled={isAddingDisk || allowedAddonStorages.length === 0}
-                              className={cn("px-8 py-3 bg-cyan-500 hover:bg-cyan-400 font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 flex items-center gap-2", isDark ? "text-slate-950" : "text-white bg-cyan-600 hover:bg-cyan-700")}
+                              className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950 text-sm"
                             >
                               {isAddingDisk ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
                               {isAddingDisk ? "Attaching Disk..." : "Attach New Disk"}
@@ -2557,12 +2555,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           <button
                             onClick={handleReinstallClick}
                             disabled={reinstalling || !selectedTemplate || vps.status === 'SUSPENDED' || reinstallPassword.length < 8 || reinstallPassword !== reinstallPasswordConfirm}
-                            className={cn("w-full mt-2 flex items-center justify-center gap-2 px-8 py-3 bg-cyan-600 hover:bg-cyan-700  font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 text-white")}
+                            className="w-full mt-2 flex items-center justify-center gap-2 px-6 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                           >
                             {reinstalling ? (
-                              <><div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div> Rebuilding...</>
+                              <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-slate-950"></div> Rebuilding...</>
                             ) : (
-                              <><HardDrive className="w-5 h-5" /> Reinstall Server</>
+                              <><HardDrive className="w-4 h-4" /> Reinstall Server</>
                             )}
                           </button>
                         </div>
@@ -2615,7 +2613,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <button
                       onClick={handleCreateBackup}
                       disabled={backupQuota === 0 || isBackingUp || vps.status === 'SUSPENDED' || (backupUsed >= backupQuota * 1024 * 1024 * 1024)}
-                      className={cn(isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm", "flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 font-bold")}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                     >
                       <Archive className="w-4 h-4" />
                       {isBackingUp ? "Creating Backup..." : "Create Backup Now"}
@@ -2648,7 +2646,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           onClick={handleSaveSchedule}
                           disabled={isSettingSchedule}
-                          className={cn("px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700  text-sm font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50 flex items-center gap-2 text-white")}
+                          className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950"
                         >
                           {isSettingSchedule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Settings className="w-4 h-4" />}
                           Save
@@ -2747,7 +2745,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <button
                       onClick={() => setShowSnapshotModal(true)}
                       disabled={snapshots.length >= 2 || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
-                      className={cn("px-4 py-2.5 md:py-2 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 w-full md:w-auto shrink-0", isDark ? "bg-cyan-500 text-white hover:bg-cyan-400 disabled:opacity-50" : "bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-50")}
+                      className="px-4 py-2.5 md:py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 w-full md:w-auto shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 shadow-sm"
                     >
                       <Plus className="w-4 h-4 shrink-0" />
                       Take Snapshot
@@ -3105,7 +3103,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           onClick={handleSaveAlerts}
                           disabled={isSavingAlerts}
-                          className={cn("px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600  rounded-xl font-medium shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2 disabled:opacity-50 text-white")}
+                          className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg font-semibold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingAlerts ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                           {isSavingAlerts ? "Saving..." : "Save Configuration"}
@@ -3189,16 +3187,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <button
                   onClick={() => setShowSnapshotModal(false)}
                   disabled={isSnapshotting}
-                  className={cn("flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                  className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={takeSnapshot}
                   disabled={isSnapshotting || !snapshotName}
-                  className={cn("flex-1 px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed",
-                    isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white"
-                  )}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                 >
                   {isSnapshotting ? (
                     <><RefreshCw className="w-4 h-4 animate-spin" /> Processing...</>
@@ -3243,16 +3239,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <button
                   onClick={() => setShowEditSnapshotModal(null)}
                   disabled={snapshotActionLoading === showEditSnapshotModal}
-                  className={cn("flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                  className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={updateSnapshotDesc}
                   disabled={snapshotActionLoading === showEditSnapshotModal}
-                  className={cn("flex-1 px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed",
-                    isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white" : "bg-cyan-600 hover:bg-cyan-700 text-white"
-                  )}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                 >
                   {snapshotActionLoading === showEditSnapshotModal ? (
                     <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
@@ -3459,14 +3453,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <button
                   type="button"
                   onClick={() => setShowFirewallModal(false)}
-                  className={cn("px-5 py-2.5 rounded-xl text-sm font-medium  bg-white/5 hover:bg-white/10 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                  className={cn("px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors", isDark ? "text-zinc-400 hover:text-white border-slate-800 hover:bg-white/5" : "text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingRule}
-                  className={cn("px-5 py-2.5 rounded-xl text-sm font-medium  bg-cyan-600 hover:bg-cyan-700 transition-colors flex items-center gap-2 text-white")}
+                  className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-colors flex items-center gap-2 text-slate-950 shadow-sm"
                 >
                   {isSavingRule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   {isSavingRule ? 'Saving...' : 'Save Rule'}

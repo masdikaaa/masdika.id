@@ -202,7 +202,7 @@ export default function MyVpsPage() {
         return {
           icon: <RotateCcw className="w-6 h-6 text-cyan-500" />,
           bg: "bg-cyan-500/10",
-          buttonClass: "bg-cyan-500 hover:bg-cyan-600 shadow-cyan-500/20 text-[#0f172a]",
+          buttonClass: "bg-cyan-400 hover:bg-cyan-300 text-slate-950",
           title: "Reboot",
           desc: "Are you sure you want to reboot the selected VPS instances?"
         };
@@ -267,14 +267,14 @@ export default function MyVpsPage() {
             </div>
             <button
               onClick={fetchVps}
-              className={cn("p-2.5 md:p-3 rounded-2xl border transition-colors shrink-0", isDark ? "bg-[#060b14] text-cyan-400 border-slate-800 hover:bg-[#09111e]" : "bg-white text-cyan-600 border-slate-300 hover:bg-slate-50 shadow-sm")}
+              className={cn("p-2.5 rounded-lg border transition-colors shrink-0", isDark ? "bg-[#060b14] text-cyan-400 border-slate-800 hover:bg-[#09111e]" : "bg-white text-cyan-600 border-slate-300 hover:bg-slate-50 shadow-sm")}
               title="Refresh Status"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <Link
               href="/dashboard/checkout?service=vps"
-              className="flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3 bg-cyan-600 hover:bg-cyan-700 text-sm font-bold rounded-2xl transition-all shadow-sm hover:shadow shrink-0 text-white"
+              className="flex items-center gap-2 px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-sm font-semibold rounded-lg transition-all shadow-sm shrink-0 text-slate-950"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Create Instance</span>
@@ -290,7 +290,7 @@ export default function MyVpsPage() {
           </div>
           <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPS Found</h3>
           <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any active VPS instances yet. Deploy your first virtual private server to get started.</p>
-          <Link href="/dashboard/checkout?service=vps" className="font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 inline-flex items-center justify-center gap-2">
+          <Link href="/dashboard/checkout?service=vps" className="font-semibold text-slate-950 px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-sm inline-flex items-center justify-center gap-2 text-sm">
             Deploy New VPS
           </Link>
         </div>
@@ -572,7 +572,7 @@ export default function MyVpsPage() {
                               <button
                                 onClick={() => openConsole(vps.id)}
                                 disabled={consoleLoading === vps.id || vps.status === 'TERMINATED'}
-                                className="flex items-center gap-1.5 p-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs"
+                                className="flex items-center gap-1.5 p-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-semibold text-xs"
                                 title="Console"
                               >
                                 {consoleLoading === vps.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Terminal className="w-4 h-4" />}
@@ -633,18 +633,18 @@ export default function MyVpsPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setConfirmModal(null)}
-                className={cn("px-5 py-2.5 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("px-4 py-2.5 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium", isDark ? "text-zinc-400 border-slate-700" : "text-slate-600 border-slate-200")}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleAction(confirmModal.vpsId, confirmModal.action)}
                 className={cn(
-                  "px-6 py-2.5 rounded-xl font-medium transition-colors text-white shadow-sm hover:shadow",
-                  confirmModal.action === "start" ? "bg-cyan-600 hover:bg-cyan-700" :
-                    confirmModal.action === "stop" ? "bg-red-600 hover:bg-red-700" :
-                      confirmModal.action === "shutdown" ? "bg-amber-600 hover:bg-amber-700" :
-                        "bg-blue-600 hover:bg-blue-700"
+                  "px-5 py-2.5 rounded-lg font-semibold transition-colors shadow-sm text-sm",
+                  confirmModal.action === "start" ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950" :
+                    confirmModal.action === "stop" ? "bg-red-600 hover:bg-red-500 text-white" :
+                      confirmModal.action === "shutdown" ? "bg-amber-600 hover:bg-amber-500 text-white" :
+                        "bg-blue-600 hover:bg-blue-500 text-white"
                 )}
               >
                 Yes, {confirmModal.action}
@@ -669,13 +669,13 @@ export default function MyVpsPage() {
             <div className="flex items-center justify-end gap-3 mt-6">
               <button
                 onClick={() => setActionConfirm(null)}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold bg-white/5 hover:bg-white/10 transition-colors", isDark ? "text-zinc-300" : "text-slate-500")}
+                className={cn("px-4 py-2 rounded-lg text-sm font-medium border hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors", isDark ? "text-zinc-300 border-slate-700" : "text-slate-600 border-slate-200")}
               >
                 Cancel
               </button>
               <button
                 onClick={executeAction}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-lg", getActionConfig(actionConfirm).buttonClass)}
+                className={cn("px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm", getActionConfig(actionConfirm).buttonClass)}
               >
                 Yes, {getActionConfig(actionConfirm).title}
               </button>

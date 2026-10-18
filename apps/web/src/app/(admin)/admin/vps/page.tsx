@@ -1095,7 +1095,7 @@ export default function VpsManagementPage() {
                 <button
                   type="submit"
                   disabled={savingSettings}
-                  className={cn("bg-cyan-600 hover:bg-cyan-700 px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                  className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {savingSettings ? "Saving..." : "Save Configuration"}
                 </button>
@@ -1124,7 +1124,7 @@ export default function VpsManagementPage() {
               )}
               <button
                 onClick={() => setShowAddPool(!showAddPool)}
-                className={cn("bg-cyan-600 hover:bg-cyan-700 px-4 py-3 sm:py-2 rounded-xl sm:rounded-lg font-medium flex items-center justify-center gap-2 transition-colors w-full sm:w-auto", isDark ? "text-white" : "text-slate-900")}
+                className="px-4 py-2 sm:py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
               >
                 <Plus className="w-4 h-4" /> Add Pool
               </button>
@@ -1281,7 +1281,7 @@ export default function VpsManagementPage() {
             <button
               onClick={syncTemplates}
               disabled={syncingTemplates}
-              className={cn("bg-cyan-600 hover:bg-cyan-700 px-4 py-3 sm:py-2 rounded-xl sm:rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 w-full sm:w-auto", isDark ? "text-white" : "text-slate-900")}
+              className="px-4 py-2 sm:py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
               <RefreshCw className={cn("w-4 h-4", syncingTemplates && "animate-spin")} />
               {syncingTemplates ? "Syncing..." : "Sync from Proxmox"}
@@ -1428,7 +1428,7 @@ export default function VpsManagementPage() {
                 <button
                   type="submit"
                   disabled={savingPricing}
-                  className={cn("bg-cyan-600 hover:bg-cyan-700 px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                  className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {savingPricing ? "Saving..." : "Save Pricing"}
                 </button>
@@ -1460,7 +1460,7 @@ export default function VpsManagementPage() {
                   setNewPlan({ id: 0, name: "", cpuCores: 1, ramGb: 1, diskGb: 20, diskType: "HDD", monthlyPrice: 0, quarterlyPrice: 0, semiAnnuallyPrice: 0, annuallyPrice: 0, isReseller: false, isActive: true });
                   setShowAddPlan(!showAddPlan);
                 }}
-                className={cn("bg-cyan-600 hover:bg-cyan-700 px-4 py-3 sm:py-2 rounded-xl sm:rounded-lg font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-auto", isDark ? "text-white" : "text-slate-900")}
+                className="px-4 py-2 sm:py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
               >
                 <Plus className="w-4 h-4" /> Add Plan
               </button>
@@ -1487,7 +1487,7 @@ export default function VpsManagementPage() {
               }}
               className={cn(
                 "flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all duration-300",
-                planFilterDiskType === "SSD" ? "bg-cyan-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                planFilterDiskType === "SSD" ? "bg-cyan-400 text-slate-950 font-bold" : "text-zinc-500 hover:text-zinc-300"
               )}
             >
               Disk SSD
@@ -1554,7 +1554,7 @@ export default function VpsManagementPage() {
                 </div>
                 <div className="md:col-span-2 flex justify-end gap-3 mt-4">
                   <button type="button" onClick={() => setShowAddPlan(false)} className={cn("px-4 py-2 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-                  <button type="submit" className={cn("bg-cyan-600 hover:bg-cyan-700 px-6 py-2 rounded-lg font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}>Save Plan</button>
+                  <button type="submit" className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Save Plan</button>
                 </div>
               </form>
             </div>
@@ -2317,7 +2317,7 @@ export default function VpsManagementPage() {
                               <button
                                 onClick={() => assignIp(ip.ip)}
                                 disabled={ipLoading}
-                                className={cn("opacity-0 group-hover:opacity-100 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 px-3 py-1 rounded-lg text-xs font-medium transition-all", isDark ? "text-white" : "text-slate-900")}
+                                className="opacity-0 group-hover:opacity-100 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold disabled:opacity-50 px-3 py-1 rounded-md text-xs shadow-sm transition-all"
                               >
                                 Assign
                               </button>
@@ -2471,7 +2471,7 @@ export default function VpsManagementPage() {
               <button
                 onClick={() => handleResetPassword(showResetPasswordModal.id, newPassword)}
                 disabled={actionLoading === showResetPasswordModal.id || !newPassword || newPassword.length < 8 || newPassword !== confirmPassword}
-                className={cn("bg-cyan-600 hover:bg-cyan-700 px-6 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
               >
                 {actionLoading === showResetPasswordModal.id && <RefreshCw className="w-4 h-4 animate-spin" />}
                 Reset Password

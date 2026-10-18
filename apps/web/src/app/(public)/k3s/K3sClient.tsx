@@ -1,16 +1,40 @@
 "use client";
 
-import { useTheme } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
-import { ShieldCheck, ArrowRight, Cpu, CheckCircle2, MapPin, HardDrive, Layers, RefreshCw, Shield, Network, Activity, TrendingUp, Server, Cloud, Info } from "lucide-react";
-import VpsSpecSlider from "@/components/ui/VpsSpecSlider";
+import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { 
+  Cloud, 
+  Zap, 
+  ShieldCheck, 
+  Shield, 
+  Terminal, 
+  ArrowRight, 
+  Cpu, 
+  Box, 
+  Globe, 
+  CheckCircle2, 
+  Database, 
+  MapPin, 
+  HardDrive, 
+  Activity, 
+  TrendingUp, 
+  Network, 
+  Server, 
+  Layers, 
+  RefreshCw, 
+  Info,
+  Lock,
+  Sparkles
+} from "lucide-react";
+import { SiKubernetes } from "react-icons/si";
+import VpsSpecSlider from "@/components/ui/VpsSpecSlider";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { TiltCard } from "@/components/animations/TiltCard";
-import { MagneticButton } from "@/components/animations/MagneticButton";
-import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
+import { cn } from "@/lib/utils";
 
 const K3S_TERMINAL_LOGS = [
   { time: "00:01", module: "CONFIG", message: "Parsing cluster specifications..." },
@@ -31,160 +55,299 @@ const K3S_TERMINAL_STATS = [
 
 const K3S_FAQS = [
   {
-    q: "What is K3s and how is it different from K8s?",
-    a: "K3s is a highly available, certified Kubernetes distribution designed for production workloads in unattended, resource-constrained, remote locations or inside IoT appliances. It is fully compliant but much lighter than standard K8s."
+    q: "What is K3s and how is it different from standard Kubernetes?",
+    a: "K3s is a CNCF-certified, highly available Kubernetes distribution designed for production workloads. It strips out legacy in-tree cloud providers and bloated extensions to deliver a lightweight, blazing-fast Kubernetes experience with 50% less memory overhead."
   },
   {
-    q: "Can I bring my own domain?",
-    a: "Yes! You can easily bind your custom domains to the ingress controllers running in your K3s clusters and secure them with automatic SSL certificates."
+    q: "Do I get full cluster-admin access?",
+    a: "Yes! You receive complete cluster-admin credentials via Kubeconfig. You can run any kubectl commands, deploy Helm charts, set up operators, and install CRDs without restrictions."
   },
   {
-    q: "Are the control plane and worker nodes isolated?",
-    a: "Yes, our K3s implementation allows you to seamlessly scale your control plane and worker nodes independently across our high-performance infrastructure."
+    q: "How do I add or scale worker nodes?",
+    a: "You can provision new worker nodes directly from your dashboard. Our control plane automatically attaches and registers them into your cluster with zero downtime."
+  },
+  {
+    q: "Are the nodes behind NAT and can I expose services?",
+    a: "By default, K3s nodes are provisioned with secure NAT routing. You can easily expose your web services to the internet using Cloudflare Tunnel (cloudflared) or by attaching dedicated public IPv4 addresses."
+  },
+  {
+    q: "Can I access the underlying node via SSH?",
+    a: "Yes. In addition to Kubernetes API access, you get full root SSH access and out-of-band VNC console access directly from your dashboard for complete infrastructure management."
+  },
+  {
+    q: "Why is the Sidoarjo datacenter beneficial for Kubernetes?",
+    a: "Local hosting in Sidoarjo, East Java guarantees under 20ms ping across Indonesia with direct IIX peering, making it ideal for low-latency microservices, edge data processing, and local traffic workloads."
   }
 ];
 
-
-
-
-
-export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: any, isK3sEnabled: boolean }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
+export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: any; isK3sEnabled: boolean }) {
   return (
-    <div className={cn("pt-24 md:pt-32 pb-20 px-4 selection:bg-cyan-500/30 font-sans overflow-hidden relative min-h-screen bg-transparent", isDark ? "text-white" : "text-slate-900")}>
-      <main className="relative z-10 max-w-[1400px] mx-auto">
-        {/* Hero Section */}
-        <section className="pt-10 pb-8 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
-          <FadeIn direction="up">
-            <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-              CONTAINER ORCHESTRATION
-            </div>
-          </FadeIn>
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-          <FadeIn direction="up" delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[76px] font-black mb-6 tracking-tight leading-[1.1]">
-              Managed <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent drop-shadow-sm">Kubernetes (K3s)</span>
-            </h1>
-          </FadeIn>
+        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+            
+            {/* Left – Text & Actions */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
+              {/* Status pill using shared Badge */}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  MANAGED KUBERNETES (K3S) PAAS
+                </Badge>
+              </div>
 
-          <FadeIn direction="up" delay={0.2}>
-            <p className={cn(" text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-medium px-2".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-              Deploy lightweight, highly available Kubernetes clusters in seconds. We handle the control plane, upgrades, and scaling so you can focus on deploying your containerized microservices.
-            </p>
-          </FadeIn>
+              {/* Headline H1 (Ukuran sama persis Home Page & design.md) */}
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Managed Kubernetes &amp; Clusters
+              </h1>
 
-          <FadeIn direction="up" delay={0.3}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-[280px] sm:max-w-none mx-auto">
-              <MagneticButton intensity={15} className="w-full sm:w-auto flex">
-                <Link
+              {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Deploy lightweight, production-grade K3s clusters in seconds. We handle control plane provisioning, automated upgrades, and self-healing so you can deploy containerized microservices effortlessly.
+              </p>
+
+              {/* Action Buttons (size="lg" sama persis Home Page) */}
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
                   href="#pricing"
-                  className="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 w-full"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Deploy Cluster
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </MagneticButton>
-
-              <MagneticButton intensity={15} className="w-full sm:w-auto flex">
-                <Link
+                  Configure Cluster
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
                   href="#features"
-                  className={cn("px-8 py-4 border font-bold rounded-xl transition-all flex items-center justify-center w-full", isDark ? "bg-cyan-500/5 hover:bg-cyan-500/10 border-cyan-500/30 text-white" : "bg-white hover:bg-slate-50 border-cyan-200 text-slate-900")}
+                  leftIcon={<SiKubernetes className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
-                  Explore Features
-                </Link>
-              </MagneticButton>
-            </div>
-          </FadeIn>
+                  Cluster Architecture
+                </Button>
+              </div>
+            </motion.div>
 
-          <FadeIn direction="up" delay={0.4}>
-            {/* Trust badges */}
-            <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto")}>
-              {[
-                { icon: Cloud, title: "98.99% SLA", sub: "Uptime Guarantee" },
-                { icon: ShieldCheck, title: "Enterprise Security", sub: "Anti-DDoS Protected" },
-                { icon: CheckCircle2, title: "Proven Reliability", sub: "Trusted by Developers" },
-                { icon: Activity, title: "24/7 Support", sub: "Expert Assistance" },
-              ].map((b, i) => (
-                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-cyan-500/5 border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
-                  <b.icon className={cn("w-6 h-6 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  <div className="text-left">
-                    <span className={cn("font-bold text-sm leading-tight block", isDark ? "text-white" : "text-slate-900")}>{b.title}</span>
-                    <span className={cn("text-[10px] uppercase tracking-wider font-bold", isDark ? "text-zinc-500" : "text-slate-500")}>{b.sub}</span>
+            {/* Right – Hero Avatar (kubernetes.webp) with 4 Floating Badges */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[300px] sm:w-[440px] sm:h-[360px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (Orchestration) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <SiKubernetes className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Orchestration
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Production K3s PaaS
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </FadeIn>
+
+                {/* Floating Card 2: Top-Right (Auto-Scaling) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <RefreshCw className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Auto Scaling
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Dynamic Node Pools
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Ingress & CNI) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Network className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Ingress &amp; CNI
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Traefik &amp; Flannel Ready
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (High Availability) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Availability
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Multi-Master Control
+                    </div>
+                  </div>
+                </div>
+
+                {/* Karakter kubernetes.webp utuh & proporsional sesuai design.md */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/kubernetes.webp"
+                    alt="Masdika – Managed Kubernetes Clusters"
+                    width={1536}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
         </section>
 
-        {/* Hardware / Specs Section */}
-        <section id="features" className="py-10 lg:py-16 px-4 sm:px-6 max-w-7xl mx-auto relative z-20">
-          <div className={cn("backdrop-blur-md rounded-3xl p-6 md:p-12 border shadow-2xl relative overflow-hidden hover:border-cyan-400/50 transition-colors group", isDark ? "bg-gradient-to-br from-cyan-950/40 to-[#050B14]/40 border-cyan-500/20" : "bg-white border-slate-200 shadow-lg")}>
-            <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-              <Cpu className="w-64 h-64 text-cyan-400" />
-            </div>
+        {/* ── 1. VALUE PILLARS (4 Trust Highlights, Equal Height) ────────── */}
+        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {[
+              { icon: Layers, title: "Lightweight CNCF K3s", desc: "Production-certified Kubernetes consuming 50% less RAM than traditional K8s." },
+              { icon: RefreshCw, title: "Automated Scaling", desc: "Scale worker node pools dynamically on-demand with zero disruption." },
+              { icon: Terminal, title: "Full Cluster Admin", desc: "Unrestricted Kubeconfig access, Helm 3 support, and root SSH node access." },
+              { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX routing." },
+            ].map((pillar, i) => (
+              <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm hover:border-cyan-500/40 transition-colors">
+                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <pillar.icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
 
-            <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-3 py-1.5 rounded-lg", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border border-cyan-200")}>Performance</span>
-                <h2 className={cn("text-4xl md:text-5xl font-black  mb-6 leading-[1.2]".trim(), isDark ? "text-white" : "text-slate-900")}>
-                  Engineered for <br className="hidden md:block" />
-                  <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm">Extreme Power</span>
+        {/* ── 2. CLUSTER HARDWARE ARCHITECTURE ──────────────────────────── */}
+        <section id="features" className="scroll-mt-24 mb-16 lg:mb-24">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
+            <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-7">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                  INFRASTRUCTURE ARCHITECTURE
+                </span>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                  Engineered for High-Density Pod Orchestration
                 </h2>
-                <p className={cn(" text-lg leading-relaxed font-medium mb-8".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-                  We don't compromise on hardware. Every K3s cluster is backed by enterprise-grade processors and localized routing (Sidoarjo Datacenter) ensuring microservices run flawlessly with under 20ms local latency.
+                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
+                  Every K3s cluster node is deployed on enterprise-grade Dell PowerEdge R630 servers with high-frequency Intel Xeon processors, high-IOPS storage, and native CNI networking.
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {[
-                    "Dual Socket Dell PowerEdge Server",
-                    "2x Intel Xeon E5-2673v4 Processors",
-                    "Choose between Enterprise SATA SSD or SAS HDD",
-                    "500Mbps Shared Bandwidth",
+                    "Dell PowerEdge R630 Dual-Socket Hardware Architecture",
+                    "Intel Xeon E5-2673v4 High-Thread Processors",
+                    "Enterprise SSD Storage for High-Throughput etcd & State",
+                    "Flannel CNI + Built-in Traefik v2 Ingress Controller",
                   ].map((item, i) => (
-                    <div key={i} className={cn("flex items-center gap-4 p-4 rounded-2xl border", isDark ? "bg-cyan-950/30 border-cyan-500/10" : "bg-slate-50 border-slate-200")}>
-                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/20" : "bg-cyan-50 border border-cyan-200")}>
-                        <CheckCircle2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                    <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                       </div>
-                      <span className={cn("font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{item}</span>
+                      <span className="font-medium text-[var(--text-primary)]">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:gap-6">
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/50 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">40</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Physical Cores</div>
+              {/* Hardware Stats Grid */}
+              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
+                    40
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Physical Cores
+                  </span>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/50 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Threads</div>
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
+                    80
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Compute Threads
+                  </span>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <HardDrive className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <HardDrive className="w-5 h-5" />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>SSD / HDD</div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                    SSD Storage
+                  </span>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <MapPin className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <MapPin className="w-5 h-5" />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Sidoarjo</div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                    Sidoarjo DC
+                  </span>
                 </div>
-                <div className={cn("col-span-2 backdrop-blur-md border p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/20 shrink-0">
-                      <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+
+                <div className="col-span-2 p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text-primary)]">
+                      99.99% Cluster Availability
                     </div>
-                    <div className="text-left">
-                      <div className={cn("text-sm sm:text-base font-bold ".trim(), isDark ? "text-white" : "text-slate-900")}>95% Network Uptime</div>
-                      <div className={cn("text-[10px] sm:text-xs  mt-0.5".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Enterprise-grade reliability</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Multi-master control plane with automatic node failover
                     </div>
                   </div>
                 </div>
@@ -193,145 +356,177 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* Spec Slider Section */}
-        <section id="pricing" className="py-10 lg:py-16 px-0 sm:px-6 max-w-[1200px] mx-auto relative z-20">
-          <div className="text-center max-w-3xl mx-auto mb-16 px-6 sm:px-0">
-            <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              Pricing
-            </div>
-            <h2 className={cn("text-4xl md:text-5xl font-black  leading-tight mb-6".trim(), isDark ? "text-white" : "text-slate-900")}>
-              Size Your Master Node
+        {/* ── 3. SPEC SLIDER & PRICING CALCULATOR ───────────────────────── */}
+        <section id="pricing" className="scroll-mt-24 mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
+              CLUSTER PRICING
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Size Your Initial Master Node
             </h2>
-            <p className={cn(" text-lg leading-relaxed font-medium mb-6".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-              Configure your initial control plane node. Choose between Pay-As-You-Go or Fixed Monthly billing, and simply top up your deposit balance to deploy instantly.
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed mb-6">
+              Configure your initial master node specs. Choose Pay-As-You-Go hourly or monthly billing. Add worker nodes anytime as your application scales.
             </p>
-            <div className={cn("inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl border transition-all shadow-md text-sm font-medium", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-              <Info className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs text-[var(--text-secondary)] shadow-sm">
+              <Info className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
               <span>
-                <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong>
-                By default, all K3s nodes are provisioned with NAT IPv4. Dedicated IPs are available via support ticket.
+                <strong>Note:</strong> Default nodes are provisioned with secure NAT routing. Dedicated public IPv4 addresses can be added anytime.
               </span>
             </div>
           </div>
 
           <VpsSpecSlider pricing={safePricing} serviceType="K3S" isDisabled={!isK3sEnabled} />
-        </section>
 
-        {/* Use Cases Section */}
-        <section className="py-10 lg:py-16 relative z-20">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-                Use Cases
+          {/* 4 Feature Badges Under Slider */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            {[
+              { icon: Layers, title: "Resource Isolation", desc: "Dedicated CPU and RAM allocation for control plane and container pods." },
+              { icon: Terminal, title: "Full Kubeconfig", desc: "Direct kubectl and Helm access with complete cluster-admin privileges." },
+              { icon: TrendingUp, title: "One-Click Workers", desc: "Scale worker node pools dynamically from the management dashboard." },
+              { icon: Network, title: "Pre-Configured CNI", desc: "Flannel overlay networking with Traefik Ingress out-of-the-box." },
+            ].map((feat, i) => (
+              <div key={i} className="p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-3.5">
+                <feat.icon className="w-5 h-5 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1">{feat.title}</h4>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{feat.desc}</p>
+                </div>
               </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  mb-6 leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>
-                Built for Modern Workloads
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {[
-                { icon: Layers, title: "Microservices", desc: "Perfectly optimized for running distributed microservices. Leverage our high-thread CPU for orchestration and isolation." },
-                { icon: RefreshCw, title: "CI/CD Pipelines", desc: "Host your Gitlab Runners or Jenkins agents dynamically. Scale up and down effortlessly as your build requirements change." },
-                { icon: Network, title: "Edge & IoT", desc: "Run lightweight K3s clusters at the edge for IoT data processing. Our localized datacenter ensures under 20ms latency data ingestion." }
-              ].map((srv, idx) => (
-                <TiltCard key={idx} intensity={5} className={cn("backdrop-blur-md p-8 md:p-10 rounded-3xl border hover:border-cyan-500/50 transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl group", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:bg-[#111f38] shadow-black/40" : "bg-white border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
-                  <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <srv.icon className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  </div>
-                  <h3 className={cn("text-2xl font-bold  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>{srv.title}</h3>
-                  <p className={cn(" font-medium leading-relaxed mb-8 flex-1".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{srv.desc}</p>
-                </TiltCard>
-              ))}
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className={cn("py-10 lg:py-16 relative z-20 transition-colors", isDark ? "bg-[#09152a]/30" : "bg-slate-50")}>
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-                Features
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  mb-6 leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>Everything you need</h2>
-            </div>
+        {/* ── 4. WORKLOAD SOLUTIONS / USE CASES ─────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              TARGET USE CASES
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Engineered for Modern Cloud Workloads
+            </h2>
+            <p className="text-base text-[var(--text-secondary)]">
+              Lightweight K3s is tailored for fast microservices, dynamic CI runners, and edge deployments.
+            </p>
+          </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-              {[
-                { icon: Layers, title: "Lightweight K3s", desc: "Streamlined Kubernetes experience that consumes fewer resources." },
-                { icon: RefreshCw, title: "Easy Scaling", desc: "Add or remove worker nodes to your cluster with a single click." },
-                { icon: Network, title: "Built-in Networking", desc: "Pre-configured with Traefik Ingress and Flannel CNI." },
-                { icon: Shield, title: "Secure by Default", desc: "Automated certificates and secure node-to-node VPN tunnels." },
-                { icon: TrendingUp, title: "Seamless Upgrades", desc: "Easily upgrade your control plane and worker node specifications anytime." },
-                { icon: Cloud, title: "VPC Support", desc: "Deploy your Kubernetes nodes within isolated Virtual Private Clouds for maximum security." },
-                { icon: Server, title: "VPC Peering", desc: "Connect your K3s cluster with other VPS instances securely via zero-cost internal networking." },
-                { icon: ShieldCheck, title: "High Availability", desc: "Run your clusters with confidence on our reliable infrastructure." }
-              ].map((feat, i) => (
-                <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
-                  <div className={cn(
-                    "backdrop-blur-sm border p-8 rounded-3xl transition-all flex flex-col shadow-xl h-full group aspect-square",
-                    isDark 
-                      ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" 
-                      : "bg-white border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md"
-                  )}>
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform">
-                      <feat.icon className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
+            {[
+              { 
+                icon: Layers, 
+                title: "Distributed Microservices", 
+                desc: "Run polyglot microservice architectures with zero noisy neighbors, internal VPC communication, and built-in load balancing." 
+              },
+              { 
+                icon: RefreshCw, 
+                title: "Dynamic CI/CD Runners", 
+                desc: "Spin up ephemeral GitLab or GitHub Actions runners on demand. Scale down when builds finish to minimize compute costs." 
+              },
+              { 
+                icon: Network, 
+                title: "Edge & IoT Workloads", 
+                desc: "Deploy resource-efficient container pods at the edge with under 20ms local latency across Indonesia for rapid telemetry ingestion." 
+              }
+            ].map((srv, idx) => (
+              <FadeIn key={idx} delay={idx * 0.1} direction="up" className="h-full">
+                <div className="p-8 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-200 h-full flex flex-col justify-between group shadow-sm">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6 group-hover:scale-105 transition-transform">
+                      <srv.icon className="w-6 h-6" />
                     </div>
-                    <h3 className={cn("text-xl font-bold  mb-3".trim(), isDark ? "text-white" : "text-slate-900")}>{feat.title}</h3>
-                    <p className={cn(" font-medium leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{feat.desc}</p>
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                      {srv.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {srv.desc}
+                    </p>
                   </div>
-                </FadeIn>
-              ))}
-            </div>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className={cn("py-16 lg:py-24 relative z-20 transition-colors", isDark ? "bg-gradient-to-b from-transparent to-[#09152a]/50" : "bg-gradient-to-b from-transparent to-slate-50")}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-6 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-                Deployment Process
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  leading-tight mb-6".trim(), isDark ? "text-white" : "text-slate-900")}>
-                Go Live in 3 Simple Steps
-              </h2>
-            </div>
+        {/* ── 5. ENTERPRISE CAPABILITIES GRID ───────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              ENTERPRISE CAPABILITIES
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Everything Your Cluster Demands
+            </h2>
+          </div>
 
-            <div className="grid md:grid-cols-3 gap-8 relative">
-              {/* Connecting Line Container */}
-              <div className={cn("hidden md:block absolute top-10 left-[15%] right-[15%] h-[2px]  overflow-hidden rounded-full".trim(), isDark ? "bg-white/5 text-zinc-400" : "bg-slate-100 text-slate-600")}>
-                <AnimatedBeam />
-              </div>
-
-              {[
-                { step: "01", title: "Size Your Cluster", desc: "Select the CPU, RAM, and storage size that fits your initial master node requirements perfectly." },
-                { step: "02", title: "Top Up Balance", desc: "Add funds to your account seamlessly. You only pay for the exact resources you allocate." },
-                { step: "03", title: "Deploy Instantly", desc: "Your high-availability Kubernetes cluster will be provisioned and ready for Helm charts in under 60 seconds." }
-              ].map((item, i) => (
-                <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/50 hover:bg-[#111f38] transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-
-                    {/* Animated Step Circle */}
-                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#091122] border-slate-700/80" : "bg-white border-cyan-200")}>
-                      <OrbitalRings />
-                      <span className={cn("relative z-10 text-3xl font-black bg-clip-text text-transparent", isDark ? "bg-gradient-to-br from-white to-zinc-400" : "bg-gradient-to-br from-cyan-600 to-cyan-400")}>{item.step}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {[
+              { icon: Layers, title: "Lightweight Architecture", desc: "CNCF certified with minimal footprint, saving resource overhead for workloads." },
+              { icon: RefreshCw, title: "Effortless Worker Scaling", desc: "Add or detach worker nodes in seconds from the management dashboard." },
+              { icon: Network, title: "Built-In Traefik Ingress", desc: "Pre-installed HTTP/HTTPS reverse proxy and SSL certificate automation." },
+              { icon: Shield, title: "VPC & Encrypted Tunnels", desc: "Isolated private network topologies with WireGuard node-to-node security." },
+              { icon: TrendingUp, title: "Zero-Downtime Upgrades", desc: "Upgrade Kubernetes control plane and node specifications smoothly." },
+              { icon: Cloud, title: "Isolated VPC Peering", desc: "Connect your cluster with VPS databases privately at zero internal egress cost." },
+              { icon: Server, title: "Root Node & VNC Access", desc: "Out-of-band management console available directly in your browser." },
+              { icon: ShieldCheck, title: "Multi-Master Failover", desc: "Automated etcd replication ensuring continuous cluster availability." }
+            ].map((feat, i) => (
+              <FadeIn key={i} delay={i * 0.05} direction="up" className="h-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors flex flex-col justify-between h-full shadow-sm">
+                  <div>
+                    <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-4">
+                      <feat.icon className="w-5 h-5" />
                     </div>
-
-                    <h3 className={cn("text-xl font-bold  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>{item.title}</h3>
-                    <p className={cn(" font-medium leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{item.desc}</p>
+                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-2">
+                      {feat.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {feat.desc}
+                    </p>
                   </div>
-                </FadeIn>
-              ))}
-            </div>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </section>
 
+        {/* ── 6. DEPLOYMENT WORKFLOW (3 Steps) ──────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              DEPLOYMENT PROCESS
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Deploy Your Cluster in 3 Steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
+            {[
+              { step: "01", title: "Size Your Master Node", desc: "Select initial CPU cores, RAM, and storage required for your control plane." },
+              { step: "02", title: "Top Up Deposit", desc: "Add balance via automated QRIS or VA. You only pay for active hourly resources." },
+              { step: "03", title: "Deploy & Download Kubeconfig", desc: "Your cluster provisions automatically with Kubeconfig and Helm ready in under 60 seconds." }
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
+                <div className="p-8 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-center shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between h-full">
+                  <div>
+                    <div className="w-16 h-16 mx-auto rounded-full border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-center mb-6">
+                      <span className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{item.step}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3">{item.title}</h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 7. PROVISIONING SECTION (Live Terminal) ───────────────────── */}
         <ProvisioningSection
-          subtitle="READY TO START?"
-          title="One click, production-ready clusters."
-          description="We handle the heavy lifting of Kubernetes provisioning. Define your node pools, pay as you go, and access your Kubeconfig in seconds."
+          subtitle="AUTOMATED CLUSTER PROVISIONING"
+          title="One-click, production-ready Kubernetes clusters."
+          description="We handle the heavy lifting of Kubernetes provisioning, etcd state replication, and Flannel CNI configuration. Download your Kubeconfig and start deploying Helm charts in seconds."
           buttonText="Open Dashboard"
           buttonHref="/dashboard"
           logs={K3S_TERMINAL_LOGS}
@@ -340,93 +535,47 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
           iconType="k3s"
         />
 
+        {/* ── 8. FINAL CTA SECTION ──────────────────────────────────────── */}
+        <section className="py-16 lg:py-24">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden max-w-5xl mx-auto">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
+
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                SCALE WITH CONFIDENCE
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-tight mb-4">
+                Ready to Deploy Your Kubernetes Cluster?
+              </h2>
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
+                Experience high-performance container orchestration without control plane complexity. Start scaling workloads today.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/dashboard/checkout"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Deploy Your Cluster
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/contact"
+                >
+                  Contact DevOps Specialist
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 9. FAQ SECTION ────────────────────────────────────────────── */}
         <FaqSection faqs={K3S_FAQS} />
 
-        {/* Final CTA Section */}
-        <section className="py-20 lg:py-32 relative z-20">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className={cn("backdrop-blur-xl border rounded-[2.5rem] p-10 md:p-16 text-center shadow-2xl relative overflow-hidden group", isDark ? "bg-gradient-to-br from-[#0e172a] via-[#0d1629] to-[#0a1324] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/40 shadow-black/50" : "bg-white border-slate-200 shadow-xl")}>
-              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
-              <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-
-              <div className="relative z-10">
-                <h2 className={cn("text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                  Ready to experience <br className="hidden md:block" />
-                  <span className={cn("bg-clip-text text-transparent bg-gradient-to-r", isDark ? "from-cyan-400 to-cyan-100" : "from-cyan-600 to-cyan-400")}>true performance?</span>
-                </h2>
-                <p className={cn("text-lg md:text-xl font-medium max-w-2xl mx-auto mb-10 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
-                  Join thousands of developers deploying workloads on Masdika Cloud today. Start scaling without limits.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                  <MagneticButton intensity={20} className="w-full sm:w-auto flex">
-                    <Link
-                      href="/dashboard/checkout"
-                      className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-all gap-2 w-full"
-                    >
-                      Deploy Your Cluster
-                      <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </MagneticButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQs Section */}
-        <section className="py-16 lg:py-24 px-4 relative z-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-                Support
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>Frequently Asked Questions</h2>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                {
-                  q: "What is K3s and how is it different from K8s?",
-                  a: "K3s is a highly available, certified Kubernetes distribution designed for production workloads in unattended, resource-constrained, remote locations or inside IoT appliances. It strips out unnecessary bloated features to give you a very fast and efficient Kubernetes cluster."
-                },
-                {
-                  q: "How do I add worker nodes?",
-                  a: "You can provision a new node directly from the dashboard and configure it as a worker node. Our system will automatically attach it to your Master Node cluster."
-                },
-                {
-                  q: "Do I get full cluster admin access?",
-                  a: "Yes! You have full cluster-admin access to your Kubeconfig, allowing you to run any kubectl command, install Helm charts, and manage your cluster completely."
-                },
-                {
-                  q: "Are the nodes behind NAT?",
-                  a: "By default, your nodes will use NAT IPv4 and IPv6 routing. If you require a Dedicated Public IP, you can purchase it as an add-on."
-                },
-                {
-                  q: "Can I access the underlying VM?",
-                  a: "Yes. In addition to Kubernetes cluster access, you have full root SSH access to the underlying node and a built-in VNC Console available from your dashboard for out-of-band management."
-                },
-                {
-                  q: "How can I expose my applications online with K3s NAT?",
-                  a: "Since the NAT nodes do not come with a dedicated public IP by default, you can easily use Cloudflare Tunnel (cloudflared) within your cluster to securely expose your web services and applications to the internet without needing port forwarding."
-                }
-              ].map((faq, i) => (
-                <details key={i} className={cn("group backdrop-blur-md border rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-xl hover:border-cyan-500/50 transition-colors", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <summary className={cn("flex items-center justify-between gap-4 p-5 sm:p-8 font-bold text-base sm:text-lg md:text-xl select-none list-none group-open:text-cyan-400 transition-colors [&::-webkit-details-marker]:hidden", isDark ? "text-white" : "text-slate-900")}>
-                    <span className="flex-1 leading-snug">{faq.q}</span>
-                    <div className={cn("shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 group-open:bg-cyan-500/20 group-open:border-cyan-500/40" : "bg-cyan-50 border-cyan-200 group-open:bg-cyan-100 group-open:border-cyan-300")}>
-                      <svg fill="none" height="16" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="16" className="transition-transform duration-300 group-open:rotate-180 sm:w-5 sm:h-5"><path d="M6 9l6 6 6-6"></path></svg>
-                    </div>
-                  </summary>
-                  <div className={cn("px-5 pb-5 sm:px-8 sm:pb-8 pt-0  text-sm sm:text-base md:text-lg leading-relaxed font-medium".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-                    {faq.a}
-                  </div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-      </main>
+      </div>
     </div>
   );
 }
-

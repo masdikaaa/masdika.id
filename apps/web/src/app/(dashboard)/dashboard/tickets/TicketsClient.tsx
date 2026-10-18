@@ -91,9 +91,9 @@ export default function TicketsClient() {
           </div>
           <Link
             href="/dashboard/tickets/new"
-            className={cn("px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             New Ticket
           </Link>
         </div>
@@ -141,7 +141,7 @@ export default function TicketsClient() {
               {!searchQuery && (
                 <Link
                   href="/dashboard/tickets/new"
-                  className={cn("mt-2 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm")}
+                  className="mt-2 px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   <Plus className="w-4 h-4" /> Open a Ticket
                 </Link>

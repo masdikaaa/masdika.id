@@ -173,9 +173,9 @@ export default function CustomerBillingPage() {
         <div className="relative z-10 shrink-0">
           <Link 
             href="/dashboard/checkout"
-            className="w-full md:w-auto px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
+            className="w-full md:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             Order New Service
           </Link>
         </div>
@@ -397,9 +397,9 @@ export default function CustomerBillingPage() {
            
            <Link
              href="/dashboard/topup"
-             className={cn("w-full px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 text-white shadow-sm", isDark ? "bg-cyan-600 hover:bg-cyan-500" : "bg-cyan-600 hover:bg-cyan-700")}
+             className="w-full px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
            >
-             <Plus className="w-5 h-5" />
+             <Plus className="w-4 h-4" />
              Top Up Balance
            </Link>
         </motion.div>
@@ -598,7 +598,7 @@ export default function CustomerBillingPage() {
                       <Link
                         href={`/invoice/${invoice.invoiceNumber || invoice.merchantOrderId}`}
                         target="_blank"
-                        className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-xs font-bold border whitespace-nowrap shadow-sm", isDark ? "bg-slate-800/50 hover:bg-slate-800 text-white border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                        className={cn("inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-colors text-xs font-medium border whitespace-nowrap shadow-sm", isDark ? "bg-slate-800/50 hover:bg-slate-800 text-white border-slate-700" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                       >
                         <Printer className="w-3.5 h-3.5" />
                         Print / View

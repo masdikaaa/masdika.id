@@ -215,12 +215,12 @@ export default function DashboardApiKeys() {
             <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-600")}>Manage your API access tokens and service permissions to connect securely to Masdika endpoints.</p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/api-lab" className={cn("border px-5 py-3.5 rounded-xl font-medium transition-all flex items-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
-              <FlaskConical className="w-5 h-5 text-cyan-500" />
+            <Link href="/dashboard/api-lab" className={cn("border px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
+              <FlaskConical className="w-4 h-4 text-cyan-500" />
               API Lab
             </Link>
-            <Link href="/dashboard/api-stats" className={cn("px-6 py-3.5 rounded-xl text-white font-bold transition-all hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>
-              <Activity className="w-5 h-5" />
+            <Link href="/dashboard/api-stats" className="px-5 py-2.5 rounded-lg text-slate-950 font-semibold text-sm transition-all inline-flex items-center justify-center gap-2 shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm">
+              <Activity className="w-4 h-4" />
               View API Stats
             </Link>
           </div>
@@ -237,7 +237,7 @@ export default function DashboardApiKeys() {
             <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
               You need an active subscription to any API service (like File CDN or URL Shortener) to generate and manage API keys.
             </p>
-            <Link href="/dashboard/checkout" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-sm">
+            <Link href="/dashboard/checkout" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-2.5 px-5 rounded-lg text-sm transition-all shadow-sm">
               View Plans
             </Link>
           </div>
@@ -284,9 +284,9 @@ export default function DashboardApiKeys() {
                 <button 
                   onClick={generateKey}
                   disabled={generating || keys.some(k => (k.service || '').toLowerCase() === selectedService.toLowerCase())}
-                  className={cn("px-6 py-3 rounded-2xl font-bold flex items-center gap-2 whitespace-nowrap transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+                  className="px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 whitespace-nowrap transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
                 >
-                  {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+                  {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Generate Key
                 </button>
               </div>
@@ -335,9 +335,9 @@ export default function DashboardApiKeys() {
                   <button
                     onClick={() => setShowBulkDeleteModal(true)}
                     disabled={isBulkDeleting}
-                    className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2 border border-red-500/20 w-fit"
+                    className="bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 border border-red-500/20 w-fit"
                   >
-                    {isBulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                     Delete Selected ({selectedKeys.length})
                   </button>
                 )}
@@ -436,7 +436,7 @@ export default function DashboardApiKeys() {
                     <button 
                       onClick={() => setKeyToDelete(key.id)}
                       disabled={key.isSuspended}
-                      className={cn("p-3 rounded-xl transition-all ml-auto lg:ml-4 group/btn disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white" : "bg-red-50 hover:bg-red-500 border border-red-200 hover:border-red-500 text-red-500 hover:text-white")}
+                      className={cn("p-2.5 rounded-lg transition-all ml-auto lg:ml-4 group/btn disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white" : "bg-red-50 hover:bg-red-500 border border-red-200 hover:border-red-500 text-red-500 hover:text-white")}
                       title={key.isSuspended ? "Key is suspended" : "Revoke Key"}
                     >
                       <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />

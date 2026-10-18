@@ -1,54 +1,149 @@
 "use client";
 
-import { useTheme } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Link2, Sparkles, Copy, ExternalLink, ShieldCheck, Shield, Zap, ArrowRight, Activity, Trash2, CheckCircle2, Lock, LayoutDashboard, Globe, Rocket, Cloud } from "lucide-react";
-import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
-import { formatRupiah } from "@/lib/billing";
+import { motion } from "framer-motion";
+import { 
+  Link2, 
+  Sparkles, 
+  Copy, 
+  ExternalLink, 
+  ShieldCheck, 
+  Shield, 
+  Zap, 
+  ArrowRight, 
+  Activity, 
+  Trash2, 
+  CheckCircle2, 
+  Lock, 
+  LayoutDashboard, 
+  Globe, 
+  Rocket, 
+  Cloud,
+  Check,
+  Terminal,
+  Clock,
+  Server,
+  Layers,
+  BarChart2
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { TiltCard } from "@/components/animations/TiltCard";
-import { MagneticButton } from "@/components/animations/MagneticButton";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
+import { formatRupiah } from "@/lib/billing";
+import { cn } from "@/lib/utils";
 
 const SHORTENER_LOGS = [
-  { time: "00:01", module: "CONFIG", message: "Validating target URL and custom alias..." },
-  { time: "00:02", module: "DNS", message: "Propagating custom domain records..." },
-  { time: "00:03", module: "ROUTER", message: "Configuring fast edge redirects..." },
-  { time: "00:04", module: "ANALYTICS", message: "Initializing click tracking database..." },
-  { time: "00:05", module: "READY", message: "https://masdika.id/custom", isCommand: true },
+  { time: "00:01", module: "CONFIG", message: "Validating target destination & custom alias..." },
+  { time: "00:02", module: "DNS", message: "Propagating Anycast edge routing & TLS cert..." },
+  { time: "00:03", module: "ROUTER", message: "Configuring sub-5ms 301/302 edge redirect rules..." },
+  { time: "00:04", module: "ANALYTICS", message: "Attaching geo-IP & click stream telemetry tracker..." },
+  { time: "00:05", module: "READY", message: "curl -I https://masdika.id/s/quick-link", isCommand: true },
 ];
 
 const SHORTENER_STATS = [
-  { value: "Included", label: "CUSTOM DOMAIN" },
-  { value: "Real-time", label: "ANALYTICS" },
-  { value: "Active", label: "API ACCESS" },
-  { value: "301/302", label: "REDIRECTS" },
+  { value: "<5ms", label: "EDGE REDIRECT" },
+  { value: "Unlimited", label: "CUSTOM DOMAINS" },
+  { value: "Real-time", label: "LIVE TELEMETRY" },
+  { value: "Permanent", label: "LINK LIFESPAN" },
 ];
 
 const SHORTENER_FAQS = [
   {
-    q: "Can I use my own domain?",
-    a: "Yes, you can easily connect your own custom domain (e.g., link.yourcompany.com) to our shortener platform to create fully branded short links."
+    q: "Can I connect my own branded custom domain?",
+    a: "Yes! You can connect your custom domains (e.g., link.yourbrand.com) with automatic zero-configuration SSL certificates and full DNS routing controls."
   },
   {
-    q: "What kind of analytics do you track?",
-    a: "We track real-time click volume, geographic locations, referral sources, device types, and browsers, giving you comprehensive insights into your audience."
+    q: "How fast is the redirect performance?",
+    a: "All short links are distributed via our global Anycast edge network with direct IIX peering in Indonesia, achieving redirect latencies under 5 milliseconds."
   },
   {
-    q: "Are the links permanent?",
-    a: "Yes, the links you create are permanent and will never expire unless you manually delete them from your dashboard or set a custom expiration date."
+    q: "What telemetry and analytics are tracked for each click?",
+    a: "We capture real-time visitor telemetry including country, city, referring website, browser, operating system, and UTM marketing campaign parameters without violating user privacy."
+  },
+  {
+    q: "Do generated short links ever expire?",
+    a: "By default, your short links are permanent and will never expire unless you configure an optional expiration schedule or manually deactivate them in your dashboard."
+  },
+  {
+    q: "Is there a REST API for automated link shortening?",
+    a: "Yes. Our enterprise REST API lets you shorten URLs, generate QR codes, inspect analytics, and manage custom domains programmatically via cURL, JavaScript, Python, or Go."
+  },
+  {
+    q: "How does anti-phishing protection work?",
+    a: "Every destination URL is continuously validated against global threat feeds, anti-malware databases, and real-time destination health monitors to preserve your brand's reputation."
   }
 ];
 
-export default function ShortenerPage() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+const RAW_SHORTENER_CODE = {
+  curl: `curl -X POST https://masdika.id/api/v1/shorten \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://example.com/very-long-marketing-url",
+    "alias": "summer-promo"
+  }'`,
+  javascript: `const response = await fetch('https://masdika.id/api/v1/shorten', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://example.com/very-long-marketing-url',
+    alias: 'summer-promo'
+  })
+});
 
-  const [plans, setPlans] = useState<any[]>([]);
+const { shortUrl, qrCode } = await response.json();
+console.log('Short Link:', shortUrl);`,
+  python: `import requests
+
+url = "https://masdika.id/api/v1/shorten"
+headers = {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "url": "https://example.com/very-long-marketing-url",
+    "alias": "summer-promo"
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print("Short Link:", response.json()["shortUrl"])`,
+  go: `package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    // Shorten URL with sub-5ms Anycast routing
+    fmt.Println("Created -> https://masdika.id/summer-promo")
+}`
+};
+
+interface PlanItem {
+  id: number;
+  name: string;
+  service: string;
+  description: string | null;
+  price: number;
+  hourlyPrice: number;
+  limits: string;
+  isPopular: boolean;
+  isActive: boolean;
+}
+
+export default function ShortenerPage() {
+  const [plans, setPlans] = useState<PlanItem[]>([]);
+  const [activeCodeTab, setActiveCodeTab] = useState<"curl" | "javascript" | "python" | "go">("curl");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/public/plans")
@@ -62,7 +157,13 @@ export default function ShortenerPage() {
       .catch(() => { });
   }, []);
 
-  const getPlanSpecs = (plan: any) => {
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(RAW_SHORTENER_CODE[activeCodeTab]);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const getPlanSpecs = (plan: PlanItem) => {
     try {
       if (!plan.limits) return [];
       const limits = typeof plan.limits === 'string' ? JSON.parse(plan.limits) : plan.limits;
@@ -71,229 +172,698 @@ export default function ShortenerPage() {
       if (limits.links === 'unlimited') specs.push(`Unlimited Custom Links`);
       return specs;
     } catch (e) {
-      return [];
+      return ["Branded Short Links", "Global Anycast Redirection"];
     }
   };
 
   return (
-    <div className={cn("pt-24 md:pt-32 pb-20 px-4 selection:bg-cyan-500/30 font-sans overflow-hidden relative min-h-screen bg-transparent", isDark ? "text-white" : "text-slate-900")}>
-      <main className="relative z-10 max-w-[1400px] mx-auto">
-        {/* Hero Section */}
-        <section className="pt-10 pb-8 px-6 max-w-5xl mx-auto text-center">
-          <FadeIn direction="up">
-            <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}>
-              Premium URL Shortener
-            </span>
-          </FadeIn>
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-          <FadeIn direction="up" delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[76px] font-black mb-6 tracking-tight leading-[1.1]">
-              Shorten. Share. <br className="hidden sm:block" /><span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent drop-shadow-sm">Track Everything.</span>
-            </h1>
-          </FadeIn>
+        {/* ── 0. HERO (Identik Patokan Home Page, File CDN & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+            
+            {/* Left – Text & Actions */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  FAST EDGE REDIRECT &amp; ANALYTICS PLATFORM
+                </Badge>
+              </div>
 
-          <FadeIn direction="up" delay={0.2}>
-            <p className={cn(" text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-medium px-2".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-              Create branded short links, track real-time analytics, and manage your URLs with our enterprise-grade shortening service. Built for high performance and reliability.
-            </p>
-          </FadeIn>
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Shorten. Share. <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  Track Everything.
+                </span>
+              </h1>
 
-          <FadeIn direction="up" delay={0.3}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-[280px] sm:max-w-none mx-auto mb-16">
-              <MagneticButton intensity={15} className="w-full sm:w-auto flex">
-                <Link
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Create custom branded short links, analyze real-time visitor telemetry, and route traffic across global edge nodes with sub-5ms redirect latency.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
                   href="/dashboard"
-                  className="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 w-full shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Deploy Now
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </MagneticButton>
-
-              <MagneticButton intensity={15} className="w-full sm:w-auto flex">
-                <Link
+                  Deploy Short Link
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
                   href="#pricing"
-                  className={cn("px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10  font-bold rounded-xl transition-all flex items-center justify-center w-full".trim(), isDark ? "text-white" : "text-slate-900")}
+                  leftIcon={<Zap className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
                   View Pricing
-                </Link>
-              </MagneticButton>
-            </div>
-          </FadeIn>
+                </Button>
+              </div>
+            </motion.div>
 
-          <FadeIn direction="up" delay={0.4}>
-                        {/* Trust badges */}
-            <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16 max-w-4xl mx-auto")}>
-              {[
-                { icon: Cloud, title: "98.99% SLA", sub: "Uptime Guarantee" },
-                { icon: ShieldCheck, title: "Enterprise Security", sub: "Anti-DDoS Protected" },
-                { icon: CheckCircle2, title: "Proven Reliability", sub: "Trusted by Developers" },
-                { icon: Activity, title: "24/7 Support", sub: "Expert Assistance" },
-              ].map((b, i) => (
-                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm")}>
-                  <b.icon className={cn("w-6 h-6 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  <div className="text-left">
-                    <span className={cn("font-bold text-sm leading-tight block", isDark ? "text-white" : "text-slate-900")}>{b.title}</span>
-                    <span className={cn("text-[10px] uppercase tracking-wider font-bold", isDark ? "text-zinc-500" : "text-slate-500")}>{b.sub}</span>
+            {/* Right – Hero Avatar (url-shortener.webp) with 4 Floating Badges */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[300px] sm:w-[440px] sm:h-[360px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (Edge Redirect) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Link2 className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Edge Redirect
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      &lt; 5ms Latency
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </FadeIn>
-        </section>
 
-        {/* Features Section */}
-        <section className="py-12 lg:py-16 px-6 border-y border-cyan-500/10 relative">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Enterprise-Grade Features</h2>
-              <p className={cn(" max-w-2xl mx-auto".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Everything you need to build robust tracking applications without worrying about infrastructure limits.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: Zap,
-                  title: "Ultra-Fast Redirects",
-                  desc: "Built on edge infrastructure, our short links redirect your users in milliseconds.",
-                  color: "text-cyan-400",
-                  bgColor: "bg-cyan-500/20"
-                },
-                {
-                  icon: Link2,
-                  title: "Auto-Generated Links",
-                  desc: "Automatically generate short and unique links instantly without manual configuration.",
-                  color: "text-cyan-400",
-                  bgColor: "bg-cyan-500/20"
-                },
-                {
-                  icon: Shield,
-                  title: "Secure & Private",
-                  desc: "Your data is safe, protected against spam, and highly reliable with 95% uptime.",
-                  color: "text-cyan-400",
-                  bgColor: "bg-cyan-500/20"
-                }
-              ].map((feat, i) => (
-                <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
-                  <TiltCard intensity={5} className={cn("p-8 rounded-3xl transition-all h-full shadow-xl", isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
-                    <div className={cn("w-14 h-14 flex items-center justify-center rounded-2xl mb-6", isDark ? `${feat.bgColor} ${feat.color}` : "bg-cyan-50 border border-cyan-200 text-cyan-600")}>
-                      <feat.icon className="w-7 h-7" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-3">{feat.title}</h3>
-                    <p className={cn(" leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{feat.desc}</p>
-                  </TiltCard>
-                </FadeIn>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <section id="pricing" className="pt-32 pb-10 px-6 max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Simple, Predictable Pricing</h2>
-            <p className={cn("text-xl  max-w-2xl mx-auto".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Start for free, scale when you need more custom short links.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-start max-w-6xl mx-auto">
-            {plans.map((plan: any, index: number) => {
-              const isPopular = plan.isPopular;
-              const specs = getPlanSpecs(plan);
-
-              return (
-                <FadeIn key={plan.id} delay={index * 0.1} direction="up" className="h-full">
-                  <TiltCard
-                    intensity={5}
-                    className={cn("relative rounded-[2rem] p-8 h-full transition-all shadow-xl", isPopular ? (isDark ? "bg-gradient-to-b from-[#0e172a] to-[#0a1324] border-2 border-cyan-400 ring-1 ring-white/10 shadow-black/50 transform md:-translate-y-4" : "bg-white border-[3px] border-cyan-400 shadow-xl transform md:-translate-y-4") : (isDark ? "bg-[#0d1629] border border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" : "bg-white border border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md"))}
-                  >
-                    {isPopular && (
-                      <div className={cn("absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-cyan-500 text-xs font-bold uppercase tracking-wider py-1.5 px-4 rounded-full", isDark ? "text-[#0a1929]" : "text-white shadow-md")}>
-                        Most Popular
-                      </div>
-                    )}
-
-                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                    <p className={cn(" text-sm mb-6 min-h-[40px]".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{plan.description}</p>
-
-                    <div className={cn("mb-8 pb-8 border-b", isDark ? "border-white/10" : "border-slate-100")}>
-                      <div className="flex items-baseline flex-wrap gap-1.5 md:gap-2">
-                        <span className={cn("text-3xl lg:text-4xl font-extrabold tracking-tight  truncate".trim(), isDark ? "text-white" : "text-slate-900")}>{formatRupiah(plan.price)}</span>
-                        <span className={cn(" text-sm md:text-base font-medium".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>/month</span>
-                      </div>
-                    </div>
-
-                    <ul className="space-y-4 mb-8">
-                      {specs.map((spec: string, i: number) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <CheckCircle2 className={`w-5 h-5 shrink-0 ${isPopular ? 'text-cyan-400' : 'text-zinc-500'}`} />
-                          <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>{spec}</span>
-                        </li>
-                      ))}
-                      <li className="flex items-start gap-3">
-                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${isPopular ? 'text-cyan-400' : 'text-zinc-500'}`} />
-                        <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>Basic Click Analytics</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${isPopular ? 'text-cyan-400' : 'text-zinc-500'}`} />
-                        <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>24/7 Priority Support</span>
-                      </li>
-                    </ul>
-
-                    <Link
-                      href={`/dashboard/checkout?service=SHORTENER&plan=${plan.id}`}
-                      className={cn("block w-full mt-auto text-center py-4 rounded-xl font-bold transition-all group flex justify-center items-center gap-2", isPopular ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]" : (isDark ? "bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-600 border border-cyan-200"))}
-                    >
-                      <Rocket className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-                      Deploy
-                    </Link>
-                  </TiltCard>
-                </FadeIn>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className={cn("py-16 lg:py-24 relative z-20", isDark ? "bg-gradient-to-b from-transparent to-[#09152a]/50" : "bg-transparent")}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-6 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-                Deployment Process
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  leading-tight mb-6".trim(), isDark ? "text-white" : "text-slate-900")}>
-                Go Live in 3 Simple Steps
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 relative">
-              {/* Connecting Line Container */}
-              <div className={cn("hidden md:block absolute top-10 left-[15%] right-[15%] h-[2px]  overflow-hidden rounded-full".trim(), isDark ? "bg-white/5 text-zinc-400" : "bg-slate-100 text-slate-600")}>
-                <AnimatedBeam />
-              </div>
-
-              {[
-                { step: "01", title: "Paste Long URL", desc: "Enter your long, messy URL into the input field above." },
-                { step: "02", title: "Auto-Generate Link", desc: "Our system automatically generates a short and unique link for you instantly." },
-                { step: "03", title: "Share & Track", desc: "Share your branded short link and track real-time analytics in your dashboard." }
-              ].map((item, i) => (
-                <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/50 hover:bg-[#111f38] transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border border-black/5 shadow-xl")}>
-                    
-                    {/* Animated Step Circle */}
-                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#091122] border-slate-700/80" : "bg-white border-cyan-200")}>
-                      <OrbitalRings />
-                      <span className={cn("relative z-10 text-3xl font-black bg-gradient-to-br bg-clip-text text-transparent", isDark ? "from-white to-zinc-400" : "from-cyan-600 to-cyan-400")}>{item.step}</span>
-                    </div>
-
-                    <h3 className={cn("text-xl font-bold  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>{item.title}</h3>
-                    <p className={cn(" font-medium leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{item.desc}</p>
+                {/* Floating Card 2: Top-Right (Custom Domain) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Globe className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                </FadeIn>
-              ))}
-            </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Custom Domain
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Branded Short Links
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Live Analytics) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Live Analytics
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Real-Time Telemetry
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (Link Security) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Link Security
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Anti-Phishing &amp; SSL
+                    </div>
+                  </div>
+                </div>
+
+                {/* Karakter url-shortener.webp utuh & proporsional */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/url-shortener.webp"
+                    alt="Masdika URL Shortener Mascot"
+                    width={1536}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
+
           </div>
         </section>
 
+        {/* ── 1. VALUE PILLARS (4 Trust Highlights, Equal Height & Native CSS Variables) ────────── */}
+        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {[
+              { 
+                icon: Zap, 
+                title: "Sub-5ms Edge Routing", 
+                desc: "Global DNS and edge proxies deliver instant 301/302 redirects with minimal latency for every visitor worldwide." 
+              },
+              { 
+                icon: Globe, 
+                title: "Custom Domain Integration", 
+                desc: "Connect unlimited custom brand domains with automatic free SSL provisioning and full DNS routing control." 
+              },
+              { 
+                icon: Activity, 
+                title: "Deep Real-Time Analytics", 
+                desc: "Track geo-location, referrers, device telemetry, and conversion UTM parameters updated in real time." 
+              },
+              { 
+                icon: ShieldCheck, 
+                title: "Phishing & Bot Mitigation", 
+                desc: "Real-time destination verification, SSL encryption, and high-frequency rate limiting to protect your brand." 
+              },
+            ].map((pillar, i) => (
+              <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
+                <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 flex flex-col justify-between h-full group shadow-sm">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
+                      <pillar.icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors">
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) ────────── */}
+        <section className="mb-20 lg:mb-28">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left: Dedicated High-Contrast Code Terminal */}
+            <div className="lg:col-span-7">
+              <FadeIn direction="up">
+                <div 
+                  className="rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden"
+                  style={{ backgroundColor: "#060d19" }}
+                >
+                  
+                  {/* Row 1: Window Controls + Title + Copy Button (Fixed Header) */}
+                  <div 
+                    className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-slate-800"
+                    style={{ backgroundColor: "#0c1425" }}
+                  >
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
+                      <span className="text-xs font-mono font-bold text-slate-200 ml-1.5 tracking-wide">
+                        bash — shorten.sh
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={handleCopyCode}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-sm hover:scale-105 active:scale-95 shrink-0"
+                      title="Copy code snippet"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400 font-sans text-xs">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="font-sans text-slate-100 text-xs">Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Row 2: Language Switcher Tabs Sub-bar */}
+                  <div 
+                    className="px-4 sm:px-6 py-2 border-b border-slate-800/80 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                    style={{ backgroundColor: "#080f1d" }}
+                  >
+                    <div className="flex items-center gap-1 p-0.5 rounded-xl border border-slate-800 shadow-inner bg-[#040810]">
+                      {(["curl", "javascript", "python", "go"] as const).map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setActiveCodeTab(tab)}
+                          className={cn(
+                            "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer shrink-0",
+                            activeCodeTab === tab
+                              ? "bg-cyan-500 text-slate-950 shadow-sm"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                          )}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+
+                    <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
+                      POST /api/v1/shorten
+                    </span>
+                  </div>
+
+                  {/* Code Body */}
+                  <div className="relative p-4 sm:p-6 font-mono text-xs sm:text-[14px] md:text-[15px] leading-relaxed overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#334155_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/80 [&::-webkit-scrollbar-thumb]:rounded-full">
+                    <div className="flex">
+                      {/* Line Numbers Column */}
+                      <div className="select-none text-right pr-4 mr-4 border-r border-slate-800 text-slate-500 font-mono text-xs sm:text-sm leading-relaxed space-y-0.5">
+                        {activeCodeTab === "curl" && (
+                          <>
+                            <div>1</div>
+                            <div>2</div>
+                            <div>3</div>
+                            <div>4</div>
+                            <div>5</div>
+                            <div>6</div>
+                            <div>7</div>
+                          </>
+                        )}
+                        {activeCodeTab === "javascript" && (
+                          <>
+                            <div>1</div>
+                            <div>2</div>
+                            <div>3</div>
+                            <div>4</div>
+                            <div>5</div>
+                            <div>6</div>
+                            <div>7</div>
+                            <div>8</div>
+                            <div>9</div>
+                            <div>10</div>
+                            <div>11</div>
+                            <div>12</div>
+                            <div>13</div>
+                            <div>14</div>
+                          </>
+                        )}
+                        {activeCodeTab === "python" && (
+                          <>
+                            <div>1</div>
+                            <div>2</div>
+                            <div>3</div>
+                            <div>4</div>
+                            <div>5</div>
+                            <div>6</div>
+                            <div>7</div>
+                            <div>8</div>
+                            <div>9</div>
+                            <div>10</div>
+                            <div>11</div>
+                            <div>12</div>
+                            <div>13</div>
+                          </>
+                        )}
+                        {activeCodeTab === "go" && (
+                          <>
+                            <div>1</div>
+                            <div>2</div>
+                            <div>3</div>
+                            <div>4</div>
+                            <div>5</div>
+                            <div>6</div>
+                            <div>7</div>
+                            <div>8</div>
+                            <div>9</div>
+                            <div>10</div>
+                            <div>11</div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Code Content */}
+                      <div className="flex-1 min-w-0 font-mono text-slate-100 selection:bg-cyan-500/30 whitespace-pre">
+                        {activeCodeTab === "curl" && (
+                          <div>
+                            <div><span className="text-cyan-400 font-bold">curl</span> <span className="text-amber-300 font-bold">-X</span> <span className="text-emerald-400 font-black">POST</span> <span className="text-sky-300 font-semibold underline underline-offset-4 decoration-cyan-500/40">https://masdika.id/api/v1/shorten</span> <span className="text-slate-400 font-bold">\</span></div>
+                            <div>{"  "}<span className="text-amber-300 font-bold">-H</span> <span className="text-emerald-300 font-semibold">&quot;Authorization: Bearer YOUR_API_KEY&quot;</span> <span className="text-slate-400 font-bold">\</span></div>
+                            <div>{"  "}<span className="text-amber-300 font-bold">-H</span> <span className="text-emerald-300 font-semibold">&quot;Content-Type: application/json&quot;</span> <span className="text-slate-400 font-bold">\</span></div>
+                            <div>{"  "}<span className="text-amber-300 font-bold">-d</span> <span className="text-purple-300 font-semibold">&apos;&#123;</span></div>
+                            <div>{"    "}<span className="text-sky-300">&quot;url&quot;</span>: <span className="text-emerald-300">&quot;https://example.com/very-long-marketing-url&quot;</span>,</div>
+                            <div>{"    "}<span className="text-sky-300">&quot;alias&quot;</span>: <span className="text-emerald-300">&quot;summer-promo&quot;</span></div>
+                            <div>{"  "}<span className="text-purple-300 font-semibold">&#125;&apos;</span></div>
+                          </div>
+                        )}
+                        {activeCodeTab === "javascript" && (
+                          <div>
+                            <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100 font-semibold">res</span> = <span className="text-purple-400 font-bold">await</span> <span className="text-blue-300 font-semibold">fetch</span>(<span className="text-emerald-300 font-medium">&apos;https://masdika.id/api/v1/shorten&apos;</span>, &#123;</div>
+                            <div>{"  "}method: <span className="text-emerald-400 font-bold">&apos;POST&apos;</span>,</div>
+                            <div>{"  "}headers: &#123;</div>
+                            <div>{"    "}<span className="text-emerald-300 font-medium">&apos;Authorization&apos;</span>: <span className="text-emerald-300 font-medium">&apos;Bearer YOUR_API_KEY&apos;</span>,</div>
+                            <div>{"    "}<span className="text-emerald-300 font-medium">&apos;Content-Type&apos;</span>: <span className="text-emerald-300 font-medium">&apos;application/json&apos;</span></div>
+                            <div>{"  "}&#125;,</div>
+                            <div>{"  "}body: JSON.<span className="text-blue-300 font-semibold">stringify</span>(&#123;</div>
+                            <div>{"    "}url: <span className="text-emerald-300 font-medium">&apos;https://example.com/very-long-marketing-url&apos;</span>,</div>
+                            <div>{"    "}alias: <span className="text-emerald-300 font-medium">&apos;summer-promo&apos;</span></div>
+                            <div>{"  "}&#125;)</div>
+                            <div>&#125;);</div>
+                            <div>&nbsp;</div>
+                            <div><span className="text-purple-400 font-bold">const</span> &#123; <span className="text-cyan-300 font-semibold">shortUrl</span>, <span className="text-cyan-300 font-semibold">qrCode</span> &#125; = <span className="text-purple-400 font-bold">await</span> <span className="text-slate-100">res</span>.<span className="text-blue-300 font-semibold">json</span>();</div>
+                            <div>console.<span className="text-blue-300 font-semibold">log</span>(<span className="text-emerald-300 font-medium">&apos;Short Link:&apos;</span>, <span className="text-cyan-300 font-semibold">shortUrl</span>);</div>
+                          </div>
+                        )}
+                        {activeCodeTab === "python" && (
+                          <div>
+                            <div><span className="text-purple-400 font-bold">import</span> <span className="text-sky-300 font-bold">requests</span></div>
+                            <div>&nbsp;</div>
+                            <div><span className="text-slate-100 font-semibold">url</span> = <span className="text-emerald-300 font-medium">&quot;https://masdika.id/api/v1/shorten&quot;</span></div>
+                            <div><span className="text-slate-100 font-semibold">headers</span> = &#123;</div>
+                            <div>{"    "}<span className="text-emerald-300 font-medium">&quot;Authorization&quot;</span>: <span className="text-emerald-300 font-medium">&quot;Bearer YOUR_API_KEY&quot;</span>,</div>
+                            <div>{"    "}<span className="text-emerald-300 font-medium">&quot;Content-Type&quot;</span>: <span className="text-emerald-300 font-medium">&quot;application/json&quot;</span></div>
+                            <div>&#125;</div>
+                            <div><span className="text-slate-100 font-semibold">payload</span> = &#123;<span className="text-emerald-300 font-medium">&quot;url&quot;</span>: <span className="text-emerald-300 font-medium">&quot;https://example.com/long-url&quot;</span>, <span className="text-emerald-300 font-medium">&quot;alias&quot;</span>: <span className="text-emerald-300 font-medium">&quot;summer-promo&quot;</span>&#125;</div>
+                            <div>&nbsp;</div>
+                            <div><span className="text-slate-100 font-semibold">res</span> = requests.<span className="text-blue-300 font-semibold">post</span>(url, headers=headers, json=payload)</div>
+                            <div><span className="text-blue-300 font-semibold">print</span>(<span className="text-emerald-300 font-medium">&quot;Short Link:&quot;</span>, res.<span className="text-blue-300 font-semibold">json</span>()[<span className="text-emerald-300 font-medium">&quot;shortUrl&quot;</span>])</div>
+                          </div>
+                        )}
+                        {activeCodeTab === "go" && (
+                          <div>
+                            <div><span className="text-purple-400 font-bold">package</span> <span className="text-sky-300 font-bold">main</span></div>
+                            <div>&nbsp;</div>
+                            <div><span className="text-purple-400 font-bold">import</span> (</div>
+                            <div>{"  "}<span className="text-emerald-300 font-medium">&quot;fmt&quot;</span></div>
+                            <div>{"  "}<span className="text-emerald-300 font-medium">&quot;net/http&quot;</span></div>
+                            <div>)</div>
+                            <div>&nbsp;</div>
+                            <div><span className="text-purple-400 font-bold">func</span> <span className="text-blue-300 font-semibold">main</span>() &#123;</div>
+                            <div>{"  "}<span className="text-slate-400 italic">// Shorten URL with sub-5ms Anycast routing</span></div>
+                            <div>{"  "}fmt.<span className="text-blue-300 font-semibold">Println</span>(<span className="text-emerald-300 font-medium">&quot;Created -&gt; https://masdika.id/summer-promo&quot;</span>)</div>
+                            <div>&#125;</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Code Box Footer: Response Preview */}
+                  <div 
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono"
+                    style={{ backgroundColor: "#0c1425" }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                      </span>
+                      <span className="font-bold text-emerald-400">HTTP 201 Created</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-slate-300">&lt;5ms Edge Routing</span>
+                    </div>
+
+                    <div className="text-slate-200 font-medium flex items-center gap-1.5 overflow-x-auto text-[11px] sm:text-xs">
+                      <span className="text-slate-400 shrink-0">Payload:</span>
+                      <span className="text-cyan-300 font-bold bg-[#060d19] px-2 py-0.5 rounded border border-cyan-800/60 truncate max-w-[260px] sm:max-w-none">
+                        &#123;&quot;status&quot;: 200, &quot;shortUrl&quot;: &quot;https://masdika.id/summer-promo&quot;&#125;
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+            </div>
+
+            {/* Right: Architectural Highlights */}
+            <div className="lg:col-span-5 space-y-6">
+              <FadeIn direction="up" delay={0.2}>
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                    DEVELOPER ARCHITECTURE
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                    Instant Link Routing, Zero Friction
+                  </h2>
+                  <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 font-normal">
+                    Designed for marketers and engineers who require high-concurrency redirect pipelines, automated custom domain provisioning, and detailed click telemetry without maintenance overhead.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: "Median Ping", value: "<5ms", sub: "Global Anycast Edge" },
+                    { label: "Custom Domains", value: "Unlimited", sub: "Auto Free TLS Certs" },
+                    { label: "Click Telemetry", value: "Real-time", sub: "Geo & UTM Tracking" },
+                    { label: "Link Durability", value: "100%", sub: "Zero Unplanned Expiry" },
+                  ].map((stat, i) => (
+                    <div 
+                      key={i} 
+                      className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm"
+                    >
+                      <div className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
+                        {stat.value}
+                      </div>
+                      <div className="text-xs font-bold text-[var(--text-primary)] leading-tight">
+                        {stat.label}
+                      </div>
+                      <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                        {stat.sub}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </FadeIn>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ── 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) ────────── */}
+        <section className="mb-20 lg:mb-28">
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              ENTERPRISE CAPABILITIES
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Engineered for Speed, Scale &amp; Trust
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl mx-auto">
+              Everything required to scale marketing campaigns, protect customer links, and integrate URL generation into production pipelines.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
+            {[
+              {
+                icon: Zap,
+                title: "Ultra-Fast Edge Redirects",
+                desc: "Distributed routing nodes return instantaneous 301/302 headers to visitors, preserving SEO equity and ensuring zero load delay."
+              },
+              {
+                icon: ShieldCheck,
+                title: "Phishing & Bot Shielding",
+                desc: "Real-time destination malware scanning, intelligent rate limiters, and TLS encryption protect visitors and preserve domain reputation."
+              },
+              {
+                icon: BarChart2,
+                title: "Deep Audience Analytics",
+                desc: "Inspect visitor countries, device types, operating systems, and campaign UTM performance in real-time with zero sampling lag."
+              }
+            ].map((cap, i) => (
+              <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
+                <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-8 h-full flex flex-col justify-between shadow-sm group">
+                  <div>
+                    <div className="w-14 h-14 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6 group-hover:scale-110 transition-transform">
+                      <cap.icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors">
+                      {cap.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {cap.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 4. PRICING PLANS SECTION (Consistent Native Theme Cards) ────────── */}
+        {plans && plans.length > 0 && (
+          <section id="pricing" className="mb-20 lg:mb-28 pt-10">
+            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                TRANSPARENT PRICING
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                Simple, Predictable Link Tiers
+              </h2>
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl mx-auto">
+                Start with free link management, or unlock custom domains, unmetered redirects, and dedicated API keys.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+              {plans.map((plan, index) => {
+                const isPopular = plan.isPopular;
+                const specs = getPlanSpecs(plan);
+
+                return (
+                  <FadeIn key={plan.id} delay={index * 0.1} direction="up" className="h-full">
+                    <div
+                      className={cn(
+                        "relative rounded-2xl p-8 h-full flex flex-col justify-between transition-all duration-300",
+                        isPopular
+                          ? "border-2 border-cyan-500 dark:border-cyan-400 bg-[var(--surface)] shadow-xl shadow-cyan-500/10 md:-translate-y-2"
+                          : "border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 shadow-sm"
+                      )}
+                    >
+                      {isPopular && (
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-cyan-500 text-white text-[11px] font-bold uppercase tracking-wider py-1 px-4 rounded-full shadow-md select-none">
+                          Most Popular
+                        </div>
+                      )}
+
+                      <div>
+                        <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+                          {plan.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-6 min-h-[36px]">
+                          {plan.description || "High-speed edge URL shortening & link routing."}
+                        </p>
+
+                        <div className="mb-6 pb-6 border-b border-[var(--border-primary)]">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl lg:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+                              {formatRupiah(plan.price)}
+                            </span>
+                            <span className="text-sm font-medium text-[var(--text-secondary)]">
+                              /month
+                            </span>
+                          </div>
+                        </div>
+
+                        <ul className="space-y-3.5 mb-8">
+                          {specs.map((spec, i) => (
+                            <li key={i} className="flex items-start gap-3">
+                              <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
+                              <span className="text-sm text-[var(--text-primary)] font-medium">
+                                {spec}
+                              </span>
+                            </li>
+                          ))}
+                          <li className="flex items-start gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
+                            <span className="text-sm text-[var(--text-primary)] font-medium">
+                              Sub-5ms Edge Redirects
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
+                            <span className="text-sm text-[var(--text-primary)] font-medium">
+                              Real-Time Click Telemetry
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
+                            <span className="text-sm text-[var(--text-primary)] font-medium">
+                              24/7 Monitoring &amp; Anti-DDoS
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <Button
+                        variant={isPopular ? "primary" : "secondary"}
+                        href={`/dashboard/checkout?service=SHORTENER&plan=${plan.id}`}
+                        className="w-full justify-center"
+                        leftIcon={<Rocket className="w-4 h-4" />}
+                      >
+                        Deploy Shortener
+                      </Button>
+                    </div>
+                  </FadeIn>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ── 5. THREE-STEP WORKFLOW ────────── */}
+        <section className="mb-20 lg:mb-28">
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              DEPLOYMENT PROCESS
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Go Live in 3 Simple Steps
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl mx-auto">
+              Create branded links or integrate API endpoints seamlessly with zero complex setup.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
+            {/* Connecting Line Container */}
+            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-slate-200 dark:bg-white/10 overflow-hidden rounded-full">
+              <AnimatedBeam />
+            </div>
+
+            {[
+              {
+                step: "01",
+                title: "Input Destination URL",
+                desc: "Paste your destination URL or API payload and specify a custom brand alias."
+              },
+              {
+                step: "02",
+                title: "Edge DNS Routing",
+                desc: "Our Anycast edge network provisions automated routing records and fast SSL handshakes."
+              },
+              {
+                step: "03",
+                title: "Share & Track Live",
+                desc: "Deploy your branded short link and observe real-time click telemetry in your dashboard."
+              }
+            ].map((st, i) => (
+              <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
+                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 text-center shadow-sm hover:border-cyan-500/40 transition-all duration-300 h-full flex flex-col justify-between relative z-10 group">
+                  <div>
+                    <div className="w-20 h-20 mx-auto rounded-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform duration-300">
+                      <OrbitalRings />
+                      <span className="relative z-10 text-3xl font-black bg-gradient-to-br from-cyan-600 to-cyan-400 bg-clip-text text-transparent">
+                        {st.step}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
+                      {st.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {st.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 6. PROVISIONING TERMINAL & FAQ ────────── */}
         <ProvisioningSection 
           title="Instant Link Generation"
           description="Create branded short links in seconds. We automatically configure fast edge redirects and real-time analytics tracking."
@@ -305,9 +875,7 @@ export default function ShortenerPage() {
         />
 
         <FaqSection faqs={SHORTENER_FAQS} />
-      </main>
+      </div>
     </div>
   );
 }
-
-

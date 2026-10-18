@@ -153,7 +153,7 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
               href={src}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(6,182,212,0.35)]"
+              className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-sm"
             >
               <ExternalLink className="w-4 h-4" />
               Buka di Pemutar Bawaan
@@ -162,7 +162,7 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
               <a
                 href={downloadUrl}
                 download
-                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs sm:text-sm border border-white/15 flex items-center gap-2 transition-all"
+                className="px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium text-xs sm:text-sm border border-white/15 flex items-center gap-2 transition-all"
               >
                 <Download className="w-4 h-4" />
                 Unduh Video Asli

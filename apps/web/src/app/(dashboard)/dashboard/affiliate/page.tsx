@@ -153,9 +153,9 @@ export default function AffiliatePage() {
             />
             <button
               onClick={copyToClipboard}
-              className={cn("px-6 py-3 w-full sm:w-auto border rounded-xl font-bold transition-all flex items-center justify-center gap-2", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-600 hover:bg-cyan-700 text-white border-transparent shadow-sm")}
+              className="px-5 py-2.5 w-full sm:w-auto rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm text-sm"
             >
-              {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
@@ -185,14 +185,10 @@ export default function AffiliatePage() {
             <button
               onClick={() => setShowWithdraw(true)}
               disabled={data?.affiliateBalance < 50000}
-              className={cn("w-full py-3 font-semibold rounded-xl transition-all flex items-center justify-center gap-2", 
-                isDark 
-                  ? "bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-800 disabled:text-zinc-500 text-slate-950 shadow-sm hover:shadow disabled:shadow-none" 
-                  : "bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-200 disabled:text-slate-400 text-white shadow-sm hover:shadow-md disabled:shadow-none"
-              )}
+              className="w-full py-2.5 px-5 font-semibold text-sm rounded-lg transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 disabled:pointer-events-none text-slate-950 shadow-sm"
             >
-            Withdraw Funds <ArrowUpRight className="w-4 h-4" />
-          </button>
+              Withdraw Funds <ArrowUpRight className="w-4 h-4" />
+            </button>
             {data?.affiliateBalance < 50000 && (
               <p className={cn("text-xs mt-2 text-center", isDark ? "text-zinc-500" : "text-slate-400")}>Min. Rp 50.000</p>
             )}
@@ -418,14 +414,14 @@ export default function AffiliatePage() {
                   <button
                     type="button"
                     onClick={() => setShowWithdraw(false)}
-                    className={cn("flex-1 py-3 border rounded-xl font-medium transition-colors", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900")}
+                    className={cn("flex-1 py-2.5 px-5 border rounded-lg font-medium text-sm transition-colors", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={withdrawing}
-                    className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-sm hover:shadow disabled:shadow-none"
+                    className="flex-1 py-2.5 px-5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 rounded-lg font-semibold text-sm transition-all shadow-sm disabled:shadow-none"
                   >
                     {withdrawing ? "Processing..." : "Withdraw Now"}
                   </button>

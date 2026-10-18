@@ -68,11 +68,11 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
                         validUntil={promo.validUntil}
                       />
                     ) : promo.link ? (
-                      <a href={promo.link} target="_blank" rel="noopener noreferrer" className={cn("w-full font-bold py-3 rounded-xl transition-all text-center block text-white shadow-sm", isDark ? "bg-cyan-600 hover:bg-cyan-500" : "bg-cyan-600 hover:bg-cyan-700")}>
+                      <a href={promo.link} target="_blank" rel="noopener noreferrer" className="w-full font-semibold py-2.5 px-4 rounded-lg transition-all text-center block text-slate-950 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm text-sm">
                         Learn More
                       </a>
                     ) : (
-                      <div className={cn("w-full font-bold py-3 rounded-xl text-center border cursor-not-allowed", isDark ? "bg-[#060b14] text-zinc-500 border-slate-800" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                      <div className={cn("w-full font-semibold py-2.5 px-4 rounded-lg text-center border cursor-not-allowed text-sm", isDark ? "bg-[#060b14] text-zinc-500 border-slate-800" : "bg-slate-100 text-slate-500 border-slate-200")}>
                         Information Only
                       </div>
                     )}

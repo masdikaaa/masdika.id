@@ -5,11 +5,9 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { Tracker } from "@/components/Tracker";
 import { prisma } from "@/lib/prisma";
-import { AIChat } from "@/components/AIChat";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
-
-export const dynamic = 'force-dynamic';
+import { AIChatWrapper } from "@/components/AIChatWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -99,10 +97,15 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${initialTheme} overflow-x-hidden`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${initialTheme} overflow-x-clip`}
       suppressHydrationWarning
     >
       <head>
+        {/* Preconnect to external CDNs for faster tech-stack icon loading */}
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.simpleicons.org" />
+        <link rel="preconnect" href="https://cdn.simpleicons.org" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.transparenttextures.com" />
         {/* Prevent flash of wrong theme */}
         <script
@@ -124,13 +127,13 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground overflow-x-hidden">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground overflow-x-clip">
         <ThemeProvider initialTheme={initialTheme}>
           <Tracker />
           <main className="flex-1 flex flex-col">
             {children}
           </main>
-          <AIChat />
+          <AIChatWrapper />
           <Toaster 
             theme="dark" 
             position="top-right" 

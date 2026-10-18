@@ -122,17 +122,17 @@ export default function NotificationsPage() {
         <div className="relative z-10 shrink-0 flex flex-col sm:flex-row gap-3">
           <Link 
             href="/dashboard"
-            className={cn("w-full sm:w-auto px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border transition-all", isDark ? "bg-slate-800/60 hover:bg-slate-800 text-white border-slate-700/80" : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200 shadow-sm")}
+            className={cn("w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 border transition-all", isDark ? "bg-slate-800/60 hover:bg-slate-800 text-white border-slate-700/80" : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200 shadow-sm")}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
             Back to Dashboard
           </Link>
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className={cn("px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm hover:shadow" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-4 h-4" />
               Mark all as read
             </button>
           )}

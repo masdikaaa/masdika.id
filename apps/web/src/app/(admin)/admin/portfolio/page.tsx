@@ -127,7 +127,7 @@ export default function AdminPortfolioPage() {
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your projects, categories, and case studies.</p>
         </div>
       </div>
-        <Link href="/admin/portfolio/edit/new" className={cn("inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+        <Link href="/admin/portfolio/edit/new" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
           <Plus className="w-4 h-4" /> Add Project
         </Link>
       </motion.div>

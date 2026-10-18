@@ -63,7 +63,7 @@ export default function K3sListPage() {
           </div>
           
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <Link href="/dashboard/checkout?service=kubernetes" className="font-bold text-white px-5 py-3 bg-cyan-600 hover:bg-cyan-700 rounded-2xl text-sm transition-all flex items-center gap-2 w-full md:w-auto justify-center shadow-sm">
+            <Link href="/dashboard/checkout?service=kubernetes" className="font-semibold text-slate-950 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg text-sm transition-all flex items-center gap-2 w-full md:w-auto justify-center shadow-sm">
               <Server className="w-4 h-4" /> Deploy Cluster
             </Link>
           </div>
@@ -77,7 +77,7 @@ export default function K3sListPage() {
           </div>
           <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Clusters Found</h3>
           <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any Kubernetes clusters deployed yet. Deploy your first cluster to get started with container orchestration.</p>
-          <Link href="/dashboard/checkout?service=kubernetes" className="font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-sm hover:-translate-y-0.5 inline-flex items-center justify-center gap-2">
+          <Link href="/dashboard/checkout?service=kubernetes" className="font-semibold text-slate-950 px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-sm inline-flex items-center justify-center gap-2 text-sm">
             Deploy Now
           </Link>
         </div>

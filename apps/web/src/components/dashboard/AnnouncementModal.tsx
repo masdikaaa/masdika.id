@@ -62,7 +62,7 @@ export function AnnouncementModal() {
           border: "border-cyan-500/30",
           icon: <Hammer className="w-6 h-6 md:w-8 md:h-8 text-cyan-400" />,
           iconBg: "bg-cyan-500/10 border-cyan-500/20",
-          button: "bg-cyan-600 hover:bg-cyan-700 shadow-sm",
+          button: "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm",
           checkbox: "bg-cyan-600 border-cyan-600",
           link: "text-cyan-400 hover:text-cyan-300"
         };
@@ -71,18 +71,18 @@ export function AnnouncementModal() {
           border: "border-amber-500/30",
           icon: <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-amber-400" />,
           iconBg: "bg-amber-500/10 border-amber-500/20",
-          button: "bg-amber-600 hover:bg-amber-700 shadow-sm",
+          button: "bg-amber-600 hover:bg-amber-700 text-white shadow-sm",
           checkbox: "bg-amber-600 border-amber-600",
           link: "text-amber-400 hover:text-amber-300"
         };
       default: 
         return {
-          border: "border-blue-500/30",
-          icon: <Info className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />,
-          iconBg: "bg-blue-500/10 border-blue-500/20",
-          button: "bg-blue-600 hover:bg-blue-700 shadow-sm",
-          checkbox: "bg-blue-600 border-blue-600",
-          link: "text-blue-400 hover:text-blue-300"
+          border: "border-cyan-500/30",
+          icon: <Info className="w-6 h-6 md:w-8 md:h-8 text-cyan-400" />,
+          iconBg: "bg-cyan-500/10 border-cyan-500/20",
+          button: "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm",
+          checkbox: "bg-cyan-600 border-cyan-600",
+          link: "text-cyan-400 hover:text-cyan-300"
         };
     }
   };
@@ -160,7 +160,7 @@ export function AnnouncementModal() {
                 
                 <button 
                   onClick={handleClose}
-                  className={`w-full sm:w-auto px-6 py-2.5 ${styles.button} text-white font-semibold rounded-xl transition-all`}
+                  className={`w-full sm:w-auto px-6 py-2.5 ${styles.button} font-semibold rounded-lg transition-all`}
                 >
                   Got it
                 </button>

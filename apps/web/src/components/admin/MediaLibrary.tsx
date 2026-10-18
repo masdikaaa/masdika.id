@@ -254,7 +254,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
                       onSelect(selectedFile.url, selectedFile.name);
                       onClose();
                     }}
-                    className={cn("w-full py-3 font-bold rounded-xl transition-colors", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                    className="w-full py-2.5 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm shadow-sm"
                   >
                     Select Image
                   </button>

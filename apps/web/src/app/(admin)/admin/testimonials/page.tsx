@@ -223,7 +223,7 @@ export default function AdminTestimonialsPage() {
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage client reviews and feedback.</p>
         </div>
       </div>
-        <button onClick={openAddModal} className={cn("inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+        <button onClick={openAddModal} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
           <Plus className="w-4 h-4" /> Add Testimonial
         </button>
       </motion.div>
@@ -500,14 +500,14 @@ export default function AdminTestimonialsPage() {
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className={cn("px-5 py-3 rounded-xl font-bold hover:text-white hover:bg-white/5 transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}
+                    className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={cn("flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50"
                   >
                     <CheckCircle className="w-4 h-4" />
                     {isSubmitting ? (editId ? "Updating..." : "Adding...") : (editId ? "Update Testimonial" : "Add Testimonial")}

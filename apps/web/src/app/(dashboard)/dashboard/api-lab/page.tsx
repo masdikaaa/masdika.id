@@ -400,7 +400,7 @@ export default function ApiLabPage() {
                     <button
                       onClick={handleSend}
                       disabled={loading || !apiKey}
-                      className={cn("shrink-0 px-8 py-3 lg:py-0 h-full min-h-[52px] rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+                      className="shrink-0 px-6 py-2.5 lg:py-0 h-full min-h-[48px] rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                     >
                       {loading ? (
                         <>

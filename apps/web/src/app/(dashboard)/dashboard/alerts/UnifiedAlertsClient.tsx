@@ -135,11 +135,11 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
           <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
             You don't have any active Cloud VPS or K3s clusters running. Deploy a service to start monitoring and configuring alerts.
           </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/dashboard/checkout?service=vps" className="px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-sm hover:shadow inline-flex items-center gap-2">
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard/checkout?service=vps" className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center gap-2">
               Deploy VPS
             </Link>
-            <Link href="/dashboard/k3s" className={cn("px-6 py-3.5 rounded-xl border font-bold transition-all inline-flex items-center gap-2", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
+            <Link href="/dashboard/k3s" className={cn("px-5 py-2.5 rounded-lg border font-medium text-sm transition-all inline-flex items-center gap-2", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
               Deploy K3s
             </Link>
           </div>

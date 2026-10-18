@@ -264,7 +264,7 @@ export default function AdminPlansPage() {
           )}
           <button
             onClick={openAddModal}
-            className={cn("flex items-center gap-2 font-semibold py-2 px-6 rounded-xl transition-all shrink-0", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+            className="flex items-center gap-2 font-semibold py-2.5 px-5 rounded-lg text-sm transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Add New Plan
@@ -548,14 +548,14 @@ export default function AdminPlansPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className={cn("px-6 py-2.5 rounded-xl font-medium hover:text-white hover:bg-white/10 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                  className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={cn("px-6 py-2.5 rounded-xl font-semibold disabled:opacity-50 transition-all flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                  className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {isSubmitting ? (
                     <>

@@ -218,17 +218,17 @@ export default function AdminResumePage() {
         </div>
         <div className="shrink-0 w-full sm:w-auto flex justify-end">
           {activeTab === 'experience' && (
-            <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className={cn("font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+            <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className="font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
               <Plus className="w-4 h-4" /> Add Experience
             </button>
           )}
           {activeTab === 'education' && (
-            <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className={cn("font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+            <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className="font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
               <Plus className="w-4 h-4" /> Add Education
             </button>
           )}
           {activeTab === 'certification' && (
-            <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className={cn("font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+            <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className="font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
               <Plus className="w-4 h-4" /> Add Certification
             </button>
           )}
@@ -263,8 +263,8 @@ export default function AdminResumePage() {
                     </div>
                   </div>
                   <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/10" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowExpForm(false)} className={cn("px-5 py-2.5 rounded-xl font-bold hover:text-white hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className={cn("px-6 py-2.5 rounded-xl font-bold disabled:opacity-50 transition-all flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" onClick={() => setShowExpForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
@@ -316,8 +316,8 @@ export default function AdminResumePage() {
                     </div>
                   </div>
                   <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/10" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowEduForm(false)} className={cn("px-5 py-2.5 rounded-xl font-bold hover:text-white hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className={cn("px-6 py-2.5 rounded-xl font-bold disabled:opacity-50 transition-all flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" onClick={() => setShowEduForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
@@ -373,8 +373,8 @@ export default function AdminResumePage() {
                     </div>
                   </div>
                   <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/10" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowCertForm(false)} className={cn("px-5 py-2.5 rounded-xl font-bold hover:text-white hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className={cn("px-6 py-2.5 rounded-xl font-bold disabled:opacity-50 transition-all flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" onClick={() => setShowCertForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}

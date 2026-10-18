@@ -119,7 +119,7 @@ export default function AdminOpportunitiesPage() {
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage events, webinars, and job vacancies.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/admin/opportunities/edit/new" className={cn("inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <Link href="/admin/opportunities/edit/new" className="inline-flex items-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
             <Plus className="w-5 h-5" /> New Item
           </Link>
       </div>

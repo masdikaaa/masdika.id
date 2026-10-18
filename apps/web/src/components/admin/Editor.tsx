@@ -209,13 +209,13 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                 <div className="flex gap-3 justify-end pt-2 border-t border-white/5">
                   <button
                     onClick={() => setIsYoutubeModalOpen(false)}
-                    className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors border border-white/10"
+                    className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg transition-colors border border-white/10 text-sm"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleYoutubeSubmit}
-                    className="px-6 py-3 font-bold rounded-xl transition-colors bg-cyan-500 hover:bg-cyan-600 text-[#011627]"
+                    className="px-5 py-2.5 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm"
                   >
                     Insert Video
                   </button>

@@ -107,7 +107,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
     isDark ? "bg-cyan-950/40 border-cyan-500/20" : "bg-slate-100 border-slate-200"
   );
   const toggleActiveClass = isDark
-    ? "bg-cyan-600 text-white shadow-sm"
+    ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm"
     : "bg-white text-slate-900 shadow-sm border border-slate-200";
   const toggleInactiveClass = isDark
     ? "text-zinc-400 hover:text-white"
@@ -368,14 +368,14 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
             onClick={handleDeploy}
             disabled={loading || isDisabled}
             className={cn(
-              "w-full px-8 py-4 mt-8 rounded-xl font-bold flex items-center justify-center gap-2 transition-all group",
+              "w-full px-7 py-3.5 mt-8 rounded-lg font-semibold flex items-center justify-center gap-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500",
               isDisabled
                 ? (isDark ? "bg-white/5 text-zinc-500 border border-white/10 cursor-not-allowed" : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed")
-                : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]",
+                : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm",
               loading && !isDisabled && "opacity-70 cursor-not-allowed"
             )}
           >
-            <span className="relative z-10 flex items-center gap-2 drop-shadow-sm tracking-wide">
+            <span className="relative z-10 flex items-center gap-2 tracking-wide font-semibold">
               {!isDisabled && <Rocket className="w-5 h-5 group-hover:-translate-y-1.5 group-hover:translate-x-1.5 transition-transform duration-300" />}
               {isDisabled ? "Coming Soon" : loading ? "Loading..." : "Deploy Now"}
             </span>

@@ -237,10 +237,10 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
             type="submit"
             form="edit-service-form"
             disabled={loading}
-            className="px-5 py-2.5 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-5 py-2.5 text-sm font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {loading ? (
-              <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
+              <><div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" /> Saving...</>
             ) : (
               <><Save className="w-4 h-4" /> Save Changes</>
             )}

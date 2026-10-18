@@ -157,8 +157,8 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                     <button
                       onClick={() => setConfirmModal({ vpsId: vps.id, enable: !sched.enabled })}
                       className={cn(
-                        "shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2",
-                        sched.enabled ? (isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm") : (isDark ? "bg-[#060b14] border border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-700")
+                        "shrink-0 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2",
+                        sched.enabled ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm" : (isDark ? "bg-[#060b14] border border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-700")
                       )}
                     >
                       <Power className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -225,7 +225,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                       <button
                         onClick={() => handleSave(vps.id)}
                         disabled={loading[vps.id]}
-                        className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-sm hover:shadow disabled:opacity-50 flex items-center gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                        className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                       >
                         {loading[vps.id] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Save Schedule
@@ -263,7 +263,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
             </p>
             <div className="flex items-center justify-end gap-2.5 sm:gap-3">
               <button onClick={() => setConfirmModal(null)}
-                className={cn("px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white/5 hover:bg-white/10 transition-colors", isDark ? "text-zinc-300" : "text-slate-500")}>
+                className={cn("px-4 py-2 rounded-lg text-xs sm:text-sm font-medium border transition-colors", isDark ? "text-zinc-300 border-slate-700 hover:bg-white/5" : "text-slate-600 border-slate-200 hover:bg-slate-50")}>
                 Cancel
               </button>
               <button onClick={() => {
@@ -272,8 +272,8 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                   handleSave(confirmModal.vpsId, newSchedule);
                   setConfirmModal(null);
                 }}
-                className={cn("px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-colors shadow-sm hover:shadow",
-                  confirmModal.enable ? (isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950" : "bg-cyan-600 hover:bg-cyan-700 text-white") : "bg-red-500 hover:bg-red-600 text-white"
+                className={cn("px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm",
+                  confirmModal.enable ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950" : "bg-red-500 hover:bg-red-600 text-white"
                 )}>
                 Yes, {confirmModal.enable ? "Enable" : "Disable"}
               </button>

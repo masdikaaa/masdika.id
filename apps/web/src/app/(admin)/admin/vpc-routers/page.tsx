@@ -167,7 +167,7 @@ export default function VpcRoutersPage() {
         
         <button
           onClick={openAddModal}
-          className={cn("bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shrink-0", isDark ? "text-white" : "text-slate-900")}
+          className="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Add Router
@@ -390,7 +390,7 @@ export default function VpcRoutersPage() {
                   setShowAddModal(false);
                   setShowEditModal(null);
                 }}
-                className={cn("px-4 py-2 hover:bg-white/10 rounded-xl text-sm font-medium transition-colors", isDark ? "text-white" : "text-slate-900")}
+                className={cn("px-4 py-2 rounded-lg text-sm font-medium border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 disabled={saving}
               >
                 Cancel
@@ -399,7 +399,7 @@ export default function VpcRoutersPage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className={cn("px-4 py-2 bg-cyan-500 hover:bg-cyan-600 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 {showEditModal ? "Update" : "Add Router"}

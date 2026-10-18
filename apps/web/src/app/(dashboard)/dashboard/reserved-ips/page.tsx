@@ -214,7 +214,7 @@ export default function ReservedIpsPage() {
             )}
             <Link
               href="/dashboard/reserved-ips/new"
-              className={cn("px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", "")}
+              className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Reserve New IP
@@ -234,7 +234,7 @@ export default function ReservedIpsPage() {
           </p>
           <Link
             href="/dashboard/reserved-ips/new"
-            className={cn("px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all shadow-md hover:-translate-y-0.5 inline-flex items-center justify-center gap-2", "")}
+            className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center justify-center gap-2"
           >
             Reserve Your First IP
           </Link>
@@ -416,7 +416,7 @@ export default function ReservedIpsPage() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowAttachModal(false)}
-                className={cn("px-4 py-2 text-sm font-medium hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 disabled={isAttaching}
               >
                 Cancel
@@ -424,7 +424,7 @@ export default function ReservedIpsPage() {
               <button
                 onClick={handleAttach}
                 disabled={!selectedVpsId || isAttaching}
-                className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-[#0f172a] font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isAttaching ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />}
                 Attach IP

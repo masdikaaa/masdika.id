@@ -41,7 +41,11 @@ export async function GET(req: Request) {
 
     const projects = await getCachedProjects(category);
 
-    return NextResponse.json(projects);
+    return NextResponse.json(projects, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    });
   } catch (error) {
     console.error('Error fetching public projects:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

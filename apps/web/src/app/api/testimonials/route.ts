@@ -21,7 +21,11 @@ const getCachedTestimonials = unstable_cache(
 export async function GET() {
   try {
     const testimonials = await getCachedTestimonials();
-    return NextResponse.json(testimonials);
+    return NextResponse.json(testimonials, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    });
   } catch (error) {
     console.error("Error fetching testimonials:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

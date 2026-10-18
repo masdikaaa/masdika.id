@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ProvisioningVisualizer } from "@/components/animations/ProvisioningVisualizer";
+import { Button } from "@/components/ui/Button";
+import { ProvisioningLiveVisualizer } from "@/components/animations/ProvisioningLiveVisualizer";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ interface ProvisioningSectionProps {
   stats: any[];
   terminalTitle?: string;
   iconType?: "vps" | "k3s" | "api-hub" | "file-cdn" | "shortener";
+  targetServer?: string;
+  provisionEstimate?: string;
 }
 
 export function ProvisioningSection({
@@ -26,7 +29,9 @@ export function ProvisioningSection({
   logs,
   stats,
   terminalTitle = "DEPLOYMENT",
-  iconType = "vps"
+  iconType = "vps",
+  targetServer = "Dell PowerEdge R630 • Sidoarjo DC",
+  provisionEstimate = "Backend: KVM Hypervisor (Estimasi ~5 Menit)",
 }: ProvisioningSectionProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -82,17 +87,14 @@ export function ProvisioningSection({
                 {description}
               </p>
               
-              <Link
+              <Button
+                variant="primary"
+                size="lg"
                 href={buttonHref}
-                className={cn(
-                  "inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all shadow-lg",
-                  "bg-cyan-600 hover:bg-cyan-500 text-white",
-                  isDark ? "shadow-[0_0_20px_rgba(6,182,212,0.25)] hover:shadow-[0_0_30px_rgba(6,182,212,0.4)]" : "shadow-md hover:shadow-lg"
-                )}
+                rightIcon={<ArrowRight className="w-5 h-5" />}
               >
                 {buttonText}
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              </Button>
             </div>
           </FadeIn>
 
@@ -101,11 +103,13 @@ export function ProvisioningSection({
             {/* Ambient Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
             
-            <ProvisioningVisualizer
+            <ProvisioningLiveVisualizer
               logs={logs}
               stats={stats}
               title={terminalTitle}
               iconType={iconType}
+              targetServer={targetServer}
+              provisionEstimate={provisionEstimate}
             />
           </FadeIn>
           

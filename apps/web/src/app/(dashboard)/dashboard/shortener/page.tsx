@@ -197,7 +197,7 @@ export default function DashboardShortenerPage() {
             <button
               onClick={handleBulkDelete}
               disabled={isBulkDeleting}
-              className="flex-1 md:flex-none bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base"
+              className="flex-1 md:flex-none bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 font-semibold py-2.5 px-4 rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 text-sm"
             >
               {isBulkDeleting ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />}
               <span className="hidden md:inline">Delete Selected ({selectedIds.length})</span>
@@ -206,7 +206,7 @@ export default function DashboardShortenerPage() {
           )}
           <button
             onClick={() => setShowCreateModal(true)}
-            className={cn("px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden md:inline">Create New Link</span>
@@ -225,7 +225,7 @@ export default function DashboardShortenerPage() {
             <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
               You need an active URL Shortener subscription to start creating, managing, and tracking your shortened links.
             </p>
-            <Link href="/dashboard/checkout?service=SHORTENER" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-sm">
+            <Link href="/dashboard/checkout?service=SHORTENER" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-2.5 px-5 rounded-lg text-sm transition-all shadow-sm">
               View Plans
             </Link>
           </div>
@@ -479,19 +479,19 @@ export default function DashboardShortenerPage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className={cn("flex-1 py-3.5 rounded-2xl border font-medium transition-colors", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-50")}
+                    className={cn("flex-1 py-2.5 px-5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-50")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isCreating}
-                    className={cn("flex-1 py-3.5 rounded-2xl text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+                    className="flex-1 py-2.5 px-5 rounded-lg text-slate-950 font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm"
                   >
                     {isCreating ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-4 h-4" />
                     )}
                     Create Link
                   </button>

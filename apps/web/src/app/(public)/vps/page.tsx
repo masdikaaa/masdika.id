@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import VpsClient from "./VpsClient";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Cloud VPS - High Performance Compute",
   description: "Deploy scalable, lightning-fast cloud virtual private servers. Powered by Intel Xeon E5-2673v4, enterprise-grade storage, and KVM virtualization.",

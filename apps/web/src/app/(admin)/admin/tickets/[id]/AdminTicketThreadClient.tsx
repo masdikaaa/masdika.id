@@ -642,7 +642,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   <button
                     type="submit"
                     disabled={isSubmitting || ((!message || message === '<p><br></p>') && attachments.length === 0)}
-                    className={cn("transition-all px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                    className="transition-all px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                   >
                     <span className="hidden sm:inline">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <Send className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'}`} />

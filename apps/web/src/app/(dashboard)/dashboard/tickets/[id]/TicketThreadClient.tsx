@@ -232,11 +232,12 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     console.error(err);
                   }
                 }}
-                className={`w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center justify-center gap-2 whitespace-nowrap ${
+                className={cn(
+                  "w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all shrink-0 flex items-center justify-center gap-2 whitespace-nowrap",
                   isClosed 
-                    ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm' 
-                    : isDark ? 'bg-slate-800 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/30 text-zinc-300 hover:text-red-400 shadow-sm' : 'bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-700 hover:text-red-600 shadow-sm'
-                }`}
+                    ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm" 
+                    : isDark ? "bg-slate-800 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/30 text-zinc-300 hover:text-red-400 shadow-sm" : "bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-700 hover:text-red-600 shadow-sm"
+                )}
               >
                 {isClosed ? 'Reopen Ticket' : 'Close Ticket'}
               </button>
@@ -566,7 +567,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={cn("hover:text-cyan-400 hover:bg-cyan-500/10 p-2 sm:p-2.5 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 text-xs font-semibold ml-1 sm:ml-2", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("hover:text-cyan-400 hover:bg-cyan-500/10 p-2 sm:p-2.5 rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 text-xs font-semibold ml-1 sm:ml-2", isDark ? "text-zinc-400" : "text-slate-500")}
                   >
                     <Paperclip className="w-4 h-4" />
                     <span className="hidden sm:inline">Attach Files</span>
@@ -575,7 +576,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   <button
                     type="submit"
                     disabled={isSubmitting || ((!message || message === '<p><br></p>') && attachments.length === 0)}
-                    className="bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 disabled:from-zinc-700 disabled:to-zinc-800 text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md hover:shadow-sm disabled:shadow-none flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2"
+                    className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2"
                   >
                     <span className="hidden sm:inline">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <Send className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'}`} />

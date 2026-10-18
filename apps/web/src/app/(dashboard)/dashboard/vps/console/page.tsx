@@ -156,7 +156,7 @@ function ConsoleContent() {
                   <li>Check browser DevTools (F12) Console tab for detailed error.</li>
                 </ul>
               </div>
-              <button onClick={reconnect} className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2 mx-auto">
+              <button onClick={reconnect} className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 px-5 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2 mx-auto text-sm shadow-sm">
                 <RefreshCw className="w-4 h-4" />
                 Reconnect
               </button>

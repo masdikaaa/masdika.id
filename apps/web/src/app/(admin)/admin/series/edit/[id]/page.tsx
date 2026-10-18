@@ -222,7 +222,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
             <span className={cn("text-sm font-bold transition-colors", form.published ? "text-cyan-500" : isDark ? "text-white" : "text-slate-900")}>{form.published ? 'Published' : 'Draft'}</span>
           </label>
           <button onClick={handleSaveSeries} disabled={saving}
-            className={cn("flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto font-bold rounded-xl disabled:opacity-50 transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+            className="flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
             <Save className="w-5 h-5" /> {saving ? 'Saving...' : 'Save Series'}
           </button>
         </div>
@@ -401,11 +401,11 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                   <span className={cn("text-sm font-bold group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{epForm.published ? 'Published' : 'Draft'}</span>
                 </label>
                 <div className="flex gap-3">
-                  <button onClick={() => setEditingEp(null)} className={cn("px-5 py-3 rounded-xl hover:text-white font-bold hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  <button onClick={() => setEditingEp(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
                     Cancel
                   </button>
                   <button onClick={handleSaveEpisode} disabled={epSaving}
-                    className={cn("flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 font-bold rounded-xl disabled:opacity-50 transition-all", isDark ? "text-white" : "text-slate-900")}>
+                    className="flex items-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm disabled:opacity-50 transition-all">
                     <Save className="w-4 h-4" /> {epSaving ? 'Saving...' : 'Save Episode'}
                   </button>
                 </div>

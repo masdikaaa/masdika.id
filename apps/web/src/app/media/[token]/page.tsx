@@ -224,7 +224,7 @@ function DownloadButton({
       onClick={onClick}
       disabled={downloading}
       aria-label={label}
-      className={cn("cursor-pointer relative inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-80 disabled:cursor-not-allowed rounded-xl font-bold text-sm transition-colors overflow-hidden min-w-[160px]", isDark ? "text-[#011627]" : "text-white")}
+      className="cursor-pointer relative inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm disabled:opacity-80 disabled:cursor-not-allowed transition-all overflow-hidden min-w-[160px]"
     >
       {downloading && progress > 0 && (
         <span
@@ -359,13 +359,13 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/login"
-            className="px-6 py-3 rounded-xl text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all shadow-[0_0_20px_rgba(6,182,212,0.35)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] inline-flex items-center justify-center gap-2"
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm inline-flex items-center justify-center gap-2"
           >
             Sign In to Access
           </Link>
           <Link
             href="/"
-            className={cn("px-6 py-3 rounded-xl text-sm font-semibold border transition-all inline-flex items-center justify-center", isDark ? "border-white/10 text-zinc-300 hover:text-white hover:bg-white/5 hover:border-white/20" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+            className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors inline-flex items-center justify-center", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
           >
             Back to Home
           </Link>
@@ -482,10 +482,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
                 ? dlProgress > 0 ? `Downloading ${dlProgress}%` : "Preparing download…"
                 : `Download ${media.originalName}`
             }
-            className={cn(
-              "cursor-pointer relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all overflow-hidden",
-              "bg-cyan-500 hover:bg-cyan-400 active:scale-95 disabled:opacity-80 text-[#011627] shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] border border-cyan-400/50"
-            )}
+            className="cursor-pointer relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center transition-all overflow-hidden bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-80"
           >
             {downloading && dlProgress > 0 && (
               <span

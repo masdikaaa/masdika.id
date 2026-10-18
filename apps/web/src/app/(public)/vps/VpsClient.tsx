@@ -1,17 +1,41 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useTheme } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
-import { Cloud, Zap, ShieldCheck, Shield, Terminal, ArrowRight, Cpu, Box, Globe, CheckCircle2, Database, MapPin, HardDrive, Activity, TrendingUp, Network, Server, ChevronLeft, ChevronRight, Info } from "lucide-react";
-import VpsSpecSlider from "@/components/ui/VpsSpecSlider";
+import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { 
+  Cloud, 
+  Zap, 
+  ShieldCheck, 
+  Shield, 
+  Terminal, 
+  ArrowRight, 
+  Cpu, 
+  Box, 
+  Globe, 
+  CheckCircle2, 
+  Database, 
+  MapPin, 
+  HardDrive, 
+  Activity, 
+  TrendingUp, 
+  Network, 
+  Server, 
+  ChevronLeft, 
+  ChevronRight, 
+  Info,
+  Layers,
+  Lock
+} from "lucide-react";
+import VpsSpecSlider from "@/components/ui/VpsSpecSlider";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { TiltCard } from "@/components/animations/TiltCard";
-import { MagneticButton } from "@/components/animations/MagneticButton";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
+import { cn } from "@/lib/utils";
 
 const VPS_TERMINAL_LOGS = [
   { time: "00:01", module: "CONFIG", message: "Parsing instance specifications..." },
@@ -71,10 +95,7 @@ const VPS_FAQS = [
   }
 ];
 
-export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: any, isVpsEnabled: boolean }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
+export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: any; isVpsEnabled: boolean }) {
   const osScrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
@@ -100,7 +121,6 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
     const setWidth = getItemSetWidth(container);
     if (!setWidth || setWidth <= 10) return;
 
-    // Buffer range keeping viewport centered around Set 2 and Set 3
     const minScroll = setWidth * 1.5;
     const maxScroll = setWidth * 3.5;
 
@@ -136,7 +156,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
 
     let animationId: number;
     let accumulated = 0;
-    const speed = 0.75; // smooth auto-scroll speed
+    const speed = 0.75;
     let isVisible = true;
 
     const observer = new IntersectionObserver((entries) => {
@@ -239,138 +259,272 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
   };
 
   return (
-    <div className={cn("pt-24 md:pt-32 pb-20 px-4 selection:bg-cyan-500/30 font-sans overflow-hidden relative min-h-screen bg-transparent", isDark ? "text-white" : "text-slate-900")}>
-      <main className="relative z-10 max-w-[1400px] mx-auto">
-        {/* Hero Section */}
-        <section className="pt-10 pb-8 px-4 sm:px-6 max-w-5xl mx-auto text-center relative z-30">
-          <FadeIn direction="up">
-            <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-              MASDIKA KVM CLOUD VPS
-            </div>
-          </FadeIn>
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-          <FadeIn direction="up" delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[76px] font-black mb-6 tracking-tight leading-[1.1]">
-              High-Performance KVM <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent drop-shadow-sm">Cloud VPS Indonesia</span>
-            </h1>
-          </FadeIn>
+        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+            
+            {/* Left – Text & Actions */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
+              {/* Status pill using shared Badge */}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  HIGH-PERFORMANCE KVM COMPUTE
+                </Badge>
+              </div>
 
-          <FadeIn direction="up" delay={0.2}>
-            <p className={cn(" text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-medium px-2".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-              Deploy scalable, lightning-fast KVM cloud instances in seconds. Located securely in Sidoarjo, engineered for intensive workloads with dedicated kernel isolation and under 20ms latency across Indonesia.
-            </p>
-          </FadeIn>
+              {/* Headline H1 (Ukuran sama persis Home Page & design.md) */}
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Cloud VPS &amp; Scalable Compute
+              </h1>
 
-          <FadeIn direction="up" delay={0.3}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-[280px] sm:max-w-none mx-auto">
-              <MagneticButton intensity={15} className="w-full sm:w-auto flex">
-                <Link
+              {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Deploy scalable, lightning-fast KVM cloud instances in seconds. Located securely in Sidoarjo Datacenter with under 20ms latency across Indonesia.
+              </p>
+
+              {/* Action Buttons (size="lg" sama persis Home Page) */}
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
                   href="#pricing"
-                  className="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 w-full"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Deploy Now
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </MagneticButton>
-
-              <MagneticButton intensity={15} className="w-full sm:w-auto flex">
-                <Link
+                  Configure &amp; Deploy
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
                   href="#features"
-                  className={cn("px-8 py-4 border font-bold rounded-xl transition-all flex items-center justify-center w-full", isDark ? "bg-cyan-500/5 hover:bg-cyan-500/10 border-cyan-500/30 text-white" : "bg-white hover:bg-slate-50 border-cyan-200 text-slate-900")}
+                  leftIcon={<Server className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
-                  Explore Features
-                </Link>
-              </MagneticButton>
-            </div>
-          </FadeIn>
+                  Explore Hardware
+                </Button>
+              </div>
+            </motion.div>
 
-          <FadeIn direction="up" delay={0.4}>
-            {/* Trust badges */}
-            <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto")}>
-              {[
-                { icon: Cloud, title: "98.99% SLA", sub: "Uptime Guarantee" },
-                { icon: ShieldCheck, title: "Enterprise Security", sub: "Anti-DDoS Protected" },
-                { icon: CheckCircle2, title: "Proven Reliability", sub: "Trusted by Developers" },
-                { icon: Activity, title: "24/7 Support", sub: "Expert Assistance" },
-              ].map((b, i) => (
-                <div key={i} className={cn("flex items-center gap-3 p-4 rounded-xl border", isDark ? "bg-cyan-500/5 border-cyan-500/20" : "bg-white border-cyan-200 shadow-sm")}>
-                  <b.icon className={cn("w-6 h-6 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                  <div className="text-left">
-                    <span className={cn("font-bold text-sm leading-tight block", isDark ? "text-white" : "text-slate-900")}>{b.title}</span>
-                    <span className={cn("text-[10px] uppercase tracking-wider font-bold", isDark ? "text-zinc-500" : "text-slate-500")}>{b.sub}</span>
+            {/* Right – Hero Avatar (vps.webp) with 4 Floating Badges */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[300px] sm:w-[440px] sm:h-[360px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (KVM Virtualization) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Cpu className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      KVM Architecture
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Dedicated vCPU
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </FadeIn>
+
+                {/* Floating Card 2: Top-Right (Storage Tiers) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <HardDrive className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Storage Tiers
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      SSD &amp; SAS Drives
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Local Latency) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Zap className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Local Routing
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      &lt; 20ms Latency ID
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (Availability) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Availability
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      99.99% Uptime SLA
+                    </div>
+                  </div>
+                </div>
+
+                {/* Karakter vps.webp utuh & proporsional sesuai design.md */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/vps.webp"
+                    alt="Masdika – Cloud VPS & Compute"
+                    width={1536}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
         </section>
 
-        {/* Hardware / Specs Section */}
-        <section id="features" className="py-10 lg:py-16 px-4 sm:px-6 max-w-7xl mx-auto relative z-20">
-          <div className={cn("backdrop-blur-md rounded-3xl p-6 md:p-12 border shadow-2xl relative overflow-hidden hover:border-cyan-400/50 transition-colors group", isDark ? "bg-gradient-to-br from-cyan-950/40 to-[#050B14]/40 border-cyan-500/20" : "bg-white border-slate-200 shadow-lg")}>
-            <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-              <Cpu className="w-64 h-64 text-cyan-400" />
-            </div>
+        {/* ── 1. VALUE PILLARS (4 Trust Highlights) ─────────────────────── */}
+        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {[
+              { icon: Cloud, title: "99.99% Uptime SLA", desc: "Automated failover with redundant power and enterprise network backbone." },
+              { icon: ShieldCheck, title: "Enterprise Anti-DDoS", desc: "Always-on multi-layered traffic scrubbing to protect mission-critical apps." },
+              { icon: Terminal, title: "Full Root & VNC", desc: "Unrestricted root SSH access plus browser-based out-of-band VNC console." },
+              { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX routing." },
+            ].map((pillar, i) => (
+              <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm hover:border-cyan-500/40 transition-colors">
+                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <pillar.icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
 
-            <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <span className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-3 py-1.5 rounded-lg", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border border-cyan-200")}>Performance</span>
-                <h2 className={cn("text-4xl md:text-5xl font-black  mb-6 leading-[1.2]".trim(), isDark ? "text-white" : "text-slate-900")}>
-                  Engineered for <br className="hidden md:block" />
-                  <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm">Extreme Power</span>
+        {/* ── 2. HARDWARE & SPECS SHOWCASE ──────────────────────────────── */}
+        <section id="features" className="scroll-mt-24 mb-16 lg:mb-24">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
+            <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-7">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                  HARDWARE ARCHITECTURE
+                </span>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                  Engineered for Extreme Power &amp; Stability
                 </h2>
-                <p className={cn(" text-lg leading-relaxed font-medium mb-8".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-                  We don't compromise on hardware. Every VPS instance is backed by enterprise-grade processors and localized routing (Sidoarjo Datacenter) ensuring multi-threaded applications run flawlessly with under 20ms latency.
+                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
+                  Every VPS instance is backed by enterprise-grade Dell PowerEdge R630 servers and localized routing in our Sidoarjo datacenter for intensive multi-threaded workloads.
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {[
-                    "Dual Socket Dell PowerEdge Server",
-                    "2x Intel Xeon E5-2673v4 Processors",
-                    "Choose between Enterprise SATA SSD or SAS HDD",
-                    "500Mbps Shared Bandwidth",
+                    "Dual Socket Dell PowerEdge R630 Enterprise Servers",
+                    "2x Intel Xeon E5-2673v4 High-Frequency Processors",
+                    "Choose between Enterprise NVMe/SATA SSD or SAS HDD",
+                    "500Mbps High-Throughput Shared Local Bandwidth",
                   ].map((item, i) => (
-                    <div key={i} className={cn("flex items-center gap-4 p-4 rounded-2xl border", isDark ? "bg-cyan-950/30 border-cyan-500/10" : "bg-slate-50 border-slate-200")}>
-                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/20" : "bg-cyan-50 border border-cyan-200")}>
-                        <CheckCircle2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                    <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                       </div>
-                      <span className={cn("font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{item}</span>
+                      <span className="font-medium text-[var(--text-primary)]">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:gap-6">
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/50 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">40</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Physical Cores</div>
+              {/* Hardware Stats Grid */}
+              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
+                    40
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Physical Cores
+                  </span>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center group-hover:border-cyan-500/50 transition-colors shadow-xl flex flex-col items-center justify-center", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent mb-1 sm:mb-2">80</div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Threads</div>
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
+                    80
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    CPU Threads
+                  </span>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <HardDrive className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <HardDrive className="w-5 h-5" />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>SSD / HDD</div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                    SSD &amp; HDD Tiers
+                  </span>
                 </div>
-                <div className={cn("backdrop-blur-md border p-4 sm:p-8 rounded-2xl sm:rounded-3xl text-center flex flex-col items-center justify-center group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-                  <div className={cn("w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-4 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <MapPin className={cn("w-5 h-5 sm:w-8 sm:h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <MapPin className="w-5 h-5" />
                   </div>
-                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest" style={{ color: isDark ? '#71717a' : '#64748b' }}>Sidoarjo</div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                    Sidoarjo DC
+                  </span>
                 </div>
-                <div className={cn("col-span-2 backdrop-blur-md border p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between group-hover:border-cyan-500/50 transition-colors shadow-xl", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/20 shrink-0">
-                      <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+
+                <div className="col-span-2 p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text-primary)]">
+                      99.99% Network Availability
                     </div>
-                    <div className="text-left">
-                      <div className={cn("text-sm sm:text-base font-bold ".trim(), isDark ? "text-white" : "text-slate-900")}>95% Network Uptime</div>
-                      <div className={cn("text-[10px] sm:text-xs  mt-0.5".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Enterprise-grade reliability</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Carrier-neutral backbone with enterprise reliability
                     </div>
                   </div>
                 </div>
@@ -379,276 +533,257 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* Spec Slider Section */}
-        <section id="pricing" className="py-10 lg:py-16 px-0 sm:px-6 max-w-[1200px] mx-auto relative z-20">
-          <div className="text-center max-w-3xl mx-auto mb-16 px-6 sm:px-0">
-            <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-              Pricing
-            </div>
-            <h2 className={cn("text-4xl md:text-5xl font-black  leading-tight mb-6".trim(), isDark ? "text-white" : "text-slate-900")}>
-              Flexible Billing Options
+        {/* ── 3. SPEC SLIDER & PRICING CALCULATOR ───────────────────────── */}
+        <section id="pricing" className="scroll-mt-24 mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
+              FLEXIBLE CLOUD PRICING
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Pay-As-You-Go Hourly Billing
             </h2>
-            <p className={cn(" text-lg leading-relaxed font-medium mb-8".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>
-              Choose Pay-As-You-Go (hourly) billing. Simply top up your deposit balance to get started and deploy your server instantly.
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed mb-6">
+              Allocate the exact resources your workload requires. Top up your deposit balance and scale anytime with zero commitment.
             </p>
-            <div className={cn("inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl border transition-all shadow-md text-sm font-medium", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-              <Info className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs text-[var(--text-secondary)] shadow-sm">
+              <Info className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
               <span>
-                <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong>
-                By default, all VPS are provisioned with NAT IPv4. Dedicated IPs are available via support ticket.
+                <strong>Note:</strong> Default provisioning includes NAT IPv4. Dedicated public IPv4 addresses can be attached anytime.
               </span>
             </div>
           </div>
 
           <VpsSpecSlider pricing={safePricing} serviceType="VPS" isDisabled={!isVpsEnabled} />
 
-          <div className="max-w-4xl mx-auto mt-12 grid sm:grid-cols-2 gap-x-12 gap-y-8 px-4 sm:px-0">
-            <div className="flex gap-4">
-              <ShieldCheck className="w-6 h-6 text-cyan-500 shrink-0 mt-1" />
-              <div>
-                <h4 className={cn(" font-bold text-lg mb-1".trim(), isDark ? "text-white" : "text-slate-900")}>Isolated Resources</h4>
-                <p className={cn(" text-sm leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Dedicated resources - zero noisy neighbors.</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Terminal className="w-6 h-6 text-cyan-500 shrink-0 mt-1" />
-              <div>
-                <h4 className={cn(" font-bold text-lg mb-1".trim(), isDark ? "text-white" : "text-slate-900")}>Full Root Access</h4>
-                <p className={cn(" text-sm leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Custom OS - install apps as needed.</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <TrendingUp className="w-6 h-6 text-cyan-500 shrink-0 mt-1" />
-              <div>
-                <h4 className={cn(" font-bold text-lg mb-1".trim(), isDark ? "text-white" : "text-slate-900")}>Flexible Upgrades</h4>
-                <p className={cn(" text-sm leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Scale anytime - add CPU, RAM, or storage.</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Shield className="w-6 h-6 text-cyan-500 shrink-0 mt-1" />
-              <div>
-                <h4 className={cn(" font-bold text-lg mb-1".trim(), isDark ? "text-white" : "text-slate-900")}>Full Virtualization</h4>
-                <p className={cn(" text-sm leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>KVM-based - separate kernel for each VPS.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Supported OS Section */}
-        <section className="py-16 lg:py-24 relative z-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h2 className={cn("text-3xl md:text-4xl font-black mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>Available Operating Systems</h2>
-              <p className={cn("font-medium text-lg".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>Deploy your instance with your preferred OS in seconds.</p>
-              <div className={cn("inline-flex items-center gap-2 mt-4 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wider uppercase border select-none", isDark ? "border-cyan-500/20 bg-cyan-500/5 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-                <ChevronLeft className="w-3.5 h-3.5 animate-pulse" />
-                <span>Drag left / right to explore</span>
-                <ChevronRight className="w-3.5 h-3.5 animate-pulse" />
-              </div>
-            </div>
-
-            <div className={cn(
-              "relative overflow-hidden w-full backdrop-blur-md border rounded-[2rem] p-6 shadow-2xl group transition-all",
-              isDark 
-                ? "bg-cyan-500/5 border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.1)]" 
-                : "bg-white border-cyan-200 shadow-md"
-            )}>
-              {/* Left Arrow Button */}
-              <button
-                type="button"
-                onClick={() => handleManualSlide("left")}
-                className={cn(
-                  "absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border transition-all duration-200 shadow-lg backdrop-blur-md hidden sm:flex items-center justify-center",
-                  "opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95 focus:opacity-100",
-                  isDark
-                    ? "bg-[#0b1120]/90 border-cyan-500/40 text-cyan-400 hover:bg-cyan-950 hover:border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]"
-                    : "bg-white/95 border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500 shadow-sm"
-                )}
-                aria-label="Previous OS"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
-              {/* Scroll Track with Gradient Mask on Edges */}
-              <div className="w-full [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-                <div
-                  ref={osScrollRef}
-                  onMouseDown={handleMouseDown}
-                  onMouseEnter={() => { isPausedRef.current = true; }}
-                  onMouseLeave={() => {
-                    if (!isDraggingRef.current) isPausedRef.current = false;
-                  }}
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  onScroll={() => {
-                    if (osScrollRef.current) wrapScroll(osScrollRef.current);
-                  }}
-                  className={cn(
-                    "flex items-center gap-12 sm:gap-20 overflow-x-auto select-none py-2 w-full",
-                    "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
-                    isDragging ? "cursor-grabbing" : "cursor-grab"
-                  )}
-                >
-                  {REPEATED_OPERATING_SYSTEMS.map((os, idx) => (
-                    <div
-                      key={`os-${idx}`}
-                      className="flex items-center gap-3 md:gap-4 shrink-0 transition-transform duration-200 select-none hover:scale-105"
-                    >
-                      <img
-                        referrerPolicy="no-referrer"
-                        src={os.icon}
-                        alt={os.name}
-                        className="h-8 w-8 md:h-10 md:w-10 object-contain pointer-events-none select-none"
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                      />
-                      <span className={cn("font-bold text-lg md:text-2xl tracking-tight select-none pointer-events-none", isDark ? "text-white" : "text-slate-900")}>
-                        {os.name}
-                      </span>
-                    </div>
-                  ))}
+          {/* 4 Feature Badges Under Slider */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            {[
+              { icon: ShieldCheck, title: "Isolated Resources", desc: "Dedicated vCPU and memory allocation — zero noisy neighbors." },
+              { icon: Terminal, title: "Full Root Control", desc: "Install custom kernels, OS packages, and daemons without limitations." },
+              { icon: TrendingUp, title: "Instant Upgrades", desc: "Scale compute, memory, and disk capacity smoothly from your dashboard." },
+              { icon: Shield, title: "KVM Virtualization", desc: "Hardware-level virtualization ensuring complete operational isolation." },
+            ].map((feat, i) => (
+              <div key={i} className="p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-3.5">
+                <feat.icon className="w-5 h-5 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1">{feat.title}</h4>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{feat.desc}</p>
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
 
-              {/* Right Arrow Button */}
-              <button
-                type="button"
-                onClick={() => handleManualSlide("right")}
+        {/* ── 4. SUPPORTED OPERATING SYSTEMS ────────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center mb-8">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              OPERATING SYSTEMS
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-[1.15] mb-3">
+              One-Click OS Deployment
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)]">
+              Choose from leading Linux distributions or Windows Server images ready in seconds.
+            </p>
+          </div>
+
+          <div className="relative overflow-hidden w-full border border-[var(--border-primary)] bg-[var(--surface)] rounded-2xl p-6 shadow-md group">
+            {/* Left Arrow Button */}
+            <button
+              type="button"
+              onClick={() => handleManualSlide("left")}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] hover:border-cyan-500 transition-all duration-200 shadow-md hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-105"
+              aria-label="Previous OS"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {/* Scroll Track */}
+            <div className="w-full [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+              <div
+                ref={osScrollRef}
+                onMouseDown={handleMouseDown}
+                onMouseEnter={() => { isPausedRef.current = true; }}
+                onMouseLeave={() => {
+                  if (!isDraggingRef.current) isPausedRef.current = false;
+                }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onScroll={() => {
+                  if (osScrollRef.current) wrapScroll(osScrollRef.current);
+                }}
                 className={cn(
-                  "absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border transition-all duration-200 shadow-lg backdrop-blur-md hidden sm:flex items-center justify-center",
-                  "opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95 focus:opacity-100",
-                  isDark
-                    ? "bg-[#0b1120]/90 border-cyan-500/40 text-cyan-400 hover:bg-cyan-950 hover:border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]"
-                    : "bg-white/95 border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500 shadow-sm"
+                  "flex items-center gap-12 sm:gap-16 overflow-x-auto select-none py-2 w-full",
+                  "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
+                  isDragging ? "cursor-grabbing" : "cursor-grab"
                 )}
-                aria-label="Next OS"
               >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Use Cases Section */}
-        <section className="py-10 lg:py-16 relative z-20">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-                Use Cases
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  mb-6 leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>
-                Built for Modern Workloads
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {[
-                { icon: Box, title: "Docker & Containers", desc: "Perfectly optimized for running containerized applications. Leverage our high-thread CPU for orchestration and microservices." },
-                { icon: Globe, title: "High-Traffic Web Hosting", desc: "Host your Next.js, Laravel, or WordPress applications. With dedicated resources, your sites stay fast and responsive." },
-                { icon: Database, title: "Database Clusters", desc: "Run MySQL, PostgreSQL, or Redis with confidence. Our enterprise-grade SSD storage ensures high IOPS for database-heavy workloads." }
-              ].map((srv, idx) => (
-                <TiltCard key={idx} intensity={5} className={cn("backdrop-blur-md p-8 md:p-10 rounded-3xl border hover:border-cyan-500/50 transition-colors duration-300 transform-gpu h-full flex flex-col shadow-xl group", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:bg-[#111f38] shadow-black/40" : "bg-white border-cyan-200 hover:border-cyan-400 hover:shadow-md")}>
-                  <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                    <srv.icon className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                {REPEATED_OPERATING_SYSTEMS.map((os, idx) => (
+                  <div
+                    key={`os-${idx}`}
+                    className="flex items-center gap-3 shrink-0 transition-transform duration-200 select-none hover:scale-105"
+                  >
+                    <img
+                      referrerPolicy="no-referrer"
+                      src={os.icon}
+                      alt={os.name}
+                      className="h-8 w-8 sm:h-9 sm:w-9 object-contain pointer-events-none select-none"
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                    />
+                    <span className="font-bold text-base sm:text-lg tracking-tight text-[var(--text-primary)] select-none pointer-events-none">
+                      {os.name}
+                    </span>
                   </div>
-                  <h3 className={cn("text-2xl font-bold  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>{srv.title}</h3>
-                  <p className={cn(" font-medium leading-relaxed mb-8 flex-1".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{srv.desc}</p>
-                </TiltCard>
-              ))}
+                ))}
+              </div>
             </div>
+
+            {/* Right Arrow Button */}
+            <button
+              type="button"
+              onClick={() => handleManualSlide("right")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] hover:border-cyan-500 transition-all duration-200 shadow-md hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-105"
+              aria-label="Next OS"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className={cn("py-10 lg:py-16 relative z-20 transition-colors", isDark ? "bg-[#09152a]/30" : "bg-slate-50")}>
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-8 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "border-cyan-200 bg-cyan-50 text-cyan-700")}>
-                Features
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  mb-6 leading-tight".trim(), isDark ? "text-white" : "text-slate-900")}>Everything you need</h2>
-            </div>
+        {/* ── 5. USE CASES SECTION ──────────────────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              WORKLOAD SOLUTIONS
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Built for Modern Cloud Workloads
+            </h2>
+            <p className="text-base text-[var(--text-secondary)]">
+              From microservices to high-traffic database clusters, Masdika Cloud VPS provides dedicated performance.
+            </p>
+          </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-              {[
-                { icon: Zap, title: "SSD & HDD Options", desc: "Choose SSD for database-heavy workloads or HDD for cheap mass storage." },
-                { icon: ShieldCheck, title: "DDoS Protection", desc: "Enterprise-grade DDoS mitigation included free of charge to keep your apps online." },
-                { icon: Terminal, title: "Root & VNC Access", desc: "Total control over your environment. Connect via SSH or use the built-in VNC Console directly from your dashboard." },
-                { icon: Cloud, title: "98.99% Uptime SLA", desc: "Highly available infrastructure with automatic failover ensures maximum reliability." },
-                { icon: TrendingUp, title: "Seamless Upgrades", desc: "Easily upgrade your server specifications (CPU, RAM, and Storage) anytime your business grows." },
-                { icon: Network, title: "Virtual Private Cloud", desc: "Create isolated private networks to securely deploy your instances without public internet exposure." },
-                { icon: Server, title: "VPC Peering", desc: "Connect multiple VPS servers securely over a fast internal network with zero egress costs." },
-                { icon: Activity, title: "High-Speed Networking", desc: "Experience ultra-low latency and blazing fast throughput across our local datacenter." }
-              ].map((feat, i) => (
-                <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
-                  <div className={cn(
-                    "backdrop-blur-sm border p-8 rounded-3xl transition-all flex flex-col shadow-xl h-full group aspect-square",
-                    isDark 
-                      ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 hover:border-cyan-500/50 hover:bg-[#111f38] shadow-black/40" 
-                      : "bg-white border-cyan-200 shadow-sm hover:border-cyan-400 hover:shadow-md"
-                  )}>
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform">
-                      <feat.icon className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              { 
+                icon: Box, 
+                title: "Docker & Container Pods", 
+                desc: "Optimized for lightweight containerization. Leverage multi-threaded CPUs for Docker, microservices, and CI runners." 
+              },
+              { 
+                icon: Globe, 
+                title: "High-Traffic Web Applications", 
+                desc: "Host Next.js, Laravel, Node.js, and WordPress with zero noisy neighbors and under 20ms local latency across Indonesia." 
+              },
+              { 
+                icon: Database, 
+                title: "Database Clusters & Storage", 
+                desc: "Run PostgreSQL, MySQL, Redis, and Elasticsearch with high sustained IOPS and enterprise-grade SSD storage." 
+              }
+            ].map((srv, idx) => (
+              <FadeIn key={idx} delay={idx * 0.1} direction="up" className="h-full">
+                <div className="p-8 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-200 h-full flex flex-col justify-between group shadow-sm">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6 group-hover:scale-105 transition-transform">
+                      <srv.icon className="w-6 h-6" />
                     </div>
-                    <h3 className={cn("text-xl font-bold  mb-3".trim(), isDark ? "text-white" : "text-slate-900")}>{feat.title}</h3>
-                    <p className={cn(" font-medium leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{feat.desc}</p>
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                      {srv.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {srv.desc}
+                    </p>
                   </div>
-                </FadeIn>
-              ))}
-            </div>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className={cn("py-16 lg:py-24 relative z-20 transition-colors", isDark ? "bg-gradient-to-b from-transparent to-[#09152a]/50" : "bg-gradient-to-b from-transparent to-slate-50")}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-6 shadow-sm", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-                Deployment Process
-              </div>
-              <h2 className={cn("text-4xl md:text-5xl font-black  leading-tight mb-6".trim(), isDark ? "text-white" : "text-slate-900")}>
-                Go Live in 3 Simple Steps
-              </h2>
-            </div>
+        {/* ── 6. COMPREHENSIVE FEATURES GRID ────────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              ENTERPRISE CAPABILITIES
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Everything Your Infrastructure Demands
+            </h2>
+          </div>
 
-            <div className="grid md:grid-cols-3 gap-8 relative">
-              {/* Connecting Line Container */}
-              <div className={cn("hidden md:block absolute top-10 left-[15%] right-[15%] h-[2px]  overflow-hidden rounded-full".trim(), isDark ? "bg-white/5 text-zinc-400" : "bg-slate-100 text-slate-600")}>
-                <AnimatedBeam />
-              </div>
-
-              {[
-                { step: "01", title: "Choose Specifications", desc: "Select the CPU, RAM, and storage size that fits your application's requirements perfectly." },
-                { step: "02", title: "Top Up Balance", desc: "Add funds to your account seamlessly. You only pay for the exact resources you allocate." },
-                { step: "03", title: "Deploy Instantly", desc: "Your high-performance cloud instance will be provisioned and ready to use in less than 60 seconds." }
-              ].map((item, i) => (
-                <FadeIn key={i} delay={i * 0.2} direction="up" className="relative group">
-                  <div className={cn("backdrop-blur-md border p-8 rounded-3xl text-center shadow-xl hover:border-cyan-500/50 hover:bg-[#111f38] transition-colors h-full flex flex-col relative z-10", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-white border-cyan-200 shadow-sm")}>
-
-                    {/* Animated Step Circle */}
-                    <div className={cn("w-20 h-20 mx-auto rounded-full border flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:scale-110 transition-transform duration-500", isDark ? "bg-[#091122] border-slate-700/80" : "bg-white border-cyan-200")}>
-                      <OrbitalRings />
-                      <span className={cn("relative z-10 text-3xl font-black bg-clip-text text-transparent", isDark ? "bg-gradient-to-br from-white to-zinc-400" : "bg-gradient-to-br from-cyan-600 to-cyan-400")}>{item.step}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Zap, title: "SSD & HDD Tiers", desc: "Choose high-speed SSD for databases or economical HDD for large backup stores." },
+              { icon: ShieldCheck, title: "Automated Anti-DDoS", desc: "Carrier-level DDoS mitigation protecting all public-facing services." },
+              { icon: Terminal, title: "SSH & VNC Console", desc: "Out-of-band console access directly from your browser even if network fails." },
+              { icon: Cloud, title: "99.99% Availability", desc: "Fault-tolerant infrastructure designed for mission-critical uptime." },
+              { icon: TrendingUp, title: "Seamless Scaling", desc: "Dynamically increase CPU, RAM, or storage anytime without data loss." },
+              { icon: Network, title: "Virtual Private Cloud", desc: "Isolated internal network topology for internal service communication." },
+              { icon: Server, title: "VPC Peering", desc: "Connect instances privately with zero bandwidth egress charges." },
+              { icon: Activity, title: "Hardware Monitoring", desc: "Real-time metrics on CPU load, memory utilization, and network I/O." }
+            ].map((feat, i) => (
+              <FadeIn key={i} delay={i * 0.05} direction="up" className="h-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors flex flex-col justify-between h-full shadow-sm">
+                  <div>
+                    <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-4">
+                      <feat.icon className="w-5 h-5" />
                     </div>
-
-                    <h3 className={cn("text-xl font-bold  mb-4".trim(), isDark ? "text-white" : "text-slate-900")}>{item.title}</h3>
-                    <p className={cn(" font-medium leading-relaxed".trim(), isDark ? "text-zinc-400" : "text-slate-600")}>{item.desc}</p>
+                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-2">
+                      {feat.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {feat.desc}
+                    </p>
                   </div>
-                </FadeIn>
-              ))}
-            </div>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </section>
 
+        {/* ── 7. HOW IT WORKS SECTION ───────────────────────────────────── */}
+        <section className="mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              DEPLOYMENT WORKFLOW
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Go Live in 3 Simple Steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {[
+              { step: "01", title: "Select Specifications", desc: "Configure vCPU cores, RAM size, disk type, and operating system tailored to your workload." },
+              { step: "02", title: "Top Up Deposit", desc: "Add funds using automated payment gateways. You only pay for exact hourly usage." },
+              { step: "03", title: "Deploy Instantly", desc: "Your cloud instance provisions automatically and becomes SSH-accessible in under 60 seconds." }
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
+                <div className="p-8 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-center shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between h-full">
+                  <div>
+                    <div className="w-16 h-16 mx-auto rounded-full border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-center mb-6">
+                      <span className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{item.step}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3">{item.title}</h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 8. PROVISIONING SECTION (Live Terminal) ───────────────────── */}
         <ProvisioningSection
-          subtitle="READY TO START?"
-          title="One click, instant server deployment."
-          description="Our panel handles complex provisioning in the background. Simply select your specifications, pay strictly for what you use, and connect via SSH instantly."
+          subtitle="AUTOMATED PROVISIONING"
+          title="One-click, instant cloud server deployment."
+          description="Our control panel manages backend virtualization, disk attachments, and network routing seamlessly. Simply choose your specs and connect via SSH instantly."
           buttonText="Open Dashboard"
           buttonHref="/dashboard"
           logs={VPS_TERMINAL_LOGS}
@@ -657,40 +792,47 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           iconType="vps"
         />
 
-        {/* Final CTA Section */}
-        <section className="py-20 lg:py-32 relative z-20">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className={cn("backdrop-blur-xl border rounded-[2.5rem] p-10 md:p-16 text-center shadow-2xl relative overflow-hidden group", isDark ? "bg-gradient-to-br from-cyan-900/40 via-[#0a1526]/80 to-[#050b14]/90 border-cyan-500/20" : "bg-white border-slate-200 shadow-xl")}>
-              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
-              <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
+        <section className="py-16 lg:py-24">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden max-w-5xl mx-auto">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
-              <div className="relative z-10">
-                <h2 className={cn("text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                  Ready to experience <br className="hidden md:block" />
-                  <span className={cn("bg-clip-text text-transparent bg-gradient-to-r", isDark ? "from-cyan-400 to-cyan-100" : "from-cyan-600 to-cyan-400")}>true performance?</span>
-                </h2>
-                <p className={cn("text-lg md:text-xl font-medium max-w-2xl mx-auto mb-10 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
-                  Join thousands of developers deploying workloads on Masdika Cloud today. Start scaling without limits.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                  <MagneticButton intensity={20} className="w-full sm:w-auto flex">
-                    <Link
-                      href="/dashboard/checkout"
-                      className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-all gap-2 w-full"
-                    >
-                      Deploy Your Server
-                      <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </MagneticButton>
-                </div>
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                START COMPUTING TODAY
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-tight mb-4">
+                Ready for True High-Performance Compute?
+              </h2>
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
+                Deploy workloads on Masdika Cloud infrastructure today. Enjoy dedicated resources, local low latency, and full administrative freedom.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/dashboard/checkout"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Deploy Your Server
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/contact"
+                >
+                  Contact Support
+                </Button>
               </div>
             </div>
           </div>
         </section>
 
+        {/* ── 10. FAQ SECTION ───────────────────────────────────────────── */}
         <FaqSection faqs={VPS_FAQS} />
-      </main>
+
+      </div>
     </div>
   );
 }
-

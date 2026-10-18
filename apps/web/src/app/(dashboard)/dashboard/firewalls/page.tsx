@@ -262,9 +262,7 @@ export default function FirewallsDashboardPage() {
                 setShowFirewallModal(true);
               }}
               disabled={!selectedVpsId}
-              className={cn("w-full md:w-auto px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
-                isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
-              )}
+              className="w-full md:w-auto px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
               <Plus className="w-4 h-4" /> Add Rule
             </button>
@@ -518,16 +516,14 @@ export default function FirewallsDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setShowFirewallModal(false)}
-                    className={cn("px-5 py-2.5 rounded-xl text-sm font-medium transition-colors border", isDark ? "text-white bg-white/5 hover:bg-white/10 border-transparent" : "text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-200")}
+                    className={cn("px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingRule}
-                    className={cn("px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed",
-                      isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
-                    )}
+                    className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                   >
                     {isSavingRule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                     {isSavingRule ? 'Saving...' : 'Save Rule'}

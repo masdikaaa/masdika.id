@@ -267,7 +267,7 @@ export default function TopUpPage() {
                         <div className={cn(
                           "w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ml-4 transition-all",
                           selectedMethod === pm.code
-                            ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                            ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-sm"
                             : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
                         )}>
                           {selectedMethod === pm.code && <Check className="w-3 h-3 stroke-[3]" />}
@@ -374,7 +374,7 @@ export default function TopUpPage() {
                   {appliedVoucher ? (
                     <button
                       onClick={() => { setAppliedVoucher(null); setVoucherCode(""); }}
-                      className={cn("px-4 py-3 rounded-xl border font-bold transition-all text-sm", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}
+                      className={cn("px-4 py-3 rounded-lg border font-semibold transition-all text-sm", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -382,7 +382,7 @@ export default function TopUpPage() {
                     <button
                       onClick={handleCheckVoucher}
                       disabled={!voucherCode || isCheckingVoucher}
-                      className={cn("px-4 py-3 rounded-xl border font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center min-w-[80px]", isDark ? "bg-cyan-600 hover:bg-cyan-500 text-white border-transparent" : "bg-cyan-600 hover:bg-cyan-700 text-white border-transparent shadow-sm")}
+                      className="px-4 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center min-w-[80px] bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                     >
                       {isCheckingVoucher ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
                     </button>
@@ -395,10 +395,10 @@ export default function TopUpPage() {
               onClick={handleTopUp}
               disabled={isProcessing || !selectedMethod || topUpAmount < 50000}
               className={cn(
-                "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm",
+                "w-full py-3.5 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all shadow-sm",
                 isProcessing || !selectedMethod || topUpAmount < 50000
-                  ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-none cursor-not-allowed"
-                  : "bg-cyan-600 hover:bg-cyan-700 text-white"
+                  ? "bg-cyan-500/10 text-cyan-500/60 border border-cyan-500/20 shadow-none cursor-not-allowed"
+                  : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
               )}
             >
               {isProcessing ? (

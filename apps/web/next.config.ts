@@ -42,6 +42,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // ── Aggressive static-asset caching (images, fonts, icons) ──
+      {
+        source: "/:path*.(webp|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      // ── Security + default headers for all other routes ──
       {
         source: "/(.*)",
         headers: [

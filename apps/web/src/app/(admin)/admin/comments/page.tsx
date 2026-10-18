@@ -410,14 +410,14 @@ export default function AdminCommentsPage() {
                   <button 
                     type="button" 
                     onClick={() => setReplyingTo(null)}
-                    className={cn("px-5 py-2.5 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     disabled={submittingReply}
-                    className={cn("font-bold px-6 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                    className="font-semibold px-5 py-2.5 rounded-lg text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {submittingReply ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <Reply className="w-4 h-4" />}
                     {submittingReply ? "Sending..." : "Send Reply"}

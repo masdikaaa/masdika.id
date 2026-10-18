@@ -181,7 +181,7 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-6 py-4 font-bold tracking-wide transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-sm hover:shadow-[0_0_20px_rgba(8,145,178,0.3)] flex items-center justify-center gap-2"
+              className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg px-6 py-3 font-semibold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>

@@ -573,7 +573,7 @@ export default function SettingsPage() {
             </div>
             
             <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-              <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+              <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                 {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
                 {saving ? "Saving..." : "Save Profile"}
               </button>
@@ -616,7 +616,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Contact Info"}
           </button>
@@ -660,7 +660,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Social Links"}
           </button>
@@ -701,7 +701,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Content"}
           </button>
@@ -749,7 +749,7 @@ export default function SettingsPage() {
           </p>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save CV"}
           </button>
@@ -856,7 +856,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save SEO Settings"}
           </button>
@@ -945,7 +945,7 @@ export default function SettingsPage() {
                         <button 
                           onClick={handleVerify2FA}
                           disabled={verifyCode.length !== 6 || verifying2FA}
-                          className={cn("flex-1 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                          className="flex-1 py-2.5 px-4 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                         >
                           {verifying2FA ? "Verifying..." : "Verify"}
                         </button>
@@ -1030,7 +1030,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Maintenance Settings"}
           </button>
@@ -1131,7 +1131,7 @@ export default function SettingsPage() {
 
         </div>
         <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
-          <button onClick={handleSave} disabled={saving} className={cn("flex items-center justify-center w-full sm:w-auto gap-2 px-8 py-3.5 font-bold rounded-xl transition-all disabled:opacity-50 hover:scale-[1.02]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}>
+          <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Service Settings"}
           </button>

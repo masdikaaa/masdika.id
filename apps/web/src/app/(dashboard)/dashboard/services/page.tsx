@@ -186,9 +186,9 @@ export default function MyServicesPage() {
         <div className="relative z-10 shrink-0">
           <Link
             href="/dashboard/checkout"
-            className="w-full md:w-auto bg-cyan-600 hover:bg-cyan-700 px-6 py-4 rounded-2xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-white"
+            className="w-full md:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-2 text-slate-950"
           >
-            <Box className="w-5 h-5" />
+            <Box className="w-4 h-4" />
             Order New Service
           </Link>
         </div>
@@ -204,7 +204,7 @@ export default function MyServicesPage() {
             <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You haven't subscribed to any Masdika services yet. Explore our high-performance infrastructure.</p>
             <Link
               href="/dashboard/checkout"
-              className="font-bold text-white px-6 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 transition-all shadow-sm hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
+              className="font-semibold text-slate-950 px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-sm inline-flex items-center justify-center gap-2 text-sm"
             >
               Browse Services
             </Link>
@@ -291,12 +291,12 @@ export default function MyServicesPage() {
                       {vps.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/vps/${vps.id}`}
-                          className="flex-1 bg-cyan-600 hover:bg-cyan-700 py-3 rounded-2xl text-sm font-bold flex items-center justify-center transition-all shadow-sm text-white"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center transition-all shadow-sm text-slate-950"
                         >
                           Manage Instance
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-sm font-bold flex items-center justify-center shadow-sm cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center shadow-sm cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -368,12 +368,12 @@ export default function MyServicesPage() {
                       {k3s.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/k3s/${k3s.id}`}
-                          className="flex-1 bg-cyan-600 hover:bg-cyan-700 py-3 rounded-2xl text-sm font-bold flex items-center justify-center transition-all shadow-sm text-white"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center transition-all shadow-sm text-slate-950"
                         >
                           Manage Cluster
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-sm font-bold flex items-center justify-center shadow-sm cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center shadow-sm cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -456,7 +456,7 @@ export default function MyServicesPage() {
                         <>
                           <button
                             onClick={() => setTerminateModal({ id: sub.id, name: sub.plan.name, service: sub.plan.service })}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-3 rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0"
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-2.5 rounded-lg flex items-center justify-center transition-all shadow-sm shrink-0"
                             title="Terminate Service"
                           >
                             <XCircle className="w-4 h-4" />
@@ -465,7 +465,7 @@ export default function MyServicesPage() {
                           {sub.status === 'ACTIVE' && hasHigherPlan(sub) && (
                             <Link
                               href={`/dashboard/checkout?upgradeId=${sub.id}`}
-                              className={cn("flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm", isDark ? "text-white" : "text-slate-900")}
+                              className={cn("flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm", isDark ? "text-white" : "text-slate-900")}
                             >
                               <ArrowUpCircle className="w-4 h-4" /> Upgrade
                             </Link>
@@ -476,13 +476,13 @@ export default function MyServicesPage() {
                               sub.plan.service === 'SHORTENER' ? '/dashboard/shortener' :
                                   '/dashboard'
                             }
-                            className="flex-1 bg-cyan-600 hover:bg-cyan-700 py-3 rounded-2xl text-xs font-bold flex items-center justify-center transition-all shadow-sm text-white"
+                            className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-lg text-xs font-semibold flex items-center justify-center transition-all shadow-sm text-slate-950"
                           >
                             Manage
                           </Link>
                         </>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-3 rounded-2xl text-xs font-bold flex items-center justify-center shadow-sm cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center shadow-sm cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -529,7 +529,7 @@ export default function MyServicesPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setTerminateModal(null)}
-                className={cn("px-5 py-2.5 hover:text-white transition-colors text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-500")}
+                className={cn("px-4 py-2.5 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium", isDark ? "text-zinc-400 border-slate-700" : "text-slate-600 border-slate-200")}
                 disabled={terminateLoading}
               >
                 Cancel
@@ -537,7 +537,7 @@ export default function MyServicesPage() {
               <button
                 onClick={handleTerminate}
                 disabled={terminateLoading}
-                className="px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 flex items-center gap-2 text-sm"
+                className="px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 flex items-center gap-2 text-sm"
               >
                 {terminateLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                 Yes, Terminate

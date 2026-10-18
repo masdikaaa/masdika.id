@@ -1,12 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { Send, Loader2, ExternalLink, Users, Copy } from "lucide-react";
+import { 
+  Users, 
+  Send, 
+  Globe, 
+  Server, 
+  ShieldCheck, 
+  Terminal, 
+  ArrowRight, 
+  ExternalLink, 
+  Copy, 
+  Check, 
+  Search, 
+  X, 
+  CheckCircle2, 
+  MessageSquare,
+  Sparkles,
+  Layers
+} from "lucide-react";
 import { toast } from "sonner";
-import { useTheme } from "@/components/ThemeProvider";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { FadeIn } from "@/components/animations/FadeIn";
 import { cn } from "@/lib/utils";
-
 
 // WhatsApp SVG icon
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -23,31 +42,70 @@ const TelegramIcon = ({ className }: { className?: string }) => (
 );
 
 // Detect platform from link
-function getPlatform(link: string): 'whatsapp' | 'telegram' | 'unknown' {
-  if (link.includes('whatsapp.com')) return 'whatsapp';
-  if (link.includes('t.me') || link.includes('telegram.me')) return 'telegram';
-  return 'unknown';
+function getPlatform(link: string): "whatsapp" | "telegram" | "unknown" {
+  if (link.includes("whatsapp.com")) return "whatsapp";
+  if (link.includes("t.me") || link.includes("telegram.me")) return "telegram";
+  return "unknown";
 }
 
+export interface CommunityGroupItem {
+  id: number;
+  name: string;
+  link: string;
+  image?: string | null;
+  description?: string | null;
+  isPublished?: boolean;
+  createdAt?: string | Date;
+}
 
-export default function CommunityClient({ initialGroups }: { initialGroups: any[] }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-  const [groups] = useState<any[]>(initialGroups);
+export default function CommunityClient({ initialGroups }: { initialGroups: CommunityGroupItem[] }) {
+  const [groups] = useState<CommunityGroupItem[]>(initialGroups);
+  const [selectedPlatform, setSelectedPlatform] = useState<"all" | "whatsapp" | "telegram">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(8);
-  
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
   // Form state
   const [link, setLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Filtered groups
+  const filteredGroups = useMemo(() => {
+    return groups.filter((group) => {
+      const platform = getPlatform(group.link);
+      const matchesPlatform =
+        selectedPlatform === "all" ||
+        (selectedPlatform === "whatsapp" && platform === "whatsapp") ||
+        (selectedPlatform === "telegram" && platform === "telegram");
 
+      const matchesSearch =
+        searchQuery.trim() === "" ||
+        group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        group.link.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesPlatform && matchesSearch;
+    });
+  }, [groups, selectedPlatform, searchQuery]);
+
+  const platformCounts = useMemo(() => {
+    const wa = groups.filter((g) => getPlatform(g.link) === "whatsapp").length;
+    const tg = groups.filter((g) => getPlatform(g.link) === "telegram").length;
+    return { all: groups.length, whatsapp: wa, telegram: tg };
+  }, [groups]);
+
+  const handleCopy = (id: number, groupLink: string) => {
+    navigator.clipboard.writeText(groupLink);
+    setCopiedId(id);
+    toast.success("Community link copied to clipboard!");
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!link.trim()) return;
 
-    const isWhatsApp = link.startsWith('https://chat.whatsapp.com/');
-    const isTelegram = link.startsWith('https://t.me/') || link.startsWith('https://telegram.me/');
+    const isWhatsApp = link.startsWith("https://chat.whatsapp.com/");
+    const isTelegram = link.startsWith("https://t.me/") || link.startsWith("https://telegram.me/");
 
     if (!isWhatsApp && !isTelegram) {
       toast.error("Link must be a WhatsApp (chat.whatsapp.com) or Telegram (t.me) group link.");
@@ -56,229 +114,600 @@ export default function CommunityClient({ initialGroups }: { initialGroups: any[
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/community', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link })
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ link }),
       });
       const data = await res.json();
 
       if (res.ok) {
-        toast.success(data.message || "Group submitted successfully!");
+        toast.success(data.message || "Group submitted successfully and waiting for admin review!");
         setLink("");
       } else {
         toast.error(data.error || "Failed to submit group");
       }
-    } catch (error) {
-      toast.error("A system error occurred.");
+    } catch {
+      toast.error("A system error occurred. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
+  const detectedPlatform = getPlatform(link);
+
   return (
-    <div className="pt-24 md:pt-32 pb-20 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-screen">
-      <svg width="0" height="0" className="absolute">
-        <linearGradient id="icon-gradient-community" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#22d3ee" offset="0%" />
-          <stop stopColor="#3b82f6" offset="50%" />
-          <stop stopColor="#8b5cf6" offset="100%" />
-        </linearGradient>
-      </svg>
-        
-        {/* Header */}
-        <div className="text-center mb-16 relative pt-10">
-          <motion.span 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={cn("font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]", isDark ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20" : "text-cyan-600 bg-cyan-50 border border-cyan-200")}
-          >
-            Network
-          </motion.span>
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className={cn("text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.1]", isDark ? "text-white" : "text-slate-900")}
-          >
-            Developer <br className="hidden sm:block" />
-            <span className={cn("text-transparent bg-clip-text drop-shadow-sm", isDark ? "bg-gradient-to-r from-cyan-400 to-cyan-200" : "bg-gradient-to-r from-cyan-600 to-cyan-400")}>Community</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className={cn("text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}
-          >
-            Find and join various WhatsApp & Telegram IT and Developer groups to discuss, learn, and network.
-          </motion.p>
-        </div>
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* Grid of Groups */}
-        {groups.length === 0 ? (
-          <div className={cn("text-center py-16 px-6 sm:px-8 rounded-3xl border backdrop-blur-sm shadow-xl", isDark ? "bg-[#0d1629] border-slate-700/80 ring-1 ring-white/5 shadow-black/40" : "bg-cyan-50 border-cyan-200")}>
-            <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border relative", isDark ? "bg-gradient-to-br from-cyan-500/10 via-cyan-500/5 to-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-300")}>
-              <Users className="w-10 h-10" style={{ stroke: isDark ? "url(#icon-gradient-community)" : "#0284c7" }} />
-            </div>
-            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No groups yet</h3>
-            <p className={isDark ? "text-white/50" : "text-slate-500"}>Be the first to share your community group.</p>
-          </div>
-        ) : (
-          <div className="mb-12 lg:mb-16">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {groups.slice(0, visibleCount).map((group, index) => (
-                <motion.div
-                  key={group.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className="group relative flex flex-col items-center p-5 sm:p-6 rounded-3xl overflow-hidden hover:-translate-y-1 transition-transform duration-300"
+        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+            
+            {/* Left – Text & Actions */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
+              {/* Status pill using shared Badge */}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  ACTIVE DEVELOPER NETWORK
+                </Badge>
+              </div>
+
+              {/* Headline H1 (Ukuran sama persis Home Page & design.md) */}
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Developer &amp; Tech Communities
+              </h1>
+
+              {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Join active WhatsApp and Telegram developer groups to discuss cloud architecture, DevOps pipelines, Linux administration, and network with tech engineers.
+              </p>
+
+              {/* Action Buttons (size="lg" sama persis Home Page) */}
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="#community-groups"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  <div className={cn("absolute inset-0 backdrop-blur-sm transition-colors", isDark ? "bg-[#0d1629] group-hover:bg-[#111f38]" : "bg-white group-hover:bg-cyan-50/50")} />
-                  {/* Blobs on hover */}
-                  <div className={cn("absolute -top-6 -left-6 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
-                  <div className={cn("absolute -bottom-6 -right-6 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
-                  {/* Shine */}
-                  <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
-                  <div className={cn("absolute inset-0 rounded-3xl border transition-colors duration-300 pointer-events-none", isDark ? "border-slate-700/80 group-hover:border-cyan-500/50 ring-1 ring-white/5 shadow-xl shadow-black/40" : "border-slate-200 group-hover:border-cyan-300 shadow-[0_4px_24px_rgba(0,0,0,0.07)]")} />
+                  Explore Communities
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="#submit-group"
+                  leftIcon={<Users className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  Submit a Group
+                </Button>
+              </div>
+            </motion.div>
 
-                  {/* Avatar */}
-                  <div className={cn("relative z-10 w-16 h-16 mb-4 rounded-2xl overflow-hidden border flex items-center justify-center shrink-0", isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-slate-50")}>
-                    {group.image ? (
-                      <img referrerPolicy="no-referrer" src={group.image} alt={group.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                    ) : getPlatform(group.link) === 'whatsapp' ? (
-                      <WhatsAppIcon className={cn("h-8 w-8 group-hover:scale-110 transition-transform", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                    ) : getPlatform(group.link) === 'telegram' ? (
-                      <TelegramIcon className={cn("h-8 w-8 group-hover:scale-110 transition-transform", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                    ) : (
-                      <svg className={cn("h-7 w-7 group-hover:scale-110 transition-transform", isDark ? "text-cyan-400" : "text-cyan-600")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    )}
+            {/* Right – Hero Avatar (community.webp) with 4 Floating Badges */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex items-center justify-center mt-10 lg:mt-0"
+            >
+              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
+                {/* Subtle ambient depth bloom behind avatar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[300px] sm:w-[440px] sm:h-[360px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -z-0" />
+
+                {/* Floating Card 1: Top-Left (Active Network) */}
+                <div
+                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Users className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Active Network
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Tech Enthusiasts
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Name */}
-                  <h3 className={cn("relative z-10 font-bold text-center text-sm leading-snug mb-1 flex-1 flex items-center justify-center transition-all", isDark ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-200" : "text-slate-900 group-hover:text-cyan-600")}>
-                    {group.name}
+                {/* Floating Card 2: Top-Right (Channels) */}
+                <div
+                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Globe className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Channels
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      WhatsApp &amp; TG
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 3: Bottom-Left (Tech Tracks) */}
+                <div
+                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <Server className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Tech Tracks
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Cloud &amp; DevOps
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Card 4: Bottom-Right (Moderated) */}
+                <div
+                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#061e33]/85 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/30 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[145px] sm:max-w-none"
+                >
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none">
+                      Moderated
+                    </div>
+                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap">
+                      Spam-Free Groups
+                    </div>
+                  </div>
+                </div>
+
+                {/* Karakter community.webp utuh & proporsional sesuai design.md */}
+                <div
+                  className="w-full h-full relative z-10 flex items-end justify-center"
+                  style={{
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
+                  }}
+                >
+                  <Image
+                    src="/community.webp"
+                    alt="Masdika – Developer Community"
+                    width={1536}
+                    height={1024}
+                    priority={true}
+                    unoptimized={true}
+                    className="w-full h-full object-contain object-bottom"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+        </section>
+
+        {/* ── 1. VALUE PILLARS (3 Highlights) ───────────────────────────── */}
+        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
+            <FadeIn delay={0.1} direction="up" className="h-full">
+              <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm">
+                <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                    Verified Tech Groups
                   </h3>
-                  
-                  {/* Description */}
-                  <p className={cn("relative z-10 text-center text-xs mb-4 line-clamp-2", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    {group.description || "An active developer community for discussion, learning, and sharing experiences."}
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    Direct invite links inspected and filtered to ensure high-quality discussion and spam-free technical networking.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2} direction="up" className="h-full">
+              <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm">
+                <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                  <Terminal className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                    Cloud &amp; DevOps Focused
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    Engage in technical discussions on Kubernetes, Linux, Terraform, Docker, and automation pipelines.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3} direction="up" className="h-full">
+              <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm">
+                <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                    Engineering Networking
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    Collaborate with peers, share project opportunities, and ask troubleshooting advice in real time.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+
+        {/* ── 2. COMMUNITY GROUPS DIRECTORY ─────────────────────────────── */}
+        <section id="community-groups" className="scroll-mt-24 mb-20 lg:mb-28">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
+                DISCOVER COMMUNITIES
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
+                Verified Developer Groups
+              </h2>
+            </div>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-md">
+              Browse through developer communities across Indonesia and globally. Filter by your preferred chat platform.
+            </p>
+          </div>
+
+          {/* Filter & Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8 p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
+            {/* Platform Filter Buttons */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              <button
+                type="button"
+                onClick={() => setSelectedPlatform("all")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap",
+                  selectedPlatform === "all"
+                    ? "bg-cyan-400 text-slate-950 shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
+                )}
+              >
+                All Groups
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded-full text-[10px]",
+                  selectedPlatform === "all" ? "bg-slate-950/20 text-slate-950" : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                )}>
+                  {platformCounts.all}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedPlatform("whatsapp")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap",
+                  selectedPlatform === "whatsapp"
+                    ? "bg-cyan-400 text-slate-950 shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
+                )}
+              >
+                <WhatsAppIcon className="w-3.5 h-3.5" />
+                WhatsApp
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded-full text-[10px]",
+                  selectedPlatform === "whatsapp" ? "bg-slate-950/20 text-slate-950" : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                )}>
+                  {platformCounts.whatsapp}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedPlatform("telegram")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap",
+                  selectedPlatform === "telegram"
+                    ? "bg-cyan-400 text-slate-950 shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
+                )}
+              >
+                <TelegramIcon className="w-3.5 h-3.5" />
+                Telegram
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded-full text-[10px]",
+                  selectedPlatform === "telegram" ? "bg-slate-950/20 text-slate-950" : "bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                )}>
+                  {platformCounts.telegram}
+                </span>
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative min-w-[240px] sm:w-72">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search group name..."
+                className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Grid Content */}
+          {filteredGroups.length === 0 ? (
+            <div className="text-center py-16 px-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] max-w-lg mx-auto">
+              <div className="w-14 h-14 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mx-auto mb-4">
+                <Users className="w-7 h-7" />
+              </div>
+              <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">
+                No Community Groups Found
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-sm mx-auto">
+                {searchQuery || selectedPlatform !== "all"
+                  ? "Try clearing your search query or platform filter to see more groups."
+                  : "Be the first to share your developer community with our network."}
+              </p>
+              {searchQuery || selectedPlatform !== "all" ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedPlatform("all");
+                  }}
+                >
+                  Reset Filters
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  size="md"
+                  href="#submit-group"
+                  leftIcon={<Users className="w-4 h-4" />}
+                >
+                  Submit First Group
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredGroups.slice(0, visibleCount).map((group, index) => {
+                  const platform = getPlatform(group.link);
+                  const isWhatsApp = platform === "whatsapp";
+                  const isTelegram = platform === "telegram";
+                  const isCopied = copiedId === group.id;
+
+                  return (
+                    <FadeIn key={group.id} delay={index * 0.05} direction="up" className="h-full">
+                      <div className="group rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 p-5 sm:p-6 transition-all duration-200 flex flex-col justify-between h-full shadow-sm hover:shadow-md">
+                        <div>
+                          {/* Top row: Platform Tag */}
+                          <div className="flex items-center justify-between gap-2 mb-4">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider",
+                                isWhatsApp
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                  : isTelegram
+                                  ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20"
+                                  : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20"
+                              )}
+                            >
+                              {isWhatsApp ? (
+                                <>
+                                  <WhatsAppIcon className="w-3 h-3" />
+                                  WhatsApp
+                                </>
+                              ) : isTelegram ? (
+                                <>
+                                  <TelegramIcon className="w-3 h-3" />
+                                  Telegram
+                                </>
+                              ) : (
+                                <>
+                                  <Globe className="w-3 h-3" />
+                                  Community
+                                </>
+                              )}
+                            </span>
+
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                              Verified
+                            </span>
+                          </div>
+
+                          {/* Center: Avatar & Details */}
+                          <div className="flex items-start gap-3.5 mb-3">
+                            <div className="w-12 h-12 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] overflow-hidden flex items-center justify-center shrink-0">
+                              {group.image ? (
+                                <img
+                                  referrerPolicy="no-referrer"
+                                  src={group.image}
+                                  alt={group.name}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              ) : isWhatsApp ? (
+                                <WhatsAppIcon className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
+                              ) : isTelegram ? (
+                                <TelegramIcon className="w-6 h-6 text-sky-500 group-hover:scale-110 transition-transform" />
+                              ) : (
+                                <Users className="w-6 h-6 text-cyan-500 group-hover:scale-110 transition-transform" />
+                              )}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors line-clamp-1 leading-snug">
+                                {group.name}
+                              </h3>
+                              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                                Public Group
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2 mb-6">
+                            {group.description || "Active tech and developer community for discussion, learning, and networking."}
+                          </p>
+                        </div>
+
+                        {/* Bottom Action Row */}
+                        <div className="flex items-center gap-2 pt-4 border-t border-[var(--border-primary)]">
+                          <a
+                            href={group.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-colors"
+                          >
+                            Join Group
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(group.id, group.link)}
+                            title="Copy link"
+                            className="p-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-all flex items-center justify-center shrink-0"
+                          >
+                            {isCopied ? (
+                              <Check className="w-4 h-4 text-emerald-500" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </FadeIn>
+                  );
+                })}
+              </div>
+
+              {/* Load More Button */}
+              {visibleCount < filteredGroups.length && (
+                <div className="mt-12 flex justify-center">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => setVisibleCount((prev) => prev + 8)}
+                  >
+                    Load More Communities ({filteredGroups.length - visibleCount} remaining)
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+
+        {/* ── 3. SUBMIT GROUP SECTION (Design-system Compliant Card) ────── */}
+        <section id="submit-group" className="scroll-mt-24 mb-12">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 overflow-hidden shadow-xl">
+            {/* Soft Ambient Accent */}
+            <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-bl from-cyan-500/10 via-sky-500/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              
+              {/* Left Column: Information */}
+              <div className="lg:col-span-7">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                  COMMUNITY SUBMISSION
+                </span>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--text-primary)] leading-tight mb-4">
+                  Have a Developer Group to Share?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed mb-6 max-w-xl">
+                  Share your WhatsApp or Telegram tech community with thousands of developers and engineers. Help build a strong collaborative ecosystem across Indonesia.
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>WhatsApp (`chat.whatsapp.com`) &amp; Telegram (`t.me`) direct invite links</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>Focused on IT, cloud, DevOps, networking, programming, or Linux</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>Reviewed by admin team before publishing to ensure zero spam</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Submission Form */}
+              <div className="lg:col-span-5 w-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] shadow-sm">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                    Submit Invite Link
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">
+                    Paste your group invite URL below to submit for review.
                   </p>
 
-                  {/* Actions */}
-                  <div className="relative z-10 mt-auto flex items-center gap-2 w-full">
-                    <a
-                      href={group.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn("flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold border transition-all flex items-center justify-center gap-1.5 whitespace-nowrap", isDark ? "bg-white/5 text-cyan-400 border-white/10 hover:bg-cyan-500 hover:text-[#011627] hover:border-cyan-500" : "bg-slate-50 text-cyan-600 border-black/10 hover:bg-cyan-600 hover:text-white hover:border-cyan-600 shadow-sm")}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        {detectedPlatform === "whatsapp" ? (
+                          <WhatsAppIcon className="h-4 w-4 text-emerald-500" />
+                        ) : detectedPlatform === "telegram" ? (
+                          <TelegramIcon className="h-4 w-4 text-sky-500" />
+                        ) : (
+                          <Globe className="h-4 w-4 text-[var(--text-muted)]" />
+                        )}
+                      </div>
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => setLink(e.target.value)}
+                        placeholder="https://chat.whatsapp.com/... or https://t.me/..."
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="md"
+                      loading={submitting}
+                      disabled={submitting || !link.trim()}
+                      className="w-full"
+                      leftIcon={<Send className="w-4 h-4" />}
                     >
-                      Join Group <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    </a>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigator.clipboard.writeText(group.link);
-                        toast.success("Link copied to clipboard!");
-                      }}
-                      className={cn("cursor-pointer p-2 sm:p-2.5 rounded-full border transition-all flex items-center justify-center shrink-0 focus:outline-none", isDark ? "bg-white/5 text-cyan-400 border-white/10 hover:bg-cyan-500 hover:text-[#011627] hover:border-cyan-500" : "bg-slate-50 text-cyan-600 border-black/10 hover:bg-cyan-600 hover:text-white hover:border-cyan-600 shadow-sm")}
-                      title="Copy Link"
-                    >
-                      <Copy className="w-4 h-4 sm:w-4 sm:h-4" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                      Submit for Review
+                    </Button>
 
-            {visibleCount < groups.length && (
-              <div className="mt-12 flex justify-center">
-                <button
-                  onClick={() => setVisibleCount(prev => prev + 8)}
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-cyan-600 text-white font-bold hover:bg-cyan-500 transition-all gap-2 w-fit shrink-0 shadow-md"
-                >
-                  Load More
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Submit Form Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className={cn("mt-10 pt-16 border-t", isDark ? "border-white/[0.06]" : "border-black/5")}
-        >
-          <div className="relative w-full flex flex-col md:flex-row items-center md:items-start gap-8 p-8 rounded-3xl overflow-hidden shadow-2xl">
-            {/* Glass */}
-            <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-gradient-to-br from-[#0e172a] to-[#0a1324]" : "bg-white")} />
-            <div className={cn("absolute -top-10 -left-10 w-56 h-56 rounded-full blur-3xl pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
-            <div className={cn("absolute -bottom-10 -right-10 w-56 h-56 rounded-full blur-3xl pointer-events-none", isDark ? "bg-cyan-500/15" : "bg-cyan-500/5")} />
-            <div className={cn("absolute inset-0 bg-gradient-to-br via-transparent to-transparent pointer-events-none", isDark ? "from-white/[0.05]" : "from-black/[0.02]")} />
-            <div className={cn("absolute inset-0 rounded-3xl border pointer-events-none", isDark ? "border-slate-700/80 ring-1 ring-white/5 shadow-xl shadow-black/40" : "border-transparent")} />
-
-            <div className="relative z-10 flex-1 text-center md:text-left">
-              <h2 className={cn("text-2xl font-bold mb-3", isDark ? "bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-200 bg-clip-text text-transparent" : "text-slate-900")}>
-                Have a Developer Group?
-              </h2>
-              <p className={cn("text-sm leading-relaxed max-w-xl", isDark ? "text-white/60" : "text-slate-600")}>
-                Share your WhatsApp or Telegram developer group to connect with thousands of other tech enthusiasts across our network. Building a strong community helps everyone grow, learn, and collaborate together. All submissions will be carefully reviewed by our admin team before being published to ensure a high-quality environment for all members.
-              </p>
-            </div>
-            
-            <div className="relative z-10 w-full md:w-auto md:min-w-[400px]">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    {(() => {
-                      const p = getPlatform(link);
-                      if (p === 'whatsapp') return <WhatsAppIcon className={cn("h-5 w-5", isDark ? "text-cyan-400" : "text-cyan-600")} />;
-                      if (p === 'telegram') return <TelegramIcon className={cn("h-5 w-5", isDark ? "text-cyan-400" : "text-cyan-600")} />;
-                      return (
-                        <svg className={cn("h-5 w-5", isDark ? "text-white/40" : "text-slate-400")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                        </svg>
-                      );
-                    })()}
-                  </div>
-                  <input
-                    type="url"
-                    value={link}
-                    onChange={(e) => setLink(e.target.value)}
-                    placeholder="https://chat.whatsapp.com/... or https://t.me/..."
-                    required
-                    className={cn(
-                      "w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-1 transition-all",
-                      isDark 
-                        ? "bg-white/[0.04] border-white/[0.08] text-white placeholder-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/50" 
-                        : "bg-white border-black/10 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
-                    )}
-                  />
+                    <p className="text-[11px] text-[var(--text-muted)] text-center">
+                      Protected by rate-limiting &amp; spam verification.
+                    </p>
+                  </form>
                 </div>
-                <button
-                  type="submit"
-                  disabled={submitting || !link}
-                  className="w-full flex items-center justify-center px-8 py-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-all gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-                >
-                  {submitting ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      Submit Group
-                    </>
-                  )}
-                </button>
-              </form>
+              </div>
+
             </div>
           </div>
-        </motion.div>
+        </section>
 
       </div>
+    </div>
   );
 }

@@ -197,16 +197,16 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
               <div className={cn("mt-8 pt-6 border-t flex justify-end gap-4", isDark ? "border-slate-800" : "border-slate-200")}>
                 <Link
                   href="/dashboard/alerts"
-                  className={cn("px-6 py-3 border rounded-xl font-medium transition-all inline-flex items-center", isDark ? "bg-slate-800 hover:bg-slate-700 border-slate-700 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700")}
+                  className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors inline-flex items-center", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </Link>
                 <button
                   onClick={handleSaveAlerts}
                   disabled={isSavingAlerts}
-                  className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl font-medium shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
                 >
-                  {isSavingAlerts ? <RefreshCw className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+                  {isSavingAlerts ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   {isSavingAlerts ? "Saving..." : "Save Configuration"}
                 </button>
               </div>

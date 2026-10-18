@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Server, Globe, Download, Activity, CheckCircle2, ChevronRight, Play, Terminal, Code2, UploadCloud, Link2, FlaskConical, Copy, Check } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -197,8 +198,8 @@ export default function LookingGlassPage() {
                       onClick={() => setTestType(type)}
                       className={cn("py-2 sm:py-2.5 text-[10px] sm:text-sm font-semibold rounded-md uppercase tracking-wider transition-all truncate px-1", 
                         testType === type 
-                          ? (isDark ? "bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" : "bg-cyan-600 text-white shadow-sm")
-                          : (isDark ? "text-zinc-500 hover:text-zinc-300 hover:bg-white/5" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100")
+                          ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm"
+                          : (isDark ? "text-zinc-400 hover:text-zinc-200 hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
                       )}
                     >
                       {type}
@@ -222,18 +223,17 @@ export default function LookingGlassPage() {
                       disabled={isRunning}
                     />
                   </div>
-                  <button 
+                  <Button 
                     onClick={handleRunTest}
                     disabled={isRunning || !host.trim()}
-                    className={cn("w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 shrink-0 text-white text-sm sm:text-base", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm")}
+                    loading={isRunning}
+                    variant="primary"
+                    size="md"
+                    leftIcon={<Play className="w-4 h-4" />}
+                    className="w-full sm:w-auto shrink-0"
                   >
-                    {isRunning ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
                     Run Test
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Status Indicator */}

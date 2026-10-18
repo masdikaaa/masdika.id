@@ -285,7 +285,7 @@ export default function AdminLiveChat() {
                   <button
                     onClick={handleSend}
                     disabled={isSending || !replyText.trim() || status === 'OFFLINE'}
-                    className={cn("transition-all hover:from-cyan-400 hover:to-cyan-400 p-3 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center min-w-[50px]", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                    className="p-3 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50 flex items-center justify-center min-w-[50px]"
                   >
                     {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                   </button>

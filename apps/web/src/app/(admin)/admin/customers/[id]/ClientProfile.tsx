@@ -559,7 +559,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <h3 className={cn("font-semibold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} /> All Products & Services</h3>
               <button
                 onClick={() => setCreateCustomServiceModal(true)}
-                className={cn("px-3 py-1.5 text-xs font-semibold bg-cyan-500 hover:bg-cyan-600 rounded-lg transition-colors flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                className="px-3.5 py-1.5 text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-md shadow-sm transition-all flex items-center gap-1.5"
               >
                 + Custom Service
               </button>
@@ -699,7 +699,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <button 
                 onClick={() => setSuspendModalOpen(false)}
                 disabled={isSuspending}
-                className={cn("px-4 py-2 text-sm font-medium hover:text-white hover:bg-white/10 rounded-xl transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}
+                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -851,14 +851,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   type="button"
                   onClick={() => setCreateCustomServiceModal(false)}
                   disabled={isCreatingCs}
-                  className={cn("px-4 py-2 text-sm font-medium hover:text-white hover:bg-white/10 rounded-xl transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}
+                  className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={isCreatingCs}
-                  className={cn("px-4 py-2 text-sm font-medium bg-cyan-500 hover:bg-cyan-600 rounded-xl transition-colors disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                  className="px-5 py-2.5 text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg shadow-sm transition-all disabled:opacity-50"
                 >
                   {isCreatingCs ? 'Creating...' : 'Create & Generate Invoice'}
                 </button>

@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { TiltCard } from "@/components/animations/TiltCard";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 
@@ -83,25 +81,19 @@ export function TechStackMarquee() {
   return (
     <div className="relative w-full overflow-hidden flex flex-col gap-6 py-4">
       {/* Left and Right Gradients for smooth fade out */}
-      <div className={cn("absolute inset-y-0 left-0 w-24 z-10 pointer-events-none", isDark ? "bg-gradient-to-r from-[#011627] to-transparent" : "bg-gradient-to-r from-slate-50 to-transparent")} />
-      <div className={cn("absolute inset-y-0 right-0 w-24 z-10 pointer-events-none", isDark ? "bg-gradient-to-l from-[#011627] to-transparent" : "bg-gradient-to-l from-slate-50 to-transparent")} />
+      <div className="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none bg-gradient-to-r from-[var(--background)] to-transparent" />
+      <div className="absolute inset-y-0 right-0 w-24 z-10 pointer-events-none bg-gradient-to-l from-[var(--background)] to-transparent" />
 
       {/* Row 1 - Scrolling Left */}
       <div className="flex w-max animate-marquee hover:[animation-play-state:paused]" style={{ animationDuration: '60s' }}>
         {MARQUEE_1.map((skill, idx) => (
           <div key={`row1-${idx}`} className="w-[280px] mx-3 shrink-0">
-            <TiltCard intensity={10} className={cn(
-              "backdrop-blur-sm rounded-3xl p-6 transition-colors transform-gpu group cursor-pointer shadow-xl h-full flex flex-col items-center justify-center text-center border",
-              isDark ? "bg-[#0b1120]/80 border-white/10 hover:bg-white/5 hover:border-cyan-500/30" : "bg-white border-black/5 hover:border-cyan-500/30 hover:shadow-2xl"
-            )}>
-              <div className={cn(
-                "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 border",
-                isDark ? "bg-white/5 border-white/10 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30" : "bg-cyan-50 border-cyan-200 group-hover:bg-cyan-100 group-hover:border-cyan-300"
-              )}>
-                <img referrerPolicy="no-referrer" src={skill.img.startsWith('http') ? skill.img : `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.img}`} width="32" height="32" className={`h-8 w-auto filter drop-shadow-md ${needsInvert.includes(skill.name) ? (isDark ? "invert" : "") : ""}`} alt={skill.name} loading="lazy" decoding="async" />
+            <div className="rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-300 dark:hover:border-cyan-500/30 hover:shadow-md group">
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-3 border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-200 dark:group-hover:border-cyan-500/20 transition-colors">
+                <img referrerPolicy="no-referrer" src={skill.img.startsWith('http') ? skill.img : `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.img}`} width="28" height="28" className={`h-7 w-auto ${needsInvert.includes(skill.name) ? (isDark ? "invert opacity-80" : "") : ""}`} alt={skill.name} loading="lazy" decoding="async" />
               </div>
-              <h3 className={cn("text-lg font-bold transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{skill.name}</h3>
-            </TiltCard>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{skill.name}</h3>
+            </div>
           </div>
         ))}
       </div>
@@ -110,18 +102,12 @@ export function TechStackMarquee() {
       <div className="flex w-max animate-marquee-reverse hover:[animation-play-state:paused]" style={{ animationDuration: '60s' }}>
         {MARQUEE_2.map((skill, idx) => (
           <div key={`row2-${idx}`} className="w-[280px] mx-3 shrink-0">
-            <TiltCard intensity={10} className={cn(
-              "backdrop-blur-sm rounded-3xl p-6 transition-colors transform-gpu group cursor-pointer shadow-xl h-full flex flex-col items-center justify-center text-center border",
-              isDark ? "bg-[#0b1120]/80 border-white/10 hover:bg-white/5 hover:border-cyan-500/30" : "bg-white border-black/5 hover:border-cyan-500/30 hover:shadow-2xl"
-            )}>
-              <div className={cn(
-                "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 border",
-                isDark ? "bg-white/5 border-white/10 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30" : "bg-cyan-50 border-cyan-200 group-hover:bg-cyan-100 group-hover:border-cyan-300"
-              )}>
-                <img referrerPolicy="no-referrer" src={skill.img.startsWith('http') ? skill.img : `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.img}`} width="32" height="32" className={`h-8 w-auto filter drop-shadow-md ${needsInvert.includes(skill.name) ? (isDark ? "invert" : "") : ""}`} alt={skill.name} loading="lazy" decoding="async" />
+            <div className="rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-300 dark:hover:border-cyan-500/30 hover:shadow-md group">
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-3 border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-200 dark:group-hover:border-cyan-500/20 transition-colors">
+                <img referrerPolicy="no-referrer" src={skill.img.startsWith('http') ? skill.img : `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${skill.img}`} width="28" height="28" className={`h-7 w-auto ${needsInvert.includes(skill.name) ? (isDark ? "invert opacity-80" : "") : ""}`} alt={skill.name} loading="lazy" decoding="async" />
               </div>
-              <h3 className={cn("text-lg font-bold transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{skill.name}</h3>
-            </TiltCard>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{skill.name}</h3>
+            </div>
           </div>
         ))}
       </div>

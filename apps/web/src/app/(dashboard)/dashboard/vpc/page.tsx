@@ -731,7 +731,7 @@ export default function VpcDashboardPage() {
               </AnimatePresence>
               <button
                 onClick={() => setShowAddVpcModal(true)}
-                className={cn("bg-cyan-500 hover:bg-cyan-600 border border-transparent px-4 py-2 rounded-lg flex items-center gap-2 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 Create VPC
@@ -957,7 +957,7 @@ export default function VpcDashboardPage() {
               </AnimatePresence>
               <button
                 onClick={() => setShowAddPeeringModal(true)}
-                className={cn("bg-cyan-500 hover:bg-cyan-600 border border-transparent px-4 py-2 rounded-lg flex items-center gap-2 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
               >
                 <Link2 className="w-4 h-4" />
                 Create Peering
@@ -1161,7 +1161,7 @@ export default function VpcDashboardPage() {
               <div className="flex justify-end gap-3 mt-8">
                 <button
                   onClick={() => setShowAddVpcModal(false)}
-                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900")}
+                  className={cn("px-5 py-2.5 rounded-lg font-medium text-sm border transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "border-slate-800 hover:bg-white/5 text-zinc-300" : "border-slate-200 hover:bg-slate-50 text-slate-700")}
                   disabled={saving}
                 >
                   Cancel
@@ -1169,7 +1169,7 @@ export default function VpcDashboardPage() {
                 <button
                   onClick={handleCreateVpc}
                   disabled={saving}
-                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-sm" : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md")}
+                  className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   Create VPC
@@ -1260,14 +1260,14 @@ export default function VpcDashboardPage() {
                 <button
                   onClick={handleAddPeeringSubmit}
                   disabled={saving}
-                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-[#011627] shadow-sm" : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md")}
+                  className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   Create Peering
                 </button>
                 <button
                   onClick={() => setShowAddPeeringModal(false)}
-                  className={cn("px-6 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900")}
+                  className={cn("px-5 py-2.5 rounded-lg font-medium text-sm border transition-all flex items-center justify-center gap-2 disabled:opacity-50", isDark ? "border-slate-800 hover:bg-white/5 text-zinc-300" : "border-slate-200 hover:bg-slate-50 text-slate-700")}
                   disabled={saving}
                 >
                   Cancel
@@ -1370,7 +1370,7 @@ export default function VpcDashboardPage() {
               <div className="flex justify-end gap-3 mt-8">
                 <button
                   onClick={() => setShowAttachVmModal(null)}
-                  className={cn("px-4 py-2 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                  className={cn("px-4 py-2 rounded-lg border text-sm font-medium transition-colors", isDark ? "border-slate-800 text-zinc-400 hover:bg-white/5" : "border-slate-200 text-slate-600 hover:bg-slate-50")}
                   disabled={saving}
                 >
                   Cancel
@@ -1378,7 +1378,7 @@ export default function VpcDashboardPage() {
                 <button
                   onClick={handleAttachVm}
                   disabled={saving || !attachForm.vpsId || !attachForm.privateIpAddress.trim()}
-                  className={cn("bg-cyan-500 hover:bg-cyan-600 px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50", isDark ? "text-white" : "text-slate-900")}
+                  className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 disabled:opacity-50 text-slate-950 shadow-sm"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   Attach VM

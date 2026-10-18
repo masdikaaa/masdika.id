@@ -754,13 +754,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               <div className={cn("flex rounded-lg p-1 border w-full sm:w-max", isDark ? "bg-black/50 border-white/10" : "bg-slate-200 border-slate-300")}>
                 <button
                   onClick={() => setDiskType("HDD")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center justify-center gap-2", diskType === "HDD" ? "bg-cyan-600 text-white shadow-sm" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
+                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition-all flex items-center justify-center gap-2", diskType === "HDD" ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
                 >
                   <HardDrive className="w-4 h-4" /> HDD
                 </button>
                 <button
                   onClick={() => setDiskType("SSD")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center justify-center gap-2", diskType === "SSD" ? "bg-cyan-600 text-white shadow-sm" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
+                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition-all flex items-center justify-center gap-2", diskType === "SSD" ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
                 >
                   <Disc className="w-4 h-4" /> SSD
                 </button>
@@ -1230,7 +1230,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                               type="button"
                               onClick={handleCreateVpcInline}
                               disabled={isSubmittingVpc}
-                              className="bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
+                              className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2"
                             >
                               {isSubmittingVpc ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
                               Create VPC
@@ -1243,7 +1243,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                           <button 
                             type="button"
                             onClick={() => setIsCreatingVpc(true)} 
-                            className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-semibold transition-colors text-xs"
                           >
                             Create VPC Network
                           </button>
@@ -1820,7 +1820,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 })())) ||
                 (serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0)
               }
-              className={cn("group w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10", "shadow-sm")}
+              className={cn("group w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-3.5 px-6 rounded-lg flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500")}
             >
               {isDisabled ? "Coming Soon" : isSubmitting ? (
                 <>

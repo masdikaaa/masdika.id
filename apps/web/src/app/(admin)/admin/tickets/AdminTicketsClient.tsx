@@ -209,7 +209,7 @@ export default function AdminTicketsClient() {
             )}
             <button
               onClick={() => setIsModalOpen(true)}
-              className={cn("col-span-1 sm:col-span-1 px-2 sm:px-4 py-2 rounded-xl text-sm font-bold transition-colors shrink-0 flex items-center justify-center gap-1 sm:gap-2", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
+              className="col-span-1 sm:col-span-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1 sm:gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="truncate">Open Ticket</span>
@@ -529,14 +529,14 @@ export default function AdminTicketsClient() {
                     type="button"
                     onClick={closeModal}
                     disabled={isSubmitting}
-                    className={cn("w-full sm:w-auto px-4 py-2.5 text-sm font-medium hover:text-white hover:bg-white/10 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("w-full sm:w-auto px-4 py-2.5 text-sm font-medium border rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={cn("w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap", isDark ? "bg-cyan-500 hover:bg-cyan-600 text-[#0a0b1a]" : "bg-slate-900 hover:bg-slate-800 text-white")}
+                    className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                   >
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     Submit Ticket

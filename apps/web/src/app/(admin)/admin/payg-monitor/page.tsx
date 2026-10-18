@@ -153,7 +153,7 @@ export default function PaygMonitorPage() {
               <button
                 onClick={handleSave}
                 disabled={saving || loading}
-                className={cn("w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all hover:from-cyan-400 hover:to-cyan-400 transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-cyan-600 hover:bg-cyan-700 text-white")}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 Save Setting

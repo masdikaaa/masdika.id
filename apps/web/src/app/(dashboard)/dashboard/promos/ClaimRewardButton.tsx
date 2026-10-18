@@ -58,15 +58,15 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
 
   if (claimed) {
     return (
-      <div className="w-full bg-cyan-500/10 text-cyan-400 font-bold py-3 rounded-xl text-center border border-cyan-500/20 cursor-default flex items-center justify-center gap-2">
-        <Check className="w-5 h-5" /> Reward Claimed!
+      <div className="w-full bg-cyan-500/10 text-cyan-400 font-semibold py-2.5 rounded-lg text-center border border-cyan-500/20 cursor-default flex items-center justify-center gap-2 text-sm">
+        <Check className="w-4 h-4" /> Reward Claimed!
       </div>
     );
   }
 
   if (isExpired) {
     return (
-      <div className="w-full bg-rose-500/10 text-rose-400 font-bold py-3 rounded-xl text-center border border-rose-500/20 cursor-default">
+      <div className="w-full bg-rose-500/10 text-rose-400 font-semibold py-2.5 rounded-lg text-center border border-rose-500/20 cursor-default text-sm">
         Promo Expired
       </div>
     );
@@ -74,7 +74,7 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
 
   if (isFullyClaimed) {
     return (
-      <div className={cn("w-full bg-zinc-500/10 font-bold py-3 rounded-xl text-center border border-zinc-500/20 cursor-default", isDark ? "text-zinc-400" : "text-slate-500")}>
+      <div className={cn("w-full bg-zinc-500/10 font-semibold py-2.5 rounded-lg text-center border border-zinc-500/20 cursor-default text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
         Fully Claimed
       </div>
     );
@@ -84,13 +84,13 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
     <button
       onClick={handleClaim}
       disabled={loading}
-      className="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow"
+      className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 group shadow-sm text-sm"
     >
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin" />
+        <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
         <>
-          <Gift className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <Gift className="w-4 h-4 group-hover:scale-110 transition-transform" />
           Claim {formatRupiah(rewardAmount)}
         </>
       )}

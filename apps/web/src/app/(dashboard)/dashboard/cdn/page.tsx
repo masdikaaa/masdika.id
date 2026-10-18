@@ -680,7 +680,7 @@ export default function UserCDNLibrary() {
             <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
               You need an active File CDN subscription to start managing, hosting, and delivering your files securely.
             </p>
-            <Link href="/dashboard/checkout?service=CDN" className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all shadow-sm">
+            <Link href="/dashboard/checkout?service=CDN" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-2.5 px-5 rounded-lg text-sm transition-all shadow-sm">
               View Plans
             </Link>
           </div>
@@ -730,12 +730,12 @@ export default function UserCDNLibrary() {
             <button onClick={() => setViewMode("list")} className={cn("p-2 rounded-xl transition-all", viewMode === "list" ? (isDark ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "bg-slate-100 text-cyan-700 shadow-sm") : (isDark ? "text-zinc-500 hover:text-white" : "text-slate-500 hover:text-slate-900"))}><ListIcon className="w-4 h-4" /></button>
           </div>
 
-          <button onClick={() => setShowCreateFolder(true)} disabled={isSuspended} className={cn("border px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-sm flex-1 sm:flex-none disabled:opacity-50", isDark ? "bg-[#060b14] border-slate-800 hover:bg-slate-800/40 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
+          <button onClick={() => setShowCreateFolder(true)} disabled={isSuspended} className={cn("border px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 shrink-0 transition-all shadow-sm flex-1 sm:flex-none disabled:opacity-50", isDark ? "bg-[#060b14] border-slate-800 hover:bg-slate-800/40 text-white" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}>
             <FolderPlus className="w-4 h-4" /> New Folder
           </button>
 
           <input type="file" multiple ref={fileInputRef} onChange={handleFileSelect} className="hidden" disabled={isSuspended} />
-          <button onClick={() => fileInputRef.current?.click()} disabled={isSuspended} className={cn("px-5 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 flex-1 sm:flex-none transition-all disabled:opacity-50", isDark ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm hover:shadow-md")}>
+          <button onClick={() => fileInputRef.current?.click()} disabled={isSuspended} className="px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 flex-1 sm:flex-none transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
             <UploadCloud className="w-4 h-4" /> Upload
           </button>
         </div>
@@ -988,8 +988,8 @@ export default function UserCDNLibrary() {
               </h3>
               <input autoFocus type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Enter folder name" className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
               <div className="flex justify-end gap-3 relative z-10">
-                <button onClick={() => setShowCreateFolder(false)} className={cn("px-5 py-3 rounded-xl transition-colors font-medium border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
-                <button onClick={handleCreateFolder} className={cn("px-6 py-3 text-white font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>Create</button>
+                <button onClick={() => setShowCreateFolder(false)} className={cn("px-4 py-2.5 rounded-lg transition-colors font-medium text-sm border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-slate-800" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
+                <button onClick={handleCreateFolder} className="px-5 py-2.5 text-slate-950 font-semibold text-sm rounded-lg transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm">Create</button>
               </div>
             </motion.div>
           </motion.div>
@@ -1005,8 +1005,8 @@ export default function UserCDNLibrary() {
               </h3>
               <input autoFocus type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
               <div className="flex justify-end gap-3 relative z-10">
-                <button onClick={() => setShowRenameModal(null)} className={cn("px-5 py-3 rounded-xl transition-colors font-medium border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
-                <button onClick={handleRename} className={cn("px-6 py-3 text-white font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>Rename</button>
+                <button onClick={() => setShowRenameModal(null)} className={cn("px-4 py-2.5 rounded-lg transition-colors font-medium text-sm border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-slate-800" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
+                <button onClick={handleRename} className="px-5 py-2.5 text-slate-950 font-semibold text-sm rounded-lg transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm">Rename</button>
               </div>
             </motion.div>
           </motion.div>
@@ -1022,8 +1022,8 @@ export default function UserCDNLibrary() {
               </h3>
               <input autoFocus type="text" value={moveDest} onChange={e => setMoveDest(e.target.value)} placeholder="Destination Path (e.g. /images)" className={cn("w-full rounded-2xl p-4 mb-6 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm relative z-10 border", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} />
               <div className="flex justify-end gap-3 relative z-10">
-                <button onClick={() => setShowMoveModal(null)} className={cn("px-5 py-3 rounded-xl transition-colors font-medium border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
-                <button onClick={handleMove} className={cn("px-6 py-3 text-white font-bold rounded-xl transition-all", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}>Move</button>
+                <button onClick={() => setShowMoveModal(null)} className={cn("px-4 py-2.5 rounded-lg transition-colors font-medium text-sm border", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-slate-800" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200")}>Cancel</button>
+                <button onClick={handleMove} className="px-5 py-2.5 text-slate-950 font-semibold text-sm rounded-lg transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm">Move</button>
               </div>
             </motion.div>
           </motion.div>
@@ -1125,16 +1125,16 @@ export default function UserCDNLibrary() {
                 <button
                   onClick={() => { setShowUploadModal(false); setSelectedFiles([]); if(fileInputRef.current) fileInputRef.current.value = ""; }}
                   disabled={uploading}
-                  className={cn("flex-1 py-3.5 rounded-2xl border font-medium transition-colors disabled:opacity-50", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-50")}
+                  className={cn("flex-1 py-2.5 px-4 rounded-lg border font-medium text-sm transition-colors disabled:opacity-50", isDark ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-50")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpload}
                   disabled={uploading}
-                  className={cn("flex-1 py-3.5 rounded-2xl text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none", isDark ? "bg-cyan-500 hover:bg-cyan-400 shadow-sm" : "bg-cyan-600 hover:bg-cyan-700 shadow-sm hover:shadow-md")}
+                  className="flex-1 py-2.5 px-4 rounded-lg text-slate-950 font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm"
                 >
-                  {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
                   Confirm Upload
                 </button>
               </div>
