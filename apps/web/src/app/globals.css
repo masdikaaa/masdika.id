@@ -203,11 +203,15 @@ html.dark .animate-float-4 {
   box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

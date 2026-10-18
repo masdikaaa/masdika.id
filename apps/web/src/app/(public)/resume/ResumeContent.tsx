@@ -225,7 +225,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col items-center justify-center text-center hover:border-slate-400 dark:hover:border-white/30 transition-colors shadow-sm"
+              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col items-center justify-center text-center hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div className="text-6xl sm:text-7xl font-black text-[var(--text-primary)] mb-2 tracking-tight">
                 4+
@@ -241,10 +241,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-              className="md:col-span-1 lg:col-span-2 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-slate-400 dark:hover:border-white/30 transition-colors shadow-sm"
+              className="md:col-span-1 lg:col-span-2 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div className="flex items-center gap-4 mb-5">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 shrink-0">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
                   <Link2 className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Business</h3>
@@ -260,10 +260,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-slate-400 dark:hover:border-white/30 transition-colors shadow-sm"
+              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div className="flex items-center gap-4 mb-5">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 shrink-0">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
                   <Megaphone className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Partners</h3>
@@ -279,7 +279,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex items-center justify-between gap-4 hover:border-slate-400 dark:hover:border-white/30 transition-colors shadow-sm"
+              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex items-center justify-between gap-4 hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div>
                 <div className="text-4xl sm:text-5xl font-black text-[var(--text-primary)] mb-1 tracking-tight">
@@ -289,7 +289,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   Cloud<br />Deployments
                 </p>
               </div>
-              <div className="w-14 h-14 rounded-full border border-dashed border-slate-300 dark:border-white/20 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-full border border-dashed border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
                 <Lock className="w-6 h-6" />
               </div>
             </motion.div>

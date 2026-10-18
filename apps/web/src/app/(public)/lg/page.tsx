@@ -433,39 +433,39 @@ export default function LookingGlassPage() {
               </div>
 
               {/* Network Test Terminal Module */}
-              <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-4 sm:p-8 shadow-sm space-y-5 sm:space-y-6 w-full max-w-full overflow-hidden">
                 
                 {/* Module Header with Live Status Indicator */}
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-primary)] pb-5">
-                  <div className="flex items-center gap-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 border-b border-[var(--border-primary)] pb-4 sm:pb-5">
+                  <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
                       <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h3 className="text-lg sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
+                      <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
                         Interactive Diagnostic Probe
                       </h3>
-                      <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+                      <p className="text-[11px] sm:text-sm text-[var(--text-secondary)]">
                         Test ICMP ping reachability, traceroute hops, and MTR telemetry.
                       </p>
                     </div>
                   </div>
 
                   {/* Status Indicator */}
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)]">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)]">
                     <span className={cn("w-2 h-2 rounded-full", isRunning ? "bg-cyan-400 animate-pulse" : output ? "bg-cyan-400" : "bg-slate-400")} />
                     <span>{isRunning ? "DIAGNOSTIC IN PROGRESS" : output ? "COMMAND COMPLETED" : "AWAITING TARGET"}</span>
                   </div>
                 </div>
                 
                 {/* Protocol Tabs (Ping, MTR, Traceroute) */}
-                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] max-w-md">
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] w-full sm:max-w-md">
                   {(["ping", "mtr", "traceroute"] as const).map((type) => (
                     <button
                       key={type}
                       onClick={() => setTestType(type)}
                       className={cn(
-                        "flex-1 py-2 text-xs font-mono font-bold rounded-lg uppercase tracking-wider transition-all text-center",
+                        "flex-1 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-lg uppercase tracking-wider transition-all text-center",
                         testType === type 
                           ? "bg-[var(--surface)] text-cyan-600 dark:text-cyan-400 shadow-sm border border-[var(--border-primary)]"
                           : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium"
@@ -477,7 +477,7 @@ export default function LookingGlassPage() {
                 </div>
 
                 {/* Target Input and Action Button */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <div className="flex-1 relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Globe className="w-4 h-4 text-[var(--text-muted)]" />
@@ -488,7 +488,7 @@ export default function LookingGlassPage() {
                       onChange={(e) => setHost(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleRunTest()}
                       placeholder="e.g. 1.1.1.1, google.com, or your IP"
-                      className="w-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl py-3 pl-10 pr-4 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
+                      className="w-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl py-2.5 sm:py-3 pl-10 pr-4 text-xs sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
                       disabled={isRunning}
                     />
                   </div>
@@ -507,19 +507,21 @@ export default function LookingGlassPage() {
 
                 {/* Developer Terminal Box */}
                 <div 
-                  className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-transparent shadow-2xl"
+                  className="relative rounded-2xl overflow-hidden border border-slate-700/60 dark:border-slate-800 shadow-2xl w-full"
                   style={{ backgroundColor: "#060d19" }}
                 >
                   {/* Terminal Header Bar */}
                   <div 
-                    className="flex items-center justify-between px-4 py-3 border-b border-slate-800/40 text-xs font-mono select-none"
+                    className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800/60 text-xs font-mono select-none gap-2"
                     style={{ backgroundColor: "#0c1425" }}
                   >
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
-                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
-                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
-                      <span className="ml-2 text-slate-200 font-mono font-medium text-xs sm:text-sm tracking-tight truncate">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
+                      </div>
+                      <span className="ml-1 text-slate-200 font-mono font-medium text-[11px] sm:text-sm tracking-tight truncate">
                         masdika@sidoarjo-edge:~$ {testType} {host ? host : "8.8.8.8"}
                       </span>
                     </div>
@@ -527,10 +529,21 @@ export default function LookingGlassPage() {
                     {output && (
                       <button
                         onClick={handleCopyOutput}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-semibold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 hover:bg-cyan-900/40 transition-colors"
+                        title={copiedOutput ? "Copied to clipboard" : "Copy terminal output"}
+                        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-mono font-bold !text-white bg-slate-800 hover:bg-slate-700 border border-slate-600/80 hover:border-cyan-400/60 transition-all shrink-0 active:scale-95 shadow-md group"
+                        style={{ color: "#ffffff" }}
                       >
-                        {copiedOutput ? <Check className="w-3.5 h-3.5 text-cyan-300" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedOutput ? "Copied" : "Copy Output"}</span>
+                        {copiedOutput ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" style={{ color: "#34d399" }} />
+                            <span className="font-bold hidden sm:inline !text-emerald-400" style={{ color: "#34d399" }}>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5 text-cyan-400 group-hover:text-cyan-300 shrink-0" style={{ color: "#22d3ee" }} />
+                            <span className="font-bold tracking-wide hidden sm:inline !text-white group-hover:!text-cyan-200" style={{ color: "#ffffff" }}>Copy</span>
+                          </>
+                        )}
                       </button>
                     )}
                   </div>
@@ -538,17 +551,17 @@ export default function LookingGlassPage() {
                   {/* Terminal Content Screen */}
                   <div 
                     ref={terminalRef}
-                    className="p-5 sm:p-6 h-[340px] sm:h-[400px] overflow-y-auto overflow-x-hidden font-mono text-[13px] sm:text-sm text-slate-100 leading-[1.7] selection:bg-cyan-500/30 custom-scrollbar"
+                    className="p-3.5 sm:p-6 h-[340px] sm:h-[400px] overflow-y-auto overflow-x-auto font-mono text-[11px] sm:text-xs md:text-sm text-slate-100 leading-relaxed selection:bg-cyan-500/30 custom-scrollbar"
                   >
                     {!output && (
-                      <div className="space-y-2 text-slate-400 font-mono">
+                      <div className="space-y-1.5 sm:space-y-2 text-slate-400 font-mono text-[11px] sm:text-xs md:text-sm">
                         <p className="text-cyan-400 font-bold"># Masdika Looking Glass Telemetry v2.4 (AS63859)</p>
                         <p># Edge Router Location: Sidoarjo Datacenter, East Java, Indonesia</p>
                         <p># Enter a remote IP or domain above and click &quot;Run Test&quot;.</p>
                         <p className="text-cyan-300 mt-4">$ _</p>
                       </div>
                     )}
-                    <pre className="whitespace-pre-wrap break-all sm:break-words text-slate-100 font-mono leading-relaxed">{output}</pre>
+                    <pre className="font-mono text-[11px] sm:text-xs md:text-sm text-slate-100 leading-relaxed whitespace-pre font-normal inline-block min-w-full">{output}</pre>
                     {isRunning && <span className="animate-pulse inline-block w-2 h-4 bg-cyan-400 ml-1 translate-y-0.5" />}
                   </div>
                 </div>

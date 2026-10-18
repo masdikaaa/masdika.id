@@ -1117,8 +1117,8 @@ export default function ResellerApiClient() {
 
             {/* Sidebar */}
             <aside 
-              className="w-64 flex-shrink-0 border-r border-[var(--border-primary)] bg-[var(--surface)] hidden lg:block sticky top-28 self-start max-h-[calc(100vh-8rem)] overflow-y-auto rounded-l-2xl z-20"
-              style={{ top: '112px' }}
+              className="w-64 flex-shrink-0 border-r border-[var(--border-primary)] bg-[var(--surface)] hidden lg:block sticky self-start overflow-y-auto rounded-l-2xl z-20 custom-scrollbar"
+              style={{ position: 'sticky', top: '88px', maxHeight: 'calc(100vh - 6.5rem)' }}
             >
               <div className="p-5 space-y-6">
                   {navSections.map((section) => (
