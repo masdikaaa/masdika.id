@@ -106,7 +106,7 @@ export function AnnouncementModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`relative w-full max-w-lg md:max-w-2xl bg-[#0b1322] border border-slate-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]`}
+            className={`relative w-full max-w-lg md:max-w-2xl bg-[#0c0c0e] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]`}
           >
             <button 
               onClick={handleClose}

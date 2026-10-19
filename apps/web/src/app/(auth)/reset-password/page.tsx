@@ -74,21 +74,18 @@ function ResetPasswordForm() {
   if (!token) return null;
 
   return (
-    <div className={cn("min-h-screen w-full flex overflow-hidden items-center justify-center p-4 relative", isDark ? "text-white" : "text-slate-900")}>
-      {/* Clean ambient background with subtle grid lines */}
+    <div className={cn("min-h-screen w-full flex overflow-hidden items-center justify-center p-4 relative font-sans selection:bg-cyan-500/30", isDark ? "text-white" : "text-slate-900")}>
+      {/* Clean atmospheric cyan background matching frontend */}
       <div 
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
-        style={{ backgroundColor: isDark ? "#050B14" : "#f8fafb" }}
+        style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
       >
         <div 
-          className="absolute inset-0 transition-opacity duration-500" 
+          className="absolute inset-0 pointer-events-none"
           style={{
-            opacity: isDark ? 0.07 : 0.05,
-            backgroundImage: `
-              linear-gradient(to right, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px),
-              linear-gradient(to bottom, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
+            background: isDark
+              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
+              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
           }}
         />
       </div>
@@ -107,41 +104,54 @@ function ResetPasswordForm() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className={cn("w-full backdrop-blur-sm border rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden", isDark ? "bg-[#020d18]/50 border-white/5" : "bg-white/70 border-slate-200")}
+          className={cn(
+            "w-full backdrop-blur-xl border rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all duration-300",
+            isDark ? "bg-[#0c0c0e]/95 border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)]" : "bg-white/95 border-slate-200/80 shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
+          )}
         >
           {/* Decorative glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-          <h1 className={cn("text-3xl font-bold drop-shadow-sm mb-3 text-center", isDark ? "text-white" : "text-[#0F3B4A]")}>
+          <h1 className={cn("text-3xl font-extrabold drop-shadow-sm mb-2 text-center tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Reset Password
           </h1>
-          <p className={cn("mb-10 text-sm text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("mb-8 text-sm text-center font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
             Enter your new password below.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2.5">
-              <label className={cn("text-[11px] font-bold uppercase tracking-widest pl-1", isDark ? "text-cyan-500/80" : "text-cyan-700")}>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className={cn("text-[11px] font-bold uppercase tracking-widest pl-1", isDark ? "text-cyan-400" : "text-cyan-600")}>
                 New Password
               </label>
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                <div className={cn("relative flex items-center border rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-1", isDark ? "bg-[#0a1624] border-white/5 focus-within:border-cyan-500/30 focus-within:bg-[#0c1b2b] focus-within:ring-cyan-500/30 shadow-inner" : "bg-white border-slate-200 focus-within:border-cyan-500 focus-within:ring-cyan-500 shadow-sm")}>
+                <div className={cn(
+                  "relative flex items-center border rounded-xl overflow-hidden transition-all duration-300 shadow-inner",
+                  isDark
+                    ? "bg-[#121216] border-white/10 focus-within:border-cyan-500/50 focus-within:bg-[#18181d] focus-within:ring-1 focus-within:ring-cyan-500/30"
+                    : "bg-slate-50 border-slate-200 focus-within:border-cyan-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-cyan-400/40 shadow-sm"
+                )}>
                   <div className="pl-4 pr-3 flex items-center justify-center">
-                    <Lock className={cn("w-5 h-5 transition-colors", isDark ? "text-zinc-500 group-focus-within:text-cyan-400" : "text-slate-400 group-focus-within:text-cyan-600")} />
+                    <Lock className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-500 group-focus-within:text-cyan-400" : "text-slate-400 group-focus-within:text-cyan-600")} />
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     placeholder="Min. 8 characters"
-                    className={cn("w-full py-3.5 pr-12 bg-transparent focus:outline-none font-medium", isDark ? "text-white placeholder:text-zinc-600" : "text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full py-3.5 pr-12 bg-transparent focus:outline-none font-medium text-sm", isDark ? "text-white placeholder:text-zinc-500" : "text-slate-900 placeholder:text-slate-400")}
                     required
                     minLength={8}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className={cn("absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-colors", isDark ? "text-zinc-500 hover:text-cyan-400 bg-gradient-to-l from-[#0a1624] via-[#0a1624] to-transparent group-focus-within:from-[#0c1b2b] group-focus-within:via-[#0c1b2b]" : "text-slate-400 hover:text-cyan-600 bg-gradient-to-l from-white via-white to-transparent")}
+                    className={cn(
+                      "absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-colors",
+                      isDark
+                        ? "text-zinc-500 hover:text-cyan-400 bg-gradient-to-l from-[#121216] via-[#121216] to-transparent group-focus-within:from-[#18181d] group-focus-within:via-[#18181d]"
+                        : "text-slate-400 hover:text-cyan-600 bg-gradient-to-l from-white via-white to-transparent"
+                    )}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -149,28 +159,38 @@ function ResetPasswordForm() {
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              <label className={cn("text-[11px] font-bold uppercase tracking-widest pl-1", isDark ? "text-cyan-500/80" : "text-cyan-700")}>
+            <div className="space-y-1.5">
+              <label className={cn("text-[11px] font-bold uppercase tracking-widest pl-1", isDark ? "text-cyan-400" : "text-cyan-600")}>
                 Confirm Password
               </label>
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                <div className={cn("relative flex items-center border rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-1", isDark ? "bg-[#0a1624] border-white/5 focus-within:border-cyan-500/30 focus-within:bg-[#0c1b2b] focus-within:ring-cyan-500/30 shadow-inner" : "bg-white border-slate-200 focus-within:border-cyan-500 focus-within:ring-cyan-500 shadow-sm")}>
+                <div className={cn(
+                  "relative flex items-center border rounded-xl overflow-hidden transition-all duration-300 shadow-inner",
+                  isDark
+                    ? "bg-[#121216] border-white/10 focus-within:border-cyan-500/50 focus-within:bg-[#18181d] focus-within:ring-1 focus-within:ring-cyan-500/30"
+                    : "bg-slate-50 border-slate-200 focus-within:border-cyan-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-cyan-400/40 shadow-sm"
+                )}>
                   <div className="pl-4 pr-3 flex items-center justify-center">
-                    <Lock className={cn("w-5 h-5 transition-colors", isDark ? "text-zinc-500 group-focus-within:text-cyan-400" : "text-slate-400 group-focus-within:text-cyan-600")} />
+                    <Lock className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-500 group-focus-within:text-cyan-400" : "text-slate-400 group-focus-within:text-cyan-600")} />
                   </div>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     placeholder="Repeat your password"
-                    className={cn("w-full py-3.5 pr-12 bg-transparent focus:outline-none font-medium", isDark ? "text-white placeholder:text-zinc-600" : "text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full py-3.5 pr-12 bg-transparent focus:outline-none font-medium text-sm", isDark ? "text-white placeholder:text-zinc-500" : "text-slate-900 placeholder:text-slate-400")}
                     required
                     minLength={8}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className={cn("absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-colors", isDark ? "text-zinc-500 hover:text-cyan-400 bg-gradient-to-l from-[#0a1624] via-[#0a1624] to-transparent group-focus-within:from-[#0c1b2b] group-focus-within:via-[#0c1b2b]" : "text-slate-400 hover:text-cyan-600 bg-gradient-to-l from-white via-white to-transparent")}
+                    className={cn(
+                      "absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center transition-colors",
+                      isDark
+                        ? "text-zinc-500 hover:text-cyan-400 bg-gradient-to-l from-[#121216] via-[#121216] to-transparent group-focus-within:from-[#18181d] group-focus-within:via-[#18181d]"
+                        : "text-slate-400 hover:text-cyan-600 bg-gradient-to-l from-white via-white to-transparent"
+                    )}
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -181,18 +201,18 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg px-6 py-3 font-semibold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg px-6 py-3 font-semibold tracking-wide transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-6 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center">
             <Link
               href="/login"
-              className={cn("inline-flex items-center gap-2 text-sm transition-colors group", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}
+              className={cn("inline-flex items-center gap-2 text-xs font-semibold transition-colors group", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
             >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
               Back to log in
             </Link>
           </div>

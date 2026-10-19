@@ -73,9 +73,9 @@ const TunnelIcon = ({ className }: { className?: string }) => (
 );
 
 const SIDEBAR_LINKS = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-blue-400", group: "Main" },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-cyan-400", group: "Main" },
   { name: "My Services", href: "/dashboard/services", icon: Layers, color: "text-cyan-400", group: "Main" },
-  { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-blue-400", group: "Compute & Network" },
+  { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Managed K3s", href: "/dashboard/k3s", icon: SiKubernetes, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Compute & Network" },
@@ -89,10 +89,10 @@ const SIDEBAR_LINKS = [
   { name: "API Keys", href: "/dashboard/api-keys", icon: Key, color: "text-amber-400", group: "Tools" },
   { name: "Reseller API", href: "/dashboard/reseller-api", icon: Code2, color: "text-cyan-400", group: "Tools" },
   { name: "Support Tickets", href: "/dashboard/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Support" },
-  { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-purple-400", group: "Affiliate" },
+  { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-cyan-400", group: "Affiliate" },
   { name: "Promo & Rewards", href: "/dashboard/promos", icon: Ticket, color: "text-cyan-400", group: "Promotions" },
   { name: "Order Service", href: "/dashboard/checkout", icon: ArrowUpCircle, color: "text-cyan-400", group: "Billing & Account" },
-  { name: "Billing & Invoices", href: "/dashboard/billing", icon: Receipt, color: "text-cyan-500", group: "Billing & Account" },
+  { name: "Billing & Invoices", href: "/dashboard/billing", icon: Receipt, color: "text-cyan-400", group: "Billing & Account" },
   { name: "Settings", href: "/dashboard/settings", icon: Settings, color: "text-zinc-400", group: "Billing & Account" },
 ];
 
@@ -192,22 +192,19 @@ export default function DashboardLayoutClient({
   };
 
   return (
-    <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#050B14] text-white" : "bg-[#f8fafb] text-slate-900")}>
+    <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#000000] text-white" : "bg-[#f8fafb] text-slate-900")}>
 
-      {/* Clean ambient background with subtle grid lines */}
+      {/* Clean atmospheric cyan background matching frontend */}
       <div 
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
-        style={{ backgroundColor: isDark ? "#050B14" : "#f8fafb" }}
+        style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
       >
         <div 
-          className="absolute inset-0 transition-opacity duration-500" 
+          className="absolute inset-0 pointer-events-none"
           style={{
-            opacity: isDark ? 0.07 : 0.05,
-            backgroundImage: `
-              linear-gradient(to right, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px),
-              linear-gradient(to bottom, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
+            background: isDark
+              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
+              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
           }}
         />
       </div>
@@ -227,11 +224,11 @@ export default function DashboardLayoutClient({
         aria-label="Customer navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-[100] w-64 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 flex flex-col border-r",
-          isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm",
+          isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200 shadow-sm",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className={cn("h-16 flex items-center px-6 border-b", isDark ? "border-slate-800" : "border-slate-200")}>
+        <div className={cn("h-16 flex items-center px-6 border-b", isDark ? "border-white/10" : "border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
@@ -250,7 +247,7 @@ export default function DashboardLayoutClient({
             }, {} as Record<string, typeof SIDEBAR_LINKS>)
           ).map(([groupName, links]) => (
             <div key={groupName}>
-              <h3 className={cn("px-3 mb-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-400" : "text-slate-400")}>{groupName}</h3>
+              <h3 className={cn("px-3 mb-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-500" : "text-slate-400")}>{groupName}</h3>
               <div className="space-y-1">
                 {links.map((link) => {
                   const isActive = pathname === link.href;
@@ -261,12 +258,12 @@ export default function DashboardLayoutClient({
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
-                        isActive ? "bg-cyan-500 text-slate-900 shadow-sm font-bold" : cn("transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/60" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")
+                        isActive ? "bg-cyan-400 text-slate-950 shadow-sm font-bold" : cn("transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
                       )}
                     >
                       <link.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", 
                         isActive 
-                          ? "" 
+                          ? "text-slate-950" 
                           : (isDark ? "text-cyan-500/60 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")
                       )} />
                       <span className="relative z-10">{link.name}</span>
@@ -278,14 +275,14 @@ export default function DashboardLayoutClient({
           ))}
         </div>
 
-        <div className={cn("absolute bottom-0 left-0 w-full h-[72px] flex items-center px-4 border-t z-10", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
+        <div className={cn("absolute bottom-0 left-0 w-full h-[72px] flex items-center px-4 border-t z-10", isDark ? "border-white/10 bg-[#0c0c0e]" : "border-slate-200 bg-white")}>
           <button
             onClick={() => {
               setSidebarOpen(false);
               handleLogout();
             }}
             aria-label="Sign out"
-            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/60" : "text-slate-500 hover:text-red-600 hover:bg-red-50")}
+            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-red-600 hover:bg-red-50")}
           >
             <LogOut className="w-5 h-5" aria-hidden="true" />
             Sign Out
@@ -296,7 +293,7 @@ export default function DashboardLayoutClient({
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
-        <header className={cn("h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm")}>
+        <header className={cn("h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "bg-[#0c0c0e]/90 backdrop-blur-md border-white/10" : "bg-white/90 backdrop-blur-md border-slate-200/80 shadow-sm")}>
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation menu"
@@ -333,8 +330,8 @@ export default function DashboardLayoutClient({
               {showNotifications && (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
-                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:-right-2 sm:left-auto sm:w-80 border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-100")}>
+                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:-right-2 sm:left-auto sm:w-80 border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200 shadow-xl")}>
+                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-white/10" : "border-slate-100")}>
                       <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">
                         {notifications.length > 0 && (
@@ -361,7 +358,7 @@ export default function DashboardLayoutClient({
                             key={notif.id}
                             href={notif.link || `/dashboard`}
                             onClick={() => setShowNotifications(false)}
-                            className={cn("block p-4 border-b transition-colors", isDark ? "border-slate-800 hover:bg-slate-800/40" : "border-slate-100 hover:bg-slate-50")}
+                            className={cn("block p-4 border-b transition-colors", isDark ? "border-white/5 hover:bg-white/5" : "border-slate-100 hover:bg-slate-50")}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className={cn("font-semibold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{notif.subject || 'No Subject'}</div>

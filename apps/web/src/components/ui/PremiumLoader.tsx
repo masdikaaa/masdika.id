@@ -19,7 +19,7 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
       "flex flex-col items-center justify-center overflow-hidden",
       inline
         ? "relative py-20 min-h-[300px]"
-        : cn("fixed inset-0 z-[100]", isDark ? "bg-[#050B14]" : "bg-[#f8fafb]")
+        : cn("fixed inset-0 z-[100]", isDark ? "bg-[#000000]" : "bg-[#f8fafb]")
     )}>
       {/* Background Glow — pure radial gradient, no CSS blur */}
       {!inline && (

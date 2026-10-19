@@ -7,17 +7,12 @@ import { Button } from "@/components/ui/Button";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#050B14] flex items-center justify-center relative overflow-hidden px-6 py-12 md:py-20">
-      {/* Subtle Grid Pattern */}
+    <div className="min-h-screen bg-[#000000] flex items-center justify-center relative overflow-hidden px-6 py-12 md:py-20 font-sans selection:bg-cyan-500/30 text-white">
+      {/* Clean atmospheric cyan background matching frontend */}
       <div 
-        className="absolute inset-0 pointer-events-none" 
+        className="absolute inset-0 pointer-events-none"
         style={{
-          opacity: 0.07,
-          backgroundImage: `
-            linear-gradient(to right, #ffffff 1px, transparent 1px),
-            linear-gradient(to bottom, #ffffff 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px'
+          background: "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
         }}
       />
 

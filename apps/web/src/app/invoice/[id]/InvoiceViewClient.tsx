@@ -29,11 +29,11 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
             <p className={cn('text-sm mt-1', isDark ? 'text-zinc-500' : 'text-slate-500')}>View and download your official invoice.</p>
           </div>
 
-          <div className={cn('relative border rounded-3xl p-6 sm:p-12 print:p-6 shadow-2xl print:shadow-none overflow-hidden group print:break-inside-avoid', isDark ? 'bg-[#0b1322] border-slate-800' : 'bg-white border-slate-200')}>
+          <div className={cn('relative border rounded-3xl p-6 sm:p-12 print:p-6 shadow-2xl print:shadow-none overflow-hidden group print:break-inside-avoid', isDark ? 'bg-[#0c0c0e] border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)]' : 'bg-white border-slate-200')}>
             <div className={cn('absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none print:hidden', isDark ? 'bg-cyan-500/10' : 'bg-cyan-500/5')} />
             <div className={cn('absolute bottom-0 left-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none print:hidden', isDark ? 'bg-cyan-500/10' : 'bg-cyan-500/5')} />
 
-            <div className={cn('relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-8 mb-8 print:pb-4 print:mb-4 gap-6', isDark ? 'border-slate-800' : 'border-slate-200')}>
+            <div className={cn('relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-8 mb-8 print:pb-4 print:mb-4 gap-6', isDark ? 'border-white/10' : 'border-slate-200')}>
               <div className='flex items-center gap-4'>
                 <div className='flex items-center justify-center'>
                   <img
@@ -65,15 +65,15 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                 )}
               </div>
             </div>
-            <div className={cn('relative z-10 mb-12 print:mb-4 overflow-x-auto rounded-xl border custom-scrollbar', isDark ? 'border-slate-800' : 'border-slate-200')}>
+            <div className={cn('relative z-10 mb-12 print:mb-4 overflow-x-auto rounded-xl border custom-scrollbar', isDark ? 'border-white/10' : 'border-slate-200')}>
               <table className='w-full text-left text-sm whitespace-nowrap'>
-                <thead className={cn('border-b', isDark ? 'bg-black/40 border-slate-800' : 'bg-slate-100 border-slate-200')}>
+                <thead className={cn('border-b', isDark ? 'bg-white/[0.03] border-white/10' : 'bg-slate-100 border-slate-200')}>
                   <tr>
                     <th className={cn('px-4 sm:px-6 print:px-4 py-4 print:py-2 font-semibold uppercase tracking-wider text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>Description</th>
                     <th className={cn('px-4 sm:px-6 print:px-4 py-4 print:py-2 font-semibold uppercase tracking-wider text-xs text-right', isDark ? 'text-zinc-400' : 'text-slate-500')}>Amount</th>
                   </tr>
                 </thead>
-                <tbody className={cn('divide-y', isDark ? 'divide-slate-800/80 bg-white/[0.01]' : 'divide-slate-200 bg-white')}>
+                <tbody className={cn('divide-y', isDark ? 'divide-white/5 bg-white/[0.01]' : 'divide-slate-200 bg-white')}>
                   <tr className={cn('transition-colors', isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
                     <td className='px-4 sm:px-6 print:px-4 py-6 print:py-4 whitespace-normal min-w-[200px]'>
                       <div className={cn('font-bold text-base mb-1.5', isDark ? 'text-white' : 'text-slate-900')}>

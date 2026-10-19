@@ -76,7 +76,7 @@ export function OnlineUsersWidget() {
                       {user.name?.substring(0, 2).toUpperCase() || 'US'}
                     </div>
                   )}
-                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0A0B1A]"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0c0c0e]"></div>
                 </div>
                 <div className="flex flex-col truncate">
                   <span className={cn("text-sm font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>{user.name}</span>

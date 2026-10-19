@@ -84,7 +84,7 @@ export function Select({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               "absolute z-50 w-full mt-2 rounded-xl shadow-2xl overflow-hidden border",
-              isDark ? "bg-[#0b1322] border-slate-700/80 shadow-2xl" : "bg-white border-slate-200/90 shadow-xl"
+              isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200/90 shadow-xl"
             )}
           >
             <div className="max-h-60 overflow-y-auto p-1.5 custom-scrollbar space-y-0.5">

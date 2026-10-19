@@ -92,13 +92,13 @@ export function VisitorChart() {
         </div>
 
         {/* Range Toggles */}
-        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#0A0B1A]/80 border-white/5" : "bg-slate-100 border-slate-200")}>
+        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#121216] border-white/10" : "bg-slate-100 border-slate-200")}>
           {RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setRange(r.value)}
               className={`px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${range === r.value
-                  ? "bg-cyan-500 text-slate-900 font-bold"
+                  ? "bg-cyan-400 text-slate-950 font-bold"
                   : cn(isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-white")
                 }`}
             >

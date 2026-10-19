@@ -177,14 +177,29 @@ export default function AdminLayout({
   };
 
   return (
-    <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#050B14] text-zinc-100" : "bg-[#f8fafb] text-slate-900")}>
+    <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#000000] text-zinc-100" : "bg-[#f8fafb] text-slate-900")}>
+
+      {/* Clean atmospheric cyan background matching frontend */}
+      <div 
+        className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
+        style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
+      >
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: isDark
+              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
+              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
+          }}
+        />
+      </div>
 
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <button
           type="button"
           aria-label="Close navigation menu"
-          className="fixed inset-0 z-40 bg-[#0A0B1A]/80 backdrop-blur-sm lg:hidden cursor-default"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden cursor-default"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -194,11 +209,11 @@ export default function AdminLayout({
         aria-label="Admin navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 lg:translate-x-0 lg:relative lg:inset-0 flex flex-col h-full border-r",
-          isDark ? "glass border-white/5" : "bg-white border-slate-200",
+          isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200 shadow-sm",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className={cn("h-16 flex items-center px-6 border-b shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("h-16 flex items-center px-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -218,7 +233,7 @@ export default function AdminLayout({
             }, {} as Record<string, typeof SIDEBAR_LINKS>)
           ).map(([groupName, links]) => (
             <div key={groupName}>
-              <h3 className="px-3 mb-2 text-xs font-bold text-zinc-500 uppercase tracking-wider">{groupName}</h3>
+              <h3 className={cn("px-3 mb-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-500" : "text-slate-400")}>{groupName}</h3>
               <div className="space-y-1">
                 {links.map((link) => {
                   const isActive = pathname === link.href;
@@ -229,10 +244,10 @@ export default function AdminLayout({
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
-                        isActive ? "bg-cyan-500 text-slate-900 font-bold" : cn("transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")
+                        isActive ? "bg-cyan-400 text-slate-950 font-bold shadow-sm" : cn("transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
                       )}
                     >
-                      <link.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-slate-900" : cn("group-hover:scale-110 transition-transform", isDark ? "text-cyan-500/60 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600"))} />
+                      <link.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-slate-950" : cn("group-hover:scale-110 transition-transform", isDark ? "text-cyan-500/60 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600"))} />
                       <span className="relative z-10">{link.name}</span>
                     </Link>
                   );
@@ -242,14 +257,14 @@ export default function AdminLayout({
           ))}
         </div>
 
-        <div className={cn("shrink-0 w-full h-[72px] flex items-center px-4 border-t bg-background/80 backdrop-blur-sm z-10 mt-auto", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("shrink-0 w-full h-[72px] flex items-center px-4 border-t z-10 mt-auto", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
           <button
             onClick={() => {
               setSidebarOpen(false);
               handleLogout();
             }}
             aria-label="Sign out"
-            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
+            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
           >
             <LogOut className="w-5 h-5" aria-hidden="true" />
             Sign Out
@@ -260,7 +275,7 @@ export default function AdminLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden z-10 relative">
         {/* Topbar */}
-        <header className={cn("shrink-0 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 glass border-b sticky top-0 z-30", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <header className={cn("shrink-0 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "bg-[#0c0c0e]/90 backdrop-blur-md border-white/10" : "bg-white/90 backdrop-blur-md border-slate-200/80 shadow-sm")}>
           <div className="flex items-center flex-1 gap-6">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -281,12 +296,12 @@ export default function AdminLayout({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                className={cn("w-full backdrop-blur-md border text-sm rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full backdrop-blur-md border text-sm rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#121216] border-white/10 text-white placeholder:text-zinc-500 focus:bg-[#18181d]" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white")}
               />
 
               {/* Search Results Dropdown */}
               {isSearchFocused && searchQuery.trim() !== "" && (
-                <div className={cn("absolute top-full mt-2 w-full backdrop-blur-sm border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50", isDark ? "bg-slate-900/95 border-white/10" : "bg-white border-slate-200 shadow-xl")}>
+                <div className={cn("absolute top-full mt-2 w-full backdrop-blur-md border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50", isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200 shadow-xl")}>
                   <div className="max-h-64 overflow-y-auto p-2">
                     {searchResults.length > 0 ? (
                       searchResults.map(link => (
@@ -328,8 +343,8 @@ export default function AdminLayout({
               {showNotifications && (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
-                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 backdrop-blur-sm border rounded-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-slate-900/95 border-white/10" : "bg-white border-slate-200 shadow-xl")}>
-                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-100")}>
+                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 backdrop-blur-md border rounded-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200 shadow-xl")}>
+                    <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-white/10" : "bg-white border-slate-100")}>
                       <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">
                         {notifications.length > 0 && (
@@ -356,7 +371,7 @@ export default function AdminLayout({
                             key={notif.id}
                             href={notif.link || `/admin/messages`}
                             onClick={() => setShowNotifications(false)}
-                            className={cn("block p-4 border-b transition-colors", isDark ? "bg-[#0A0B1A]/50 border-white/5 hover:bg-white/5" : "bg-white border-slate-100 hover:bg-slate-50")}
+                            className={cn("block p-4 border-b transition-colors", isDark ? "border-white/5 hover:bg-white/5" : "bg-white border-slate-100 hover:bg-slate-50")}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className={cn("font-semibold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{notif.subject || 'No Subject'}</div>

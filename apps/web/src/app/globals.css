@@ -1217,6 +1217,29 @@ html.light [class*="bg-[#050B14]"] {
   background-color: var(--navbar-bg-solid) !important;
 }
 
+/* Dark Mode Palette Harmonization - unify legacy navy blue hexes with frontend pitch black tokens */
+html.dark [class*="bg-[#050B14]"],
+html.dark [class*="bg-[#020d18]"],
+html.dark [class*="bg-[#0A0B1A]"] {
+  background-color: #000000 !important;
+}
+
+html.dark [class*="bg-[#0b1322]"],
+html.dark [class*="bg-[#061220]"],
+html.dark [class*="bg-[#09182a]"] {
+  background-color: #0c0c0e !important;
+}
+
+html.dark [class*="bg-[#0a1624]"],
+html.dark [class*="bg-[#0c1b2b]"],
+html.dark [class*="bg-[#0b1b2d]"] {
+  background-color: #121216 !important;
+}
+
+html.dark [class*="border-slate-800"] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Override Tailwind's white/X opacity classes for text in light mode */
 html.light .text-white {
   color: var(--text-primary) !important;

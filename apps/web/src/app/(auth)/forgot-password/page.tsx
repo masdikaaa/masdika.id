@@ -59,12 +59,12 @@ export default function ForgotPasswordPage() {
   const inputWrapper = cn(
     "relative flex items-center rounded-xl overflow-hidden transition-all duration-300 shadow-inner",
     isDark
-      ? "bg-[#0a1624] border border-white/5 focus-within:border-cyan-500/30 focus-within:bg-[#0c1b2b] focus-within:ring-1 focus-within:ring-cyan-500/30"
-      : "bg-white border border-slate-200 focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-400/40 shadow-sm"
+      ? "bg-[#121216] border border-white/10 focus-within:border-cyan-500/50 focus-within:bg-[#18181d] focus-within:ring-1 focus-within:ring-cyan-500/30"
+      : "bg-slate-50 border border-slate-200 focus-within:border-cyan-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-cyan-400/40 shadow-sm"
   );
   const inputClass = cn(
     "w-full py-3.5 pr-4 bg-transparent focus:outline-none font-medium text-sm",
-    isDark ? "text-white placeholder:text-zinc-600" : "text-slate-900 placeholder:text-slate-400"
+    isDark ? "text-white placeholder:text-zinc-500" : "text-slate-900 placeholder:text-slate-400"
   );
   const iconClass = cn(
     "transition-colors",
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
   );
   const labelClass = cn(
     "text-[11px] font-bold uppercase tracking-widest pl-1",
-    isDark ? "text-cyan-500/80" : "text-cyan-700"
+    isDark ? "text-cyan-400" : "text-cyan-600"
   );
 
   return (
@@ -82,20 +82,17 @@ export default function ForgotPasswordPage() {
         isDark ? "text-white" : "text-slate-900"
       )}
     >
-      {/* Clean ambient background with subtle grid lines */}
+      {/* Clean atmospheric cyan background matching frontend */}
       <div 
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
-        style={{ backgroundColor: isDark ? "#050B14" : "#f8fafb" }}
+        style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
       >
         <div 
-          className="absolute inset-0 transition-opacity duration-500" 
+          className="absolute inset-0 pointer-events-none"
           style={{
-            opacity: isDark ? 0.07 : 0.05,
-            backgroundImage: `
-              linear-gradient(to right, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px),
-              linear-gradient(to bottom, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
+            background: isDark
+              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
+              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
           }}
         />
       </div>
@@ -108,8 +105,8 @@ export default function ForgotPasswordPage() {
         className={cn(
           "relative z-10 w-full max-w-5xl rounded-2xl sm:rounded-[2.5rem] border backdrop-blur-xl shadow-2xl overflow-hidden grid lg:grid-cols-12 transition-all duration-300",
           isDark
-            ? "bg-[#020d18]/85 border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
-            : "bg-white/95 border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
+            ? "bg-[#0c0c0e]/95 border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)]"
+            : "bg-white/95 border-slate-200/80 shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
         )}
       >
         {/* LEFT COLUMN: Form */}
@@ -312,15 +309,15 @@ export default function ForgotPasswordPage() {
           className={cn(
             "hidden lg:flex lg:col-span-6 flex-col justify-between p-8 xl:p-12 relative overflow-hidden select-none",
             isDark
-              ? "bg-gradient-to-br from-[#061220]/95 via-[#09182a]/85 to-[#020b14]/95 border-l border-white/10"
+              ? "bg-gradient-to-br from-[#0c0c0e]/95 via-[#121216]/90 to-[#0c0c0e]/95 border-l border-white/10"
               : "bg-gradient-to-br from-cyan-50/70 via-sky-50/40 to-slate-50/80 border-l border-slate-200/80"
           )}
         >
           {/* Ambient Glows */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/15 rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
 
-          {/* Floating Decorative Circles (As seen in Reference Image 1) */}
+          {/* Floating Decorative Circles */}
           <motion.div
             animate={{ y: [0, -12, 0], x: [0, 4, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -334,7 +331,7 @@ export default function ForgotPasswordPage() {
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className={cn(
               "absolute top-1/3 right-10 w-14 h-14 rounded-full pointer-events-none",
-              isDark ? "bg-blue-500/10 border border-blue-400/20" : "bg-blue-200/40"
+              isDark ? "bg-cyan-500/10 border border-cyan-400/20" : "bg-cyan-200/40"
             )}
           />
           <motion.div
@@ -384,7 +381,7 @@ export default function ForgotPasswordPage() {
 
           {/* Character Illustration Area with Floating Badges */}
           <div className="relative z-10 my-auto flex flex-col items-center justify-center py-6 px-1 w-full">
-            {/* Floating Badge 1: Top Right (Positioned cleanly beside shoulder/ear, clear of hair and subtitle) */}
+            {/* Floating Badge 1: Top Right */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
@@ -396,7 +393,7 @@ export default function ForgotPasswordPage() {
               className={cn(
                 "absolute top-8 sm:top-10 -right-3 sm:-right-1 xl:right-1 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-md shadow-md select-none",
                 isDark
-                  ? "bg-[#0b1b2d]/95 border-cyan-500/30 text-white shadow-cyan-950/40"
+                  ? "bg-[#121216]/95 border-cyan-500/30 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
                   : "bg-white/95 border-slate-200 text-slate-800 shadow-slate-200/70"
               )}
             >
@@ -412,7 +409,7 @@ export default function ForgotPasswordPage() {
               </div>
             </motion.div>
 
-            {/* Floating Badge 2: Bottom Left (Positioned well outward to clear the character's hoodie) */}
+            {/* Floating Badge 2: Bottom Left */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1, y: [0, 6, 0] }}
@@ -424,7 +421,7 @@ export default function ForgotPasswordPage() {
               className={cn(
                 "absolute bottom-8 sm:bottom-10 -left-3 sm:-left-1 xl:left-1 z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-md shadow-md select-none",
                 isDark
-                  ? "bg-[#0b1b2d]/95 border-blue-500/30 text-white shadow-blue-950/40"
+                  ? "bg-[#121216]/95 border-cyan-500/30 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
                   : "bg-white/95 border-slate-200 text-slate-800 shadow-slate-200/70"
               )}
             >
@@ -476,7 +473,7 @@ export default function ForgotPasswordPage() {
               </div>
               <span className={cn("w-1 h-1 rounded-full", isDark ? "bg-white/20" : "bg-slate-300")} />
               <div className="flex items-center gap-1.5">
-                <Server className={cn("w-3.5 h-3.5", isDark ? "text-blue-400" : "text-blue-700")} />
+                <Server className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 <span className={cn("text-[11px] font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>Cloud VPS & K3s</span>
               </div>
               <span className={cn("w-1 h-1 rounded-full", isDark ? "bg-white/20" : "bg-slate-300")} />
