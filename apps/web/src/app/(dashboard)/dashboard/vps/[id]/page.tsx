@@ -1858,7 +1858,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             value={hostnameInput}
                             onChange={(e) => setHostnameInput(e.target.value)}
                             placeholder="new-hostname.example.com"
-                            className={cn("w-full bg-[#060b14] border border-slate-800 rounded-xl px-4 py-3  focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all", isDark ? "text-white" : "text-slate-900")}
+                            className={cn(
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all",
+                              isDark
+                                ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500"
+                                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+                            )}
                             required
                           />
                         </div>
@@ -1890,7 +1895,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             value={passwordInput}
                             onChange={(e) => setPasswordInput(e.target.value)}
                             placeholder="••••••••••••"
-                            className={cn("w-full bg-[#060b14] border border-slate-800 rounded-xl px-4 py-3  focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all", isDark ? "text-white" : "text-slate-900")}
+                            className={cn(
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all",
+                              isDark
+                                ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500"
+                                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+                            )}
                             required
                             minLength={8}
                           />
@@ -1964,7 +1974,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             value={sshKeyInput}
                             onChange={(e) => setSshKeyInput(e.target.value)}
                             placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
-                            className={cn("w-full bg-[#060b14] border border-slate-800 rounded-xl px-4 py-3  focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono text-xs min-h-[150px]", isDark ? "text-white" : "text-slate-900")}
+                            className={cn(
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all font-mono text-xs min-h-[150px]",
+                              isDark
+                                ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500"
+                                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+                            )}
                             required
                           />
                         </div>
