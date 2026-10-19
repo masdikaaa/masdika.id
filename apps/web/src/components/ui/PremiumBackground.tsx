@@ -11,19 +11,7 @@ export function PremiumBackground() {
       aria-hidden="true"
       className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#f8fafd] dark:bg-[#000000] transition-colors duration-700"
     >
-      {/* ── ARCHITECTURAL GRID OVERLAY (Dark Mode Only) ── */}
-      <div
-        className="absolute inset-0 pointer-events-none hidden dark:block opacity-75"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-          maskImage: "radial-gradient(ellipse 85% 65% at 50% 30%, black 35%, transparent 85%)",
-          WebkitMaskImage: "radial-gradient(ellipse 85% 65% at 50% 30%, black 35%, transparent 85%)",
-        }}
-      />
+
 
       {/* ── LIGHT MODE GRADIENT SYSTEM (Pure Unified Brand Cyan & Sky) ─── */}
       <div className="absolute inset-0 pointer-events-none transition-opacity duration-700 opacity-100 dark:opacity-0">
