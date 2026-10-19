@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -144,7 +144,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
               transition={{ duration: 0.8, delay: 0.15 }}
               className="relative flex items-center justify-center mt-10 lg:mt-0"
             >
-              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
+              <div className="relative w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[560px] xl:max-w-[600px] h-[400px] sm:h-[460px] lg:h-[500px] mx-auto flex items-end justify-center">
                 {/* Subtle ambient depth bloom behind avatar */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
@@ -231,7 +231,8 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
                     height={1024}
                     priority={true}
                     unoptimized={true}
-                    className="w-full h-full object-contain object-bottom"
+                    className="w-full h-full object-contain object-bottom select-none"
+                    style={{ imageRendering: "-webkit-optimize-contrast" }}
                   />
                   <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
                 </div>

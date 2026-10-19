@@ -190,7 +190,7 @@ function EngineeringRolesScroller({ roles, fallbackRole }: { roles: string[]; fa
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         className={cn(
-          "flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 px-1",
+          "flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1",
           hasOverflow ? "cursor-grab active:cursor-grabbing" : "cursor-default"
         )}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -204,8 +204,6 @@ function EngineeringRolesScroller({ roles, fallbackRole }: { roles: string[]; fa
             {r}
           </span>
         ))}
-        {/* End spacer for comfortable scroll ending */}
-        <div className="w-3 shrink-0 pointer-events-none" />
       </div>
 
       {/* Right Gradient Fade Mask */}
@@ -370,7 +368,7 @@ export function PortfolioDetailContent({
               </div>
 
               {/* 3. Engineering Roles */}
-              <div className="flex items-center gap-3 w-full md:w-auto md:pl-6 md:pr-4 min-w-0 flex-1 overflow-hidden">
+              <div className="flex items-center gap-3 w-full md:w-auto md:pl-6 min-w-0 flex-1 overflow-hidden">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
                   <Briefcase className="w-4 h-4" />
                 </div>
