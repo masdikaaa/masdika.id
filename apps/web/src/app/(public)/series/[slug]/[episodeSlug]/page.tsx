@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, use } from "react";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
@@ -233,7 +233,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
         <div className={cn("mt-16 pt-10 border-t grid grid-cols-1 sm:grid-cols-2 gap-4", isDark ? "border-slate-800" : "border-black/5")}>
           {prev ? (
             <Link href={`/series/${slug}/${prev.slug}`}
-              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5", isDark ? "bg-[var(--surface)] hover:bg-[#0d172e] border-[var(--border-primary)] hover:border-cyan-500/50 shadow-xl shadow-black/40" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
+              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5", isDark ? "bg-[var(--surface)] hover:bg-[#121212] border-[var(--border-primary)] hover:border-cyan-500/50 shadow-xl shadow-black/40" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
               <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <ChevronLeft className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>
@@ -245,7 +245,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
           ) : <div />}
           {next && (
             <Link href={`/series/${slug}/${next.slug}`}
-              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 sm:flex-row-reverse sm:text-right", isDark ? "bg-[var(--surface)] hover:bg-[#0d172e] border-[var(--border-primary)] hover:border-cyan-500/50 shadow-xl shadow-black/40" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
+              className={cn("group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 sm:flex-row-reverse sm:text-right", isDark ? "bg-[var(--surface)] hover:bg-[#121212] border-[var(--border-primary)] hover:border-cyan-500/50 shadow-xl shadow-black/40" : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-sm hover:shadow-md")}>
               <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <ChevronRight className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>

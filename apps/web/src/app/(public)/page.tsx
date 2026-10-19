@@ -257,10 +257,10 @@ export default function HomePage() {
     return seq;
   }, [settings?.hero_typing_text]);
 
-  // Unified icon box styling that guarantees cyan tone in dark mode (never white)
+  // Unified cyan accent matching high-tech cloud & DevOps platform aesthetic (Image 2)
   const iconBoxStyle = isDark
-    ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
-    : "bg-cyan-50 border-cyan-200 text-cyan-600";
+    ? "bg-cyan-950/30 border-cyan-500/30 text-cyan-400 group-hover:border-cyan-500/60 group-hover:bg-cyan-500/10 group-hover:text-cyan-300"
+    : "bg-cyan-50 border-cyan-200/80 text-cyan-600 group-hover:bg-cyan-100/60 group-hover:border-cyan-300";
 
   const iconAccent = isDark ? "text-cyan-400" : "text-cyan-600";
 
@@ -342,8 +342,8 @@ export default function HomePage() {
               className="relative flex items-center justify-center mt-10 lg:mt-0"
             >
               <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] h-[440px] sm:h-[500px] lg:h-[600px] mx-auto flex items-end justify-center">
-                {/* Subtle ambient depth bloom behind avatar — multi-tonal cyan/sky/violet matching Gambar 1 */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-400/20 via-sky-400/25 to-violet-400/20 dark:from-cyan-400/25 dark:via-sky-500/30 dark:to-purple-500/25 rounded-full blur-3xl pointer-events-none -z-0" />
+                {/* Subtle ambient depth bloom behind avatar — pure Cyan */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
                 {/* Hero Character with progressive blur and gradient mask fade */}
                 <div
@@ -381,8 +381,8 @@ export default function HomePage() {
                       "flex absolute z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
                       pos,
                       anim,
-                      "bg-white/45 dark:bg-[#080e1e]/85 backdrop-blur-xl border border-white/60 dark:border-cyan-500/30",
-                      "shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.5)]",
+                      "bg-white/45 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-white/60 dark:border-white/10",
+                      "shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)]",
                       "hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default"
                     )}
                   >
@@ -670,17 +670,17 @@ export default function HomePage() {
               <Link
                 href="/services"
                 key={idx}
-                className="block group h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors duration-200"
+                className="block group h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.1)] transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
               >
                 <div className="p-6 flex flex-col h-full">
-                  <div className={cn("w-11 h-11 rounded-lg flex items-center justify-center mb-5 border", iconBoxStyle)}>
-                    <srv.icon className={cn("w-5 h-5", iconAccent)} />
+                  <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-5 border transition-all duration-300", iconBoxStyle)}>
+                    <srv.icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                   </div>
-                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-2">{srv.title}</h3>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{srv.title}</h3>
                   <p className="text-sm text-[var(--text-secondary)] leading-relaxed flex-1 mb-5">{srv.desc}</p>
-                  <div className={cn("flex items-center gap-2 text-sm font-semibold mt-auto group-hover:gap-3 transition-all", iconAccent)}>
-                    Learn More
-                    <ArrowRight className={cn("w-3.5 h-3.5", iconAccent)} />
+                  <div className="flex items-center gap-2 text-sm font-semibold mt-auto text-zinc-500 dark:text-zinc-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all">
+                    <span>Learn More</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </Link>
@@ -690,7 +690,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 6. PORTFOLIO HIGHLIGHTS ─────────────────────────────────── */}
-      <section className={cn("py-16 lg:py-24 relative z-10", isDark ? "" : "bg-[var(--surface-secondary)]")}>
+      <section className="py-16 lg:py-24 relative z-10 bg-slate-100/70 dark:bg-white/[0.02] border-y border-slate-200/80 dark:border-white/[0.06]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
@@ -699,7 +699,7 @@ export default function HomePage() {
             className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16"
           >
             <div>
-              <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 mb-4">
                 Projects
               </span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
@@ -726,13 +726,14 @@ export default function HomePage() {
               <p className="text-sm text-[var(--text-muted)] max-w-xs mx-auto">Projects will appear here once they are added to the database.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {portfolioProjects.map((project, index) => (
                 <FadeIn key={project.id} delay={index * 0.1} direction="up" className="h-full">
-                  <div className="group relative rounded-xl overflow-hidden border border-[var(--border-primary)] h-[320px] sm:h-[380px] md:h-[420px] focus-within:ring-2 focus-within:ring-cyan-500">
+                  <div className="group flex flex-col rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 hover:shadow-xl transition-all duration-300 h-full">
+                    {/* Crisp Screenshot Preview — No blur or obscuring gradient */}
                     <Link
                       href={project.slug ? `/portfolio/${project.slug}` : "#"}
-                      className="block w-full h-full relative focus:outline-none"
+                      className="block relative aspect-[16/10] overflow-hidden bg-[var(--surface-secondary)] group/img border-b border-[var(--border-primary)]"
                     >
                       <Image
                         referrerPolicy="no-referrer"
@@ -741,33 +742,39 @@ export default function HomePage() {
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         unoptimized={true}
-                        className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-105"
                       />
-                      {/* Dark gradient vignette overlay per design.md image card rules */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-
-                      <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end z-20">
-                        <span
-                          className="text-[11px] font-semibold uppercase tracking-wider mb-2 block"
-                          style={{ color: "#cbd5e1" }}
-                        >
+                      {/* Category Badge */}
+                      <div className="absolute top-3.5 left-3.5 z-10">
+                        <span className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white/95 dark:bg-[#121212]/95 border border-[var(--border-primary)] text-[var(--text-secondary)] shadow-sm">
                           {project.category?.name || project.category || "Uncategorized"}
                         </span>
-                        <h3
-                          className="text-xl sm:text-2xl font-bold mb-3 leading-tight"
-                          style={{ color: "#ffffff" }}
-                        >
-                          {project.title}
-                        </h3>
-                        <div
-                          className="flex items-center gap-2 text-sm font-semibold transition-colors"
-                          style={{ color: "#ffffff" }}
-                        >
-                          View Case Study
-                          <ArrowRight className="w-3.5 h-3.5 text-cyan-400" />
-                        </div>
                       </div>
                     </Link>
+
+                    {/* Clean Card Body */}
+                    <div className="p-5 sm:p-6 flex flex-col flex-1">
+                      <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="group/title focus:outline-none mb-2">
+                        <h3 className="text-lg sm:text-xl font-bold transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400">
+                          {project.title}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-4 flex-1">
+                        {project.description || "Explore full technical architecture, features, and deployment details."}
+                      </p>
+                      <div className="mt-auto pt-3 border-t border-[var(--border-primary)] flex items-center justify-between">
+                        <span className="text-xs font-medium text-[var(--text-muted)]">
+                          {project.client || "Personal Project"}
+                        </span>
+                        <Link
+                          href={project.slug ? `/portfolio/${project.slug}` : "#"}
+                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-cyan-600 dark:text-cyan-400 group-hover:text-cyan-500 transition-colors"
+                        >
+                          <span>View Case Study</span>
+                          <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 </FadeIn>
               ))}
