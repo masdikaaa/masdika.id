@@ -391,7 +391,7 @@ spec:
               echo "Redis is online and accepting connections!"
       containers:
         - name: app
-          image: andikaferdialvianto/masdika-id:v0.0.1
+          image: andikaferdialvianto/masdika-id:v1.0.1
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -526,7 +526,7 @@ spec:
               echo "Redis is online and accepting connections!"
       containers:
         - name: worker
-          image: andikaferdialvianto/masdika-id:v0.0.1
+          image: andikaferdialvianto/masdika-id:v1.0.1
           imagePullPolicy: Always
           args:
             - "sh"
@@ -632,7 +632,7 @@ spec:
               echo "Redis is online and accepting connections!"
       containers:
         - name: vnc-proxy
-          image: andikaferdialvianto/masdika-id:v0.0.1
+          image: andikaferdialvianto/masdika-id:v1.0.1
           imagePullPolicy: Always
           args:
             - "sh"

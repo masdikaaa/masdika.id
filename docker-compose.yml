@@ -27,7 +27,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: andikaferdialvianto/masdika-id:v0.0.1
+    image: andikaferdialvianto/masdika-id:v1.0.1
     container_name: masdika_app
     restart: always
     depends_on:
@@ -70,7 +70,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: andikaferdialvianto/masdika-id:v0.0.1
+    image: andikaferdialvianto/masdika-id:v1.0.1
     container_name: masdika_worker
     restart: always
     depends_on:
@@ -112,7 +112,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: andikaferdialvianto/masdika-id:v0.0.1
+    image: andikaferdialvianto/masdika-id:v1.0.1
     container_name: masdika_vnc_proxy
     restart: always
     security_opt:
