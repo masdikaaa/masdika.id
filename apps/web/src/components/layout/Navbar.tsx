@@ -314,7 +314,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
           <div className="flex-shrink-0 z-10">
             <Link
               href="/"
-              scroll={false}
               className="flex items-center group w-fit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg p-1"
             >
               <img
@@ -387,7 +386,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                   <Link
                     key={link.name}
                     href={link.href}
-                    scroll={false}
                     className={cn(
                       "px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors relative group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500",
                       isActive
@@ -444,7 +442,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
             {session ? (
               <Link
                 href={session.role === "ADMIN" ? "/admin" : "/dashboard"}
-                scroll={false}
                 className="px-4 py-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
               >
                 Dashboard
@@ -452,7 +449,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
             ) : (
               <Link
                 href="/login"
-                scroll={false}
                 className="px-4 py-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
               >
                 Login
@@ -503,7 +499,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
 
                   <Link
                     href={activeMenu === "Explore" ? "/opportunities" : activeMenu === "Profile" ? "/resume" : "/api-hub"}
-                    scroll={false}
                     onClick={() => {
                       setActiveMenu(null);
                       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -522,7 +517,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                       <Link
                         key={item.title}
                         href={item.href}
-                        scroll={false}
                         onClick={() => {
                           setActiveMenu(null);
                           if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -617,7 +611,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                                   <Link
                                     key={item.title}
                                     href={item.href}
-                                    scroll={false}
                                     onClick={() => {
                                       setIsOpen(false);
                                       setOpenState(false);
@@ -657,7 +650,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                     <div key={link.name} className="py-1.5 border-b border-[var(--border-subtle)] last:border-0">
                       <Link
                         href={link.href}
-                        scroll={false}
                         onClick={() => setIsOpen(false)}
                         className={cn(
                           "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors",
@@ -690,7 +682,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                 {session ? (
                   <Link
                     href={session.role === "ADMIN" ? "/admin" : "/dashboard"}
-                    scroll={false}
                     onClick={() => setIsOpen(false)}
                     className="block w-full text-center py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-sm transition-colors"
                   >
@@ -699,7 +690,6 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                 ) : (
                   <Link
                     href="/login"
-                    scroll={false}
                     onClick={() => setIsOpen(false)}
                     className="block w-full text-center py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-sm transition-colors"
                   >

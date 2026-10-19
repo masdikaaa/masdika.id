@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -8,19 +10,43 @@ import { useTheme } from "@/components/ThemeProvider";
  * Zero Framer Motion dependency = instant render, no JS animation overhead,
  * dramatically lower CPU/RAM usage while spinning.
  * 
- * The spinner continuously rotates until the page fully loads.
+ * Uses createPortal into document.body to ensure it renders above all elements
+ * (navbar, page content, footer) regardless of parent stacking contexts or scroll position.
  */
 export function PremiumLoader({ inline = false }: { inline?: boolean }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className={cn(
-      "flex flex-col items-center justify-center overflow-hidden",
-      inline
-        ? "relative py-20 min-h-[300px]"
-        : cn("fixed inset-0 z-[100]", isDark ? "bg-[#000000]" : "bg-[#f8fafb]")
-    )}>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const content = (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center overflow-hidden",
+        inline
+          ? "relative py-20 min-h-[300px]"
+          : cn(
+              "fixed inset-0 z-[99999] pointer-events-auto",
+              isDark ? "bg-[#000000]" : "bg-[#f8fafb]"
+            )
+      )}
+      style={
+        !inline
+          ? {
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: "100vw",
+              height: "100vh",
+            }
+          : undefined
+      }
+    >
       {/* Background Glow — pure radial gradient, no CSS blur */}
       {!inline && (
         <div
@@ -101,4 +127,17 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
       </div>
     </div>
   );
+
+  if (inline) {
+    return content;
+  }
+
+  // When rendered in browser, portal to document.body so that it is never trapped
+  // inside any parent container stacking context, overflow, or covered by the footer.
+  if (mounted && typeof document !== "undefined") {
+    return createPortal(content, document.body);
+  }
+
+  // Fallback for SSR / initial mount
+  return content;
 }

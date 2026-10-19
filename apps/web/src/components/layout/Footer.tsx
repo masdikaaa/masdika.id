@@ -44,7 +44,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
   };
 
   return (
-    <footer className="relative pt-20 pb-10 z-20 border-t border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] transition-colors duration-200">
+    <footer className="relative pt-20 pb-10 z-10 border-t border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] transition-colors duration-200">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
 
