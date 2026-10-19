@@ -30,6 +30,7 @@ const parseCookie = (str: string) => {
   }, {} as Record<string, string>);
 };
 import { verifySessionToken } from "./lib/session";
+import { warmupPublicCache } from "./lib/cache";
 import cron from "node-cron";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -174,6 +175,11 @@ app.prepare().then(async () => {
     console.log(`> [CUSTOM SERVER] Running with WebSocket Support`);
     console.log(`> Ready on http://${hostname}:${port}`);
     console.log(`> WebSocket VNC Proxy ready on ws://${hostname}:${port}/api/ws/vnc`);
+
+    // ⚡ Pre-warm public caches in background so initial page visits are instantaneous
+    warmupPublicCache().catch((err) => {
+      console.warn('> [Cache Warmup] Background warmup note:', err?.message || err);
+    });
   });
 
   // ========================================

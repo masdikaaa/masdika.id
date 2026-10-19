@@ -29,7 +29,7 @@ export async function GET() {
     const series = await getCachedData('series:list', 300, fetchSeries);
     return NextResponse.json(series, {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
   } catch (error) {

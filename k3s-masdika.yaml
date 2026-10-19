@@ -267,9 +267,9 @@ spec:
             - -c
             - |
               if [ -n "$REDIS_PASSWORD" ]; then
-                exec redis-server --requirepass "$REDIS_PASSWORD" --bind 0.0.0.0 --appendonly yes
+                exec redis-server --requirepass "$REDIS_PASSWORD" --bind 0.0.0.0 --appendonly yes --appendfsync everysec --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --tcp-backlog 511
               else
-                exec redis-server --bind 0.0.0.0 --appendonly yes
+                exec redis-server --bind 0.0.0.0 --appendonly yes --appendfsync everysec --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --tcp-backlog 511
               fi
           env:
             - name: REDIS_PASSWORD

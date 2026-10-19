@@ -139,9 +139,9 @@ services:
     command: >
       sh -c '
         if [ -n "$$REDIS_PASSWORD" ]; then
-          redis-server --requirepass "$$REDIS_PASSWORD" --bind 0.0.0.0
+          redis-server --requirepass "$$REDIS_PASSWORD" --bind 0.0.0.0 --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --tcp-backlog 511 --timeout 0 --save 900 1 300 10
         else
-          redis-server --bind 0.0.0.0
+          redis-server --bind 0.0.0.0 --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --tcp-backlog 511 --timeout 0 --save 900 1 300 10
         fi
       '
     environment:

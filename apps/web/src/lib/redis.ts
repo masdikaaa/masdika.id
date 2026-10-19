@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
 const useRedis = process.env.USE_REDIS === 'true';
 
@@ -15,13 +15,22 @@ if (redisUrl.includes('://:@')) {
   redisUrl = redisUrl.replace('://:@', '://');
 }
 
-const redisOptions: any = {
-  maxRetriesPerRequest: 3,
+// Ultra-fast, low-latency Redis client configuration
+const redisOptions: RedisOptions = {
+  maxRetriesPerRequest: 2,
+  enableAutoPipelining: true,  // Automatically pipeline concurrent requests in the same event loop tick
+  enableReadyCheck: true,
+  family: 4,                   // Enforce IPv4 to eliminate 200-300ms IPv6 DNS timeouts in Docker
+  connectTimeout: 5000,        // Fast failover if Redis is temporarily unreachable
+  commandTimeout: 3000,        // Never allow hanging queries longer than 3s
+  keepAlive: 10000,            // Keep TCP connection hot and alive
+  noDelay: true,               // TCP_NODELAY: disable Nagle's algorithm for instant sub-millisecond dispatch
+  lazyConnect: false,
   retryStrategy(times: number) {
     if (times >= 3) {
       return null;
     }
-    return Math.min(times * 50, 2000);
+    return Math.min(times * 50, 1000);
   }
 };
 
@@ -34,11 +43,11 @@ export const redis = useRedis ? (globalForRedis.redis ?? new Redis(redisUrl, red
 // Prevent app crashes if Redis connection fails
 if (redis) {
   redis.on('connect', () => {
-    console.log('✅ Redis connected successfully');
+    console.log('⚡ [Redis] High-performance connection established');
   });
   
   redis.on('error', (err) => {
-    console.warn('❌ Redis connection warning:', err.message);
+    console.warn('⚠️ [Redis] Connection warning (graceful fallback active):', err.message);
   });
 }
 
