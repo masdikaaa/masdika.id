@@ -84,14 +84,14 @@ export default function AdminApiHubPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-4">
             <h3 className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Keys</h3>
             <Key className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
           </div>
           <p className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>{users.length}</p>
         </div>
-        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-4">
             <h3 className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Requests</h3>
             <Server className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
@@ -100,7 +100,7 @@ export default function AdminApiHubPage() {
             {users.reduce((acc: number, curr: any) => acc + curr.totalUsage, 0).toLocaleString()}
           </p>
         </div>
-        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-4">
             <h3 className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Active Users</h3>
             <UserIcon className={cn("w-5 h-5", isDark ? "text-emerald-400" : "text-emerald-700")} />
@@ -111,19 +111,19 @@ export default function AdminApiHubPage() {
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b", isDark ? "border-white/10" : "border-slate-200")}>
-                <th className={cn("p-4 text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>User</th>
-                <th className={cn("p-4 text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Key Details</th>
-                <th className={cn("p-4 text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Usage Count</th>
-                <th className={cn("p-4 text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Last Used</th>
-                <th className={cn("p-4 text-xs font-semibold uppercase tracking-wider text-right", isDark ? "text-zinc-400" : "text-slate-500")}>Actions</th>
+              <tr className={cn("border-b text-[10px] uppercase tracking-wider font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <th className="p-4">User</th>
+                <th className="p-4">Key Details</th>
+                <th className="p-4">Usage Count</th>
+                <th className="p-4">Last Used</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading && users.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center">
@@ -188,7 +188,7 @@ export default function AdminApiHubPage() {
           </table>
         </div>
         {users.length > 0 && (
-          <div className={cn("p-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("p-4 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}

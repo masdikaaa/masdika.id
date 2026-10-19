@@ -151,11 +151,11 @@ export default function MenuOrderPage() {
             <Reorder.Item
               key={key}
               value={key}
-              className={cn("flex items-center gap-3 p-3 sm:p-4 rounded-2xl bg-white/[0.04] border hover:border-white/20 cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "border-white/10" : "border-slate-200")}
+              className={cn("flex items-center gap-3 p-3 sm:p-4 rounded-xl border cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}
             >
               <GripVertical className="w-5 h-5 text-zinc-500 shrink-0" />
 
-              <span className={cn("w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0", isDark ? "bg-slate-800 text-slate-400" : "bg-slate-200 text-slate-600")}>
                 {idx + 1}
               </span>
 
@@ -186,11 +186,13 @@ export default function MenuOrderPage() {
                   type="button"
                   onClick={() => toggleBadge(key, listType)}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className={`shrink-0 px-3 w-16 sm:w-20 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap ${
+                  className={cn("shrink-0 px-3 w-16 sm:w-20 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
                     hasBadge
                       ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-red-500/15 hover:border-red-500/30 hover:text-red-400'
-                      : 'bg-white/5 border-white/10 text-zinc-500 hover:bg-cyan-500/10 hover:border-cyan-500/20 hover:text-cyan-400'
-                  }`}
+                      : isDark
+                        ? 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:bg-cyan-500/10 hover:border-cyan-500/30 hover:text-cyan-400'
+                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-700'
+                  )}
                 >
                   {hasBadge ? 'Hide' : '+ Add'}
                 </button>
@@ -212,7 +214,7 @@ export default function MenuOrderPage() {
       </div>
 
       <div className="space-y-8">
-        <div className="glass-card p-6">
+        <div className={cn("rounded-2xl border p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <h2 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Compass className="w-5 h-5" />
@@ -222,7 +224,7 @@ export default function MenuOrderPage() {
           {renderList(order, badges, setOrder, 'explore')}
         </div>
 
-        <div className="glass-card p-6">
+        <div className={cn("rounded-2xl border p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <h2 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Code className="w-5 h-5" />
@@ -232,7 +234,7 @@ export default function MenuOrderPage() {
           {renderList(devOrder, devBadges, setDevOrder, 'dev')}
         </div>
 
-        <div className="glass-card p-6">
+        <div className={cn("rounded-2xl border p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <h2 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Briefcase className="w-5 h-5" />
@@ -242,7 +244,7 @@ export default function MenuOrderPage() {
           {renderList(companyOrder, companyBadges, setCompanyOrder, 'company')}
         </div>
 
-        <div className="glass-card p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className={cn("rounded-2xl border p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <button onClick={handleReset}
             className={cn("flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
             <RotateCcw className="w-4 h-4" /> Reset to Default

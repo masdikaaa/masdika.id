@@ -398,13 +398,13 @@ export default function AdminCommentsPage() {
             </div>
 
             {replyingTo === comment.id && (
-              <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} onSubmit={(e) => handleReplySubmit(e, comment.id)} className={cn("mt-6 pt-6 border-t relative", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} onSubmit={(e) => handleReplySubmit(e, comment.id)} className={cn("mt-6 pt-6 border-t relative", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <textarea 
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   placeholder="Type your reply as Admin..."
                   required
-                  className={cn("w-full border rounded-xl px-5 py-4 font-medium focus:outline-none transition-all resize-y min-h-[120px] mb-4", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:bg-[#11162C]" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white")}
+                  className={cn("w-full border rounded-xl px-5 py-4 font-medium focus:outline-none focus:border-cyan-500 transition-all resize-y min-h-[120px] mb-4", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 ></textarea>
                 <div className="flex justify-end gap-3">
                   <button 
@@ -430,8 +430,8 @@ export default function AdminCommentsPage() {
         ))}
 
         {comments.length === 0 && (
-          <div className={cn("glass-card rounded-[32px] p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
               <MessageCircle className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
             <h3 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Comments Yet</h3>
@@ -443,7 +443,7 @@ export default function AdminCommentsPage() {
       {/* Block Confirmation Modal */}
       {blockModalOpen && userToBlock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
-          <div className={cn("border rounded-2xl p-6 w-full max-w-md relative overflow-hidden animate-in fade-in zoom-in-95 duration-200", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl p-6 w-full max-w-md relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
             
             <div className="flex items-center gap-4 mb-6">
@@ -456,7 +456,7 @@ export default function AdminCommentsPage() {
               </div>
             </div>
             
-            <div className={cn("rounded-xl p-4 border mb-6 space-y-3", isDark ? "bg-black/40 border-white/5" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("rounded-xl p-4 border mb-6 space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
               <div>
                 <div className="text-xs text-zinc-500 mb-1">Email to block:</div>
                 <div className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{userToBlock.email}</div>

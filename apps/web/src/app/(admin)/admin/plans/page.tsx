@@ -275,7 +275,7 @@ export default function AdminPlansPage() {
         <div className="relative w-full sm:w-64">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={cn("w-full flex items-center justify-between border text-sm font-semibold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C] hover:bg-white/5" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50 hover:bg-slate-50")}
+            className={cn("w-full flex items-center justify-between border text-sm font-semibold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white hover:bg-white/5" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}
           >
             <span>{activeTab === "ALL" ? "All Services" : activeTab.replace('_', ' ')}</span>
             <ChevronDown className={cn("w-4 h-4 transition-transform", isDropdownOpen ? "rotate-180" : "", isDark ? "text-zinc-400" : "text-slate-500")} />
@@ -284,7 +284,7 @@ export default function AdminPlansPage() {
           {isDropdownOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
-              <div className={cn("absolute z-50 w-full mt-2 border rounded-xl overflow-hidden py-1 shadow-xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+              <div className={cn("absolute z-50 w-full mt-2 border rounded-xl overflow-hidden py-1 shadow-xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
                 <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                   {services.map((service) => (
                     <button
@@ -305,10 +305,10 @@ export default function AdminPlansPage() {
           )}
         </div>
       </div>
-      <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b", isDark ? "text-zinc-500 bg-[#0A0B1A]/50 border-white/5" : "text-slate-500 bg-white border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th scope="col" className="px-6 py-4 font-semibold w-12 text-center">
                   <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === paginatedPlans.length && paginatedPlans.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
@@ -323,7 +323,7 @@ export default function AdminPlansPage() {
                 <th scope="col" className="px-6 py-4 font-semibold text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
@@ -338,7 +338,7 @@ export default function AdminPlansPage() {
                 </tr>
               ) : (
                 paginatedPlans.map((plan) => (
-                  <tr key={plan.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50", selectedIds.includes(plan.id) ? (isDark ? "bg-cyan-500/[0.02]" : "bg-cyan-50") : "")}>
+                  <tr key={plan.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedIds.includes(plan.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : "")}>
                     <td className="px-6 py-4 text-center">
                       <button onClick={() => toggleSelect(plan.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(plan.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
                         {selectedIds.includes(plan.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
@@ -359,14 +359,14 @@ export default function AdminPlansPage() {
                       {plan.hourlyPrice > 0 && <div className={cn("text-xs mt-0.5", isDark ? "text-purple-400" : "text-purple-700")}>{formatRupiah(plan.hourlyPrice)} <span className="text-[10px] opacity-70">/hr (PAYG)</span></div>}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={cn("bg-black/30 p-2 rounded border text-[10px] font-mono max-w-[200px] overflow-hidden whitespace-nowrap overflow-ellipsis", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}>
+                      <div className={cn("p-2 rounded border text-[10px] font-mono max-w-[200px] overflow-hidden whitespace-nowrap overflow-ellipsis", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
                         {plan.limits}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
                       {plan.isActive ? (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
-                          <Check className="w-3 h-3" /> Active
+                          <Check className="w-3 br-3" /> Active
                         </span>
                       ) : (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-500/10 border border-zinc-500/20", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -377,7 +377,7 @@ export default function AdminPlansPage() {
                     <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                       <button
                         onClick={() => openEditModal(plan)}
-                        className={cn("p-2 hover:bg-white/10 hover:text-white rounded-lg transition-colors border", isDark ? "text-zinc-400 border-white/5" : "text-slate-500 border-slate-200")}
+                        className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}
                         title="Edit Plan"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -396,7 +396,7 @@ export default function AdminPlansPage() {
             </tbody>
           </table>
         </div>
-        <div className={cn("p-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
@@ -404,9 +404,9 @@ export default function AdminPlansPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
             
-            <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 backdrop-blur z-10", isDark ? "bg-[#0f172a]/95 border-white/5" : "bg-white/95 border-slate-200")}>
+            <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 backdrop-blur z-10", isDark ? "bg-[#0b1322]/95 border-slate-800" : "bg-white/95 border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
                 {editingPlan ? "Edit Plan" : "Create New Plan"}
               </h2>
@@ -425,7 +425,7 @@ export default function AdminPlansPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder="e.g., Starter, Pro, Enterprise"
-                    className={cn("w-full border rounded-xl px-4 py-3 placeholder:text-zinc-500 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div className="space-y-2">
@@ -448,7 +448,7 @@ export default function AdminPlansPage() {
                       { value: "BMKG_EARTHQUAKE", label: "BMKG Earthquake API" }
                     ]}
                     placeholder="Select Target Service..."
-                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
               </div>
@@ -459,7 +459,7 @@ export default function AdminPlansPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   placeholder="e.g., Perfect for small businesses."
-                  className={cn("w-full border rounded-xl px-4 py-3 placeholder:text-zinc-500 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -473,7 +473,7 @@ export default function AdminPlansPage() {
                       min="0"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
-                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 font-bold", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-cyan-500 font-bold transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                 </div>
@@ -487,7 +487,7 @@ export default function AdminPlansPage() {
                       min="0"
                       value={formData.hourlyPrice}
                       onChange={(e) => setFormData({...formData, hourlyPrice: Number(e.target.value)})}
-                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-bold", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-purple-500 font-bold transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                 </div>
@@ -511,7 +511,7 @@ export default function AdminPlansPage() {
                           newFields[idx].value = e.target.value;
                           setLimitFields(newFields);
                         }}
-                        className={cn("w-2/3 bg-[#050b14] border rounded-lg px-3 py-2 font-mono text-xs placeholder:text-zinc-500 dark:placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500/50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                        className={cn("w-2/3 border rounded-lg px-3 py-2 font-mono text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                       />
                     </div>
                   ))}
@@ -544,7 +544,7 @@ export default function AdminPlansPage() {
                     />
                   </label>
                 </div>
-              <div className={cn("flex justify-end gap-3 pt-6 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("flex justify-end gap-3 pt-6 border-t", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -578,7 +578,7 @@ export default function AdminPlansPage() {
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setDeleteConfirmId(null)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
@@ -618,7 +618,7 @@ export default function AdminPlansPage() {
       {isBulkDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsBulkDeleteModalOpen(false)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />

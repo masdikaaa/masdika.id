@@ -92,7 +92,7 @@ export function VisitorChart() {
         </div>
 
         {/* Range Toggles */}
-        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#121216] border-white/10" : "bg-slate-100 border-slate-200")}>
+        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
           {RANGES.map((r) => (
             <button
               key={r.value}
@@ -111,7 +111,7 @@ export function VisitorChart() {
       {/* Chart */}
       <div className="flex-1 w-full relative min-h-[200px]">
         {loading ? (
-          <div className={cn("absolute inset-0 flex items-center justify-center backdrop-blur-sm z-10 rounded-xl", isDark ? "bg-[#0a1f33]/50" : "bg-white/50")}>
+          <div className={cn("absolute inset-0 flex items-center justify-center backdrop-blur-sm z-10 rounded-xl", isDark ? "bg-[#060b14]/50" : "bg-white/50")}>
             <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
           </div>
         ) : null}
@@ -155,7 +155,7 @@ export function VisitorChart() {
               <Tooltip content={({ active, payload, label }: any) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className={cn("backdrop-blur-md border p-4 rounded-xl", isDark ? "bg-[#0f172a]/90 border-cyan-500/20" : "bg-white/90 border-slate-200")}>
+                    <div className={cn("backdrop-blur-md border p-4 rounded-xl", isDark ? "bg-[#0b1322]/95 border-slate-800 shadow-xl" : "bg-white/95 border-slate-200 shadow-lg")}>
                       <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>{formatXAxis(label)}</p>
                       <p className={cn("font-bold text-lg flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         {formatCompact(payload[0].value)} <span className="text-zinc-500 text-xs font-normal">Visitors</span>

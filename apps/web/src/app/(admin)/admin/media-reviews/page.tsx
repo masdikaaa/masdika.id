@@ -227,8 +227,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10"
-            : "bg-white border-slate-200"
+            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
+            : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -253,8 +253,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10"
-            : "bg-white border-slate-200"
+            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
+            : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -279,8 +279,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10"
-            : "bg-white border-slate-200"
+            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
+            : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -305,8 +305,8 @@ export default function AdminMediaReviewsPage() {
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark
-            ? "bg-[#0A0B1A]/80 border-white/10"
-            : "bg-white border-slate-200"
+            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
+            : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -330,13 +330,13 @@ export default function AdminMediaReviewsPage() {
 
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
-        "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl backdrop-blur-xl transition-colors w-full",
-        isDark ? "bg-[#0A0B1A]/80 border-white/10" : "bg-white border-slate-200"
+        "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
+        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Tab switch */}
         <div className={cn(
           "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 w-full sm:w-auto",
-          isDark ? "bg-black/40 border-white/5" : "bg-slate-100 border-slate-200"
+          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
         )}>
           <button
             onClick={() => setActiveTab("comments")}
@@ -437,7 +437,7 @@ export default function AdminMediaReviewsPage() {
           filteredComments.length === 0 ? (
             <div className={cn(
               "rounded-2xl border p-12 text-center",
-              isDark ? "border-white/10 bg-[#0A0B1A]/60" : "border-slate-200 bg-white"
+              isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm"
             )}>
               <MessageSquare className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No comments found</p>
@@ -455,13 +455,13 @@ export default function AdminMediaReviewsPage() {
                   className={cn(
                     "rounded-2xl border p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
-                      ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30"
-                      : "bg-white border-slate-200 hover:border-cyan-500/40"
+                      ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md"
+                      : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
                   )}
                 >
                   <div className="flex items-start gap-3.5 min-w-0 flex-1">
                     {/* Profile Avatar (Google / Gravatar / Initials - identical to Customers page) */}
-                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/10" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-slate-800" : "border-slate-200")}>
                       <img
                         referrerPolicy="no-referrer"
                         src={comment.avatar ? `${comment.avatar}${comment.avatar.includes('?') ? '&' : '?'}v=4` : `/api/avatar?email=${encodeURIComponent(comment.email)}&name=${encodeURIComponent(comment.name)}&v=4`}
@@ -580,7 +580,7 @@ export default function AdminMediaReviewsPage() {
           filteredRatings.length === 0 ? (
             <div className={cn(
               "rounded-2xl border p-12 text-center",
-              isDark ? "border-white/10 bg-[#0A0B1A]/60" : "border-slate-200 bg-white"
+              isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm"
             )}>
               <Star className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No ratings found</p>
@@ -598,13 +598,13 @@ export default function AdminMediaReviewsPage() {
                   className={cn(
                     "rounded-2xl border p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
-                      ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30"
-                      : "bg-white border-slate-200 hover:border-cyan-500/40"
+                      ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md"
+                      : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
                   )}
                 >
                   <div className="flex items-start gap-3.5 min-w-0 flex-1">
                     {/* Rating Profile Avatar */}
-                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/10" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-slate-800" : "border-slate-200")}>
                       <img
                         referrerPolicy="no-referrer"
                         src={

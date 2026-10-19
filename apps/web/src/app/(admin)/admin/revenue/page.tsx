@@ -99,7 +99,7 @@ export default function AdminRevenuePage() {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Revenue */}
-        <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300")}>
           <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
           <div className="relative z-10 flex items-center justify-between mb-4">
             <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Revenue</h2>
@@ -117,7 +117,7 @@ export default function AdminRevenuePage() {
         </div>
 
         {/* Monthly Revenue */}
-        <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300")}>
           <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
           <div className="relative z-10 flex items-center justify-between mb-4">
             <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>This Month</h2>
@@ -135,7 +135,7 @@ export default function AdminRevenuePage() {
         </div>
 
         {/* Daily Revenue */}
-        <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300")}>
           <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-700", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")} />
           <div className="relative z-10 flex items-center justify-between mb-4">
             <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Today</h2>
@@ -154,7 +154,7 @@ export default function AdminRevenuePage() {
       </div>
 
       {/* Main Chart Card */}
-      <div className={cn("backdrop-blur-md rounded-3xl border p-4 sm:p-6 relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("rounded-2xl border p-4 sm:p-6 relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div>
             <h2 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>30-Day Revenue Trend</h2>
@@ -177,7 +177,7 @@ export default function AdminRevenuePage() {
       </div>
 
       {/* Paid Invoices Table */}
-      <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("rounded-2xl border p-6 relative overflow-hidden mt-2 shrink-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <h2 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Paid Invoices</h2>
           
@@ -188,7 +188,7 @@ export default function AdminRevenuePage() {
               placeholder="Search ID, Name, or Email..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className={cn("w-full bg-[#0A0B1A]/80 border rounded-xl py-2 pl-10 pr-4 text-sm placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           </form>
@@ -196,12 +196,12 @@ export default function AdminRevenuePage() {
         
         <div className="overflow-x-auto relative min-h-[200px]">
           {loading && (
-            <div className="absolute inset-0 bg-[#11162C]/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+            <div className={cn("absolute inset-0 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl", isDark ? "bg-[#0b1322]/80" : "bg-white/80")}>
                <AdminLoader className="min-h-0" size="sm" />
             </div>
           )}
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase", isDark ? "text-zinc-300" : "text-slate-600")}>
+            <thead className={cn("text-xs uppercase", isDark ? "bg-slate-900/60 text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
               <tr>
                 <th className="px-4 py-3 rounded-l-lg font-semibold whitespace-nowrap">Date</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">Invoice ID</th>
@@ -212,7 +212,7 @@ export default function AdminRevenuePage() {
             </thead>
             <tbody>
               {data.recentInvoices.map((inv: any, i: number) => (
-                <tr key={i} className={cn("border-b hover:bg-white/[0.02] transition-colors", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                <tr key={i} className={cn("border-b transition-colors", isDark ? "border-slate-800/80 hover:bg-white/5" : "border-slate-200 hover:bg-slate-50/80")}>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {format(new Date(inv.paidAt), 'dd MMM yyyy, HH:mm')}
                   </td>
@@ -248,7 +248,7 @@ export default function AdminRevenuePage() {
 
         {/* Pagination Controls */}
         {data.pagination && data.pagination.totalPages > 0 && (
-          <div className={cn("flex items-center justify-between mt-6 pt-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("flex items-center justify-between mt-6 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
             <div className="text-xs text-zinc-500 font-medium">
               Showing <span className={cn(isDark ? "text-white" : "text-slate-900")}>{(data.pagination.page - 1) * data.pagination.limit + (data.recentInvoices.length > 0 ? 1 : 0)}</span> to <span className={cn(isDark ? "text-white" : "text-slate-900")}>{(data.pagination.page - 1) * data.pagination.limit + data.recentInvoices.length}</span> of <span className={cn(isDark ? "text-white" : "text-slate-900")}>{data.pagination.total}</span> entries
             </div>
@@ -256,7 +256,7 @@ export default function AdminRevenuePage() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={data.pagination.page === 1 || loading}
-                className={cn("p-2 rounded-lg border hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}
+                className={cn("p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all", isDark ? "border-slate-800 bg-[#060b14] text-slate-400 hover:text-white hover:bg-slate-800" : "border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -270,7 +270,7 @@ export default function AdminRevenuePage() {
               <button
                 onClick={() => setPage(p => Math.min(data.pagination.totalPages, p + 1))}
                 disabled={data.pagination.page === data.pagination.totalPages || loading}
-                className={cn("p-2 rounded-lg border hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}
+                className={cn("p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all", isDark ? "border-slate-800 bg-[#060b14] text-slate-400 hover:text-white hover:bg-slate-800" : "border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

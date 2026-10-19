@@ -1934,7 +1934,7 @@ export default function AdminResourceFindingPage() {
             ) : (
               <div className="space-y-6">
                 {/* CPU Chart */}
-                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-black/30 border-white/10" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Cpu className="w-4 h-4 text-cyan-500" />
@@ -1951,12 +1951,12 @@ export default function AdminResourceFindingPage() {
                             <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff0a" : "#f1f5f9"} vertical={false} />
                         <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
                         <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} domain={[0, 100]} />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                            backgroundColor: isDark ? "#0b1322" : "#ffffff",
                             borderColor: isDark ? "#334155" : "#e2e8f0",
                             borderRadius: "12px",
                             fontSize: "12px",
@@ -1969,7 +1969,7 @@ export default function AdminResourceFindingPage() {
                 </div>
 
                 {/* Memory (RAM) Chart */}
-                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-black/30 border-white/10" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Activity className="w-4 h-4 text-cyan-500" />
@@ -1986,12 +1986,12 @@ export default function AdminResourceFindingPage() {
                             <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff0a" : "#f1f5f9"} vertical={false} />
                         <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
                         <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} domain={[0, 100]} />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                            backgroundColor: isDark ? "#0b1322" : "#ffffff",
                             borderColor: isDark ? "#334155" : "#e2e8f0",
                             borderRadius: "12px",
                             fontSize: "12px",
@@ -2004,7 +2004,7 @@ export default function AdminResourceFindingPage() {
                 </div>
 
                 {/* Network Throughput Chart (Download vs Upload) */}
-                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-black/30 border-white/10" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Network className="w-4 h-4 text-cyan-500" />
@@ -2032,12 +2032,12 @@ export default function AdminResourceFindingPage() {
                             <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff0a" : "#f1f5f9"} vertical={false} />
                         <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
                         <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                            backgroundColor: isDark ? "#0b1322" : "#ffffff",
                             borderColor: isDark ? "#334155" : "#e2e8f0",
                             borderRadius: "12px",
                             fontSize: "12px",

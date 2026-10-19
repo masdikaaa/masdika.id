@@ -40,7 +40,7 @@ export function ConfirmModal({
             exit={{ opacity: 0, scale: 0.95 }}
  className={`w-full max-w-sm rounded-2xl p-6 border transition-colors ${
               isDark
-                ? "bg-[#0c0c0e] border-white/10 text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+                ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl"
                 : "bg-white border-slate-200 text-slate-900 shadow-xl"
             }`}
           >

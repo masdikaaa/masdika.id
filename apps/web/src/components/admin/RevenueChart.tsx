@@ -66,7 +66,7 @@ export function RevenueChart({ data }: { data: any[] }) {
           content={({ active, payload, label }) => {
             if (active && payload && payload.length) {
               return (
-                <div className={cn("border rounded-xl p-3", isDark ? "bg-[#0b1021] border-white/10" : "bg-white border-slate-200")}>
+                <div className={cn("border rounded-xl p-3", isDark ? "bg-[#0b1322] border-slate-800 shadow-xl" : "bg-white border-slate-200 shadow-lg")}>
                   <p className={cn("text-xs mb-1 font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{label}</p>
                   <p className={cn("font-bold text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     {formatRupiah(payload[0].value as number)}
@@ -85,7 +85,7 @@ export function RevenueChart({ data }: { data: any[] }) {
           strokeWidth={3}
           fillOpacity={1}
           fill="url(#colorRevenue)"
-          activeDot={{ r: 6, fill: isDark ? "#0b1021" : "#ffffff", stroke: '#22d3ee', strokeWidth: 2 }}
+          activeDot={{ r: 6, fill: isDark ? "#0b1322" : "#ffffff", stroke: '#22d3ee', strokeWidth: 2 }}
         />
       </AreaChart>
     </ResponsiveContainer>

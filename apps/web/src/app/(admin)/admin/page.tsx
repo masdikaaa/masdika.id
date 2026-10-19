@@ -63,7 +63,7 @@ export default function AdminDashboard() {
         <div className="xl:col-span-8 flex flex-col gap-6">
           
           {/* Main Chart Card (Like Balance Summary in ref) */}
-          <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("backdrop-blur-md rounded-3xl border p-6 relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {/* Inner Glows */}
             <div className={cn("absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-600/10 rounded-full blur-[80px] pointer-events-none group-hover:bg-cyan-600/20 transition-all duration-700" />
@@ -77,11 +77,11 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Abstract Pie Chart Widget Placeholder */}
-            <div className={cn("backdrop-blur-md rounded-3xl border p-6 flex flex-col justify-between relative overflow-hidden group hover:border-white/10 transition-colors", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("backdrop-blur-md rounded-3xl border p-6 flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               
               <div className="relative z-10 flex items-center justify-between mb-8">
                 <h2 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>Content Distribution</h2>
-                <div className={cn("p-2 rounded-lg border", isDark ? "border-white/10" : "border-slate-200")}>
+                <div className={cn("p-2 rounded-lg border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
                   <PieChart className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 </div>
               </div>
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
                  {/* Visual Mock of the Donut Chart from the reference */}
                  <div className="relative w-40 h-40">
                    <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90 overflow-visible">
-                     <circle cx="50" cy="50" r="40" fill="transparent" stroke={isDark ? "#1E293B" : "#e2e8f0"} strokeWidth="12" />
+                     <circle cx="50" cy="50" r="40" fill="transparent" stroke={isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"} strokeWidth="12" />
                      {/* cyan segment */}
                      <circle cx="50" cy="50" r="40" fill="transparent" stroke="#22d3ee" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="60" />
                      {/* purple segment */}
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Quick Actions / Balance Widget Placeholder */}
-            <div className={cn("rounded-3xl border p-6 relative overflow-hidden group hover:border-white/10 transition-colors", isDark ? "border-white/5 bg-gradient-to-br from-[#11162C] to-[#0A0B1A]" : "bg-white border-slate-200")}>
+            <div className={cn("rounded-3xl border p-6 relative overflow-hidden group hover:border-slate-700 transition-colors", isDark ? "border-slate-800/80 bg-[#0b1322] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none" />
                <div className="relative z-10 flex items-center justify-between mb-6">
                 <h2 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>Quick Overview</h2>
@@ -130,15 +130,15 @@ export default function AdminDashboard() {
                   </div>
                 </Link>
 
-                <div className={cn("space-y-3 pt-6 border-t", isDark ? "border-white/5" : "border-slate-200")}>
-                  <Link href="/admin/portfolio/edit/new" className={cn("w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors border group/link", isDark ? "bg-[#0A0B1A]/50 hover:bg-[#11162C] border-white/5" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
+                <div className={cn("space-y-3 pt-6 border-t", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                  <Link href="/admin/portfolio/edit/new" className={cn("w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors border group/link", isDark ? "bg-[#060b14] hover:bg-slate-800/50 border-slate-800" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
                     <div className="flex items-center gap-3">
                       <FolderGit2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       <span className={cn("text-sm font-bold transition-colors", isDark ? "text-zinc-200 group-hover/link:text-white" : "text-slate-700 group-hover/link:text-slate-900")}>New Project</span>
                     </div>
                     <ExternalLink className={cn("w-3 h-3 text-zinc-500 group-hover/link: transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")} />
                   </Link>
-                  <Link href="/admin/blog" className={cn("w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors border group/link", isDark ? "bg-[#0A0B1A]/50 hover:bg-[#11162C] border-white/5" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
+                  <Link href="/admin/blog" className={cn("w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors border group/link", isDark ? "bg-[#060b14] hover:bg-slate-800/50 border-slate-800" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
                     <div className="flex items-center gap-3">
                       <FileText className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       <span className={cn("text-sm font-bold transition-colors", isDark ? "text-zinc-200 group-hover/link:text-white" : "text-slate-700 group-hover/link:text-slate-900")}>Write Article</span>
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
         <div className="xl:col-span-4 flex flex-col gap-6">
           
           {/* Vertical Metric Cards (Like Income/Expense in ref) */}
-          <div className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group transition-colors", isDark ? "bg-gradient-to-br from-cyan-950/40 to-[#0A0B1A]/80 border-cyan-500/20 hover:border-cyan-400/40" : "bg-white border-cyan-200 hover:border-cyan-400")}>
+          <div className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group transition-colors", isDark ? "bg-[#0b1322] border-cyan-500/30 hover:border-cyan-400/50 shadow-md" : "bg-white border-cyan-200 hover:border-cyan-400 shadow-sm")}>
             <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
             <div className="relative z-10 flex justify-between items-center">
               <div>
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <Link href="/admin/portfolio" className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors block cursor-pointer", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+          <Link href="/admin/portfolio" className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors block cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
              <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-600/20 transition-all duration-500", isDark ? "bg-cyan-600/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
              <div className="relative z-10 flex justify-between items-center">
               <div>
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
                   Live Projects
                 </div>
               </div>
-              <div className={cn("w-14 h-14 rounded-full border flex items-center justify-center relative group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("w-14 h-14 rounded-full border flex items-center justify-center relative group-hover:border-cyan-500/30 transition-colors", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeDasharray="75, 100" />
                  </svg>
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/admin/blog" className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors block cursor-pointer", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+          <Link href="/admin/blog" className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors block cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
              <div className="relative z-10 flex justify-between items-center">
               <div>
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
                   Published Articles
                 </div>
               </div>
-              <div className={cn("w-14 h-14 rounded-full border flex items-center justify-center relative group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className={cn("w-14 h-14 rounded-full border flex items-center justify-center relative group-hover:border-cyan-500/30 transition-colors", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeDasharray="45, 100" />
                  </svg>
@@ -216,13 +216,13 @@ export default function AdminDashboard() {
           <OnlineUsersWidget />
 
           {/* Contacts / Activity List (Like Contacts in ref) */}
-          <div className={cn("backdrop-blur-xl rounded-3xl border p-6 flex-1 flex flex-col min-h-[350px]", isDark ? "bg-gradient-to-b from-[#11162C]/80 to-[#0A0B1A]/80 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("backdrop-blur-xl rounded-3xl border p-6 flex-1 flex flex-col min-h-[350px]", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>Recent Messages</h2>
                 <div className={cn("text-[10px] mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>You have {stats.unreadMessages} unread messages</div>
               </div>
-              <Link href="/admin/messages" className={cn("w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors border", isDark ? "text-zinc-300 border-white/5" : "text-slate-600 border-slate-200")}>
+              <Link href="/admin/messages" className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-colors border", isDark ? "text-zinc-300 border-slate-800 bg-[#060b14] hover:bg-slate-800" : "text-slate-600 border-slate-200 bg-slate-50 hover:bg-slate-100")}>
                 <Plus className="w-4 h-4" />
               </Link>
             </div>
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                    const colorClass = colors[idx % colors.length];
                    
                    return (
-                     <Link key={msg.id} href="/admin/messages" className={cn("flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer group", isDark ? "bg-[#0A0B1A]/40 hover:bg-[#0A0B1A] border-white/5" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
+                     <Link key={msg.id} href="/admin/messages" className={cn("flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer group", isDark ? "bg-[#060b14] hover:bg-slate-800/50 border-slate-800" : "bg-slate-50 hover:bg-slate-100 border-slate-200")}>
                        <div className="flex items-center gap-4 truncate">
                          {msg.name === "System Notification" ? (
                             <div className={cn("w-10 h-10 rounded-full flex items-center justify-center border shrink-0 transition-transform group-hover:scale-105", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/25" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
                )}
             </div>
             
-            <div className={cn("mt-4 pt-4 border-t text-center", isDark ? "border-white/5" : "border-slate-200")}>
+            <div className={cn("mt-4 pt-4 border-t text-center", isDark ? "border-slate-800/80" : "border-slate-200")}>
                <Link href="/admin/messages" className={cn("text-xs font-semibold hover:text-cyan-300 transition-colors flex items-center justify-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
                  View all messages <ArrowUpRight className="w-3 h-3" />
                </Link>

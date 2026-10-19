@@ -125,8 +125,8 @@ export default function AdminOpportunitiesPage() {
       </div>
       </div>
 
-      <div className="glass-card overflow-hidden">
-        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
+      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <div className="relative w-full sm:w-80">
               <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-cyan-500" : "text-cyan-700")} />
@@ -135,7 +135,7 @@ export default function AdminOpportunitiesPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search title or type..." 
-                className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors", isDark ? "bg-[#0a1624] border-cyan-500/30 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-slate-50 border-cyan-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")}
+                className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
             
@@ -148,7 +148,7 @@ export default function AdminOpportunitiesPage() {
                   ...uniqueTypes.map((type: any) => ({ value: type, label: type }))
                 ]}
                 placeholder="All Types"
-                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-slate-800" : "border-slate-200")}
               />
             </div>
           </div>
@@ -156,10 +156,10 @@ export default function AdminOpportunitiesPage() {
             {filteredOpportunities.length > 0 && (
               <button 
                 onClick={toggleSelectAll}
-                className={cn("flex items-center gap-2 px-4 py-2.5 font-bold rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+                className={cn("flex items-center gap-2 px-4 py-2.5 font-bold rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 hover:bg-slate-800/60" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
               >
-                <div className={`w-5 h-5 border rounded flex items-center justify-center ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500" : "border-slate-300"}`}>
-                  {selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                <div className={`w-5 h-5 border rounded flex items-center justify-center ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700 bg-slate-900/50" : "border-slate-300 bg-white"}`}>
+                  {selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                 </div>
                 <span className="hidden sm:inline">{selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'Deselect All' : 'Select All'}</span>
               </button>
@@ -178,11 +178,11 @@ export default function AdminOpportunitiesPage() {
         
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
+            <thead className={cn("text-[10px] uppercase border-b tracking-wider font-bold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th className="px-6 py-4 font-medium w-12">
-                  <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
-                    {selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                  <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-slate-900/50" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
+                    {selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                   </button>
                 </th>
                 <th className="px-6 py-4 font-medium">Title</th>
@@ -192,7 +192,7 @@ export default function AdminOpportunitiesPage() {
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-zinc-500">Loading items...</td>
@@ -203,10 +203,10 @@ export default function AdminOpportunitiesPage() {
                 </tr>
               ) : (
                 filteredOpportunities.map((item) => (
-                  <tr key={item.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
+                  <tr key={item.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                     <td className="px-6 py-4">
-                      <button onClick={() => toggleSelect(item.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(item.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
-                        {selectedIds.includes(item.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                      <button onClick={() => toggleSelect(item.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(item.id) ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-slate-900/50" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
+                        {selectedIds.includes(item.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                       </button>
                     </td>
                     <td className={cn("px-6 py-4 font-medium transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{item.title}</td>

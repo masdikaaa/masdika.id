@@ -251,10 +251,10 @@ export default function VpcRoutersPage() {
       {/* Add / Edit Modal */}
       {(showAddModal || showEditModal) && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
-            <div className={cn("p-6 border-b flex items-center justify-between shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
+            <div className={cn("p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
               <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Network className={cn("w-5 h-5", isDark ? "text-cyan-500" : "text-cyan-700")} />
+                <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 {showEditModal ? "Edit VPC Router" : "Add VPC Router"}
               </h3>
               <button
@@ -267,34 +267,34 @@ export default function VpcRoutersPage() {
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto">
               <div className="md:col-span-2 space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Router Name</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Router Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Primary Mikrotik"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Hostname / IP</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Hostname / IP</label>
                 <input
                   type="text"
                   value={formData.host}
                   onChange={(e) => setFormData({ ...formData, host: e.target.value })}
                   placeholder="e.g. 192.168.1.1"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>API Port</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>API Port</label>
                 <input
                   type="number"
                   value={formData.apiPort}
                   onChange={(e) => setFormData({ ...formData, apiPort: parseInt(e.target.value) })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -304,31 +304,31 @@ export default function VpcRoutersPage() {
                     type="checkbox"
                     checked={formData.useSsl}
                     onChange={(e) => setFormData({ ...formData, useSsl: e.target.checked })}
-                    className={cn("w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500/20", isDark ? "bg-black/40 border-white/10 focus:ring-offset-[#0f172a]" : "bg-white border-slate-200")}
+                    className={cn("w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500/20", isDark ? "bg-[#060b14] border-slate-800 focus:ring-offset-[#0b1322]" : "bg-white border-slate-200")}
                   />
                   <span className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Use SSL (api-ssl)</span>
                 </label>
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Username</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Username</label>
                 <input
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
               <div className="space-y-2 relative">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Password</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder={showEditModal ? "(Leave empty to keep)" : ""}
-                    className={cn("w-full border rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-cyan-500 transition-colors [&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-cyan-500 transition-colors [&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                   <button
                     type="button"
@@ -349,41 +349,41 @@ export default function VpcRoutersPage() {
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Mikrotik Bridge</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Mikrotik Bridge</label>
                 <input
                   type="text"
                   value={formData.interfaceName}
                   onChange={(e) => setFormData({ ...formData, interfaceName: e.target.value })}
                   placeholder="e.g. bridge-vpc"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Proxmox Bridge (VMs)</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Proxmox Bridge (VMs)</label>
                 <input
                   type="text"
                   value={formData.proxmoxBridge}
                   onChange={(e) => setFormData({ ...formData, proxmoxBridge: e.target.value })}
                   placeholder="e.g. vmbr2"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
               <div className="md:col-span-2 space-y-2">
-                <label className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>WAN Interface (to Internet)</label>
+                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>WAN Interface (to Internet)</label>
                 <input
                   type="text"
                   value={formData.wanInterface}
                   onChange={(e) => setFormData({ ...formData, wanInterface: e.target.value })}
                   placeholder="e.g. ether1 or pppoe-out1"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
                 <p className="text-xs text-zinc-500">Used for VPC NAT Gateway (Internet Access)</p>
               </div>
             </div>
 
-            <div className={cn("p-6 border-t flex items-center justify-end gap-3 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("p-6 border-t flex items-center justify-end gap-3 shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
               <button
                 type="button"
                 onClick={() => {

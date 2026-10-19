@@ -70,19 +70,19 @@ const PaginatedTable = ({ data, columns, renderRow, emptyMessage, itemsPerPage =
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className={cn("text-xs uppercase tracking-wider border-b", isDark ? "bg-black/20 text-zinc-500 border-white/10" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <tr className={cn("text-xs uppercase tracking-wider border-b font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               {columns.map((c: any, i: number) => (
                 <th key={i} className={`p-4 font-semibold ${c.align === 'right' ? 'text-right' : ''}`}>{c.label}</th>
               ))}
             </tr>
           </thead>
-          <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+          <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
             {paginatedData.map(renderRow)}
           </tbody>
         </table>
       </div>
       {totalPages > 1 && (
-        <div className={cn("p-4 border-t bg-white/[0.01]", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
@@ -412,7 +412,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             <ArrowLeft className={cn("w-5 h-5", isDark ? "text-zinc-300" : "text-slate-600")} />
           </button>
           
-          <div className={cn("w-14 h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#0f172a] border-white/20" : "bg-white border-slate-200")}>
+          <div className={cn("w-14 h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
             <img referrerPolicy="no-referrer" 
               src={user.image || `/api/avatar?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || 'User')}`} 
               alt="Profile" 
@@ -429,31 +429,31 @@ export default function ClientProfile({ userId }: { userId: string }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className={cn("px-4 py-2 rounded-xl border text-sm", isDark ? "bg-[#1e293b] border-white/5" : "bg-slate-100 border-slate-200")}>
+          <div className={cn("px-4 py-2 rounded-xl border text-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
             <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Balance:</span> <span className={cn("font-bold ml-1", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(user.balance)}</span>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className={cn("flex overflow-x-auto border-b gap-6 sm:gap-8 [&::-webkit-scrollbar]:hidden", isDark ? "border-white/10" : "border-slate-200")} style={{ scrollbarWidth: 'none' }}>
+      <div className={cn("flex border-b gap-6 sm:gap-8 [&::-webkit-scrollbar]:hidden", isDark ? "border-slate-800/80" : "border-slate-200")} style={{ scrollbarWidth: 'none' }}>
         <button
           onClick={() => setActiveTab('summary')}
-          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'summary' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-zinc-400 hover:text-white'}`}
+          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'summary' ? 'border-cyan-500 text-cyan-400' : isDark ? 'border-transparent text-zinc-400 hover:text-white' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
         >
           <User className="w-4 h-4 inline-block mr-2 -mt-0.5" />
           Summary
         </button>
         <button
           onClick={() => setActiveTab('services')}
-          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'services' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-zinc-400 hover:text-white'}`}
+          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'services' ? 'border-cyan-500 text-cyan-400' : isDark ? 'border-transparent text-zinc-400 hover:text-white' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
         >
           <Server className="w-4 h-4 inline-block mr-2 -mt-0.5" />
           Products/Services
         </button>
         <button
           onClick={() => setActiveTab('invoices')}
-          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'invoices' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-zinc-400 hover:text-white'}`}
+          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'invoices' ? 'border-cyan-500 text-cyan-400' : isDark ? 'border-transparent text-zinc-400 hover:text-white' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
         >
           <FileText className="w-4 h-4 inline-block mr-2 -mt-0.5" />
           Invoices
@@ -466,7 +466,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         {/* SUMMARY TAB */}
         {activeTab === 'summary' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className={cn("p-6 rounded-2xl border md:col-span-2", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("p-6 rounded-2xl border md:col-span-2", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-slate-900")}>Client Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                 <div>
@@ -478,7 +478,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   <p className={cn("text-sm font-medium break-all", isDark ? "text-zinc-200" : "text-slate-900")}>{user.email}</p>
                 </div>
                 
-                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-slate-800/80" : "border-slate-200")}>
                   <h4 className={cn("text-sm font-bold uppercase tracking-widest mb-4", isDark ? "text-cyan-400" : "text-cyan-700")}>Billing Information</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
@@ -516,7 +516,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   </div>
                 </div>
 
-                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-slate-800/80" : "border-slate-200")}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
                       <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Registered On</p>
@@ -534,7 +534,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
             
             <div className="space-y-6">
-              <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                 <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-slate-900")}>Quick Stats</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
@@ -553,9 +553,9 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
         {/* SERVICES TAB */}
         {activeTab === 'services' && (
-          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
 
-            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
+            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
               <h3 className={cn("font-semibold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} /> All Products & Services</h3>
               <button
                 onClick={() => setCreateCustomServiceModal(true)}
@@ -575,10 +575,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 { label: "Actions", align: "right" }
               ]}
               renderRow={(svc: any, idx: number) => (
-                <tr key={`${svc.type}-${svc.id}-${idx}`} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={`${svc.type}-${svc.id}-${idx}`} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                   <td className="p-4">
                     <div className="flex items-center gap-3 min-w-[180px]">
-                      <div className={cn("p-2 rounded-lg border flex-shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                      <div className={cn("p-2 rounded-lg border flex-shrink-0", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                         {svc.icon}
                       </div>
                       <div className="min-w-0">
@@ -603,7 +603,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                           setEditTarget(svc);
                           setEditModalOpen(true);
                         }}
-                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border whitespace-nowrap flex items-center gap-1.5", isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}
+                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border whitespace-nowrap flex items-center gap-1.5", isDark ? "bg-[#060b14] border-slate-800 hover:bg-white/5 text-zinc-300" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}
                       >
                         <Edit3 className="w-3.5 h-3.5" /> Edit
                       </button>
@@ -639,7 +639,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
         {/* INVOICES TAB */}
         {activeTab === 'invoices' && (
-          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <PaginatedTable
               data={user.invoices}
               emptyMessage="No invoices found for this customer."
@@ -651,7 +651,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 { label: "Status", align: "right" }
               ]}
               renderRow={(inv: any) => (
-                <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={inv.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                   <td className={cn("p-4 text-sm font-medium break-all max-w-[120px] sm:max-w-none", isDark ? "text-cyan-400" : "text-cyan-700")}>{inv.invoiceNumber}</td>
                   <td className={cn("p-4 text-sm whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(inv.createdAt).toLocaleDateString()}</td>
                   <td className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-900")}>{formatRupiah(inv.amount)}</td>
@@ -676,8 +676,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
       {/* Suspend Modal */}
       {suspendModalOpen && suspendTarget && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
-            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800 shadow-2xl" : "bg-white border-slate-200 shadow-2xl")}>
+            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-slate-800" : "border-slate-200")}>
               <h3 className={cn("font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
                 Suspend {suspendTarget.label}
@@ -692,10 +692,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 value={suspendReason}
                 onChange={(e) => setSuspendReason(e.target.value)}
                 placeholder="e.g. Overdue payment, Terms violation..."
-                className={cn("w-full border rounded-xl p-3 placeholder-zinc-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all min-h-[100px]", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                className={cn("w-full border rounded-xl p-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all min-h-[100px]", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
-            <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
               <button 
                 onClick={() => setSuspendModalOpen(false)}
                 disabled={isSuspending}
@@ -776,8 +776,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
       {/* Create Custom Service Modal */}
       {createCustomServiceModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
-            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800 shadow-2xl" : "bg-white border-slate-200 shadow-2xl")}>
+            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-slate-800" : "border-slate-200")}>
               <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Create Custom Service</h3>
               <button onClick={() => setCreateCustomServiceModal(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <XCircle className="w-5 h-5" />
@@ -793,7 +793,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     value={csForm.name}
                     onChange={(e) => setCsForm({...csForm, name: e.target.value})}
                     placeholder="e.g. Addon Public IP"
-                    className={cn("w-full border rounded-xl p-2.5 placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div>
@@ -803,7 +803,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     value={csForm.description}
                     onChange={(e) => setCsForm({...csForm, description: e.target.value})}
                     placeholder="Short description"
-                    className={cn("w-full border rounded-xl p-2.5 placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div>
@@ -815,7 +815,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     value={csForm.price}
                     onChange={(e) => setCsForm({...csForm, price: e.target.value})}
                     placeholder="e.g. 50000"
-                    className={cn("w-full border rounded-xl p-2.5 placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -831,7 +831,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         { value: "1_YEAR", label: "1 Tahun" }
                       ]}
                       placeholder="Billing Cycle"
-                      className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                      className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
@@ -841,12 +841,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
                       type="date"
                       value={csForm.expiresAt}
                       onChange={(e) => setCsForm({...csForm, expiresAt: e.target.value})}
-                      className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C] [color-scheme:dark]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50 [color-scheme:light]")}
+                      className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                     />
                   </div>
                 </div>
               </div>
-              <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <button 
                   type="button"
                   onClick={() => setCreateCustomServiceModal(false)}

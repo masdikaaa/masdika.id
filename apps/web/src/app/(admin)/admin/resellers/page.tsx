@@ -53,7 +53,7 @@ export default function AdminResellersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {resellers.map((reseller, idx) => (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} key={reseller.id} className={cn("rounded-2xl md:rounded-[32px] p-5 md:p-6 relative overflow-hidden group border transition-colors", isDark ? "bg-[#0A0B1A]/80 border-white/10 hover:border-cyan-500/30" : "bg-white border-slate-200 hover:border-cyan-500/30")}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} key={reseller.id} className={cn("rounded-2xl p-5 md:p-6 relative overflow-hidden group border transition-all", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-cyan-500/40" : "bg-white border-slate-200 shadow-sm hover:border-cyan-500/40")}>
             {/* Background Glow */}
             <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none transition-all", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
             
@@ -68,14 +68,14 @@ export default function AdminResellersPage() {
             </div>
 
             <div className="space-y-3 md:space-y-4 mb-6 relative z-10">
-              <div className={cn("flex items-center justify-between p-3 rounded-xl border", isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-100")}>
+              <div className={cn("flex items-center justify-between p-3 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <div className={cn("flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
                   <Wallet className="w-4 h-4" /> <span className="text-xs md:text-sm">Balance</span>
                 </div>
                 <span className={cn("font-bold text-sm md:text-base", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(reseller.balance)}</span>
               </div>
 
-              <div className={cn("flex items-center justify-between p-3 rounded-xl border", isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-100")}>
+              <div className={cn("flex items-center justify-between p-3 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <div className={cn("flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
                   <Server className="w-4 h-4" /> <span className="text-xs md:text-sm">Active VPS</span>
                 </div>
@@ -83,7 +83,7 @@ export default function AdminResellersPage() {
               </div>
             </div>
 
-            <div className={cn("border-t pt-4 relative z-10", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("border-t pt-4 relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
               <h4 className={cn("text-xs md:text-sm font-bold mb-3 flex items-center gap-2 uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                 <Key className="w-4 h-4" /> API Keys
               </h4>

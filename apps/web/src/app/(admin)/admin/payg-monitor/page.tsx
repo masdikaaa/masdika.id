@@ -114,7 +114,7 @@ export default function PaygMonitorPage() {
         <button 
           onClick={fetchData}
           disabled={loading}
-          className={cn("flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-white/10 font-medium transition-colors disabled:opacity-50", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+          className={cn("flex items-center gap-2 px-4 py-2 border rounded-lg font-medium transition-colors disabled:opacity-50", isDark ? "bg-[#0b1322] border-slate-800 text-white hover:bg-slate-800" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh Data
@@ -123,7 +123,7 @@ export default function PaygMonitorPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <div className={cn("glass border rounded-xl p-6", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-xl p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <h2 className={cn("text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Clock className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
               Billing Interval
@@ -139,7 +139,7 @@ export default function PaygMonitorPage() {
                     { value: "minutely", label: "Minutely (Fast Testing / Accelerated)" }
                   ]}
                   placeholder="Select frequency..."
-                  className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                  className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-slate-800 bg-[#060b14] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
                 />
                 <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm mt-3", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
                   <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -163,7 +163,7 @@ export default function PaygMonitorPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className={cn("glass border rounded-xl p-6 h-full", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-xl p-6 h-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
@@ -175,7 +175,7 @@ export default function PaygMonitorPage() {
                   placeholder="Search name or email..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setCustomerPage(1); }}
-                  className={cn("w-full border rounded-lg pl-3 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500/50 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-lg pl-3 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
             </div>
@@ -186,30 +186,30 @@ export default function PaygMonitorPage() {
                 <p>Loading data...</p>
               </div>
             ) : filteredCustomers.length === 0 ? (
-              <div className={cn("flex flex-col items-center justify-center h-48 border border-dashed rounded-lg", isDark ? "text-zinc-500 border-white/10" : "text-slate-500 border-slate-300")}>
+              <div className={cn("flex flex-col items-center justify-center h-48 border border-dashed rounded-lg", isDark ? "text-zinc-500 border-slate-800" : "text-slate-500 border-slate-300")}>
                 <p>No active Pay-As-You-Go customers found.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
                   <thead>
-                    <tr className={cn("border-b", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
-                      <th className="pb-3 pl-4 font-medium">Customer</th>
-                      <th className="pb-3 font-medium text-center">Active Services</th>
-                      <th className="pb-3 font-medium text-right">Total Accumulated</th>
-                      <th className="pb-3 font-medium text-center">Invoice Status</th>
+                    <tr className={cn("border-b", isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-500")}>
+                      <th className="pb-3 pl-4 font-semibold">Customer</th>
+                      <th className="pb-3 font-semibold text-center">Active Services</th>
+                      <th className="pb-3 font-semibold text-right">Total Accumulated</th>
+                      <th className="pb-3 font-semibold text-center">Invoice Status</th>
                     </tr>
                   </thead>
-                  <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+                  <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                     {filteredCustomers.slice((customerPage - 1) * customersPerPage, customerPage * customersPerPage).map((cust) => (
                       <Fragment key={cust.id}>
                         <tr 
-                          className="hover:bg-white/5 transition-colors cursor-pointer group"
+                          className={cn("transition-colors cursor-pointer group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}
                           onClick={() => setExpandedCustomerId(expandedCustomerId === cust.id ? null : cust.id)}
                         >
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-3">
-                              <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-slate-50 border-slate-200")}>
+                              <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                                 <img referrerPolicy="no-referrer" 
                                   src={cust.image || `/api/avatar?email=${encodeURIComponent(cust.email || '')}&name=${encodeURIComponent(cust.name || 'User')}`} 
                                   alt={cust.name} 
@@ -243,13 +243,13 @@ export default function PaygMonitorPage() {
                           </td>
                         </tr>
                         {expandedCustomerId === cust.id && (
-                          <tr className={cn(isDark ? "bg-black/20" : "bg-slate-50")}>
-                            <td colSpan={4} className={cn("p-4 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
-                              <div className={cn("border rounded-xl p-4", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+                          <tr className={cn(isDark ? "bg-[#060b14]/50" : "bg-slate-50/70")}>
+                            <td colSpan={4} className={cn("p-4 border-b", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                              <div className={cn("border rounded-xl p-4", isDark ? "bg-[#0b1322] border-slate-800 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
                                 <h4 className={cn("text-sm font-bold mb-3", isDark ? "text-white" : "text-slate-900")}>Service Details</h4>
                                 <table className="w-full text-left text-xs whitespace-nowrap">
                                   <thead>
-                                    <tr className={cn("border-b", isDark ? "text-zinc-500 border-white/10" : "text-slate-500 border-slate-200")}>
+                                    <tr className={cn("border-b", isDark ? "text-slate-400 border-slate-800 font-semibold" : "text-slate-500 border-slate-200 font-semibold")}>
                                       <th className="pb-2 pl-2 font-medium">Service</th>
                                       <th className="pb-2 font-medium">Type</th>
                                       <th className="pb-2 font-medium text-right">Hourly Rate</th>
@@ -257,11 +257,11 @@ export default function PaygMonitorPage() {
                                       <th className="pb-2 font-medium text-center">Status</th>
                                     </tr>
                                   </thead>
-                                  <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+                                  <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                                     {cust.services
                                       .slice(((servicePageMap[cust.id] || 1) - 1) * servicesPerPage, (servicePageMap[cust.id] || 1) * servicesPerPage)
                                       .map((svc) => (
-                                      <tr key={svc.id} className="hover:bg-white/5 transition-colors">
+                                      <tr key={svc.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                                         <td className={cn("py-2 px-2 font-medium flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                                           {getIcon(svc.type)}
                                           {svc.name}
@@ -292,7 +292,7 @@ export default function PaygMonitorPage() {
                                   </tbody>
                                 </table>
                                 {cust.services.length > servicesPerPage && (
-                                  <div className={cn("flex items-center justify-between mt-3 pt-3 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                                  <div className={cn("flex items-center justify-between mt-3 pt-3 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
                                     <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                                       Showing {((servicePageMap[cust.id] || 1) - 1) * servicesPerPage + 1} to {Math.min((servicePageMap[cust.id] || 1) * servicesPerPage, cust.services.length)} of {cust.services.length} services
                                     </p>
@@ -300,14 +300,14 @@ export default function PaygMonitorPage() {
                                       <button
                                         onClick={() => setServicePageMap(prev => ({ ...prev, [cust.id]: Math.max(1, (prev[cust.id] || 1) - 1) }))}
                                         disabled={(servicePageMap[cust.id] || 1) === 1}
-                                        className={cn("px-2 py-1 text-xs rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}
+                                        className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#060b14] border-slate-800 text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
                                       >
                                         Prev
                                       </button>
                                       <button
                                         onClick={() => setServicePageMap(prev => ({ ...prev, [cust.id]: Math.min(Math.ceil(cust.services.length / servicesPerPage), (prev[cust.id] || 1) + 1) }))}
                                         disabled={(servicePageMap[cust.id] || 1) >= Math.ceil(cust.services.length / servicesPerPage)}
-                                        className={cn("px-2 py-1 text-xs rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-600")}
+                                        className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#060b14] border-slate-800 text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
                                       >
                                         Next
                                       </button>
@@ -323,7 +323,7 @@ export default function PaygMonitorPage() {
                   </tbody>
                 </table>
                 {filteredCustomers.length > customersPerPage && (
-                  <div className={cn("p-4 border-t", isDark ? "bg-black/10 border-white/10" : "bg-slate-50 border-slate-200")}>
+                  <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
                     <Pagination 
                       currentPage={customerPage} 
                       totalPages={Math.ceil(filteredCustomers.length / customersPerPage)} 

@@ -45,7 +45,7 @@ export function OnlineUsersWidget() {
   const displayedUsers = onlineUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#11162C]/80 border-white/5" : "bg-white border-slate-200")}>
+    <div className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
       <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-[50px] pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-500", isDark ? "bg-emerald-500/5 border-emerald-500/10" : "bg-emerald-50 border-emerald-200")} />
       
       <div className="relative z-10 flex items-center justify-between mb-6">
@@ -94,7 +94,7 @@ export function OnlineUsersWidget() {
       </div>
 
       {totalPages > 1 && (
-        <div className="relative z-10 flex items-center justify-between mt-4 pt-4 border-t border-white/5 dark:border-white/5">
+        <div className={cn("relative z-10 flex items-center justify-between mt-4 pt-4 border-t", isDark ? "border-slate-800/80" : "border-slate-200")}>
           <div className={cn("text-[10px]", isDark ? "text-zinc-500" : "text-slate-500")}>
             Page {currentPage} of {totalPages}
           </div>

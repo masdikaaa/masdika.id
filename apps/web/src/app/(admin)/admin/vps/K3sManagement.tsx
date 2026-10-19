@@ -102,19 +102,19 @@ export default function K3sManagement() {
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden relative shadow-sm", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className={cn("border-b", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
+              <tr className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                 <th className="p-4 w-10">
                   <button
                     onClick={toggleSelectAll}
                     className={cn(
                       "w-5 h-5 rounded flex items-center justify-center transition-colors",
                       selectedClusters.length > 0
-                        ? "bg-cyan-500 text-[#0f172a]"
-                        : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
+                        ? "bg-cyan-500 text-slate-950"
+                        : (isDark ? "bg-slate-900 border border-slate-700 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                     )}
                   >
                     <CheckCircle className="w-4 h-4 stroke-[2.5]" />
@@ -129,17 +129,17 @@ export default function K3sManagement() {
                 <th className={cn("p-4 text-sm font-semibold text-right whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/10" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {clusters.map((cluster) => (
-                <tr key={cluster.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
+                <tr key={cluster.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                   <td className="p-4">
                     <button
                       onClick={() => toggleSelect(cluster.id)}
                       className={cn(
                         "w-5 h-5 rounded flex items-center justify-center transition-colors",
                         selectedClusters.includes(cluster.id)
-                          ? "bg-cyan-500 text-[#0f172a]"
-                          : (isDark ? "bg-black/50 border border-white/10 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
+                          ? "bg-cyan-500 text-slate-950"
+                          : (isDark ? "bg-slate-900 border border-slate-700 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                       )}
                     >
                       <CheckCircle className="w-4 h-4 stroke-[2.5]" />

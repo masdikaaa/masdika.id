@@ -271,19 +271,19 @@ export default function AdminCommunityPage() {
 
       <div className="grid gap-6">
         {groups.length === 0 ? (
-          <div className={cn("glass-card rounded-[32px] p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className={cn("absolute top-0 left-1/4 w-96 h-96 blur-[100px] rounded-full pointer-events-none", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
               <Users className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
             <h2 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Groups Yet</h2>
             <p className={cn("font-medium max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>When someone submits a WhatsApp group, it will appear here for you to review and publish.</p>
           </div>
         ) : (
-          <div className={cn("glass-card rounded-2xl overflow-hidden border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("rounded-2xl overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className={cn("bg-white/5 border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-400" : "bg-white border-slate-200 text-slate-500")}>
+                <thead className={cn("text-[10px] uppercase border-b tracking-wider font-bold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <tr>
                     <th className="px-6 py-4 w-10"></th>
                     <th className="px-6 py-4 font-medium">Group</th>
@@ -293,23 +293,23 @@ export default function AdminCommunityPage() {
                     <th className="px-6 py-4 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+                <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                   {groups.map((group, index) => (
                     <motion.tr 
                       key={group.id} 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.02 }}
-                      className="hover:bg-white/[0.02] transition-colors"
+                      className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}
                     >
                       <td className="px-6 py-4">
-                        <button onClick={() => toggleSelect(group.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(group.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
-                          {selectedIds.includes(group.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                        <button onClick={() => toggleSelect(group.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(group.id) ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-slate-900/50" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
+                          {selectedIds.includes(group.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                         </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={cn("w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                          <div className={cn("w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                             {group.image ? (
                               <img referrerPolicy="no-referrer" src={group.image} alt={group.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             ) : (
@@ -421,10 +421,10 @@ export default function AdminCommunityPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className={cn("border rounded-[32px] w-full max-w-lg overflow-hidden relative z-10", isDark ? "glass-card border-cyan-500/30" : "bg-white border-slate-200")}
+            className={cn("border rounded-2xl w-full max-w-lg overflow-hidden relative z-10 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-cyan-500"></div>
-            <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-200")}>
               <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Edit2 className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 Edit Group
@@ -441,7 +441,7 @@ export default function AdminCommunityPage() {
                   type="text" 
                   value={editGroup.name}
                   onChange={e => setEditGroup({...editGroup, name: e.target.value})}
-                  className={cn("w-full border rounded-xl px-5 py-3.5 font-bold focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-5 py-3.5 font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   required
                 />
               </div>
@@ -454,7 +454,7 @@ export default function AdminCommunityPage() {
                     type="url" 
                     value={editGroup.link}
                     onChange={e => setEditGroup({...editGroup, link: e.target.value})}
-                    className={cn("w-full border rounded-xl pl-12 pr-5 py-3.5 font-medium focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl pl-12 pr-5 py-3.5 font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     required
                   />
                 </div>
@@ -463,7 +463,7 @@ export default function AdminCommunityPage() {
               <div>
                 <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Group Image (Optional)</label>
                 {editGroup.image ? (
-                  <div className={cn("relative group rounded-xl overflow-hidden border w-32 h-32", isDark ? "border-white/10" : "border-slate-200")}>
+                  <div className={cn("relative group rounded-xl overflow-hidden border w-32 h-32", isDark ? "border-slate-800" : "border-slate-200")}>
                     <img referrerPolicy="no-referrer" src={editGroup.image} alt="Group" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                       <label className={cn("cursor-pointer px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition-colors backdrop-blur-md border flex items-center gap-1.5", isDark ? "text-white border-white/20" : "text-slate-900 border-slate-200")}>

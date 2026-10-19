@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { X, Server, Save, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTheme } from "@/components/ThemeProvider";
+import { cn } from "@/lib/utils";
 
 interface AdminEditServiceModalProps {
   isOpen: boolean;
@@ -12,6 +14,8 @@ interface AdminEditServiceModalProps {
 }
 
 export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: AdminEditServiceModalProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +59,6 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
       let payload = { action: 'update', id: service.id, ...formData };
       
       // For other services we need a generic endpoint or we can skip for now since VPS is main priority
-      // But we'll add it just in case
       if (!isVps) {
          endpoint = `/api/admin/services`; 
          payload = { action: 'update', id: service.id, type: service.type, ...formData };
@@ -84,13 +87,13 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#0f172a] border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-5 border-b border-white/10 flex justify-between items-center bg-black/20 shrink-0">
-          <h3 className="font-bold text-white flex items-center gap-2">
-            <Server className="w-5 h-5 text-cyan-400" />
+      <div className={cn("border rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+        <div className={cn("p-5 border-b flex justify-between items-center shrink-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+          <h3 className={cn("font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <Server className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
             Edit {service.category}: {service.name}
           </h3>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
+          <button onClick={onClose} className={cn("transition-colors p-1.5 rounded-lg", isDark ? "text-zinc-400 hover:text-white hover:bg-slate-800" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200")}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -101,91 +104,91 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Server Node</label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>Server Node</label>
                     <input
                       name="node"
                       value={formData.node || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Hostname</label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>Hostname</label>
                     <input
                       name="hostname"
                       value={formData.hostname || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">CPU Cores</label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>CPU Cores</label>
                     <input
                       type="number"
                       name="cpuCores"
                       value={formData.cpuCores || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">RAM (GB)</label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>RAM (GB)</label>
                     <input
                       type="number"
                       name="ramGb"
                       value={formData.ramGb || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Disk (GB)</label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>Disk (GB)</label>
                     <input
                       type="number"
                       name="diskGb"
                       value={formData.diskGb || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Username</label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>Username</label>
                     <input
                       name="username"
                       value={formData.username || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">New Password <span className="text-zinc-600">(Leave blank to keep)</span></label>
+                    <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>New Password <span className="text-zinc-500 font-normal">(Leave blank to keep)</span></label>
                     <input
                       name="password"
                       type="text"
                       placeholder="Enter new root password"
                       value={formData.password || ''}
                       onChange={handleChange}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                      className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                     />
                   </div>
                 </div>
               </>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t border-white/5">
+            <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Status</label>
+                <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>Status</label>
                 <select
                   name="status"
                   value={formData.status || ''}
                   onChange={handleChange}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all appearance-none"
+                  className={cn("w-full border rounded-xl p-2.5 text-sm transition-all appearance-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="RUNNING">Running</option>
@@ -196,7 +199,7 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
                   <Calendar className="w-3.5 h-3.5" /> Next Due Date
                 </label>
                 <input
@@ -204,11 +207,11 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
                   name="expiresAt"
                   value={formData.expiresAt || ''}
                   onChange={handleChange}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                  className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
                   <Calendar className="w-3.5 h-3.5 text-orange-400" /> Termination Date
                 </label>
                 <input
@@ -216,7 +219,7 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
                   name="terminationDate"
                   value={formData.terminationDate || ''}
                   onChange={handleChange}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                  className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
             </div>
@@ -224,12 +227,12 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
           </form>
         </div>
 
-        <div className="p-5 border-t border-white/10 flex justify-end gap-3 bg-black/20 shrink-0">
+        <div className={cn("p-5 border-t flex justify-end gap-3 shrink-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
           <button 
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-5 py-2.5 text-sm font-medium text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+            className={cn("px-4 py-2 text-sm font-semibold rounded-xl border transition-colors", isDark ? "bg-[#060b14] hover:bg-slate-800 text-slate-300 border-slate-800" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
           >
             Cancel
           </button>
@@ -237,7 +240,7 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
             type="submit"
             form="edit-service-form"
             disabled={loading}
-            className="px-5 py-2.5 text-sm font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-5 py-2 text-sm font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
           >
             {loading ? (
               <><div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" /> Saving...</>

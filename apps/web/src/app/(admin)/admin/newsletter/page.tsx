@@ -157,9 +157,9 @@ export default function NewsletterPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className={cn("p-6 rounded-2xl border group", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200")}>
+        <div className={cn("p-6 rounded-2xl border group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center gap-4 relative z-10">
-            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", isDark ? "bg-white/5 border border-white/10 text-cyan-400" : "bg-slate-100 border border-slate-200 text-slate-600")}>
+            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", isDark ? "bg-[#060b14] border border-slate-800 text-cyan-400" : "bg-slate-100 border border-slate-200 text-slate-600")}>
               <Users className="w-6 h-6" />
             </div>
             <div>
@@ -170,8 +170,8 @@ export default function NewsletterPage() {
         </div>
       </div>
 
-      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200")}>
-        <div className={cn("p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-center", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
+      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
           <div className="relative w-full sm:w-96">
             <Search className={cn("w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-400" : "text-slate-500")} />
             <input
@@ -179,7 +179,7 @@ export default function NewsletterPage() {
               placeholder="Search subscribers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={cn("w-full border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:border-cyan-500/50 focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 focus:bg-slate-50")}
+              className={cn("w-full border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
         </div>
@@ -187,12 +187,12 @@ export default function NewsletterPage() {
         <div className="overflow-x-auto">
           {loading ? (
             <div className={cn("p-12 text-center flex flex-col items-center gap-4", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-slate-400")} />
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-slate-400")} />
               <p>Loading subscribers...</p>
             </div>
           ) : filteredSubscribers.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
-              <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4", isDark ? "bg-white/5 text-zinc-400" : "bg-slate-100 text-slate-400")}>
+              <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-400")}>
                 <AlertCircle className="w-8 h-8" />
               </div>
               <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Subscribers Found</h3>
@@ -201,22 +201,22 @@ export default function NewsletterPage() {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className={cn("border-b", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                  <th className={cn("p-4 sm:p-6 w-12 text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>SEL</th>
-                  <th className={cn("p-4 sm:p-6 text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-600")}>Email Address</th>
-                  <th className={cn("p-4 sm:p-6 text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-600")}>Subscribed Date</th>
-                  <th className={cn("p-4 sm:p-6 text-sm font-semibold text-right", isDark ? "text-zinc-300" : "text-slate-600")}>Actions</th>
+                <tr className={cn("border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-slate-200 font-semibold")}>
+                  <th className="p-4 sm:p-6 w-12 text-xs">SEL</th>
+                  <th className="p-4 sm:p-6 text-sm font-semibold">Email Address</th>
+                  <th className="p-4 sm:p-6 text-sm font-semibold">Subscribed Date</th>
+                  <th className="p-4 sm:p-6 text-sm font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                 {filteredSubscribers.map((sub) => (
-                  <tr key={sub.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50")}>
+                  <tr key={sub.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                     <td className="p-4 sm:p-6">
                       <button 
                         onClick={() => toggleSelect(sub.id)} 
-                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(sub.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}
+                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(sub.id) ? 'bg-cyan-400 border-cyan-400' : isDark ? "border-slate-700 bg-slate-900 hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}
                       >
-                        {selectedIds.includes(sub.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                        {selectedIds.includes(sub.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                       </button>
                     </td>
                     <td className="p-4 sm:p-6">

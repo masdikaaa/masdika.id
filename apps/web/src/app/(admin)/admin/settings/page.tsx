@@ -9,9 +9,9 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-const inputClassDark = 'w-full bg-[#0b1120] border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all';
-const inputClassLight = 'w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all';
-const labelClassDark = 'block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2';
+const inputClassDark = 'w-full bg-[#060b14] border border-slate-800 rounded-xl px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all';
+const inputClassLight = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition-all';
+const labelClassDark = 'block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2';
 const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
 
 export default function SettingsPage() {
@@ -456,7 +456,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 md:space-y-8 pb-10 w-full relative z-10">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0f172a] to-[#011627] border p-6 md:p-8 group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-2xl border p-6 md:p-8", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-semibold mb-4 tracking-wide", isDark ? "text-cyan-400" : "text-cyan-700")}>
             <Settings className="w-3 h-3" /> Account Management
@@ -471,14 +471,14 @@ export default function SettingsPage() {
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Navigation Sidebar */}
         <div className="w-full md:w-60 shrink-0">
-          <div className={cn("backdrop-blur-sm border rounded-3xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={cn("relative flex items-center gap-3 px-4 py-4 rounded-2xl transition-all text-left shrink-0 w-full border", isActive ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-white text-slate-900 border-slate-200") : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-transparent"))}
+                  className={cn("relative flex items-center gap-3 px-4 py-4 rounded-xl transition-all text-left shrink-0 w-full border", isActive ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200") : (isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/50 border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-transparent"))}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isActive ? 'bg-cyan-500/20 border border-cyan-500/30' : isDark ? "bg-white/5" : "bg-slate-100"}`}>
                     <tab.icon className={cn("w-4 h-4", isActive ? (isDark ? "text-cyan-400" : "text-slate-900") : (isDark ? "text-zinc-500" : "text-slate-400"))} />
@@ -502,7 +502,7 @@ export default function SettingsPage() {
                 {/* Profile Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
         
         
@@ -572,7 +572,7 @@ export default function SettingsPage() {
               <textarea rows={4} name="bio" value={formData.bio} onChange={handleChange} className={cn(inputClass, "resize-none")} />
             </div>
             
-            <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
               <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                 {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
                 {saving ? "Saving..." : "Save Profile"}
@@ -589,9 +589,9 @@ export default function SettingsPage() {
                 {/* Contact Information Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <Phone className="w-6 h-6" />
           </div>
@@ -615,7 +615,7 @@ export default function SettingsPage() {
             <input type="text" name="contact_location" value={formData.contact_location} onChange={handleChange} placeholder="Surabaya, Indonesia" className={inputClass} />
           </div>
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Contact Info"}
@@ -625,9 +625,9 @@ export default function SettingsPage() {
                 {/* Social Links Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <Share2 className="w-6 h-6" />
           </div>
@@ -659,7 +659,7 @@ export default function SettingsPage() {
             <input type="url" name="social_github" value={formData.social_github} onChange={handleChange} placeholder="https://github.com/..." className={inputClass} />
           </div>
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Social Links"}
@@ -674,9 +674,9 @@ export default function SettingsPage() {
                 {/* Website Content Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <Layout className="w-6 h-6" />
           </div>
@@ -700,7 +700,7 @@ export default function SettingsPage() {
             <input type="text" name="hero_typing_text" value={formData.hero_typing_text} onChange={handleChange} placeholder="Cloud Engineer, DevOps Expert, SysAdmin Pro, Backend Dev" className={inputClass} />
           </div>
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Content"}
@@ -710,9 +710,9 @@ export default function SettingsPage() {
                 {/* Resume / CV Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <FileText className="w-6 h-6" />
           </div>
@@ -724,7 +724,7 @@ export default function SettingsPage() {
 
         <div className="space-y-4 relative z-10">
           <div className="flex items-center gap-4">
-            <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white hover:border-slate-700" : "bg-white border-slate-200 text-slate-900 hover:border-slate-300")}>
               <input type="file" accept="application/pdf" className="hidden" onChange={handleCVUpload} />
               <FileText className={cn("w-5 h-5 mr-2", isDark ? "text-cyan-400" : "text-cyan-700")} />
               Upload New CV
@@ -748,7 +748,7 @@ export default function SettingsPage() {
             {formData.cv_url ? `Current CV path: ${formData.cv_url}` : "No CV uploaded yet."}
           </p>
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save CV"}
@@ -765,9 +765,9 @@ export default function SettingsPage() {
                 {/* SEO & Favicon Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <Search className="w-6 h-6" />
           </div>
@@ -824,14 +824,14 @@ export default function SettingsPage() {
             </div>
           </div>
           
-          <div className={cn("space-y-4 pt-6 mt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("space-y-4 pt-6 mt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
             <label className={labelClass}>Favicon (.ico only)</label>
             <div className="flex items-center gap-6">
-              <div className={cn("w-16 h-16 rounded-xl border flex items-center justify-center overflow-hidden relative", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("w-16 h-16 rounded-xl border flex items-center justify-center overflow-hidden relative", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <img referrerPolicy="no-referrer" src={`/favicon.ico?v=${faviconKey}`} alt="Favicon" className="w-8 h-8" onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgY3Vyc29yPSJwb2ludGVyIj48cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik00IDE2bDQuNTg2LTQuNTg2YTIgMiAwIDAxMi44MjggMEwxNiAxNm0tMi0ybDEuNTg2LTEuNTg2YTIgMiAwIDAxMi44MjggMEwyMCAxNG0tNi02aC4wMSIgLz48L3N2Zz4=' }} />
               </div>
               <div className="flex items-center gap-4">
-                <label className={cn("flex flex-col items-center justify-center px-6 py-2 border hover:border-cyan-500/50 rounded-xl cursor-pointer transition-all", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200")}>
+                <label className={cn("flex flex-col items-center justify-center px-6 py-2 border hover:border-cyan-500/50 rounded-xl cursor-pointer transition-all", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
                   <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Upload .ico</span>
                   <span className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>Recommended: 32x32px</span>
                   <input type="file" accept=".ico" className="hidden" onChange={handleFaviconUpload} />
@@ -839,7 +839,7 @@ export default function SettingsPage() {
                 <button 
                   onClick={() => setShowDeleteFaviconModal(true)}
                   disabled={isDeletingFavicon}
-                  className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                  className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-[#060b14] hover:bg-slate-800 text-white border-slate-800" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                   title="Delete Favicon"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -855,7 +855,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save SEO Settings"}
@@ -870,11 +870,11 @@ export default function SettingsPage() {
                 {/* Security Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
 
         <div className="flex items-center gap-4 border-b border-cyan-500/10 pb-6 relative z-10">
-          <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")} >
             <Shield className="w-6 h-6" />
           </div>
           <div>
@@ -885,7 +885,7 @@ export default function SettingsPage() {
 
         <div className="space-y-8 relative z-10">
           <div className="flex flex-col gap-4">
-            <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
+            <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
               <div>
                 <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Key className={cn("w-5 h-5 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} /> 
@@ -896,10 +896,10 @@ export default function SettingsPage() {
               
               <button 
                 onClick={handleToggle2FA}
-                className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.twoFactorEnabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
+                className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 ${formData.twoFactorEnabled ? 'bg-cyan-400' : (isDark ? 'bg-slate-800' : 'bg-slate-300')}`}
               >
                 <span className="sr-only">Use setting</span>
- <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.twoFactorEnabled ?'translate-x-3':'-translate-x-3'}`} />
+ <span aria-hidden="true"className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-slate-950 ring-0 transition duration-200 ease-in-out ${formData.twoFactorEnabled ?'translate-x-3 bg-slate-950':'-translate-x-3 bg-white'}`} />
               </button>
             </div>
 
@@ -911,7 +911,7 @@ export default function SettingsPage() {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className={cn("p-8 rounded-2xl border flex flex-col items-center gap-6 text-center", isDark ? "bg-[#0f172a] border-cyan-500/20" : "bg-white border-slate-200")}>
+                  <div className={cn("p-8 rounded-2xl border flex flex-col items-center gap-6 text-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                     <p className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-600")}>1. Scan this QR Code with your Authenticator app</p>
                     <div className="p-4 bg-white rounded-2xl">
                       <img referrerPolicy="no-referrer" src={setup2FAData.url} alt="2FA QR Code" className="w-48 h-48" loading="lazy" decoding="async" />
@@ -922,7 +922,7 @@ export default function SettingsPage() {
                       <p className={cn("text-sm font-bold tracking-widest", isDark ? "text-white" : "text-slate-900")}>{setup2FAData.secret}</p>
                     </div>
 
-                    <div className="w-full max-w-sm h-px bg-white/10 my-2" />
+                    <div className={cn("w-full max-w-sm h-px my-2", isDark ? "bg-slate-800" : "bg-slate-200")} />
 
                     <div className="w-full max-w-sm space-y-4">
                       <p className={cn("text-sm font-semibold text-left", isDark ? "text-zinc-300" : "text-slate-600")}>2. Enter the 6-digit code from the app</p>
@@ -932,13 +932,13 @@ export default function SettingsPage() {
                         value={verifyCode}
                         onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
                         placeholder="123456" 
-                        className={cn("w-full px-5 py-4 bg-black/60 border rounded-xl text-center tracking-[0.5em] text-2xl font-bold focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")} 
+                        className={cn("w-full px-5 py-4 border rounded-xl text-center tracking-[0.5em] text-2xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")} 
                       />
                       
                       <div className="flex gap-3">
                         <button 
                           onClick={() => setSetup2FAData(null)}
-                          className={cn("flex-1 py-3.5 font-bold rounded-xl transition-colors border", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+                          className={cn("flex-1 py-3.5 font-bold rounded-xl transition-colors border", isDark ? "text-slate-300 border-slate-800 bg-[#060b14] hover:bg-slate-800" : "text-slate-700 border-slate-200 bg-white hover:bg-slate-50")}
                         >
                           Cancel
                         </button>
@@ -957,24 +957,24 @@ export default function SettingsPage() {
             </AnimatePresence>
           </div>
 
-          <div className={cn("space-y-6 w-full p-6 rounded-2xl border", isDark ? "border-white/10" : "border-slate-200")}>
+          <div className={cn("space-y-6 w-full p-6 rounded-2xl border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
             <h3 className={cn("font-bold text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>Change Password</h3>
             <div className="space-y-3">
               <label className={labelClass}>Current Password</label>
-              <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 bg-black/60 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")} />
+              <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
             </div>
             <div className="space-y-3">
               <label className={labelClass}>New Password</label>
-              <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 bg-black/60 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")} />
+              <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
             </div>
             <div className="space-y-3">
               <label className={labelClass}>Confirm New Password</label>
-              <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 bg-black/60 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")} />
+              <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
             </div>
             <button 
               onClick={handleUpdatePassword} 
               disabled={passwordSaving}
-              className={cn("flex items-center justify-center w-full px-6 py-3.5 font-bold rounded-xl transition-colors border mt-2 disabled:opacity-50", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+              className={cn("flex items-center justify-center w-full px-6 py-3.5 font-bold rounded-xl transition-colors border mt-2 disabled:opacity-50", isDark ? "text-white border-slate-800 bg-[#0b1322] hover:bg-slate-800" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
             >
               {passwordSaving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : "Update Password"}
             </button>
@@ -986,9 +986,9 @@ export default function SettingsPage() {
       {/* System Maintenance Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <Shield className="w-6 h-6" />
           </div>
@@ -1029,7 +1029,7 @@ export default function SettingsPage() {
             />
           </div>
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Maintenance Settings"}
@@ -1045,9 +1045,9 @@ export default function SettingsPage() {
       {/* Service Management */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-        className={cn("glass-card rounded-[32px] p-6 md:p-10 space-y-8 relative overflow-hidden group border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
           <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
             <Settings className="w-6 h-6" />
           </div>
@@ -1114,7 +1114,7 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          <div className={cn("space-y-3 mt-6 pt-6 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("space-y-3 mt-6 pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
             <label className={labelClass}>Global PPN (Tax Rate %)</label>
             <p className={cn("text-sm mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Set the global tax rate (e.g. 11 for 11%). This tax is applied when customers Top Up their balance.</p>
             <input
@@ -1130,7 +1130,7 @@ export default function SettingsPage() {
           </div>
 
         </div>
-        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
           <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
             {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
             {saving ? "Saving..." : "Save Service Settings"}

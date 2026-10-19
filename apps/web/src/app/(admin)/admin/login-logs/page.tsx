@@ -214,12 +214,12 @@ export default function LoginLogsPage() {
       </div>
 
       {/* Main Content */}
-      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {loading ? (
           <AdminLoader className="min-h-[250px] p-12" />
         ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center">
-            <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-slate-800 bg-slate-900/50" : "border-slate-200 bg-slate-50")}>
               <ShieldAlert className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
             </div>
             <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Login Logs Found</h3>
@@ -229,25 +229,25 @@ export default function LoginLogsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className={cn("border-b", isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-200")}>
+                <tr className={cn("border-b text-[10px] uppercase tracking-wider font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <th className="px-6 py-4 w-12 text-center"></th>
-                  <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Status</th>
-                  <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Email Attempted</th>
-                  <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>IP Address</th>
-                  <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Time</th>
-                  <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider text-right", isDark ? "text-zinc-400" : "text-slate-500")}>Actions</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Email Attempted</th>
+                  <th className="px-6 py-4">IP Address</th>
+                  <th className="px-6 py-4">Time</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                 {paginatedLogs.map((log) => (
-                  <tr key={log.id} className={cn("transition-colors group", selectedIds.includes(log.id) ? (isDark ? "bg-cyan-500/5" : "bg-cyan-50") : (isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50"))}>
+                  <tr key={log.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedIds.includes(log.id) && (isDark ? "bg-white/5" : "bg-slate-50"))}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => toggleSelect(log.id)}
                         className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${
                           selectedIds.includes(log.id)
-                            ? "bg-cyan-500 border-cyan-500"
-                            : 'border-zinc-500 group-hover:border-zinc-400'
+                            ? "bg-cyan-400 border-cyan-400 text-slate-950"
+                            : isDark ? "border-slate-700 hover:border-cyan-400 bg-slate-900/50" : "border-slate-300 hover:border-cyan-600 bg-white"
                         }`}
                       >
                         {selectedIds.includes(log.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
@@ -301,7 +301,7 @@ export default function LoginLogsPage() {
           </div>
         )}
         {logs.length > 0 && (
-          <div className={cn("p-6 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("p-6 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}

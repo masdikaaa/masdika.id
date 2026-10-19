@@ -150,8 +150,8 @@ export default function AdminCloudflaredPage() {
         </button>
       </div>
 
-      <div className={cn("glass-card border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
-        <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto flex-1">
             <h2 className={cn("text-lg font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
               {activeTab === 'domains' ? 'All Domains' : 'All Tunnels'}
@@ -167,7 +167,7 @@ export default function AdminCloudflaredPage() {
                   if (activeTab === 'domains') setCurrentDomainPage(1);
                   else setCurrentTunnelPage(1);
                 }}
-                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-colors", isDark ? "bg-[#1e293b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900")}
+                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function AdminCloudflaredPage() {
                 </tbody>
               </table>
             </div>
-            <div className={cn("p-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("p-4 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
               <Pagination currentPage={currentDomainPage} totalPages={totalDomainPages} onPageChange={setCurrentDomainPage} />
             </div>
           </>
@@ -375,7 +375,7 @@ export default function AdminCloudflaredPage() {
                 </tbody>
               </table>
             </div>
-            <div className={cn("p-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("p-4 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
               <Pagination currentPage={currentTunnelPage} totalPages={totalTunnelPages} onPageChange={setCurrentTunnelPage} />
             </div>
           </>

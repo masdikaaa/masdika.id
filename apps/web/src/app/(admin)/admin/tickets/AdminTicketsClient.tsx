@@ -192,7 +192,7 @@ export default function AdminTicketsClient() {
               placeholder="Search ID, subject, or name..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn("w-full border rounded-xl pl-9 pr-4 py-2 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full border rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
           
@@ -227,14 +227,14 @@ export default function AdminTicketsClient() {
                   { value: "MERGED", label: "Merged" }
                 ]}
                 placeholder="All Status"
-                className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className={cn("glass-card border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {isLoading ? (
           <AdminLoader className="min-h-[250px] py-20" />
         ) : error ? (
@@ -251,7 +251,7 @@ export default function AdminTicketsClient() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left border-collapse">
               <thead>
-                <tr className={cn("border-b text-xs uppercase tracking-wider text-zinc-500", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
+                <tr className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <th className="p-4 w-12">
                     <button 
                       type="button"
@@ -365,10 +365,10 @@ export default function AdminTicketsClient() {
 
       {showBulkDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0A0B1A] border-red-500/20" : "bg-white border-red-200")}>
-            <div className="p-5 border-b border-red-500/10 flex justify-between items-center bg-red-500/[0.04]">
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
+            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-slate-800" : "border-slate-200")}>
               <h3 className={cn("font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Trash2 className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-700")} />
+                <Trash2 className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-600")} />
                 Delete Tickets
               </h3>
               <button onClick={() => setShowBulkDeleteModal(false)} disabled={isBulkDeleting} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
@@ -379,19 +379,19 @@ export default function AdminTicketsClient() {
               <p className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>
                 Are you sure you want to delete {selectedTickets.length} selected tickets? This action cannot be undone.
               </p>
-              <div className={cn("flex justify-end gap-3 pt-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("flex justify-end gap-3 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
                 <button
                   type="button"
                   onClick={() => setShowBulkDeleteModal(false)}
                   disabled={isBulkDeleting}
-                  className={cn("px-4 py-2 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50", isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
+                  className={cn("px-4 py-2 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBulkDelete}
                   disabled={isBulkDeleting}
-                  className="px-6 py-2 text-sm font-bold bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
                 >
                   {isBulkDeleting ? 'Deleting...' : 'Delete Permanently'}
                 </button>
@@ -404,8 +404,8 @@ export default function AdminTicketsClient() {
       {/* New Ticket Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("border rounded-3xl w-full max-w-2xl overflow-hidden relative max-h-[90vh] flex flex-col shadow-2xl", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
-            <div className={cn("p-4 md:p-6 border-b flex justify-between items-start md:items-center relative z-10 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-3xl w-full max-w-2xl overflow-hidden relative max-h-[90vh] flex flex-col shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <div className={cn("p-4 md:p-6 border-b flex justify-between items-start md:items-center relative z-10 shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
               <div className="flex-1 pr-4">
                 <h3 className={cn("text-lg md:text-xl font-bold flex items-start md:items-center gap-3", isDark ? "text-white" : "text-slate-900")}>
                   <div className={cn("w-10 h-10 md:w-8 md:h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 md:mt-0", isDark ? "bg-cyan-500/20" : "bg-cyan-50")}>
@@ -436,7 +436,7 @@ export default function AdminTicketsClient() {
                       type="email"
                       value={formData.targetEmail}
                       onChange={e => setFormData({...formData, targetEmail: e.target.value})}
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                       placeholder="customer@email.com"
                     />
                   </div>
@@ -452,7 +452,7 @@ export default function AdminTicketsClient() {
                         ...userServices.map(s => ({ value: s.value, label: s.value }))
                       ]}
                       placeholder="-- Select Service (Optional) --"
-                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}
                     />
                   </div>
                 </div>
@@ -465,7 +465,7 @@ export default function AdminTicketsClient() {
                       type="text"
                       value={formData.subject}
                       onChange={e => setFormData({...formData, subject: e.target.value})}
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                       placeholder="Ticket subject..."
                     />
                   </div>
@@ -481,7 +481,7 @@ export default function AdminTicketsClient() {
                         { value: "CRITICAL", label: "Critical" }
                       ]}
                       placeholder="Priority"
-                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}
                     />
                   </div>
                 </div>
@@ -493,7 +493,7 @@ export default function AdminTicketsClient() {
                     rows={5}
                     value={formData.message}
                     onChange={e => setFormData({...formData, message: e.target.value})}
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-all resize-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     placeholder="Describe the issue..."
                   />
                 </div>
@@ -504,7 +504,7 @@ export default function AdminTicketsClient() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={cn("flex items-center gap-2 px-5 py-3 border border-dashed hover:border-cyan-500/50 rounded-2xl text-sm hover:text-cyan-400 transition-all w-full justify-center", isDark ? "border-white/20 text-zinc-400" : "border-slate-200 text-slate-500")}
+                    className={cn("flex items-center gap-2 px-5 py-3 border border-dashed hover:border-cyan-500/50 rounded-2xl text-sm hover:text-cyan-400 transition-all w-full justify-center", isDark ? "border-slate-800 text-zinc-400 bg-[#060b14]" : "border-slate-200 text-slate-500 bg-slate-50")}
                   >
                     <Paperclip className="w-4 h-4" />
                     Attach Files (max 5, 5MB each)
@@ -512,7 +512,7 @@ export default function AdminTicketsClient() {
                   {attachments.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {attachments.map((file, i) => (
-                        <div key={i} className={cn("flex items-center gap-2 border px-3 py-2 rounded-xl text-xs", isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-600")}>
+                        <div key={i} className={cn("flex items-center gap-2 border px-3 py-2 rounded-xl text-xs", isDark ? "border-slate-800 bg-[#060b14] text-zinc-300" : "border-slate-200 bg-slate-50 text-slate-600")}>
                           {file.type.startsWith('image/') ? <ImageIcon className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} /> : <FileText className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} />}
                           <span className="truncate max-w-[140px]">{file.name}</span>
                           <button type="button" onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} className={cn("text-zinc-500 hover: ml-1", isDark ? "text-red-400" : "text-red-700")}>
@@ -524,7 +524,7 @@ export default function AdminTicketsClient() {
                   )}
                 </div>
 
-                <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
                   <button
                     type="button"
                     onClick={closeModal}

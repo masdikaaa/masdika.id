@@ -135,7 +135,7 @@ export default function TagsPage() {
       {/* Add New Tag */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className={cn("glass-card rounded-2xl p-6 border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl p-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
         <h2 className={cn("text-lg font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Add New Tag</h2>
         <div className="flex gap-3">
@@ -145,7 +145,7 @@ export default function TagsPage() {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Tag Name"
-            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")}
+            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
           />
           <input
             type="text"
@@ -153,7 +153,7 @@ export default function TagsPage() {
             onChange={(e) => setNewSlug(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Custom Slug (optional)"
-            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-white" : "bg-white border-slate-200 text-slate-900")}
+            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
           />
           <button
             onClick={handleCreate}
@@ -167,7 +167,7 @@ export default function TagsPage() {
       {/* Tags List */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-        className={cn("glass-card rounded-2xl border overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}
+        className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
         {tags.length === 0 ? (
           <div className="p-12 text-center">
@@ -178,14 +178,14 @@ export default function TagsPage() {
             <p className="text-zinc-500 text-sm">Create your first tag using the form above.</p>
           </div>
         ) : (
-          <div className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+          <div className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
             {tags.map((cat, index) => (
               <motion.div 
                 key={cat.id}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className={cn("flex items-center justify-between p-4 transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50")}
+                className={cn("flex items-center justify-between p-4 transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}
               >
                 {editingId === cat.id ? (
                   <div className="flex items-center gap-2 flex-1">
@@ -196,7 +196,7 @@ export default function TagsPage() {
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cat.id)}
                       autoFocus
                       placeholder="Name"
-                      className={cn("flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-cyan-500/30 text-white" : "bg-white border-slate-300 text-slate-900")}
+                      className={cn("flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900")}
                     />
                     <input
                       type="text"
@@ -204,7 +204,7 @@ export default function TagsPage() {
                       onChange={(e) => setEditingSlug(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cat.id)}
                       placeholder="Slug"
-                      className={cn("flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-cyan-500/30 text-white" : "bg-white border-slate-300 text-slate-900")}
+                      className={cn("flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900")}
                     />
                     <button onClick={() => handleUpdate(cat.id)} className={cn("p-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}>
                       <Check className="w-4 h-4" />

@@ -153,14 +153,14 @@ export default function AdminMessagesPage() {
               <p className={cn("leading-relaxed italic relative z-10 text-base", isDark ? "text-zinc-200" : "text-slate-700")}>"{commentText}"</p>
             </div>
             <div className="flex items-center gap-2 text-xs text-zinc-500">
-               <span className={cn("px-2 py-1 rounded font-mono border", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
+               <span className={cn("px-2 py-1 rounded font-mono border", isDark ? "bg-[#060b14] border-slate-800 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
             </div>
           </div>
         );
       }
     }
     return (
-      <div className={cn("p-4 sm:p-5 rounded-2xl border leading-relaxed text-sm whitespace-pre-wrap", isDark ? "bg-black/40 border-white/5 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
+      <div className={cn("p-4 sm:p-5 rounded-2xl border leading-relaxed text-sm whitespace-pre-wrap", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
         {content}
       </div>
     );
@@ -168,7 +168,7 @@ export default function AdminMessagesPage() {
 
   if (loading) return (
     <div className="min-h-[60vh] w-full flex items-center justify-center">
-      <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+      <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-cyan-700")} />
     </div>
   );
 
@@ -183,10 +183,10 @@ export default function AdminMessagesPage() {
           {messages.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-5 py-2.5 font-bold rounded-xl transition-all border", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+              className={cn("flex items-center gap-2 px-5 py-2.5 font-bold rounded-xl transition-all border", isDark ? "text-white border-slate-800 hover:bg-slate-800" : "text-slate-900 border-slate-200 hover:bg-slate-50")}
             >
-              <div className={`w-5 h-5 border rounded flex items-center justify-center ${selectedIds.length === messages.length ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500" : "border-slate-300"}`}>
-                {selectedIds.length === messages.length && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+              <div className={`w-5 h-5 border rounded flex items-center justify-center ${selectedIds.length === messages.length ? 'bg-cyan-400 border-cyan-400' : isDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"}`}>
+                {selectedIds.length === messages.length && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
               </div>
               {selectedIds.length === messages.length ? 'Deselect All' : 'Select All'}
             </button>
@@ -214,11 +214,11 @@ export default function AdminMessagesPage() {
 
       <div className="grid gap-6">
         {messages.length === 0 ? (
-          <div className={cn("glass-card rounded-[32px] p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <MailOpen className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
-            <h2 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Messages Yet</h2>
+            <h2 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-slate-900")}>No Messages Yet</h2>
             <p className={cn("font-medium max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>When someone contacts you, their message will appear here.</p>
           </div>
         ) : (
@@ -228,19 +228,19 @@ export default function AdminMessagesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={cn("glass-card rounded-3xl p-5 sm:p-8 border transition-all", msg.isRead ? (isDark ? "bg-white/[0.01] border-white/5" : "bg-white border-slate-200") : (isDark ? "bg-cyan-500/[0.03] border-cyan-500/20" : "bg-cyan-50 border-cyan-200"))}
+              className={cn("rounded-2xl p-5 sm:p-8 border transition-all", msg.isRead ? (isDark ? "bg-[#0b1322] border-slate-800/80 shadow-sm" : "bg-white border-slate-200 shadow-sm") : (isDark ? "bg-[#0b1322] border-cyan-500/40 shadow-md" : "bg-cyan-50/50 border-cyan-300 shadow-sm"))}
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
                 <div className="pt-1">
-                  <button onClick={() => toggleSelect(msg.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(msg.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
-                    {selectedIds.includes(msg.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                  <button onClick={() => toggleSelect(msg.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(msg.id) ? 'bg-cyan-400 border-cyan-400' : isDark ? "border-slate-700 bg-slate-900 hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
+                    {selectedIds.includes(msg.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                   </button>
                 </div>
                 <div className="flex-1 space-y-4 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
                     <div className="min-w-0">
                       <div className="flex items-start gap-3 mb-1">
-                        {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse mt-2 shrink-0" />}
+                        {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse mt-2 shrink-0" />}
                         <h3 className={cn("text-lg sm:text-xl font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-sm">

@@ -145,8 +145,8 @@ export default function AdminBlogPage() {
       </div>
       </div>
 
-      <motion.div variants={itemVariants} className="glass-card overflow-hidden">
-        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
           <div className="relative w-full max-w-md">
             <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 /70", isDark ? "text-cyan-500" : "text-cyan-700")} />
             <input 
@@ -154,17 +154,17 @@ export default function AdminBlogPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search articles by title or category..." 
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {filteredArticles.length > 0 && (
               <button 
                 onClick={toggleSelectAll}
-                className={cn("flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 py-2.5 text-sm font-bold rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+                className={cn("flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 py-2.5 text-sm font-bold rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 hover:bg-slate-800/60" : "text-slate-900 border-slate-200 hover:bg-slate-50")}
               >
-                <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredArticles.length && filteredArticles.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500" : "border-slate-300"}`}>
-                  {selectedIds.length === filteredArticles.length && filteredArticles.length > 0 && <Check className="w-3 h-3 text-slate-900 font-bold" strokeWidth={3} />}
+                <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredArticles.length && filteredArticles.length > 0 ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700" : "border-slate-300"}`}>
+                  {selectedIds.length === filteredArticles.length && filteredArticles.length > 0 && <Check className="w-3 h-3 text-slate-950 font-bold" strokeWidth={3} />}
                 </div>
                 <span>{selectedIds.length === filteredArticles.length && filteredArticles.length > 0 ? 'Deselect All' : 'Select All'}</span>
               </button>
@@ -183,7 +183,7 @@ export default function AdminBlogPage() {
         
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-[10px] uppercase border-b tracking-wider font-bold", isDark ? "bg-[#0A0B1A]/50 border-white/5 text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-500")}>
+            <thead className={cn("text-[10px] uppercase border-b tracking-wider font-semibold", isDark ? "bg-slate-900/60 border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
               <tr>
                 <th className="px-6 py-4 w-10 whitespace-nowrap"></th>
                 <th className="px-6 py-4 whitespace-nowrap">Article Title</th>
@@ -193,7 +193,7 @@ export default function AdminBlogPage() {
                 <th className="px-6 py-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12">
@@ -219,10 +219,10 @@ export default function AdminBlogPage() {
                 </tr>
               ) : (
                 paginatedArticles.map((article) => (
-                  <tr key={article.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.03]" : "hover:bg-slate-50")}>
+                  <tr key={article.id} className={cn("transition-colors group", selectedIds.includes(article.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button onClick={() => toggleSelect(article.id)} className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(article.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? 'border-zinc-600 hover:border-cyan-400' : 'border-slate-300 hover:border-cyan-600'}`}>
-                        {selectedIds.includes(article.id) && <Check className="w-3 h-3 text-slate-900 font-bold" strokeWidth={3} />}
+                      <button onClick={() => toggleSelect(article.id)} className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(article.id) ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? 'bg-[#060b14] border-slate-700 hover:border-cyan-400' : 'bg-white border-slate-300 hover:border-cyan-600'}`}>
+                        {selectedIds.includes(article.id) && <Check className="w-3 h-3 text-slate-950 font-bold" strokeWidth={3} />}
                       </button>
                     </td>
                     <td className={cn("px-6 py-4 font-bold transition-colors whitespace-nowrap", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700")}>
@@ -264,7 +264,7 @@ export default function AdminBlogPage() {
             </tbody>
           </table>
         </div>
-        <div className={cn("p-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </motion.div>

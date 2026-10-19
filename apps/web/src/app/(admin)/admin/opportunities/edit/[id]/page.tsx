@@ -179,7 +179,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 flex flex-col space-y-6">
-          <div className="glass-card p-6 flex-1 flex flex-col">
+          <div className={cn("rounded-2xl p-6 flex-1 flex flex-col border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="space-y-4 flex-1 flex flex-col">
               <div>
                 <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Title</label>
@@ -188,7 +188,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className={cn("w-full bg-black/40 border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Enter title"
                   required
                 />
@@ -200,7 +200,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className={cn("w-full flex-1 min-h-[150px] md:min-h-[300px] bg-black/40 border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full flex-1 min-h-[150px] md:min-h-[300px] border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Enter description..."
                 ></textarea>
               </div>
@@ -209,8 +209,8 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
         </div>
 
         <div className="space-y-6">
-          <div className="glass-card p-6 space-y-4">
-            <h3 className={cn("font-semibold border-b pb-3", isDark ? "text-white border-white/5" : "text-slate-900 border-slate-200")}>Settings</h3>
+          <div className={cn("rounded-2xl p-6 space-y-4 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <h3 className={cn("font-semibold border-b pb-3", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>Settings</h3>
             
             <div>
               <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Type</label>
@@ -223,7 +223,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   { value: "JOBS", label: "Job Vacancy" }
                 ]}
                 placeholder="Type"
-                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-slate-800" : "border-slate-200")}
               />
             </div>
 
@@ -237,7 +237,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   { value: "DRAFT", label: "Draft" }
                 ]}
                 placeholder="Status"
-                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-slate-800" : "border-slate-200")}
               />
             </div>
 
@@ -250,21 +250,21 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   name="link"
                   value={formData.link}
                   onChange={handleChange}
-                  className={cn("w-full bg-black/40 border rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                  className={cn("w-full border rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="https://..."
                 />
               </div>
             </div>
           </div>
 
-          <div className="glass-card p-6 space-y-4">
-            <h3 className={cn("font-semibold border-b pb-3", isDark ? "text-white border-white/5" : "text-slate-900 border-slate-200")}>Highlights</h3>
+          <div className={cn("rounded-2xl p-6 space-y-4 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <h3 className={cn("font-semibold border-b pb-3", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>Highlights</h3>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-3 cursor-pointer group">
-                <div className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${formData.isNew ? 'bg-cyan-500 border-cyan-500' : 'border-zinc-500 group-hover:border-cyan-400'}`}>
-                  {formData.isNew && <div className="w-2.5 h-2.5 bg-white rounded-sm" />}
+                <div className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${formData.isNew ? 'bg-cyan-400 border-cyan-400 text-slate-950' : (isDark ? 'border-slate-700 bg-slate-900/50 group-hover:border-cyan-400' : 'border-slate-300 bg-white group-hover:border-cyan-600')}`}>
+                  {formData.isNew && <div className="w-2.5 h-2.5 bg-slate-950 rounded-sm" />}
                 </div>
-                <span className={cn("text-sm font-medium group-hover:text-white transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}>Mark as "NEW"</span>
+                <span className={cn("text-sm font-medium group-hover:text-cyan-400 transition-colors", isDark ? "text-zinc-300" : "text-slate-600")}>Mark as "NEW"</span>
                 <input 
                   type="checkbox" 
                   name="isNew"
@@ -276,19 +276,19 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          <div className="glass-card p-6 space-y-4">
-            <h3 className={cn("font-semibold border-b pb-3", isDark ? "text-white border-white/5" : "text-slate-900 border-slate-200")}>Cover Image</h3>
+          <div className={cn("rounded-2xl p-6 space-y-4 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <h3 className={cn("font-semibold border-b pb-3", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>Cover Image</h3>
 
             {/* Image source toggle */}
-            <div className={cn("flex rounded-xl overflow-hidden border bg-black/30 p-1 gap-1", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className={cn("flex rounded-xl overflow-hidden border p-1 gap-1", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-100")}>
               <button type="button"
                 onClick={() => setImageMode('upload')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${imageMode === 'upload' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${imageMode === 'upload' ? 'bg-cyan-400 text-slate-950 shadow-sm' : isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>
                 Upload File
               </button>
               <button type="button"
                 onClick={() => setImageMode('url')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${imageMode === 'url' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${imageMode === 'url' ? 'bg-cyan-400 text-slate-950 shadow-sm' : isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>
                 Image URL
               </button>
             </div>
@@ -303,11 +303,11 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                     value={formData.image}
                     onChange={e => setFormData(prev => ({ ...prev, image: e.target.value }))}
                     placeholder="https://example.com/image.jpg"
-                    className={cn("w-full bg-black/40 border rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors text-sm", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 {formData.image && (
-                  <div className={cn("relative group rounded-xl overflow-hidden border", isDark ? "border-white/10" : "border-slate-200")}>
+                  <div className={cn("relative group rounded-xl overflow-hidden border", isDark ? "border-slate-800" : "border-slate-200")}>
                     <img referrerPolicy="no-referrer" src={formData.image} alt="Preview" className="w-full h-40 object-cover"
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     <button type="button" onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
@@ -322,7 +322,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
               /* File upload */
               <>
                 {formData.image && formData.image.startsWith('/') ? (
-                  <div className={cn("relative group rounded-xl overflow-hidden border", isDark ? "border-white/10" : "border-slate-200")}>
+                  <div className={cn("relative group rounded-xl overflow-hidden border", isDark ? "border-slate-800" : "border-slate-200")}>
                     <img referrerPolicy="no-referrer" src={formData.image} alt="Cover" className="w-full h-40 object-cover" loading="lazy" decoding="async" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                       <label className={cn("cursor-pointer px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors backdrop-blur-md border flex items-center gap-2", isDark ? "text-white border-white/20" : "text-slate-900 border-slate-200")}>

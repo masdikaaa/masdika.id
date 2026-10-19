@@ -151,10 +151,10 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className={cn("w-full max-w-5xl h-[85vh] rounded-3xl border flex flex-col overflow-hidden", isDark ? "bg-[#0b1823] border-white/10" : "bg-white border-slate-200")}
+          className={cn("w-full max-w-5xl h-[85vh] rounded-3xl border flex flex-col overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
         >
           {/* Header */}
-          <div className={cn("flex items-center justify-between p-6 border-b", isDark ? "border-white/10 bg-white/[0.02]" : "border-slate-200 bg-slate-50")}>
+          <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-slate-50")}>
             <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <ImageIcon className="w-5 h-5" />
               {title}
@@ -184,7 +184,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
             onDrop={handleDrop}
           >
             {isDragging && (
-              <div className={cn("absolute inset-0 z-50 border-2 border-dashed border-cyan-500 backdrop-blur-sm flex flex-col items-center justify-center", isDark ? "bg-[#0b1823]/90" : "bg-white/90")}>
+              <div className={cn("absolute inset-0 z-50 border-2 border-dashed border-cyan-500 backdrop-blur-sm flex flex-col items-center justify-center", isDark ? "bg-[#0b1322]/90" : "bg-white/90")}>
                 <Upload className={cn("w-16 h-16 mb-6 animate-bounce", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 <p className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Drop image to upload</p>
                 <p className="text-zinc-400">Release your mouse to add this image to the library</p>
@@ -226,10 +226,10 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
 
             {/* Sidebar (Details) */}
             {selectedFile && (
-              <div className={cn("w-full md:w-80 border-t md:border-t-0 md:border-l p-6 flex flex-col", isDark ? "bg-black/20 border-white/10" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("w-full md:w-80 border-t md:border-t-0 md:border-l p-6 flex flex-col", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-4", isDark ? "text-white" : "text-slate-900")}>Attachment Details</h3>
                 
-                <div className={cn("aspect-video rounded-lg overflow-hidden border mb-4 flex items-center justify-center", isDark ? "bg-black/40 border-white/5" : "bg-white border-slate-200")}>
+                <div className={cn("aspect-video rounded-lg overflow-hidden border mb-4 flex items-center justify-center", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
                   <img referrerPolicy="no-referrer" src={selectedFile.url} alt={selectedFile.name} className="max-w-full max-h-full object-contain" loading="lazy" decoding="async" />
                 </div>
 

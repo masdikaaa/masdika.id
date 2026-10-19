@@ -129,20 +129,20 @@ export default function AdminBlockedUsersPage() {
       </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b", isDark ? "bg-[#0A0B1A]/50 text-zinc-500 border-white/5" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-[10px] uppercase border-b tracking-wider font-bold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
-                <th className={cn("px-6 py-4 font-medium w-10", isDark ? "text-white" : "text-slate-900")}></th>
-                <th className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>Type</th>
-                <th className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>Value</th>
-                <th className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>Reason</th>
-                <th className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>Date</th>
-                <th className={cn("px-6 py-4 text-right font-medium", isDark ? "text-white" : "text-slate-900")}>Actions</th>
+                <th className="px-6 py-4 w-10"></th>
+                <th className="px-6 py-4">Type</th>
+                <th className="px-6 py-4">Value</th>
+                <th className="px-6 py-4">Reason</th>
+                <th className="px-6 py-4">Date</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {blockedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className={cn("px-6 py-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
@@ -151,10 +151,10 @@ export default function AdminBlockedUsersPage() {
                 </tr>
               ) : (
                 blockedUsers.map((user) => (
-                  <tr key={user.id} className={cn("border-b hover:bg-white/[0.02] transition-colors", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                  <tr key={user.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
                     <td className="px-6 py-4">
-                      <button onClick={() => toggleSelect(user.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(user.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
-                        {selectedIds.includes(user.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                      <button onClick={() => toggleSelect(user.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(user.id) ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-slate-900/50" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
+                        {selectedIds.includes(user.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                       </button>
                     </td>
                     <td className="px-6 py-4">

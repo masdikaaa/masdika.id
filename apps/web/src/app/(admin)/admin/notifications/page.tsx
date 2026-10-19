@@ -109,7 +109,7 @@ export default function AdminNotificationsPage() {
         {unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
-            className={cn("flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-xl border transition-colors text-sm font-medium", isDark ? "text-white border-white/5" : "text-slate-900 border-slate-200")}
+            className={cn("flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors text-sm font-medium", isDark ? "text-white border-slate-800 hover:bg-slate-800" : "text-slate-900 border-slate-200 hover:bg-slate-50")}
           >
             <CheckCircle2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
             Mark all as read
@@ -117,24 +117,24 @@ export default function AdminNotificationsPage() {
         )}
       </div>
 
-      <div className={cn("bg-[#0a1f33]/40 backdrop-blur-sm border rounded-3xl overflow-hidden relative", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
         
         {notifications.length === 0 ? (
           <div className="py-20 text-center relative z-10">
-            <div className={cn("w-20 h-20 bg-zinc-800/30 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
               <BellRing className="w-8 h-8 text-zinc-500" />
             </div>
             <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Notifications</h3>
             <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Everything is caught up. No recent activities.</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/5 relative z-10">
+          <div className={cn("divide-y relative z-10", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
             {paginatedNotifications.map((notif, index) => (
               <motion.div key={notif.id} variants={itemVariants}>
                 <Link
                   href={notif.link || "#"}
-                  className={`block p-5 sm:p-6 transition-all hover:bg-white/[0.03] group ${!notif.isRead ? 'bg-cyan-500/[0.02]' : ''}`}
+                  className={cn("block p-5 sm:p-6 transition-all group", !notif.isRead ? (isDark ? "bg-cyan-500/10 hover:bg-cyan-500/15" : "bg-cyan-50/70 hover:bg-cyan-50") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))}
                 >
                   <div className="flex gap-4 sm:gap-6">
                     <div className="shrink-0 mt-1">
@@ -158,14 +158,14 @@ export default function AdminNotificationsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 mb-1">
-                        <h4 className={`font-semibold text-base truncate ${notif.isRead ? 'text-zinc-300' : 'text-white'}`}>
+                        <h4 className={cn("font-semibold text-base truncate", notif.isRead ? (isDark ? "text-slate-300" : "text-slate-700") : (isDark ? "text-white font-bold" : "text-slate-900 font-bold"))}>
                           {notif.subject}
                         </h4>
                         <span className="text-xs font-medium text-zinc-500 shrink-0">
                           {formatRelativeTime(notif.createdAt)}
                         </span>
                       </div>
-                      <p className={`text-sm line-clamp-2 ${notif.isRead ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      <p className={cn("text-sm line-clamp-2", notif.isRead ? (isDark ? "text-zinc-500" : "text-slate-400") : (isDark ? "text-zinc-300" : "text-slate-600"))}>
                         {notif.content}
                       </p>
                       
@@ -182,7 +182,7 @@ export default function AdminNotificationsPage() {
             ))}
             
             {totalPages > 1 && (
-              <div className={cn("p-4 border-t bg-white/[0.01] mt-2", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("p-4 border-t mt-2", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
               </div>
             )}

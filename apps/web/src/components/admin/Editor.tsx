@@ -178,26 +178,26 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="w-full max-w-md bg-[#0f172a] rounded-3xl p-6 border border-cyan-500/20"
+                className={cn("w-full max-w-md rounded-2xl p-6 border shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={cn("p-3 rounded-2xl border", isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200")}>
-                    <FaYoutube className={cn("w-6 h-6", isDark ? "text-white" : "text-slate-900")} />
+                  <div className={cn("p-3 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <FaYoutube className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-700")} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Insert YouTube Video</h3>
-                    <p className="text-zinc-400 text-sm">Paste your YouTube link below.</p>
+                    <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Insert YouTube Video</h3>
+                    <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Paste your YouTube link below.</p>
                   </div>
                 </div>
                 
                 <div className="mb-6">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2 block">YouTube URL</label>
+                  <label className={cn("text-xs font-bold uppercase tracking-widest mb-2 block", isDark ? "text-zinc-400" : "text-slate-500")}>YouTube URL</label>
                   <input 
                     type="url"
                     value={youtubeUrl}
                     onChange={(e) => setYoutubeUrl(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full px-5 py-3.5 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all"
+                    className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleYoutubeSubmit();
@@ -206,10 +206,10 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                   />
                 </div>
                 
-                <div className="flex gap-3 justify-end pt-2 border-t border-white/5">
+                <div className={cn("flex gap-3 justify-end pt-2 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
                   <button
                     onClick={() => setIsYoutubeModalOpen(false)}
-                    className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg transition-colors border border-white/10 text-sm"
+                    className={cn("px-5 py-2.5 font-semibold rounded-lg transition-colors border text-sm", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>

@@ -139,8 +139,8 @@ export default function AdminSeriesPage() {
         </Link>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="glass-card overflow-hidden">
-        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
           <div className="relative w-full sm:max-w-md">
             <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-70", isDark ? "text-cyan-500" : "text-cyan-700")} />
             <input 
@@ -148,17 +148,17 @@ export default function AdminSeriesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search series..." 
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-500", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {series.length > 0 && (
               <button 
                 onClick={toggleSelectAll}
-                className={cn("flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 py-2.5 text-sm font-bold rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+                className={cn("flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 py-2.5 text-sm font-bold rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 hover:bg-slate-800/60" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
               >
-                <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-colors", selectedIds.length === series.length ? (isDark ? "bg-cyan-500 border-cyan-500" : "bg-cyan-600 border-cyan-600") : (isDark ? "border-zinc-600" : "border-slate-300"))}>
-                  {selectedIds.length === series.length && <Check className="w-3 h-3 text-white" />}
+                <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-colors", selectedIds.length === series.length ? "bg-cyan-400 border-cyan-400 text-slate-950" : (isDark ? "border-slate-700 bg-slate-900/50" : "border-slate-300 bg-white"))}>
+                  {selectedIds.length === series.length && <Check className="w-3 h-3 text-slate-950 font-bold" strokeWidth={3} />}
                 </div>
                 Select All
               </button>
@@ -176,7 +176,7 @@ export default function AdminSeriesPage() {
         </div>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-[10px] text-zinc-500 uppercase bg-black/40 border-b tracking-wider font-bold", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+            <thead className={cn("text-[10px] uppercase border-b tracking-wider font-bold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th className="px-6 py-4 whitespace-nowrap w-12"></th>
                 <th className="px-6 py-4 whitespace-nowrap">Series</th>
@@ -186,7 +186,7 @@ export default function AdminSeriesPage() {
                 <th className="px-6 py-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center">
@@ -197,7 +197,7 @@ export default function AdminSeriesPage() {
                 <tr>
                   <td colSpan={6} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-slate-800 bg-slate-900/50" : "border-slate-200 bg-slate-50")}>
                         <BookOpen className="w-8 h-8 text-zinc-500" />
                       </div>
                       <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No series found</h3>
@@ -206,18 +206,18 @@ export default function AdminSeriesPage() {
                   </td>
                 </tr>
               ) : series.map(s => (
-                <tr key={s.id} className={cn("hover:bg-white/[0.03] transition-colors group", selectedIds.includes(s.id) && (isDark ? "bg-white/5" : "bg-slate-50"))}>
+                <tr key={s.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedIds.includes(s.id) && (isDark ? "bg-white/5" : "bg-slate-50"))}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button 
                       onClick={() => toggleSelect(s.id)}
-                      className={cn("w-4 h-4 rounded border flex items-center justify-center transition-colors", selectedIds.includes(s.id) ? (isDark ? "bg-cyan-500 border-cyan-500" : "bg-cyan-600 border-cyan-600") : (isDark ? "border-zinc-600" : "border-slate-300"))}
+                      className={cn("w-4 h-4 rounded border flex items-center justify-center transition-colors", selectedIds.includes(s.id) ? "bg-cyan-400 border-cyan-400 text-slate-950" : (isDark ? "border-slate-700 bg-slate-900/50" : "border-slate-300 bg-white"))}
                     >
-                      {selectedIds.includes(s.id) && <Check className="w-3 h-3 text-white" />}
+                      {selectedIds.includes(s.id) && <Check className="w-3 h-3 text-slate-950 font-bold" strokeWidth={3} />}
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-4">
-                      <div className={cn("w-12 h-12 rounded-xl overflow-hidden border flex items-center justify-center shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-12 h-12 rounded-xl overflow-hidden border flex items-center justify-center shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-slate-800" : "border-slate-200")}>
                         {s.image ? <img referrerPolicy="no-referrer" src={s.image} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <BookOpen className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />}
                       </div>
                       <Link href={`/admin/series/edit/${s.id}`} className={cn("font-bold line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
@@ -231,19 +231,19 @@ export default function AdminSeriesPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-300 border-white/10" : "text-slate-600 border-slate-200")}>
+                    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-300 border-slate-800 bg-slate-900/40" : "text-slate-600 border-slate-200 bg-slate-50")}>
                       {s.episodes?.length ?? 0} Episodes
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
- <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border ${s.published ?'text-cyan-400 bg-cyan-500/10 border-cyan-500/20': isDark ?"text-zinc-400 border-white/10":"text-slate-500 border-slate-200"}`}>
+ <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border ${s.published ?'text-cyan-400 bg-cyan-500/10 border-cyan-500/20': isDark ?"text-zinc-400 border-slate-800":"text-slate-500 border-slate-200"}`}>
                       {s.published ? 'Published' : 'Draft'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => handleTogglePublish(s.id, s.published)}
- className={`p-2 rounded-lg transition-all border ${s.published ? isDark ?"bg-white/5 border-transparent hover:border-white/10 text-zinc-400 hover:text-white":"bg-slate-100 border-transparent hover:border-slate-200 text-slate-500 hover:text-slate-900":'bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-cyan-400 hover:text-white'}`}
+ className={`p-2 rounded-lg transition-all border ${s.published ? isDark ?"bg-white/5 border-transparent hover:border-slate-800 text-zinc-400 hover:text-white":"bg-slate-100 border-transparent hover:border-slate-200 text-slate-500 hover:text-slate-900":'bg-cyan-500/10 border-transparent hover:border-cyan-500/20 text-cyan-400 hover:text-white'}`}
                         title={s.published ? 'Unpublish' : 'Publish'}>
                         {s.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -263,7 +263,7 @@ export default function AdminSeriesPage() {
           </table>
         </div>
         {totalPages > 1 && (
-          <div className={cn("flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
             <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
               Showing <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{series.length}</span> of <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{total}</span> results
             </div>
@@ -271,7 +271,7 @@ export default function AdminSeriesPage() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className={cn("px-3 py-1 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-colors", isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-600")}
+                className={cn("px-3 py-1 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-slate-800 text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
               >
                 Previous
               </button>
@@ -281,7 +281,7 @@ export default function AdminSeriesPage() {
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className={cn("px-3 py-1 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-colors", isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-600")}
+                className={cn("px-3 py-1 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-slate-800 text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
               >
                 Next
               </button>

@@ -423,49 +423,49 @@ export default function AdminAnnouncementsPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="glass-card overflow-hidden">
+      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {/* Tabs */}
-        <div className={cn("flex border-b px-5 pt-3", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("flex border-b px-5 pt-3", isDark ? "border-slate-800" : "border-slate-200")}>
           <button
             onClick={() => setActiveTab('berita')}
-            className={cn("px-4 py-3 text-sm font-bold transition-all relative", activeTab === 'berita' ? (isDark ? "text-white" : "text-slate-900") : (isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-500 hover:text-slate-700"))}
+            className={cn("px-4 py-3 text-sm font-bold transition-all relative", activeTab === 'berita' ? (isDark ? "text-white" : "text-slate-900") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-700"))}
           >
             News & Promos
             {activeTab === 'berita' && (
-              <div className={cn("absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full", isDark ? "bg-cyan-400" : "bg-cyan-500")} />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full bg-cyan-400" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('banner')}
-            className={cn("px-4 py-3 text-sm font-bold transition-all relative", activeTab === 'banner' ? (isDark ? "text-white" : "text-slate-900") : (isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-500 hover:text-slate-700"))}
+            className={cn("px-4 py-3 text-sm font-bold transition-all relative", activeTab === 'banner' ? (isDark ? "text-white" : "text-slate-900") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-700"))}
           >
             Dashboard Banners
             {activeTab === 'banner' && (
-              <div className={cn("absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full", isDark ? "bg-cyan-400" : "bg-cyan-500")} />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full bg-cyan-400" />
             )}
           </button>
         </div>
 
-        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
           <div className="relative w-full sm:max-w-md">
-            <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 /70", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={activeTab === 'banner' ? "Search banners..." : "Search news..."}
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-slate-400", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
         </div>
       </motion.div>
 
       {/* Table Section */}
-      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden backdrop-blur-sm", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
+      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-slate-50 border-slate-200")}>
+              <tr className={cn("border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-slate-200 font-semibold")}>
                 <th className="px-6 py-4 w-12 text-center">
                   <div className="flex items-center">
                     {(() => {
@@ -473,24 +473,24 @@ export default function AdminAnnouncementsPage() {
                       return (
                         <label className="relative flex items-center justify-center cursor-pointer group">
                           <input type="checkbox" className="sr-only" checked={allSelected} onChange={toggleSelectAll} />
-                          <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", allSelected ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
-                            {allSelected && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
+                          <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center", allSelected ? "bg-cyan-400 border-cyan-400 text-slate-950" : (isDark ? "border-slate-700 bg-slate-900 hover:border-cyan-500" : "border-slate-300 bg-white hover:border-cyan-500"))}>
+                            {allSelected && <CheckCircle className="w-3.5 h-3.5 text-slate-950" strokeWidth={3} />}
                           </div>
                         </label>
                       );
                     })()}
                   </div>
                 </th>
-                <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Title</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Title</th>
                 {activeTab === 'berita' && (
-                  <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Type</th>
+                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Type</th>
                 )}
-                <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Status</th>
-                <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Date</th>
-                <th className={cn("px-6 py-4 text-xs font-bold uppercase tracking-wider text-right", isDark ? "text-zinc-400" : "text-slate-500")}>Actions</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading ? (
                 <tr>
                   <td colSpan={activeTab === 'berita' ? 6 : 5} className="px-6 py-12">
@@ -501,7 +501,7 @@ export default function AdminAnnouncementsPage() {
                 <tr>
                   <td colSpan={activeTab === 'berita' ? 6 : 5} className="px-6 py-16">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
                         <AlertCircle className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
                       </div>
                       <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No {activeTab === 'banner' ? 'Banners' : 'News'}</h3>
@@ -511,7 +511,7 @@ export default function AdminAnnouncementsPage() {
                 </tr>
               ) : (
                 paginatedAnnouncements.map((announcement) => (
-                  <tr key={announcement.id} className={cn("transition-colors group", selectedIds.includes(announcement.id) ? (isDark ? "bg-cyan-500/5" : "bg-cyan-50") : (isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50"))}>
+                  <tr key={announcement.id} className={cn("transition-colors group", selectedIds.includes(announcement.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))}>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         {(() => {
@@ -519,8 +519,8 @@ export default function AdminAnnouncementsPage() {
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelect(announcement.id)} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-white/20 bg-black/40" : "border-slate-300 bg-white"))}>
-                                {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center", isChecked ? "bg-cyan-400 border-cyan-400 text-slate-950" : (isDark ? "border-slate-700 bg-slate-900 hover:border-cyan-500" : "border-slate-300 bg-white hover:border-cyan-500"))}>
+                                {isChecked && <CheckCircle className="w-3.5 h-3.5 text-slate-950" strokeWidth={3} />}
                               </div>
                             </label>
                           );
@@ -580,7 +580,7 @@ export default function AdminAnnouncementsPage() {
           </table>
         </div>
         {totalPages > 1 && (
-          <div className={cn("p-4 border-t", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+          <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
@@ -614,19 +614,19 @@ export default function AdminAnnouncementsPage() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-[#0A0B1A]/80" : "bg-slate-50")} onClick={closeModal} />
+          <div className={cn("absolute inset-0 backdrop-blur-sm", isDark ? "bg-slate-950/80" : "bg-slate-900/50")} onClick={closeModal} />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={cn("relative w-full max-w-3xl border rounded-2xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "border-white/10" : "border-slate-200")}
+            className={cn("relative w-full max-w-3xl border rounded-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
           >
-            <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5 bg-white/[0.02]" : "bg-white border-slate-200 bg-white")}>
+            <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
               <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
                 {editingId
                   ? (activeTab === 'banner' ? 'Edit Banner' : 'Edit Announcement')
                   : (activeTab === 'banner' ? 'Create Banner' : 'Create Announcement')}
               </h2>
-              <button onClick={closeModal} className={cn("p-2 hover:text-white rounded-lg hover:bg-white/5 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <button onClick={closeModal} className={cn("p-2 rounded-lg hover:bg-white/5 transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -644,7 +644,7 @@ export default function AdminAnnouncementsPage() {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder={activeTab === 'banner' ? "E.g. Banner Lebaran 2026" : "E.g. Diskon 50% Hosting"}
-                    className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-zinc-600", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                    className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
 
@@ -662,13 +662,13 @@ export default function AdminAnnouncementsPage() {
                             { value: "WARNING", label: "Warning" }
                           ]}
                           placeholder="Type"
-                          className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                          className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-slate-800 bg-[#060b14] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
                         />
                       </div>
 
                       <div className="space-y-1.5">
                         <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Status</label>
-                        <label className={cn("flex items-center gap-3 cursor-pointer p-2.5 bg-cyan-500/5 border rounded-xl hover: transition-colors", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                        <label className={cn("flex items-center gap-3 cursor-pointer p-2.5 border rounded-xl hover: transition-colors", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                           <div className="relative shrink-0">
                             <input
                               type="checkbox"
@@ -676,7 +676,7 @@ export default function AdminAnnouncementsPage() {
                               checked={formData.isActive}
                               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                             />
-                            <div className={cn("w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500", isDark ? "bg-black/50" : "bg-slate-300")}></div>
+                            <div className={cn("w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-400", isDark ? "bg-slate-800" : "bg-slate-300")}></div>
                           </div>
                           <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{formData.isActive ? 'Active (Visible)' : 'Inactive (Hidden)'}</span>
                         </label>
@@ -692,13 +692,13 @@ export default function AdminAnnouncementsPage() {
                           onChange={(e) => setStructuredData({ ...structuredData, rawHtml: e.target.value })}
                           rows={6}
                           style={{ colorScheme: 'dark' }}
-                          className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono resize-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                          className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all font-mono resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     ) : (
                       <>
                         {formData.type === 'MAINTENANCE' ? (
-                          <div className={cn("space-y-4 border p-4 rounded-xl", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+                          <div className={cn("space-y-4 border p-4 rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                             <div className="space-y-1.5">
                               <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Maintenance Description <span className={cn("", isDark ? "text-red-400" : "text-red-700")}>*</span></label>
                               <textarea
@@ -708,7 +708,7 @@ export default function AdminAnnouncementsPage() {
                                 placeholder="E.g. Kami informasikan bahwa tim NOC akan melaksanakan upgrade network..."
                                 rows={3}
                                 style={{ colorScheme: 'dark' }}
-                                className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-600 resize-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                                className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                               />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -719,7 +719,7 @@ export default function AdminAnnouncementsPage() {
                                   required
                                   value={structuredData.maintenanceStart || ''}
                                   onChange={(e) => setStructuredData({ ...structuredData, maintenanceStart: e.target.value })}
-                                  className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                                  className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                                 />
                               </div>
                               <div className="space-y-1.5">
@@ -729,7 +729,7 @@ export default function AdminAnnouncementsPage() {
                                   required
                                   value={structuredData.maintenanceEnd || ''}
                                   onChange={(e) => setStructuredData({ ...structuredData, maintenanceEnd: e.target.value })}
-                                  className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 transition-all", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                                  className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
                                 />
                               </div>
                             </div>
@@ -741,7 +741,7 @@ export default function AdminAnnouncementsPage() {
                                 value={structuredData.maintenanceImpact || ''}
                                 onChange={(e) => setStructuredData({ ...structuredData, maintenanceImpact: e.target.value })}
                                 placeholder="E.g. Jaringan mungkin terputus selama 15-30 menit"
-                                className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-600", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                                className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                               />
                             </div>
                           </div>
@@ -755,7 +755,7 @@ export default function AdminAnnouncementsPage() {
                               placeholder="Enter your announcement text here..."
                               rows={5}
                               style={{ colorScheme: 'dark' }}
-                              className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-zinc-600 resize-none", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                              className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                             />
                             <p className={cn("text-xs mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Paragraphs will be automatically formatted.</p>
                           </div>
@@ -771,13 +771,13 @@ export default function AdminAnnouncementsPage() {
                       <div className="space-y-1.5">
                         <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Image (Optional)</label>
                         {formData.imageUrl ? (
-                          <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border group", isDark ? "border-white/10" : "border-slate-200")}>
+                          <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border group", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
                             <img referrerPolicy="no-referrer" src={formData.imageUrl} alt="Banner Preview" className="w-full h-full object-contain" loading="lazy" decoding="async" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <button
                                 type="button"
                                 onClick={() => setShowRemoveImageModal(true)}
-                                className={cn("p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium", isDark ? "text-white" : "text-slate-900")}
+                                className="p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
                               >
                                 <Trash2 className="w-4 h-4" /> Remove Image
                               </button>
@@ -785,7 +785,7 @@ export default function AdminAnnouncementsPage() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed ${isUploading ? 'border-cyan-500/50 bg-cyan-500/5' : isDark ? "border-white/10 hover:border-cyan-500/50 hover:bg-white/5" : "border-slate-300 hover:border-cyan-600 hover:bg-slate-50"} rounded-xl cursor-pointer transition-all group`}>
+                            <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed ${isUploading ? 'border-cyan-500/50 bg-cyan-500/5' : isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-white/5 bg-[#060b14]" : "border-slate-300 hover:border-cyan-600 hover:bg-slate-50 bg-slate-50"} rounded-xl cursor-pointer transition-all group`}>
                               {isUploading ? (
                                 <>
                                   <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-2"></div>
@@ -807,9 +807,9 @@ export default function AdminAnnouncementsPage() {
                             </label>
 
                             <div className="flex items-center gap-3">
-                              <div className="flex-1 h-px bg-white/10"></div>
+                              <div className={cn("flex-1 h-px", isDark ? "bg-slate-800" : "bg-slate-200")}></div>
                               <span className={cn("text-[10px] font-bold tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>OR PASTE URL</span>
-                              <div className="flex-1 h-px bg-white/10"></div>
+                              <div className={cn("flex-1 h-px", isDark ? "bg-slate-800" : "bg-slate-200")}></div>
                             </div>
 
                             <input
@@ -817,7 +817,7 @@ export default function AdminAnnouncementsPage() {
                               value={formData.imageUrl}
                               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                               placeholder="https://..."
-                              className={cn("w-full border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-zinc-600", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                              className={cn("w-full border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                             />
                           </div>
                         )}
@@ -830,14 +830,14 @@ export default function AdminAnnouncementsPage() {
                           value={formData.actionUrl}
                           onChange={(e) => setFormData({ ...formData, actionUrl: e.target.value })}
                           placeholder="e.g. /dashboard/checkout"
-                          className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-zinc-600", isDark ? "bg-[#0A0B1A] border-white/10 text-white focus:bg-[#11162C]" : "bg-white border-slate-200 text-slate-900 focus:bg-slate-50")}
+                          className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
                       <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Status</label>
-                      <label className={cn("flex items-center gap-3 cursor-pointer p-2.5 bg-cyan-500/5 border rounded-xl hover: transition-colors w-fit", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                      <label className={cn("flex items-center gap-3 cursor-pointer p-2.5 border rounded-xl hover: transition-colors w-fit", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                         <div className="relative shrink-0">
                           <input
                             type="checkbox"
@@ -845,7 +845,7 @@ export default function AdminAnnouncementsPage() {
                             checked={formData.isActive}
                             onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                           />
-                          <div className={cn("w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500", isDark ? "bg-black/50" : "bg-slate-300")}></div>
+                          <div className={cn("w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-400", isDark ? "bg-slate-800" : "bg-slate-300")}></div>
                         </div>
                         <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{formData.isActive ? 'Active (Visible)' : 'Inactive (Hidden)'}</span>
                       </label>
@@ -855,11 +855,11 @@ export default function AdminAnnouncementsPage() {
 
               </div>
 
-              <div className={cn("p-4 sm:p-6 border-t flex flex-col sm:flex-row items-center justify-end gap-3 shrink-0", isDark ? "bg-[#0A0B1A]/50 border-white/5" : "bg-white border-slate-200")}>
+              <div className={cn("p-4 sm:p-6 border-t flex flex-col sm:flex-row items-center justify-end gap-3 shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 bg-[#060b14] text-slate-300 hover:bg-slate-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50")}
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -870,7 +870,7 @@ export default function AdminAnnouncementsPage() {
                   className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 min-w-[120px] justify-center"
                 >
                   {isSubmitting ? (
-                    <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} />
+                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <CheckCircle className="w-4 h-4" />
                   )}
