@@ -137,7 +137,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
               </div>
             </motion.div>
 
-            {/* Right – Hero Avatar (kubernetes.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (k3s.webp) with 4 Floating Badges */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -216,7 +216,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
                   </div>
                 </div>
 
-                {/* Karakter kubernetes.webp utuh & proporsional sesuai design.md */}
+                {/* Karakter k3s.webp utuh & proporsional sesuai design.md */}
                 <div
                   className="w-full h-full relative z-10 flex items-end justify-center"
                   style={{
@@ -225,7 +225,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
                   }}
                 >
                   <Image
-                    src="/kubernetes.webp"
+                    src="/k3s.webp"
                     alt="Masdika – Managed Kubernetes Clusters"
                     width={1536}
                     height={1024}
