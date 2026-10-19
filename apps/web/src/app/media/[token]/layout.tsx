@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { PremiumBackground } from "@/components/ui/PremiumBackground";
 
 function formatBytes(bytes: number) {
   if (!+bytes) return "0 Bytes";
@@ -266,5 +267,12 @@ export async function generateMetadata({
 }
 
 export default function MediaLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <PremiumBackground />
+      </div>
+      {children}
+    </>
+  );
 }

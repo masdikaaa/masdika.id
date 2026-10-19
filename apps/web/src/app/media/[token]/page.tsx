@@ -20,7 +20,7 @@ const VideoPlayer = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full aspect-video rounded-2xl bg-[#03040b] border border-white/10 flex items-center justify-center">
+      <div className="w-full aspect-video rounded-2xl bg-black/60 border border-white/10 flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
       </div>
     ),
@@ -138,7 +138,7 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
   };
 
   return (
-    <div className={cn("relative w-full h-[65vh] rounded-2xl overflow-hidden flex flex-col select-none transition-all", isDark ? "border border-white/10 bg-[#03040b]" : "border border-slate-200 bg-slate-100/80 shadow-md")}>
+    <div className={cn("relative w-full h-[65vh] rounded-2xl overflow-hidden flex flex-col select-none transition-all", isDark ? "border border-white/10 bg-black/50 shadow-2xl backdrop-blur-md" : "border border-slate-200 bg-white/80 shadow-md backdrop-blur-md")}>
       {/* Zoom controls */}
       <div className={cn("absolute top-3 right-3 z-20 flex items-center gap-0.5 backdrop-blur-md rounded-xl overflow-hidden border shadow-lg", isDark ? "bg-black/70 border-white/10" : "bg-white/95 border-slate-200 shadow-sm")}>
         <button
@@ -329,21 +329,8 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
 
   // ── Private ──────────────────────────────────────────────────────────────────
   if (status === "private") return (
-    <div className={cn("min-h-screen flex items-center justify-center p-6 relative overflow-hidden", isDark ? "bg-[#050B14]" : "bg-[#f8fafb]")}>
-      {/* Subtle Grid Pattern */}
-      <div 
-        className="absolute inset-0 pointer-events-none" 
-        style={{
-          opacity: isDark ? 0.07 : 0.05,
-          backgroundImage: `
-            linear-gradient(to right, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px),
-            linear-gradient(to bottom, ${isDark ? "#ffffff" : "#000000"} 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px'
-        }}
-      />
-
-      <div className={cn("text-center max-w-md w-full mx-auto p-8 md:p-10 rounded-3xl border backdrop-blur-xl shadow-2xl transition-all relative z-10", isDark ? "bg-[#0A0E1A]/90 border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.12)]" : "bg-white border-slate-200 shadow-xl")}>
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      <div className={cn("text-center max-w-md w-full mx-auto p-8 md:p-10 rounded-3xl border backdrop-blur-xl shadow-2xl transition-all relative z-10", isDark ? "bg-[#0c0c0e]/90 border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.12)] text-white" : "bg-white/95 border-slate-200 shadow-xl text-slate-900")}>
         <div className={cn(
           "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border transition-all",
           isDark
@@ -365,7 +352,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
           </Link>
           <Link
             href="/"
-            className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors inline-flex items-center justify-center", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+            className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors inline-flex items-center justify-center", isDark ? "border-white/10 text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
           >
             Back to Home
           </Link>
@@ -376,22 +363,24 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
 
   // ── Expired ──────────────────────────────────────────────────────────────────
   if (status === "expired") return (
-    <div className={cn("min-h-screen flex items-center justify-center p-6", isDark ? "bg-[#011627]" : "bg-slate-50")}>
-      <div className="text-center max-w-sm">
-        <Clock className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative">
+      <div className={cn("text-center max-w-sm w-full mx-auto p-8 rounded-3xl border backdrop-blur-xl shadow-xl transition-all", isDark ? "bg-[#0c0c0e]/90 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900 shadow-xl")}>
+        <Clock className="w-16 h-16 text-amber-400 mx-auto mb-4" />
         <h1 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Link Expired</h1>
         <p className={isDark ? "text-zinc-400" : "text-slate-500"}>This secure link has expired and is no longer accessible.</p>
+        <Link href="/" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm">Back to Home</Link>
       </div>
     </div>
   );
 
   // ── Not found / error ────────────────────────────────────────────────────────
   if (status !== "ok" || !media) return (
-    <div className={cn("min-h-screen flex items-center justify-center p-6", isDark ? "bg-[#011627]" : "bg-slate-50")}>
-      <div className="text-center max-w-sm">
+    <div className="min-h-screen flex items-center justify-center p-6 relative">
+      <div className={cn("text-center max-w-sm w-full mx-auto p-8 rounded-3xl border backdrop-blur-xl shadow-xl transition-all", isDark ? "bg-[#0c0c0e]/90 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900 shadow-xl")}>
         <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
         <h1 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>File Not Found</h1>
         <p className={isDark ? "text-zinc-400" : "text-slate-500"}>This link is invalid or the file has been removed.</p>
+        <Link href="/" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm">Back to Home</Link>
       </div>
     </div>
   );
@@ -401,14 +390,14 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
   const hasExpiry = !!media.expiresAt;
 
   return (
-    <div className={cn("min-h-screen flex flex-col selection:bg-cyan-500/30 transition-colors duration-300", isDark ? "bg-[#050714] text-white" : "bg-[#f8fafc] text-slate-900")}>
+    <div className={cn("min-h-screen flex flex-col selection:bg-cyan-500/30 transition-colors duration-300 relative", isDark ? "text-white" : "text-slate-900")}>
       {/* ── Top bar (Fixed on scroll) ────────────────────────────────────────── */}
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 h-16 shrink-0 flex items-center justify-between px-3 sm:px-8 backdrop-blur-xl border-b transition-colors duration-300",
           isDark
-            ? "bg-[#070918]/90 border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.5)]"
-            : "bg-white/90 border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+            ? "bg-black/75 border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.5)]"
+            : "bg-white/80 border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
         )}
       >
         {/* File info */}
@@ -492,9 +481,9 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
             )}
             <span className="relative flex items-center justify-center">
               {downloading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-[#011627]" aria-hidden="true" />
+                <Loader2 className="w-4 h-4 animate-spin text-slate-950" aria-hidden="true" />
               ) : (
-                <Download className="w-4 h-4 text-[#011627]" aria-hidden="true" />
+                <Download className="w-4 h-4 text-slate-950" aria-hidden="true" />
               )}
             </span>
           </button>
@@ -535,7 +524,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
 
         {/* AUDIO */}
         {type === "audio" && (
-          <div className={cn("w-full rounded-2xl border p-8 sm:p-12 flex flex-col items-center justify-center gap-6 shadow-xl transition-all", isDark ? "bg-gradient-to-b from-[#0c0f24] to-[#070914] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("w-full rounded-2xl border p-8 sm:p-12 flex flex-col items-center justify-center gap-6 shadow-xl backdrop-blur-xl transition-all", isDark ? "bg-[#0c0c0e]/85 border-white/10 shadow-black/80" : "bg-white/90 border-slate-200")}>
             <div className={cn("w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.2)]" : "bg-cyan-50 border-cyan-200 shadow-sm")}>
               <FileAudio className="w-12 h-12 text-cyan-500" aria-hidden="true" />
             </div>
@@ -556,7 +545,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
 
         {/* DOCUMENT / OTHER FALLBACKS */}
         {type !== "video" && type !== "image" && type !== "audio" && (
-          <div className={cn("w-full rounded-2xl border p-10 flex flex-col items-center justify-center gap-5 text-center shadow-lg transition-all", isDark ? "bg-[#0c0f24] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("w-full rounded-2xl border p-10 flex flex-col items-center justify-center gap-5 text-center shadow-lg backdrop-blur-xl transition-all", isDark ? "bg-[#0c0c0e]/85 border-white/10 shadow-black/80" : "bg-white/90 border-slate-200")}>
             <div className={cn("w-20 h-20 rounded-2xl border flex items-center justify-center transition-all", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
               <FileText className="w-10 h-10" aria-hidden="true" />
             </div>
@@ -599,7 +588,7 @@ export default function PublicMediaPage({ params }: { params: Promise<{ token: s
       </main>
 
       {/* ── Footer ────────────────────────────────────────────────────────────── */}
-      <footer className={cn("mt-auto border-t py-6 text-center text-xs backdrop-blur-md transition-colors", isDark ? "border-white/5 bg-[#040612]/90 text-zinc-500" : "border-slate-200 bg-white/90 text-slate-500")}>
+      <footer className={cn("mt-auto border-t py-6 text-center text-xs backdrop-blur-md transition-colors", isDark ? "border-white/10 bg-black/60 text-zinc-400" : "border-slate-200 bg-white/75 text-slate-500")}>
         Powered by{" "}
         <span className="text-cyan-500 font-semibold">
           PT Masdika Teknologi Indonesia

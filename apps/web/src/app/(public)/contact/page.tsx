@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -126,7 +126,7 @@ export default function ContactPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden bg-[var(--background)] text-[var(--text-primary)] transition-colors">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden text-[var(--text-primary)] transition-colors">
       {/* ── 1. HERO SECTION (2-Kolom Sesuai design.md) ───────────────── */}
       <section className="relative pt-4 sm:pt-8 pb-12 lg:pb-20 flex items-center">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">

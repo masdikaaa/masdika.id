@@ -515,7 +515,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
   return (
     <div id="engagement-section" className="w-full space-y-8 mt-4 pb-28">
       {/* ── RATINGS & OVERVIEW CARD ────────────────────────────────────────────── */}
-      <section className={cn("relative overflow-hidden rounded-2xl border p-5 sm:p-8 backdrop-blur-xl transition-all duration-300", isDark ? "bg-gradient-to-b from-[#0c0f24] to-[#070914] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]" : "bg-white border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.06)]")}>
+      <section className={cn("relative overflow-hidden rounded-2xl border p-5 sm:p-8 backdrop-blur-xl transition-all duration-300", isDark ? "bg-[#0c0c0e]/80 border-white/10 shadow-2xl" : "bg-white/95 border-slate-200/90 shadow-md")}>
         <div className={cn("absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32 transition-all", isDark ? "bg-cyan-500/10" : "bg-cyan-500/5")} />
 
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
@@ -655,7 +655,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
 
         {/* Form Write Comment or Already Commented Notice */}
         {hasCommented ? (
-          <div className={cn("rounded-2xl border p-6 sm:p-8 text-center backdrop-blur-xl transition-all shadow-md", isDark ? "bg-[#0c0f24]/90 border-cyan-500/25 shadow-[0_0_30px_rgba(6,182,212,0.1)]" : "bg-cyan-50/70 border-cyan-200")}>
+          <div className={cn("rounded-2xl border p-6 sm:p-8 text-center backdrop-blur-xl transition-all shadow-md", isDark ? "bg-cyan-950/30 border-cyan-500/30 text-cyan-300 shadow-[0_0_30px_rgba(6,182,212,0.1)]" : "bg-cyan-50/80 border-cyan-200 text-cyan-900")}>
             <div className={cn("w-12 h-12 rounded-2xl border flex items-center justify-center mx-auto mb-3.5", isDark ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]" : "bg-cyan-100 border-cyan-300 text-cyan-700")}>
               <CheckCircle2 className="w-6 h-6" />
             </div>
@@ -667,7 +667,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
             </p>
           </div>
         ) : (
-          <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-lg relative transition-all duration-300", isDark ? "bg-[#0c0f24]/90 border-white/10" : "bg-white border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.06)]")}>
+          <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-lg relative transition-all duration-300", isDark ? "bg-[#0c0c0e]/80 border-white/10 shadow-xl" : "bg-white/95 border-slate-200/90 shadow-md")}>
             <form onSubmit={handleInitiateComment} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -679,7 +679,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                     placeholder="e.g. Alex Johnson"
                     value={authorName}
                     onChange={(e) => setAuthorName(e.target.value)}
-                    className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-black/40 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white")}
+                    className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30", isDark ? "bg-black/60 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white")}
                     required
                   />
                 </div>
@@ -693,7 +693,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                     placeholder="name@email.com"
                     value={authorEmail}
                     onChange={(e) => setAuthorEmail(e.target.value)}
-                    className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-black/40 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white")}
+                    className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30", isDark ? "bg-black/60 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white")}
                     required
                   />
                 </div>
@@ -753,7 +753,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                   placeholder="Share your thoughts, review, or feedback about this media..."
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className={cn("w-full px-4 py-3 rounded-xl border text-sm transition-all resize-none focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-black/40 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white")}
+                  className={cn("w-full px-4 py-3 rounded-xl border text-sm transition-all resize-none focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30", isDark ? "bg-black/60 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white")}
                   required
                 />
               </div>
@@ -851,7 +851,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
               <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
             </div>
           ) : comments.length === 0 ? (
-            <div className={cn("rounded-2xl border p-10 text-center transition-all", isDark ? "border-white/5 bg-[#0a0d20]/50" : "border-slate-200 bg-white shadow-xs")}>
+            <div className={cn("rounded-2xl border p-10 text-center transition-all", isDark ? "border-white/10 bg-[#0c0c0e]/60" : "border-slate-200 bg-white shadow-xs")}>
               <MessageSquare className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-400")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-zinc-300" : "text-slate-800")}>
                 No comments yet
@@ -866,7 +866,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                 key={comment.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={cn("rounded-2xl border p-5 backdrop-blur-md transition-all", isDark ? "bg-[#0c0f24]/80 border-white/5 hover:border-white/10" : "bg-white border-slate-200/80 hover:border-slate-300 shadow-xs")}
+                className={cn("rounded-2xl border p-5 backdrop-blur-md transition-all", isDark ? "bg-[#0c0c0e]/75 border-white/10 hover:border-cyan-500/30 shadow-lg" : "bg-white/95 border-slate-200 hover:border-cyan-300 shadow-xs")}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
@@ -887,7 +887,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                       />
                       <div
                         style={{ display: "none" }}
-                        className="w-full h-full bg-[#137333] items-center justify-center text-white font-medium text-sm"
+                        className="w-full h-full bg-cyan-600 items-center justify-center text-white font-medium text-sm"
                       >
                         {comment.name.charAt(0).toUpperCase()}
                       </div>
@@ -980,7 +980,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
                         className={cn(
                           "absolute left-0 bottom-full mb-2 z-30 flex items-center gap-1 p-1.5 rounded-full border shadow-2xl backdrop-blur-xl",
                           isDark
-                            ? "bg-[#0b0e24]/95 border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
+                            ? "bg-[#0c0c0e]/95 border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
                             : "bg-white/95 border-slate-200 shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
                         )}
                       >
@@ -1028,7 +1028,7 @@ export function MediaEngagement({ token, fileName }: { token: string; fileName: 
               className={cn(
                 "relative w-full max-w-[390px] rounded-2xl border p-5 sm:p-6 text-center transition-all",
                 isDark
-                  ? "bg-[#0b0e24] border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.22)] text-white"
+                  ? "bg-[#0c0c0e] border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.22)] text-white"
                   : "bg-white border-slate-200 shadow-2xl text-slate-900"
               )}
             >
