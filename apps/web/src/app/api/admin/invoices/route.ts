@@ -17,8 +17,7 @@ export async function GET(req: NextRequest) {
         subscription: {
           include: { plan: true }
         },
-        vpsService: { select: { hostname: true } },
-        customService: { select: { name: true } }
+        vpsService: { select: { hostname: true } }
       }
     });
 

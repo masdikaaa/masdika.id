@@ -104,13 +104,6 @@ export async function PUT(req: Request, props: { params: Promise<{ type: string;
         });
         break;
       }
-      case 'custom-services': {
-        result = await prisma.customService.update({
-          where: { id },
-          data: { status: statusValue === 'ACTIVE' ? 'ACTIVE' : statusValue }
-        });
-        break;
-      }
       default:
         return NextResponse.json({ error: 'Unknown service type' }, { status: 400 });
     }

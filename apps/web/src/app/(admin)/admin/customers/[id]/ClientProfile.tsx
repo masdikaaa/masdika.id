@@ -114,10 +114,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
   const [deleteTarget, setDeleteTarget] = useState<{serviceType: string, id: number, label: string} | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Custom Service Modal
-  const [createCustomServiceModal, setCreateCustomServiceModal] = useState(false);
-  const [csForm, setCsForm] = useState({ name: '', description: '', price: '', billingCycle: '1_MONTH', expiresAt: '' });
-  const [isCreatingCs, setIsCreatingCs] = useState(false);
+
 
   // Edit Service Modal
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -140,31 +137,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
     }
   };
 
-  const handleCreateCustomService = async (e: any) => {
-    e.preventDefault();
-    setIsCreatingCs(true);
-    const toastId = toast.loading("Creating custom service & invoice...");
-    try {
-      const res = await fetch("/api/admin/custom-services", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...csForm, userId }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Custom service and pending invoice created!", { id: toastId });
-        setCreateCustomServiceModal(false);
-        setCsForm({ name: '', description: '', price: '', billingCycle: '1_MONTH', expiresAt: '' });
-        fetchUserData();
-      } else {
-        toast.error(data.error || "Failed to create", { id: toastId });
-      }
-    } catch (err) {
-      toast.error("An error occurred", { id: toastId });
-    } finally {
-      setIsCreatingCs(false);
-    }
-  };  const allServices = user ? [
+  const allServices = user ? [
     ...(user.subscriptions?.map((s: any) => {
       let serviceName = s.plan?.service || 'UNKNOWN';
       let icon = <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
@@ -255,27 +228,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       createdAt: k8s.createdAt,
       rawData: k8s
     })) || []),
-    ...(user.customServices?.map((cs: any) => ({
-      id: cs.id,
-      category: 'Custom Service',
-      type: 'custom-services',
-      name: cs.name,
-      detail: (
-        <div className="flex flex-col gap-0.5 mt-0.5">
-          <div className={cn("text-sm font-medium truncate", isDark ? "text-zinc-300" : "text-slate-600")}>
-             {cs.description || 'No description provided'}
-          </div>
-          <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
-            {formatRupiah(cs.price)} / {cs.billingCycle} • Expires: {cs.expiresAt ? new Date(cs.expiresAt).toLocaleDateString() : 'N/A'}
-          </div>
-        </div>
-      ),
-      status: cs.status,
-      suspendReason: null,
-      icon: <FileText className="w-4 h-4 text-orange-400" />,
-      createdAt: cs.createdAt,
-      rawData: cs
-    })) || []),
+
   ] : [];
 
   // Sort services so newest is at the top
@@ -557,12 +510,6 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
             <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
               <h3 className={cn("font-semibold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} /> All Products & Services</h3>
-              <button
-                onClick={() => setCreateCustomServiceModal(true)}
-                className="px-3.5 py-1.5 text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-md shadow-sm transition-all flex items-center gap-1.5"
-              >
-                + Custom Service
-              </button>
             </div>
             <PaginatedTable
               data={allServices}
@@ -750,10 +697,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <li>Any linked resources or assets will be deleted and data lost.</li>
               </>
             )}
-            {terminateTarget?.serviceType === 'custom-services' && (
-              <li>This custom service will be permanently terminated.</li>
-            )}
-            {(!terminateTarget || !['vps', 'kubernetes', 'subscriptions', 'custom-services'].includes(terminateTarget.serviceType)) && (
+            {(!terminateTarget || !['vps', 'kubernetes', 'subscriptions'].includes(terminateTarget.serviceType)) && (
               <li>The selected service and all its associated data will be permanently deleted.</li>
             )}
           </ul>
@@ -773,100 +717,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         isLoading={isDeleting}
       />
 
-      {/* Create Custom Service Modal */}
-      {createCustomServiceModal && (
-        <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800 shadow-2xl" : "bg-white border-slate-200 shadow-2xl")}>
-            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Create Custom Service</h3>
-              <button onClick={() => setCreateCustomServiceModal(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-                <XCircle className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleCreateCustomService}>
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Service Name</label>
-                  <input
-                    required
-                    type="text"
-                    value={csForm.name}
-                    onChange={(e) => setCsForm({...csForm, name: e.target.value})}
-                    placeholder="e.g. Addon Public IP"
-                    className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-                  />
-                </div>
-                <div>
-                  <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Description (Optional)</label>
-                  <input
-                    type="text"
-                    value={csForm.description}
-                    onChange={(e) => setCsForm({...csForm, description: e.target.value})}
-                    placeholder="Short description"
-                    className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-                  />
-                </div>
-                <div>
-                  <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Price (IDR)</label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    value={csForm.price}
-                    onChange={(e) => setCsForm({...csForm, price: e.target.value})}
-                    placeholder="e.g. 50000"
-                    className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Billing Cycle</label>
-                    <Select
-                      value={csForm.billingCycle}
-                      onChange={(val) => setCsForm({...csForm, billingCycle: val})}
-                      options={[
-                        { value: "1_MONTH", label: "1 Bulan" },
-                        { value: "3_MONTHS", label: "3 Bulan" },
-                        { value: "6_MONTHS", label: "6 Bulan" },
-                        { value: "1_YEAR", label: "1 Tahun" }
-                      ]}
-                      placeholder="Billing Cycle"
-                      className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
-                    />
-                  </div>
-                  <div>
-                    <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Due Date / Expiry</label>
-                    <input
-                      required
-                      type="date"
-                      value={csForm.expiresAt}
-                      onChange={(e) => setCsForm({...csForm, expiresAt: e.target.value})}
-                      className={cn("w-full border rounded-xl p-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                <button 
-                  type="button"
-                  onClick={() => setCreateCustomServiceModal(false)}
-                  disabled={isCreatingCs}
-                  className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  disabled={isCreatingCs}
-                  className="px-5 py-2.5 text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg shadow-sm transition-all disabled:opacity-50"
-                >
-                  {isCreatingCs ? 'Creating...' : 'Create & Generate Invoice'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

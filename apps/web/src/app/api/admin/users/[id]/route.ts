@@ -24,7 +24,6 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         shortLinks: true,
         vpsServices: { where: { kubernetesClusterId: null }, include: { assignedIps: true } },
         kubernetesClusters: true,
-        customServices: { orderBy: { createdAt: 'desc' } },
       }
     });
 
@@ -152,7 +151,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     // Services cleanup
     await prisma.vpsService.deleteMany({ where: { userId: user.id } });
     await prisma.vpcNetwork.deleteMany({ where: { userId: user.id } });
-    await prisma.customService.deleteMany({ where: { userId: user.id } });
     await prisma.kubernetesCluster.deleteMany({ where: { userId: user.id } });
     await prisma.reservedIp.deleteMany({ where: { userId: user.id } });
     await prisma.secureMedia.deleteMany({ where: { userId: user.id } });

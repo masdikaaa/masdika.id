@@ -455,14 +455,6 @@ export default function AdminInvoicesPage() {
                             } catch (e) { return null; }
                           })()}
                         </div>
-                      ) : invoice.type === 'CUSTOM_SERVICE' ? (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <Receipt className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                            <span className={cn("truncate font-bold", isDark ? "text-white" : "text-slate-900")}>{invoice.customService?.name || 'Custom Service'}</span>
-                          </div>
-                          <span className={cn("text-xs ml-[24px]", isDark ? "text-zinc-500" : "text-slate-500")}>Manual Billing</span>
-                        </div>
                       ) : invoice.type === 'IP_RESERVATION' ? (
                         <div className="flex flex-col gap-0.5">
                           <div className="flex items-center gap-2">

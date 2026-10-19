@@ -25,11 +25,6 @@ export async function POST(req: NextRequest) {
         where: { id: Number(id) },
         data: updateData
       });
-    } else if (type === 'custom-services') {
-      await prisma.customService.update({
-        where: { id: Number(id) },
-        data: updateData
-      });
     } else if (type === 'kubernetes') {
       await prisma.kubernetesCluster.update({
         where: { id: Number(id) },

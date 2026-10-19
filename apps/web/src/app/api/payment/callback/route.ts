@@ -521,47 +521,6 @@ export async function POST(req: NextRequest) {
             }).catch(e => console.error('Email error:', e));
           }
         }
-      } else if (invoice.type === 'CUSTOM_SERVICE') {
-        if (invoice.customServiceId) {
-          const service = await prisma.customService.findUnique({ where: { id: invoice.customServiceId } });
-          if (service) {
-             let newExpiry = service.expiresAt ? new Date(service.expiresAt) : new Date();
-             
-             // Only extend expiry if it's a renewal (already ACTIVE) or EXPIRED
-             if (service.status !== 'PENDING') {
-               if (service.billingCycle === 'MONTHLY' || service.billingCycle === '1_MONTH') newExpiry.setMonth(newExpiry.getMonth() + 1);
-               else if (service.billingCycle === '3_MONTHS') newExpiry.setMonth(newExpiry.getMonth() + 3);
-               else if (service.billingCycle === '6_MONTHS') newExpiry.setMonth(newExpiry.getMonth() + 6);
-               else if (service.billingCycle === 'ANNUALLY' || service.billingCycle === '1_YEAR') newExpiry.setFullYear(newExpiry.getFullYear() + 1);
-             }
-             
-             await prisma.customService.update({
-               where: { id: service.id },
-               data: { expiresAt: newExpiry, status: 'ACTIVE' }
-             });
-          }
-          
-          sendCustomerPaymentSuccessEmail({
-            toEmail: customerEmail,
-            customerName,
-            type: 'SUBSCRIPTION',
-            planName: service?.name || 'Custom Service',
-            serviceName: 'Manual Billing',
-            amount: invoice.amount,
-            invoiceNumber: invoice.invoiceNumber,
-          }).catch(e => console.error('Email error:', e));
-
-          sendAdminNewOrderEmail({
-            customerName,
-            customerEmail,
-            type: 'SUBSCRIPTION',
-            planName: service?.name || 'Custom Service',
-            serviceName: 'Manual Billing',
-            amount: invoice.amount,
-            paymentMethod: invoice.paymentMethod || 'Unknown',
-            invoiceNumber: invoice.invoiceNumber,
-          }).catch(e => console.error('Email error:', e));
-        }
       }
 
 

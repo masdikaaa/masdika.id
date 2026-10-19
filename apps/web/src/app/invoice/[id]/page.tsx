@@ -20,8 +20,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       subscription: {
         include: { plan: true }
       },
-      vpsService: true,
-      customService: true
+      vpsService: true
     }
   });
 
@@ -33,8 +32,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         subscription: {
           include: { plan: true }
         },
-        vpsService: true,
-        customService: true
+        vpsService: true
       }
     });
 

@@ -25,18 +25,12 @@ export async function GET(req: NextRequest) {
       },
       include: {
         subscription: { include: { plan: true } },
-        vpsService: { select: { hostname: true } },
-        customService: { select: { name: true } }
+        vpsService: { select: { hostname: true } }
       },
       orderBy: { createdAt: "desc" }
     });
 
     const vpsServices = await prisma.vpsService.findMany({
-      where: { userId, status: { not: 'TERMINATED' } },
-      orderBy: { createdAt: "desc" }
-    });
-
-    const customServices = await prisma.customService.findMany({
       where: { userId, status: { not: 'TERMINATED' } },
       orderBy: { createdAt: "desc" }
     });
@@ -51,7 +45,7 @@ export async function GET(req: NextRequest) {
       select: { balance: true }
     });
 
-    return NextResponse.json({ success: true, data: { subscriptions, invoices, vpsServices, customServices, reservedIps, balance: user?.balance || 0 } });
+    return NextResponse.json({ success: true, data: { subscriptions, invoices, vpsServices, reservedIps, balance: user?.balance || 0 } });
   } catch (error) {
     console.error("Fetch billing error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -37,7 +37,6 @@ export default function CustomerBillingPage() {
           subscriptions: json.data.subscriptions || [],
           invoices: json.data.invoices || [],
           vpsServices: json.data.vpsServices || [],
-          customServices: json.data.customServices || [],
           reservedIps: json.data.reservedIps || [],
           balance: json.data.balance || 0
         });
@@ -49,7 +48,7 @@ export default function CustomerBillingPage() {
     }
   };
 
-  const [data, setData] = useState<{subscriptions: any[], invoices: any[], vpsServices: any[], customServices: any[], reservedIps: any[], balance: number}>({ subscriptions: [], invoices: [], vpsServices: [], customServices: [], reservedIps: [], balance: 0 });
+  const [data, setData] = useState<{subscriptions: any[], invoices: any[], vpsServices: any[], reservedIps: any[], balance: number}>({ subscriptions: [], invoices: [], vpsServices: [], reservedIps: [], balance: 0 });
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const { theme } = useTheme();
@@ -79,7 +78,6 @@ export default function CustomerBillingPage() {
       const status = (inv.status || "").toLowerCase();
       const desc = inv.type === 'TOP_UP' ? 'account top up' :
                    inv.type === 'VPS' || inv.type === 'VPS_UPGRADE' ? `cloud vps ${inv.vpsService?.hostname || ''}` :
-                   inv.type === 'CUSTOM_SERVICE' ? (inv.customService?.name || 'custom service') :
                    inv.type === 'IP_RESERVATION' ? 'reserved ip' :
                    inv.type === 'SUBSCRIPTION' ? (inv.vpsService?.hostname || `${inv.subscription?.plan?.service || ''} ${inv.subscription?.plan?.name || ''}`) : '';
       const dateFormatted = invDate.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }).toLowerCase();
@@ -128,14 +126,12 @@ export default function CustomerBillingPage() {
 
   const activeSubscriptions = data.subscriptions.filter(s => s.status === 'ACTIVE');
   const activeVps = data.vpsServices.filter(s => s.status === 'RUNNING' || s.status === 'STOPPED');
-  const activeCustom = data.customServices.filter(s => s.status === 'ACTIVE');
   const activeIps = data.reservedIps;
-  const totalActive = activeSubscriptions.length + activeVps.length + activeCustom.length + activeIps.length;
+  const totalActive = activeSubscriptions.length + activeVps.length + activeIps.length;
 
   const unifiedServices = [
     ...activeSubscriptions.map(s => ({ type: 'SUBSCRIPTION', data: s, key: `sub-${s.id}` })),
     ...activeVps.map(v => ({ type: 'VPS', data: v, key: `vps-${v.id}` })),
-    ...activeCustom.map(c => ({ type: 'CUSTOM_SERVICE', data: c, key: `custom-${c.id}` })),
     ...activeIps.map(ip => ({ type: 'RESERVED_IP', data: ip, key: `ip-${ip.id}` }))
   ];
   
@@ -276,40 +272,7 @@ export default function CustomerBillingPage() {
                           </div>
                         </div>
                       );
-                    } else if (type === 'CUSTOM_SERVICE') {
-                      const c = item.data;
-                      return (
-                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
-                          <div className="flex items-center gap-3 overflow-hidden">
-                            <Box className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <div className="min-w-0">
-                              <div className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{c.name}</div>
-                              <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{formatRupiah(c.price)}</div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end shrink-0 pl-2">
-                            <button
-                              onClick={() => handleToggleAutoRenew(c.id, 'CUSTOM_SERVICE', c.autoRenew)}
-                              disabled={toggling === `CUSTOM_SERVICE-${c.id}`}
-                              className={cn(
-                                "group relative flex items-center justify-center w-10 h-5 rounded-full transition-all duration-300 border focus:outline-none",
-                                c.autoRenew ? "bg-cyan-500/20 border-cyan-500/50" : isDark ? "bg-zinc-800 border-zinc-700 hover:border-zinc-600" : "bg-slate-200 border-slate-300 hover:border-slate-400",
-                                toggling === `CUSTOM_SERVICE-${c.id}` && "opacity-50 cursor-wait"
-                              )}
-                            >
-                              <div className={cn(
-                                "absolute w-3.5 h-3.5 rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
-                                c.autoRenew ? "translate-x-2 bg-cyan-400" : isDark ? "-translate-x-2 bg-zinc-500 group-hover:bg-zinc-400" : "-translate-x-2 bg-slate-400 group-hover:bg-slate-500"
-                              )}>
-                                {toggling === `CUSTOM_SERVICE-${c.id}` && <Loader2 className={cn("w-2.5 h-2.5 animate-spin", isDark ? "text-zinc-900" : "text-slate-900")} />}
-                              </div>
-                            </button>
-                            <span className={cn("text-[9px] mt-1.5 font-bold uppercase tracking-widest transition-colors duration-300", c.autoRenew ? "text-cyan-400" : "text-zinc-500")}>
-                              {c.autoRenew ? 'Auto' : 'Manual'}
-                            </span>
-                          </div>
-                        </div>
-                      );
+
                     } else if (type === 'RESERVED_IP') {
                       const ip = item.data;
                       return (
@@ -515,14 +478,7 @@ export default function CustomerBillingPage() {
                             } catch (e) { return null; }
                           })()}
                         </div>
-                      ) : invoice.type === 'CUSTOM_SERVICE' ? (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <Receipt className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span className={cn("truncate font-bold", isDark ? "text-white" : "text-slate-900")}>{invoice.customService?.name || 'Custom Service'}</span>
-                          </div>
-                          <span className={cn("text-xs ml-[24px]", isDark ? "text-zinc-500" : "text-slate-500")}>Manual Billing</span>
-                        </div>
+
                       ) : invoice.type === 'IP_RESERVATION' ? (
                         <div className="flex flex-col gap-0.5">
                           <div className="flex items-center gap-2">

@@ -26,10 +26,6 @@ export async function POST(req: NextRequest) {
       const vps = await prisma.vpsService.findUnique({ where: { id: serviceId } });
       if (!vps || vps.userId !== userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
       updated = await prisma.vpsService.update({ where: { id: serviceId }, data: { autoRenew } });
-    } else if (serviceType === 'CUSTOM_SERVICE') {
-      const custom = await prisma.customService.findUnique({ where: { id: serviceId } });
-      if (!custom || custom.userId !== userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-      updated = await prisma.customService.update({ where: { id: serviceId }, data: { autoRenew } });
     } else if (serviceType === 'RESERVED_IP') {
       const ip = await prisma.reservedIp.findUnique({ where: { id: serviceId } });
       if (!ip || ip.userId !== userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

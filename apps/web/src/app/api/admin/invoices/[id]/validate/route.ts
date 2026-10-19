@@ -127,20 +127,6 @@ export async function POST(
           }
         }
       }
-    } else if (invoice.type === 'CUSTOM_SERVICE' && invoice.customServiceId) {
-      const service = await prisma.customService.findUnique({ where: { id: invoice.customServiceId } });
-      if (service && service.expiresAt) {
-         const newExpiry = new Date(service.expiresAt);
-         if (service.billingCycle === 'MONTHLY' || service.billingCycle === '1_MONTH') newExpiry.setMonth(newExpiry.getMonth() + 1);
-         else if (service.billingCycle === '3_MONTHS') newExpiry.setMonth(newExpiry.getMonth() + 3);
-         else if (service.billingCycle === '6_MONTHS') newExpiry.setMonth(newExpiry.getMonth() + 6);
-         else if (service.billingCycle === 'ANNUALLY' || service.billingCycle === '1_YEAR') newExpiry.setFullYear(newExpiry.getFullYear() + 1);
-         
-         await prisma.customService.update({
-           where: { id: service.id },
-           data: { expiresAt: newExpiry, status: 'ACTIVE' }
-         });
-      }
     } else if (invoice.type === 'VPS_UPGRADE' && invoice.vpsServiceId && invoice.details) {
         const details = JSON.parse(invoice.details);
         const vps = await prisma.vpsService.findUnique({ where: { id: invoice.vpsServiceId } });

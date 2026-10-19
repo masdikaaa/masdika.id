@@ -80,10 +80,9 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                         {invoice.type === "TOP_UP" ? "Account Balance Top Up"
                           : invoice.type === "VPS" ? ("Cloud VPS Order (Pay-As-You-Go) - " + (invoice.vpsService?.hostname || "New Instance"))
                             : invoice.type === "VPS_UPGRADE" ? ("Cloud VPS Specs Upgrade (Pay-As-You-Go) - " + (invoice.vpsService?.hostname || "Unknown"))
-                              : invoice.type === "CUSTOM_SERVICE" ? (invoice.customService?.name || "Custom Service")
-                                : invoice.type === "IP_RESERVATION" ? "Reserved IP"
-                                  : invoice.type === "SUBSCRIPTION" && invoice.vpsServiceId ? ("PAYG FINAL BILLING - " + (invoice.vpsService?.hostname || "Cloud VPS"))
-                                    : invoice.subscription?.plan?.name || "Unknown Item"}
+                              : invoice.type === "IP_RESERVATION" ? "Reserved IP"
+                                : invoice.type === "SUBSCRIPTION" && invoice.vpsServiceId ? ("PAYG FINAL BILLING - " + (invoice.vpsService?.hostname || "Cloud VPS"))
+                                  : invoice.subscription?.plan?.name || "Unknown Item"}
                       </div>
                       <div className={cn('text-xs sm:text-sm leading-relaxed max-w-md', isDark ? 'text-zinc-400' : 'text-slate-600')} style={{ color: 'inherit' }}>
                         {invoice.type === "TOP_UP"
@@ -150,10 +149,8 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                                   })()}
                                 </>
                               )
-                              : invoice.type === "CUSTOM_SERVICE"
-                                ? 'Manual billing for custom requested service or setup.'
-                                : invoice.type === "IP_RESERVATION"
-                                  ? (
+                              : invoice.type === "IP_RESERVATION"
+                                ? (
                                     <>
                                       <p>Reservation for premium IPv4 address.</p>
                                       <div className={cn('mt-2 flex flex-col gap-1 text-[11px] font-mono p-2 rounded-md', isDark ? 'text-zinc-500 bg-white/5' : 'text-slate-500 bg-slate-100')}>

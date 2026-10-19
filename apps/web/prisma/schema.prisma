@@ -39,7 +39,6 @@ model User {
   posts              BlogPost[]
   cloudflareDomains  CloudflareDomain[]
   cloudflareTunnels  CloudflareTunnel[]
-  customServices     CustomService[]
   invoices           Invoice[]
   kubernetesClusters KubernetesCluster[]
   promoClaims        PromoClaim[]
@@ -595,11 +594,9 @@ model Invoice {
   isReadByUser    Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  customServiceId Int?
   subtotal        Int            @default(0)
   taxAmount       Int            @default(0)
   taxRate         Int            @default(0)
-  customService   CustomService? @relation(fields: [customServiceId], references: [id])
   subscription    Subscription?  @relation(fields: [subscriptionId], references: [id])
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   vpsService      VpsService?    @relation(fields: [vpsServiceId], references: [id])
@@ -607,7 +604,6 @@ model Invoice {
   @@index([userId])
   @@index([subscriptionId])
   @@index([vpsServiceId])
-  @@index([customServiceId])
   @@index([status])
   @@index([createdAt])
 }
@@ -905,26 +901,6 @@ model PromoClaim {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([promoId, userId])
-}
-
-model CustomService {
-  id              Int       @id @default(autoincrement())
-  userId          Int
-  name            String
-  description     String?
-  price           Int
-  billingCycle    String    @default("MONTHLY")
-  status          String    @default("PENDING")
-  expiresAt       DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  autoRenew       Boolean   @default(true)
-  terminationDate DateTime?
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  invoices        Invoice[]
-
-  @@index([userId])
-  @@index([status])
 }
 
 model VpcRouter {

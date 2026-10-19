@@ -50,7 +50,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
           await prisma.vpsService.deleteMany({ where: { kubernetesClusterId: id } });
           result = await prisma.kubernetesCluster.delete({ where: { id } }); 
           break;
-        case 'custom-services': result = await prisma.customService.delete({ where: { id } }); break;
         default: return NextResponse.json({ error: 'Unknown service type' }, { status: 400 });
       }
       return NextResponse.json({ success: true, message: 'Service deleted permanently' });
@@ -136,13 +135,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
             data: { status: statusValue }
           });
         }
-        break;
-      }
-      case 'custom-services': {
-        result = await prisma.customService.update({
-          where: { id },
-          data: { status: statusValue }
-        });
         break;
       }
       default:

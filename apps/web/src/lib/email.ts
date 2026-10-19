@@ -1312,51 +1312,6 @@ export const sendAdminServiceReactivatedEmail = async (customerName: string, cus
   });
 };
 
-export const sendCustomServiceSuspendEmailToAdmin = async (serviceName: string, customerName: string, customerEmail: string) => {
-  const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-  if (!adminUser || !adminUser.email) return;
-
-  const content = `
-    <h2 style="color: #f59e0b; margin-bottom: 20px;">Manual Suspension Required</h2>
-    <p>Admin Notification:</p>
-    <p>A Custom Service has reached its due date and needs to be manually suspended:</p>
-    <ul>
-      <li><strong>Customer:</strong> ${customerName} (${customerEmail})</li>
-      <li><strong>Service:</strong> ${serviceName}</li>
-      <li><strong>Action Required:</strong> Please manually disable/suspend this service.</li>
-    </ul>
-  `;
-
-  await getTransporter().sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
-    to: decryptDeterministic(adminUser.email) || adminUser.email,
-    subject: `[Admin Action Required] Suspend Custom Service for ${customerName}`,
-    html: getBaseHtml(content),
-  });
-};
-
-export const sendCustomServiceTerminateEmailToAdmin = async (serviceName: string, customerName: string, customerEmail: string) => {
-  const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-  if (!adminUser || !adminUser.email) return;
-
-  const content = `
-    <h2 style="color: #ef4444; margin-bottom: 20px;">Manual Termination Required</h2>
-    <p>Admin Notification:</p>
-    <p>A Custom Service has been overdue for 3 days and needs to be manually terminated:</p>
-    <ul>
-      <li><strong>Customer:</strong> ${customerName} (${customerEmail})</li>
-      <li><strong>Service:</strong> ${serviceName}</li>
-      <li><strong>Action Required:</strong> Please manually terminate/destroy this service.</li>
-    </ul>
-  `;
-
-  await getTransporter().sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
-    to: decryptDeterministic(adminUser.email) || adminUser.email,
-    subject: `[Admin Action Required] Terminate Custom Service for ${customerName}`,
-    html: getBaseHtml(content),
-  });
-};
 
 export const sendResourceAlertEmail = async (emails: string[], hostname: string, metric: string, usage: number, threshold: number) => {
   if (!process.env.SMTP_HOST) {
