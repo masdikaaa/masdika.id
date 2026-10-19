@@ -79,27 +79,42 @@ app.prepare().then(async () => {
           return;
         }
 
-        const uploadToken = crypto.randomUUID();
+        // Chunking support: allow clients to upload in 40MB slices to bypass Cloudflare 100MB body limit
+        const clientToken = (req.headers["x-upload-token"] as string) || "";
+        const chunkIndex = parseInt((req.headers["x-upload-chunk-index"] as string) || "0", 10);
+        const totalChunks = parseInt((req.headers["x-upload-total-chunks"] as string) || "1", 10);
+
+        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const uploadToken = (clientToken && UUID_REGEX.test(clientToken)) ? clientToken : crypto.randomUUID();
         const tempPath = path.join(process.cwd(), "storage", "upload-buffers", uploadToken);
 
         await fs.promises.mkdir(path.dirname(tempPath), { recursive: true });
-        const ws = fs.createWriteStream(tempPath);
 
-        // Limit upload size to 100MB for public, 5GB for authenticated users/admins
-        const MAX_FILE_SIZE = isPublicUpload ? 100 * 1024 * 1024 : 5 * 1024 * 1024 * 1024;
+        let existingSize = 0;
+        if (chunkIndex > 0) {
+          try {
+            const st = await fs.promises.stat(tempPath);
+            existingSize = st.size;
+          } catch {}
+        }
+
+        const ws = fs.createWriteStream(tempPath, { flags: chunkIndex > 0 ? "a" : "w" });
+
+        // Limit upload size to 100MB for public, 10GB for authenticated users/admins
+        const MAX_FILE_SIZE = isPublicUpload ? 100 * 1024 * 1024 : 10 * 1024 * 1024 * 1024;
         let uploadedBytes = 0;
         let isAborted = false;
 
         req.on('data', (chunk) => {
           uploadedBytes += chunk.length;
-          if (uploadedBytes > MAX_FILE_SIZE) {
+          if (existingSize + uploadedBytes > MAX_FILE_SIZE) {
             isAborted = true;
             req.destroy();
             ws.destroy();
             fs.unlink(tempPath, () => { });
             if (!res.headersSent) {
               res.statusCode = 413;
-              res.end(JSON.stringify({ error: "Payload Too Large (Max 5GB)" }));
+              res.end(JSON.stringify({ error: "Payload Too Large (Max 10GB)" }));
             }
           }
         });
@@ -123,6 +138,14 @@ app.prepare().then(async () => {
           return;
         }
 
+        // If this is an intermediate chunk, respond 200 immediately
+        if (chunkIndex < totalChunks - 1) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ success: true, uploadToken, chunkIndex, totalChunks }));
+          return;
+        }
+
+        // Final chunk assembled! Forward to Next.js targetPath
         const nextReqHeaders = { ...req.headers, "x-upload-token": uploadToken };
         delete nextReqHeaders["content-length"];
         delete nextReqHeaders["content-type"];

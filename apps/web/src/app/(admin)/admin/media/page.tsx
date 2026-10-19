@@ -467,52 +467,73 @@ export default function AdminMediaLibrary() {
 
     const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
     const uploadedBytes = new Array(selectedFiles.length).fill(0);
+    const CHUNK_SIZE = 40 * 1024 * 1024; // 40MB per chunk — safely under Cloudflare's 100MB edge limit
 
-    const uploadPromises = selectedFiles.map((file, index) => {
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) {
-            uploadedBytes[index] = event.loaded;
-            const totalUploaded = uploadedBytes.reduce((acc, curr) => acc + curr, 0);
-            const percentCompleted = Math.round((totalUploaded * 100) / totalSize);
-            setUploadProgress(percentCompleted);
-          }
+    const uploadFile = async (file: File, fileIndex: number) => {
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE) || 1;
+      const uploadToken = crypto.randomUUID();
+
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const start = chunkIndex * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        const chunkBlob = file.slice(start, end);
+
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) {
+              const currentChunkLoaded = start + event.loaded;
+              uploadedBytes[fileIndex] = currentChunkLoaded;
+              const totalUploaded = uploadedBytes.reduce((acc, curr) => acc + curr, 0);
+              const percentCompleted = Math.round((totalUploaded * 100) / totalSize);
+              setUploadProgress(percentCompleted);
+            }
+          });
+
+          xhr.addEventListener("load", () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(true);
+            } else {
+              try {
+                const res = JSON.parse(xhr.responseText);
+                reject(new Error(res.error || `Upload failed with status ${xhr.status}`));
+              } catch {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+              }
+            }
+          });
+
+          xhr.addEventListener("error", () => {
+            reject(new Error("Network error"));
+          });
+
+          xhr.open("POST", "/api/admin/secure-media/upload-raw");
+
+          // Chunking & Metadata headers
+          xhr.setRequestHeader("x-upload-token", uploadToken);
+          xhr.setRequestHeader("x-upload-chunk-index", chunkIndex.toString());
+          xhr.setRequestHeader("x-upload-total-chunks", totalChunks.toString());
+          xhr.setRequestHeader("x-upload-original-name", btoa(encodeURIComponent(file.name)));
+          xhr.setRequestHeader("x-upload-mime-type", file.type || "application/octet-stream");
+          xhr.setRequestHeader("x-upload-file-size", file.size.toString());
+          xhr.setRequestHeader("x-upload-folder-path", btoa(encodeURIComponent(currentFolder)));
+          xhr.setRequestHeader("x-upload-expires-in", expiresIn);
+          xhr.setRequestHeader("x-upload-is-public", isPublicUpload ? "true" : "false");
+
+          xhr.send(chunkBlob);
         });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(true);
-          } else {
-            reject(new Error("Failed to upload file"));
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error"));
-        });
-
-        xhr.open("POST", "/api/admin/secure-media/upload-raw");
-        
-        // Base64 encode non-ascii headers
-        xhr.setRequestHeader("x-upload-original-name", btoa(encodeURIComponent(file.name)));
-        xhr.setRequestHeader("x-upload-mime-type", file.type || "application/octet-stream");
-        xhr.setRequestHeader("x-upload-file-size", file.size.toString());
-        xhr.setRequestHeader("x-upload-folder-path", btoa(encodeURIComponent(currentFolder)));
-        xhr.setRequestHeader("x-upload-expires-in", expiresIn);
-        xhr.setRequestHeader("x-upload-is-public", isPublicUpload ? "true" : "false");
-
-        xhr.send(file);
-      });
-    });
+      }
+    };
 
     try {
-      await Promise.all(uploadPromises);
+      for (let i = 0; i < selectedFiles.length; i++) {
+        await uploadFile(selectedFiles[i], i);
+      }
       toast.success(`${selectedFiles.length} file(s) uploaded successfully!`);
       fetchMedia();
       setShowUploadModal(false);
-    } catch (err) {
-      toast.error("Failed to upload some files.");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to upload some files.");
     } finally {
       setUploading(false);
       setUploadProgress(0);

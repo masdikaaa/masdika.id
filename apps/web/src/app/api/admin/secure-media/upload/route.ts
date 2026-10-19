@@ -10,12 +10,12 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { requireAuth } from "@/lib/auth-middleware";
 
-// Allow up to 5GB request body for this route
+// Allow up to 10GB request body for this route
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
-// ─── Max upload size: 5 GB ───────────────────────────────────────────────────
-const MAX_SIZE = 5 * 1024 * 1024 * 1024;
+// ─── Max upload size: 10 GB ──────────────────────────────────────────────────
+const MAX_SIZE = 10 * 1024 * 1024 * 1024;
 
 // ─── Allowed MIME types (server-enforced whitelist) ───────────────────────────
 const ALLOWED_MIME_TYPES = new Set([
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
       const fileSize = fileStats.size;
 
       if (fileSize > MAX_SIZE) {
-        return NextResponse.json({ error: "File exceeds 5GB limit" }, { status: 413 });
+        return NextResponse.json({ error: "File exceeds 10GB limit" }, { status: 413 });
       }
 
       // MIME detection — read only first 12 bytes (magic bytes)
