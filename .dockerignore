@@ -3,24 +3,38 @@
 # Mencegah file tidak penting, cache, dan data sensitif masuk ke Docker Image
 # ==============================================================================
 
-# 1. Environment & Kredensial Sensitif (WAJIB DIABAIKAN)
+# ─── 1. Environment & Kredensial Sensitif (WAJIB DIABAIKAN) ───
 .env
 .env.*
+*.env
+*.env.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 !.env.example
+
 *.pem
 *.key
 *.cert
 *.crt
+*.pub
 id_rsa*
 **/id_rsa*
+id_ed25519*
+**/id_ed25519*
+set_secrets.bat
+*secret*.bat
+*secret*.sh
+*secrets*
 
-# 2. Version Control & CI/CD
+# ─── 2. Version Control & CI/CD ───
 .git
 .github
 .gitignore
 .gitattributes
 
-# 3. Dependencies & Build Cache
+# ─── 3. Dependencies & Build Cache ───
 **/node_modules
 **/.next
 **/.turbo
@@ -32,15 +46,20 @@ id_rsa*
 !**/.yarn/plugins
 !**/.yarn/releases
 
-# 4. Dynamic Storage & Uploads (Dikelola via Volume Mount, bukan di dalam Image)
+# ─── 4. Dynamic Storage & Uploads (Dikelola via Volume Mount, bukan di Image) ───
 apps/web/public/uploads/**
 !apps/web/public/uploads/.gitkeep
+public/uploads/**
+!public/uploads/.gitkeep
+
 apps/web/storage/**
 !apps/web/storage/.gitkeep
-public/uploads/**
 storage/**
+!storage/.gitkeep
+**/storage/**
+!**/storage/**/.gitkeep
 
-# 5. Build Artifacts, Reports, & Logs
+# ─── 5. Build Artifacts, Reports, & Logs ───
 **/*.tsbuildinfo
 **/*.log
 **/*.log.*
@@ -55,8 +74,15 @@ coverage
 debug_*.json
 **/debug_*.json
 .eslintcache
+scratch
+**/scratch
+*.tmp
+*.temp
+/test.js
+/test.ts
+/_test_*
 
-# 6. Database Storage & Volume Mount Directories di Host
+# ─── 6. Database Storage & Volume Mount Directories di Host ───
 postgres_data
 redis_data
 grafana_data
@@ -69,8 +95,9 @@ mongo_shared_data
 *.sql
 *.sql.gz
 *.dump
+*.bak
 
-# 7. File Konfigurasi & Service Infrastruktur Terpisah
+# ─── 7. File Konfigurasi & Service Infrastruktur Terpisah ───
 nginx
 prometheus
 logstash
@@ -80,14 +107,14 @@ set_secrets.bat
 Dockerfile
 .dockerignore
 
-# 8. Dokumentasi & Panduan Developer
+# ─── 8. Dokumentasi & Panduan Developer ───
 README.md
 design.md
 CLAUDE.md
 AGENTS.md
 .agents
 
-# 9. IDE & OS Junk Files
+# ─── 9. IDE & OS Junk Files ───
 .idea
 .vscode
 *.swp
@@ -95,3 +122,5 @@ AGENTS.md
 .DS_Store
 Thumbs.db
 ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN

@@ -7,6 +7,26 @@ const globalForPrisma3 = globalThis as unknown as {
   pool: Pool | undefined;
 };
 
+import path from 'path';
+import fs from 'fs';
+import { config } from 'dotenv';
+
+// Automatically load environment variables if DATABASE_URL is not yet defined (monorepo root fallback)
+if (!process.env.DATABASE_URL) {
+  const possiblePaths = [
+    path.resolve(process.cwd(), '../../.env'),
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(__dirname, '../../../../.env'),
+    path.resolve(__dirname, '../../../.env'),
+  ];
+  for (const envPath of possiblePaths) {
+    if (fs.existsSync(envPath)) {
+      config({ path: envPath, override: true });
+      if (process.env.DATABASE_URL) break;
+    }
+  }
+}
+
 const dbUrlString = process.env.DATABASE_URL;
 if (!dbUrlString) {
   throw new Error('Please define the DATABASE_URL environment variable inside .env');

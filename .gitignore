@@ -1,7 +1,77 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ==============================================================================
+# .gitignore - Masdika.ID
+# Mencegah file kredensial sensitif, build cache, dynamic storage, dan junk ter-commit
+# ==============================================================================
 
-# dependencies
+# ─── 1. Kredensial Sensitif, Kunci, & Secrets (SANGAT KRUSIAL) ───
+.env
+.env.*
+*.env
+*.env.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Kunci SSH, Sertifikat, Token & Skrip Rahasia
+*.pem
+*.key
+*.cert
+*.crt
+*.pub
+id_rsa*
+**/id_rsa*
+id_ed25519*
+**/id_ed25519*
+set_secrets.bat
+*secret*.bat
+*secret*.sh
+*secrets*
+
+# ─── 2. Storage Dinamis & File Upload Pengguna ───
+# Seluruh folder uploads dan storage dinamis (SSH keys generated, tickets, secure media)
+apps/web/public/uploads/**
+!apps/web/public/uploads/.gitkeep
+!apps/web/public/uploads/**/.gitkeep
+public/uploads/**
+!public/uploads/.gitkeep
+!public/uploads/**/.gitkeep
+
+apps/web/storage/**
+!apps/web/storage/.gitkeep
+!apps/web/storage/**/.gitkeep
+storage/**
+!storage/.gitkeep
+!storage/**/.gitkeep
+**/storage/**
+!**/storage/**/.gitkeep
+
+# ─── 3. Database Data, Cache & Backup Dumps ───
+postgres_data/
+redis_data/
+grafana_data/
+prometheus_data/
+elasticsearch_data/
+mysql_data/
+mysql_shared_data/
+postgres_shared_data/
+mongo_shared_data/
+
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.backup
+*.sqlite
+*.sqlite3
+apps/web/prisma/*.db
+apps/web/prisma/*.db-journal
+/src/generated/prisma
+
+# ─── 4. Dependencies & Package Managers ───
 node_modules/
+**/node_modules/
 .pnp
 .pnp.*
 .yarn/*
@@ -10,68 +80,51 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# testing
-coverage/
-
-# next.js
+# ─── 5. Next.js, Build Output, & Cache ───
 .next/
+**/.next/
 out/
 build/
 dist/
+.vercel/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
 
-# misc
-.DS_Store
-*.pem
+# ─── 6. Testing & Coverage ───
+coverage/
+**/coverage/
+
+# ─── 7. Log & Debug Files ───
 *.log
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 .eslintcache
+*.report.json
+*_report*.json
+debug_*.json
 
-# environments
-.env
-.env.*
-!.env.example
+# ─── 8. File Scratch, Temporary, & Pengujian Lokal ───
+scratch/
+**/scratch/
+/test.js
+/test.ts
+/_test_*
+*.tmp
+*.temp
 
-# vercel
-.vercel/
-.turbo/
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# prisma
-/src/generated/prisma
-apps/web/prisma/*.db
-apps/web/prisma/*.db-journal
-
-# Database Data
-postgres_data/
-redis_data/
-mysql_shared_data/
-postgres_shared_data/
-mongo_shared_data/
-
-# IDE and Editors
+# ─── 9. IDE, Editor & OS Junk Files ───
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# public uploads
-public/uploads/
-storage/secure-media/
-apps/web/public/uploads/
-apps/web/storage/secure-media/
-**/storage/secure-media/
-
-# temporary and scratch files
-scratch/
-test.js
-test.ts
-*.tmp
-*.report.json
-*_report*.json
-debug_*.json
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
