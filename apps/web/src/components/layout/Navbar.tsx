@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Menu,
+  X,
   ChevronDown,
   Calendar,
   Briefcase,
@@ -183,12 +184,13 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
     }, 150);
   };
 
+  const prevPathnameRef = useRef(pathname);
   useEffect(() => {
-    const t = setTimeout(() => {
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
       setActiveMenu(null);
       setIsOpen(false);
-    }, 0);
-    return () => clearTimeout(t);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -298,12 +300,12 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
   return (
     <nav
       className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-300",
+        "fixed top-0 z-50 w-full transition-[background-color,border-color,box-shadow,padding] duration-200 border-b",
         isOpen
-          ? "bg-[var(--surface)] shadow-lg border-b border-[var(--border-primary)]"
+          ? "bg-[var(--surface)] shadow-lg border-[var(--border-primary)] duration-0"
           : scrolled
-            ? "bg-[var(--navbar-bg)] backdrop-blur-md shadow-sm border-b border-[var(--border-subtle)]"
-            : "bg-transparent",
+            ? "bg-[var(--navbar-bg)] backdrop-blur-md shadow-sm border-[var(--border-subtle)]"
+            : "bg-transparent border-transparent",
         scrolled ? "py-3" : "py-5"
       )}
     >
@@ -459,12 +461,17 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
           {/* Mobile menu trigger */}
           <div className="lg:hidden flex items-center z-10">
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              type="button"
+              onClick={() => setIsOpen((prev) => !prev)}
               aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isOpen}
-              className="p-2 rounded-lg text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 hover:bg-[var(--surface-secondary)] border border-[var(--border-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors"
+              className="p-2 rounded-lg text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 hover:bg-[var(--surface-secondary)] border border-[var(--border-primary)] focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors touch-manipulation active:scale-95"
             >
-              <Menu className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+              {isOpen ? (
+                <X className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+              ) : (
+                <Menu className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+              )}
             </button>
           </div>
         </div>
@@ -555,18 +562,15 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
             onScroll={(e) => {
               const scrolled = e.currentTarget.scrollTop > 10;
               if (scrolled !== isMenuScrolled) setIsMenuScrolled(scrolled);
             }}
-            className={cn(
-              "lg:hidden absolute top-[100%] w-full h-[calc(100vh-72px)] overflow-y-auto bg-[var(--surface)] text-[var(--text-primary)] border-b border-[var(--border-primary)]",
-              isMenuScrolled && "border-t border-[var(--border-subtle)]"
-            )}
+            className="lg:hidden absolute top-full left-0 right-0 w-full h-[calc(100dvh-100%)] overflow-y-auto bg-[var(--surface)] text-[var(--text-primary)] border-b border-[var(--border-primary)] shadow-2xl"
           >
             <div className="px-4 pt-4 pb-24">
               <div className="flex flex-col">

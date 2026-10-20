@@ -205,6 +205,8 @@ html.dark .animate-float-4 {
 
 html {
   scroll-behavior: smooth;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -213,6 +215,13 @@ body {
   font-family: var(--font-sans), sans-serif;
   overflow-x: clip;
   transition: background-color 0.3s ease, color 0.3s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Custom Scrollbar */
