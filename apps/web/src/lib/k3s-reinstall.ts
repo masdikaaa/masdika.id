@@ -39,10 +39,24 @@ export async function reinstallK3sCluster(payload: any) {
       await K3sProvisioningService.appendLog(cluster.id, `[K3s Reinstall] Notice during uninstall: ${e.message}`);
     }
 
+    // Ensure swap and master hostname
+    try {
+      const masterHostname = masterNode.hostname || `master-${masterNode.vmid}`;
+      await K3sProvisioningService.runGuestCommand(
+        proxmox,
+        masterNode.node,
+        masterNode.vmid,
+        `if [ ! -f /swapfile ]; then fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 2>/dev/null; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile; grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab; fi; hostnamectl set-hostname ${masterHostname}`,
+        cluster.id,
+        "Ensuring master memory swap and hostname",
+        60
+      );
+    } catch (e: any) {}
+
     // 2. Install fresh K3s with new version on Master Node
     await K3sProvisioningService.appendLog(cluster.id, `[K3s Reinstall] Installing K3s ${version} on master node via Cloud-Init...`);
     const nodeIpArg = masterVpcIp ? `--node-ip ${masterVpcIp} --flannel-iface eth1` : '';
-    const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${version}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg} --write-kubeconfig-mode 644' sh -`;
+    const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${version}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg} --disable traefik --disable servicelb --write-kubeconfig-mode 644' sh -`;
 
     await K3sProvisioningService.runGuestCommand(
       proxmox,
@@ -151,9 +165,20 @@ export async function reinstallK3sCluster(payload: any) {
             );
           } catch (e) {}
 
+          const workerHost = worker.hostname || `worker-${worker.vmid}`;
+          await K3sProvisioningService.runGuestCommand(
+            proxmox,
+            worker.node,
+            worker.vmid,
+            `if [ ! -f /swapfile ]; then fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 2>/dev/null; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile; grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab; fi; hostnamectl set-hostname ${workerHost} && rm -rf /etc/rancher/node/password /var/lib/rancher/k3s/agent`,
+            cluster.id,
+            `Setting worker hostname and swap (${workerHost})`,
+            60
+          );
+
           const workerNodeIpArg = worker.vpcIp ? `--node-ip ${worker.vpcIp} --flannel-iface eth1` : '';
           const joinIp = masterVpcIp || ipAddress;
-          const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${nodeToken} INSTALL_K3S_CHANNEL='${version}' INSTALL_K3S_EXEC='agent ${workerNodeIpArg}' sh -`;
+          const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${nodeToken} INSTALL_K3S_CHANNEL='${version}' INSTALL_K3S_EXEC='agent ${workerNodeIpArg} --node-name ${workerHost} --with-node-id' sh -`;
 
           await K3sProvisioningService.runGuestCommand(
             proxmox,

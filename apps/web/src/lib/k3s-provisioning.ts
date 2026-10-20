@@ -78,12 +78,17 @@ export class K3sProvisioningService {
     let lastHeartbeat = Date.now();
 
     while ((Date.now() - startTime) < timeoutSeconds * 1000) {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       let status: any;
       try {
         status = await proxmox.getAgentExecStatus(node, vmid, execRes.pid);
       } catch (e: any) {
+        // If the PID does not exist, QEMU Guest Agent reaped the process after fast completion
+        if (e.message && (e.message.includes('does not exist') || e.message.includes('PID'))) {
+          console.log(`[K3s Agent Poll] Process PID ${execRes.pid} on VM ${vmid} already reaped or exited.`);
+          return { exitcode: 0, stdout: '', stderr: '' };
+        }
         console.warn(`[K3s Agent Poll] Transient error on VM ${vmid}:`, e.message);
         continue;
       }
@@ -149,21 +154,36 @@ export class K3sProvisioningService {
       throw new Error(`Guest agent did not respond on VM ${vmid} within ${maxAttempts * 5}s`);
     }
 
-    await this.appendLog(clusterId, `Guest agent online on VM ${vmid}. Verifying cloud-init status...`);
-
-    // Ensure cloud-init has finished initial boot modules
+    // Ensure swapfile exists (2GB) so memory starvation does not freeze SQLite/Kine on 1GB nodes
     try {
       await this.runGuestCommand(
         proxmox,
         node,
         vmid,
-        "cloud-init status --wait || true",
+        `if [ ! -f /swapfile ]; then fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048 2>/dev/null; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile; grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab; fi`,
         clusterId,
-        "Waiting for cloud-init initial setup",
-        180
+        "Ensuring 2GB memory swap configuration",
+        60
       );
     } catch (e: any) {
-      await this.appendLog(clusterId, `Cloud-init status notice (${e.message}). Proceeding...`);
+      console.warn(`[K3s Provisioning] Swap creation notice on VM ${vmid}:`, e.message);
+    }
+
+    await this.appendLog(clusterId, `Guest agent online on VM ${vmid}. Verifying cloud-init status...`);
+
+    // Verify cloud-init without hanging
+    for (let i = 0; i < 15; i++) {
+      try {
+        const ciRes = await proxmox.agentExecString(node, vmid, "cloud-init status 2>&1");
+        await new Promise(r => setTimeout(r, 2000));
+        const st = await proxmox.getAgentExecStatus(node, vmid, ciRes.pid);
+        const out = (st?.['out-data'] || '').toLowerCase();
+        if (out.includes("done") || out.includes("error")) {
+          break;
+        }
+      } catch (e) {
+        break;
+      }
     }
   }
 
@@ -219,8 +239,19 @@ export class K3sProvisioningService {
       await K3sProvisioningService.appendLog(clusterId, `Installing K3s ${k3sChannel} as ${role} via Cloud-Init...`);
 
       if (role === "MASTER") {
+        const masterHostname = vps.hostname || `master-${vps.vmid}`;
+        await this.runGuestCommand(
+          proxmox,
+          vps.node,
+          vps.vmid,
+          `hostnamectl set-hostname ${masterHostname}`,
+          clusterId,
+          `Configuring master hostname (${masterHostname})`,
+          30
+        );
+
         const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
-        const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg} --write-kubeconfig-mode 644' sh -`;
+        const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg} --disable traefik --disable servicelb --write-kubeconfig-mode 644' sh -`;
 
         await this.runGuestCommand(
           proxmox,
@@ -336,9 +367,20 @@ export class K3sProvisioningService {
           });
         }
 
+        const workerHostname = vps.hostname || `worker-${vps.vmid}`;
+        await this.runGuestCommand(
+          proxmox,
+          vps.node,
+          vps.vmid,
+          `hostnamectl set-hostname ${workerHostname} && (systemctl stop k3s-agent 2>/dev/null || true) && rm -rf /etc/rancher/node/password /var/lib/rancher/k3s/agent`,
+          clusterId,
+          `Preparing worker node identity (${workerHostname})`,
+          60
+        );
+
         const joinIp = masterVpcIp || masterEndpoint.replace("https://", "").replace(":6443", "");
         const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
-        const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${masterNodeToken} INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='agent ${nodeIpArg}' sh -`;
+        const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${masterNodeToken} INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='agent ${nodeIpArg} --node-name ${workerHostname} --with-node-id' sh -`;
 
         await this.runGuestCommand(
           proxmox,

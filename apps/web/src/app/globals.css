@@ -1322,6 +1322,102 @@ html.light .hover\:text-white:hover {
   color: var(--text-primary) !important;
 }
 
+/* ========================================================
+   Developer Terminal / Code Console Protection (Dark UI)
+   Preserves high contrast dark terminal aesthetics in Light Mode.
+   Prevents global html.light text-white/slate color overrides from washing out terminal.
+   ======================================================== */
+.developer-terminal,
+html.light .developer-terminal {
+  background-color: #060b14 !important;
+  color: #f1f5f9 !important;
+}
+
+.developer-terminal-header,
+html.light .developer-terminal-header {
+  background-color: #0b1322 !important;
+  border-color: #1e293b !important;
+}
+
+.developer-terminal-footer,
+html.light .developer-terminal-footer {
+  background-color: #0b1322 !important;
+  border-color: #1e293b !important;
+}
+
+.developer-terminal-title,
+html.light .developer-terminal-title,
+html.light .developer-terminal .developer-terminal-title {
+  color: #ffffff !important;
+}
+
+.developer-terminal .terminal-time,
+html.light .developer-terminal .terminal-time {
+  color: #94a3b8 !important;
+}
+
+.developer-terminal .terminal-time:hover,
+html.light .developer-terminal .terminal-time:hover,
+.developer-terminal .group:hover .terminal-time,
+html.light .developer-terminal .group:hover .terminal-time {
+  color: #f1f5f9 !important;
+}
+
+.developer-terminal .terminal-cmd,
+html.light .developer-terminal .terminal-cmd {
+  color: #ffffff !important;
+}
+
+.developer-terminal .terminal-text,
+html.light .developer-terminal .terminal-text {
+  color: #cbd5e1 !important;
+}
+
+.developer-terminal .terminal-muted,
+html.light .developer-terminal .terminal-muted {
+  color: #94a3b8 !important;
+}
+
+/* Specific class overrides inside developer-terminal for html.light */
+html.light .developer-terminal .text-white,
+html.light .developer-terminal [class*="text-white"] {
+  color: #ffffff !important;
+}
+
+html.light .developer-terminal .text-slate-100,
+html.light .developer-terminal [class*="text-slate-100"] {
+  color: #f1f5f9 !important;
+}
+
+html.light .developer-terminal .text-slate-200,
+html.light .developer-terminal [class*="text-slate-200"] {
+  color: #e2e8f0 !important;
+}
+
+html.light .developer-terminal .text-slate-300,
+html.light .developer-terminal [class*="text-slate-300"] {
+  color: #cbd5e1 !important;
+}
+
+html.light .developer-terminal .text-slate-400,
+html.light .developer-terminal [class*="text-slate-400"] {
+  color: #94a3b8 !important;
+}
+
+html.light .developer-terminal .text-zinc-300,
+html.light .developer-terminal [class*="text-zinc-300"] {
+  color: #d4d4d8 !important;
+}
+
+html.light .developer-terminal .text-zinc-400,
+html.light .developer-terminal [class*="text-zinc-400"] {
+  color: #a1a1aa !important;
+}
+
+html.light .developer-terminal .hover\:text-white:hover {
+  color: #ffffff !important;
+}
+
 
 /* Selection color */
 html.light ::selection {

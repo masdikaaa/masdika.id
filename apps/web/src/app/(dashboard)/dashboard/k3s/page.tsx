@@ -107,11 +107,11 @@ export default function K3sListPage() {
                 </div>
 
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-5">
-                  <div className={cn("rounded-2xl p-3.5 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                    <span className={cn("block text-[10px] uppercase tracking-wider font-semibold mb-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
+                  <div className={cn("rounded-2xl p-3.5 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+                    <span className={cn("block text-[10px] uppercase tracking-wider font-semibold mb-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Status</span>
                     <span className={cn(
                       "font-bold flex items-center gap-2 text-sm",
-                      cluster.status === "RUNNING" ? "text-cyan-400" : cluster.status === "FAILED" ? "text-rose-400" : "text-amber-400"
+                      cluster.status === "RUNNING" ? (isDark ? "text-cyan-400" : "text-cyan-700") : cluster.status === "FAILED" ? "text-rose-500" : "text-amber-500"
                     )}>
                       {cluster.status === "RUNNING" ? (
                         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
@@ -125,10 +125,10 @@ export default function K3sListPage() {
                           : cluster.status}
                     </span>
                   </div>
-                  <div className={cn("rounded-2xl p-3.5 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
-                    <span className={cn("block text-[10px] uppercase tracking-wider font-semibold mb-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>Nodes</span>
+                  <div className={cn("rounded-2xl p-3.5 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+                    <span className={cn("block text-[10px] uppercase tracking-wider font-semibold mb-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Nodes</span>
                     <span className={cn("font-bold text-sm flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                      <Server className="w-3.5 h-3.5 text-cyan-400" />
+                      <Server className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                       {cluster.nodeCount} Node(s)
                     </span>
                   </div>
@@ -136,8 +136,8 @@ export default function K3sListPage() {
 
                 <div className={cn("relative z-10 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
                   <div className="flex items-center justify-between">
-                    <div className={cn("text-xs font-mono truncate flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                    <div className={cn("text-xs font-mono truncate flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isDark ? "bg-zinc-600" : "bg-slate-400")} />
                       {cluster.endpoint || "Provisioning API Endpoint..."}
                     </div>
                   </div>
