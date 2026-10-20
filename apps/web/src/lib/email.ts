@@ -1442,6 +1442,9 @@ export const sendAdminMediaNotificationEmail = async ({
   authorEmail,
   rating,
   content: commentContent,
+  ownerEmail,
+  ownerName,
+  isCustomerOwner,
 }: {
   type: "comment" | "rating";
   fileName: string;
@@ -1450,22 +1453,42 @@ export const sendAdminMediaNotificationEmail = async ({
   authorEmail?: string;
   rating?: number | null;
   content?: string;
+  ownerEmail?: string | null;
+  ownerName?: string | null;
+  isCustomerOwner?: boolean;
 }) => {
   if (!process.env.SMTP_HOST) {
-    console.warn("SMTP_HOST is not set. Admin media review notification email skipped.");
+    console.warn("SMTP_HOST is not set. Media review notification email skipped.");
     return;
   }
 
-  const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-  if (!adminUser || !adminUser.email) return;
-
-  const adminEmail = decryptDeterministic(adminUser.email);
-  const adminName = adminUser.name ? decryptDeterministic(adminUser.name) : 'Admin';
-
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
-  const reviewsAdminUrl = `${baseUrl}/admin/media-reviews`;
-  const mediaUrl = `${baseUrl}/media/${mediaToken}`;
+  let recipientEmail = ownerEmail?.trim() || null;
+  let recipientName = ownerName?.trim() || null;
+  let reviewsUrl = `${baseUrl}/admin/media-reviews`;
+  let buttonLabel = "Open Media Reviews Admin";
+  let footerNote = "You can inspect, moderate, or remove reviews anytime from your admin dashboard.";
 
+  if (isCustomerOwner && recipientEmail) {
+    reviewsUrl = `${baseUrl}/dashboard/cdn/reviews`;
+    buttonLabel = "Open Media Reviews";
+    recipientName = recipientName || "Valued Customer";
+    footerNote = "You can inspect, moderate, or remove reviews on your files anytime from your CDN dashboard.";
+  } else {
+    // If no customer owner email provided, or admin-owned file, route to system Admin
+    if (!recipientEmail) {
+      const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (!adminUser || !adminUser.email) return;
+      recipientEmail = decryptDeterministic(adminUser.email);
+      recipientName = adminUser.name ? decryptDeterministic(adminUser.name) : 'Admin';
+    } else if (!recipientName) {
+      recipientName = 'Admin';
+    }
+  }
+
+  if (!recipientEmail) return;
+
+  const mediaUrl = `${baseUrl}/media/${mediaToken}`;
   const isComment = type === "comment";
   const starsBadge = rating ? `${rating}.0 / 5.0 ★` : null;
 
@@ -1475,7 +1498,7 @@ export const sendAdminMediaNotificationEmail = async ({
         ${isComment ? "💬 New Verified Media Comment" : "⭐ New Star Rating Received"}
       </h2>
       <p style="color: #94a3b8; font-size: 14px; margin: 0;">
-        Hello <strong>${adminName}</strong>, a new ${isComment ? "comment" : "rating"} was just submitted for your CDN media.
+        Hello <strong>${recipientName}</strong>, a new ${isComment ? "comment" : "rating"} was just submitted for your CDN media file.
       </p>
     </div>
 
@@ -1511,8 +1534,8 @@ export const sendAdminMediaNotificationEmail = async ({
     <table border="0" cellspacing="0" cellpadding="0" align="center" style="margin: 32px auto 20px auto; width: 100%; max-width: 320px;">
       <tr>
         <td align="center" style="padding-bottom: 14px;">
-          <a href="${reviewsAdminUrl}" target="_blank" style="background-color: #06b6d4; color: #020817; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; display: block; text-align: center; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);">
-            Open Media Reviews Admin
+          <a href="${reviewsUrl}" target="_blank" style="background-color: #06b6d4; color: #020817; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; display: block; text-align: center; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);">
+            ${buttonLabel}
           </a>
         </td>
       </tr>
@@ -1526,7 +1549,7 @@ export const sendAdminMediaNotificationEmail = async ({
     </table>
 
     <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 25px;">
-      You can inspect, moderate, or remove reviews anytime from your admin dashboard.
+      ${footerNote}
     </p>
   `;
 
@@ -1537,12 +1560,12 @@ export const sendAdminMediaNotificationEmail = async ({
   try {
     await getTransporter().sendMail({
       from: `"${FROM_NAME} Alerts" <${FROM_EMAIL}>`,
-      to: adminEmail,
+      to: recipientEmail,
       subject,
       html: getBaseHtml(content),
     });
   } catch (error) {
-    console.error("Error sending admin media notification email:", error);
+    console.error("Error sending media notification email:", error);
   }
 };
 

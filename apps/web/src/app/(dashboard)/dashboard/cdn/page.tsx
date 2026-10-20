@@ -4,7 +4,7 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle, Lock, Globe } from "lucide-react";
+import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle, Lock, Globe, MessageSquareQuote } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -672,6 +672,20 @@ export default function UserCDNLibrary() {
             File <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>CDN</span>
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Manage folders, upload encrypted files, and generate secure delivery links instantly.</p>
+          <div className="flex items-center gap-3 mt-4">
+            <Link
+              href="/dashboard/cdn/reviews"
+              className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all shadow-sm cursor-pointer",
+                isDark
+                  ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/40"
+                  : "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
+              )}
+            >
+              <MessageSquareQuote className="w-3.5 h-3.5" />
+              <span>Media Reviews & Comments</span>
+            </Link>
+          </div>
         </div>
 
         {storageQuota && (

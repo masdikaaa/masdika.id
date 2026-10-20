@@ -11,6 +11,14 @@ export async function GET() {
 
   try {
     const comments = await prisma.mediaComment.findMany({
+      where: {
+        media: {
+          OR: [
+            { userId: null },
+            { user: { role: 'ADMIN' } },
+          ],
+        },
+      },
       include: {
         media: {
           select: {
@@ -26,6 +34,14 @@ export async function GET() {
     });
 
     const ratings = await prisma.mediaRating.findMany({
+      where: {
+        media: {
+          OR: [
+            { userId: null },
+            { user: { role: 'ADMIN' } },
+          ],
+        },
+      },
       include: {
         media: {
           select: {
@@ -183,15 +199,31 @@ export async function DELETE(req: NextRequest) {
     const ratingId = searchParams.get("ratingId");
 
     if (commentId) {
-      await prisma.mediaComment.delete({
+      const comment = await prisma.mediaComment.findUnique({
         where: { id: parseInt(commentId, 10) },
+        include: { media: { include: { user: true } } },
+      });
+      if (!comment) return NextResponse.json({ error: "Comment not found" }, { status: 404 });
+      if (comment.media.userId !== null && comment.media.user?.role !== 'ADMIN') {
+        return NextResponse.json({ error: "Cannot delete reviews on customer-owned media" }, { status: 403 });
+      }
+      await prisma.mediaComment.delete({
+        where: { id: comment.id },
       });
       return NextResponse.json({ success: true, message: "Comment deleted successfully" });
     }
 
     if (ratingId) {
-      await prisma.mediaRating.delete({
+      const rating = await prisma.mediaRating.findUnique({
         where: { id: parseInt(ratingId, 10) },
+        include: { media: { include: { user: true } } },
+      });
+      if (!rating) return NextResponse.json({ error: "Rating not found" }, { status: 404 });
+      if (rating.media.userId !== null && rating.media.user?.role !== 'ADMIN') {
+        return NextResponse.json({ error: "Cannot delete reviews on customer-owned media" }, { status: 403 });
+      }
+      await prisma.mediaRating.delete({
+        where: { id: rating.id },
       });
       return NextResponse.json({ success: true, message: "Rating deleted successfully" });
     }

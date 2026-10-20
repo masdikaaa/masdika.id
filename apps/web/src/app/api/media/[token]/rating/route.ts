@@ -130,7 +130,19 @@ export async function POST(
 
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { id: true, originalName: true, token: true },
+      select: {
+        id: true,
+        originalName: true,
+        token: true,
+        userId: true,
+        user: {
+          select: {
+            email: true,
+            name: true,
+            role: true,
+          },
+        },
+      },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
@@ -231,14 +243,39 @@ export async function POST(
     const sum = allRatings.reduce((acc, curr) => acc + curr.rating, 0);
     const averageRating = totalRatings > 0 ? parseFloat((sum / totalRatings).toFixed(1)) : ratingVal;
 
-    // Send email notification to admin asynchronously
+    let ownerEmail: string | null = null;
+    let ownerName: string | null = null;
+    let isCustomerOwner = false;
+
+    if (media.user) {
+      if (media.user.email) {
+        try {
+          ownerEmail = decryptDeterministic(media.user.email) || media.user.email;
+        } catch {
+          ownerEmail = media.user.email;
+        }
+      }
+      if (media.user.name) {
+        try {
+          ownerName = decryptDeterministic(media.user.name) || media.user.name;
+        } catch {
+          ownerName = media.user.name;
+        }
+      }
+      isCustomerOwner = media.user.role !== 'ADMIN';
+    }
+
+    // Send email notification to file owner asynchronously
     sendAdminMediaNotificationEmail({
       type: "rating",
       fileName: media.originalName,
       mediaToken: media.token,
       authorEmail: email || undefined,
       rating: ratingVal,
-    }).catch((err) => console.error("Admin rating notification error:", err));
+      ownerEmail,
+      ownerName,
+      isCustomerOwner,
+    }).catch((err) => console.error("Rating notification error:", err));
 
     return NextResponse.json({
       success: true,

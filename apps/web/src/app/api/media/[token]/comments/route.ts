@@ -152,7 +152,19 @@ export async function POST(
 
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { id: true, originalName: true, token: true },
+      select: {
+        id: true,
+        originalName: true,
+        token: true,
+        userId: true,
+        user: {
+          select: {
+            email: true,
+            name: true,
+            role: true,
+          },
+        },
+      },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
@@ -281,7 +293,29 @@ export async function POST(
       },
     });
 
-    // Send email notification to admin asynchronously
+    let ownerEmail: string | null = null;
+    let ownerName: string | null = null;
+    let isCustomerOwner = false;
+
+    if (media.user) {
+      if (media.user.email) {
+        try {
+          ownerEmail = decryptDeterministic(media.user.email) || media.user.email;
+        } catch {
+          ownerEmail = media.user.email;
+        }
+      }
+      if (media.user.name) {
+        try {
+          ownerName = decryptDeterministic(media.user.name) || media.user.name;
+        } catch {
+          ownerName = media.user.name;
+        }
+      }
+      isCustomerOwner = media.user.role !== 'ADMIN';
+    }
+
+    // Send email notification to file owner asynchronously
     sendAdminMediaNotificationEmail({
       type: "comment",
       fileName: media.originalName,
@@ -290,7 +324,10 @@ export async function POST(
       authorEmail: email,
       rating: finalRating || undefined,
       content: content,
-    }).catch((err) => console.error("Admin comment notification error:", err));
+      ownerEmail,
+      ownerName,
+      isCustomerOwner,
+    }).catch((err) => console.error("Comment notification error:", err));
 
     const cleanEmail = email.toLowerCase().trim();
     const encEmail = encryptDeterministic(cleanEmail);
