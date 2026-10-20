@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import {
   Star, MessageSquare, Trash2, ExternalLink, ShieldCheck,
   Search, RefreshCw, FileVideo, Filter, CheckCircle2,
-  Calendar, Mail, User, AlertCircle, ArrowLeft, MessageSquareQuote
+  Calendar, Mail, User, AlertCircle, ArrowLeft, MessageSquareQuote, ChevronLeft
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -185,31 +185,33 @@ export default function CustomerCdnReviewsPage() {
 
   return (
     <div className="w-full space-y-6 md:space-y-8 pb-10 relative z-10">
+      {/* ── BACK BUTTON (OUTSIDE / ABOVE CARD - MATCHING IMAGE 1) ─────────── */}
+      <div className="flex items-center">
+        <Link 
+          href="/dashboard/cdn" 
+          className={cn(
+            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            isDark 
+              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back to CDN Files
+        </Link>
+      </div>
+
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className={cn(
         "relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 border w-full",
         isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200"
       )}>
         <div className="relative z-10 flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-3">
-            <Link
-              href="/dashboard/cdn"
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors",
-                isDark
-                  ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                  : "bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200"
-              )}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to CDN Files</span>
-            </Link>
-            <div className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border",
-              isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700"
-            )}>
-              <MessageSquareQuote className="w-3.5 h-3.5" /> Edge Delivery Feedback
-            </div>
+          <div className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border mb-4",
+            isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700"
+          )}>
+            <MessageSquareQuote className="w-3.5 h-3.5" /> Edge Delivery Feedback
           </div>
           <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Media Reviews & <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Comments</span>

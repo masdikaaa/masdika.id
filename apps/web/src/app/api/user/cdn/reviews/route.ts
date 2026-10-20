@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { encryptDeterministic, decryptDeterministic } from "@/lib/encryption";
 
 export async function GET() {
-  const auth = await requireAuth();
+  const auth = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
@@ -183,7 +183,7 @@ export async function GET() {
 }
 
 export async function DELETE(req: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
