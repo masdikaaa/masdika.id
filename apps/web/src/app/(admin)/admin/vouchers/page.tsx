@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Ticket, Settings2, Check, X, RefreshCw, Save, Loader2, LayoutDashboard, Pencil, CheckCircle } from "lucide-react";
+import { Plus, Trash2, Ticket, Settings2, Check, X, RefreshCw, Save, Loader2, LayoutDashboard, Pencil, CheckCircle, Sparkles, Percent, Tag } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -385,38 +385,117 @@ export default function AdminVouchersPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage promo codes and global promos.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage promo codes, global campaigns, and claimable reward promotions.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Items: {vouchers.length + promos.length}
+          </div>
+          <button
+            onClick={() => { fetchVouchers(); fetchPromos(); }}
+            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
         </div>
       </div>
-      <div className={cn("flex flex-col sm:flex-row gap-2 sm:gap-4 border-b pb-4", isDark ? "border-slate-800/80" : "border-slate-200")}>
-        <button
-          onClick={() => setActiveTab("vouchers")}
-          className={cn(
-            "px-6 py-2.5 rounded-full font-medium transition-all text-sm w-full sm:w-auto flex justify-center",
-            activeTab === "vouchers" ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-white/5 text-zinc-400 border-transparent hover:bg-white/10" : "bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100")
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <Ticket className="w-4 h-4" />
-            Voucher Codes
-          </div>
-        </button>
 
-        <button
-          onClick={() => setActiveTab("promos")}
-          className={cn(
-            "px-6 py-2.5 rounded-full font-medium transition-all text-sm w-full sm:w-auto flex justify-center",
-            activeTab === "promos" ? (isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-white/5 text-zinc-400 border-transparent hover:bg-white/10" : "bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100")
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <Ticket className="w-4 h-4" />
-            Promos
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Vouchers</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Ticket className="w-4 h-4" />
+            </div>
           </div>
-        </button>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {vouchers.length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            {vouchers.filter(v => v.isActive).length} active vouchers
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Promos</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Sparkles className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {promos.length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            {promos.filter(p => p.isActive).length} active campaigns
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Vouchers</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Percent className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {vouchers.filter(v => v.isActive).length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Ready for checkout
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Reward Offers</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Tag className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {promos.filter(p => p.isReward).length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Claimable balance rewards
+          </div>
+        </div>
+      </div>
+
+      {/* GAMBAR 1 Filter Bar */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          <button
+            onClick={() => setActiveTab("vouchers")}
+            className={cn(
+              "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
+              activeTab === "vouchers"
+                ? "bg-cyan-500 text-slate-950 shadow-sm"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+            )}
+          >
+            <Ticket className="w-3.5 h-3.5" />
+            Voucher Codes <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-bold", activeTab === "vouchers" ? "bg-slate-950/20 text-slate-950" : "bg-white/10 text-zinc-400")}>{vouchers.length}</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("promos")}
+            className={cn(
+              "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
+              activeTab === "promos"
+                ? "bg-cyan-500 text-slate-950 shadow-sm"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+            )}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Promos <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-bold", activeTab === "promos" ? "bg-slate-950/20 text-slate-950" : "bg-white/10 text-zinc-400")}>{promos.length}</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -452,7 +531,7 @@ export default function AdminVouchersPage() {
           <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="overflow-x-auto">
               <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <tr className="whitespace-nowrap">
                     <th className="px-6 py-4 w-10">
                       <div className="flex items-center">
@@ -461,7 +540,7 @@ export default function AdminVouchersPage() {
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={toggleSelectAllVouchers} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -487,7 +566,7 @@ export default function AdminVouchersPage() {
                             return (
                               <label className="relative flex items-center justify-center cursor-pointer group">
                                 <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelectVoucher(v.id)} />
-                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"))}>
+                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
                                   {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                                 </div>
                               </label>
@@ -589,7 +668,7 @@ export default function AdminVouchersPage() {
           <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="overflow-x-auto">
               <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <tr className="whitespace-nowrap">
                     <th className="px-6 py-4 w-10">
                       <div className="flex items-center">
@@ -598,7 +677,7 @@ export default function AdminVouchersPage() {
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={toggleSelectAllPromos} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -624,7 +703,7 @@ export default function AdminVouchersPage() {
                             return (
                               <label className="relative flex items-center justify-center cursor-pointer group">
                                 <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelectPromo(p.id)} />
-                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"))}>
+                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
                                   {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                                 </div>
                               </label>
@@ -847,7 +926,7 @@ export default function AdminVouchersPage() {
                           checked={isChecked}
                           onChange={e => setNewPromo({ ...newPromo, isReward: e.target.checked })}
                         />
-                        <div className={cn("w-5 h-5 flex-shrink-0 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-500/50", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"))}>
+                        <div className={cn("w-5 h-5 flex-shrink-0 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
                           {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                         </div>
                       </>

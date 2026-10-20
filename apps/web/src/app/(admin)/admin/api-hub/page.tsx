@@ -1,9 +1,8 @@
 "use client";
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
-
 import { useState, useEffect } from "react";
-import { Key, Activity, Clock, Loader2, Server, User as UserIcon, Trash2 } from "lucide-react";
+import { Key, Activity, Clock, Loader2, Server, User as UserIcon, Trash2, RefreshCw, Link as LinkIcon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -72,42 +71,86 @@ export default function AdminApiHubPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor API key usage and active users in real-time.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor API key usage, short URLs, and active developers in real-time.</p>
         </div>
-        <div className={cn("px-4 py-2 rounded-xl border flex items-center gap-2 shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-          <Activity className="w-4 h-4 animate-pulse shrink-0" />
-          <span className="text-sm font-bold whitespace-nowrap">Real-time Sync</span>
-      </div>
+        <div className="flex items-center gap-3">
+          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Users: {users.length}
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchKeys(); }}
+            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Keys</h3>
-            <Key className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Keys</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Key className="w-4 h-4" />
+            </div>
           </div>
-          <p className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>{users.length}</p>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {users.reduce((acc: number, curr: any) => acc + (curr.keyCount || 0), 0)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Generated developer keys
+          </div>
         </div>
-        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Requests</h3>
-            <Server className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Requests</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Server className="w-4 h-4" />
+            </div>
           </div>
-          <p className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {users.reduce((acc: number, curr: any) => acc + curr.totalUsage, 0).toLocaleString()}
-          </p>
-        </div>
-        <div className={cn("border p-6 rounded-2xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Active Users</h3>
-            <UserIcon className={cn("w-5 h-5", isDark ? "text-emerald-400" : "text-emerald-700")} />
           </div>
-          <p className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Total endpoint hits
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Users</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <UserIcon className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {users.length}
-          </p>
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Registered accounts
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Short Links</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <LinkIcon className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {users.reduce((acc: number, curr: any) => acc + (curr.shortLinkCount || 0), 0)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Generated tracking URLs
+          </div>
         </div>
       </div>
 
@@ -115,7 +158,7 @@ export default function AdminApiHubPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b text-[10px] uppercase tracking-wider font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                 <th className="p-4">User</th>
                 <th className="p-4">Key Details</th>
                 <th className="p-4">Usage Count</th>

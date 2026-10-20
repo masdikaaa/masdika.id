@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
 import { formatCompact } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
-import { DollarSign, Wallet, TrendingUp, Calendar, CreditCard, Activity, ArrowUpRight, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { DollarSign, Wallet, TrendingUp, Calendar, CreditCard, Activity, ArrowUpRight, Search, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
@@ -88,67 +88,91 @@ export default function AdminRevenuePage() {
   return (
     <div className="w-full h-full flex flex-col gap-6 max-w-[1600px] mx-auto pb-8 z-10 relative">
       
-      {/* Top Title */}
-      <div className="flex items-center justify-between mb-2">
-        <h1 className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-          Revenue Monitoring
-        </h1>
-        <div className={cn("text-sm hidden sm:block", isDark ? "text-zinc-400" : "text-slate-500")}>Track financial performance in real-time</div>
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
+        <div>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Revenue Monitoring
+          </h1>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Track financial performance, realized subscriptions, and cashflow in real-time.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Invoices: {data.pagination?.total || data.recentInvoices?.length || 0}
+          </div>
+          <button
+            onClick={fetchRevenueData}
+            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
-        <div className={cn("rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300")}>
-          <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
-          <div className="relative z-10 flex items-center justify-between mb-4">
-            <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Revenue</h2>
-            <div className={cn("p-2.5 bg-cyan-500/10 rounded-xl border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              <DollarSign className="w-5 h-5" />
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Revenue</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="relative z-10">
-            <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(data.totalRevenue)}</div>
-            <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1.5">
-              <TrendingUp className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
-              All-time realized income
-            </p>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+            {formatRupiah(data.totalRevenue)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            All-time realized income
           </div>
         </div>
 
         {/* Monthly Revenue */}
-        <div className={cn("rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300")}>
-          <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
-          <div className="relative z-10 flex items-center justify-between mb-4">
-            <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>This Month</h2>
-            <div className={cn("p-2.5 bg-cyan-500/10 rounded-xl border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              <Calendar className="w-5 h-5" />
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>This Month</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <div className="relative z-10">
-            <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(data.monthlyRevenue)}</div>
-            <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1.5">
-              <Activity className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
-              {format(new Date(), 'MMMM yyyy')}
-            </p>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+            {formatRupiah(data.monthlyRevenue)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            {format(new Date(), 'MMMM yyyy')}
           </div>
         </div>
 
         {/* Daily Revenue */}
-        <div className={cn("rounded-2xl border p-6 relative overflow-hidden transition-all duration-300 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300")}>
-          <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-700", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")} />
-          <div className="relative z-10 flex items-center justify-between mb-4">
-            <h2 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Today</h2>
-            <div className={cn("p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
-              <Wallet className="w-5 h-5" />
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Today</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Wallet className="w-4 h-4" />
             </div>
           </div>
-          <div className="relative z-10">
-            <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(data.dailyRevenue)}</div>
-            <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1.5">
-              <ArrowUpRight className={cn("w-3.5 h-3.5", isDark ? "text-emerald-400" : "text-emerald-700")} />
-              Cash in today
-            </p>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+            {formatRupiah(data.dailyRevenue)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Cash in today
+          </div>
+        </div>
+
+        {/* Services Share */}
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Services Share</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+            {formatRupiah(data.revenueByType?.SUBSCRIPTION || 0)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Subscriptions gross
           </div>
         </div>
       </div>
@@ -201,7 +225,7 @@ export default function AdminRevenuePage() {
             </div>
           )}
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase", isDark ? "bg-slate-900/60 text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
+            <thead className={cn("text-xs uppercase", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
               <tr>
                 <th className="px-4 py-3 rounded-l-lg font-semibold whitespace-nowrap">Date</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">Invoice ID</th>

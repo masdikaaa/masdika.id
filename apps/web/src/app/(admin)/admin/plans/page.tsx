@@ -3,7 +3,7 @@ import { useUpdateEffect, useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, LayoutList, Server, Zap, Link as LinkIcon, Database, Check, X, ShieldAlert, CheckCircle, FileText, FileVideo, Music, PlaySquare, Cloud, Activity, UploadCloud, ChevronDown , LayoutDashboard } from "lucide-react";
+import { Plus, Edit2, Trash2, LayoutList, Server, Zap, Link as LinkIcon, Database, Check, X, ShieldAlert, CheckCircle, FileText, FileVideo, Music, PlaySquare, Cloud, Activity, UploadCloud, ChevronDown, LayoutDashboard, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -245,70 +245,146 @@ export default function AdminPlansPage() {
     return <AdminLoader />;
   }
 
+  const totalCount = plans.length;
+  const activeCount = plans.filter(p => p.isActive).length;
+  const popularCount = plans.filter(p => p.isPopular).length;
+  const servicesCovered = new Set(plans.map(p => p.service)).size;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Subscription Plans</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage pricing, specs, and availability for all services.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Subscription Plans
+          </h1>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage pricing tiers, resource quotas, and billing availability for all microservices.
+          </p>
         </div>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+            <span>Total Plans:</span>
+            <span className="font-extrabold text-white">{totalCount}</span>
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchPlans(); }}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            )}
+          >
+            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={openAddModal}
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Plan</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards Grid (GAMBAR 1 Style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL PLANS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <LayoutDashboard className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Configured</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ACTIVE PLANS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Purchasable</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>SERVICES COVERED</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Server className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{servicesCovered}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Modules</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>POPULAR HIGHLIGHTS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
+              <Zap className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{popularCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Featured</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Control Bar (GAMBAR 1 Style) */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex p-1 rounded-xl border self-start md:self-auto overflow-x-auto max-w-full", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          {["ALL", "OBJECT_STORAGE", "CDN", "SHORTENER", "PASTEBIN", "LINK_BIO"].map((srv) => {
+            const count = srv === "ALL" ? plans.length : plans.filter(p => p.service === srv).length;
+            return (
+              <button
+                key={srv}
+                onClick={() => { setActiveTab(srv); setCurrentPage(1); }}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5",
+                  activeTab === srv
+                    ? "bg-cyan-500 text-slate-950 shadow-sm"
+                    : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+                )}
+              >
+                <span>{srv === "ALL" ? "All Services" : srv.replace('_', ' ')}</span>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === srv ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="flex items-center gap-3">
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}
-              className={cn("flex items-center gap-2 font-semibold py-2 px-6 rounded-xl transition-all border shrink-0", isDark ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-500" : "bg-red-50 hover:bg-red-100 border-red-200 text-red-700")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors border", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}
             >
-              <Trash2 className="w-4 h-4" />
-              Delete ({selectedIds.length})
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete Selected ({selectedIds.length})</span>
             </button>
-          )}
-          <button
-            onClick={openAddModal}
-            className="flex items-center gap-2 font-semibold py-2.5 px-5 rounded-lg text-sm transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add New Plan
-          </button>
-      </div>
-      </div>
-      <div className="flex justify-start mb-6">
-        <div className="relative w-full sm:w-64">
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={cn("w-full flex items-center justify-between border text-sm font-semibold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white hover:bg-white/5" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}
-          >
-            <span>{activeTab === "ALL" ? "All Services" : activeTab.replace('_', ' ')}</span>
-            <ChevronDown className={cn("w-4 h-4 transition-transform", isDropdownOpen ? "rotate-180" : "", isDark ? "text-zinc-400" : "text-slate-500")} />
-          </button>
-          
-          {isDropdownOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
-              <div className={cn("absolute z-50 w-full mt-2 border rounded-xl overflow-hidden py-1 shadow-xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                  {services.map((service) => (
-                    <button
-                      key={service}
-                      onClick={() => {
-                        setActiveTab(service);
-                        setIsDropdownOpen(false);
-                        setCurrentPage(1);
-                      }}
-                      className={cn("w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors", activeTab === service ? (isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-50 text-cyan-700") : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"))}
-                    >
-                      {service === "ALL" ? "All Services" : service.replace('_', ' ')}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
           )}
         </div>
       </div>
-      <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+
+      {/* Table Container */}
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th scope="col" className="px-6 py-4 font-semibold w-12 text-center">
                   <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === paginatedPlans.length && paginatedPlans.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>

@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Link as LinkIcon, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server , DollarSign } from "lucide-react";
+import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Link as LinkIcon, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server , DollarSign, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { AdminLoader } from "@/components/admin/AdminLoader";
 
@@ -51,16 +51,23 @@ export default function AdminInvoicesPage() {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
+  const [statusTab, setStatusTab] = useState<string>("all");
+
+  const totalPaidCount = invoices.filter(i => i.status === 'PAID').length;
+  const totalPendingCount = invoices.filter(i => i.status === 'PENDING').length;
+  const totalFailedCount = invoices.filter(i => ['FAILED', 'CANCELED', 'EXPIRED'].includes(i.status)).length;
+  const totalPaidVolume = invoices.filter(i => i.status === 'PAID').reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
 
   // Filtering
   const filteredInvoices = invoices.filter((inv) => {
+    const matchesStatus = statusTab === "all" ? true : statusTab === "FAILED" ? ['FAILED', 'CANCELED', 'EXPIRED'].includes(inv.status) : inv.status === statusTab;
     const term = searchQuery.toLowerCase();
     const invoiceId = (inv.invoiceNumber || inv.merchantOrderId || "").toLowerCase();
     const customerName = (inv.user?.name || "").toLowerCase();
     const customerEmail = (inv.user?.email || "").toLowerCase();
     const planTitle = (inv.plan?.title || "").toLowerCase();
 
-    return invoiceId.includes(term) || customerName.includes(term) || customerEmail.includes(term) || planTitle.includes(term);
+    return matchesStatus && (invoiceId.includes(term) || customerName.includes(term) || customerEmail.includes(term) || planTitle.includes(term));
   });
 
   // Pagination
@@ -306,53 +313,221 @@ export default function AdminInvoicesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
-        <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Invoices</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage customer orders and billing history.</p>
+    <div className="w-full space-y-6 md:space-y-8 pb-10 relative z-10">
+      {/* ── HEADER ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
+        <div className="flex-1 min-w-0">
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Invoices & Billing
+          </h1>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage customer orders, transactions, payment gateways, and billing history.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+          <div className={cn("px-4 py-2 rounded-lg border font-medium text-sm md:text-base text-center sm:text-left", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Invoices: {invoices.length}
+          </div>
+          <button
+            onClick={fetchInvoices}
+            disabled={loading}
+            className={cn(
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
+              isDark
+                ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
+                : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
+            )}
+          >
+            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin text-cyan-500")} />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "border-slate-800/80" : "border-slate-200")}>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto flex-1">
-            <h2 className={cn("text-lg font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>All Invoices</h2>
-            <div className="w-full sm:max-w-xs relative">
-              <Search className={cn("w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
-              <input
-                type="text"
-                placeholder="Search invoices..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-              />
+      {/* ── STATS CARDS ──────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        {/* Total Invoices */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Total Invoices
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <Receipt className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-            {selectedInvoices.length > 0 && (
-              <button
-                onClick={() => setShowBulkDeleteModal(true)}
-                disabled={isBulkDeleting}
-                className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 font-semibold py-2 px-4 rounded-xl transition-all disabled:opacity-50 text-sm text-white"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete Selected ({selectedInvoices.length})
-              </button>
-            )}
-            <div className={cn("px-4 py-2 rounded-xl border whitespace-nowrap flex items-center justify-center h-[36px]", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-              <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Total: </span>
-              <span className={cn("font-semibold ml-1", isDark ? "text-white" : "text-slate-900")}>{filteredInvoices.length}</span>
-            </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+              {invoices.length}
+            </span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Orders</span>
           </div>
         </div>
 
+        {/* Paid Invoices */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Paid Invoices
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+              {totalPaidCount}
+            </span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Settled</span>
+          </div>
+        </div>
+
+        {/* Pending Invoices */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Pending Invoices
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+              {totalPendingCount}
+            </span>
+            <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Awaiting Pay</span>
+          </div>
+        </div>
+
+        {/* Total Paid Volume */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Total Paid Volume
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-2xl font-extrabold truncate", isDark ? "text-white" : "text-slate-900")}>
+              {formatRupiah(totalPaidVolume)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
+      <div className={cn(
+        "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
+        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+      )}>
+        {/* Status Tab switch */}
+        <div className={cn(
+          "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 w-full sm:w-auto",
+          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+        )}>
+          {[
+            { id: "all", label: "All Invoices", count: invoices.length },
+            { id: "PAID", label: "Paid", count: totalPaidCount },
+            { id: "PENDING", label: "Pending", count: totalPendingCount },
+            { id: "FAILED", label: "Failed", count: totalFailedCount },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setStatusTab(tab.id);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
+                statusTab === tab.id
+                  ? "bg-cyan-500 text-white font-bold"
+                  : isDark
+                    ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+                statusTab === tab.id
+                  ? "bg-white/20 text-white"
+                  : isDark
+                    ? "bg-white/10 text-zinc-300"
+                    : "bg-slate-200 text-slate-700"
+              )}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Search & Bulk delete */}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {selectedInvoices.length > 0 && (
+            <button
+              onClick={() => setShowBulkDeleteModal(true)}
+              disabled={isBulkDeleting}
+              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 font-semibold py-2 px-4 rounded-xl transition-all disabled:opacity-50 text-xs text-white"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete Selected ({selectedInvoices.length})
+            </button>
+          )}
+
+          <div className="relative flex-1 min-w-[200px] sm:min-w-[260px] w-full sm:w-auto">
+            <Search className={cn("w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
+            <input
+              type="text"
+              placeholder="Search user, email, ID, or plan..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
+                isDark
+                  ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th scope="col" className="px-6 py-4 w-12 text-center">
                   <button
@@ -360,7 +535,7 @@ export default function AdminInvoicesPage() {
                     className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                       filteredInvoices.length > 0 && selectedInvoices.length === filteredInvoices.length
                         ? 'bg-cyan-500 border-cyan-500'
-                        : isDark ? 'border-slate-700 hover:border-slate-500' : 'border-zinc-400 hover:border-zinc-500'
+                        : isDark ? 'border-slate-700 bg-[#060b14] hover:border-cyan-400' : 'border-zinc-300 bg-white hover:border-cyan-600'
                     }`}
                   >
                     {filteredInvoices.length > 0 && selectedInvoices.length === filteredInvoices.length && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
@@ -387,11 +562,11 @@ export default function AdminInvoicesPage() {
                 <tr>
                   <td colSpan={9} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center">
-                      <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-4", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                        <Receipt className={cn("w-10 h-10 opacity-50", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                      </div>
-                      <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Invoices Found</h3>
-                      <p className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>There are no invoices matching your criteria.</p>
+                      <Receipt className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
+                      <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No invoices found</p>
+                      <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        {searchQuery || statusTab !== 'all' ? "No invoices matching your search or filter criteria." : "There are currently no customer invoices."}
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -404,7 +579,7 @@ export default function AdminInvoicesPage() {
                         className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                           selectedInvoices.includes(invoice.id)
                             ? 'bg-cyan-500 border-cyan-500'
-                            : isDark ? 'border-slate-700 group-hover:border-slate-500' : 'border-zinc-400 group-hover:border-zinc-500'
+                            : isDark ? 'border-slate-700 bg-[#060b14] group-hover:border-cyan-400' : 'border-zinc-300 bg-white group-hover:border-cyan-600'
                         }`}
                       >
                         {selectedInvoices.includes(invoice.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}

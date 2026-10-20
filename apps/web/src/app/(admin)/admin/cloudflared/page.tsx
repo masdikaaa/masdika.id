@@ -110,90 +110,166 @@ export default function AdminCloudflaredPage() {
   const totalTunnelPages = Math.ceil(filteredTunnels.length / itemsPerPage);
   const paginatedTunnels = filteredTunnels.slice((currentTunnelPage - 1) * itemsPerPage, currentTunnelPage * itemsPerPage);
 
+  const activeDomainsCount = data.domains.filter(d => d.status === 'ACTIVE' || d.status === 'active').length;
+  const activeTunnelsCount = data.tunnels.filter(t => t.cfStatus === 'active' || t.cfStatus === 'healthy').length;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+      {/* Header matching Gambar 1 */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Cloudflared Tunnels</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage all domains and tunnels created by users.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Cloudflared Tunnels
+          </h1>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage all domains and tunnels created by users.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-xl font-medium text-xs flex items-center gap-2">
+            <span>Total Domains:</span>
+            <span className="font-extrabold text-white">{data.domains.length}</span>
+          </div>
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-xl font-medium text-xs flex items-center gap-2">
+            <span>Total Tunnels:</span>
+            <span className="font-extrabold text-white">{data.tunnels.length}</span>
+          </div>
+          <button
+            onClick={fetchData}
+            className={cn(
+              "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border",
+              isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            )}
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      <div className="flex gap-4 border-b border-slate-200 dark:border-white/10 mb-6">
-        <button
-          onClick={() => setActiveTab('domains')}
-          className={cn(
-            "pb-3 text-sm font-semibold transition-colors relative",
-            activeTab === 'domains' 
-              ? (isDark ? "text-cyan-400" : "text-cyan-600") 
-              : (isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-500 hover:text-slate-700")
-          )}
-        >
-          <span className="flex items-center gap-2"><Globe className="w-4 h-4" /> Domains ({data.domains.length})</span>
-          {activeTab === 'domains' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 rounded-t-full" />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('tunnels')}
-          className={cn(
-            "pb-3 text-sm font-semibold transition-colors relative",
-            activeTab === 'tunnels' 
-              ? (isDark ? "text-cyan-400" : "text-cyan-600") 
-              : (isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-500 hover:text-slate-700")
-          )}
-        >
-          <span className="flex items-center gap-2"><Server className="w-4 h-4" /> Tunnels ({data.tunnels.length})</span>
-          {activeTab === 'tunnels' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 rounded-t-full" />
-          )}
-        </button>
-      </div>
-
-      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto flex-1">
-            <h2 className={cn("text-lg font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-              {activeTab === 'domains' ? 'All Domains' : 'All Tunnels'}
-            </h2>
-            <div className="w-full sm:max-w-xs relative">
-              <Search className={cn("w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
-              <input
-                type="text"
-                placeholder={activeTab === 'domains' ? "Search domains or users..." : "Search tunnels or users..."}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (activeTab === 'domains') setCurrentDomainPage(1);
-                  else setCurrentTunnelPage(1);
-                }}
-                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-              />
+      {/* Stat Cards Grid (GAMBAR 1 Style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL DOMAINS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Globe className="w-4 h-4" />
             </div>
           </div>
-          <button 
-            onClick={fetchData} 
-            className={cn("p-2 rounded-xl border hover:bg-white/5 transition-colors", isDark ? "text-zinc-400 border-white/5" : "text-slate-500 border-slate-200")}
-            title="Refresh Data"
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{data.domains.length}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Registered</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ACTIVE DOMAINS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeDomainsCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Live on Edge</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL TUNNELS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Server className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{data.tunnels.length}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Configured</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>HEALTHY TUNNELS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <Network className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeTunnelsCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Connected</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Tab Bar (GAMBAR 1 Style) */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex p-1 rounded-xl border self-start md:self-auto", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          <button
+            onClick={() => setActiveTab('domains')}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all",
+              activeTab === 'domains'
+                ? "bg-cyan-500 text-slate-950 shadow-sm"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+            )}
           >
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            <Globe className="w-3.5 h-3.5" />
+            <span>Domains</span>
+            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'domains' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              {data.domains.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('tunnels')}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all",
+              activeTab === 'tunnels'
+                ? "bg-cyan-500 text-slate-950 shadow-sm"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+            )}
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Tunnels</span>
+            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'tunnels' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              {data.tunnels.length}
+            </span>
           </button>
         </div>
 
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="w-full md:w-72 relative">
+            <Search className={cn("w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
+            <input
+              type="text"
+              placeholder={activeTab === 'domains' ? "Search domains or users..." : "Search tunnels or users..."}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (activeTab === 'domains') setCurrentDomainPage(1);
+                else setCurrentTunnelPage(1);
+              }}
+              className={cn("w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {activeTab === 'domains' && (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
-                  <tr className={cn("border-b text-xs uppercase tracking-wider text-zinc-500 font-semibold", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                    <th className="p-4 whitespace-nowrap">Domain</th>
-                    <th className="p-4 whitespace-nowrap">Owner</th>
-                    <th className="p-4 whitespace-nowrap">Zone ID</th>
-                    <th className="p-4 text-center whitespace-nowrap">Status</th>
-                    <th className="p-4 text-right whitespace-nowrap">Actions</th>
+                  <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <th className="p-4 whitespace-nowrap font-medium">Domain</th>
+                    <th className="p-4 whitespace-nowrap font-medium">Owner</th>
+                    <th className="p-4 whitespace-nowrap font-medium">Zone ID</th>
+                    <th className="p-4 text-center whitespace-nowrap font-medium">Status</th>
+                    <th className="p-4 text-right whitespace-nowrap font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+                <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                   {loading ? (
                     <tr><td colSpan={5} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
                       <div className="flex flex-col items-center justify-center gap-3">
@@ -213,7 +289,7 @@ export default function AdminCloudflaredPage() {
                     </td></tr>
                   ) : (
                     paginatedDomains.map((d) => (
-                      <tr key={d.id} className="hover:bg-white/[0.01] transition-colors group">
+                      <tr key={d.id} className="hover:bg-white/5 transition-colors group border-b border-slate-800/80">
                         <td className="p-4 whitespace-nowrap">
                           <div className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
                             {d.domain}
@@ -266,7 +342,7 @@ export default function AdminCloudflaredPage() {
                 </tbody>
               </table>
             </div>
-            <div className={cn("p-4 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
               <Pagination currentPage={currentDomainPage} totalPages={totalDomainPages} onPageChange={setCurrentDomainPage} />
             </div>
           </>
@@ -277,15 +353,15 @@ export default function AdminCloudflaredPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
-                  <tr className={cn("border-b text-xs uppercase tracking-wider text-zinc-500 font-semibold", isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-slate-200")}>
-                    <th className="p-4 whitespace-nowrap">Tunnel Name</th>
-                    <th className="p-4 whitespace-nowrap">Owner</th>
-                    <th className="p-4 whitespace-nowrap">Status</th>
-                    <th className="p-4 whitespace-nowrap text-center">Connector</th>
-                    <th className="p-4 text-right whitespace-nowrap">Actions</th>
+                  <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <th className="p-4 whitespace-nowrap font-medium">Tunnel Name</th>
+                    <th className="p-4 whitespace-nowrap font-medium">Owner</th>
+                    <th className="p-4 whitespace-nowrap font-medium">Status</th>
+                    <th className="p-4 whitespace-nowrap text-center font-medium">Connector</th>
+                    <th className="p-4 text-right whitespace-nowrap font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+                <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                   {loading ? (
                     <tr><td colSpan={5} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
                       <div className="flex flex-col items-center justify-center gap-3">
@@ -305,7 +381,7 @@ export default function AdminCloudflaredPage() {
                     </td></tr>
                   ) : (
                     paginatedTunnels.map((t) => (
-                      <tr key={t.id} className="hover:bg-white/[0.01] transition-colors group">
+                      <tr key={t.id} className="hover:bg-white/5 transition-colors group border-b border-slate-800/80">
                         <td className="p-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 shrink-0 bg-cyan-500/10 rounded-xl flex items-center justify-center">

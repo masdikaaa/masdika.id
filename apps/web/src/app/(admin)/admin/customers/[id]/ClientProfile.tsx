@@ -389,28 +389,28 @@ export default function ClientProfile({ userId }: { userId: string }) {
       </div>
 
       {/* Tabs */}
-      <div className={cn("flex border-b gap-6 sm:gap-8 [&::-webkit-scrollbar]:hidden", isDark ? "border-slate-800/80" : "border-slate-200")} style={{ scrollbarWidth: 'none' }}>
-        <button
-          onClick={() => setActiveTab('summary')}
-          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'summary' ? 'border-cyan-500 text-cyan-400' : isDark ? 'border-transparent text-zinc-400 hover:text-white' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
-        >
-          <User className="w-4 h-4 inline-block mr-2 -mt-0.5" />
-          Summary
-        </button>
-        <button
-          onClick={() => setActiveTab('services')}
-          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'services' ? 'border-cyan-500 text-cyan-400' : isDark ? 'border-transparent text-zinc-400 hover:text-white' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
-        >
-          <Server className="w-4 h-4 inline-block mr-2 -mt-0.5" />
-          Products/Services
-        </button>
-        <button
-          onClick={() => setActiveTab('invoices')}
-          className={`pb-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'invoices' ? 'border-cyan-500 text-cyan-400' : isDark ? 'border-transparent text-zinc-400 hover:text-white' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
-        >
-          <FileText className="w-4 h-4 inline-block mr-2 -mt-0.5" />
-          Invoices
-        </button>
+      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4 overflow-x-auto", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex p-1 rounded-xl border max-w-full overflow-x-auto", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          {[
+            { key: 'summary', label: 'Summary', icon: User },
+            { key: 'services', label: 'Products/Services', icon: Server },
+            { key: 'invoices', label: 'Invoices', icon: FileText }
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer",
+                activeTab === tab.key
+                  ? "bg-cyan-500 text-slate-950 shadow-sm"
+                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              )}
+            >
+              <tab.icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}

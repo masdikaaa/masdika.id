@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { Bell, BellRing, CheckCircle2, Loader2, MessageSquare, AlertCircle, Users, HardDrive , LayoutDashboard } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, Loader2, MessageSquare, AlertCircle, Users, HardDrive , LayoutDashboard, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -92,6 +92,8 @@ export default function AdminNotificationsPage() {
   const totalPages = Math.ceil(notifications.length / itemsPerPage);
   const paginatedNotifications = notifications.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  const readCount = notifications.length - unreadCount;
+
   return (
     <motion.div
       className="space-y-6 pb-10"
@@ -99,34 +101,94 @@ export default function AdminNotificationsPage() {
       initial="hidden"
       animate="visible"
     >
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+      {/* Header matching Gambar 1 */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Admin Notifications</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor all platform activities, new messages, and system alerts.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Admin Notifications
+          </h1>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Monitor all platform activities, new messages, and system alerts.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-xl font-medium text-xs flex items-center gap-2">
+            <span>Total Alerts:</span>
+            <span className="font-extrabold text-white">{notifications.length}</span>
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchNotifications(); }}
+            className={cn(
+              "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border",
+              isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            )}
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+            <span>Refresh</span>
+          </button>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs shadow-sm transition-all"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Mark all as read</span>
+            </button>
+          )}
         </div>
       </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={markAllAsRead}
-            className={cn("flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors text-sm font-medium", isDark ? "text-white border-slate-800 hover:bg-slate-800" : "text-slate-900 border-slate-200 hover:bg-slate-50")}
-          >
-            <CheckCircle2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
-            Mark all as read
-          </button>
-        )}
+
+      {/* Stat Cards Grid (GAMBAR 1 Style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL NOTIFICATIONS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Bell className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{notifications.length}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All activities</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>UNREAD ALERTS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
+              <BellRing className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{unreadCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Action needed</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>READ & ARCHIVED</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{readCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Completed</span>
+          </div>
+        </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-        
+      {/* Notifications List Container */}
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {notifications.length === 0 ? (
           <div className="py-20 text-center relative z-10">
-            <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-              <BellRing className="w-8 h-8 text-zinc-500" />
+            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-400")}>
+              <BellRing className="w-8 h-8" />
             </div>
-            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Notifications</h3>
-            <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Everything is caught up. No recent activities.</p>
+            <h3 className={cn("text-lg font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No Notifications</h3>
+            <p className={cn("text-xs text-zinc-500", isDark ? "text-zinc-400" : "text-slate-500")}>Everything is caught up. No recent activities.</p>
           </div>
         ) : (
           <div className={cn("divide-y relative z-10", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -139,19 +201,19 @@ export default function AdminNotificationsPage() {
                   <div className="flex gap-4 sm:gap-6">
                     <div className="shrink-0 mt-1">
                       {notif.type === 'MESSAGE' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#060b14] border-slate-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400'}`}>
                           <MessageSquare className="w-5 h-5" />
                         </div>
                       ) : notif.type === 'TICKET' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#060b14] border-slate-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400'}`}>
                           <AlertCircle className="w-5 h-5" />
                         </div>
                       ) : notif.type === 'COMMUNITY' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#060b14] border-slate-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-purple-500/15 border-purple-500/25 text-purple-400'}`}>
                           <Users className="w-5 h-5" />
                         </div>
                       ) : (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notif.isRead ? 'bg-zinc-800/50 text-zinc-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#060b14] border-slate-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-indigo-500/15 border-indigo-500/25 text-indigo-400'}`}>
                           <HardDrive className="w-5 h-5" />
                         </div>
                       )}
@@ -182,7 +244,7 @@ export default function AdminNotificationsPage() {
             ))}
             
             {totalPages > 1 && (
-              <div className={cn("p-4 border-t mt-2", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
               </div>
             )}

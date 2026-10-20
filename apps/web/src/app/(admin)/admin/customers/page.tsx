@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Users, Trash2, ShieldAlert, CheckCircle, Eye, Ban, Play, Activity, Search , RefreshCw, Gift, X } from "lucide-react";
+import { Users, Trash2, ShieldAlert, CheckCircle, Eye, Ban, Play, Activity, Search , RefreshCw, Gift, X, Wallet, ShieldCheck } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -58,11 +58,19 @@ export default function AdminCustomersPage() {
   const [isResettingReferrals, setIsResettingReferrals] = useState(false);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
 
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended">("all");
+
+  const activeCount = users.filter(u => !u.isSuspended).length;
+  const suspendedCount = users.filter(u => u.isSuspended).length;
+  const totalBalance = users.reduce((acc, u) => acc + (Number(u.balance) || 0), 0);
+
   // Filtering
-  const filteredUsers = users.filter((u) => 
-    (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredUsers = users.filter((u) => {
+    const matchesStatus = statusFilter === "all" ? true : statusFilter === "suspended" ? u.isSuspended : !u.isSuspended;
+    const matchesSearch = (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesStatus && matchesSearch;
+  });
 
   // Pagination
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
@@ -238,60 +246,228 @@ export default function AdminCustomersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
-        <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Customers</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage registered users on the platform.</p>
+    <div className="w-full space-y-6 md:space-y-8 pb-10 relative z-10">
+      {/* ── HEADER ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
+        <div className="flex-1 min-w-0">
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Customers & Users
+          </h1>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage registered users, supervise wallet balances, adjust limits, and oversee account access.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+          <div className={cn("px-4 py-2 rounded-lg border font-medium text-sm md:text-base text-center sm:text-left", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Customers: {users.length}
+          </div>
+          <button
+            onClick={fetchUsers}
+            disabled={loading}
+            className={cn(
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
+              isDark
+                ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
+                : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
+            )}
+          >
+            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin text-cyan-500")} />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      <div className={cn("border rounded-[2rem] overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto flex-1">
-            <h2 className={cn("text-lg font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>All Users</h2>
-            <div className="w-full sm:max-w-xs relative">
-              <Search className={cn("w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
-              <input
-                type="text"
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className={cn("w-full border rounded-xl pl-10 pr-4 py-2 text-sm placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-              />
+      {/* ── STATS CARDS ──────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        {/* Total Customers */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Total Customers
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <Users className="w-4 h-4" />
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-            {selectedUsers.length > 0 && (
-              <button
-                onClick={() => setShowBulkDeleteModal(true)}
-                disabled={isBulkDeleting}
-                className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 font-semibold py-2 px-4 rounded-xl transition-all disabled:opacity-50 text-sm text-white"
-              >
-                <Trash2 className="w-4 h-4" />
-                Destroy Selected ({selectedUsers.length})
-              </button>
-            )}
-            <div className={cn("text-sm px-4 py-2 rounded-xl border flex items-center justify-center h-[36px]", isDark ? "text-zinc-400 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-100 border-slate-200")}>
-              Total: <span className={cn("font-bold ml-1", isDark ? "text-cyan-400" : "text-cyan-700")}>{filteredUsers.length}</span>
-            </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+              {users.length}
+            </span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Registered</span>
           </div>
         </div>
+
+        {/* Active Users */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Active Status
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+              {activeCount}
+            </span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Good Standing</span>
+          </div>
+        </div>
+
+        {/* Suspended Users */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Suspended
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <Ban className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+              {suspendedCount}
+            </span>
+            <span className={cn("text-xs font-medium", isDark ? "text-red-400" : "text-red-600")}>Restricted</span>
+          </div>
+        </div>
+
+        {/* Total Saldo */}
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="flex items-center justify-between">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Customer Balance
+            </span>
+            <div className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+            )}>
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={cn("text-2xl font-extrabold truncate", isDark ? "text-white" : "text-slate-900")}>
+              {formatRupiah(totalBalance)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
+      <div className={cn(
+        "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
+        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+      )}>
+        {/* Status Tab switch */}
+        <div className={cn(
+          "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 w-full sm:w-auto",
+          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+        )}>
+          {[
+            { id: "all", label: "All Users", count: users.length },
+            { id: "active", label: "Active", count: activeCount },
+            { id: "suspended", label: "Suspended", count: suspendedCount },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setStatusFilter(tab.id as any);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
+                statusFilter === tab.id
+                  ? "bg-cyan-500 text-white font-bold"
+                  : isDark
+                    ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+                statusFilter === tab.id
+                  ? "bg-white/20 text-white"
+                  : isDark
+                    ? "bg-white/10 text-zinc-300"
+                    : "bg-slate-200 text-slate-700"
+              )}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Search & Bulk delete */}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {selectedUsers.length > 0 && (
+            <button
+              onClick={() => setShowBulkDeleteModal(true)}
+              disabled={isBulkDeleting}
+              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 font-semibold py-2 px-4 rounded-xl transition-all disabled:opacity-50 text-xs text-white"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Destroy Selected ({selectedUsers.length})
+            </button>
+          )}
+
+          <div className="relative flex-1 min-w-[200px] sm:min-w-[260px] w-full sm:w-auto">
+            <Search className={cn("w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
+                isDark
+                  ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
-              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-slate-900/60 border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
+              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 border-slate-200 text-slate-500")}>
                 <th className="p-4 w-12 text-center">
                   <button
                     onClick={() => setSelectedUsers(selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 ? [] : filteredUsers.map(u => u.id))}
                     className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                       selectedUsers.length === filteredUsers.length && filteredUsers.length > 0
                         ? 'bg-cyan-500 border-cyan-500'
-                        : 'border-zinc-500 hover:border-zinc-400'
+                        : isDark ? 'border-slate-700 bg-[#060b14] hover:border-cyan-400' : 'border-zinc-300 bg-white hover:border-cyan-600'
                     }`}
                   >
                     {selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
@@ -315,11 +491,11 @@ export default function AdminCustomersPage() {
               ) : filteredUsers.length === 0 ? (
                 <tr><td colSpan={8} className="p-16 text-center">
                   <div className="flex flex-col items-center justify-center">
-                    <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-4", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                      <Users className={cn("w-10 h-10 opacity-50", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                    </div>
-                    <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Customers Found</h3>
-                    <p className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>There are no customers matching your criteria.</p>
+                    <Users className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
+                    <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No customers found</p>
+                    <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      {searchQuery || statusFilter !== 'all' ? "No customers matching your search criteria." : "There are currently no customers on the platform."}
+                    </p>
                   </div>
                 </td></tr>
               ) : (
@@ -331,7 +507,7 @@ export default function AdminCustomersPage() {
                         className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                           selectedUsers.includes(u.id)
                             ? 'bg-cyan-500 border-cyan-500'
-                            : 'border-zinc-500 group-hover:border-zinc-400'
+                            : isDark ? 'border-slate-700 bg-[#060b14] group-hover:border-cyan-400' : 'border-zinc-300 bg-white group-hover:border-cyan-600'
                         }`}
                       >
                         {selectedUsers.includes(u.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}

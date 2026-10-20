@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, ChevronRight, User, Trash2, X, CheckCircle, Search, ChevronLeft , Loader2, Plus, AlertCircle, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { MessageSquare, ChevronRight, User, Trash2, X, CheckCircle, Search, ChevronLeft, Loader2, Plus, AlertCircle, Paperclip, FileText, Image as ImageIcon, RefreshCw } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
 import { AdminLoader } from '@/components/admin/AdminLoader';
@@ -175,83 +175,175 @@ export default function AdminTicketsClient() {
     mutate();
   };
 
+  const totalCount = tickets.length;
+  const openCount = tickets.filter((t: any) => t.status === 'OPEN').length;
+  const replyCount = tickets.filter((t: any) => t.status === 'CUSTOMER_REPLY').length;
+  const answeredCount = tickets.filter((t: any) => t.status === 'ANSWERED').length;
+  const closedCount = tickets.filter((t: any) => t.status === 'CLOSED').length;
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Manage Support Tickets
           </h1>
-          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>View and respond to customer support requests.</p>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            View and respond to customer support requests and prioritize escalations.
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-          <div className="relative w-full sm:w-64 shrink-0">
-            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-400" : "text-slate-500")} />
-            <input 
-              type="text" 
-              placeholder="Search ID, subject, or name..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn("w-full border rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-            />
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+            <span>Total Tickets:</span>
+            <span className="font-extrabold text-white">{totalCount}</span>
           </div>
-          
-          <div className="grid grid-cols-2 sm:flex sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            {selectedTickets.length > 0 && (
-              <button
-                onClick={() => setShowBulkDeleteModal(true)}
-                disabled={isBulkDeleting}
-                className={cn("col-span-2 sm:col-span-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-4 py-2 rounded-xl text-sm font-semibold transition-colors shrink-0", isDark ? "text-red-400" : "text-red-700")}
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete</span> ({selectedTickets.length})
-              </button>
+          <button
+            onClick={() => mutate()}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="col-span-1 sm:col-span-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1 sm:gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
-            >
-              <Plus className="w-4 h-4 shrink-0" />
-              <span className="truncate">Open Ticket</span>
-            </button>
-            <div className="col-span-1 sm:col-span-1">
-              <Select 
-                value={filter} 
-                onChange={(val) => setFilter(val)}
-                options={[
-                  { value: "", label: "All Status" },
-                  { value: "OPEN", label: "Open" },
-                  { value: "CUSTOMER_REPLY", label: "Customer Reply" },
-                  { value: "ANSWERED", label: "Answered" },
-                  { value: "CLOSED", label: "Closed" },
-                  { value: "MERGED", label: "Merged" }
-                ]}
-                placeholder="All Status"
-                className={cn("w-full rounded-xl px-3 py-2 text-sm", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}
-              />
+          >
+            <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+          >
+            <Plus className="w-4 h-4 shrink-0" />
+            <span>Open Ticket</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards Grid (GAMBAR 1 Style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL TICKETS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <MessageSquare className="w-4 h-4" />
             </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All logged</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>OPEN TICKETS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <AlertCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{openCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Pending action</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>CUSTOMER REPLIES</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-orange-500/15 border-orange-500/25 text-orange-400" : "bg-orange-50 border-orange-200 text-orange-700")}>
+              <User className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{replyCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-orange-400" : "text-orange-600")}>Awaiting response</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ANSWERED & CLOSED</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{answeredCount + closedCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Resolved tickets</span>
           </div>
         </div>
       </div>
 
-      <div className={cn("border rounded-[32px] overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      {/* Filter and Control Bar (GAMBAR 1 Style) */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex p-1 rounded-xl border self-start md:self-auto overflow-x-auto max-w-full", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          {[
+            { key: "", label: "All Tickets", count: totalCount },
+            { key: "OPEN", label: "Open", count: openCount },
+            { key: "CUSTOMER_REPLY", label: "Customer Reply", count: replyCount },
+            { key: "ANSWERED", label: "Answered", count: answeredCount },
+            { key: "CLOSED", label: "Closed", count: closedCount },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => { setFilter(tab.key); setPage(1); }}
+              className={cn(
+                "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5",
+                filter === tab.key
+                  ? "bg-cyan-500 text-slate-950 shadow-sm"
+                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", filter === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {selectedTickets.length > 0 && (
+            <button
+              onClick={() => setShowBulkDeleteModal(true)}
+              disabled={isBulkDeleting}
+              className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors border", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete ({selectedTickets.length})</span>
+            </button>
+          )}
+          <div className="relative w-full md:w-64">
+            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-500" : "text-slate-400")} />
+            <input 
+              type="text" 
+              placeholder="Search ID, subject, name..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Table Container */}
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {isLoading ? (
           <AdminLoader className="min-h-[250px] py-20" />
         ) : error ? (
           <div className={cn("p-8 text-center", isDark ? "text-red-400" : "text-red-700")}>Failed to load tickets.</div>
         ) : tickets?.length === 0 ? (
           <div className="p-16 text-center relative overflow-hidden group">
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-              <MessageSquare className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
+            <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border transition-transform duration-500 group-hover:scale-105", isDark ? "bg-[#060b14] border-slate-800 text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-400")}>
+              <MessageSquare className="w-10 h-10" />
             </div>
-            <h3 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No tickets found</h3>
-            <p className={cn("font-medium max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>There are no tickets matching your criteria.</p>
+            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No tickets found</h3>
+            <p className={cn("text-sm max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>There are no tickets matching your criteria.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left border-collapse">
               <thead>
-                <tr className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <tr className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <th className="p-4 w-12">
                     <button 
                       type="button"
@@ -263,13 +355,14 @@ export default function AdminTicketsClient() {
                           setSelectedTickets(tickets.map((t: any) => t.ticketId));
                         }
                       }}
-                      className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${
+                      className={cn(
+                        "w-5 h-5 border rounded flex items-center justify-center transition-colors",
                         tickets.length > 0 && selectedTickets.length === tickets.length
-                          ? 'bg-cyan-500 border-cyan-500'
-                          : 'border-zinc-500 hover:border-zinc-400 bg-transparent'
-                      }`}
+                          ? "bg-cyan-500 border-cyan-500 text-slate-950"
+                          : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
+                      )}
                     >
-                      {tickets.length > 0 && selectedTickets.length === tickets.length && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                      {tickets.length > 0 && selectedTickets.length === tickets.length && <CheckCircle className="w-3.5 h-3.5" />}
                     </button>
                   </th>
                   <th className="p-4 font-medium">Ticket ID & Subject</th>
@@ -279,9 +372,9 @@ export default function AdminTicketsClient() {
                   <th className="p-4 font-medium"></th>
                 </tr>
               </thead>
-              <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                 {tickets.length > 0 ? tickets.map((t: any) => (
-                  <tr key={t.id} className="hover:bg-white/[0.02] transition-colors group cursor-pointer" onClick={() => router.push(`/admin/tickets/${t.ticketId.toLowerCase()}`)}>
+                  <tr key={t.id} className={cn("transition-colors group cursor-pointer", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")} onClick={() => router.push(`/admin/tickets/${t.ticketId.toLowerCase()}`)}>
                     <td className="p-4" onClick={(e) => e.stopPropagation()}>
                       <button 
                         type="button"
@@ -293,13 +386,14 @@ export default function AdminTicketsClient() {
                             setSelectedTickets([...selectedTickets, t.ticketId]);
                           }
                         }}
-                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${
+                        className={cn(
+                          "w-5 h-5 border rounded flex items-center justify-center transition-colors",
                           selectedTickets.includes(t.ticketId)
-                            ? 'bg-cyan-500 border-cyan-500'
-                            : 'border-zinc-500 group-hover:border-zinc-400 bg-transparent'
-                        }`}
+                            ? "bg-cyan-500 border-cyan-500 text-slate-950"
+                            : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
+                        )}
                       >
-                        {selectedTickets.includes(t.ticketId) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                        {selectedTickets.includes(t.ticketId) && <CheckCircle className="w-3.5 h-3.5" />}
                       </button>
                     </td>
                     <td className="p-4">
@@ -319,13 +413,13 @@ export default function AdminTicketsClient() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <StatusBadge status={t.status} />
+                      <StatusBadge status={t.status} isDark={isDark} />
                     </td>
                     <td className={cn("p-4 text-sm whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
                       {new Date(t.updatedAt).toLocaleString('id-ID')}
                     </td>
                     <td className="p-4 text-right">
-                      <ChevronRight className={cn("w-4 h-4 text-zinc-600 group-hover: inline-block transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                      <ChevronRight className={cn("w-4 h-4 text-zinc-600 group-hover:inline-block transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")} />
                     </td>
                   </tr>
                 )) : (

@@ -106,7 +106,7 @@ export default function K3sManagement() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+              <tr className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                 <th className="p-4 w-10">
                   <button
                     onClick={toggleSelectAll}
@@ -114,7 +114,7 @@ export default function K3sManagement() {
                       "w-5 h-5 rounded flex items-center justify-center transition-colors",
                       selectedClusters.length > 0
                         ? "bg-cyan-500 text-slate-950"
-                        : (isDark ? "bg-slate-900 border border-slate-700 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
+                        : (isDark ? "bg-[#060b14] border border-slate-700 text-transparent hover:border-cyan-400" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                     )}
                   >
                     <CheckCircle className="w-4 h-4 stroke-[2.5]" />
@@ -139,7 +139,7 @@ export default function K3sManagement() {
                         "w-5 h-5 rounded flex items-center justify-center transition-colors",
                         selectedClusters.includes(cluster.id)
                           ? "bg-cyan-500 text-slate-950"
-                          : (isDark ? "bg-slate-900 border border-slate-700 text-transparent hover:border-cyan-500/50" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
+                          : (isDark ? "bg-[#060b14] border border-slate-700 text-transparent hover:border-cyan-400" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                       )}
                     >
                       <CheckCircle className="w-4 h-4 stroke-[2.5]" />

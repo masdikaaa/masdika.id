@@ -777,44 +777,75 @@ export default function VpsManagementPage() {
   }
 
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+    <div className="space-y-6 pb-10">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Proxmox VPS Management</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage Proxmox integration, IP pools, templates, and pricing.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Proxmox VPS Management
+          </h1>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage Proxmox hypervisor integration, IP pools, OS templates, and customer instances.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+            <span>Proxmox Node:</span>
+            <span className="font-extrabold text-white">{settings.name || "Default Node"}</span>
+          </div>
+          <button
+            onClick={() => {
+              if (activeTab === "settings") fetchSettings();
+              if (activeTab === "pools") fetchPools();
+              if (activeTab === "templates") fetchTemplates();
+              if (activeTab === "pricing") fetchPricing();
+              if (activeTab === "services" || activeTab === "k3s") fetchVpsServices();
+              if (activeTab === "reserved-ips") fetchReservedIps();
+              toast.success("Refreshed data");
+            }}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            )}
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className={cn("flex gap-2 overflow-x-auto pb-4 mb-6 border-b [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]", isDark ? "border-white/10" : "border-slate-200")}>
-        {[
-          { id: "settings", label: "Proxmox Settings", icon: Settings },
-          { id: "pools", label: "IP Pools", icon: Network },
-          { id: "templates", label: "OS Templates", icon: HardDrive },
-          { id: "pricing", label: "Pricing", icon: DollarSign },
-          { id: "services", label: "User VPS Services", icon: Server },
-          { id: "k3s", label: "Managed K3s", icon: Server },
-          { id: "reserved-ips", label: "Reserved IPs", icon: Network },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap border",
-              activeTab === tab.id
-                ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")
-                : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100 border-transparent")
-            )}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
+      {/* Tabs (GAMBAR 1 Filter Bar Style) */}
+      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4 overflow-x-auto", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex p-1 rounded-xl border max-w-full overflow-x-auto", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          {[
+            { id: "settings", label: "Proxmox Settings", icon: Settings },
+            { id: "pools", label: "IP Pools", icon: Network },
+            { id: "templates", label: "OS Templates", icon: HardDrive },
+            { id: "pricing", label: "Pricing", icon: DollarSign },
+            { id: "services", label: "User VPS Services", icon: Server },
+            { id: "k3s", label: "Managed K3s", icon: Server },
+            { id: "reserved-ips", label: "Reserved IPs", icon: Network },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                activeTab === tab.id
+                  ? "bg-cyan-500 text-slate-950 shadow-sm"
+                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              )}
+            >
+              <tab.icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className={cn("glass p-8 rounded-3xl border w-full", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <h2 className={cn("text-xl font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Proxmox Server Configuration</h2>
 
           {loadingSettings ? (
@@ -1132,7 +1163,7 @@ export default function VpsManagementPage() {
           </div>
 
           {showAddPool && (
-            <form onSubmit={handleAddPool} className={cn("glass p-8 rounded-3xl border space-y-6", isDark ? "border-white/10" : "border-slate-200")}>
+            <form onSubmit={handleAddPool} className={cn("p-6 md:p-8 rounded-2xl border space-y-6 shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
 
               {/* IP Version Selector */}
               <div>
@@ -1179,7 +1210,7 @@ export default function VpsManagementPage() {
 
           <div className={cn("rounded-xl border overflow-x-auto", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
             <table className={cn("w-full text-left text-sm min-w-[600px]", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <thead className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+              <thead className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                 <tr>
                   <th className="px-6 py-4 w-10">
                     <button
@@ -1662,7 +1693,7 @@ export default function VpsManagementPage() {
 
       {/* Services and K3s Nodes Tabs */}
       {(activeTab === "services" || activeTab === "k3s") && (
-        <div className={cn("p-6 md:p-8 rounded-3xl border w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-slate-900")}>
@@ -1704,7 +1735,7 @@ export default function VpsManagementPage() {
             <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
-                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                     <th className="p-4 w-10">
                       <button
                         onClick={toggleSelectAllVps}
@@ -1929,7 +1960,7 @@ export default function VpsManagementPage() {
 
       {/* Reserved IPs Tab */}
       {activeTab === "reserved-ips" && (
-        <div className={cn("p-6 md:p-8 rounded-3xl border w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-slate-900")}>Reserved IPs Management</h2>
@@ -1955,7 +1986,7 @@ export default function VpsManagementPage() {
             <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
-                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                     <th className="p-4 font-semibold whitespace-nowrap">IP Address</th>
                     <th className="p-4 font-semibold whitespace-nowrap">Client</th>
                     <th className="p-4 font-semibold whitespace-nowrap">IP Pool</th>

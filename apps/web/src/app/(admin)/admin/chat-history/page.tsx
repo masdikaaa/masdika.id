@@ -246,74 +246,148 @@ export default function AdminChatHistoryPage() {
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Chat History</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor all AI Assistant conversation sessions ({total} {total === 1 ? 'session' : 'sessions'})</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Chat History
+          </h1>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Monitor and inspect all AI Assistant conversation sessions and injection attempts.
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {sessions.length > 0 && (
-            <button
-              onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-5 py-2 font-bold rounded-xl transition-all border", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
-            >
-              <div className={`w-5 h-5 border rounded flex items-center justify-center ${selectedIds.length === sessions.length ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500" : "border-slate-300"}`}>
-                {selectedIds.length === sessions.length && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
-              </div>
-              <span className="hidden sm:inline">{selectedIds.length === sessions.length ? 'Deselect All' : 'Select All'}</span>
-            </button>
-          )}
-          <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-            <Bot className={cn("w-5 h-5 sm:w-6 sm:h-6", isDark ? "text-cyan-400" : "text-cyan-700")} />
+        <div className="flex items-center gap-3">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm">
+            Total Sessions: {total}
           </div>
+          <button
+            onClick={() => fetchSessions()}
+            disabled={loading}
+            className="px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
+          >
+            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            Refresh
+          </button>
           {selectedIds.length > 0 && (
             <button
               onClick={() => setShowBulkDelete(true)}
-              className={cn("flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-red-500/10 hover:bg-red-500/20 font-bold rounded-xl transition-all border border-red-500/20", isDark ? "text-red-400" : "text-red-700")}
+              className="flex items-center gap-2 px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 font-bold rounded-lg transition-all border border-red-500/20 text-red-400 text-sm"
             >
-              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Delete ({selectedIds.length})</span>
+              <Trash2 className="w-4 h-4" />
+              <span>Delete ({selectedIds.length})</span>
             </button>
           )}
-      </div>
+        </div>
       </div>
 
-      {/* Search & Filter */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Sessions</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Bot className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>{total}</div>
+          <p className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All logged sessions</p>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Sessions</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>
+            {sessions.filter(s => s.status === 'ACTIVE').length}
+          </div>
+          <p className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Currently open</p>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Messages Logged</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <MessageSquare className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>
+            {sessions.reduce((acc, s) => acc + (s.messageCount || 0), 0)}
+          </div>
+          <p className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>In active page view</p>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Injections Flagged</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Shield className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>
+            {sessions.reduce((acc, s) => acc + (s.injectionCount || 0), 0)}
+          </div>
+          <p className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Blocked prompts</p>
+        </div>
+      </div>
+
+      {/* GAMBAR 1 Filter & Controls Bar */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="flex items-center gap-2">
+          <div className={cn("p-1 rounded-xl border flex items-center gap-1", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+            {[
+              { id: '', label: 'All' },
+              { id: 'ACTIVE', label: 'Active' },
+              { id: 'ENDED', label: 'Ended' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => { setStatusFilter(tab.id); setPage(1); }}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all",
+                  statusFilter === tab.id
+                    ? "bg-cyan-500 text-slate-950 shadow-sm"
+                    : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative min-w-[280px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search name, email, phone, or IP..."
-            className={cn("w-full border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+            className={cn("w-full border rounded-xl py-2 pl-9 pr-4 text-xs md:text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
           />
-        </div>
-        <div className="flex gap-2">
-          {['', 'ACTIVE', 'ENDED'].map(f => (
-            <button
-              key={f}
-              onClick={() => { setStatusFilter(f); setPage(1); }}
-              className={cn("px-4 py-2 rounded-xl text-xs font-semibold transition-all border",
-                statusFilter === f
-                  ? "bg-cyan-400 border-cyan-400 text-slate-950 font-bold"
-                  : (isDark ? "bg-[#060b14] text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900")
-              )}
-            >
-              {f === '' ? 'All' : f === 'ACTIVE' ? '● Active' : 'Ended'}
-            </button>
-          ))}
         </div>
       </div>
 
       {/* Table */}
-      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-slate-200 font-semibold")}>
+            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
-                <th className="px-4 py-4 font-medium w-10"></th>
+                <th className="px-4 py-4 font-medium w-10">
+                  <button
+                    onClick={toggleSelectAll}
+                    className={cn(
+                      "w-5 h-5 border rounded flex items-center justify-center transition-colors",
+                      selectedIds.length === sessions.length && sessions.length > 0
+                        ? "bg-cyan-500 border-cyan-500 text-slate-950"
+                        : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"
+                    )}
+                  >
+                    {selectedIds.length === sessions.length && sessions.length > 0 && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                  </button>
+                </th>
                 <th className={cn("px-4 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>User</th>
                 <th className={cn("px-4 py-4 font-medium hidden lg:table-cell", isDark ? "text-white" : "text-slate-900")}>IP</th>
                 <th className={cn("px-4 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>Status</th>
@@ -328,17 +402,20 @@ export default function AdminChatHistoryPage() {
             <tbody>
               {sessions.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
-                    <Bot className="w-8 h-8 mx-auto mb-2 text-zinc-600" />
-                    No chat sessions found.
+                  <td colSpan={8} className="px-6 py-16 text-center">
+                    <div className={cn("w-16 h-16 mx-auto mb-4 rounded-2xl border flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800 text-zinc-600" : "bg-slate-100 border-slate-200 text-slate-400")}>
+                      <Bot className="w-8 h-8" />
+                    </div>
+                    <p className={cn("text-base font-semibold mb-1", isDark ? "text-white" : "text-slate-900")}>No chat sessions found</p>
+                    <p className="text-xs text-zinc-500">There are currently no AI assistant conversation sessions matching the filters.</p>
                   </td>
                 </tr>
               ) : (
                 sessions.map((s) => (
                   <tr key={s.id} className={cn("border-b transition-colors", isDark ? "border-slate-800/80 hover:bg-white/5" : "border-slate-200 hover:bg-slate-50/80")}>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <button onClick={() => toggleSelect(s.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(s.id) ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "border-slate-700 bg-slate-900 hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
-                        {selectedIds.includes(s.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
+                      <button onClick={() => toggleSelect(s.id)} className={cn("w-5 h-5 border rounded flex items-center justify-center transition-colors", selectedIds.includes(s.id) ? "bg-cyan-500 border-cyan-500 text-slate-950" : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600")}>
+                        {selectedIds.includes(s.id) && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                       </button>
                     </td>
                     <td className="px-4 py-3 min-w-[220px]">

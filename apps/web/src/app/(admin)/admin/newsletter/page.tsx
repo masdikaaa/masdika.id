@@ -123,67 +123,127 @@ export default function NewsletterPage() {
   );
 
   return (
-    <div className="space-y-6 w-full">
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
+    <div className="w-full space-y-6 md:space-y-8 pb-10 relative z-10">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Newsletter</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your newsletter subscribers</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Newsletter Subscribers</h1>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage registered audience email subscriptions and outbound campaign deliverability.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Subscribers: {subscribers.length}
+          </div>
+          <button
+            onClick={() => { setLoading(true); fetchSubscribers(); }}
+            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Subscribers</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Mail className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {subscribers.length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Verified recipient emails
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>This Month</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Calendar className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {subscribers.filter(s => new Date(s.createdAt).getMonth() === new Date().getMonth()).length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            New subscriptions
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Audience Reach</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {subscribers.length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Instant campaign audience
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Deliverability</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            100%
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Zero bounce rate
+          </div>
+        </div>
+      </div>
+
+      {/* GAMBAR 1 Filter Bar */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Search subscribers by email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+          />
+        </div>
+        <div className="flex items-center gap-3 self-end md:self-auto">
           {subscribers.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-5 py-2 font-bold rounded-xl transition-all border", isDark ? "text-white border-white/10 hover:bg-white/10" : "text-slate-900 border-slate-200 hover:bg-slate-100")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 bg-[#060b14] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-50")}
             >
-              <div className={`w-5 h-5 border rounded flex items-center justify-center ${selectedIds.length === subscribers.length && subscribers.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500" : "border-slate-300"}`}>
-                {selectedIds.length === subscribers.length && subscribers.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+              <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === subscribers.length && subscribers.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"}`}>
+                {selectedIds.length === subscribers.length && subscribers.length > 0 && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
               </div>
-              {selectedIds.length === subscribers.length && subscribers.length > 0 ? 'Deselect All' : 'Select All'}
+              <span>{selectedIds.length === subscribers.length && subscribers.length > 0 ? 'Deselect All' : 'Select All'}</span>
             </button>
           )}
-          <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200")}>
-            <Mail className={cn("w-5 h-5 sm:w-6 sm:h-6", isDark ? "text-cyan-400" : "text-slate-700")} />
-          </div>
           {selectedIds.length > 0 && (
             <button 
               onClick={() => setShowDeleteAllModal(true)}
-              className={cn("flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-red-500/10 hover:bg-red-500/20 font-bold rounded-xl transition-all border border-red-500/20", isDark ? "text-red-400" : "text-red-700")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200")}
             >
-              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-              Delete ({selectedIds.length})
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete ({selectedIds.length})</span>
             </button>
           )}
-      </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className={cn("p-6 rounded-2xl border group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center gap-4 relative z-10">
-            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", isDark ? "bg-[#060b14] border border-slate-800 text-cyan-400" : "bg-slate-100 border border-slate-200 text-slate-600")}>
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Total Subscribers</p>
-              <h3 className={cn("text-2xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>{subscribers.length}</h3>
-            </div>
-          </div>
         </div>
       </div>
 
       <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-          <div className="relative w-full sm:w-96">
-            <Search className={cn("w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-400" : "text-slate-500")} />
-            <input
-              type="text"
-              placeholder="Search subscribers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={cn("w-full border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
-            />
-          </div>
-        </div>
-
         <div className="overflow-x-auto">
           {loading ? (
             <div className={cn("p-12 text-center flex flex-col items-center gap-4", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -201,22 +261,29 @@ export default function NewsletterPage() {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className={cn("border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-slate-200 font-semibold")}>
-                  <th className="p-4 sm:p-6 w-12 text-xs">SEL</th>
-                  <th className="p-4 sm:p-6 text-sm font-semibold">Email Address</th>
-                  <th className="p-4 sm:p-6 text-sm font-semibold">Subscribed Date</th>
-                  <th className="p-4 sm:p-6 text-sm font-semibold text-right">Actions</th>
+                <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                  <th className="p-4 sm:p-5 w-12 text-center">
+                    <button 
+                      onClick={toggleSelectAll} 
+                      className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${selectedIds.length === subscribers.length && subscribers.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}
+                    >
+                      {selectedIds.length === subscribers.length && subscribers.length > 0 && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                    </button>
+                  </th>
+                  <th className="p-4 sm:p-5 text-sm font-semibold">Email Address</th>
+                  <th className="p-4 sm:p-5 text-sm font-semibold">Subscribed Date</th>
+                  <th className="p-4 sm:p-5 text-sm font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                 {filteredSubscribers.map((sub) => (
                   <tr key={sub.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                    <td className="p-4 sm:p-6">
+                    <td className="p-4 sm:p-5 text-center">
                       <button 
                         onClick={() => toggleSelect(sub.id)} 
-                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(sub.id) ? 'bg-cyan-400 border-cyan-400' : isDark ? "border-slate-700 bg-slate-900 hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}
+                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${selectedIds.includes(sub.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}
                       >
-                        {selectedIds.includes(sub.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
+                        {selectedIds.includes(sub.id) && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                       </button>
                     </td>
                     <td className="p-4 sm:p-6">

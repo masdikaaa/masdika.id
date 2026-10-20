@@ -51,7 +51,6 @@ export default function AdminDashboard() {
     <div className="w-full h-full flex flex-col gap-6 max-w-[1600px] mx-auto pb-8 z-10 relative">
       
       {/* Top Welcome Title */}
-      {/* Top Welcome Title */}
       <div className="flex items-center justify-between mb-2">
         <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Dashboard Overview</h1>
         <div className={cn("text-sm hidden sm:block", isDark ? "text-zinc-400" : "text-slate-500")}>Welcome back to your control center</div>

@@ -3,7 +3,7 @@ import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/us
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Search, AlertCircle, Info, Hammer, AlertTriangle, FileText, AlignLeft, CheckCircle, UploadCloud, Check } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, AlertCircle, Info, Hammer, AlertTriangle, FileText, AlignLeft, CheckCircle, UploadCloud, Check, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -399,73 +399,164 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
+  const totalCount = sourceList.length;
+  const newsCount = announcements.length;
+  const bannersCount = banners.length;
+  const activeCount = sourceList.filter(a => a.isActive).length;
+  const maintenanceCount = announcements.filter(a => a.type === 'MAINTENANCE').length;
+
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
-      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>News & Announcements</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage news, promos, and information displayed to customers.</p>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            News & Announcements
+          </h1>
+          <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage public broadcasts, maintenance notices, and customer dashboard banners.
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+            <span>Total Items:</span>
+            <span className="font-extrabold text-white">{totalCount}</span>
+          </div>
+          <button
+            onClick={() => {
+              if (activeTab === 'banner') fetchBanners();
+              else fetchAnnouncements();
+              toast.success("Refreshed");
+            }}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            )}
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
+          </button>
+          <button 
+            onClick={() => openModal()} 
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{activeTab === 'banner' ? 'Create Banner' : 'Create News'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards Grid (GAMBAR 1 Style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL NEWS & PROMOS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <FileText className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{newsCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Broadcasts</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>DASHBOARD BANNERS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <UploadCloud className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{bannersCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Hero visuals</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ACTIVE & VISIBLE</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Currently shown</span>
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>MAINTENANCE ALERTS</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
+              <Hammer className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{maintenanceCount}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Notices</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Control Bar (GAMBAR 1 Style) */}
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex p-1 rounded-xl border self-start md:self-auto overflow-x-auto max-w-full", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          {[
+            { key: 'berita', label: 'News & Promos', count: newsCount },
+            { key: 'banner', label: 'Dashboard Banners', count: bannersCount },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5",
+                activeTab === tab.key
+                  ? "bg-cyan-500 text-slate-950 shadow-sm"
+                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}
               disabled={isBulkDeleting}
-              className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-sm font-bold hover:bg-red-500/30 hover:text-red-300 transition-all disabled:opacity-50", isDark ? "text-red-400" : "text-red-700")}
+              className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-colors border flex items-center gap-2", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}
             >
-              {isBulkDeleting ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              Delete Selected ({selectedIds.length})
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete ({selectedIds.length})</span>
             </button>
           )}
-          <button onClick={() => openModal()} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
-            <Plus className="w-4 h-4" /> {activeTab === 'banner' ? 'Create Banner' : 'Create Announcement'}
-          </button>
-        </div>
-      </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        {/* Tabs */}
-        <div className={cn("flex border-b px-5 pt-3", isDark ? "border-slate-800" : "border-slate-200")}>
-          <button
-            onClick={() => setActiveTab('berita')}
-            className={cn("px-4 py-3 text-sm font-bold transition-all relative", activeTab === 'berita' ? (isDark ? "text-white" : "text-slate-900") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-700"))}
-          >
-            News & Promos
-            {activeTab === 'berita' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full bg-cyan-400" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('banner')}
-            className={cn("px-4 py-3 text-sm font-bold transition-all relative", activeTab === 'banner' ? (isDark ? "text-white" : "text-slate-900") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-700"))}
-          >
-            Dashboard Banners
-            {activeTab === 'banner' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full bg-cyan-400" />
-            )}
-          </button>
-        </div>
-
-        <div className={cn("p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-          <div className="relative w-full sm:max-w-md">
-            <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
+          <div className="relative w-full sm:w-64">
+            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-zinc-500" : "text-slate-400")} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={activeTab === 'banner' ? "Search banners..." : "Search news..."}
-              className={cn("w-full pl-11 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
             />
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Table Section */}
-      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-slate-200 font-semibold")}>
+              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
                 <th className="px-6 py-4 w-12 text-center">
                   <div className="flex items-center">
                     {(() => {
@@ -584,7 +675,7 @@ export default function AdminAnnouncementsPage() {
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Delete Modal */}
       <ConfirmModal
@@ -881,6 +972,6 @@ export default function AdminAnnouncementsPage() {
           </motion.div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

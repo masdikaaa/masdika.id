@@ -417,7 +417,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
         <div className={cn(
           "fixed bottom-0 left-0 right-0 lg:left-64 z-40 pt-8 sm:pt-12 pb-3 sm:pb-4 md:pb-6 px-3 sm:px-4 md:px-6 pointer-events-none",
           isDark 
-            ? "bg-gradient-to-t from-[#011627] via-[#011627]/90 to-transparent" 
+            ? "bg-gradient-to-t from-[#000000] via-[#000000]/90 to-transparent" 
             : "bg-gradient-to-t from-slate-100 via-slate-100/90 to-transparent"
         )}>
           <div className="max-w-5xl mx-auto pointer-events-auto">
@@ -426,7 +426,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               className={cn(
                 "w-full relative border rounded-2xl sm:rounded-3xl transition-all duration-300",
                 isDark 
-                  ? "bg-[#0a1f33]/90 backdrop-blur-sm border-white/10" 
+                  ? "bg-[#0b1322]/95 backdrop-blur-md border-slate-800 shadow-xl" 
                   : "bg-white border-slate-200",
                 isDragging 
                   ? "border-cyan-500 ring-4 ring-cyan-500/20" 

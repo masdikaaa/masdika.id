@@ -1,10 +1,9 @@
 "use client";
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
-
 import React, { useState, useEffect, Fragment } from "react";
 import { toast } from "sonner";
-import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info } from "lucide-react";
+import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info, Users, Layers, DollarSign } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -104,26 +103,95 @@ export default function PaygMonitorPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             PAYG Billing Monitor
           </h1>
-          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Manage and monitor Pay-As-You-Go billing execution.</p>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage and monitor Pay-As-You-Go automated deductions, cron cycles, and unbilled charges.</p>
         </div>
-        <button 
-          onClick={fetchData}
-          disabled={loading}
-          className={cn("flex items-center gap-2 px-4 py-2 border rounded-lg font-medium transition-colors disabled:opacity-50", isDark ? "bg-[#0b1322] border-slate-800 text-white hover:bg-slate-800" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Data
-        </button>
+        <div className="flex items-center gap-3">
+          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Customers: {customers.length}
+          </div>
+          <button 
+            onClick={fetchData}
+            disabled={loading}
+            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border disabled:opacity-50", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>PAYG Customers</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {customers.length}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Active enrolled accounts
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Services</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {customers.reduce((acc, c) => acc + c.services.length, 0)}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            VPS & Reserved IPs
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Unbilled Balance</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+            {formatRupiah(customers.reduce((acc, c) => acc + c.totalAccumulatedCost, 0))}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Accumulated this cycle
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Cron Interval</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight capitalize", isDark ? "text-white" : "text-slate-900")}>
+            {interval}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            {interval === 'hourly' ? '1-hour cycle' : '1-minute fast cycle'}
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <div className={cn("border rounded-xl p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <h2 className={cn("text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Clock className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
               Billing Interval
@@ -163,7 +231,7 @@ export default function PaygMonitorPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className={cn("border rounded-xl p-6 h-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl p-6 h-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
@@ -192,12 +260,12 @@ export default function PaygMonitorPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead>
-                    <tr className={cn("border-b", isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-500")}>
-                      <th className="pb-3 pl-4 font-semibold">Customer</th>
-                      <th className="pb-3 font-semibold text-center">Active Services</th>
-                      <th className="pb-3 font-semibold text-right">Total Accumulated</th>
-                      <th className="pb-3 font-semibold text-center">Invoice Status</th>
+                  <thead className={cn("text-xs uppercase", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
+                    <tr>
+                      <th className="py-3 px-4 rounded-l-lg font-semibold">Customer</th>
+                      <th className="py-3 px-4 font-semibold text-center">Active Services</th>
+                      <th className="py-3 px-4 font-semibold text-right">Total Accumulated</th>
+                      <th className="py-3 px-4 rounded-r-lg font-semibold text-center">Invoice Status</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -248,13 +316,13 @@ export default function PaygMonitorPage() {
                               <div className={cn("border rounded-xl p-4", isDark ? "bg-[#0b1322] border-slate-800 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
                                 <h4 className={cn("text-sm font-bold mb-3", isDark ? "text-white" : "text-slate-900")}>Service Details</h4>
                                 <table className="w-full text-left text-xs whitespace-nowrap">
-                                  <thead>
-                                    <tr className={cn("border-b", isDark ? "text-slate-400 border-slate-800 font-semibold" : "text-slate-500 border-slate-200 font-semibold")}>
-                                      <th className="pb-2 pl-2 font-medium">Service</th>
-                                      <th className="pb-2 font-medium">Type</th>
-                                      <th className="pb-2 font-medium text-right">Hourly Rate</th>
-                                      <th className="pb-2 font-medium text-right">Accumulated</th>
-                                      <th className="pb-2 font-medium text-center">Status</th>
+                                  <thead className={cn("text-xs uppercase", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
+                                    <tr>
+                                      <th className="py-2.5 px-3 rounded-l-lg font-medium">Service</th>
+                                      <th className="py-2.5 px-3 font-medium">Type</th>
+                                      <th className="py-2.5 px-3 font-medium text-right">Hourly Rate</th>
+                                      <th className="py-2.5 px-3 font-medium text-right">Accumulated</th>
+                                      <th className="py-2.5 px-3 rounded-r-lg font-medium text-center">Status</th>
                                     </tr>
                                   </thead>
                                   <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>

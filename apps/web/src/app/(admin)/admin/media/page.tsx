@@ -628,8 +628,8 @@ export default function AdminMediaLibrary() {
     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6 relative min-h-[calc(100vh-4rem)]" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
       {isDragging && (
         <div className={cn("absolute inset-0 z-50 flex items-center justify-center backdrop-blur-sm border-4 border-dashed border-cyan-500 rounded-2xl m-6 transition-all pointer-events-none", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-          <div className={cn("text-center p-8 rounded-2xl border border-cyan-500/30", isDark ? "bg-[#011627]" : "bg-white")}>
-            <UploadCloud className={cn("w-16 h-16 mx-auto mb-4 animate-bounce", isDark ? "text-cyan-500" : "text-cyan-700")} />
+          <div className={cn("text-center p-8 rounded-2xl border", isDark ? "bg-[#0b1322] border-slate-800 shadow-2xl" : "bg-white border-slate-200")}>
+            <UploadCloud className={cn("w-16 h-16 mx-auto mb-4 animate-bounce", isDark ? "text-cyan-400" : "text-cyan-600")} />
             <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-[#0F3B4A]")}>Drop file to upload</h2>
           </div>
         </div>
