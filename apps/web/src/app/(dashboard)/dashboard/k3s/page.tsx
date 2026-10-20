@@ -111,10 +111,18 @@ export default function K3sListPage() {
                     <span className={cn("block text-[10px] uppercase tracking-wider font-semibold mb-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
                     <span className={cn(
                       "font-bold flex items-center gap-2 text-sm",
-                      cluster.status === "RUNNING" ? "text-cyan-400" : "text-amber-400"
+                      cluster.status === "RUNNING" ? "text-cyan-400" : cluster.status === "FAILED" ? "text-rose-400" : "text-amber-400"
                     )}>
-                      {cluster.status === "RUNNING" ? <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" /> : <Clock className="w-3.5 h-3.5 animate-pulse" />}
-                      {cluster.status}
+                      {cluster.status === "RUNNING" ? (
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                      ) : (
+                        <Clock className="w-3.5 h-3.5 animate-pulse" />
+                      )}
+                      {cluster.status === "WAITING_FOR_CLOUD_INIT" || cluster.status === "WAITING_FOR_SSH"
+                        ? "INITIALIZING"
+                        : cluster.status === "INSTALLING_K3S"
+                          ? "INSTALLING"
+                          : cluster.status}
                     </span>
                   </div>
                   <div className={cn("rounded-2xl p-3.5 border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>

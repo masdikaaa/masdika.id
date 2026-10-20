@@ -131,6 +131,45 @@ export class ProxmoxClient {
       target: node
     });
   }
+
+  // --- Tasks & Locks ---
+  async waitForTask(node: string, upid: string, timeoutMs: number = 300000): Promise<void> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const task = await this.getTaskStatus(node, upid);
+        if (task && task.status === "stopped") {
+          if (task.exitstatus && task.exitstatus !== "OK") {
+            throw new Error(`Proxmox task failed: ${task.exitstatus}`);
+          }
+          return;
+        }
+      } catch (err: any) {
+        if (err.message && err.message.includes("Proxmox task failed")) {
+          throw err;
+        }
+        // Transient network error while polling task status
+      }
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+    throw new Error(`Timeout after ${Math.round(timeoutMs / 1000)}s waiting for Proxmox task ${upid}`);
+  }
+
+  async waitForVmUnlock(node: string, vmid: number, timeoutMs: number = 180000): Promise<void> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const status = await this.getVmStatus(node, vmid);
+        if (status && !status.lock) {
+          return;
+        }
+      } catch (err: any) {
+        // VM may still be registering in Proxmox during clone
+      }
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+    throw new Error(`Timeout after ${Math.round(timeoutMs / 1000)}s waiting for VMID ${vmid} lock to release`);
+  }
   
   async configVm(node: string, vmid: number, config: any) {
     return this.request<any>("POST", `/nodes/${node}/qemu/${vmid}/config`, config);

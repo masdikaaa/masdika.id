@@ -202,7 +202,7 @@ export class K3sProvisioningService {
       if (role === "MASTER") {
         await prisma.kubernetesCluster.update({
           where: { id: clusterId },
-          data: { status: "INSTALLING_K3S" }
+          data: { status: "WAITING_FOR_CLOUD_INIT" }
         });
       }
 
@@ -210,6 +210,12 @@ export class K3sProvisioningService {
       await this.waitForGuestReady(proxmox, vps.node, vps.vmid, clusterId);
 
       // 2. Install K3s
+      if (role === "MASTER") {
+        await prisma.kubernetesCluster.update({
+          where: { id: clusterId },
+          data: { status: "INSTALLING_K3S" }
+        });
+      }
       await K3sProvisioningService.appendLog(clusterId, `Installing K3s ${k3sChannel} as ${role} via Cloud-Init...`);
 
       if (role === "MASTER") {

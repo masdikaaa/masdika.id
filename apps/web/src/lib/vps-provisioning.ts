@@ -278,9 +278,15 @@ export class VpsProvisioningService {
 
     // 3. Clone Template
     console.log(`Cloning VMID ${template.vmid} to ${newVmid}...`);
-    await proxmox.cloneVm(vps.node, template.vmid, newVmid, vps.hostname, vps.storageId);
+    const cloneResult = await proxmox.cloneVm(vps.node, template.vmid, newVmid, vps.hostname, vps.storageId);
+    if (typeof cloneResult === "string" && cloneResult.startsWith("UPID:")) {
+      console.log(`Waiting for clone task ${cloneResult} to complete...`);
+      await proxmox.waitForTask(vps.node, cloneResult, 300000);
+      console.log(`Clone task completed for VMID ${newVmid}`);
+    }
 
-    // Note: We don't need a static wait here anymore because we'll poll below.
+    // Wait until VM lock is completely released by Proxmox
+    await proxmox.waitForVmUnlock(vps.node, newVmid, 180000);
 
     // 4. Configure Cloud-Init and Resources
     const config: any = {
@@ -307,7 +313,7 @@ export class VpsProvisioningService {
       sshKeys += vps.sshKey.trim() + "\n";
     }
 
-    // Always inject the panel's system SSH key for background management tasks (like K3s provisioning)
+    // Always inject the panel's system SSH key for background maintenance tasks
     try {
       const systemKeyPath = require("path").join(process.cwd(), "storage", "ssh", "id_rsa.pub");
       if (require("fs").existsSync(systemKeyPath)) {
@@ -383,9 +389,10 @@ export class VpsProvisioningService {
         await proxmox.configVm(vps.node, newVmid, config);
         configured = true;
       } catch (err: any) {
-        if (err.message && err.message.includes("can't lock file")) {
+        const errMsg = (err.message || "").toLowerCase();
+        if (errMsg.includes("lock") || errMsg.includes("clone") || errMsg.includes("busy")) {
           attempts++;
-          console.log(`VMID ${newVmid} is locked (cloning in progress). Waiting 5s... (Attempt ${attempts}/${maxAttempts})`);
+          console.log(`VMID ${newVmid} is locked (${err.message}). Waiting 5s... (Attempt ${attempts}/${maxAttempts})`);
           await new Promise(resolve => setTimeout(resolve, 5000));
         } else {
           // If it's a different error, throw it immediately
@@ -411,8 +418,23 @@ export class VpsProvisioningService {
           }
         }
       }
-      await proxmox.resizeVmDisk(vps.node, newVmid, targetDisk, `${vps.diskGb}G`);
-      console.log(`Resized ${targetDisk} to ${vps.diskGb}G successfully`);
+      let resized = false;
+      let resizeAttempts = 0;
+      while (!resized && resizeAttempts < 10) {
+        try {
+          await proxmox.resizeVmDisk(vps.node, newVmid, targetDisk, `${vps.diskGb}G`);
+          resized = true;
+          console.log(`Resized ${targetDisk} to ${vps.diskGb}G successfully`);
+        } catch (rErr: any) {
+          const rMsg = (rErr.message || "").toLowerCase();
+          if (rMsg.includes("lock") || rMsg.includes("clone") || rMsg.includes("busy")) {
+            resizeAttempts++;
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          } else {
+            throw rErr;
+          }
+        }
+      }
     } catch (err: any) {
       console.error(`Failed to resize disk for VMID ${newVmid}:`, err);
     }
@@ -656,7 +678,15 @@ export class VpsProvisioningService {
       if (!template) throw new Error(`Template ${newTemplateName} not found in DB`);
 
       console.log(`Cloning VMID ${template.vmid} to existing VMID ${vps.vmid}...`);
-      await proxmox.cloneVm(vps.node, template.vmid, vps.vmid, vps.hostname, vps.storageId);
+      const cloneResult = await proxmox.cloneVm(vps.node, template.vmid, vps.vmid, vps.hostname, vps.storageId);
+      if (typeof cloneResult === "string" && cloneResult.startsWith("UPID:")) {
+        console.log(`Waiting for reinstall clone task ${cloneResult} to complete...`);
+        await proxmox.waitForTask(vps.node, cloneResult, 300000);
+        console.log(`Clone task completed for VMID ${vps.vmid}`);
+      }
+
+      // Wait until VM lock is completely released by Proxmox
+      await proxmox.waitForVmUnlock(vps.node, vps.vmid, 180000);
 
       // 3. Configure Cloud-Init
       const config: any = {
@@ -741,7 +771,8 @@ export class VpsProvisioningService {
           await proxmox.configVm(vps.node, vps.vmid, config);
           configured = true;
         } catch (err: any) {
-          if (err.message && err.message.includes("can't lock file")) {
+          const errMsg = (err.message || "").toLowerCase();
+          if (errMsg.includes("lock") || errMsg.includes("clone") || errMsg.includes("busy")) {
             attempts++;
             await new Promise(resolve => setTimeout(resolve, 5000));
           } else {
@@ -763,8 +794,23 @@ export class VpsProvisioningService {
             }
           }
         }
-        await proxmox.resizeVmDisk(vps.node, vps.vmid, targetDisk, `${vps.diskGb}G`);
-        console.log(`Resized ${targetDisk} to ${vps.diskGb}G successfully`);
+        let resized = false;
+        let resizeAttempts = 0;
+        while (!resized && resizeAttempts < 10) {
+          try {
+            await proxmox.resizeVmDisk(vps.node, vps.vmid, targetDisk, `${vps.diskGb}G`);
+            resized = true;
+            console.log(`Resized ${targetDisk} to ${vps.diskGb}G successfully`);
+          } catch (rErr: any) {
+            const rMsg = (rErr.message || "").toLowerCase();
+            if (rMsg.includes("lock") || rMsg.includes("clone") || rMsg.includes("busy")) {
+              resizeAttempts++;
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            } else {
+              throw rErr;
+            }
+          }
+        }
       } catch (err: any) {
         console.error(`Failed to resize disk for VMID ${vps.vmid}:`, err);
       }

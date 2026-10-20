@@ -344,7 +344,7 @@ export default function K3sDetailPage() {
 
     fetchLog();
     // Poll every 2s when installing, every 30s otherwise (to check for new worker installs)
-    const installingStatuses = ['PENDING', 'PROVISIONING', 'WAITING_FOR_SSH', 'INSTALLING_K3S'];
+    const installingStatuses = ['PENDING', 'PROVISIONING', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH', 'INSTALLING_K3S'];
     const isInstalling = installingStatuses.includes(cluster?.status || '');
     const interval = setInterval(fetchLog, isInstalling ? 2000 : 30000);
     return () => clearInterval(interval);
@@ -715,7 +715,7 @@ export default function K3sDetailPage() {
         {(() => {
           const masterNode = cluster.nodes?.find((n: any) => n.kubernetesRole === 'MASTER');
           const isPendingPayment = masterNode?.status === 'PENDING_PAYMENT';
-          const isDeploying = ['PENDING', 'PROVISIONING'].includes(cluster.status) || ['PENDING', 'PROVISIONING'].includes(masterNode?.status);
+          const isDeploying = ['PENDING', 'PROVISIONING', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH', 'INSTALLING_K3S'].includes(cluster.status) || ['PENDING', 'PROVISIONING', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH', 'INSTALLING_K3S'].includes(masterNode?.status);
 
           if (isPendingPayment) {
             return (
@@ -758,34 +758,45 @@ export default function K3sDetailPage() {
                   <div className="flex flex-wrap justify-center gap-3 mb-8">
                     <span className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border",
-                      ['RUNNING', 'INSTALLING_K3S', 'WAITING_FOR_SSH'].includes(cluster.status)
+                      ['RUNNING', 'INSTALLING_K3S', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH'].includes(cluster.status)
                         ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200")
-                        : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
+                        : (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
                     )}>
-                      <CheckCircle className="w-3.5 h-3.5" /> VM Provisioned
+                      {['RUNNING', 'INSTALLING_K3S', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH'].includes(cluster.status)
+                        ? <CheckCircle className="w-3.5 h-3.5" />
+                        : <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />}
+                      VM Provisioned
                     </span>
                     <span className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border",
                       ['INSTALLING_K3S', 'RUNNING'].includes(cluster.status)
                         ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200")
-                        : cluster.status === 'WAITING_FOR_SSH'
+                        : ['WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH'].includes(cluster.status)
                           ? (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
                           : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
                     )}>
                       {['INSTALLING_K3S', 'RUNNING'].includes(cluster.status)
                         ? <CheckCircle className="w-3.5 h-3.5" />
-                        : <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />}
-                      SSH Connected
+                        : ['WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH'].includes(cluster.status)
+                          ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          : <div className="w-3.5 h-3.5 rounded-full border-2 border-current opacity-50" />}
+                      Cloud-Init Ready
                     </span>
                     <span className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border",
-                      cluster.status === 'INSTALLING_K3S'
-                        ? (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
-                        : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
+                      cluster.status === 'RUNNING'
+                        ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200")
+                        : cluster.status === 'INSTALLING_K3S'
+                          ? (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
+                          : (isDark ? "bg-[#060b14] text-slate-500 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")
                     )}>
-                      {cluster.status === 'INSTALLING_K3S'
-                        ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        : <div className="w-3.5 h-3.5 rounded-full border-2 border-current opacity-50" />}
+                      {cluster.status === 'RUNNING' ? (
+                        <CheckCircle className="w-3.5 h-3.5" />
+                      ) : cluster.status === 'INSTALLING_K3S' ? (
+                        <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 rounded-full border-2 border-current opacity-50" />
+                      )}
                       Installing K3s
                     </span>
                   </div>
@@ -1562,7 +1573,7 @@ export default function K3sDetailPage() {
                     <span className={cn("text-xs font-mono mx-auto", isDark ? "text-zinc-500" : "text-slate-500")}>
                       provisioning-log — {cluster.name}
                     </span>
-                    {['PENDING', 'PROVISIONING', 'WAITING_FOR_SSH', 'INSTALLING_K3S'].includes(cluster.status) ? (
+                    {['PENDING', 'PROVISIONING', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH', 'INSTALLING_K3S'].includes(cluster.status) ? (
                       <span className="flex items-center gap-1.5 text-[10px] font-bold text-green-400">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                         LIVE
@@ -1610,7 +1621,7 @@ export default function K3sDetailPage() {
                           </div>
                         ))}
                         {/* Blinking cursor when live */}
-                        {['PENDING', 'PROVISIONING', 'WAITING_FOR_SSH', 'INSTALLING_K3S'].includes(cluster.status) && (
+                        {['PENDING', 'PROVISIONING', 'WAITING_FOR_CLOUD_INIT', 'WAITING_FOR_SSH', 'INSTALLING_K3S'].includes(cluster.status) && (
                           <div className="flex gap-4 px-2 py-0.5 mt-1">
                             <span className={cn("text-xs select-none opacity-0", isDark ? "text-zinc-600" : "text-slate-900")}>
                               00:00:00
