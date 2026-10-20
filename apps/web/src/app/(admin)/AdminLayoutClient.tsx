@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon, Globe, Star } from "lucide-react";
+import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon, Globe, Star, UploadCloud } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
@@ -31,6 +31,7 @@ const SIDEBAR_LINKS = [
   { name: "Resource Finding", href: "/admin/resource-finding", icon: Activity, color: "text-rose-400", group: "Cloud Services" },
   { name: "VPC Routers", href: "/admin/vpc-routers", icon: Network, color: "text-cyan-500", group: "Cloud Services" },
   { name: "Secure Media", href: "/admin/media", icon: HardDrive, color: "text-sky-400", group: "Cloud Services" },
+  { name: "Customer CDN", href: "/admin/customer-cdn", icon: UploadCloud, color: "text-cyan-400", group: "Cloud Services" },
   { name: "Cloudflared Tunnels", href: "/admin/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "Cloud Services" },
 
   { name: "Customers", href: "/admin/customers", icon: Users, color: "text-cyan-500", group: "Billing & Subscriptions" },

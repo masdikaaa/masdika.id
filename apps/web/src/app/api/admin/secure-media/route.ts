@@ -33,7 +33,13 @@ export async function GET(req: NextRequest) {
     }
 
     const media = await prisma.secureMedia.findMany({
-      where: { folderPath },
+      where: {
+        folderPath,
+        OR: [
+          { userId: null },
+          { user: { role: 'ADMIN' } },
+        ],
+      },
       orderBy: [
         { isPinned: 'desc' },
         { isFolder: 'desc' },
@@ -49,7 +55,11 @@ export async function GET(req: NextRequest) {
           where: {
             folderPath: {
               startsWith: childrenPathPrefix
-            }
+            },
+            OR: [
+              { userId: null },
+              { user: { role: 'ADMIN' } },
+            ],
           }
         });
         
@@ -177,10 +187,14 @@ export async function DELETE(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
     const media = await prisma.secureMedia.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
+      include: { user: true },
     });
 
     if (!media) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+    if (media.userId !== null && media.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: "Cannot delete customer files from this route" }, { status: 403 });
+    }
 
     // If it's a folder, block deletion if it's not empty
     if (media.isFolder) {
