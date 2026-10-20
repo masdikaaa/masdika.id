@@ -151,27 +151,27 @@ export default function MenuOrderPage() {
             <Reorder.Item
               key={key}
               value={key}
-              className={cn("flex items-center gap-3 p-3 sm:p-4 rounded-xl border cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}
+              className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}
             >
-              <GripVertical className="w-5 h-5 text-zinc-500 shrink-0" />
+              <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+                <GripVertical className="w-5 h-5 text-zinc-500 shrink-0" />
 
-              <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0", isDark ? "bg-slate-800 text-slate-400" : "bg-slate-200 text-slate-600")}>
-                {idx + 1}
-              </span>
+                <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0", isDark ? "bg-slate-800 text-slate-400" : "bg-slate-200 text-slate-600")}>
+                  {idx + 1}
+                </span>
 
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${meta.bg} ${meta.color}`}>
-                <meta.icon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className={cn("font-bold text-sm leading-tight", isDark ? "text-white" : "text-slate-900")}>{meta.label}</p>
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${meta.bg} ${meta.color}`}>
+                  <meta.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <p className="text-xs text-zinc-500 line-clamp-1 mt-0.5 hidden sm:block">{meta.description}</p>
+
+                <div className="flex-1 min-w-0">
+                  <p className={cn("font-bold text-sm leading-tight truncate sm:whitespace-normal", isDark ? "text-white" : "text-slate-900")}>{meta.label}</p>
+                  <p className="text-xs text-zinc-500 line-clamp-1 mt-0.5 hidden sm:block">{meta.description}</p>
+                </div>
               </div>
 
               {/* Badge settings right column */}
-              <div className="flex items-center gap-2 shrink-0 sm:w-48 justify-end">
+              <div className="flex items-center gap-2 shrink-0 sm:w-48 justify-end pl-11 sm:pl-0 w-full sm:w-auto">
                 {hasBadge && (
                   <input
                     type="text"
@@ -206,16 +206,16 @@ export default function MenuOrderPage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-8">
-        <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+      <div className="mb-6 sm:mb-8">
+        <h1 className={cn("text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
           Menu Order Configuration
         </h1>
-        <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Drag to reorder dropdown items. Toggle the "New" badge on each item.</p>
+        <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Drag to reorder dropdown items. Toggle the "New" badge on each item.</p>
       </div>
 
-      <div className="space-y-8">
-        <div className={cn("rounded-2xl border p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+      <div className="space-y-6 sm:space-y-8">
+        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <h2 className={cn("text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Compass className="w-5 h-5" />
             </div>
@@ -224,8 +224,8 @@ export default function MenuOrderPage() {
           {renderList(order, badges, setOrder, 'explore')}
         </div>
 
-        <div className={cn("rounded-2xl border p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <h2 className={cn("text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Code className="w-5 h-5" />
             </div>
@@ -234,8 +234,8 @@ export default function MenuOrderPage() {
           {renderList(devOrder, devBadges, setDevOrder, 'dev')}
         </div>
 
-        <div className={cn("rounded-2xl border p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <h2 className={cn("text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Briefcase className="w-5 h-5" />
             </div>
@@ -244,7 +244,7 @@ export default function MenuOrderPage() {
           {renderList(companyOrder, companyBadges, setCompanyOrder, 'company')}
         </div>
 
-        <div className={cn("rounded-2xl border p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <button onClick={handleReset}
             className={cn("flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
             <RotateCcw className="w-4 h-4" /> Reset to Default

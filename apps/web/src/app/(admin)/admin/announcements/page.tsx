@@ -503,27 +503,29 @@ export default function AdminAnnouncementsPage() {
 
       {/* Filter and Control Bar (GAMBAR 1 Style) */}
       <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex p-1 rounded-xl border self-start md:self-auto overflow-x-auto max-w-full", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
-          {[
-            { key: 'berita', label: 'News & Promos', count: newsCount },
-            { key: 'banner', label: 'Dashboard Banners', count: bannersCount },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5",
-                activeTab === tab.key
-                  ? "bg-cyan-500 text-slate-950 shadow-sm"
-                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
-              )}
-            >
-              <span>{tab.label}</span>
-              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
+        <div className="w-full sm:w-auto overflow-x-auto max-w-full scrollbar-none pb-0.5">
+          <div className={cn("inline-flex p-1 rounded-xl border shrink-0 min-w-max", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+            {[
+              { key: 'berita', label: 'News & Promos', count: newsCount },
+              { key: 'banner', label: 'Dashboard Banners', count: bannersCount },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5",
+                  activeTab === tab.key
+                    ? "bg-cyan-500 text-slate-950 shadow-sm"
+                    : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+                )}
+              >
+                <span>{tab.label}</span>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">

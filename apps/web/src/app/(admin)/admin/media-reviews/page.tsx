@@ -334,59 +334,61 @@ export default function AdminMediaReviewsPage() {
         isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Tab switch */}
-        <div className={cn(
-          "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 w-full sm:w-auto",
-          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
-        )}>
-          <button
-            onClick={() => setActiveTab("comments")}
-            className={cn(
-              "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
-              activeTab === "comments"
-                ? "bg-cyan-500 text-white font-bold"
-                : isDark
-                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            )}
-          >
-            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-            <span>Comments</span>
-            <span className={cn(
-              "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
-              activeTab === "comments"
-                ? "bg-white/20 text-white"
-                : isDark
-                  ? "bg-white/10 text-zinc-300"
-                  : "bg-slate-200 text-slate-700"
-            )}>
-              {comments.length}
-            </span>
-          </button>
+        <div className="w-full sm:w-auto overflow-x-auto max-w-full scrollbar-none pb-0.5">
+          <div className={cn(
+            "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 min-w-max",
+            isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+          )}>
+            <button
+              onClick={() => setActiveTab("comments")}
+              className={cn(
+                "inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
+                activeTab === "comments"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                  : isDark
+                    ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              )}
+            >
+              <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+              <span>Comments</span>
+              <span className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+                activeTab === "comments"
+                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  : isDark
+                    ? "bg-white/10 text-zinc-300"
+                    : "bg-slate-200 text-slate-700"
+              )}>
+                {comments.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab("ratings")}
-            className={cn(
-              "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
-              activeTab === "ratings"
-                ? "bg-cyan-500 text-white font-bold"
-                : isDark
-                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            )}
-          >
-            <Star className="w-3.5 h-3.5 shrink-0" />
-            <span>Direct Ratings</span>
-            <span className={cn(
-              "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
-              activeTab === "ratings"
-                ? "bg-white/20 text-white"
-                : isDark
-                  ? "bg-white/10 text-zinc-300"
-                  : "bg-slate-200 text-slate-700"
-            )}>
-              {ratings.length}
-            </span>
-          </button>
+            <button
+              onClick={() => setActiveTab("ratings")}
+              className={cn(
+                "inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
+                activeTab === "ratings"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                  : isDark
+                    ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              )}
+            >
+              <Star className="w-3.5 h-3.5 shrink-0" />
+              <span>Direct Ratings</span>
+              <span className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+                activeTab === "ratings"
+                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  : isDark
+                    ? "bg-white/10 text-zinc-300"
+                    : "bg-slate-200 text-slate-700"
+              )}>
+                {ratings.length}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Search & Rating Filter */}

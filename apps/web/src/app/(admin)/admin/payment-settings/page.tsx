@@ -113,14 +113,14 @@ export default function AdminPaymentSettingsPage() {
             <div 
               key={pm.id} 
               className={cn(
-                "flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer",
+                "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border transition-all cursor-pointer",
                 pm.isActive 
                   ? (isDark ? "bg-[#060b14] border-emerald-500/50 hover:bg-[#060b14]/80 shadow-sm" : "bg-white border-emerald-500 shadow-sm") 
                   : (isDark ? "bg-[#060b14]/40 border-slate-800/80 opacity-60 hover:opacity-80" : "bg-slate-50 border-slate-200 opacity-60 hover:opacity-80")
               )}
               onClick={() => handleToggle(pm.id)}
             >
-              <div className="flex items-center gap-4 min-w-0">
+              <div className="flex items-center gap-3.5 min-w-0">
                 <div className={cn(
                   "w-12 h-10 flex items-center justify-center shrink-0 rounded transition-colors overflow-hidden bg-white border",
                   pm.isActive ? "border-emerald-500" : "border-slate-200 opacity-70"
@@ -130,7 +130,7 @@ export default function AdminPaymentSettingsPage() {
                       src={pm.image} 
                       alt={pm.name} 
                       className={cn("w-full h-full object-contain p-1.5", pm.isActive ? "" : "grayscale")} 
-                    loading="lazy" decoding="async" />
+                      loading="lazy" decoding="async" />
                   ) : (
                     <>
                       {type === "VIRTUAL_ACCOUNT" && <Building2 className="w-5 h-5 text-slate-800" />}
@@ -141,42 +141,48 @@ export default function AdminPaymentSettingsPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className={cn("text-sm font-semibold break-words whitespace-normal leading-tight", isDark ? "text-white" : "text-slate-900")}>{pm.name}</div>
-                  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>Fee Rp</span>
-                      <input 
-                        type="number" 
-                        value={pm.fee} 
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? 0 : parseInt(e.target.value);
-                          setPaymentMethods(prev => prev.map(p => p.id === pm.id ? { ...p, fee: val } : p));
-                        }}
-                        className={cn("border rounded px-2 py-1 text-xs w-24 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
-                      />
-                      <button 
-                        onClick={() => handleUpdateFee(pm.id, pm.fee)}
-                        className="text-[10px] px-3 py-1 rounded font-semibold transition-colors bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
+                  <div className={cn("text-sm font-semibold break-words leading-tight", isDark ? "text-white" : "text-slate-900")}>{pm.name}</div>
                 </div>
               </div>
-              
-              <button
-                type="button"
-                className={cn(
-                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2",
-                  pm.isActive ? "bg-cyan-400" : (isDark ? "bg-slate-800" : "bg-slate-300")
-                )}
+
+              {/* Action row: Fee input & Toggle */}
+              <div 
+                className="flex items-center justify-between sm:justify-end gap-3 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-slate-800/40 w-full sm:w-auto"
+                onClick={(e) => e.stopPropagation()}
               >
-                <span className={cn(
-                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 ring-0 transition duration-200 ease-in-out",
-                  pm.isActive ? "translate-x-5 bg-slate-950" : "translate-x-0 bg-white"
-                )} />
-              </button>
+                <div className="flex items-center gap-2">
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Fee Rp</span>
+                  <input 
+                    type="number" 
+                    value={pm.fee} 
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                      setPaymentMethods(prev => prev.map(p => p.id === pm.id ? { ...p, fee: val } : p));
+                    }}
+                    className={cn("border rounded-lg px-2.5 py-1 text-xs w-20 sm:w-24 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  />
+                  <button 
+                    onClick={() => handleUpdateFee(pm.id, pm.fee)}
+                    className="text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm shrink-0"
+                  >
+                    Save
+                  </button>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => handleToggle(pm.id)}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2",
+                    pm.isActive ? "bg-cyan-400" : (isDark ? "bg-slate-800" : "bg-slate-300")
+                  )}
+                >
+                  <span className={cn(
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 ring-0 transition duration-200 ease-in-out",
+                    pm.isActive ? "translate-x-5 bg-slate-950" : "translate-x-0 bg-white"
+                  )} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
