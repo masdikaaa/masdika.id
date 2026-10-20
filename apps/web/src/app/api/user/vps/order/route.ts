@@ -62,7 +62,21 @@ export async function POST(req: NextRequest) {
     ipv4Count = Math.max(0, Math.floor(Number(ipv4Count) || 0));
     ipv6Count = Math.max(0, Math.floor(Number(ipv6Count) || 0));
 
-    const template = await prisma.vpsTemplate.findUnique({ where: { id: templateId } });
+    let template = await prisma.vpsTemplate.findUnique({ where: { id: templateId } });
+
+    // Enforce Debian-13 template for Kubernetes
+    if (isKubernetes) {
+      const debian13 = await prisma.vpsTemplate.findFirst({
+        where: { name: { contains: "Debian-13", mode: "insensitive" } }
+      }) || await prisma.vpsTemplate.findFirst({
+        where: { name: { contains: "Debian", mode: "insensitive" } }
+      });
+      if (debian13) {
+        template = debian13;
+        templateId = debian13.id;
+      }
+    }
+
     if (!template) return NextResponse.json({ error: "Template not found" }, { status: 404 });
 
     let amount = 0;

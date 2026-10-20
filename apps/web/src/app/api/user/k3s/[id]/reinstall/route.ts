@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
-import { NodeSSH } from "node-ssh";
 import { K3sProvisioningService } from "@/lib/k3s-provisioning";
-import fs from "fs";
-import path from "path";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {

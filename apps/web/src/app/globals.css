@@ -2048,9 +2048,10 @@ html.light input[type="range"]::-moz-range-progress {
   animation: page-fade-in 0.15s ease-out both;
 }
 
-/* ===== Content Visibility for offscreen sections ===== */
+/* ===== Content Visibility for offscreen sections (public landing only) ===== */
 /* Tells browser to skip layout/paint for lower sections until scrolled near */
-section:not(:first-of-type) {
+.public-page section:not(:first-of-type),
+.landing-section:not(:first-of-type) {
   content-visibility: auto;
   contain-intrinsic-size: auto 500px;
 }

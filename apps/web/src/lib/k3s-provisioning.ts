@@ -1,26 +1,23 @@
 import { prisma } from "@/lib/prisma";
-import { NodeSSH } from "node-ssh";
-import { encryptDeterministic } from "@/lib/encryption";
+import { encryptDeterministic, decryptDeterministic } from "@/lib/encryption";
 import { ProxmoxClient } from "./proxmox";
-import fs from "fs";
-import path from "path";
 
 export class K3sProvisioningService {
   /**
    * Append a log message to the cluster's installLog in the database for realtime display.
    */
-  private static logBuffer: Record<number, {ts: string, msg: string}[]> = {};
+  private static logBuffer: Record<number, { ts: string; msg: string }[]> = {};
   private static logTimers: Record<number, NodeJS.Timeout> = {};
 
   static async appendLog(clusterId: number, rawMessage: string) {
     if (!this.logBuffer[clusterId]) this.logBuffer[clusterId] = [];
-    
+
     const lines = rawMessage.split('\n');
     for (const line of lines) {
       const cleanLine = line.replace(/\r/g, '').trim();
       if (cleanLine) {
-         this.logBuffer[clusterId].push({ ts: new Date().toISOString(), msg: cleanLine });
-         console.log(`[K3s Log #${clusterId}] ${cleanLine}`);
+        this.logBuffer[clusterId].push({ ts: new Date().toISOString(), msg: cleanLine });
+        console.log(`[K3s Log #${clusterId}] ${cleanLine}`);
       }
     }
 
@@ -32,7 +29,7 @@ export class K3sProvisioningService {
   static async flushLogs(clusterId: number) {
     const logs = this.logBuffer[clusterId];
     if (!logs || logs.length === 0) return;
-    
+
     this.logBuffer[clusterId] = [];
     delete this.logTimers[clusterId];
 
@@ -43,7 +40,7 @@ export class K3sProvisioningService {
       });
       const currentLog: any[] = cluster?.installLog ? JSON.parse(cluster.installLog) : [];
       const newLog = [...currentLog, ...logs].slice(-500);
-      
+
       await prisma.kubernetesCluster.update({
         where: { id: clusterId },
         data: { installLog: JSON.stringify(newLog) }
@@ -58,18 +55,130 @@ export class K3sProvisioningService {
   }
 
   /**
-   * Install K3s on a remote VM via SSH and retrieve the kubeconfig.
-   * This is meant to be called after the VM is booted.
+   * Helper to execute a command inside a VM using QEMU Guest Agent / Cloud-Init,
+   * polling until completion and streaming logs to the cluster installLog.
+   */
+  static async runGuestCommand(
+    proxmox: ProxmoxClient,
+    node: string,
+    vmid: number,
+    command: string,
+    clusterId: number,
+    description: string,
+    timeoutSeconds: number = 360
+  ): Promise<{ exitcode: number; stdout: string; stderr: string }> {
+    await this.appendLog(clusterId, `[Cloud-Init / Agent] Starting: ${description}...`);
+
+    const execRes = await proxmox.agentExecString(node, vmid, command);
+    if (!execRes || !execRes.pid) {
+      throw new Error(`Failed to initiate command via guest agent on VM ${vmid}`);
+    }
+
+    const startTime = Date.now();
+    let lastHeartbeat = Date.now();
+
+    while ((Date.now() - startTime) < timeoutSeconds * 1000) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      let status: any;
+      try {
+        status = await proxmox.getAgentExecStatus(node, vmid, execRes.pid);
+      } catch (e: any) {
+        console.warn(`[K3s Agent Poll] Transient error on VM ${vmid}:`, e.message);
+        continue;
+      }
+
+      if (status && status.exited === 1) {
+        const stdout = status['out-data'] || '';
+        const stderr = status['err-data'] || '';
+
+        if (stdout.trim()) {
+          await this.appendLog(clusterId, stdout.trim());
+        }
+        if (stderr.trim()) {
+          await this.appendLog(clusterId, `[stderr] ${stderr.trim()}`);
+        }
+
+        if (status.exitcode !== 0) {
+          throw new Error(`Command failed with exit code ${status.exitcode}: ${stderr || stdout}`);
+        }
+
+        return { exitcode: status.exitcode, stdout, stderr };
+      }
+
+      // Heartbeat every 15 seconds so UI feels responsive
+      if (Date.now() - lastHeartbeat > 15000) {
+        lastHeartbeat = Date.now();
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        await this.appendLog(clusterId, `[Cloud-Init] ${description} in progress... (${elapsed}s elapsed)`);
+      }
+    }
+
+    throw new Error(`Timed out after ${timeoutSeconds}s waiting for: ${description}`);
+  }
+
+  /**
+   * Wait for QEMU Guest Agent and Cloud-Init to be fully ready on the VM.
+   */
+  static async waitForGuestReady(
+    proxmox: ProxmoxClient,
+    node: string,
+    vmid: number,
+    clusterId: number,
+    maxAttempts: number = 60 // 60 * 5s = 5 minutes
+  ): Promise<void> {
+    await this.appendLog(clusterId, `Waiting for VM ${vmid} cloud-init and hypervisor guest agent...`);
+
+    let agentReady = false;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const pingRes = await proxmox.agentExecString(node, vmid, "echo ready");
+        if (pingRes && pingRes.pid) {
+          agentReady = true;
+          break;
+        }
+      } catch (err: any) {
+        if (attempt % 4 === 0) {
+          await this.appendLog(clusterId, `VM ${vmid} booting and initializing cloud-init... (${attempt}/${maxAttempts})`);
+        }
+      }
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+
+    if (!agentReady) {
+      throw new Error(`Guest agent did not respond on VM ${vmid} within ${maxAttempts * 5}s`);
+    }
+
+    await this.appendLog(clusterId, `Guest agent online on VM ${vmid}. Verifying cloud-init status...`);
+
+    // Ensure cloud-init has finished initial boot modules
+    try {
+      await this.runGuestCommand(
+        proxmox,
+        node,
+        vmid,
+        "cloud-init status --wait || true",
+        clusterId,
+        "Waiting for cloud-init initial setup",
+        180
+      );
+    } catch (e: any) {
+      await this.appendLog(clusterId, `Cloud-init status notice (${e.message}). Proceeding...`);
+    }
+  }
+
+  /**
+   * Install K3s on a VM using Cloud-Init / QEMU Guest Agent (SSH-Free).
    */
   static async installK3s(
-    vpsId: number, 
-    clusterId: number, 
-    ipAddress: string, 
-    rootPassword: string,
+    vpsId: number,
+    clusterId: number,
+    ipAddress: string,
+    rootPassword?: string,
     role: "MASTER" | "WORKER" = "MASTER"
   ) {
-    await K3sProvisioningService.appendLog(clusterId, `Starting K3s ${role} installation on ${ipAddress}...`);
-    
+    await K3sProvisioningService.appendLog(clusterId, `Starting K3s ${role} provisioning via Cloud-Init on ${ipAddress || 'VPC internal'}...`);
+
     try {
       const vps = await prisma.vpsService.findUnique({ where: { id: vpsId } });
       if (!vps || !vps.vmid) throw new Error("VPS or VMID not found");
@@ -77,83 +186,18 @@ export class K3sProvisioningService {
       const cluster = await prisma.kubernetesCluster.findUnique({ where: { id: clusterId } });
       if (!cluster) throw new Error("Kubernetes cluster record not found");
 
+      const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+      if (!server) throw new Error("No active Proxmox server configured");
+
+      const proxmox = new ProxmoxClient(server.host, server.tokenId, decryptDeterministic(server.tokenSecret));
+
       const vpcIp = vps.vpcIp;
       if (!vpcIp) {
-        await K3sProvisioningService.appendLog(clusterId, `Warning: No VPC IP found for VPS ${vpsId}. Cluster communication might use public IP.`);
+        await K3sProvisioningService.appendLog(clusterId, `Notice: No VPC IP found for node ${vpsId}. Cluster communication will use primary IP.`);
       }
 
       // Extract version channel (e.g. "v1.31")
       const k3sChannel = cluster.version || "v1.31";
-
-      const ssh = new NodeSSH();
-      
-      // Load system private key if available
-      let privateKey: string | undefined;
-      try {
-        const systemKeyPath = path.join(process.cwd(), "storage", "ssh", "id_rsa");
-        if (fs.existsSync(systemKeyPath)) {
-          privateKey = fs.readFileSync(systemKeyPath, "utf-8");
-        }
-      } catch (err) {
-        console.warn("Could not load system private key for SSH:", err);
-      }
-
-      // 1. Connect via SSH (max 30 attempts, 10 seconds apart)
-      if (role === "MASTER") {
-        await prisma.kubernetesCluster.update({
-          where: { id: clusterId },
-          data: { status: "WAITING_FOR_SSH" }
-        });
-      }
-
-      await K3sProvisioningService.appendLog(clusterId, `Waiting for SSH on ${ipAddress}... (up to 5 minutes)`);
-
-      let sshReady = false;
-      const sshUsername = vps.username || 'root';
-      const sudoPrefix = sshUsername === 'root' ? '' : 'sudo ';
-      let sshConnected = new NodeSSH();
-
-      for (let i = 0; i < 30; i++) {
-        try {
-          await sshConnected.connect({
-            host: ipAddress,
-            username: sshUsername,
-            password: rootPassword,
-            privateKey: privateKey,
-            readyTimeout: 10000,
-            tryKeyboard: true,
-          });
-          sshReady = true;
-          break;
-        } catch (err: any) {
-          await K3sProvisioningService.appendLog(clusterId, `SSH not ready yet (attempt ${i + 1}/30): ${err.message}. Retrying in 10s...`);
-
-          if (err.message && err.message.includes("authentication methods failed") && privateKey) {
-            try {
-              await K3sProvisioningService.appendLog(clusterId, `Retrying without private key (using password only)...`);
-              await sshConnected.connect({
-                host: ipAddress,
-                username: sshUsername,
-                password: rootPassword,
-                readyTimeout: 10000,
-                tryKeyboard: true,
-              });
-              sshReady = true;
-              break;
-            } catch(e2: any) {
-              await K3sProvisioningService.appendLog(clusterId, `Password auth also failed: ${e2.message}`);
-            }
-          }
-
-          await new Promise(resolve => setTimeout(resolve, 10000));
-        }
-      }
-
-      if (!sshReady) {
-        throw new Error("Failed to connect via SSH after multiple attempts");
-      }
-
-      await K3sProvisioningService.appendLog(clusterId, `SSH connected to ${ipAddress} successfully.`);
 
       if (role === "MASTER") {
         await prisma.kubernetesCluster.update({
@@ -162,193 +206,75 @@ export class K3sProvisioningService {
         });
       }
 
+      // 1. Wait for Cloud-Init and Guest Agent to be ready
+      await this.waitForGuestReady(proxmox, vps.node, vps.vmid, clusterId);
+
       // 2. Install K3s
-      await K3sProvisioningService.appendLog(clusterId, `Installing K3s ${k3sChannel} as ${role}... (this may take 2-5 minutes)`);
-
-      let installRes: any = { code: 0, stdout: "", stderr: "" };
-      if (role === "MASTER") {
-        const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
-        try {
-          installRes = await sshConnected.execCommand(
-            `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg}' sh -`,
-            {
-              onStdout: (chunk) => K3sProvisioningService.appendLog(clusterId, chunk.toString("utf8")),
-              onStderr: (chunk) => K3sProvisioningService.appendLog(clusterId, chunk.toString("utf8"))
-            }
-          );
-        } catch (err: any) {
-          installRes.stderr = err.message || "Connection reset";
-        }
-      } else {
-        let masterNodeToken = cluster.nodeToken;
-        let masterEndpoint = cluster.endpoint;
-        let masterVpcIp: string | null = null;
-
-        if (!masterNodeToken || !masterEndpoint) {
-          await K3sProvisioningService.appendLog(clusterId, `Master node token/endpoint missing in DB, fetching dynamically...`);
-          const masterVps = await prisma.vpsService.findFirst({
-            where: { kubernetesClusterId: clusterId, kubernetesRole: "MASTER" },
-            include: { assignedIps: { include: { ipPool: true } } }
-          });
-          if (!masterVps) {
-            throw new Error("Master node VPS not found. Cannot join worker.");
-          }
-          masterVpcIp = masterVps.vpcIp;
-          const masterIpAddr = masterVps.assignedIps.length > 0 ? masterVps.assignedIps[0].ipAddress : (masterVpcIp || ipAddress);
-          
-          const masterSsh = new NodeSSH();
-          const { decryptDeterministic } = require("@/lib/encryption");
-          const masterPassword = decryptDeterministic(masterVps.rootPassword) || masterVps.rootPassword;
-          
-          const masterSshUsername = masterVps.username || 'root';
-          const masterSudoPrefix = masterSshUsername === 'root' ? '' : 'sudo ';
-          try {
-            await masterSsh.connect({
-              host: masterIpAddr,
-              username: masterSshUsername,
-              password: masterPassword,
-              privateKey: privateKey,
-              readyTimeout: 10000,
-              tryKeyboard: true,
-            });
-            
-            const tokenRes = await masterSsh.execCommand(`${masterSudoPrefix}cat /var/lib/rancher/k3s/server/node-token`);
-            if (tokenRes.code !== 0 && tokenRes.code !== null) throw new Error("Failed to read node token from master");
-            
-            masterNodeToken = tokenRes.stdout.trim();
-            masterEndpoint = `https://${masterIpAddr}:6443`;
-            masterSsh.dispose();
-
-            // Save it back to DB for future workers
-            await prisma.kubernetesCluster.update({
-              where: { id: clusterId },
-              data: { nodeToken: masterNodeToken, endpoint: masterEndpoint }
-            });
-          } catch (err: any) {
-            if (err.message && err.message.includes("authentication methods failed") && privateKey) {
-              try {
-                await masterSsh.connect({
-                  host: masterIpAddr,
-                  username: masterSshUsername,
-                  password: masterPassword,
-                  readyTimeout: 10000,
-                  tryKeyboard: true,
-                });
-                const tokenRes = await masterSsh.execCommand(`${masterSudoPrefix}cat /var/lib/rancher/k3s/server/node-token`);
-                if (tokenRes.code !== 0 && tokenRes.code !== null) throw new Error("Failed to read node token from master");
-                masterNodeToken = tokenRes.stdout.trim();
-                masterEndpoint = `https://${masterIpAddr}:6443`;
-                masterSsh.dispose();
-
-                await prisma.kubernetesCluster.update({
-                  where: { id: clusterId },
-                  data: { nodeToken: masterNodeToken, endpoint: masterEndpoint }
-                });
-              } catch(e2: any) {
-                throw new Error("Failed to fetch node-token from master: " + e2.message);
-              }
-            } else {
-              throw new Error("Failed to fetch node-token from master: " + err.message);
-            }
-          }
-        } else {
-          // If master token exists, we still need master's VPC IP to join securely
-          const masterVps = await prisma.vpsService.findFirst({
-            where: { kubernetesClusterId: clusterId, kubernetesRole: "MASTER" }
-          });
-          masterVpcIp = masterVps?.vpcIp || null;
-        }
-        
-        const joinIp = masterVpcIp || masterEndpoint.replace("https://", "").replace(":6443", "");
-        const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
-        try {
-          installRes = await sshConnected.execCommand(
-            `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${masterNodeToken} INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='agent ${nodeIpArg}' sh -`,
-            {
-              onStdout: (chunk) => K3sProvisioningService.appendLog(clusterId, chunk.toString("utf8")),
-              onStderr: (chunk) => K3sProvisioningService.appendLog(clusterId, chunk.toString("utf8"))
-            }
-          );
-        } catch (err: any) {
-          installRes.stderr = err.message || "Connection reset";
-        }
-      }
-      
-      const stderrStr = installRes.stderr || "";
-      const stdoutStr = installRes.stdout || "";
-      const isConnectionReset = stderrStr.includes("Connection reset by peer") || stdoutStr.includes("Connection reset by peer") || stderrStr.includes("D-Bus connection terminated");
-
-      if (installRes.code !== 0 && installRes.code !== null && !isConnectionReset) {
-        throw new Error(`K3s install failed: ${stderrStr || stdoutStr}`);
-      }
-
-      await K3sProvisioningService.appendLog(clusterId, `K3s ${role} installed successfully. Waiting for services to start (30s)...`);
-      await new Promise(resolve => setTimeout(resolve, 30000));
-
-      if (isConnectionReset || !sshConnected.isConnected()) {
-        await K3sProvisioningService.appendLog(clusterId, `SSH connection was reset by systemd reload. Reconnecting...`);
-        sshConnected.dispose();
-        sshConnected = new NodeSSH();
-        const { decryptDeterministic } = require("@/lib/encryption");
-        const rootPassword = decryptDeterministic(vps.rootPassword) || vps.rootPassword;
-        let privateKey = "";
-        try {
-          const privateKeyPath = require("path").join(process.cwd(), "storage", "ssh", "id_rsa");
-          if (require("fs").existsSync(privateKeyPath)) privateKey = require("fs").readFileSync(privateKeyPath, "utf-8");
-        } catch (err) {}
-
-        let reconnected = false;
-        for (let attempt = 1; attempt <= 3; attempt++) {
-            try {
-                if (privateKey) {
-                    await sshConnected.connect({ host: ipAddress, username: sshUsername, privateKey: privateKey, readyTimeout: 10000, tryKeyboard: true });
-                    reconnected = true; break;
-                }
-            } catch (e) {
-                try {
-                    await sshConnected.connect({ host: ipAddress, username: sshUsername, password: rootPassword, readyTimeout: 10000, tryKeyboard: true });
-                    reconnected = true; break;
-                } catch(e2) {
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                }
-            }
-        }
-        if (!reconnected) throw new Error("Failed to reconnect via SSH after installation");
-      }
-
-
-      let kubeconfigToSave: string | undefined;
-      let nodeTokenToSave: string | undefined;
-      let endpointToSave: string | undefined;
+      await K3sProvisioningService.appendLog(clusterId, `Installing K3s ${k3sChannel} as ${role} via Cloud-Init...`);
 
       if (role === "MASTER") {
+        const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
+        const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg} --write-kubeconfig-mode 644' sh -`;
+
+        await this.runGuestCommand(
+          proxmox,
+          vps.node,
+          vps.vmid,
+          masterInstallCmd,
+          clusterId,
+          `K3s Server (${k3sChannel}) installation`,
+          360
+        );
+
         // Ensure kubectl is in the default PATH for VNC/console logins
-        await sshConnected.execCommand(`${sudoPrefix}ln -sf /usr/local/bin/kubectl /usr/bin/kubectl`);
-        await sshConnected.execCommand(`${sudoPrefix}ln -sf /usr/local/bin/crictl /usr/bin/crictl`);
-        await sshConnected.execCommand(`${sudoPrefix}grep -q KUBECONFIG ~/.bashrc || echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc`);
+        await this.runGuestCommand(
+          proxmox,
+          vps.node,
+          vps.vmid,
+          `ln -sf /usr/local/bin/kubectl /usr/bin/kubectl && ln -sf /usr/local/bin/crictl /usr/bin/crictl && (grep -q KUBECONFIG ~/.bashrc || echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc)`,
+          clusterId,
+          "Configuring kubectl and crictl system aliases",
+          60
+        );
 
-        // 3. Fetch Kubeconfig — retry up to 5 times (K3s may need extra time to write the file)
-        await K3sProvisioningService.appendLog(clusterId, `Reading kubeconfig from master node...`);
+        // 3. Fetch Kubeconfig via Guest Agent
+        await K3sProvisioningService.appendLog(clusterId, `Reading kubeconfig from master node via Cloud-Init...`);
         let kubeconfigRaw = "";
-        for (let attempt = 1; attempt <= 5; attempt++) {
-          const kubeconfigRes = await sshConnected.execCommand(`${sudoPrefix}cat /etc/rancher/k3s/k3s.yaml`);
-          if ((kubeconfigRes.code === 0 || kubeconfigRes.code === null) && kubeconfigRes.stdout.includes("apiVersion")) {
-            kubeconfigRaw = kubeconfigRes.stdout;
-            break;
+        for (let attempt = 1; attempt <= 10; attempt++) {
+          try {
+            const fileRes = await proxmox.agentFileRead(vps.node, vps.vmid, "/etc/rancher/k3s/k3s.yaml");
+            if (fileRes && fileRes.content && fileRes.content.includes("apiVersion")) {
+              kubeconfigRaw = fileRes.content;
+              break;
+            }
+          } catch (e: any) {
+            // file not written yet
           }
-          await K3sProvisioningService.appendLog(clusterId, `Kubeconfig not ready yet (attempt ${attempt}/5), retrying in 10s... stderr: ${kubeconfigRes.stderr}`);
-          if (attempt < 5) await new Promise(resolve => setTimeout(resolve, 10000));
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
 
         if (!kubeconfigRaw) {
-          throw new Error("Failed to read kubeconfig after 5 attempts. K3s may not have started correctly.");
+          throw new Error("Failed to read kubeconfig from master node. K3s may still be starting.");
         }
 
-        // 4. Fetch Node Token
-        await K3sProvisioningService.appendLog(clusterId, `Reading node token...`);
-        const tokenRes = await sshConnected.execCommand(`${sudoPrefix}cat /var/lib/rancher/k3s/server/node-token`);
-        if (tokenRes.code !== 0 && tokenRes.code !== null) {
-          throw new Error(`Failed to read node token: ${tokenRes.stderr}`);
+        // 4. Fetch Node Token via Guest Agent
+        await K3sProvisioningService.appendLog(clusterId, `Reading node token from master node via Cloud-Init...`);
+        let masterNodeToken = "";
+        for (let attempt = 1; attempt <= 10; attempt++) {
+          try {
+            const tokenRes = await proxmox.agentFileRead(vps.node, vps.vmid, "/var/lib/rancher/k3s/server/node-token");
+            if (tokenRes && tokenRes.content && tokenRes.content.trim()) {
+              masterNodeToken = tokenRes.content.trim();
+              break;
+            }
+          } catch (e: any) {
+            // token not written yet
+          }
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+
+        if (!masterNodeToken) {
+          throw new Error("Failed to read node token from master node.");
         }
 
         const safeClusterName = cluster.name.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
@@ -357,39 +283,79 @@ export class K3sProvisioningService {
         kubeconfig = kubeconfig.replace(/cluster: default/g, `cluster: ${safeClusterName}`);
         kubeconfig = kubeconfig.replace(/user: default/g, `user: ${safeClusterName}`);
         kubeconfig = kubeconfig.replace(/current-context: default/g, `current-context: ${safeClusterName}`);
+        const kubeconfigToSave = kubeconfig.replace(/127\.0\.0\.1/g, ipAddress);
+        const endpointToSave = `https://${ipAddress}:6443`;
 
-        kubeconfigToSave = kubeconfig.replace(/127\.0\.0\.1/g, ipAddress);
-        nodeTokenToSave = tokenRes.stdout.trim();
-        endpointToSave = `https://${ipAddress}:6443`;
-
-        await K3sProvisioningService.appendLog(clusterId, `Kubeconfig and node token retrieved successfully.`);
-      }
-
-      // Clean up SSH connection
-      sshConnected.dispose();
-
-      if (role === "MASTER") {
-        // 5. Update Cluster in Database
         await prisma.kubernetesCluster.update({
           where: { id: clusterId },
           data: {
-            kubeconfig: encryptDeterministic(kubeconfigToSave!),
-            nodeToken: nodeTokenToSave,
+            kubeconfig: encryptDeterministic(kubeconfigToSave),
+            nodeToken: masterNodeToken,
             endpoint: endpointToSave,
             status: "RUNNING"
           }
         });
+
         await K3sProvisioningService.appendLog(clusterId, `Cluster is now RUNNING! Kubeconfig saved to your panel.`);
+
+      } else {
+        // WORKER ROLE
+        let masterNodeToken = cluster.nodeToken;
+        let masterEndpoint = cluster.endpoint;
+        let masterVpcIp: string | null = null;
+
+        const masterVps = await prisma.vpsService.findFirst({
+          where: { kubernetesClusterId: clusterId, kubernetesRole: "MASTER" },
+          include: { assignedIps: { include: { ipPool: true } } }
+        });
+
+        if (!masterVps || !masterVps.vmid) {
+          throw new Error("Master node VPS not found or not provisioned. Cannot join worker.");
+        }
+        masterVpcIp = masterVps.vpcIp;
+
+        if (!masterNodeToken || !masterEndpoint) {
+          await K3sProvisioningService.appendLog(clusterId, `Fetching master node token via Cloud-Init...`);
+          const tokenRes = await proxmox.agentFileRead(masterVps.node, masterVps.vmid, "/var/lib/rancher/k3s/server/node-token");
+          if (!tokenRes || !tokenRes.content) {
+            throw new Error("Failed to read node-token from master VM");
+          }
+          masterNodeToken = tokenRes.content.trim();
+          const masterPrimaryIp = masterVps.assignedIps.length > 0 ? masterVps.assignedIps[0].ipAddress : (masterVpcIp || ipAddress);
+          masterEndpoint = `https://${masterPrimaryIp}:6443`;
+
+          await prisma.kubernetesCluster.update({
+            where: { id: clusterId },
+            data: { nodeToken: masterNodeToken, endpoint: masterEndpoint }
+          });
+        }
+
+        const joinIp = masterVpcIp || masterEndpoint.replace("https://", "").replace(":6443", "");
+        const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
+        const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${masterNodeToken} INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='agent ${nodeIpArg}' sh -`;
+
+        await this.runGuestCommand(
+          proxmox,
+          vps.node,
+          vps.vmid,
+          workerJoinCmd,
+          clusterId,
+          `K3s Worker join to cluster via Cloud-Init`,
+          360
+        );
+
+        await K3sProvisioningService.appendLog(clusterId, `Worker node successfully joined cluster ${cluster.name}.`);
       }
 
-      // 6. Update VPS status to RUNNING
+      // Update VPS status to RUNNING
       await prisma.vpsService.update({
         where: { id: vpsId },
         data: { status: "RUNNING" }
       });
 
-      await K3sProvisioningService.appendLog(clusterId, `Node ${role} provisioned successfully on ${ipAddress}.`);
-    } catch (err) {
+      await K3sProvisioningService.appendLog(clusterId, `Node ${role} provisioned successfully on ${ipAddress || 'VPC network'}.`);
+
+    } catch (err: any) {
       const errMsg = err instanceof Error ? err.message : String(err);
       await K3sProvisioningService.appendLog(clusterId, `ERROR: ${errMsg}`);
       console.error("[K3s Provisioning] Error during installation:", err);

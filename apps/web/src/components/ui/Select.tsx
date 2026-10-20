@@ -49,7 +49,7 @@ export function Select({
   }, []);
 
   return (
-    <div className={cn("relative w-full", isOpen ? "z-50" : "z-auto")} ref={dropdownRef}>
+    <div className={cn("relative w-full", isOpen ? "z-[80]" : "z-auto")} ref={dropdownRef}>
       <button
         type="button"
         disabled={disabled}
@@ -83,7 +83,7 @@ export function Select({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute z-50 w-full mt-2 rounded-xl shadow-2xl overflow-hidden border",
+              "absolute z-[90] w-full mt-2 rounded-xl shadow-2xl overflow-hidden border",
               isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200/90 shadow-xl"
             )}
           >

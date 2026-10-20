@@ -374,7 +374,7 @@ function CheckoutContent() {
       <div className="space-y-6 md:space-y-8 w-full max-w-full min-w-0">
         {/* Step 1: Select Service (Moved outside to be full width) */}
         {action !== "add_node" && (
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[60] border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
+          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[60] border overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
             <div className="flex items-center gap-3 mb-6 relative z-10">
               <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm border border-cyan-500/30 shrink-0">1</div>
               <div className="min-w-0 flex-1">
@@ -556,7 +556,7 @@ function CheckoutContent() {
               isDark={isDark}
               label="services"
             />
-          </motion.section>
+          </motion.div>
         )}
 
         <AnimatePresence mode="wait" initial={false}>

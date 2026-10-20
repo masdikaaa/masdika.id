@@ -325,11 +325,21 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         }
 
         if (data.maxSpecs) setMaxSpecs(data.maxSpecs);
-        if (data.templates.length > 0) {
-          const firstTpl = data.templates[0];
-          const firstFamily = firstTpl.name.split('-')[0];
-          setSelectedOsFamily(firstFamily);
-          setSelectedTemplate(firstTpl.id);
+        if (data.templates && data.templates.length > 0) {
+          const debian13 = data.templates.find((t: any) => t.name.toLowerCase() === "debian-13")
+            || data.templates.find((t: any) => t.name.toLowerCase().includes("debian-13"))
+            || data.templates.find((t: any) => t.name.toLowerCase().includes("debian"));
+
+          if (serviceType === "KUBERNETES") {
+            const chosen = debian13 || data.templates[0];
+            setSelectedOsFamily(chosen.name.split('-')[0]);
+            setSelectedTemplate(chosen.id);
+          } else {
+            const firstTpl = data.templates[0];
+            const firstFamily = firstTpl.name.split('-')[0];
+            setSelectedOsFamily(firstFamily);
+            setSelectedTemplate(firstTpl.id);
+          }
         }
         if (data.plans && data.plans.length > 0) {
           setSelectedPlanId(data.plans[0].id);
@@ -344,13 +354,22 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     }
   };
 
-
-
-
-
   useEffect(() => {
     fetchOrderData();
   }, []);
+
+  // When ordering Kubernetes, always ensure Debian-13 is locked as the template
+  useEffect(() => {
+    if (serviceType === "KUBERNETES" && templates.length > 0) {
+      const debian13 = templates.find((t: any) => t.name.toLowerCase() === "debian-13")
+        || templates.find((t: any) => t.name.toLowerCase().includes("debian-13"))
+        || templates.find((t: any) => t.name.toLowerCase().includes("debian"));
+      if (debian13 && selectedTemplate !== debian13.id) {
+        setSelectedOsFamily(debian13.name.split('-')[0]);
+        setSelectedTemplate(debian13.id);
+      }
+    }
+  }, [serviceType, templates, selectedTemplate]);
 
   const calculateHourlyPrice = () => {
     let total = 0;
@@ -632,98 +651,102 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         {/* Configuration Pane */}
         <div className="xl:col-span-2 space-y-6 md:space-y-8 w-full max-w-full min-w-0">
 
-          {/* OS Templates */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[60] w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                        <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-              <HardDrive className="w-5 h-5 text-cyan-400" />
-              1. Choose Operating System
-            </h2>
-            {templates.length === 0 ? (
-              <div className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No templates available. Please contact support.</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Image / App</label>
-                  <Select
-                    value={selectedOsFamily || ""}
-                    onChange={(val) => {
-                      const fam = val.toString();
-                      setSelectedOsFamily(fam);
-                      const firstVersion = templates.find(t => t.name.startsWith(fam + "-")) || templates.find(t => t.name.startsWith(fam));
-                      if (firstVersion) setSelectedTemplate(firstVersion.id);
-                      if (fam.toLowerCase().includes("windows")) {
-                        setUsername("Administrator");
-                      } else if (username === "Administrator") {
-                        setUsername("");
+          {/* OS Templates - Only for regular VPS (Kubernetes is locked to Debian 13) */}
+          {serviceType !== "KUBERNETES" && (
+            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[60] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <HardDrive className="w-5 h-5 text-cyan-400" />
+                1. Choose Operating System
+              </h2>
+              {templates.length === 0 ? (
+                <div className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No templates available. Please contact support.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Image / App</label>
+                    <Select
+                      value={selectedOsFamily || ""}
+                      onChange={(val) => {
+                        const fam = val.toString();
+                        setSelectedOsFamily(fam);
+                        const firstVersion = templates.find(t => t.name.startsWith(fam + "-")) || templates.find(t => t.name.startsWith(fam));
+                        if (firstVersion) setSelectedTemplate(firstVersion.id);
+                        if (fam.toLowerCase().includes("windows")) {
+                          setUsername("Administrator");
+                        } else if (username === "Administrator") {
+                          setUsername("");
+                        }
+                      }}
+                      options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({ 
+                        value: fam, 
+                        label: (
+                          <div className="flex items-center gap-3">
+                            {getOsIcon(fam, isDark)}
+                            <span>{fam}</span>
+                          </div>
+                        ) 
+                      }))}
+                      placeholder="Select Image / App..."
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Image / App Version</label>
+                    <Select
+                      value={selectedTemplate || ""}
+                      onChange={(val) => setSelectedTemplate(Number(val))}
+                      options={templates
+                        .filter(t => t.name.startsWith((selectedOsFamily || "") + "-") || t.name === selectedOsFamily)
+                        .map(tpl => {
+                          const parts = tpl.name.split('-');
+                          const version = parts.slice(1).join('-') || 'Default';
+                          return {
+                            value: tpl.id, 
+                            label: version
+                          };
+                        })
                       }
-                    }}
-                    options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({ 
-                      value: fam, 
-                      label: (
-                        <div className="flex items-center gap-3">
-                          {getOsIcon(fam, isDark)}
-                          <span>{fam}</span>
-                        </div>
-                      ) 
-                    }))}
-                    placeholder="Select Image / App..."
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
-                  />
+                      placeholder="Select Version..."
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Image / App Version</label>
-                  <Select
-                    value={selectedTemplate || ""}
-                    onChange={(val) => setSelectedTemplate(Number(val))}
-                    options={templates
-                      .filter(t => t.name.startsWith((selectedOsFamily || "") + "-") || t.name === selectedOsFamily)
-                      .map(tpl => {
-                        const parts = tpl.name.split('-');
-                        const version = parts.slice(1).join('-') || 'Default';
-                        return {
-                          value: tpl.id, 
-                          label: version
-                        };
-                      })
-                    }
-                    placeholder="Select Version..."
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
-                  />
-                </div>
-              </div>
-            )}
-          </motion.section>
+              )}
+            </motion.div>
+          )}
 
           {serviceType === "KUBERNETES" && !isAddWorkerNode && (
-            <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[50] w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                            <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[50] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Server className="w-5 h-5 text-cyan-400" />
-                Choose Kubernetes Version
+                1. Choose Kubernetes Version
               </h2>
-              <Select
-                value={kubernetesVersion}
-                onChange={(val) => setKubernetesVersion(val)}
-                options={K3S_VERSIONS.map(v => ({ 
-                  value: v.id, 
-                  label: (
-                    <div className="flex items-center gap-3">
-                      <SiKubernetes className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                      <span>{v.name}</span>
-                    </div>
-                  ) 
-                }))}
-                className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
-              />
-            </motion.section>
+              <div className="relative z-[50]">
+                <Select
+                  value={kubernetesVersion}
+                  onChange={(val) => setKubernetesVersion(val)}
+                  options={K3S_VERSIONS.map(v => ({ 
+                    value: v.id, 
+                    label: (
+                      <div className="flex items-center gap-3">
+                        <SiKubernetes className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                        <span>{v.name}</span>
+                      </div>
+                    ) 
+                  }))}
+                  className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                />
+              </div>
+            </motion.div>
           )}
 
           {nodes.length > 0 && (
-            <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[40] w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                            <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[40] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <MapPin className="w-5 h-5 text-cyan-400" />
                 2. Region
               </h2>
-              <div>
+              <div className="relative z-[40]">
                 <Select
                   value={selectedNode}
                   onChange={(val) => setSelectedNode(val.toString())}
@@ -737,11 +760,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold transition-colors", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 text-white" : "bg-white border-slate-200 hover:border-cyan-400 text-slate-900 shadow-sm")}
                 />
               </div>
-            </motion.section>
+            </motion.div>
           )}
 
           {/* Compute Resources & Billing Mode */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[30] w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[30] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 relative z-10">
               <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Sliders className="w-5 h-5 text-cyan-400" />
@@ -826,10 +849,10 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </div>
               </div>
 
-          </motion.section>
+          </motion.div>
           {/* Network & Extra (Only for PAYG) */}
 
-            <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[20] grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[20] grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <div className="flex flex-col h-full w-full max-w-full min-w-0">
                 <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
                   <Network className="w-5 h-5 text-cyan-400 shrink-0" />
@@ -1385,9 +1408,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   )}
                 </div>
               </div>
-            </motion.section>
+            </motion.div>
           {/* Firewall Settings */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[10] w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[10] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <h2 className={cn("text-xl font-bold mb-2 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <ShieldCheck className="w-5 h-5 text-cyan-400" />
               7. Firewall
@@ -1527,11 +1550,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 )}
               </div>
             </div>
-          </motion.section>
+          </motion.div>
 
 
           {/* Authentication & Settings */}
-          <motion.section variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[5] w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[5] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                         <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Settings2 className="w-5 h-5 text-cyan-400" />
               8. Server Details
@@ -1674,7 +1697,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               />
               <p className="text-xs text-zinc-500 mt-2">Add your public key to login securely without a password.</p>
             </div>
-          </motion.section>
+          </motion.div>
         </div>
 
         {/* Order Summary Sidebar */}
@@ -1686,10 +1709,18 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
             </h2>
 
             <div className="space-y-4 mb-6 relative z-10">
+              {serviceType === "KUBERNETES" && !isAddWorkerNode && (
+                <div className="flex justify-between items-center text-sm px-2">
+                  <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Server className="w-3.5 h-3.5 text-cyan-400" /> K3s Version</span>
+                  <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-cyan-400 bg-slate-800/60 border-slate-700" : "text-cyan-700 bg-slate-100 border-slate-200")}>
+                    {kubernetesVersion}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Disc className="w-3.5 h-3.5" /> OS Template</span>
                 <span className={cn("font-bold px-2 py-1 rounded-lg border truncate max-w-[150px]", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
-                  {templates.find(t => t.id === selectedTemplate)?.name || "-"}
+                  {templates.find(t => t.id === selectedTemplate)?.name || (serviceType === "KUBERNETES" ? "Debian-13" : "-")}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
