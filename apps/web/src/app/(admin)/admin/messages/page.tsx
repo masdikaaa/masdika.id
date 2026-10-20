@@ -20,6 +20,8 @@ export default function AdminMessagesPage() {
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
@@ -169,9 +171,6 @@ export default function AdminMessagesPage() {
       <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-cyan-700")} />
     </div>
   );
-
-  const [statusFilter, setStatusFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredMessages = messages.filter(msg => {
     if (statusFilter === 'unread' && msg.isRead) return false;
