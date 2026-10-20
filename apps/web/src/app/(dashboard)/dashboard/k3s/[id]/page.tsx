@@ -32,6 +32,11 @@ export default function K3sDetailPage() {
   const activeTabRef = useRef(activeTab);
   const runningNodesCountRef = useRef<number>(-1);
   const isSuspended = cluster?.nodes?.some((n: any) => n.status === 'SUSPENDED') || false;
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   useEffect(() => {
     activeTabRef.current = activeTab;
@@ -103,12 +108,16 @@ export default function K3sDetailPage() {
   };
 
   const fetchHistoryMetrics = async (showLoading = true) => {
+    const targetId = cluster?.id || (params?.id as string);
+    if (!targetId) return;
     try {
       if (showLoading) setLoadingHistory(true);
-      const res = await fetch(`/api/user/k3s/${params.id}/metrics/history`, { cache: 'no-store' });
+      const res = await fetch(`/api/user/k3s/${targetId}/metrics/history`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        setHistoryMetrics(data);
+        if (data && (Array.isArray(data.cpu) || Array.isArray(data.memory))) {
+          setHistoryMetrics(data);
+        }
       }
     } catch (e) {
       console.error("Failed to load history metrics", e);
@@ -356,15 +365,18 @@ export default function K3sDetailPage() {
   }, [installLogs]);
 
   useEffect(() => {
-    if (activeTab === "monitoring" && !hasFetchedHistory.current) {
-      if (cluster && (cluster.status === 'RUNNING' || cluster.kubeconfig)) {
-        hasFetchedHistory.current = true;
-        fetchHistoryMetrics();
-      }
+    if (activeTab === "monitoring" && (cluster?.status === 'RUNNING' || cluster?.kubeconfig)) {
+      fetchHistoryMetrics(!historyMetrics);
+      const interval = setInterval(() => {
+        if (document.visibilityState !== 'hidden') {
+          fetchHistoryMetrics(false);
+        }
+      }, 10000);
+      return () => clearInterval(interval);
     } else if (activeTab === "alerts") {
       fetchAlertRules();
     }
-  }, [activeTab, cluster]);
+  }, [activeTab, cluster?.status, cluster?.kubeconfig, params?.id]);
 
 
 
@@ -1146,19 +1158,25 @@ export default function K3sDetailPage() {
               {activeTab === "monitoring" && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-                    <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                      <Cpu className="w-5 h-5 text-blue-400" />
-                      CPU Usage (Last 1 Hour)
-                    </h2>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                        <Cpu className="w-5 h-5 text-blue-400" />
+                        CPU Usage (Last 1 Hour)
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                        <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Live Proxmox RRD</span>
+                      </div>
+                    </div>
                     <div className="h-72 w-full">
                       {loadingHistory && !historyMetrics ? (
                         <div className={cn("w-full h-full flex flex-col items-center justify-center gap-3", isDark ? "text-zinc-400" : "text-slate-500")}>
                           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                           <span className="text-sm">Fetching historical data from hypervisor...</span>
                         </div>
-                      ) : (
+                      ) : isMounted ? (
                         <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
-                          <AreaChart data={historyMetrics?.cpu || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <AreaChart data={historyMetrics?.cpu || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -1167,29 +1185,44 @@ export default function K3sDetailPage() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <XAxis dataKey="time" stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} minTickGap={30} />
-                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={(val) => `${val}%`} width={90} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
-                            <Area type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCpu)" />
+                            <YAxis 
+                              stroke="#334155" 
+                              tick={{ fill: '#64748b', fontSize: 11 }} 
+                              tickFormatter={(val) => `${val}%`} 
+                              domain={[0, 100]} 
+                              width={45} 
+                            />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }} 
+                              formatter={(val: any) => [`${val}%`, 'Usage']}
+                            />
+                            <Area type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCpu)" />
                           </AreaChart>
                         </ResponsiveContainer>
-                      )}
+                      ) : null}
                     </div>
                   </div>
 
                   <div className={cn("border rounded-3xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-                    <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                      <HardDrive className="w-5 h-5 text-cyan-400" />
-                      Memory Usage (Last 1 Hour)
-                    </h2>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                        <HardDrive className="w-5 h-5 text-cyan-400" />
+                        Memory Usage (Last 1 Hour)
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Live Proxmox RRD</span>
+                      </div>
+                    </div>
                     <div className="h-72 w-full">
                       {loadingHistory && !historyMetrics ? (
                         <div className={cn("w-full h-full flex flex-col items-center justify-center gap-3", isDark ? "text-zinc-400" : "text-slate-500")}>
                           <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
                           <span className="text-sm">Fetching historical data from hypervisor...</span>
                         </div>
-                      ) : (
+                      ) : isMounted ? (
                         <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
-                          <AreaChart data={historyMetrics?.memory || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <AreaChart data={historyMetrics?.memory || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorMem" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -1198,12 +1231,21 @@ export default function K3sDetailPage() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <XAxis dataKey="time" stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} minTickGap={30} />
-                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={(val) => `${val}%`} width={90} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
-                            <Area type="monotone" dataKey="usage" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorMem)" />
+                            <YAxis 
+                              stroke="#334155" 
+                              tick={{ fill: '#64748b', fontSize: 11 }} 
+                              tickFormatter={(val) => `${val}%`} 
+                              domain={[0, 100]} 
+                              width={45} 
+                            />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }} 
+                              formatter={(val: any) => [`${val}%`, 'Usage']}
+                            />
+                            <Area type="monotone" dataKey="usage" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorMem)" />
                           </AreaChart>
                         </ResponsiveContainer>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </div>

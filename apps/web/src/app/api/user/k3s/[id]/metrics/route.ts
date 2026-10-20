@@ -60,9 +60,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     
     for (const node of cluster.nodes) {
       if (node.status !== "RUNNING") continue;
-      
       try {
-        const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+        const secret = decryptDeterministic(server.tokenSecret) || server.tokenSecret;
+        const proxmox = new ProxmoxClient(server.host, server.tokenId, secret);
         const rrdData = await proxmox.getRRDData(node.node, node.vmid!, tf);
         nodesMetrics.push({
           hostname: node.hostname,
