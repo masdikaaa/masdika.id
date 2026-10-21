@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, use } from "react";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
@@ -175,7 +175,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
               {new Date(episode.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
           </div>
-          <h1 className={cn("text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-extrabold mb-4 sm:mb-6 leading-snug sm:leading-tight drop-shadow-sm break-words", isDark ? "text-white" : "text-slate-900")} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+          <h1 className={cn("text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold mb-4 sm:mb-6 leading-snug sm:leading-tight break-words", isDark ? "text-white" : "text-slate-900")} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {episode.title}
           </h1>
           {episode.excerpt && (
