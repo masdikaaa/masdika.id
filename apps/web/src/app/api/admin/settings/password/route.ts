@@ -19,7 +19,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'New password cannot be the same as the current password' }, { status: 400 });
     }
 
-    const user = await prisma.user.findFirst();
+    const user = auth.user;
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

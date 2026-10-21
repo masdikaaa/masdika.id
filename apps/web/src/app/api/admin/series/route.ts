@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { requireAuth } from '@/lib/auth-middleware';
 import { slugify } from '@/lib/slugify';
+import { invalidateCache } from '@/lib/cache';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const ALLOWED_LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
@@ -119,7 +120,14 @@ export async function POST(req: Request) {
       },
     });
 
-    revalidatePath('/', 'layout');
+    try {
+      await invalidateCache('series:*');
+      revalidatePath('/series');
+      revalidatePath(`/series/${series.slug}`);
+      revalidatePath('/', 'layout');
+    } catch (cacheErr) {
+      console.warn('Failed to revalidate cache after series create:', cacheErr);
+    }
 
     return NextResponse.json(series);
   } catch (error: any) {

@@ -59,7 +59,10 @@ export async function POST(
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
-    const adminUser = await prisma.user.findFirst();
+    const adminUser = await prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+      orderBy: { id: 'asc' },
+    });
     const adminName = adminUser ? adminUser.name : encryptDeterministic('Admin');
     const adminEmail = adminUser ? adminUser.email : encryptDeterministic('admin@masdika.com');
 

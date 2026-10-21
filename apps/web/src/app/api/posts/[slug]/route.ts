@@ -59,7 +59,10 @@ const fetchPostData = async (slug: string) => {
   const socialLinkedin = settings.find(s => s.key === 'social_linkedin')?.value;
   const socialInstagram = settings.find(s => s.key === 'social_instagram')?.value;
   
-  const adminUser = await prisma.user.findFirst();
+  const adminUser = await prisma.user.findFirst({
+    where: { role: 'ADMIN' },
+    orderBy: { id: 'asc' },
+  });
 
   // Decrypt sensitive data before sending to frontend
   if (post.author && post.author.name) post.author.name = decryptDeterministic(post.author.name);

@@ -45,8 +45,11 @@ const fetchSeriesDetails = async (slug: string) => {
   });
   const profileImageSetting = settings.find(s => s.key === 'profileImage');
 
-  const adminUser = await prisma.user.findFirst();
-  let adminName = 'Admin';
+  const adminUser = await prisma.user.findFirst({
+    where: { role: 'ADMIN' },
+    orderBy: { id: 'asc' },
+  });
+  let adminName = 'Masdika.ID';
   if (adminUser && adminUser.name) {
     try {
       adminName = decryptDeterministic(adminUser.name);

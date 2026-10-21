@@ -4,7 +4,7 @@ import { AdminLoader } from "@/components/admin/AdminLoader";
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Plus, Trash2, Edit2, Image as ImageIcon, Play, ChevronUp, ChevronDown, CheckCircle2, Clock, BookOpen , Loader2, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Edit2, Image as ImageIcon, Play, ChevronUp, ChevronDown, CheckCircle2, Clock, BookOpen, Loader2, LayoutDashboard, AlertCircle } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -108,6 +108,9 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(epForm) });
     if (res.ok) {
       toast.success(isNewEp ? 'Episode added!' : 'Episode updated!');
+      if (epForm.published && !form.published) {
+        toast.info('Catatan: Jangan lupa simpan Series ("Save Series") agar episode tampil di publik!', { duration: 5000 });
+      }
       fetchSeriesData(epPage);
       setEditingEp(null);
     } else {
@@ -115,6 +118,31 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
       toast.error(d.error || 'Failed to save episode');
     }
     setEpSaving(false);
+  };
+
+  const handleToggleEpisodePublish = async (ep: any) => {
+    const nextStatus = !ep.published;
+    setEpisodes(prev => prev.map(e => e.id === ep.id ? { ...e, published: nextStatus } : e));
+    try {
+      const res = await fetch(`/api/admin/series/${id}/episodes/${ep.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: nextStatus }),
+      });
+      if (res.ok) {
+        toast.success(`Episode ${nextStatus ? 'published' : 'dipindah ke draft'}!`);
+        if (nextStatus && !form.published) {
+          toast.info('Catatan: Series masih Draft. Aktifkan toggle Series dan klik Save Series agar tampil di publik.', { duration: 5000 });
+        }
+      } else {
+        const d = await res.json();
+        toast.error(d.error || 'Gagal mengubah status episode');
+        setEpisodes(prev => prev.map(e => e.id === ep.id ? { ...e, published: ep.published } : e));
+      }
+    } catch {
+      toast.error('Network error saat memperbarui status');
+      setEpisodes(prev => prev.map(e => e.id === ep.id ? { ...e, published: ep.published } : e));
+    }
   };
 
   const handleDeleteEpisode = async () => {
@@ -214,13 +242,41 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
         </div>
 
         <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <div className={cn("relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", form.published ? "bg-cyan-500" : isDark ? "bg-slate-800 hover:bg-slate-700" : "bg-slate-300 hover:bg-slate-400")}
-              onClick={() => setForm(f => ({ ...f, published: !f.published }))}>
-              <span className={cn("pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out", form.published ? "translate-x-5" : "translate-x-0")} />
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              id="series-published-switch"
+              aria-checked={form.published}
+              onClick={() => setForm(f => ({ ...f, published: !f.published }))}
+              className={cn(
+                "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2",
+                isDark ? "focus:ring-offset-[#0b1322]" : "focus:ring-offset-white",
+                form.published
+                  ? "bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.35)]"
+                  : isDark
+                  ? "bg-slate-800 hover:bg-slate-700 border-slate-700/60"
+                  : "bg-slate-300 hover:bg-slate-400 border-slate-200"
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                  form.published ? "translate-x-5" : "translate-x-0"
+                )}
+              />
+            </button>
+            <div className="cursor-pointer select-none" onClick={() => setForm(f => ({ ...f, published: !f.published }))}>
+              <span className={cn("text-sm font-bold transition-colors block", form.published ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-white" : "text-slate-900"))}>
+                {form.published ? 'Published' : 'Draft'}
+              </span>
+              <span className={cn("text-[11px] block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                {form.published ? 'Series is visible on the public site' : 'Series and its episodes are hidden from public view'}
+              </span>
             </div>
-            <span className={cn("text-sm font-bold transition-colors", form.published ? "text-cyan-500" : isDark ? "text-white" : "text-slate-900")}>{form.published ? 'Published' : 'Draft'}</span>
-          </label>
+          </div>
+
           <button onClick={handleSaveSeries} disabled={saving}
             className="flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
             <Save className="w-5 h-5" /> {saving ? 'Saving...' : 'Save Series'}
@@ -267,10 +323,22 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                   <div className="flex-1 min-w-0 sm:hidden">
                     <p className={cn("font-bold text-sm line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{ep.title}</p>
                     <div className="mt-1">
-                      {ep.published
-                        ? <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>Published</span>
-                        : <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-400 border-slate-800" : "text-slate-500 border-slate-200")}>Draft</span>
-                      }
+                      <button
+                        type="button"
+                        onClick={() => handleToggleEpisodePublish(ep)}
+                        title={`Click to ${ep.published ? 'unpublish' : 'publish'} episode`}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 cursor-pointer",
+                          ep.published
+                            ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20"
+                            : isDark
+                            ? "text-zinc-400 border border-slate-700 bg-slate-800/50 hover:bg-slate-800 hover:text-white"
+                            : "text-slate-500 border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:text-slate-900"
+                        )}
+                      >
+                        <span className={cn("w-1.5 h-1.5 rounded-full", ep.published ? "bg-cyan-400 animate-pulse" : "bg-zinc-500")} />
+                        {ep.published ? 'Published' : 'Draft'}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -278,10 +346,22 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 <div className="hidden sm:block flex-1 min-w-0 ml-2">
                   <p className={cn("font-bold text-sm line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{ep.title}</p>
                   <div className="mt-1.5">
-                    {ep.published
-                      ? <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>Published</span>
-                      : <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border", isDark ? "text-zinc-400 border-slate-800" : "text-slate-500 border-slate-200")}>Draft</span>
-                    }
+                    <button
+                      type="button"
+                      onClick={() => handleToggleEpisodePublish(ep)}
+                      title={`Click to ${ep.published ? 'unpublish' : 'publish'} episode`}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 cursor-pointer",
+                        ep.published
+                          ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20"
+                          : isDark
+                          ? "text-zinc-400 border border-slate-700 bg-slate-800/50 hover:bg-slate-800 hover:text-white"
+                          : "text-slate-500 border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:text-slate-900"
+                      )}
+                    >
+                      <span className={cn("w-1.5 h-1.5 rounded-full", ep.published ? "bg-cyan-400 animate-pulse" : "bg-zinc-500")} />
+                      {ep.published ? 'Published' : 'Draft'}
+                    </button>
                   </div>
                 </div>
                 
@@ -392,19 +472,63 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 </div>
               </div>
 
-              <div className={cn("flex items-center justify-between pt-6 border-t mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
-                <label className="flex items-center gap-3 cursor-pointer group">
- <div className={`w-12 h-7 rounded-full transition-colors border ${epForm.published ?'bg-cyan-500 border-cyan-400': isDark ?"bg-slate-800 border-slate-700":"bg-slate-200 border-slate-300"} relative`}
-                    onClick={() => setEpForm(f => ({ ...f, published: !f.published }))}>
- <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${epForm.published ?'left-6':'left-1'}`} />
+              {/* Draft warning banner if series itself is draft */}
+              {!form.published && epForm.published && (
+                <div className={cn(
+                  "p-4 rounded-xl border flex items-start gap-3 text-xs leading-relaxed transition-all",
+                  isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
+                )}>
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                  <div>
+                    <p className="font-bold text-amber-400 mb-0.5">Catatan: Series Utama Masih Berstatus "Draft"</p>
+                    <p className="opacity-90">
+                      Episode ini di-publish, tetapi pengunjung belum dapat melihatnya karena Series utama masih diset <strong>Draft</strong>. Untuk mempublikasikan ke publik, aktifkan toggle <strong>Published</strong> pada Series dan klik <strong>Save Series</strong>.
+                    </p>
                   </div>
-                  <span className={cn("text-sm font-bold group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{epForm.published ? 'Published' : 'Draft'}</span>
-                </label>
-                <div className="flex gap-3">
-                  <button onClick={() => setEditingEp(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
+                </div>
+              )}
+
+              <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between pt-6 border-t mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    role="switch"
+                    id="episode-published-switch"
+                    aria-checked={epForm.published}
+                    onClick={() => setEpForm(f => ({ ...f, published: !f.published }))}
+                    className={cn(
+                      "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2",
+                      isDark ? "focus:ring-offset-[#0b1322]" : "focus:ring-offset-white",
+                      epForm.published
+                        ? "bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.35)]"
+                        : isDark
+                        ? "bg-slate-800 hover:bg-slate-700 border-slate-700/60"
+                        : "bg-slate-300 hover:bg-slate-400 border-slate-200"
+                    )}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                        epForm.published ? "translate-x-5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                  <div className="cursor-pointer select-none" onClick={() => setEpForm(f => ({ ...f, published: !f.published }))}>
+                    <span className={cn("text-sm font-bold transition-colors block", epForm.published ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-white" : "text-slate-900"))}>
+                      {epForm.published ? 'Published' : 'Draft'}
+                    </span>
+                    <span className={cn("text-[11px] block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      {epForm.published ? 'Visible to public readers' : 'Hidden from public view'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <button type="button" onClick={() => setEditingEp(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
                     Cancel
                   </button>
-                  <button onClick={handleSaveEpisode} disabled={epSaving}
+                  <button type="button" onClick={handleSaveEpisode} disabled={epSaving}
                     className="flex items-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm disabled:opacity-50 transition-all">
                     <Save className="w-4 h-4" /> {epSaving ? 'Saving...' : 'Save Episode'}
                   </button>

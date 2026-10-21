@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 import { requireAuth } from '@/lib/auth-middleware';
 import { slugify } from '@/lib/slugify';
 import { deleteLocalFile } from '@/lib/file-utils';
+import { invalidateCache } from '@/lib/cache';
 import { isSafeUrl, parseId, MAX_IMG_URL } from '../../../route';
 
 const MAX_TITLE   = 300;
@@ -99,6 +101,20 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         ...(published !== undefined && { published: published === true }),
       },
     });
+
+    try {
+      const series = await prisma.series.findUnique({ where: { id: seriesId }, select: { slug: true } });
+      await invalidateCache('series:*');
+      revalidatePath('/series');
+      if (series?.slug) {
+        revalidatePath(`/series/${series.slug}`);
+        revalidatePath(`/series/${series.slug}/${episode.slug}`);
+      }
+      revalidatePath('/', 'layout');
+    } catch (cacheErr) {
+      console.warn('Failed to revalidate cache after episode update:', cacheErr);
+    }
+
     return NextResponse.json(episode);
   } catch (error: any) {
     if (error?.code === 'P2025') return NextResponse.json({ error: 'Episode not found' }, { status: 404 });
@@ -129,6 +145,19 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     }
 
     await prisma.episode.delete({ where: { id: episodeId } });
+
+    try {
+      const series = await prisma.series.findUnique({ where: { id: seriesId }, select: { slug: true } });
+      await invalidateCache('series:*');
+      revalidatePath('/series');
+      if (series?.slug) {
+        revalidatePath(`/series/${series.slug}`);
+      }
+      revalidatePath('/', 'layout');
+    } catch (cacheErr) {
+      console.warn('Failed to revalidate cache after episode delete:', cacheErr);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error?.code === 'P2025') return NextResponse.json({ error: 'Episode not found' }, { status: 404 });

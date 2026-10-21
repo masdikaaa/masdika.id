@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { requireAuth } from '@/lib/auth-middleware';
 import { slugify } from '@/lib/slugify';
 import { deleteLocalFile } from '@/lib/file-utils';
+import { invalidateCache } from '@/lib/cache';
 import { isSafeUrl, parseId, ALLOWED_LEVELS, MAX_IMG_URL } from '../route';
 
 const MAX_TITLE = 200;
@@ -104,7 +105,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       },
     });
 
-    revalidatePath('/', 'layout');
+    try {
+      await invalidateCache('series:*');
+      revalidatePath('/series');
+      revalidatePath(`/series/${series.slug}`);
+      revalidatePath('/', 'layout');
+    } catch (cacheErr) {
+      console.warn('Failed to revalidate cache after series update:', cacheErr);
+    }
 
     return NextResponse.json(series);
   } catch (error: any) {
@@ -131,7 +139,16 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     
     await prisma.series.delete({ where: { id: seriesId } });
 
-    revalidatePath('/', 'layout');
+    try {
+      await invalidateCache('series:*');
+      revalidatePath('/series');
+      if (series?.slug) {
+        revalidatePath(`/series/${series.slug}`);
+      }
+      revalidatePath('/', 'layout');
+    } catch (cacheErr) {
+      console.warn('Failed to revalidate cache after series delete:', cacheErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

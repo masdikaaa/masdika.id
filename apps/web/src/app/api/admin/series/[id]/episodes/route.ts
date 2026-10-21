@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 import { requireAuth } from '@/lib/auth-middleware';
 import { slugify } from '@/lib/slugify';
+import { invalidateCache } from '@/lib/cache';
 import { isSafeUrl, parseId, MAX_IMG_URL } from '../../route';
 
 const MAX_TITLE   = 300;
@@ -31,7 +33,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   try {
     // Verify series exists and belongs to this admin operation
-    const seriesExists = await prisma.series.findUnique({ where: { id: seriesId }, select: { id: true } });
+    const seriesExists = await prisma.series.findUnique({ where: { id: seriesId }, select: { id: true, slug: true } });
     if (!seriesExists) return NextResponse.json({ error: 'Series not found' }, { status: 404 });
 
     const body = await req.json();
@@ -87,6 +89,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         seriesId,
       },
     });
+
+    try {
+      await invalidateCache('series:*');
+      revalidatePath('/series');
+      if (seriesExists.slug) {
+        revalidatePath(`/series/${seriesExists.slug}`);
+        revalidatePath(`/series/${seriesExists.slug}/${episode.slug}`);
+      }
+      revalidatePath('/', 'layout');
+    } catch (cacheErr) {
+      console.warn('Failed to revalidate cache after episode create:', cacheErr);
+    }
+
     return NextResponse.json(episode);
   } catch (error: any) {
     if (error?.code === 'P2002') {

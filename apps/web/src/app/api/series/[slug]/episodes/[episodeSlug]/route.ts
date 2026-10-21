@@ -60,14 +60,18 @@ export async function GET(
     });
     const profileImageSetting = settings.find(s => s.key === 'profileImage');
 
-    const adminUser = await prisma.user.findFirst();
-    let adminName = adminUser?.name || 'Admin';
+    const adminUser = await prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+      orderBy: { id: 'asc' },
+    });
+    let adminName = 'Masdika.ID';
     if (adminUser && adminUser.name) {
       try {
         const { decryptDeterministic } = await import('@/lib/encryption');
         adminName = decryptDeterministic(adminUser.name);
       } catch (e) {
         // Fallback if not encrypted
+        adminName = adminUser.name;
       }
     }
 
