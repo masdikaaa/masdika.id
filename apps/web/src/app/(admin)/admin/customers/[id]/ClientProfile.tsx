@@ -389,8 +389,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
       </div>
 
       {/* Tabs */}
-      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4 overflow-x-auto", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex p-1 rounded-xl border max-w-full overflow-x-auto", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
           {[
             { key: 'summary', label: 'Summary', icon: User },
             { key: 'services', label: 'Products/Services', icon: Server },

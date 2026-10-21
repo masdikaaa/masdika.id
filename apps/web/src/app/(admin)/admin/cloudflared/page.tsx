@@ -204,39 +204,37 @@ export default function AdminCloudflaredPage() {
 
       {/* Filter and Tab Bar (GAMBAR 1 Style) */}
       <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className="w-full sm:w-auto overflow-x-auto max-w-full scrollbar-none pb-0.5">
-          <div className={cn("inline-flex p-1 rounded-xl border shrink-0 min-w-max", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
-            <button
-              onClick={() => setActiveTab('domains')}
-              className={cn(
-                "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
-                activeTab === 'domains'
-                  ? "bg-cyan-500 text-slate-950 shadow-sm"
-                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
-              )}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Domains</span>
-              <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'domains' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
-                {data.domains.length}
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab('tunnels')}
-              className={cn(
-                "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
-                activeTab === 'tunnels'
-                  ? "bg-cyan-500 text-slate-950 shadow-sm"
-                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
-              )}
-            >
-              <Server className="w-3.5 h-3.5" />
-              <span>Tunnels</span>
-              <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'tunnels' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
-                {data.tunnels.length}
-              </span>
-            </button>
-          </div>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          <button
+            onClick={() => setActiveTab('domains')}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              activeTab === 'domains'
+                ? "bg-cyan-500 text-slate-950 shadow-sm"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+            )}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Domains</span>
+            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'domains' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              {data.domains.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('tunnels')}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              activeTab === 'tunnels'
+                ? "bg-cyan-500 text-slate-950 shadow-sm"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+            )}
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Tunnels</span>
+            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'tunnels' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              {data.tunnels.length}
+            </span>
+          </button>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">

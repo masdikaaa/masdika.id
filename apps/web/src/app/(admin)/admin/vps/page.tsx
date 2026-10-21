@@ -816,32 +816,30 @@ export default function VpsManagementPage() {
 
       {/* Tabs (GAMBAR 1 Filter Bar Style) */}
       <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className="w-full overflow-x-auto max-w-full scrollbar-none pb-0.5">
-          <div className={cn("inline-flex p-1 rounded-xl border shrink-0 min-w-max", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
-            {[
-              { id: "settings", label: "Proxmox Settings", icon: Settings },
-              { id: "pools", label: "IP Pools", icon: Network },
-              { id: "templates", label: "OS Templates", icon: HardDrive },
-              { id: "pricing", label: "Pricing", icon: DollarSign },
-              { id: "services", label: "User VPS Services", icon: Server },
-              { id: "k3s", label: "Managed K3s", icon: Server },
-              { id: "reserved-ips", label: "Reserved IPs", icon: Network },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
-                  activeTab === tab.id
-                    ? "bg-cyan-500 text-slate-950 shadow-sm"
-                    : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
-                )}
-              >
-                <tab.icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          {[
+            { id: "settings", label: "Proxmox Settings", icon: Settings },
+            { id: "pools", label: "IP Pools", icon: Network },
+            { id: "templates", label: "OS Templates", icon: HardDrive },
+            { id: "pricing", label: "Pricing", icon: DollarSign },
+            { id: "services", label: "User VPS Services", icon: Server },
+            { id: "k3s", label: "Managed K3s", icon: Server },
+            { id: "reserved-ips", label: "Reserved IPs", icon: Network },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                activeTab === tab.id
+                  ? "bg-cyan-500 text-slate-950 shadow-sm"
+                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              )}
+            >
+              <tab.icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 

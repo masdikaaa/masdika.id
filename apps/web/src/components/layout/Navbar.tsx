@@ -29,7 +29,6 @@ import {
 import { SiKubernetes } from "react-icons/si";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/ThemeProvider";
 
 export interface MenuItem {
@@ -299,13 +298,14 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
 
   return (
     <nav
+      data-menu-open={isOpen ? "true" : "false"}
       className={cn(
-        "fixed top-0 z-50 w-full transition-[background-color,border-color,box-shadow,padding] duration-200 border-b",
+        "fixed top-0 z-50 w-full",
         isOpen
-          ? "bg-[var(--surface)] shadow-lg border-[var(--border-primary)] duration-0"
+          ? "bg-[var(--surface)] border-b-0 shadow-none transition-none duration-0"
           : scrolled
-            ? "bg-[var(--navbar-bg)] backdrop-blur-md shadow-sm border-[var(--border-subtle)]"
-            : "bg-transparent border-transparent",
+            ? "bg-[var(--navbar-bg)] backdrop-blur-md shadow-sm border-b-0 dark:border-b dark:border-[var(--border-subtle)]"
+            : "bg-transparent border-b-0",
         scrolled ? "py-3" : "py-5"
       )}
     >
@@ -465,7 +465,7 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
               onClick={() => setIsOpen((prev) => !prev)}
               aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isOpen}
-              className="p-2 rounded-lg text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 hover:bg-[var(--surface-secondary)] border border-[var(--border-primary)] focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors touch-manipulation active:scale-95"
+              className="p-2 rounded-lg text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 hover:bg-[var(--surface-secondary)] border border-[var(--border-primary)] focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 touch-manipulation transition-none duration-0"
             >
               {isOpen ? (
                 <X className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -476,235 +476,214 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
           </div>
         </div>
 
-        {/* Mega Menu Dropdown */}
-        <AnimatePresence>
-          {(activeMenu === "Explore" || activeMenu === "Developers" || activeMenu === "Profile") && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.15 }}
-              onMouseEnter={() => {
-                if (timeoutRef.current) clearTimeout(timeoutRef.current);
-              }}
-              onMouseLeave={handleMouseLeave}
-              className="absolute top-full left-0 right-0 pt-3 px-4 sm:px-6 lg:px-8 z-50 hidden lg:block"
-            >
-              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-2xl overflow-hidden flex">
-                {/* Left Panel */}
-                <div className="w-[30%] min-w-[270px] max-w-[320px] p-7 sm:p-8 border-r border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-center">
-                  <h3 className="text-2xl font-bold mb-3 text-[var(--text-primary)]">
-                    {activeMenu === "Explore" ? "Explore Opportunities" : activeMenu === "Profile" ? "Profile & Work" : "Developer Tools & APIs"}
-                  </h3>
-                  <p className="mb-6 max-w-sm text-sm text-[var(--text-secondary)] leading-relaxed">
-                    {activeMenu === "Explore"
-                      ? "Discover new events, connect with the community, and find your next big career move."
-                      : activeMenu === "Profile"
-                        ? "Learn about our services, view our portfolio, and discover our core expertise."
-                        : "Build powerful integrations with our public REST APIs and secure file delivery network."}
-                  </p>
-
-                  <Link
-                    href={activeMenu === "Explore" ? "/opportunities" : activeMenu === "Profile" ? "/resume" : "/api-hub"}
-                    onClick={() => {
-                      setActiveMenu(null);
-                      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                    }}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-lg font-semibold text-sm transition-colors w-fit shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-                  >
-                    {activeMenu === "Explore" ? "View All" : activeMenu === "Profile" ? "About Us" : "Browse APIs"}
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-
-                {/* Right Panel - Grid */}
-                <div className="flex-1 p-6 lg:p-7 flex flex-col justify-center">
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                    {(activeMenu === "Explore" ? exploreItems : activeMenu === "Profile" ? companyItems : devItems).map((item) => (
-                      <Link
-                        key={item.title}
-                        href={item.href}
-                        onClick={() => {
-                          setActiveMenu(null);
-                          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                        }}
-                        className="group flex items-center gap-3.5 px-3.5 py-3 rounded-xl border border-transparent hover:border-[var(--border-primary)] hover:bg-[var(--surface-secondary)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-                      >
-                        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                          <item.icon className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <h4 className="font-bold text-sm leading-snug text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
-                              {item.title}
-                            </h4>
-                            {"badge" in item && item.badge && (
-                              <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider shrink-0 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
-                                {item.badge}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-[var(--text-muted)] line-clamp-1 leading-normal">
-                            {item.description}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.12, ease: "easeOut" }}
-            onScroll={(e) => {
-              const scrolled = e.currentTarget.scrollTop > 10;
-              if (scrolled !== isMenuScrolled) setIsMenuScrolled(scrolled);
+        {/* Mega Menu Dropdown (Instant / No animation) */}
+        {(activeMenu === "Explore" || activeMenu === "Developers" || activeMenu === "Profile") && (
+          <div
+            onMouseEnter={() => {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
             }}
-            className="lg:hidden absolute top-full left-0 right-0 w-full h-[calc(100dvh-100%)] overflow-y-auto bg-[var(--surface)] text-[var(--text-primary)] border-b border-[var(--border-primary)] shadow-2xl"
+            onMouseLeave={handleMouseLeave}
+            className="absolute top-full left-0 right-0 pt-3 px-4 sm:px-6 lg:px-8 z-50 hidden lg:block"
           >
-            <div className="px-4 pt-4 pb-24">
-              <div className="flex flex-col">
-                {NAV_LINKS.map((link) => {
-                  if (link.hasMegaMenu) {
-                    const isExplore = link.name === "Explore";
-                    const isCompany = link.name === "Profile";
-                    const isOpenState = isExplore ? mobileExploreOpen : isCompany ? mobileCompanyOpen : mobileDevOpen;
-                    const setOpenState = isExplore ? setMobileExploreOpen : isCompany ? setMobileCompanyOpen : setMobileDevOpen;
-                    const menuList = isExplore ? exploreItems : isCompany ? companyItems : devItems;
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-2xl overflow-hidden flex">
+              {/* Left Panel */}
+              <div className="w-[30%] min-w-[270px] max-w-[320px] p-7 sm:p-8 border-r border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-center">
+                <h3 className="text-2xl font-bold mb-3 text-[var(--text-primary)]">
+                  {activeMenu === "Explore" ? "Explore Opportunities" : activeMenu === "Profile" ? "Profile & Work" : "Developer Tools & APIs"}
+                </h3>
+                <p className="mb-6 max-w-sm text-sm text-[var(--text-secondary)] leading-relaxed">
+                  {activeMenu === "Explore"
+                    ? "Discover new events, connect with the community, and find your next big career move."
+                    : activeMenu === "Profile"
+                      ? "Learn about our services, view our portfolio, and discover our core expertise."
+                      : "Build powerful integrations with our public REST APIs and secure file delivery network."}
+                </p>
 
-                    return (
-                      <div key={link.name} className="py-1.5 border-b border-[var(--border-subtle)] last:border-0">
-                        <button
-                          onClick={() => setOpenState(!isOpenState)}
-                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-[var(--surface-secondary)] text-[var(--text-primary)]"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                              {link.icon && <link.icon className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />}
-                            </div>
-                            <span>{link.name}</span>
-                          </div>
-                          <ChevronDown
-                            className={cn(
-                              "w-4 h-4 transition-transform duration-200",
-                              isOpenState ? "rotate-180 text-cyan-500" : "text-cyan-600 dark:text-cyan-400"
-                            )}
-                          />
-                        </button>
-
-                        <AnimatePresence>
-                          {isOpenState && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="flex flex-col gap-1.5 mt-1 pl-4 pr-1 pb-2">
-                                {menuList.map((item) => (
-                                  <Link
-                                    key={item.title}
-                                    href={item.href}
-                                    onClick={() => {
-                                      setIsOpen(false);
-                                      setOpenState(false);
-                                    }}
-                                    className="flex items-center gap-3 p-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:border-cyan-500/30 transition-colors"
-                                  >
-                                    <div className={cn("w-8 h-8 rounded-md flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                                      <item.icon className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-semibold text-xs text-[var(--text-primary)]">
-                                          {item.title}
-                                        </span>
-                                        {"badge" in item && item.badge && (
-                                          <span className="px-1 py-0.2 rounded-full text-[8px] font-semibold uppercase bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
-                                            {item.badge}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <p className="text-[11px] text-[var(--text-muted)] line-clamp-1">
-                                        {item.description}
-                                      </p>
-                                    </div>
-                                  </Link>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  }
-
-                  const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-                  return (
-                    <div key={link.name} className="py-1.5 border-b border-[var(--border-subtle)] last:border-0">
-                      <Link
-                        href={link.href}
-                        onClick={() => setIsOpen(false)}
-                        className={cn(
-                          "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors",
-                          isActive
-                            ? "bg-[var(--surface-secondary)] text-cyan-600 dark:text-cyan-400 font-bold"
-                            : "text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
-                        )}
-                      >
-                        <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                          {link.icon && <link.icon className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />}
-                        </div>
-                        <span>{link.name}</span>
-                      </Link>
-                    </div>
-                  );
-                })}
+                <Link
+                  href={activeMenu === "Explore" ? "/opportunities" : activeMenu === "Profile" ? "/resume" : "/api-hub"}
+                  onClick={() => {
+                    setActiveMenu(null);
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                  }}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-lg font-semibold text-sm transition-colors w-fit shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+                >
+                  {activeMenu === "Explore" ? "View All" : activeMenu === "Profile" ? "About Us" : "Browse APIs"}
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
               </div>
 
-              {/* Mobile Theme Toggle & Actions */}
-              <div className="pt-4 mt-2 border-t border-[var(--border-subtle)] flex flex-col gap-3">
-                <button
-                  onClick={toggleTheme}
-                  aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                  className="flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] text-sm font-semibold transition-colors"
-                >
-                  {isDark ? <Sun className="w-4 h-4 text-cyan-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
-                  <span>{isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
-                </button>
-
-                {session ? (
-                  <Link
-                    href={session.role === "ADMIN" ? "/admin" : "/dashboard"}
-                    onClick={() => setIsOpen(false)}
-                    className="block w-full text-center py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-sm transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="block w-full text-center py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-sm transition-colors"
-                  >
-                    Login
-                  </Link>
-                )}
+              {/* Right Panel - Grid */}
+              <div className="flex-1 p-6 lg:p-7 flex flex-col justify-center">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  {(activeMenu === "Explore" ? exploreItems : activeMenu === "Profile" ? companyItems : devItems).map((item) => (
+                    <Link
+                      key={item.title}
+                      href={item.href}
+                      onClick={() => {
+                        setActiveMenu(null);
+                        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                      }}
+                      className="group flex items-center gap-3.5 px-3.5 py-3 rounded-xl border border-transparent hover:border-[var(--border-primary)] hover:bg-[var(--surface-secondary)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+                    >
+                      <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <item.icon className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h4 className="font-bold text-sm leading-snug text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                            {item.title}
+                          </h4>
+                          {"badge" in item && item.badge && (
+                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider shrink-0 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[var(--text-muted)] line-clamp-1 leading-normal">
+                          {item.description}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
+
+      {/* Mobile Menu (Instant open / no animation - Kencang.com style) */}
+      {isOpen && (
+        <div
+          onScroll={(e) => {
+            const scrolled = e.currentTarget.scrollTop > 10;
+            if (scrolled !== isMenuScrolled) setIsMenuScrolled(scrolled);
+          }}
+          className="lg:hidden absolute top-full left-0 right-0 w-full max-h-[calc(100dvh-4.5rem)] overflow-y-auto hide-scrollbar bg-[var(--surface)] text-[var(--text-primary)] border-b border-[var(--border-primary)] shadow-2xl rounded-b-2xl"
+        >
+          <div className="px-4 pt-2 pb-8">
+            <div className="flex flex-col">
+              {NAV_LINKS.map((link) => {
+                if (link.hasMegaMenu) {
+                  const isExplore = link.name === "Explore";
+                  const isCompany = link.name === "Profile";
+                  const isOpenState = isExplore ? mobileExploreOpen : isCompany ? mobileCompanyOpen : mobileDevOpen;
+                  const setOpenState = isExplore ? setMobileExploreOpen : isCompany ? setMobileCompanyOpen : setMobileDevOpen;
+                  const menuList = isExplore ? exploreItems : isCompany ? companyItems : devItems;
+
+                  return (
+                    <div key={link.name} className="py-1.5 border-b border-[var(--border-subtle)] last:border-0">
+                      <button
+                        onClick={() => setOpenState(!isOpenState)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-[var(--surface-secondary)] text-[var(--text-primary)]"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                            {link.icon && <link.icon className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />}
+                          </div>
+                          <span>{link.name}</span>
+                        </div>
+                        <ChevronDown
+                          className={cn(
+                            "w-4 h-4",
+                            isOpenState ? "rotate-180 text-cyan-500" : "text-cyan-600 dark:text-cyan-400"
+                          )}
+                        />
+                      </button>
+
+                      {isOpenState && (
+                        <div className="flex flex-col gap-1.5 mt-1 pl-4 pr-1 pb-2">
+                          {menuList.map((item) => (
+                            <Link
+                              key={item.title}
+                              href={item.href}
+                              onClick={() => {
+                                setIsOpen(false);
+                                setOpenState(false);
+                              }}
+                              className="flex items-center gap-3 p-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:border-cyan-500/30 transition-colors"
+                            >
+                              <div className={cn("w-8 h-8 rounded-md flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                                <item.icon className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="font-semibold text-xs text-[var(--text-primary)]">
+                                    {item.title}
+                                  </span>
+                                  {"badge" in item && item.badge && (
+                                    <span className="px-1 py-0.2 rounded-full text-[8px] font-semibold uppercase bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-[var(--text-muted)] line-clamp-1">
+                                  {item.description}
+                                </p>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                return (
+                  <div key={link.name} className="py-1.5 border-b border-[var(--border-subtle)] last:border-0">
+                    <Link
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors",
+                        isActive
+                          ? "bg-[var(--surface-secondary)] text-cyan-600 dark:text-cyan-400 font-bold"
+                          : "text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
+                      )}
+                    >
+                      <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        {link.icon && <link.icon className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />}
+                      </div>
+                      <span>{link.name}</span>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Mobile Theme Toggle & Actions */}
+            <div className="pt-4 mt-2 border-t border-[var(--border-subtle)] flex flex-col gap-3">
+              <button
+                onClick={toggleTheme}
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className="flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] text-sm font-semibold transition-colors"
+              >
+                {isDark ? <Sun className="w-4 h-4 text-cyan-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+                <span>{isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+              </button>
+
+              {session ? (
+                <Link
+                  href={session.role === "ADMIN" ? "/admin" : "/dashboard"}
+                  onClick={() => setIsOpen(false)}
+                  className="block w-full text-center py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-sm transition-colors"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="block w-full text-center py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold text-sm transition-colors"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

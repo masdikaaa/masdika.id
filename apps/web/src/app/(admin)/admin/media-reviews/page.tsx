@@ -334,11 +334,10 @@ export default function AdminMediaReviewsPage() {
         isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Tab switch */}
-        <div className="w-full sm:w-auto overflow-x-auto max-w-full scrollbar-none pb-0.5">
-          <div className={cn(
-            "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 min-w-max",
-            isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
-          )}>
+        <div className={cn(
+          "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
+          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+        )}>
             <button
               onClick={() => setActiveTab("comments")}
               className={cn(
@@ -389,7 +388,6 @@ export default function AdminMediaReviewsPage() {
               </span>
             </button>
           </div>
-        </div>
 
         {/* Search & Rating Filter */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">

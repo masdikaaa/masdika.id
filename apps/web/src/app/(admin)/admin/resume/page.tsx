@@ -196,7 +196,7 @@ export default function AdminResumePage() {
 
       {/* Tabs & Actions */}
       <div className={cn("flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4", isDark ? "border-white/10" : "border-slate-200")}>
-        <div className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+        <div className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-none scrollbar-hide w-full sm:w-auto pb-1">
         <button
           onClick={() => setActiveTab('experience')}
           className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "experience" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}

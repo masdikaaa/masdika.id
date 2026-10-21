@@ -221,43 +221,41 @@ export default function AdminAffiliatePage() {
         isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Status Tab switch */}
-        <div className="w-full sm:w-auto overflow-x-auto max-w-full scrollbar-none pb-0.5">
-          <div className={cn(
-            "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 min-w-max",
-            isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
-          )}>
-            {[
-              { id: "ALL", label: "All Requests", count: totalRequests },
-              { id: "PENDING", label: "Pending", count: pendingCount },
-              { id: "PAID", label: "Paid", count: paidCount },
-              { id: "REJECTED", label: "Rejected", count: withdrawals.filter(w => w.status === 'REJECTED').length },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setStatusFilter(tab.id)}
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
-                  statusFilter === tab.id
-                    ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                    : isDark
-                      ? "text-zinc-400 hover:text-white hover:bg-white/5"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                )}
-              >
-                <span>{tab.label}</span>
-                <span className={cn(
-                  "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
-                  statusFilter === tab.id
-                    ? "bg-slate-950/20 text-slate-950 font-extrabold"
-                    : isDark
-                      ? "bg-white/10 text-zinc-300"
-                      : "bg-slate-200 text-slate-700"
-                )}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+        <div className={cn(
+          "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
+          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+        )}>
+          {[
+            { id: "ALL", label: "All Requests", count: totalRequests },
+            { id: "PENDING", label: "Pending", count: pendingCount },
+            { id: "PAID", label: "Paid", count: paidCount },
+            { id: "REJECTED", label: "Rejected", count: withdrawals.filter(w => w.status === 'REJECTED').length },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
+              className={cn(
+                "inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
+                statusFilter === tab.id
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                  : isDark
+                    ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+                statusFilter === tab.id
+                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  : isDark
+                    ? "bg-white/10 text-zinc-300"
+                    : "bg-slate-200 text-slate-700"
+              )}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
 
         {/* Search */}

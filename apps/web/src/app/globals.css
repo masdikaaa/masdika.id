@@ -1216,10 +1216,6 @@ html.light .glass-card {
   box-shadow: 0 8px 32px var(--card-shadow);
 }
 
-/* Navbar Light Mode - override the bg-[#050B14] hardcodes */
-html.light nav.fixed {
-  border-bottom-color: var(--border-subtle) !important;
-}
 
 /* Mega menu bg override */
 html.light [class*="bg-[#050B14]"] {
@@ -1438,11 +1434,22 @@ html.dark ::selection {
 }
 
 /* Smooth transition for theme switching on key elements */
-nav.fixed,
 footer,
 .glass,
 .glass-card {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Instant mobile navbar menu - zero transition/animation glitch */
+nav.fixed[data-menu-open="true"],
+nav.fixed[data-menu-open="true"] * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Ensure no border glitch under navbar in light mode */
+html.light nav.fixed {
+  border-bottom-color: transparent !important;
 }
 
 /* ===== Smooth, lag-free theme switching =====
