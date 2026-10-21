@@ -242,40 +242,34 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
         </div>
 
         <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              role="switch"
-              id="series-published-switch"
-              aria-checked={form.published}
-              onClick={() => setForm(f => ({ ...f, published: !f.published }))}
-              className={cn(
-                "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2",
-                isDark ? "focus:ring-offset-[#0b1322]" : "focus:ring-offset-white",
-                form.published
-                  ? "bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.35)]"
-                  : isDark
-                  ? "bg-slate-800 hover:bg-slate-700 border-slate-700/60"
-                  : "bg-slate-300 hover:bg-slate-400 border-slate-200"
-              )}
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
-                  form.published ? "translate-x-5" : "translate-x-0"
-                )}
+          <label className={cn(
+            "flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-colors select-none",
+            isDark ? "bg-cyan-500/5 border-cyan-500/10 hover:bg-cyan-500/10" : "bg-cyan-50/50 border-cyan-200/60 hover:bg-cyan-50"
+          )}>
+            <div className="relative shrink-0">
+              <input
+                type="checkbox"
+                id="series-published-input"
+                checked={form.published}
+                onChange={(e) => setForm(f => ({ ...f, published: e.target.checked }))}
+                className="sr-only peer"
               />
-            </button>
-            <div className="cursor-pointer select-none" onClick={() => setForm(f => ({ ...f, published: !f.published }))}>
-              <span className={cn("text-sm font-bold transition-colors block", form.published ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-white" : "text-slate-900"))}>
+              <div className={cn(
+                "w-11 h-6 rounded-full peer peer-focus:outline-none transition-all",
+                "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all",
+                "peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:bg-cyan-500",
+                isDark ? "bg-black/50" : "bg-slate-300"
+              )}></div>
+            </div>
+            <div>
+              <span className={cn("text-sm font-medium block", isDark ? "text-white" : "text-slate-900")}>
                 {form.published ? 'Published' : 'Draft'}
               </span>
-              <span className={cn("text-[11px] block", isDark ? "text-zinc-500" : "text-slate-400")}>
+              <span className={cn("text-xs block", isDark ? "text-zinc-400" : "text-slate-500")}>
                 {form.published ? 'Series is visible on the public site' : 'Series and its episodes are hidden from public view'}
               </span>
             </div>
-          </div>
+          </label>
 
           <button onClick={handleSaveSeries} disabled={saving}
             className="flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
@@ -489,40 +483,34 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
               )}
 
               <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between pt-6 border-t mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    role="switch"
-                    id="episode-published-switch"
-                    aria-checked={epForm.published}
-                    onClick={() => setEpForm(f => ({ ...f, published: !f.published }))}
-                    className={cn(
-                      "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2",
-                      isDark ? "focus:ring-offset-[#0b1322]" : "focus:ring-offset-white",
-                      epForm.published
-                        ? "bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.35)]"
-                        : isDark
-                        ? "bg-slate-800 hover:bg-slate-700 border-slate-700/60"
-                        : "bg-slate-300 hover:bg-slate-400 border-slate-200"
-                    )}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
-                        epForm.published ? "translate-x-5" : "translate-x-0"
-                      )}
+                <label className={cn(
+                  "flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-colors select-none",
+                  isDark ? "bg-cyan-500/5 border-cyan-500/10 hover:bg-cyan-500/10" : "bg-cyan-50/50 border-cyan-200/60 hover:bg-cyan-50"
+                )}>
+                  <div className="relative shrink-0">
+                    <input
+                      type="checkbox"
+                      id="episode-published-input"
+                      checked={epForm.published}
+                      onChange={(e) => setEpForm(f => ({ ...f, published: e.target.checked }))}
+                      className="sr-only peer"
                     />
-                  </button>
-                  <div className="cursor-pointer select-none" onClick={() => setEpForm(f => ({ ...f, published: !f.published }))}>
-                    <span className={cn("text-sm font-bold transition-colors block", epForm.published ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-white" : "text-slate-900"))}>
+                    <div className={cn(
+                      "w-11 h-6 rounded-full peer peer-focus:outline-none transition-all",
+                      "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all",
+                      "peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:bg-cyan-500",
+                      isDark ? "bg-black/50" : "bg-slate-300"
+                    )}></div>
+                  </div>
+                  <div>
+                    <span className={cn("text-sm font-medium block", isDark ? "text-white" : "text-slate-900")}>
                       {epForm.published ? 'Published' : 'Draft'}
                     </span>
-                    <span className={cn("text-[11px] block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-xs block", isDark ? "text-zinc-400" : "text-slate-500")}>
                       {epForm.published ? 'Visible to public readers' : 'Hidden from public view'}
                     </span>
                   </div>
-                </div>
+                </label>
 
                 <div className="flex gap-3 justify-end">
                   <button type="button" onClick={() => setEditingEp(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
