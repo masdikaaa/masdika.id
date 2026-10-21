@@ -11,10 +11,16 @@ const MAX_DESC    = 2000;
 const MAX_TAGS    = 300;
 const MAX_IMG_URL = 500;
 
-/** Basic HTTPS URL check — rejects non-http(s) schemes to prevent javascript: etc. */
+/** URL validation: allows relative upload paths (e.g. /uploads/...) or valid http(s) URLs */
 function isSafeUrl(url: string): boolean {
+  if (typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  // Allow local relative paths like /uploads/media/..., but disallow protocol-relative //
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+    return true;
+  }
   try {
-    const u = new URL(url);
+    const u = new URL(trimmed);
     return u.protocol === 'https:' || u.protocol === 'http:';
   } catch {
     return false;
