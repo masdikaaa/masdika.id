@@ -35,6 +35,7 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { cn } from "@/lib/utils";
+import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 
 const K3S_TERMINAL_LOGS = [
   { time: "00:01", module: "CONFIG", message: "Parsing cluster specifications..." },
@@ -505,19 +506,32 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
+            {/* Connecting Line Container */}
+            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-slate-200 dark:bg-white/10 overflow-hidden rounded-full">
+              <AnimatedBeam />
+            </div>
+
             {[
               { step: "01", title: "Size Your Master Node", desc: "Select initial CPU cores, RAM, and storage required for your control plane." },
               { step: "02", title: "Top Up Deposit", desc: "Add balance via automated QRIS or VA. You only pay for active hourly resources." },
               { step: "03", title: "Deploy & Download Kubeconfig", desc: "Your cluster provisions automatically with Kubeconfig and Helm ready in under 60 seconds." }
-            ].map((item, i) => (
+            ].map((st, i) => (
               <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
-                <div className="p-8 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-center shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between h-full">
+                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 text-center shadow-sm hover:border-cyan-500/40 transition-all duration-300 h-full flex flex-col justify-between relative z-10 group">
                   <div>
-                    <div className="w-16 h-16 mx-auto rounded-full border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-center mb-6">
-                      <span className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{item.step}</span>
+                    <div className="w-20 h-20 mx-auto rounded-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform duration-300">
+                      <OrbitalRings />
+                      <span className="relative z-10 text-3xl font-black bg-gradient-to-br from-cyan-600 to-cyan-400 bg-clip-text text-transparent">
+                        {st.step}
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3">{item.title}</h3>
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
+                      {st.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {st.desc}
+                    </p>
                   </div>
                 </div>
               </FadeIn>
