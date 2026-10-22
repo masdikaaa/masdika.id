@@ -16,5 +16,14 @@
   },
   "dependencies": {
     "ssh2": "^1.17.0"
+  },
+  "overrides": {
+    "dompurify": "^3.4.11",
+    "hono": "^4.12.25",
+    "@hono/node-server": "^1.19.13",
+    "js-yaml": "^4.1.2",
+    "postcss": "^8.5.31",
+    "source-map-js": "^1.2.2",
+    "undici": "^7.30.1"
   }
 }
