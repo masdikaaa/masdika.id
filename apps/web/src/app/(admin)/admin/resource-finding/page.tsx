@@ -209,6 +209,7 @@ export default function AdminResourceFindingPage() {
     description: string;
     confirmText: string;
     variant: "danger" | "warning" | "success";
+    icon?: React.ReactNode;
     onConfirm: () => Promise<void>;
   }>({
     isOpen: false,
@@ -2219,7 +2220,19 @@ export default function AdminResourceFindingPage() {
               </div>
               {throttleModalVps.isNetDisabled ? (
                 <button
-                  onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
+                  onClick={() => {
+                    setConfirmModal({
+                      isOpen: true,
+                      title: `Enable Internet for VMID #${throttleModalVps.vmid}?`,
+                      description: `Reconnect virtual network link for ${throttleModalVps.hostname}? This will restore full internet access.`,
+                      confirmText: "Enable Internet",
+                      variant: "success",
+                      icon: <Wifi className="w-8 h-8" />,
+                      onConfirm: async () => {
+                        await handleVpsAction(throttleModalVps.id, "enable-net");
+                      },
+                    });
+                  }}
                   disabled={actionLoading}
                   className={cn(
                     "px-3 py-1.5 sm:py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 shrink-0 self-start sm:self-auto",
@@ -2232,7 +2245,19 @@ export default function AdminResourceFindingPage() {
                 </button>
               ) : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0 ? (
                 <button
-                  onClick={() => handleVpsAction(throttleModalVps.id, "unthrottle")}
+                  onClick={() => {
+                    setConfirmModal({
+                      isOpen: true,
+                      title: `Restore Full Speed for VMID #${throttleModalVps.vmid}?`,
+                      description: `Remove rate limiting and restore unlimited network speed for ${throttleModalVps.hostname}.`,
+                      confirmText: "Restore Full Speed",
+                      variant: "success",
+                      icon: <Gauge className="w-8 h-8" />,
+                      onConfirm: async () => {
+                        await handleVpsAction(throttleModalVps.id, "unthrottle");
+                      },
+                    });
+                  }}
                   disabled={actionLoading}
                   className={cn(
                     "px-3 py-1.5 sm:py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 shrink-0 self-start sm:self-auto",
@@ -2302,7 +2327,19 @@ export default function AdminResourceFindingPage() {
                 {throttleModalVps.isNetDisabled ? (
                   <button
                     type="button"
-                    onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
+                    onClick={() => {
+                      setConfirmModal({
+                        isOpen: true,
+                        title: `Enable Internet for VMID #${throttleModalVps.vmid}?`,
+                        description: `Reconnect virtual network link (link_down=0) for ${throttleModalVps.hostname}? This will restore network traffic and public internet access immediately.`,
+                        confirmText: "Enable Internet",
+                        variant: "success",
+                        icon: <Wifi className="w-8 h-8" />,
+                        onConfirm: async () => {
+                          await handleVpsAction(throttleModalVps.id, "enable-net");
+                        },
+                      });
+                    }}
                     disabled={actionLoading}
                     className={cn(
                       "w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-sm",
@@ -2316,13 +2353,17 @@ export default function AdminResourceFindingPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      if (
-                        window.confirm(
-                          `Are you sure you want to DISABLE internet for VMID #${throttleModalVps.vmid} (${throttleModalVps.hostname})?\n\nThis will instantly disconnect virtual network links via Proxmox link_down=1 without restarting the VM, and log a critical incident in the audit report.`
-                        )
-                      ) {
-                        handleVpsAction(throttleModalVps.id, "disable-net");
-                      }
+                      setConfirmModal({
+                        isOpen: true,
+                        title: `Disable Internet for VMID #${throttleModalVps.vmid}?`,
+                        description: `Disconnect virtual network link (link_down=1) for ${throttleModalVps.hostname}? This will isolate the VM from public internet immediately without restarting it, and record a critical incident in audit logs.`,
+                        confirmText: "Disable Internet",
+                        variant: "danger",
+                        icon: <WifiOff className="w-8 h-8" />,
+                        onConfirm: async () => {
+                          await handleVpsAction(throttleModalVps.id, "disable-net");
+                        },
+                      });
                     }}
                     disabled={actionLoading}
                     className={cn(
@@ -2461,6 +2502,7 @@ export default function AdminResourceFindingPage() {
         description={confirmModal.description}
         confirmText={confirmModal.confirmText}
         variant={confirmModal.variant}
+        icon={confirmModal.icon}
       />
     </div>
   );

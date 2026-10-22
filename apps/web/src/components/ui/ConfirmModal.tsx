@@ -13,6 +13,7 @@ interface ConfirmModalProps {
   isLoading?: boolean;
   variant?: "danger" | "success" | "warning";
   children?: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 export function ConfirmModal({
@@ -26,6 +27,7 @@ export function ConfirmModal({
   isLoading = false,
   variant = "danger",
   children,
+  icon,
 }: ConfirmModalProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -33,7 +35,7 @@ export function ConfirmModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -45,20 +47,42 @@ export function ConfirmModal({
             }`}
           >
             <div className="flex justify-center mb-4">
-              {variant === "danger" && (
-                <div className={`p-3 rounded-full ${isDark ? "bg-red-500/10 text-red-400" : "bg-red-50 text-red-600"}`}>
-                  <Trash2 className="w-8 h-8" />
+              {icon ? (
+                <div
+                  className={`p-3 rounded-full ${
+                    variant === "danger"
+                      ? isDark
+                        ? "bg-red-500/10 text-red-400"
+                        : "bg-red-50 text-red-600"
+                      : variant === "warning"
+                      ? isDark
+                        ? "bg-amber-500/10 text-amber-400"
+                        : "bg-amber-50 text-amber-600"
+                      : isDark
+                      ? "bg-emerald-500/10 text-emerald-400"
+                      : "bg-emerald-50 text-emerald-600"
+                  }`}
+                >
+                  {icon}
                 </div>
-              )}
-              {variant === "warning" && (
-                <div className={`p-3 rounded-full ${isDark ? "bg-amber-500/10 text-amber-400" : "bg-amber-50 text-amber-600"}`}>
-                  <AlertCircle className="w-8 h-8" />
-                </div>
-              )}
-              {variant === "success" && (
-                <div className={`p-3 rounded-full ${isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600"}`}>
-                  <CheckCircle className="w-8 h-8" />
-                </div>
+              ) : (
+                <>
+                  {variant === "danger" && (
+                    <div className={`p-3 rounded-full ${isDark ? "bg-red-500/10 text-red-400" : "bg-red-50 text-red-600"}`}>
+                      <Trash2 className="w-8 h-8" />
+                    </div>
+                  )}
+                  {variant === "warning" && (
+                    <div className={`p-3 rounded-full ${isDark ? "bg-amber-500/10 text-amber-400" : "bg-amber-50 text-amber-600"}`}>
+                      <AlertCircle className="w-8 h-8" />
+                    </div>
+                  )}
+                  {variant === "success" && (
+                    <div className={`p-3 rounded-full ${isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600"}`}>
+                      <CheckCircle className="w-8 h-8" />
+                    </div>
+                  )}
+                </>
               )}
             </div>
             
