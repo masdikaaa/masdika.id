@@ -1815,10 +1815,10 @@ export default function AdminResourceFindingPage() {
 
       {/* Inspect Deep Telemetry & RRD Modal */}
       {inspectVps && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
             className={cn(
-              "w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border p-5 sm:p-7 space-y-6 transition-colors",
+              "w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl sm:rounded-3xl border p-4 sm:p-7 space-y-5 sm:space-y-6 transition-colors my-auto shadow-2xl",
               isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
@@ -1876,7 +1876,7 @@ export default function AdminResourceFindingPage() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-mono">
+              <div className="flex items-center gap-x-4 gap-y-2 text-xs font-mono flex-wrap">
                 <div>
                   <span className="text-zinc-500">Live CPU:</span>{" "}
                   <span className={cn("font-bold", inspectVps.cpuPercent >= 80 ? "text-rose-500" : "text-cyan-500")}>
@@ -2078,24 +2078,24 @@ export default function AdminResourceFindingPage() {
 
       {/* Suspend / Lock Modal */}
       {suspendModalVps && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
             className={cn(
-              "w-full max-w-md rounded-3xl border p-6 sm:p-7 space-y-5 transition-colors",
+              "w-full max-w-md rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-5 transition-colors my-auto max-h-[92vh] overflow-y-auto shadow-2xl",
               isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+              <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 border border-rose-500/20 shrink-0">
                 <Ban className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold">Suspend Customer VPS</h3>
+                <h3 className="text-base sm:text-lg font-bold">Suspend Customer VPS</h3>
                 <p className="text-xs text-zinc-400">VMID #{suspendModalVps.vmid} ({suspendModalVps.hostname})</p>
               </div>
             </div>
 
-            <div className={cn("p-3.5 rounded-2xl text-xs leading-relaxed border", isDark ? "bg-rose-500/5 border-rose-500/20 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-800")}>
+            <div className={cn("p-3 sm:p-3.5 rounded-2xl text-xs leading-relaxed border", isDark ? "bg-rose-500/5 border-rose-500/20 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-800")}>
               <strong>Notice:</strong> Suspending this VPS will immediately power off the VM in Proxmox and restrict customer access until unsuspended.
             </div>
 
@@ -2117,12 +2117,12 @@ export default function AdminResourceFindingPage() {
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={() => setSuspendModalVps(null)}
                 disabled={actionLoading}
                 className={cn(
-                  "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all",
+                  "w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all text-center justify-center",
                   isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
                 )}
               >
@@ -2131,7 +2131,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => handleVpsAction(suspendModalVps.id, "suspend", suspendReason)}
                 disabled={actionLoading}
-                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Suspend</span>
@@ -2143,29 +2143,29 @@ export default function AdminResourceFindingPage() {
 
       {/* Bandwidth Throttle / Rate Limiter Modal */}
       {throttleModalVps && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
             className={cn(
-              "w-full max-w-lg rounded-3xl border p-6 sm:p-7 space-y-5 transition-colors",
+              "w-full max-w-lg rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-5 transition-colors my-auto max-h-[92vh] overflow-y-auto shadow-2xl",
               isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
             {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/5 pb-4">
-              <div className="flex items-center gap-3">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/5 pb-3.5 sm:pb-4 gap-2">
+              <div className="flex items-center gap-3 min-w-0">
                 <div
                   className={cn(
-                    "p-3 rounded-2xl border transition-colors",
+                    "p-2.5 sm:p-3 rounded-2xl border shrink-0 transition-colors",
                     isDark
                       ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
                       : "bg-cyan-50 text-cyan-600 border-cyan-100"
                   )}
                 >
-                  <Gauge className="w-6 h-6" />
+                  <Gauge className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold">Bandwidth Rate Limiting</h3>
-                  <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold truncate">Bandwidth Rate Limiting</h3>
+                  <p className={cn("text-xs truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
                     VMID #{throttleModalVps.vmid} ({throttleModalVps.hostname})
                   </p>
                 </div>
@@ -2173,7 +2173,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => setThrottleModalVps(null)}
                 className={cn(
-                  "p-2 rounded-xl transition-colors",
+                  "p-2 rounded-xl shrink-0 transition-colors",
                   isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
                 )}
               >
@@ -2184,7 +2184,7 @@ export default function AdminResourceFindingPage() {
             {/* Current Status banner */}
             <div
               className={cn(
-                "p-3.5 rounded-2xl text-xs flex items-center justify-between border transition-colors",
+                "p-3 sm:p-3.5 rounded-2xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border transition-colors",
                 throttleModalVps.isNetDisabled
                   ? isDark
                     ? "bg-rose-950/40 border-rose-500/30 text-rose-300"
@@ -2198,10 +2198,10 @@ export default function AdminResourceFindingPage() {
                   : "bg-emerald-50 border-emerald-200 text-emerald-900"
               )}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <span
                   className={cn(
-                    "w-2 h-2 rounded-full",
+                    "w-2 h-2 rounded-full shrink-0",
                     throttleModalVps.isNetDisabled
                       ? "bg-rose-500 animate-pulse"
                       : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
@@ -2209,7 +2209,7 @@ export default function AdminResourceFindingPage() {
                       : "bg-emerald-500"
                   )}
                 />
-                <span className="font-semibold">
+                <span className="font-semibold leading-tight">
                   Status: {throttleModalVps.isNetDisabled
                     ? "Internet Disabled (Network Link Down / Isolated)"
                     : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
@@ -2222,7 +2222,7 @@ export default function AdminResourceFindingPage() {
                   onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
                   disabled={actionLoading}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95",
+                    "px-3 py-1.5 sm:py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 shrink-0 self-start sm:self-auto",
                     isDark
                       ? "bg-emerald-500/20 hover:bg-emerald-500 hover:text-black text-emerald-300 border-emerald-500/30"
                       : "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent"
@@ -2235,7 +2235,7 @@ export default function AdminResourceFindingPage() {
                   onClick={() => handleVpsAction(throttleModalVps.id, "unthrottle")}
                   disabled={actionLoading}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95",
+                    "px-3 py-1.5 sm:py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 shrink-0 self-start sm:self-auto",
                     isDark
                       ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
                       : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200"
@@ -2249,7 +2249,7 @@ export default function AdminResourceFindingPage() {
             {/* Network Access & Isolation Controller */}
             <div
               className={cn(
-                "p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3",
+                "p-3.5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3",
                 throttleModalVps.isNetDisabled
                   ? isDark
                     ? "bg-rose-500/10 border-rose-500/30 text-rose-200"
@@ -2274,8 +2274,8 @@ export default function AdminResourceFindingPage() {
                 >
                   {throttleModalVps.isNetDisabled ? <WifiOff className="w-5 h-5" /> : <Wifi className="w-5 h-5" />}
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold flex items-center gap-1.5">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold flex flex-wrap items-center gap-1.5">
                     <span>Internet Access</span>
                     <span
                       className={cn(
@@ -2290,7 +2290,7 @@ export default function AdminResourceFindingPage() {
                       {throttleModalVps.isNetDisabled ? "DISABLED (ISOLATED)" : "ONLINE"}
                     </span>
                   </div>
-                  <p className={cn("text-[11px] truncate mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  <p className={cn("text-[11px] leading-relaxed mt-0.5 line-clamp-2 sm:truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
                     {throttleModalVps.isNetDisabled
                       ? "Virtual network link is disconnected. Registered in incident reports."
                       : "Disconnect virtual network link instantly (quarantine / security lock)."}
@@ -2298,43 +2298,45 @@ export default function AdminResourceFindingPage() {
                 </div>
               </div>
 
-              {throttleModalVps.isNetDisabled ? (
-                <button
-                  type="button"
-                  onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
-                  disabled={actionLoading}
-                  className={cn(
-                    "px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5 shrink-0 active:scale-95",
-                    "bg-emerald-600 hover:bg-emerald-500"
-                  )}
-                >
-                  <Wifi className="w-3.5 h-3.5" />
-                  <span>Enable Internet</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        `Are you sure you want to DISABLE internet for VMID #${throttleModalVps.vmid} (${throttleModalVps.hostname})?\n\nThis will instantly disconnect virtual network links via Proxmox link_down=1 without restarting the VM, and log a critical incident in the audit report.`
-                      )
-                    ) {
-                      handleVpsAction(throttleModalVps.id, "disable-net");
-                    }
-                  }}
-                  disabled={actionLoading}
-                  className={cn(
-                    "px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 border",
-                    isDark
-                      ? "bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30"
-                      : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
-                  )}
-                >
-                  <WifiOff className="w-3.5 h-3.5" />
-                  <span>Disable Internet</span>
-                </button>
-              )}
+              <div className="w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t border-black/5 dark:border-white/5 sm:border-0 flex sm:block justify-end">
+                {throttleModalVps.isNetDisabled ? (
+                  <button
+                    type="button"
+                    onClick={() => handleVpsAction(throttleModalVps.id, "enable-net")}
+                    disabled={actionLoading}
+                    className={cn(
+                      "w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-sm",
+                      "bg-emerald-600 hover:bg-emerald-500"
+                    )}
+                  >
+                    <Wifi className="w-3.5 h-3.5" />
+                    <span>Enable Internet</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Are you sure you want to DISABLE internet for VMID #${throttleModalVps.vmid} (${throttleModalVps.hostname})?\n\nThis will instantly disconnect virtual network links via Proxmox link_down=1 without restarting the VM, and log a critical incident in the audit report.`
+                        )
+                      ) {
+                        handleVpsAction(throttleModalVps.id, "disable-net");
+                      }
+                    }}
+                    disabled={actionLoading}
+                    className={cn(
+                      "w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 border shadow-sm",
+                      isDark
+                        ? "bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30"
+                        : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                    )}
+                  >
+                    <WifiOff className="w-3.5 h-3.5" />
+                    <span>Disable Internet</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Quick Presets */}
@@ -2342,7 +2344,7 @@ export default function AdminResourceFindingPage() {
               <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
                 Speed Presets (Megabytes/sec)
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
                 {[
                   { label: "1 MB/s", mbps: "8 Mbps", val: "1", desc: "Flood / Torrent" },
                   { label: "1.25 MB/s", mbps: "10 Mbps", val: "1.25", desc: "Emergency Cap" },
@@ -2358,18 +2360,18 @@ export default function AdminResourceFindingPage() {
                       type="button"
                       onClick={() => setThrottleRate(preset.val)}
                       className={cn(
-                        "p-2.5 rounded-xl border text-left transition-all active:scale-[0.98]",
+                        "p-2.5 sm:p-3 rounded-xl border text-left transition-all active:scale-[0.98] flex flex-col justify-center",
                         isSelected
                           ? isDark
-                            ? "bg-cyan-500/15 border-cyan-400 text-cyan-300 ring-1 ring-cyan-500/40"
-                            : "bg-cyan-50 border-cyan-500 text-cyan-900 ring-1 ring-cyan-500/30"
+                            ? "bg-cyan-500/15 border-cyan-400 text-cyan-300 ring-1 ring-cyan-500/40 shadow-sm"
+                            : "bg-cyan-50 border-cyan-500 text-cyan-900 ring-1 ring-cyan-500/30 shadow-sm"
                           : isDark
                           ? "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
                           : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                       )}
                     >
-                      <div className={cn("font-bold text-xs", isSelected && (isDark ? "text-cyan-300" : "text-cyan-700"))}>{preset.label}</div>
-                      <div className="text-[10px] opacity-75">{preset.mbps} • {preset.desc}</div>
+                      <div className={cn("font-bold text-xs sm:text-sm", isSelected && (isDark ? "text-cyan-300" : "text-cyan-700"))}>{preset.label}</div>
+                      <div className="text-[10px] sm:text-[11px] opacity-75 mt-0.5 leading-tight">{preset.mbps} • {preset.desc}</div>
                     </button>
                   );
                 })}
@@ -2396,20 +2398,20 @@ export default function AdminResourceFindingPage() {
                   onChange={(e) => setThrottleRate(e.target.value)}
                   placeholder="Enter limit in MB/s (e.g. 1.25)..."
                   className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border outline-none font-mono transition-all",
+                    "w-full px-3.5 py-2.5 pr-16 rounded-xl text-xs sm:text-sm border outline-none font-mono transition-all",
                     isDark
                       ? "bg-[#0a1624] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
                       : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                   )}
                 />
-                <span className={cn("absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-semibold", isDark ? "text-zinc-400" : "text-slate-400")}>
+                <span className={cn("absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-semibold pointer-events-none", isDark ? "text-zinc-400" : "text-slate-400")}>
                   MB/s
                 </span>
               </div>
             </div>
 
             {/* Explanatory Notice */}
-            <div className={cn("p-3 rounded-2xl text-[11px] leading-relaxed border flex items-start gap-2.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+            <div className={cn("p-3 sm:p-3.5 rounded-2xl text-[11px] leading-relaxed border flex items-start gap-2.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
               <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
               <div>
                 <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Notice:</strong>
@@ -2418,11 +2420,11 @@ export default function AdminResourceFindingPage() {
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-white/5">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-2 sm:pt-3 border-t border-slate-100 dark:border-white/5">
               <button
                 onClick={() => setThrottleModalVps(null)}
                 disabled={actionLoading}
-                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors text-center justify-center", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -2437,7 +2439,7 @@ export default function AdminResourceFindingPage() {
                   handleVpsAction(throttleModalVps.id, "throttle", undefined, rateNum);
                 }}
                 disabled={actionLoading}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Apply Rate Limit</span>
