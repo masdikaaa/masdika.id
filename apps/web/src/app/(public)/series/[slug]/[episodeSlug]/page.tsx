@@ -146,11 +146,13 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }} />
       ))}
       <div className="w-full max-w-full overflow-x-hidden min-w-0">
-      <div className="pt-28 md:pt-32 pb-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="pt-10">
-        <Link href={`/series/${slug}`} className={cn("inline-flex items-center text-sm font-medium mb-10 transition-colors gap-1", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-          <ChevronLeft className="w-4 h-4" /> Back to {series.title}
-        </Link>
+        <div className="pt-28 md:pt-32 pb-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href={`/series/${slug}`} className={cn("inline-flex items-center text-sm font-medium mb-8 transition-colors gap-2 group", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}>
+            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-all", isDark ? "bg-white/5 border border-white/10 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30" : "bg-white border border-black/10 group-hover:bg-cyan-50 group-hover:border-cyan-200")}>
+              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            </div>
+            Back to {series.title}
+          </Link>
 
         {/* Episode Header */}
         <header className="mb-10">
@@ -257,9 +259,8 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
           )}
         </div>
 
-      </div>
         </div>
-    </div>
+      </div>
     </>
   );
 }

@@ -84,7 +84,7 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ slug: s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 overflow-x-hidden">
+      <div className="flex flex-col min-h-screen pt-28 md:pt-32 pb-20 overflow-x-hidden">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
           {/* Breadcrumb / Back Link */}
@@ -92,13 +92,19 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ slug: s
             <Link
               href="/series"
               className={cn(
-                "inline-flex items-center text-sm font-semibold transition-colors gap-2 px-3 py-1.5 rounded-lg border",
-                isDark
-                  ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                  : "bg-slate-100/80 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80"
+                "inline-flex items-center text-sm font-medium transition-colors gap-2 group",
+                isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600"
               )}
             >
-              <ChevronLeft className="w-4 h-4 text-cyan-500" /> Back to All Series
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                isDark
+                  ? "bg-white/5 border border-white/10 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30"
+                  : "bg-white border border-black/10 group-hover:bg-cyan-50 group-hover:border-cyan-200"
+              )}>
+                <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              </div>
+              Back to All Series
             </Link>
           </div>
 
