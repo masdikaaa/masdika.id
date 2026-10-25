@@ -69,7 +69,7 @@ function sanitizeInput(input: unknown): SanitizeResult {
   if (typeof input !== 'string') return { clean: null, injectionDetected: false, matchedPattern: null };
 
   // Strip null bytes and other dangerous control characters (keep \n \t)
-  // eslint-disable-next-line no-control-regex
+   
   let clean = input.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 
   clean = clean.trim();
@@ -107,7 +107,7 @@ function validateHistory(raw: unknown): HistoryItem[] {
     if (role !== 'user' && role !== 'model') continue;
     if (typeof content !== 'string') continue;
 
-    // eslint-disable-next-line no-control-regex
+     
     const cleanContent = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
     if (cleanContent.length === 0) continue;
 

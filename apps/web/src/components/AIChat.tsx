@@ -303,7 +303,7 @@ export function AIChat() {
       }
     }
     setMessages([initialGreeting]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, []);
 
   // Save to localStorage whenever messages change
@@ -503,7 +503,7 @@ export function AIChat() {
       localStorage.removeItem(STORAGE_KEY_SESSION);
       localStorage.removeItem(STORAGE_KEY_MESSAGES);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [sessionInfo]);
 
   const handleClearChat = () => {

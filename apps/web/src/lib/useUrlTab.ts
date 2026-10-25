@@ -46,7 +46,7 @@ function useUrlValue<T>(
     if (Date.now() - lastWriteAt.current < 1000) return;
     valueRef.current = urlValue;
     setLocal(urlValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [raw]);
 
   const setValue = useCallback(
@@ -67,7 +67,7 @@ function useUrlValue<T>(
         `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [defaultValue, key]
   );
 
@@ -131,6 +131,6 @@ export function useUpdateEffect(effect: () => void | (() => void), deps: unknown
     if (prev.current.every((d, i) => Object.is(d, deps[i]))) return;
     prev.current = deps;
     return effect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, deps);
 }

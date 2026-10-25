@@ -46,7 +46,7 @@ async function start() {
 
           try {
             await VpsProvisioningService.provisionVps(vpsId, options);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           } catch (err: any) {
             console.error(`VPS Provisioning failed for VPS ID ${vpsId}:`, err);
             try {
@@ -71,7 +71,7 @@ async function start() {
         await JobQueueService.completeJob(job.id);
         console.log(`Job ${job.id} completed successfully`);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       } catch (error: any) {
         console.error(`Job ${job.id} failed:`, error);
         await JobQueueService.failJob(job.id, error.message || "Unknown error");

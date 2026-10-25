@@ -24,9 +24,9 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [categories, setCategories] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [tags, setTags] = useState<any[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [showNewCategory, setShowNewCategory] = useState(false);
@@ -93,7 +93,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
             image: data.image || ""
           });
           if (data.tags) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
             setSelectedTags(data.tags.map((t: any) => t.id));
           }
           setLoading(false);

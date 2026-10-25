@@ -99,7 +99,7 @@ export const getTransporter = () => {
 
     // Wrap sendMail to automatically record email logs
     const originalSendMail = transporterInstance.sendMail.bind(transporterInstance);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     (transporterInstance as any).sendMail = async function (mailOptions: any, callback?: any) {
       try {
         const result = await originalSendMail(mailOptions, callback);

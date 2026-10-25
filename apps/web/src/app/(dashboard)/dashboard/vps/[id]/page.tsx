@@ -1406,7 +1406,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             <div className="flex items-center gap-3 sm:gap-4 z-10 mb-4 md:mb-0 w-full">
               <div className="p-3 bg-cyan-500/20 rounded-2xl shrink-0">
                 {getOsIcon(vps.osTemplate, isDark) ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
+                   
                   <img referrerPolicy="no-referrer" src={getOsIcon(vps.osTemplate, isDark)!} alt="OS" className="w-8 h-8 object-contain" loading="lazy" decoding="async" />
                 ) : (
                   <Server className="w-8 h-8 text-cyan-400" />

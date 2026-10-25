@@ -414,7 +414,7 @@ export default function MyVpsPage() {
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 shrink-0 bg-white/5 rounded-xl flex items-center justify-center p-2">
                               {getOsIcon(vps.osTemplate, isDark) ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
+                                 
                                 <img referrerPolicy="no-referrer" src={getOsIcon(vps.osTemplate, isDark)!} alt="OS" className="w-full h-full object-contain drop-shadow-md" loading="lazy" decoding="async" />
                               ) : (
                                 <Server className="w-5 h-5 text-cyan-400" />

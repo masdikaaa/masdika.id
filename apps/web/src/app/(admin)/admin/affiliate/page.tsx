@@ -15,7 +15,7 @@ import { Select } from "@/components/ui/Select";
 export default function AdminAffiliatePage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);

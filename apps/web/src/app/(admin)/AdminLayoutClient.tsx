@@ -72,7 +72,7 @@ export default function AdminLayout({
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileData, setProfileData] = useState<{ name: string, image: string | null }>({ name: initialName || "Admin", image: initialImage || null });
   const [showNotifications, setShowNotifications] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [notifications, setNotifications] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -218,7 +218,7 @@ export default function AdminLayout({
       >
         <div className={cn("h-16 flex items-center px-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
@@ -426,7 +426,7 @@ export default function AdminLayout({
               </div>
               <div className={cn("w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-bold text-white overflow-hidden border", isDark ? "border-white/10" : "border-slate-200")}>
                 {profileData.image ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
+                   
                   <img referrerPolicy="no-referrer" src={profileData.image} alt={`${profileData.name} profile picture`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <span aria-hidden="true">{profileData.name.charAt(0).toUpperCase()}</span>
