@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Send,
@@ -243,24 +243,7 @@ export default function EmailBlastPage() {
     return `<!DOCTYPE html><html><head>${fontInject}</head><body style="margin:0;padding:20px;font-family:'Plus Jakarta Sans','Inter',sans-serif;">${rendered}</body></html>`;
   };
 
-  // Fetch recipients on mount
-  useEffect(() => {
-    fetchRecipients();
-  }, []);
-
-  // Pre-select customer if userId query param is provided
-  useEffect(() => {
-    const userIdParam = searchParams.get("userId");
-    if (userIdParam) {
-      const id = parseInt(userIdParam);
-      if (!isNaN(id)) {
-        setTargetType("selected");
-        setSelectedUserIds([id]);
-      }
-    }
-  }, [searchParams]);
-
-  const fetchRecipients = async () => {
+  const fetchRecipients = useCallback(async () => {
     setLoadingRecipients(true);
     try {
       const res = await fetch("/api/admin/email-blast/recipients");
@@ -273,7 +256,24 @@ export default function EmailBlastPage() {
     } finally {
       setLoadingRecipients(false);
     }
-  };
+  }, []);
+
+  // Fetch recipients on mount
+  useEffect(() => {
+    fetchRecipients();
+  }, [fetchRecipients]);
+
+  // Pre-select customer if userId query param is provided
+  useEffect(() => {
+    const userIdParam = searchParams.get("userId");
+    if (userIdParam) {
+      const id = parseInt(userIdParam);
+      if (!isNaN(id)) {
+        setTargetType("selected");
+        setSelectedUserIds([id]);
+      }
+    }
+  }, [searchParams]);
 
   // Recipient Count Calculation
   const getRecipientCount = () => {
