@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
-import { getTransporter, logEmailRecord } from '@/lib/email';
+import { getTransporter, logEmailRecord, getBaseHtml } from '@/lib/email';
 
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -38,48 +38,30 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
       orderBy: { createdAt: 'desc' }
     });
 
-    // If customer has no email logs yet, initialize initial sample records matching WHMCS history
+    // If customer has no email logs yet, initialize initial records matching Masdika official email template (Image 3)
     if (emailLogs.length === 0) {
-      const fontStack = "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
       const sampleLogs = [
         {
           userId: user.id,
           to: `"${decName}" <${decEmail}>`,
           subject: 'Tagihan # 1462/INV/MASDIKA/10/2026',
-          body: `<div style="background-color: #f8fafc; padding: 30px 15px; font-family: ${fontStack};">
-  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
-    <div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); padding: 30px 25px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 0.5px; font-family: ${fontStack};">MASDIKA CLOUD</h1>
-      <p style="color: #e0f2fe; margin: 6px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-family: ${fontStack};">Cloud & Datacenter Solutions</p>
-    </div>
-    <div style="padding: 30px 25px;">
-      <p style="font-size: 15px; color: #334155; margin-top: 0; font-family: ${fontStack};">Dear <strong>${decName}</strong>,</p>
-      <p style="font-size: 14px; color: #475569; line-height: 1.6; font-family: ${fontStack};">This is a notification that invoice <strong>#1462/INV/MASDIKA/10/2026</strong> has been generated and is ready for payment.</p>
-      <div style="background: #f1f5f9; border-radius: 8px; padding: 18px; margin: 24px 0; border-left: 4px solid #06b6d4;">
-        <table style="width: 100%; font-size: 14px; border-collapse: collapse; font-family: ${fontStack};">
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Invoice Number:</td>
-            <td style="padding: 6px 0; font-weight: 700; color: #0f172a; text-align: right;">#1462/INV/MASDIKA/10/2026</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Amount:</td>
-            <td style="padding: 6px 0; font-weight: 700; color: #0891b2; text-align: right;">Rp 150.000</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Due Date:</td>
-            <td style="padding: 6px 0; font-weight: 600; color: #0f172a; text-align: right;">31/10/2026</td>
-          </tr>
-        </table>
-      </div>
-      <div style="text-align: center; margin: 30px 0 10px;">
-        <a href="https://masdika.id/invoices" style="background-color: #06b6d4; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; font-family: ${fontStack};">Pay Invoice Now</a>
-      </div>
-    </div>
-    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8; font-family: ${fontStack};">
-      © 2026 PT Masdika Teknologi Indonesia. All rights reserved.
-    </div>
-  </div>
-</div>`,
+          body: getBaseHtml(`
+            <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Invoice Tagihan Layanan</h2>
+            <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Dear <strong>${decName}</strong>,</p>
+            <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">Tagihan faktur baru Anda telah dibuat dan siap untuk diselesaikan pembayarannya:</p>
+            
+            <div style="background-color: #030712; border: 1px solid #1e293b; border-left: 4px solid #06b6d4; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="160">No. Invoice:</td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">#1462/INV/MASDIKA/10/2026</td></tr>
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Total Tagihan:</td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 800; font-size: 16px; text-align: right;">Rp 150.000</td></tr>
+                <tr><td style="padding: 8px 0; color: #94a3b8;">Jatuh Tempo:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600; text-align: right;">31/10/2026</td></tr>
+              </table>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0 10px;">
+              <a href="https://masdika.id/invoices" style="background-color: #06b6d4; color: #020617; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">Bayar Tagihan Sekarang</a>
+            </div>
+          `),
           type: 'invoice',
           status: 'SENT',
           createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2)
@@ -88,29 +70,21 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
           userId: user.id,
           to: `"${decName}" <${decEmail}>`,
           subject: 'Konfirmasi Pesanan # 5302042067',
-          body: `<div style="background-color: #f8fafc; padding: 30px 15px; font-family: ${fontStack};">
-  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
-    <div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); padding: 30px 25px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; font-family: ${fontStack};">MASDIKA CLOUD</h1>
-      <p style="color: #e0f2fe; margin: 6px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-family: ${fontStack};">Order Confirmation</p>
-    </div>
-    <div style="padding: 30px 25px;">
-      <p style="font-size: 15px; color: #334155; margin-top: 0; font-family: ${fontStack};">Dear <strong>${decName}</strong>,</p>
-      <p style="font-size: 14px; color: #475569; line-height: 1.6; font-family: ${fontStack};">We have received your order and it has been successfully provisioned. Here are your order details:</p>
-      <div style="background: #f1f5f9; border-radius: 8px; padding: 18px; margin: 24px 0; border-left: 4px solid #10b981;">
-        <p style="margin: 0 0 8px; font-size: 14px; font-family: ${fontStack};"><strong>Order Number:</strong> 5302042067</p>
-        <p style="margin: 0 0 8px; font-size: 14px; font-family: ${fontStack};"><strong>Service:</strong> High-Performance Proxmox VPS (2 vCPU, 4 GB RAM, 50 GB SSD)</p>
-        <p style="margin: 0; font-size: 14px; font-family: ${fontStack};"><strong>Status:</strong> Active & Ready</p>
-      </div>
-      <div style="text-align: center; margin: 30px 0 10px;">
-        <a href="https://masdika.id/dashboard/vps" style="background-color: #06b6d4; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; font-family: ${fontStack};">Manage VPS Server</a>
-      </div>
-    </div>
-    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8; font-family: ${fontStack};">
-      © 2026 PT Masdika Teknologi Indonesia. All rights reserved.
-    </div>
-  </div>
-</div>`,
+          body: getBaseHtml(`
+            <h2 style="color: #10b981; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Konfirmasi Pesanan Layanan</h2>
+            <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Dear <strong>${decName}</strong>,</p>
+            <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">Pesanan layanan Anda telah kami terima dan berhasil diproses. Berikut rincian layanan Anda:</p>
+            
+            <div style="background-color: #030712; border: 1px solid #1e293b; border-left: 4px solid #10b981; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
+              <p style="margin: 0 0 8px; color: #cbd5e1; font-size: 14px;"><strong style="color: #ffffff;">Nomor Pesanan:</strong> <span style="color: #38bdf8;">5302042067</span></p>
+              <p style="margin: 0 0 8px; color: #cbd5e1; font-size: 14px;"><strong style="color: #ffffff;">Layanan:</strong> High-Performance Proxmox VPS (2 vCPU, 4 GB RAM, 50 GB NVMe)</p>
+              <p style="margin: 0; color: #cbd5e1; font-size: 14px;"><strong style="color: #ffffff;">Status:</strong> <span style="color: #10b981; font-weight: bold;">Aktif & Siap Digunakan</span></p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0 10px;">
+              <a href="https://masdika.id/dashboard/vps" style="background-color: #06b6d4; color: #020617; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">Kelola VPS Server</a>
+            </div>
+          `),
           type: 'order',
           status: 'SENT',
           createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24)
@@ -119,24 +93,15 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
           userId: user.id,
           to: `"${decName}" <${decEmail}>`,
           subject: 'Selamat Datang di Masdika Cloud',
-          body: `<div style="background-color: #f8fafc; padding: 30px 15px; font-family: ${fontStack};">
-  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
-    <div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); padding: 30px 25px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; font-family: ${fontStack};">WELCOME TO MASDIKA CLOUD</h1>
-      <p style="color: #e0f2fe; margin: 6px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-family: ${fontStack};">Account Activation</p>
-    </div>
-    <div style="padding: 30px 25px;">
-      <p style="font-size: 15px; color: #334155; margin-top: 0; font-family: ${fontStack};">Hello <strong>${decName}</strong>,</p>
-      <p style="font-size: 14px; color: #475569; line-height: 1.6; font-family: ${fontStack};">Thank you for registering at Masdika Cloud! Your account is active and ready for deploying cloud instances, Kubernetes clusters, and cloud storage.</p>
-      <div style="text-align: center; margin: 30px 0 10px;">
-        <a href="https://masdika.id/dashboard" style="background-color: #06b6d4; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; font-family: ${fontStack};">Go to Client Dashboard</a>
-      </div>
-    </div>
-    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8; font-family: ${fontStack};">
-      © 2026 PT Masdika Teknologi Indonesia. All rights reserved.
-    </div>
-  </div>
-</div>`,
+          body: getBaseHtml(`
+            <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Selamat Datang di Masdika Cloud</h2>
+            <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Halo <strong>${decName}</strong>,</p>
+            <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">Terima kasih telah bergabung di Masdika Cloud! Akun Anda telah aktif dan siap digunakan untuk mengelola Cloud VPS, Kubernetes, Object Storage, dan layanan infrastruktur lainnya.</p>
+            
+            <div style="text-align: center; margin: 30px 0 10px;">
+              <a href="https://masdika.id/dashboard" style="background-color: #06b6d4; color: #020617; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">Buka Dashboard Klien</a>
+            </div>
+          `),
           type: 'system',
           status: 'SENT',
           createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48)
@@ -153,10 +118,69 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
       });
     }
 
+    // Auto-upgrade any legacy email logs in DB that had the white-gradient background
+    const upgradedLogs = await Promise.all(
+      emailLogs.map(async (log) => {
+        if (log.body && (log.body.includes('background-color: #f8fafc') || log.body.includes('linear-gradient(135deg, #0891b2 0%'))) {
+          let newContent = '';
+          if (log.subject.includes('Tagihan') || log.subject.includes('Invoice')) {
+            newContent = `
+              <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Invoice Tagihan Layanan</h2>
+              <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Dear <strong>${decName}</strong>,</p>
+              <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">Tagihan faktur baru Anda telah dibuat dan siap untuk diselesaikan pembayarannya:</p>
+              
+              <div style="background-color: #030712; border: 1px solid #1e293b; border-left: 4px solid #06b6d4; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
+                  <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="160">No. Invoice:</td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">#1462/INV/MASDIKA/10/2026</td></tr>
+                  <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Total Tagihan:</td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 800; font-size: 16px; text-align: right;">Rp 150.000</td></tr>
+                  <tr><td style="padding: 8px 0; color: #94a3b8;">Jatuh Tempo:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600; text-align: right;">31/10/2026</td></tr>
+                </table>
+              </div>
+              <div style="text-align: center; margin: 30px 0 10px;">
+                <a href="https://masdika.id/invoices" style="background-color: #06b6d4; color: #020617; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">Bayar Tagihan Sekarang</a>
+              </div>
+            `;
+          } else if (log.subject.includes('Konfirmasi Pesanan')) {
+            newContent = `
+              <h2 style="color: #10b981; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Konfirmasi Pesanan Layanan</h2>
+              <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Dear <strong>${decName}</strong>,</p>
+              <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">Pesanan layanan Anda telah kami terima dan berhasil diproses. Berikut rincian layanan Anda:</p>
+              
+              <div style="background-color: #030712; border: 1px solid #1e293b; border-left: 4px solid #10b981; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
+                <p style="margin: 0 0 8px; color: #cbd5e1; font-size: 14px;"><strong style="color: #ffffff;">Nomor Pesanan:</strong> <span style="color: #38bdf8;">5302042067</span></p>
+                <p style="margin: 0 0 8px; color: #cbd5e1; font-size: 14px;"><strong style="color: #ffffff;">Layanan:</strong> High-Performance Proxmox VPS (2 vCPU, 4 GB RAM, 50 GB NVMe)</p>
+                <p style="margin: 0; color: #cbd5e1; font-size: 14px;"><strong style="color: #ffffff;">Status:</strong> <span style="color: #10b981; font-weight: bold;">Aktif & Siap Digunakan</span></p>
+              </div>
+              <div style="text-align: center; margin: 30px 0 10px;">
+                <a href="https://masdika.id/dashboard/vps" style="background-color: #06b6d4; color: #020617; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">Kelola VPS Server</a>
+              </div>
+            `;
+          } else {
+            newContent = `
+              <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Selamat Datang di Masdika Cloud</h2>
+              <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Halo <strong>${decName}</strong>,</p>
+              <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">Terima kasih telah bergabung di Masdika Cloud! Akun Anda telah aktif dan siap digunakan untuk mengelola Cloud VPS, Kubernetes, Object Storage, dan layanan infrastruktur lainnya.</p>
+              
+              <div style="text-align: center; margin: 30px 0 10px;">
+                <a href="https://masdika.id/dashboard" style="background-color: #06b6d4; color: #020617; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">Buka Dashboard Klien</a>
+              </div>
+            `;
+          }
+          const upgradedBody = getBaseHtml(newContent);
+          await prisma.emailLog.update({
+            where: { id: log.id },
+            data: { body: upgradedBody }
+          }).catch(() => {});
+          return { ...log, body: upgradedBody };
+        }
+        return log;
+      })
+    );
+
     return NextResponse.json({
       success: true,
-      data: emailLogs,
-      total: emailLogs.length
+      data: upgradedLogs,
+      total: upgradedLogs.length
     });
   } catch (error) {
     console.error('Get Customer Email Logs Error:', error);

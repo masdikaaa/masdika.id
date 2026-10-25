@@ -49,159 +49,119 @@ export async function GET(req: NextRequest, context: RouteContext) {
     const decName = user.name ? decryptDeterministic(user.name) : 'Customer';
     const decEmail = decryptDeterministic(user.email);
 
-    // Check existing count of activity logs
-    const existingCount = await prisma.clientActivityLog.count({
-      where: { userId }
+    // 1. Purge any previously seeded dummy logs
+    await prisma.clientActivityLog.deleteMany({
+      where: {
+        userId,
+        OR: [
+          { description: { contains: 'm.dana.id' } },
+          { description: { contains: 'duitku_dana' } },
+          { description: { contains: 'Passed Fraud Check' } },
+          { description: { contains: 'Fraud Check Initiated' } },
+          { description: { contains: 'Order ID 33617' } },
+          { description: { contains: 'Invoice ID: 110761' } },
+          { description: { contains: 'SMS / WhatsApp Center - order confirmation' } },
+        ]
+      }
+    }).catch(() => {});
+
+    // 2. Fetch existing logs to avoid duplicates
+    const existingLogs = await prisma.clientActivityLog.findMany({
+      where: { userId },
+      select: { description: true }
     });
+    const existingDescSet = new Set(existingLogs.map(l => l.description));
 
-    // Auto-seed WHMCS-style authentic initial activity records if empty
-    if (existingCount === 0) {
-      const now = Date.now();
-      const baseIp = "103.147.154.22";
-      const sampleLogs: {
-        userId: number;
-        description: string;
-        username: string;
-        ipAddress: string;
-        category: 'order' | 'invoice' | 'payment' | 'email' | 'service' | 'system' | 'auth';
-        createdAt: Date;
-      }[] = [];
+    const realLogsToCreate: {
+      userId: number;
+      description: string;
+      username: string;
+      ipAddress: string;
+      category: 'order' | 'invoice' | 'payment' | 'email' | 'service' | 'system' | 'auth';
+      createdAt: Date;
+    }[] = [];
 
-      // 1. DANA / Duitku payment gateway cashier redirect
-      sampleLogs.push({
+    // Real Account Registration Event
+    const regDesc = `Client Account Registered - Email: ${decEmail}`;
+    if (!existingDescSet.has(regDesc)) {
+      realLogsToCreate.push({
         userId,
-        description: `Redirect to https://m.dana.id/n/cashier/new/checkout?bizNo=20261025111212800110166626746293751&timestamp=${now}&originSourcePlatform=IPG&mid=216620000160917504310`,
-        username: "System",
-        ipAddress: baseIp,
-        category: "payment",
-        createdAt: new Date(now - 1000 * 60 * 2)
+        description: regDesc,
+        username: decName,
+        ipAddress: '127.0.0.1',
+        category: 'auth',
+        createdAt: user.createdAt || new Date()
       });
+      existingDescSet.add(regDesc);
+    }
 
-      // 2. Trx via Duitku
-      sampleLogs.push({
-        userId,
-        description: `Generate Trx Via Duitku (duitku_dana on production) with order id: 110761`,
-        username: "System",
-        ipAddress: baseIp,
-        category: "payment",
-        createdAt: new Date(now - 1000 * 60 * 3)
-      });
-
-      // 3. Fraud check passed
-      sampleLogs.push({
-        userId,
-        description: `Order ID 33617 Passed Fraud Check`,
-        username: "System",
-        ipAddress: baseIp,
-        category: "order",
-        createdAt: new Date(now - 1000 * 60 * 4)
-      });
-
-      // 4. Fraud check initiated
-      sampleLogs.push({
-        userId,
-        description: `Order ID 33617 Fraud Check Initiated`,
-        username: "System",
-        ipAddress: baseIp,
-        category: "order",
-        createdAt: new Date(now - 1000 * 60 * 5)
-      });
-
-      // 5. Email Sent for order confirmation
-      sampleLogs.push({
-        userId,
-        description: `Email Sent to ${decName} (Konfirmasi Pesanan # 5302042067) - Client ID: ${userId}`,
-        username: "System",
-        ipAddress: "127.0.0.1",
-        category: "email",
-        createdAt: new Date(now - 1000 * 60 * 8)
-      });
-
-      // 6. Admin order notification email
-      sampleLogs.push({
-        userId,
-        description: `Email Sent (WHMCS New Order Notification) - Client ID: ${userId} - Order ID: 33617`,
-        username: "System",
-        ipAddress: "127.0.0.1",
-        category: "email",
-        createdAt: new Date(now - 1000 * 60 * 9)
-      });
-
-      // 7. Notification template
-      sampleLogs.push({
-        userId,
-        description: `SMS / WhatsApp Center - order confirmation dispatched to ${decName}`,
-        username: "System",
-        ipAddress: "127.0.0.1",
-        category: "system",
-        createdAt: new Date(now - 1000 * 60 * 10)
-      });
-
-      // 8. Invoice Email
-      sampleLogs.push({
-        userId,
-        description: `Email Sent to ${decName} (Tagihan # 1462/INV/MASDIKA/10/2026) - Client ID: ${userId}`,
-        username: "System",
-        ipAddress: "127.0.0.1",
-        category: "email",
-        createdAt: new Date(now - 1000 * 60 * 15)
-      });
-
-      // 9. Created Invoice
-      sampleLogs.push({
-        userId,
-        description: `Created Invoice - Invoice ID: 110761 (#1462/INV/MASDIKA/10/2026)`,
-        username: "System",
-        ipAddress: baseIp,
-        category: "invoice",
-        createdAt: new Date(now - 1000 * 60 * 16)
-      });
-
-      // 10. Service provisioned if any or cloud VPS initialized
-      if (user.vpsServices && user.vpsServices.length > 0) {
-        const vps = user.vpsServices[0];
-        sampleLogs.push({
+    // Real Invoice Events
+    for (const inv of user.invoices) {
+      const invNum = inv.invoiceNumber || String(inv.id);
+      const invDesc = `Created Invoice - #${invNum} (Total: Rp ${Number(inv.amount || 0).toLocaleString('id-ID')})`;
+      if (!existingDescSet.has(invDesc)) {
+        realLogsToCreate.push({
           userId,
-          description: `Cloud VPS Service Provisioned Successfully - Hostname: ${vps.hostname || 'vps-server'} (${vps.cpuCores || 2} vCPU, ${vps.ramGb || 4} GB RAM)`,
-          username: "System",
-          ipAddress: "127.0.0.1",
-          category: "service",
-          createdAt: new Date(now - 1000 * 60 * 25)
+          description: invDesc,
+          username: 'System',
+          ipAddress: '127.0.0.1',
+          category: 'invoice',
+          createdAt: inv.createdAt
         });
-      } else {
-        sampleLogs.push({
-          userId,
-          description: `Cloud Service Initialized: High-Performance Proxmox VPS Container (2 vCPU, 4 GB RAM, 50 GB NVMe)`,
-          username: "System",
-          ipAddress: "127.0.0.1",
-          category: "service",
-          createdAt: new Date(now - 1000 * 60 * 25)
-        });
+        existingDescSet.add(invDesc);
       }
 
-      // 11. Customer Login Log
-      sampleLogs.push({
-        userId,
-        description: `User Login Successful - Email: ${decEmail}`,
-        username: decName,
-        ipAddress: baseIp,
-        category: "auth",
-        createdAt: new Date(now - 1000 * 60 * 60 * 2)
-      });
+      if (inv.status === 'PAID') {
+        const payDesc = `Payment Received for Invoice #${invNum} (Rp ${Number(inv.amount || 0).toLocaleString('id-ID')}) via ${inv.paymentMethod || 'Payment Gateway'}`;
+        if (!existingDescSet.has(payDesc)) {
+          realLogsToCreate.push({
+            userId,
+            description: payDesc,
+            username: 'System',
+            ipAddress: '127.0.0.1',
+            category: 'payment',
+            createdAt: inv.paidAt || inv.updatedAt || inv.createdAt
+          });
+          existingDescSet.add(payDesc);
+        }
+      }
+    }
 
-      // 12. Account Created / Welcome
-      sampleLogs.push({
-        userId,
-        description: `Client Account Created & Verified - Registered via Web Portal`,
-        username: "System",
-        ipAddress: baseIp,
-        category: "system",
-        createdAt: user.createdAt || new Date(now - 1000 * 60 * 60 * 24 * 7)
-      });
+    // Real Email Events
+    for (const em of user.emailLogs) {
+      const emDesc = `Email Sent to ${em.to} (${em.subject})`;
+      if (!existingDescSet.has(emDesc)) {
+        realLogsToCreate.push({
+          userId,
+          description: emDesc,
+          username: 'System',
+          ipAddress: '127.0.0.1',
+          category: 'email',
+          createdAt: em.createdAt
+        });
+        existingDescSet.add(emDesc);
+      }
+    }
 
-      // Insert samples in database
+    // Real VPS Service Events
+    for (const vps of user.vpsServices) {
+      const vpsDesc = `VPS Instance Provisioned: ${vps.hostname || 'Cloud VPS'} (${vps.cpuCores || 1} vCPU, ${vps.ramGb || 1} GB RAM) - Status: ${vps.status}`;
+      if (!existingDescSet.has(vpsDesc)) {
+        realLogsToCreate.push({
+          userId,
+          description: vpsDesc,
+          username: 'System',
+          ipAddress: '127.0.0.1',
+          category: 'service',
+          createdAt: vps.createdAt
+        });
+        existingDescSet.add(vpsDesc);
+      }
+    }
+
+    if (realLogsToCreate.length > 0) {
       await prisma.clientActivityLog.createMany({
-        data: sampleLogs
+        data: realLogsToCreate
       });
     }
 

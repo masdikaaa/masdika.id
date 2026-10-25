@@ -287,32 +287,134 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
   const formatEmailPreviewHtml = (rawBody: string) => {
     if (!rawBody) return "";
-    const fontInject = `
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-      <style>
-        * {
-          -webkit-font-smoothing: antialiased !important;
-          -moz-osx-font-smoothing: grayscale !important;
-          text-rendering: optimizeLegibility !important;
-        }
-        body, table, td, p, span, div, a, li, strong, b, h1, h2, h3, h4, h5, h6 {
-          font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-        code, pre {
-          font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
-        }
-      </style>
-    `;
 
-    if (rawBody.includes("<head>")) {
-      return rawBody.replace("<head>", `<head>${fontInject}`);
+    // If it already contains the official Masdika email header banner (logo-email.webp), inject font definitions
+    if (rawBody.includes("logo-email.webp")) {
+      const fontInject = `
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+        <style>
+          * {
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+            text-rendering: optimizeLegibility !important;
+          }
+          body, table, td, p, span, div, a, li, strong, b, h1, h2, h3, h4, h5, h6 {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+          }
+          code, pre {
+            font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
+          }
+        </style>
+      `;
+
+      if (rawBody.includes("<head>")) {
+        return rawBody.replace("<head>", `<head>${fontInject}`);
+      }
+      if (rawBody.includes("<html")) {
+        return rawBody.replace(/<html[^>]*>/, `$&<head>${fontInject}</head>`);
+      }
+      return rawBody;
     }
-    if (rawBody.includes("<html")) {
-      return rawBody.replace(/<html[^>]*>/, `$&<head>${fontInject}</head>`);
+
+    // Strip legacy white wrappers or gradients if any
+    let cleanContent = rawBody;
+    if (cleanContent.includes("padding: 30px 25px;")) {
+      const match = /<div style="padding: 30px 25px;">([\s\S]*?)<\/div>\s*<div style="background: #f8fafc; border-top:/i.exec(cleanContent);
+      if (match && match[1]) {
+        cleanContent = match[1];
+      }
     }
-    return `<!DOCTYPE html><html><head>${fontInject}</head><body style="margin:0;padding:20px;font-family:'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${rawBody}</body></html>`;
+
+    // Wrap cleanly in the official Masdika Dark Branded Template (Image 3)
+    return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      text-rendering: optimizeLegibility !important;
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 30px 15px;
+      background-color: #030712;
+      color: #f8fafc;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #0f172a;
+      border-radius: 16px;
+      border: 1px solid #1e293b;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .email-header {
+      width: 100%;
+      background-color: #0b132b;
+      text-align: center;
+      overflow: hidden;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+    }
+    .email-header img {
+      display: block;
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+    }
+    .email-content {
+      padding: 36px 32px 28px 32px;
+      color: #e2e8f0;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    .email-footer {
+      padding: 24px;
+      border-top: 1px solid #1e293b;
+      background-color: #030712;
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <img src="https://masdika.id/logo-email.webp?v=2" alt="Masdika Logo Header" />
+    </div>
+    <div class="email-content">
+      ${cleanContent}
+    </div>
+    <div class="email-footer">
+      <p style="margin: 0 0 6px 0; font-weight: 500;">&copy; ${new Date().getFullYear()} Masdika.ID. All Rights Reserved.</p>
+      <p style="margin: 0; color: #64748b; font-size: 12px;">Surabaya, Indonesia</p>
+    </div>
+  </div>
+</body>
+</html>`;
   };
 
   const fetchUserData = async () => {
@@ -608,8 +710,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
               className={cn(
                 "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer",
                 activeTab === tab.key
-                  ? "bg-cyan-500 text-slate-950 shadow-sm"
-                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+                  ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-400 shadow-sm" : "bg-cyan-50 text-cyan-700 border border-cyan-500 shadow-sm")
+                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent"
               )}
             >
               <tab.icon className="w-3.5 h-3.5" />
@@ -1144,11 +1246,11 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr style={{ background: 'linear-gradient(180deg, #104068 0%, #195689 100%)', color: '#ffffff' }}>
-                      <th className="py-2.5 px-4 font-bold border-r border-sky-800/60 w-44 whitespace-nowrap">Date ▼</th>
-                      <th className="py-2.5 px-4 font-bold border-r border-sky-800/60">Description</th>
-                      <th className="py-2.5 px-3 font-bold border-r border-sky-800/60 w-28 text-center">Username</th>
-                      <th className="py-2.5 px-3 font-bold w-36 text-center">IP Address</th>
+                    <tr className={cn("text-xs font-semibold border-b", isDark ? "bg-[#0c1f38] text-white border-slate-800" : "bg-[#0284c7] text-white border-sky-600")}>
+                      <th className={cn("py-3 px-4 font-semibold w-44 whitespace-nowrap", isDark ? "text-cyan-400" : "text-white")}>Date ▼</th>
+                      <th className="py-3 px-4 font-semibold">Description</th>
+                      <th className="py-3 px-3 font-semibold w-28 text-center">Username</th>
+                      <th className="py-3 px-3 font-semibold w-36 text-center">IP Address</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-slate-800/60 bg-[#09111e]" : "divide-slate-200 bg-white")}>
