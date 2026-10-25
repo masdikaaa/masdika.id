@@ -5,6 +5,7 @@ import { encryptDeterministic, decryptDeterministic } from "@/lib/encryption";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { Address4 } from "ip-address";
+import { getBandwidthOptions, bandwidthHourlyCost, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 
 // Security: Hostname validation regex (RFC 1123)
 const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
@@ -101,11 +102,16 @@ export async function POST(req: NextRequest) {
     const ipCost = (ipv4Count > 0 ? ipv4Count * (pricing.ipv4 || 0) : 0)
                  + (ipv6Count > 0 ? ipv6Count * (pricing.ipv6 || 0) : 0);
 
-    const safeBandwidth = Math.min(Math.max(Math.floor(Number(bandwidthMbps) || 100), 100), 10000);
-    const bandwidthExtra = Math.max(0, safeBandwidth - 100);
-    const bandwidthSteps = Math.floor(bandwidthExtra / 50);
-    const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
-    const bandwidthCost = bandwidthSteps * bandwidthRatePerHour;
+    // Security: bandwidth must be one of the admin-approved tiers (blocks values like 149 Mbps for free)
+    const allowedBandwidth = await getBandwidthOptions();
+    const requestedBandwidth = bandwidthMbps === undefined || bandwidthMbps === null || bandwidthMbps === ""
+      ? BASE_BANDWIDTH_MBPS
+      : Number(bandwidthMbps);
+    if (!Number.isInteger(requestedBandwidth) || !allowedBandwidth.includes(requestedBandwidth)) {
+      return NextResponse.json({ error: `Invalid bandwidth tier. Allowed: ${allowedBandwidth.join(", ")} Mbps` }, { status: 400 });
+    }
+    const safeBandwidth = requestedBandwidth;
+    const bandwidthCost = bandwidthHourlyCost(safeBandwidth, pricing);
 
     let vpsData: any = {
       userId,

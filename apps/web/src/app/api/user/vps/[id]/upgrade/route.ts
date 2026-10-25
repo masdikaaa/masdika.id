@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { createDuitkuTransaction } from "@/lib/duitku";
 import { decryptDeterministic } from "@/lib/encryption";
+import { getBandwidthOptions, bandwidthUpgradeHourlyCost, bandwidthToProxmoxRate, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -35,12 +36,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // Security: Validate and sanitize resource inputs
-    const currentBandwidth = vps.bandwidthMbps || 100;
+    const currentBandwidth = vps.bandwidthMbps || BASE_BANDWIDTH_MBPS;
     const safeCpu = Math.min(Math.max(Math.floor(Number(cpuCores) || vps.cpuCores), 1), 32);
     const safeRam = Math.min(Math.max(Math.floor(Number(ramGb) || vps.ramGb), 1), 128);
     const safeDisk = Math.min(Math.max(Math.floor(Number(diskGb) || vps.diskGb), 10), 2000);
     const safeBackup = Math.min(Math.max(Math.floor(Number(backupGb) || vps.backupGb || 0), 0), 2000);
-    const safeBandwidth = Math.min(Math.max(Math.floor(Number(bandwidthMbps) || currentBandwidth), 100), 10000);
+
+    // Security: bandwidth target must be the current value (no change) or an admin-approved tier
+    let safeBandwidth = currentBandwidth;
+    if (bandwidthMbps !== undefined && bandwidthMbps !== null && bandwidthMbps !== "") {
+      const requestedBandwidth = Number(bandwidthMbps);
+      if (!Number.isInteger(requestedBandwidth)) {
+        return NextResponse.json({ error: "Invalid bandwidth value" }, { status: 400 });
+      }
+      if (requestedBandwidth !== currentBandwidth) {
+        const allowedBandwidth = await getBandwidthOptions();
+        if (!allowedBandwidth.includes(requestedBandwidth)) {
+          return NextResponse.json({ error: `Invalid bandwidth tier. Allowed: ${allowedBandwidth.join(", ")} Mbps` }, { status: 400 });
+        }
+      }
+      safeBandwidth = requestedBandwidth;
+    }
 
     if (safeCpu < vps.cpuCores || safeRam < vps.ramGb || safeDisk < vps.diskGb || safeBackup < (vps.backupGb || 0) || safeBandwidth < currentBandwidth) {
       return NextResponse.json({ error: "Downgrading specifications is not allowed" }, { status: 400 });
@@ -91,10 +107,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       additionalStorageRate += (safeBackup - (vps.backupGb || 0)) * (pricing.backup || 0);
     }
     if (safeBandwidth > currentBandwidth) {
-      const addedBandwidthSteps = Math.floor((safeBandwidth - currentBandwidth) / 50);
-      // Rp 50.000 per 50 Mbps step monthly, or pricing.bandwidth if set by admin
-      const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
-      const addedBandwidthHourly = addedBandwidthSteps * bandwidthRatePerHour;
+      // Charged as full-tier difference so splitting upgrades can never skip payment
+      const addedBandwidthHourly = bandwidthUpgradeHourlyCost(currentBandwidth, safeBandwidth, pricing);
       additionalHourlyRate += addedBandwidthHourly;
       additionalStorageRate += addedBandwidthHourly;
     }
@@ -141,7 +155,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
       // Upgrade Bandwidth rate limit if changed
       if (safeBandwidth > currentBandwidth) {
-        const rateMBs = safeBandwidth / 8;
+        const rateMBs = bandwidthToProxmoxRate(safeBandwidth);
         const currentConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
         const netConfigUpdates: Record<string, string> = {};
         for (let i = 0; i < 5; i++) {
