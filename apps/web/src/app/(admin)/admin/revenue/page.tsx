@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
 import { formatCompact } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
-import { DollarSign, Wallet, TrendingUp, Calendar, CreditCard, Activity, ArrowUpRight, Search, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Receipt, Wallet, TrendingUp, Calendar, CreditCard, Activity, ArrowUpRight, Search, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
@@ -117,7 +117,7 @@ export default function AdminRevenuePage() {
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Revenue</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <DollarSign className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>

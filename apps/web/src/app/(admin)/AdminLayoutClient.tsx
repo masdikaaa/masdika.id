@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, DollarSign, Sun, Moon, Globe, Star, UploadCloud, Boxes } from "lucide-react";
+import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, Wallet, Sun, Moon, Globe, Star, UploadCloud, Boxes } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
@@ -43,7 +43,7 @@ const SIDEBAR_LINKS = [
   { name: "Support Tickets", href: "/admin/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Billing & Subscriptions" },
   { name: "Affiliate System", href: "/admin/affiliate", icon: Gift, color: "text-purple-400", group: "Affiliate" },
   { name: "PAYG Monitor", href: "/admin/payg-monitor", icon: Activity, color: "text-cyan-400", group: "Billing & Subscriptions" },
-  { name: "Revenue", href: "/admin/revenue", icon: DollarSign, color: "text-emerald-400", group: "Billing & Subscriptions" },
+  { name: "Revenue", href: "/admin/revenue", icon: Wallet, color: "text-emerald-400", group: "Billing & Subscriptions" },
 
   { name: "Resellers", href: "/admin/resellers", icon: Users, color: "text-amber-400", group: "System & Security" },
   { name: "API Hub Users", href: "/admin/api-hub", icon: Key, color: "text-indigo-500", group: "System & Security" },

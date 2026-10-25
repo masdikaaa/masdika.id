@@ -4,7 +4,7 @@ import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { Users, DollarSign, ArrowUpRight, Copy, Check, Gift, Landmark, Clock, Activity, AlertCircle } from "lucide-react";
+import { Users, ArrowUpRight, Copy, Check, Gift, Landmark, Clock, Activity, AlertCircle } from "lucide-react";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import { motion } from "framer-motion";

@@ -2,7 +2,7 @@
 
 import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, DollarSign, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical } from "lucide-react";
+import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -821,7 +821,7 @@ export default function VpsManagementPage() {
             { id: "settings", label: "Proxmox Settings", icon: Settings },
             { id: "pools", label: "IP Pools", icon: Network },
             { id: "templates", label: "OS Templates", icon: HardDrive },
-            { id: "pricing", label: "Pricing", icon: DollarSign },
+            { id: "pricing", label: "Pricing", icon: Receipt },
             { id: "services", label: "User VPS Services", icon: Server },
             { id: "k3s", label: "Managed K3s", icon: Server },
             { id: "reserved-ips", label: "Reserved IPs", icon: Network },

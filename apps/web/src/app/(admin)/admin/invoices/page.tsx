@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Link as LinkIcon, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server , DollarSign, RefreshCw } from "lucide-react";
+import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Link as LinkIcon, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { AdminLoader } from "@/components/admin/AdminLoader";
 
@@ -432,7 +432,7 @@ export default function AdminInvoicesPage() {
               "w-9 h-9 rounded-xl border flex items-center justify-center",
               isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
-              <DollarSign className="w-4 h-4" />
+              <Wallet className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">

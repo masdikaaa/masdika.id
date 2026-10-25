@@ -3,7 +3,7 @@ import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Check, X, Clock, RefreshCw, Gift, DollarSign, CheckCircle, Wallet, Search, AlertCircle } from "lucide-react";
+import { Check, X, Clock, RefreshCw, Gift, CheckCircle, Wallet, Search, AlertCircle } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";

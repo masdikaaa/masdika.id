@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { motion } from "framer-motion";
-import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, DollarSign, ListChecks, ChevronLeft, ChevronRight, CreditCard, Building2, Wallet, Store, QrCode, Sliders, Rocket, Loader2, Plug, MapPin, AlertTriangle, Info } from "lucide-react";
+import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, ListChecks, ChevronLeft, ChevronRight, CreditCard, Building2, Wallet, Store, QrCode, Sliders, Rocket, Loader2, Plug, MapPin, AlertTriangle, Info } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
@@ -1787,7 +1787,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><DollarSign className="w-3.5 h-3.5" /> Billing Mode</span>
+                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Wallet className="w-3.5 h-3.5" /> Billing Mode</span>
                 <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>Pay As You Go</span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
