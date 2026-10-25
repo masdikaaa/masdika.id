@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { BlogContent, BlogPostItem } from "./BlogContent";
 import { getCachedData } from "@/lib/cache";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 export const dynamic = 'force-dynamic';
 
@@ -58,13 +59,7 @@ export default async function BlogPage() {
   const posts = await getPosts();
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 items-center justify-center">
-          <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PremiumLoader />}>
       <BlogContent initialPosts={posts} />
     </Suspense>
   );

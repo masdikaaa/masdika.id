@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import { cn } from "@/lib/utils";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { TiltCard } from "@/components/animations/TiltCard";
 import { Button } from "@/components/ui/Button";
@@ -279,9 +280,7 @@ export default function PortfolioPage() {
           {/* Projects Grid */}
           <div>
             {loading ? (
-              <div className="flex justify-center items-center py-20">
-                <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
-              </div>
+              <PremiumLoader inline />
             ) : filteredProjects.length === 0 ? (
               <div className="text-center py-24 px-6 sm:px-8 rounded-2xl border border-dashed border-[var(--border-primary)] bg-[var(--surface)]">
                 <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400">

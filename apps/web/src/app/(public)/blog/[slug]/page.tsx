@@ -12,6 +12,7 @@ import { renderMarkdown } from "@/lib/markdown";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 const Github = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -267,11 +268,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
   const recentPostsRef = useRef(null);
 
   if (loading) {
-    return (
-      <div className="pt-28 md:pt-32 pb-12 lg:pb-16 flex items-center justify-center min-h-screen">
-        <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-      </div>
-    );
+    return <PremiumLoader />;
   }
 
   if (!post) {

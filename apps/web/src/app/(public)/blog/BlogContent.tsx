@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 import { cn } from "@/lib/utils";
 
 export interface BlogPostItem {
@@ -473,10 +474,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
 
           {/* Loading State */}
           {loading && (
-            <div className="flex flex-col items-center justify-center py-24">
-              <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
-              <p className="text-sm text-[var(--text-secondary)]">Loading articles...</p>
-            </div>
+            <PremiumLoader inline />
           )}
 
           {/* Empty State */}

@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 export default function SeriesDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { theme } = useTheme();
@@ -41,11 +42,7 @@ export default function SeriesDetailPage({ params }: { params: Promise<{ slug: s
       .catch(() => setLoading(false));
   }, [slug]);
 
-  if (loading) return (
-    <div className="pt-32 flex justify-center min-h-screen">
-      <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PremiumLoader />;
 
   if (!series) return (
     <div className="pt-32 text-center min-h-screen">

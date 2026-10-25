@@ -7,6 +7,7 @@ import { renderMarkdown } from "@/lib/markdown";
 import { CodeBlock } from "@/components/ui/CodeBlock";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 function MarkdownContent({ content, isDark }: { content: string, isDark: boolean }) {
   const parts = content.split(/```/);
@@ -91,11 +92,7 @@ export default function EpisodePage({ params }: { params: Promise<{ slug: string
       .catch(() => setLoading(false));
   }, [slug, episodeSlug]);
 
-  if (loading) return (
-    <div className="pt-32 flex justify-center min-h-screen">
-      <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PremiumLoader />;
 
   if (!data) return (
     <div className="pt-32 text-center min-h-screen">

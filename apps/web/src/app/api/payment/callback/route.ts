@@ -342,18 +342,46 @@ export async function POST(req: NextRequest) {
                   }
                 }
                 
+                // Upgrade Bandwidth rate limit if changed
+                const effectiveBandwidth = details.newBandwidth || vps.bandwidthMbps || 100;
+                if (details.newBandwidth && details.newBandwidth > (vps.bandwidthMbps || 100) && vps.vmid) {
+                  const { bandwidthToProxmoxRate } = await import('@/lib/vps-bandwidth');
+                  const rateMBs = bandwidthToProxmoxRate(details.newBandwidth);
+                  const currentConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
+                  const netConfigUpdates: Record<string, string> = {};
+                  for (let i = 0; i < 5; i++) {
+                    const netKey = `net${i}`;
+                    if (currentConfig[netKey]) {
+                      let netStr = currentConfig[netKey];
+                      if (netStr.includes("rate=")) {
+                        netStr = netStr.replace(/rate=[0-9.]+/g, `rate=${rateMBs}`);
+                      } else {
+                        netStr = `${netStr},rate=${rateMBs}`;
+                      }
+                      netConfigUpdates[netKey] = netStr;
+                    }
+                  }
+                  if (Object.keys(netConfigUpdates).length > 0) {
+                    await proxmox.configVm(vps.node, vps.vmid, netConfigUpdates);
+                  }
+                }
+
                 // Network Upgrades (Add IPs)
                 let networkConfigUpdate: any = {};
                 if ((details.addIpv4Count > 0 || details.addIpv6Count > 0) && vps.vmid) {
                   const { VpsProvisioningService } = await import('@/lib/vps-provisioning');
+                  const { bandwidthToProxmoxRate } = await import('@/lib/vps-bandwidth');
                   const vmConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
                   
-                  let nextNetIndex = 0;
-                  for (let i = 0; i < 10; i++) {
-                     if (vmConfig[`net${i}`] !== undefined) {
-                         nextNetIndex = i + 1;
-                     }
-                  }
+                  const getNextAvailableNetIndex = () => {
+                    for (let i = 0; i < 10; i++) {
+                      if (i === 1) continue; // Reserved strictly for VPC
+                      if (vmConfig[`net${i}`] === undefined && networkConfigUpdate[`net${i}`] === undefined) {
+                        return i;
+                      }
+                    }
+                    return 10;
+                  };
 
                   const provisionIps = async (count: number, ipVersion: number) => {
                      if (!count) return;
@@ -369,16 +397,15 @@ export async function POST(req: NextRequest) {
 
                            const cidrSuffix = pool.network.split('/')[1] || (ipVersion === 4 ? '24' : '64');
                            const ipKey = ipVersion === 4 ? 'ip' : 'ip6';
-                           const gwKey = ipVersion === 4 ? 'gw' : 'gw6';
                            
                            const bridgeToUse = pool.type === 'PUBLIC' && server.publicNetworkBridge
                              ? server.publicNetworkBridge
                              : vps.networkBridge;
 
-                           networkConfigUpdate[`net${nextNetIndex}`] = `virtio,bridge=${bridgeToUse},firewall=1`;
-                           networkConfigUpdate[`ipconfig${nextNetIndex}`] = `${ipKey}=${ipAddress}/${cidrSuffix},${gwKey}=${pool.gateway}`;
-                           
-                           nextNetIndex++;
+                           const nextNetIndex = getNextAvailableNetIndex();
+                           const rateMBs = bandwidthToProxmoxRate(effectiveBandwidth);
+                           networkConfigUpdate[`net${nextNetIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1,rate=${rateMBs}`;
+                           networkConfigUpdate[`ipconfig${nextNetIndex}`] = `${ipKey}=${ipAddress}/${cidrSuffix}`;
                         } catch (e) {
                            console.error(`Failed to provision IP version ${ipVersion} for VPS ${vps.id}`, e);
                         }
@@ -397,10 +424,12 @@ export async function POST(req: NextRequest) {
                 await prisma.vpsService.update({
                   where: { id: vps.id },
                   data: {
-                    cpuCores: details.newCpu,
-                    ramGb: details.newRam,
-                    diskGb: details.newDisk,
-                    hourlyRate: details.newHourlyRate
+                    cpuCores: details.newCpu || vps.cpuCores,
+                    ramGb: details.newRam || vps.ramGb,
+                    diskGb: details.newDisk || vps.diskGb,
+                    ...(details.newBandwidth ? { bandwidthMbps: details.newBandwidth } : {}),
+                    ...(details.newBackup !== undefined ? { backupGb: details.newBackup } : {}),
+                    hourlyRate: details.newHourlyRate || vps.hourlyRate
                   }
                 });
               } catch (err) {

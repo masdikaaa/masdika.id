@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import SeriesClient, { SeriesItem } from "./SeriesClient";
 import { getCachedData } from "@/lib/cache";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,13 +45,7 @@ export default async function SeriesPage() {
   const series = await getSeries();
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 items-center justify-center">
-          <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PremiumLoader />}>
       <SeriesClient initialSeries={series} />
     </Suspense>
   );
