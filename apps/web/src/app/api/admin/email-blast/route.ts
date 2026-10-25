@@ -32,15 +32,22 @@ export async function POST(req: Request) {
     const currentYear = new Date().getFullYear().toString();
 
     // If it's a test email
+    const ensureFontWrapper = (content: string) => {
+      if (content.includes('<html') || content.includes('font-family:')) {
+        return content;
+      }
+      return `<div style="font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; color: #1e293b; line-height: 1.65;">${content}</div>`;
+    };
+
     if (isTest) {
       const targetTestEmail = testEmail || auth.user?.email || 'admin@masdika.id';
       const cleanTestEmail = decryptDeterministic(targetTestEmail);
 
-      const personalizedHtml = htmlContent
+      const personalizedHtml = ensureFontWrapper(htmlContent
         .replace(/{name}/g, 'Admin (Test)')
         .replace(/{email}/g, cleanTestEmail)
         .replace(/{app_url}/g, appUrl)
-        .replace(/{year}/g, currentYear);
+        .replace(/{year}/g, currentYear));
 
       await getTransporter().sendMail({
         from: `"${fromName}" <${fromEmail}>`,
@@ -126,11 +133,11 @@ export async function POST(req: Request) {
       await Promise.all(
         chunk.map(async (recipient) => {
           try {
-            const personalizedHtml = htmlContent
+            const personalizedHtml = ensureFontWrapper(htmlContent
               .replace(/{name}/g, recipient.name || 'Valued Customer')
               .replace(/{email}/g, recipient.email)
               .replace(/{app_url}/g, appUrl)
-              .replace(/{year}/g, currentYear);
+              .replace(/{year}/g, currentYear));
 
             await getTransporter().sendMail({
               from: `"${fromName}" <${fromEmail}>`,

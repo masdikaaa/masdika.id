@@ -179,6 +179,36 @@ export default function ClientProfile({ userId }: { userId: string }) {
     }
   };
 
+  const formatEmailPreviewHtml = (rawBody: string) => {
+    if (!rawBody) return "";
+    const fontInject = `
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+      <style>
+        * {
+          -webkit-font-smoothing: antialiased !important;
+          -moz-osx-font-smoothing: grayscale !important;
+          text-rendering: optimizeLegibility !important;
+        }
+        body, table, td, p, span, div, a, li, strong, b, h1, h2, h3, h4, h5, h6 {
+          font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        code, pre {
+          font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
+        }
+      </style>
+    `;
+
+    if (rawBody.includes("<head>")) {
+      return rawBody.replace("<head>", `<head>${fontInject}`);
+    }
+    if (rawBody.includes("<html")) {
+      return rawBody.replace(/<html[^>]*>/, `$&<head>${fontInject}</head>`);
+    }
+    return `<!DOCTYPE html><html><head>${fontInject}</head><body style="margin:0;padding:20px;font-family:'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${rawBody}</body></html>`;
+  };
+
   const fetchUserData = async () => {
     setLoading(true);
     try {
@@ -978,13 +1008,13 @@ export default function ClientProfile({ userId }: { userId: string }) {
               </div>
             </div>
 
-            {/* Email Body Iframe */}
-            <div className="flex-1 p-3 sm:p-4 overflow-hidden bg-slate-100 flex flex-col min-h-[380px]">
+            {/* Email Body Iframe with Universal Sharp Typography */}
+            <div className={cn("flex-1 p-3 sm:p-4 overflow-hidden flex flex-col min-h-[380px]", isDark ? "bg-[#080d1a]" : "bg-slate-100")}>
               <iframe
                 title="Email Message Preview"
-                srcDoc={viewingEmail.body}
+                srcDoc={formatEmailPreviewHtml(viewingEmail.body)}
                 sandbox="allow-same-origin allow-popups"
-                className="w-full flex-1 rounded-xl bg-white border border-slate-300 shadow-inner min-h-[420px]"
+                className={cn("w-full flex-1 rounded-xl border shadow-inner min-h-[440px]", isDark ? "bg-[#030712] border-slate-800" : "bg-white border-slate-300")}
               />
             </div>
 

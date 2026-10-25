@@ -220,12 +220,12 @@ export const sendRenewalInvoiceEmail = async (email: string, userName: string, p
     <p>Hello <strong>${userName}</strong>,</p>
     <p>Your subscription for <strong>${planName} (${serviceName.replace('_', ' ')})</strong> is due for renewal on <strong>${dateStr}</strong>.</p>
     <p>We have automatically generated a renewal invoice for you (<strong>#${invoiceNumber}</strong>). Please complete the payment of <strong>${formattedAmount}</strong> to avoid any interruption to your service.</p>
-    <div style="background-color: #0a1f33; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #1e293b;">
-      <h3 style="color: #60a5fa; margin-top: 0; margin-bottom: 15px; font-size: 16px;">Invoice Details</h3>
-      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: monospace; font-size: 14px;">
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;" width="180"><strong>Invoice Number:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${invoiceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;"><strong>Due Date:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${dateStr}</td></tr>
-        <tr><td style="padding: 8px 0;"><strong>Amount:</strong></td><td style="padding: 8px 0; color: #34d399; font-weight: bold;">${formattedAmount}</td></tr>
+    <div style="background-color: #030712; padding: 22px 24px; border-radius: 10px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #06b6d4;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 700;">Invoice Details</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace; font-size: 14px;">
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="180">Invoice Number:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${invoiceNumber}</td></tr>
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Due Date:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 600; text-align: right;">${dateStr}</td></tr>
+        <tr><td style="padding: 10px 0; color: #94a3b8;">Total Amount:</td><td style="padding: 10px 0; color: #34d399; font-weight: 800; font-size: 16px; text-align: right;">${formattedAmount}</td></tr>
       </table>
     </div>
     <div style="text-align: center; margin: 35px 0;">
@@ -362,13 +362,13 @@ export const sendVpsProvisionedEmail = async (email: string, userName: string, h
     <h2 style="color: #06b6d4; margin-bottom: 20px;">Your Kubernetes Node is Ready! 🚀</h2>
     <p>Hello <strong>${userName}</strong>,</p>
     <p>Your new Kubernetes node (<strong>${hostname}</strong>) has been successfully provisioned and is now online.</p>
-    <div style="background-color: #0a1f33; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #1e293b;">
-      <h3 style="color: #60a5fa; margin-top: 0; margin-bottom: 15px; font-size: 16px;">Node Details</h3>
-      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: monospace; font-size: 14px;">
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;" width="180"><strong>Hostname:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${hostname}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;"><strong>IP Address:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${ipAddress}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;"><strong>Username:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${vpsUsername}</td></tr>
-        <tr><td style="padding: 8px 0;"><strong>Password:</strong></td><td style="padding: 8px 0;">${rootPassword}</td></tr>
+    <div style="background-color: #030712; padding: 22px 24px; border-radius: 10px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #06b6d4;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 700;">Node Details</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace; font-size: 14px;">
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="180">Hostname:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${hostname}</td></tr>
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">IP Address:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 700; text-align: right;">${ipAddress}</td></tr>
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Username:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 600; text-align: right;">${vpsUsername}</td></tr>
+        <tr><td style="padding: 10px 0; color: #94a3b8;">Password:</td><td style="padding: 10px 0; color: #fbbf24; font-weight: 700; text-align: right;">${rootPassword}</td></tr>
       </table>
     </div>
     <p>Please visit your dashboard to download your kube config file for remote access.</p>
@@ -379,13 +379,13 @@ export const sendVpsProvisionedEmail = async (email: string, userName: string, h
     <h2 style="color: #06b6d4; margin-bottom: 20px;">Your VPS is Ready! 🚀</h2>
     <p>Hello <strong>${userName}</strong>,</p>
     <p>Your new VPS (<strong>${hostname}</strong>) has been successfully provisioned and is now online.</p>
-    <div style="background-color: #0a1f33; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #1e293b;">
-      <h3 style="color: #60a5fa; margin-top: 0; margin-bottom: 15px; font-size: 16px;">Server Credentials</h3>
-      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: monospace; font-size: 14px;">
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;" width="180"><strong>Hostname:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${hostname}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;"><strong>IP Address:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${ipAddress}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;"><strong>Username:</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #1e293b;">${vpsUsername}</td></tr>
-        <tr><td style="padding: 8px 0;"><strong>Password:</strong></td><td style="padding: 8px 0;">${rootPassword}</td></tr>
+    <div style="background-color: #030712; padding: 22px 24px; border-radius: 10px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #06b6d4;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 700;">Server Credentials</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace; font-size: 14px;">
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="180">Hostname:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${hostname}</td></tr>
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">IP Address:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 700; text-align: right;">${ipAddress}</td></tr>
+        <tr><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Username:</td><td style="padding: 10px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 600; text-align: right;">${vpsUsername}</td></tr>
+        <tr><td style="padding: 10px 0; color: #94a3b8;">Password:</td><td style="padding: 10px 0; color: #fbbf24; font-weight: 700; text-align: right;">${rootPassword}</td></tr>
       </table>
     </div>
     <p>Please store these credentials securely. For security reasons, this is the only time the password will be sent to you in plain text.</p>
@@ -411,38 +411,103 @@ const getBaseHtml = (content: string, location: string = 'Surabaya, Indonesia', 
   <meta name="color-scheme" content="light dark" />
   <meta name="supported-color-schemes" content="light dark" />
   <title>Email from ${FROM_NAME}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style type="text/css">
     :root {
       color-scheme: light dark;
       supported-color-schemes: light dark;
     }
-    /* Reset Styles */
-    body { margin: 0; padding: 0; min-width: 100%; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #020617; color: #ffffff; }
-    table { border-spacing: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    td { padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-    img { border: 0; }
-    a { color: #06b6d4; text-decoration: none; }
-    p { margin: 0 0 15px 0; line-height: 1.6; color: #d1d5db; font-size: 16px; }
-    h2, h3 { margin: 0 0 15px 0; color: #ffffff; font-weight: bold; }
+    /* Universal Sharp Typography */
+    body, table, td, p, a, li, blockquote, span, strong, b, div, input, button {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-width: 100%;
+      background-color: #030712;
+      color: #f8fafc;
+    }
+    table {
+      border-spacing: 0;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    td {
+      padding: 0;
+      color: #f8fafc;
+    }
+    img {
+      border: 0;
+      outline: none;
+      text-decoration: none;
+    }
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    p {
+      margin: 0 0 16px 0;
+      line-height: 1.65;
+      color: #e2e8f0;
+      font-size: 15px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin: 0 0 16px 0;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    ul, ol {
+      margin: 0 0 18px 0;
+      padding-left: 22px;
+      color: #f1f5f9;
+    }
+    li {
+      margin-bottom: 8px;
+      line-height: 1.7;
+      color: #f1f5f9;
+      font-size: 15px;
+    }
+    strong, b {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace !important;
+      background-color: #1e293b;
+      color: #38bdf8;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 13px;
+    }
     
     /* Responsive Styles */
     @media screen and (max-width: 600px) {
       .container { width: 100% !important; padding: 0 !important; }
-      .content-wrapper { padding: 20px !important; }
+      .content-wrapper { padding: 24px 20px !important; }
       .header img { max-width: 100% !important; }
     }
   </style>
   <!--[if mso]>
   <style type="text/css">
-    body, table, td, p, a, h2, h3 { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; }
+    body, table, td, p, a, h1, h2, h3, h4, h5, h6, ul, ol, li, span, strong, b {
+      font-family: 'Segoe UI', Arial, sans-serif !important;
+    }
   </style>
   <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; background-color: #020617;">
+<body style="margin: 0; padding: 0; background-color: #030712; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
   <!-- 100% wrapper table -->
-  <table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#020617" style="background-color: #020617;">
+  <table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#030712" style="background-color: #030712; width: 100%; min-width: 100%;">
     <tr>
-      <td align="center" style="padding: 40px 15px;">
+      <td align="center" style="padding: 40px 15px; background-color: #030712;">
         <!--[if mso]>
         <table width="600" border="0" cellpadding="0" cellspacing="0" align="center">
           <tr>
@@ -450,7 +515,7 @@ const getBaseHtml = (content: string, location: string = 'Surabaya, Indonesia', 
         <![endif]-->
         
         <!-- Max-width container table -->
-        <table class="container" width="100%" max-width="600" border="0" cellpadding="0" cellspacing="0" align="center" style="max-width: 600px; background-color: #0f172a; border-radius: 16px; border: 1px solid #1e293b;">
+        <table class="container" width="100%" border="0" cellpadding="0" cellspacing="0" align="center" style="max-width: 600px; width: 100%; background-color: #0f172a; border-radius: 16px; border: 1px solid #1e293b; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);">
           
           <!-- Header -->
           <tr>
@@ -461,17 +526,17 @@ const getBaseHtml = (content: string, location: string = 'Surabaya, Indonesia', 
           
           <!-- Content -->
           <tr>
-            <td class="content-wrapper" style="padding: 40px 40px 20px 40px;">
+            <td class="content-wrapper" style="padding: 36px 36px 24px 36px; font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #e2e8f0; font-size: 15px; line-height: 1.65;">
               ${content}
             </td>
           </tr>
           
           <!-- Footer -->
           <tr>
-            <td align="center" style="padding: 30px; border-top: 1px solid #1e293b; background-color: #020617; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-              <p style="margin: 0 0 10px 0; font-size: 13px; color: #6b7280;">&copy; ${new Date().getFullYear()} ${FROM_NAME}. All Rights Reserved.</p>
-              <p style="margin: 0 0 15px 0; font-size: 13px; color: #6b7280;">${location}</p>
-              ${showUnsubscribe ? `<a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/unsubscribe" style="font-size: 13px; color: #6b7280; text-decoration: underline;">Unsubscribe from Newsletter</a>` : ''}
+            <td align="center" style="padding: 28px 24px; border-top: 1px solid #1e293b; background-color: #030712; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: #94a3b8; font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500;">&copy; ${new Date().getFullYear()} ${FROM_NAME}. All Rights Reserved.</p>
+              <p style="margin: 0 0 12px 0; font-size: 13px; color: #94a3b8; font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">${location}</p>
+              ${showUnsubscribe ? `<a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/unsubscribe" style="font-size: 13px; color: #38bdf8; text-decoration: underline; font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Unsubscribe from Newsletter</a>` : ''}
             </td>
           </tr>
           
@@ -494,7 +559,7 @@ const getButtonHtml = (text: string, url: string) => `
 <table border="0" cellspacing="0" cellpadding="0" align="center" style="margin: 25px auto;">
   <tr>
     <td align="center" bgcolor="#06b6d4" style="border-radius: 50px;">
-      <a href="${url}" target="_blank" style="font-size: 16px; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 14px 32px; border: 1px solid #06b6d4; display: inline-block; border-radius: 50px; font-weight: bold; background-color: #06b6d4;">${text}</a>
+      <a href="${url}" target="_blank" style="font-size: 15px; font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 14px 32px; border: 1px solid #06b6d4; display: inline-block; border-radius: 50px; font-weight: 700; background-color: #06b6d4; letter-spacing: 0.3px;">${text}</a>
     </td>
   </tr>
 </table>
@@ -1382,14 +1447,17 @@ export const sendAdminServiceSuspendedEmail = async (customerName: string, custo
   if (!adminUser || !adminUser.email) return;
 
   const content = `
-    <h2 style="color: #f59e0b; margin-bottom: 20px;">Customer Service Suspended</h2>
-    <p>Admin Notification:</p>
-    <p>The following service has been automatically suspended due to non-payment:</p>
-    <ul>
-      <li><strong>Customer:</strong> ${customerName} (${customerEmail})</li>
-      <li><strong>Service Type:</strong> ${serviceType}</li>
-      <li><strong>Plan:</strong> ${serviceName.replace('_', ' ')}</li>
-    </ul>
+    <h2 style="color: #f59e0b; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Customer Service Suspended</h2>
+    <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Admin Notification:</p>
+    <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">The following service has been automatically suspended due to non-payment:</p>
+    
+    <div style="background-color: #030712; border: 1px solid #1e293b; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
+      <ul style="margin: 0; padding-left: 20px; color: #f1f5f9; font-size: 15px; line-height: 1.8;">
+        <li style="margin-bottom: 8px; color: #f1f5f9;"><strong style="color: #ffffff;">Customer:</strong> <span style="color: #ffffff; font-weight: 600;">${customerName}</span> (<a href="mailto:${customerEmail}" style="color: #38bdf8; text-decoration: none;">${customerEmail}</a>)</li>
+        <li style="margin-bottom: 8px; color: #f1f5f9;"><strong style="color: #ffffff;">Service Type:</strong> <span style="color: #38bdf8; font-weight: 600;">${serviceType}</span></li>
+        <li style="margin-bottom: 0; color: #f1f5f9;"><strong style="color: #ffffff;">Plan:</strong> <span style="color: #ffffff; font-weight: 600;">${serviceName.replace('_', ' ')}</span></li>
+      </ul>
+    </div>
   `;
 
   await getTransporter().sendMail({
@@ -1405,14 +1473,17 @@ export const sendAdminServiceReactivatedEmail = async (customerName: string, cus
   if (!adminUser || !adminUser.email) return;
 
   const content = `
-    <h2 style="color: #10b981; margin-bottom: 20px;">Customer Service Reactivated</h2>
-    <p>Admin Notification:</p>
-    <p>The following service has been reactivated after successful payment:</p>
-    <ul>
-      <li><strong>Customer:</strong> ${customerName} (${customerEmail})</li>
-      <li><strong>Service Type:</strong> ${serviceType}</li>
-      <li><strong>Plan:</strong> ${serviceName.replace('_', ' ')}</li>
-    </ul>
+    <h2 style="color: #10b981; margin-top: 0; margin-bottom: 16px; font-size: 24px; font-weight: 700;">Customer Service Reactivated 🎉</h2>
+    <p style="margin: 0 0 8px 0; color: #f8fafc; font-size: 15px; font-weight: 600;">Admin Notification:</p>
+    <p style="margin: 0 0 18px 0; color: #cbd5e1; font-size: 15px; line-height: 1.6;">The following service has been reactivated after successful payment:</p>
+    
+    <div style="background-color: #030712; border: 1px solid #1e293b; border-left: 4px solid #10b981; border-radius: 8px; padding: 18px 20px; margin: 20px 0;">
+      <ul style="margin: 0; padding-left: 20px; color: #f1f5f9; font-size: 15px; line-height: 1.8;">
+        <li style="margin-bottom: 8px; color: #f1f5f9;"><strong style="color: #ffffff;">Customer:</strong> <span style="color: #ffffff; font-weight: 600;">${customerName}</span> (<a href="mailto:${customerEmail}" style="color: #38bdf8; text-decoration: none;">${customerEmail}</a>)</li>
+        <li style="margin-bottom: 8px; color: #f1f5f9;"><strong style="color: #ffffff;">Service Type:</strong> <span style="color: #38bdf8; font-weight: 600;">${serviceType}</span></li>
+        <li style="margin-bottom: 0; color: #f1f5f9;"><strong style="color: #ffffff;">Plan:</strong> <span style="color: #ffffff; font-weight: 600;">${serviceName.replace('_', ' ')}</span></li>
+      </ul>
+    </div>
   `;
 
   await getTransporter().sendMail({

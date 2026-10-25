@@ -31,64 +31,66 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-// Pre-designed Responsive Promotional Email Templates
+// Pre-designed Responsive Promotional Email Templates with Sharp Universal Typography
+const FONT_STACK = "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+
 const PROMO_TEMPLATES = [
   {
     id: "vps_sale",
     name: "⚡ VPS Cloud Flash Sale (50% OFF)",
     subject: "⚡ Flash Sale: Get 50% OFF on all High-Performance Cloud VPS!",
-    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: ${FONT_STACK};">
   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
     <!-- Header Banner -->
     <div style="background: linear-gradient(135deg, #0f172a 0%, #0891b2 50%, #06b6d4 100%); padding: 40px 30px; text-align: center;">
-      <span style="background: rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; margin-bottom: 12px;">Limited Time Offer</span>
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;">MASDIKA CLOUD VPS</h1>
-      <p style="color: #e0f2fe; margin: 8px 0 0; font-size: 15px; font-weight: 500;">High-Performance Cloud Infrastructure for Developers</p>
+      <span style="background: rgba(255, 255, 255, 0.18); color: #ffffff; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; margin-bottom: 12px; font-family: ${FONT_STACK};">Limited Time Offer</span>
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px; font-family: ${FONT_STACK};">MASDIKA CLOUD VPS</h1>
+      <p style="color: #e0f2fe; margin: 8px 0 0; font-size: 15px; font-weight: 500; font-family: ${FONT_STACK};">High-Performance Cloud Infrastructure for Developers</p>
     </div>
 
     <!-- Body Content -->
-    <div style="padding: 35px 30px;">
-      <p style="font-size: 16px; color: #334155; margin-top: 0;">Hi <strong>{name}</strong>,</p>
-      <p style="font-size: 15px; color: #475569; line-height: 1.6;">
+    <div style="padding: 35px 30px; font-family: ${FONT_STACK};">
+      <p style="font-size: 16px; color: #1e293b; margin-top: 0; font-weight: 600;">Hi <strong>{name}</strong>,</p>
+      <p style="font-size: 15px; color: #334155; line-height: 1.65;">
         We're thrilled to announce an exclusive limited-time promotion on our Enterprise Proxmox Cloud VPS. Upgrade your servers today and experience blazing-fast NVMe storage, dedicated vCPU performance, and flexible bandwidth speed tiers up to 1000 Mbps!
       </p>
 
       <!-- Promo Box -->
       <div style="background: #f8fafc; border: 2px dashed #06b6d4; border-radius: 12px; padding: 24px; text-align: center; margin: 28px 0;">
-        <span style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Use Coupon Code at Checkout</span>
-        <div style="font-size: 26px; font-weight: 900; color: #0891b2; font-family: monospace; letter-spacing: 2px;">FLASH50CLOUD</div>
+        <span style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; font-family: ${FONT_STACK};">Use Coupon Code at Checkout</span>
+        <div style="font-size: 28px; font-weight: 900; color: #0891b2; font-family: 'JetBrains Mono', monospace; letter-spacing: 2px;">FLASH50CLOUD</div>
         <p style="font-size: 13px; color: #10b981; font-weight: 700; margin: 8px 0 0;">✓ Valid for the first 50 orders this month</p>
       </div>
 
       <!-- Feature Highlights -->
       <div style="margin: 28px 0;">
-        <h3 style="font-size: 16px; color: #0f172a; margin-bottom: 14px;">Included with every Cloud VPS:</h3>
-        <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #475569;">
+        <h3 style="font-size: 16px; color: #0f172a; margin-bottom: 14px; font-weight: 700; font-family: ${FONT_STACK};">Included with every Cloud VPS:</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #334155; font-family: ${FONT_STACK};">
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">🚀 <strong>Ultra-Low Latency:</strong> Direct Indonesia IDC Tier-3 datacenter connection</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">🚀 <strong style="color: #0f172a;">Ultra-Low Latency:</strong> Direct Indonesia IDC Tier-3 datacenter connection</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">⚡ <strong>Bandwidth Upgrades:</strong> Configurable speed tiers up to 1000 Mbps</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">⚡ <strong style="color: #0f172a;">Bandwidth Upgrades:</strong> Configurable speed tiers up to 1000 Mbps</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">🛡️ <strong>Automated Protection:</strong> Enterprise Proxmox firewall & hardware isolation</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9;">🛡️ <strong style="color: #0f172a;">Automated Protection:</strong> Enterprise Proxmox firewall & hardware isolation</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0;">🔄 <strong>Instant Delivery:</strong> Fully online in less than 60 seconds with Cloud-Init</td>
+            <td style="padding: 10px 0;">🔄 <strong style="color: #0f172a;">Instant Delivery:</strong> Fully online in less than 60 seconds with Cloud-Init</td>
           </tr>
         </table>
       </div>
 
       <!-- Call to Action Button -->
       <div style="text-align: center; margin: 35px 0 15px;">
-        <a href="https://masdika.id/vps" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: #ffffff; padding: 16px 36px; text-decoration: none; border-radius: 10px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);">
+        <a href="https://masdika.id/vps" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: #ffffff; padding: 16px 36px; text-decoration: none; border-radius: 10px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4); font-family: ${FONT_STACK};">
           Deploy VPS Now with 50% OFF →
         </a>
       </div>
     </div>
 
     <!-- Footer -->
-    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px; text-align: center; font-size: 12px; color: #94a3b8; line-height: 1.5;">
+    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px; text-align: center; font-size: 12px; color: #64748b; line-height: 1.5; font-family: ${FONT_STACK};">
       <p style="margin: 0 0 4px;">You received this email because you are a registered customer at Masdika Cloud.</p>
       <p style="margin: 0;">© {year} PT Masdika Teknologi Indonesia. All rights reserved.</p>
     </div>
@@ -99,24 +101,24 @@ const PROMO_TEMPLATES = [
     id: "speed_upgrade",
     name: "🚀 Bandwidth Speed Tiers Available",
     subject: "🚀 Boost Your VPS: New Network Bandwidth Speed Options up to 1000 Mbps!",
-    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: ${FONT_STACK};">
   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
     <div style="background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%); padding: 35px 30px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900;">NEW FEATURE RELEASE</h1>
-      <p style="color: #e0f2fe; margin: 6px 0 0; font-size: 14px;">Dynamic Bandwidth Port Speed Limits</p>
+      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900; font-family: ${FONT_STACK};">NEW FEATURE RELEASE</h1>
+      <p style="color: #e0f2fe; margin: 6px 0 0; font-size: 14px; font-family: ${FONT_STACK};">Dynamic Bandwidth Port Speed Limits</p>
     </div>
-    <div style="padding: 35px 30px;">
-      <p style="font-size: 16px; color: #334155; margin-top: 0;">Hello <strong>{name}</strong>,</p>
-      <p style="font-size: 15px; color: #475569; line-height: 1.6;">
+    <div style="padding: 35px 30px; font-family: ${FONT_STACK};">
+      <p style="font-size: 16px; color: #1e293b; margin-top: 0; font-weight: 600;">Hello <strong>{name}</strong>,</p>
+      <p style="font-size: 15px; color: #334155; line-height: 1.65;">
         We have officially upgraded our network infrastructure! You can now customize your VPS port speed limits with fine-grained tiers from <strong>100 Mbps (Free Base)</strong> all the way up to <strong>1000 Mbps Gigabit</strong> directly from your client control panel.
       </p>
       <div style="text-align: center; margin: 30px 0 10px;">
-        <a href="https://masdika.id/dashboard/vps" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block;">
+        <a href="https://masdika.id/dashboard/vps" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; font-family: ${FONT_STACK};">
           Configure My VPS Speed →
         </a>
       </div>
     </div>
-    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
+    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #64748b; font-family: ${FONT_STACK};">
       © {year} PT Masdika Teknologi Indonesia. All rights reserved.
     </div>
   </div>
@@ -126,25 +128,25 @@ const PROMO_TEMPLATES = [
     id: "maintenance",
     name: "🛠️ Scheduled System Maintenance Notice",
     subject: "🛠️ Notice: Scheduled Infrastructure Maintenance Window",
-    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: ${FONT_STACK};">
   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
     <div style="background: #0f172a; padding: 35px 30px; text-align: center; border-bottom: 3px solid #f59e0b;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800;">SCHEDULED MAINTENANCE</h1>
-      <p style="color: #fbbf24; margin: 6px 0 0; font-size: 13px; font-weight: 600; text-transform: uppercase;">Infrastructure Hardware Upgrade</p>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; font-family: ${FONT_STACK};">SCHEDULED MAINTENANCE</h1>
+      <p style="color: #fbbf24; margin: 6px 0 0; font-size: 13px; font-weight: 600; text-transform: uppercase; font-family: ${FONT_STACK};">Infrastructure Hardware Upgrade</p>
     </div>
-    <div style="padding: 35px 30px;">
-      <p style="font-size: 15px; color: #334155; margin-top: 0;">Dear <strong>{name}</strong>,</p>
-      <p style="font-size: 14px; color: #475569; line-height: 1.6;">
+    <div style="padding: 35px 30px; font-family: ${FONT_STACK};">
+      <p style="font-size: 15px; color: #1e293b; margin-top: 0; font-weight: 600;">Dear <strong>{name}</strong>,</p>
+      <p style="font-size: 14px; color: #334155; line-height: 1.65;">
         To ensure optimal stability, throughput, and security, our engineering team will be performing scheduled network and hypervisor maintenance.
       </p>
-      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 20px; margin: 24px 0;">
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 20px; margin: 24px 0; font-family: ${FONT_STACK};">
         <p style="margin: 0 0 8px; font-size: 14px; color: #92400e;"><strong>Maintenance Window:</strong> Sunday, 01:00 AM – 04:00 AM (WIB)</p>
         <p style="margin: 0 0 8px; font-size: 14px; color: #92400e;"><strong>Expected Impact:</strong> Brief latency spikes or momentary disconnection under 5 minutes.</p>
         <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Scope:</strong> Core Proxmox hypervisor nodes & upstream routers.</p>
       </div>
-      <p style="font-size: 14px; color: #475569;">If you experience any issues after this maintenance period, please open a ticket with our 24/7 support desk.</p>
+      <p style="font-size: 14px; color: #334155;">If you experience any issues after this maintenance period, please open a ticket with our 24/7 support desk.</p>
     </div>
-    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
+    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #64748b; font-family: ${FONT_STACK};">
       © {year} PT Masdika Teknologi Indonesia. All rights reserved.
     </div>
   </div>
@@ -154,15 +156,15 @@ const PROMO_TEMPLATES = [
     id: "blank",
     name: "📄 Blank Clean Canvas",
     subject: "",
-    html: `<div style="background-color: #f8fafc; padding: 30px 15px; font-family: Arial, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 30px; border: 1px solid #e2e8f0;">
-    <h2 style="color: #0891b2; margin-top: 0;">Hello {name},</h2>
-    <p style="color: #475569; font-size: 15px; line-height: 1.6;">Write your promotional email announcement here...</p>
+    html: `<div style="background-color: #f8fafc; padding: 30px 15px; font-family: ${FONT_STACK};">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 30px; border: 1px solid #e2e8f0; font-family: ${FONT_STACK};">
+    <h2 style="color: #0891b2; margin-top: 0; font-family: ${FONT_STACK};">Hello {name},</h2>
+    <p style="color: #334155; font-size: 15px; line-height: 1.65;">Write your promotional email announcement here...</p>
     <div style="margin: 30px 0;">
-      <a href="https://masdika.id" style="background-color: #06b6d4; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Learn More</a>
+      <a href="https://masdika.id" style="background-color: #06b6d4; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-family: ${FONT_STACK};">Learn More</a>
     </div>
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0 15px;" />
-    <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">© {year} PT Masdika Teknologi Indonesia. All rights reserved.</p>
+    <p style="color: #64748b; font-size: 12px; text-align: center; margin: 0; font-family: ${FONT_STACK};">© {year} PT Masdika Teknologi Indonesia. All rights reserved.</p>
   </div>
 </div>`
   }
@@ -209,6 +211,37 @@ export default function EmailBlastPage() {
   const [showSendConfirmModal, setShowSendConfirmModal] = useState(false);
   const [sendingBlast, setSendingBlast] = useState(false);
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
+
+  const formatBlastPreviewHtml = (raw: string) => {
+    const rendered = raw
+      .replace(/{name}/g, "John Doe")
+      .replace(/{year}/g, new Date().getFullYear().toString())
+      .replace(/{email}/g, "customer@example.com");
+
+    const fontInject = `
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+      <style>
+        * {
+          -webkit-font-smoothing: antialiased !important;
+          -moz-osx-font-smoothing: grayscale !important;
+          text-rendering: optimizeLegibility !important;
+        }
+        body, table, td, p, span, div, a, li, strong, b, h1, h2, h3, h4, h5, h6 {
+          font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+      </style>
+    `;
+
+    if (rendered.includes("<head>")) {
+      return rendered.replace("<head>", `<head>${fontInject}`);
+    }
+    if (rendered.includes("<html")) {
+      return rendered.replace(/<html[^>]*>/, `$&<head>${fontInject}</head>`);
+    }
+    return `<!DOCTYPE html><html><head>${fontInject}</head><body style="margin:0;padding:20px;font-family:'Plus Jakarta Sans','Inter',sans-serif;">${rendered}</body></html>`;
+  };
 
   // Fetch recipients on mount
   useEffect(() => {
@@ -1049,7 +1082,7 @@ export default function EmailBlastPage() {
               >
                 <iframe
                   title="Live Responsive Preview"
-                  srcDoc={htmlContent.replace(/{name}/g, "John Doe").replace(/{year}/g, new Date().getFullYear().toString())}
+                  srcDoc={formatBlastPreviewHtml(htmlContent)}
                   sandbox="allow-same-origin allow-popups"
                   className="w-full h-full min-h-[650px] border-none"
                 />
