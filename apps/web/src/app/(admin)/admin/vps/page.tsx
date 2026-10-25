@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { Reorder } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
-import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 type VpsService = {
   id: number;
@@ -939,7 +938,9 @@ export default function VpsManagementPage() {
           <h2 className={cn("text-xl font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Proxmox Server Configuration</h2>
 
           {loadingSettings ? (
-            <PremiumLoader inline />
+            <div className="flex justify-center items-center h-64">
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            </div>
           ) : (
             <form onSubmit={handleSaveSettings} className="space-y-6">
               {/* API Configuration */}
@@ -1322,8 +1323,10 @@ export default function VpsManagementPage() {
               <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                 {loadingPools ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-6 text-center">
-                      <PremiumLoader inline />
+                    <td colSpan={6} className="py-12 text-center">
+                      <div className="flex justify-center items-center h-64">
+                        <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+                      </div>
                     </td>
                   </tr>
                 ) : pools.length === 0 ? (
@@ -1405,8 +1408,10 @@ export default function VpsManagementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loadingTemplates ? (
-              <div className="col-span-full py-4">
-                <PremiumLoader inline />
+              <div className="col-span-full">
+                <div className="flex justify-center items-center h-64">
+                  <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+                </div>
               </div>
             ) : templates.length === 0 ? (
               <div className={cn("col-span-full text-center py-8 glass rounded-xl border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>
@@ -1508,7 +1513,9 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingPricing ? (
-            <PremiumLoader inline />
+            <div className="flex justify-center items-center h-64">
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            </div>
           ) : (
             <form onSubmit={handleSavePricing}>
               <div className="grid gap-4 mb-6">
@@ -1560,7 +1567,7 @@ export default function VpsManagementPage() {
                 Network Bandwidth Speed Management
               </h2>
               <p className={cn("text-xs sm:text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Atur paket kecepatan port speed VPS (100 Mbps, 150 Mbps, 200 Mbps, dst.) yang tersedia untuk pelanggan di formulir order & upgrade.
+                Configure VPS port speed tiers (100 Mbps, 150 Mbps, 200 Mbps, etc.) available for customers during order checkout and resource upgrades.
               </p>
             </div>
             <button
@@ -1579,7 +1586,9 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingBandwidth ? (
-            <PremiumLoader inline />
+            <div className="flex justify-center items-center h-64">
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            </div>
           ) : (
             <div className="space-y-6">
               {/* Stats & Pricing Banner */}
@@ -1588,9 +1597,9 @@ export default function VpsManagementPage() {
                   <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Base Free Tier</span>
                   <div className="flex items-baseline gap-1.5 my-1">
                     <span className={cn("text-2xl font-black font-mono", isDark ? "text-emerald-400" : "text-emerald-600")}>100</span>
-                    <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Mbps (Gratis)</span>
+                    <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Mbps (Free)</span>
                   </div>
-                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Bawaan standar tiap VPS</p>
+                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Standard default for each VPS</p>
                 </div>
 
                 <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
@@ -1606,7 +1615,7 @@ export default function VpsManagementPage() {
                       step={1}
                       value={newBandwidthRateInput}
                       onChange={(e) => setNewBandwidthRateInput(e.target.value)}
-                      title="Ubah tarif per 50 Mbps step"
+                      title="Change rate per 50 Mbps step"
                       className={cn(
                         "w-20 px-2 py-0.5 rounded-lg border font-mono font-black text-xl outline-none transition-all",
                         isDark
@@ -1614,10 +1623,10 @@ export default function VpsManagementPage() {
                           : "bg-white border-slate-300 text-cyan-700 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600/20"
                       )}
                     />
-                    <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>/ jam</span>
+                    <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>/ hr</span>
                   </div>
                   <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>
-                    ≈ Rp {((Number(newBandwidthRateInput) || bandwidthRatePerHour) * 730).toLocaleString("id-ID")} / bulan
+                    ≈ Rp {((Number(newBandwidthRateInput) || bandwidthRatePerHour) * 730).toLocaleString("id-ID")} / month
                   </p>
                 </div>
 
@@ -1629,7 +1638,7 @@ export default function VpsManagementPage() {
                     </span>
                     <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Mbps</span>
                   </div>
-                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Batas maksimal di slider customer</p>
+                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Maximum limit on customer slider</p>
                 </div>
 
                 <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
@@ -1638,9 +1647,9 @@ export default function VpsManagementPage() {
                     <span className={cn("text-2xl font-black font-mono", isDark ? "text-cyan-400" : "text-cyan-700")}>
                       {bandwidthOptions.length}
                     </span>
-                    <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Paket Kecepatan</span>
+                    <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Speed Tiers</span>
                   </div>
-                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Siap dipilih pelanggan</p>
+                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Ready for customer selection</p>
                 </div>
               </div>
 
@@ -1648,7 +1657,7 @@ export default function VpsManagementPage() {
               <div className={cn("p-4 sm:p-5 rounded-2xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Plus className="w-4 h-4 shrink-0" />
-                  Tambah Paket Kecepatan Bandwidth
+                  Add Bandwidth Speed Tier
                 </h3>
 
                 <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center">
@@ -1665,7 +1674,7 @@ export default function VpsManagementPage() {
                           handleAddBandwidth();
                         }
                       }}
-                      placeholder="Contoh: 150 (kelipatan 50)"
+                      placeholder="e.g. 150 (multiples of 50)"
                       className={cn(
                         "w-full pl-3.5 pr-16 py-2.5 rounded-xl border outline-none font-mono text-sm transition-all",
                         isDark
@@ -1692,13 +1701,13 @@ export default function VpsManagementPage() {
                     )}
                   >
                     <Plus className="w-4 h-4 shrink-0" />
-                    <span>Tambah Tier</span>
+                    <span>Add Tier</span>
                   </button>
                 </div>
 
                 {/* Quick Add Presets */}
                 <div className={cn("flex flex-col sm:flex-row sm:items-start gap-2 pt-2 border-t border-dashed", isDark ? "border-slate-800" : "border-slate-200")}>
-                  <span className={cn("text-xs font-semibold shrink-0 pt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Preset Cepat:</span>
+                  <span className={cn("text-xs font-semibold shrink-0 pt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Quick Presets:</span>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {[150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000].map((preset) => {
                       const alreadyHas = bandwidthOptions.includes(preset);
@@ -1728,10 +1737,10 @@ export default function VpsManagementPage() {
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
-                    Daftar Paket Kecepatan Aktif ({bandwidthOptions.length} Tiers)
+                    Active Speed Tiers ({bandwidthOptions.length} Tiers)
                   </h3>
                   <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                    Urut otomatis dari terkecil ke terbesar
+                    Automatically sorted from lowest to highest
                   </span>
                 </div>
 
@@ -1779,7 +1788,7 @@ export default function VpsManagementPage() {
                                 "p-1.5 rounded-lg border transition-all cursor-pointer opacity-80 group-hover:opacity-100",
                                 isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-zinc-400 hover:text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-slate-400 hover:text-red-600"
                               )}
-                              title={`Hapus paket ${speed} Mbps`}
+                              title={`Remove ${speed} Mbps tier`}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1787,9 +1796,9 @@ export default function VpsManagementPage() {
                         </div>
 
                         <div className={cn("pt-2.5 border-t text-xs flex items-center justify-between", isDark ? "border-slate-800/80" : "border-slate-100")}>
-                          <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Harga Pelanggan</span>
+                          <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Customer Price</span>
                           <span className={cn("font-bold font-mono", isBase ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-cyan-400" : "text-cyan-700"))}>
-                            {isBase ? "GRATIS" : `+Rp ${monthlyPrice.toLocaleString("id-ID")}/bln (~+Rp ${hourlyPrice}/jam)`}
+                            {isBase ? "FREE" : `+Rp ${monthlyPrice.toLocaleString("id-ID")}/mo (~+Rp ${hourlyPrice}/hr)`}
                           </span>
                         </div>
                       </div>
@@ -1804,16 +1813,16 @@ export default function VpsManagementPage() {
                   <div className="flex items-center gap-2">
                     <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     <h3 className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-cyan-300" : "text-slate-800")}>
-                      Live Customer Preview (Tampilan di Panel Pelanggan)
+                      Live Customer Preview (Customer Panel Simulation)
                     </h3>
                   </div>
-                  <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Otomatis sync dengan pilihan di atas</span>
+                  <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Automatically synced with configuration above</span>
                 </div>
 
                 <div className={cn("p-3.5 sm:p-4 rounded-xl border space-y-3", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-xs")}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-medium gap-1">
                     <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Network Bandwidth (Speed Limit)</span>
-                    <span className={cn("font-mono font-bold text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>Pilihan: {bandwidthOptions.join(", ")} Mbps</span>
+                    <span className={cn("font-mono font-bold text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>Available: {bandwidthOptions.join(", ")} Mbps</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {bandwidthOptions.map((speed) => {
@@ -1966,7 +1975,9 @@ export default function VpsManagementPage() {
           )}
 
           {loadingPlans ? (
-            <PremiumLoader inline />
+            <div className="flex justify-center items-center h-64">
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            </div>
           ) : (
             <div className="grid gap-4">
               {filteredPlans.length > 0 && (
@@ -2099,7 +2110,9 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingServices ? (
-            <PremiumLoader inline />
+            <div className="flex justify-center items-center h-64">
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            </div>
           ) : (
             <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
@@ -2348,7 +2361,9 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingReservedIps ? (
-            <PremiumLoader inline />
+            <div className="flex justify-center items-center h-64">
+              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+            </div>
           ) : (
             <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
