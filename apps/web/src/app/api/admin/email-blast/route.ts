@@ -3,6 +3,18 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 import { decryptDeterministic } from '@/lib/encryption';
 import { createEmailBlastTransporter, getEmailBlastSmtpSettings } from '@/lib/email-blast-smtp';
+import { getTransporter, logEmailRecord } from '@/lib/email';
+
+const escapeHtml = (value: string) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+// Strip CR/LF and quotes so admin-entered sender values can't inject mail headers
+const sanitizeHeader = (value: string) => String(value ?? '').replace(/[\r\n"<>]/g, '').trim();
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -22,15 +34,27 @@ export async function POST(req: Request) {
       testEmail
     } = body;
 
-    if (!subject || !htmlContent) {
+    if (!subject || !htmlContent || typeof subject !== 'string' || typeof htmlContent !== 'string') {
       return NextResponse.json({ error: 'Subject and email content are required' }, { status: 400 });
     }
 
     const smtpConfig = await getEmailBlastSmtpSettings();
     const blastTransporter = await createEmailBlastTransporter();
+    // The dedicated blast transporter is a fresh pool per request and must be closed;
+    // the shared system transporter must stay open.
+    const isDedicatedTransporter = blastTransporter !== getTransporter();
 
-    const fromName = senderName || smtpConfig.fromName || process.env.SMTP_FROM_NAME || 'Masdika.ID';
-    const fromEmail = senderEmail || smtpConfig.fromEmail || 'info@masdika.id';
+    const fromName = sanitizeHeader(senderName || smtpConfig.fromName || process.env.SMTP_FROM_NAME || 'Masdika.ID');
+    const fromEmail = sanitizeHeader(senderEmail || smtpConfig.fromEmail || 'info@masdika.id');
+    const safeSubject = String(subject).replace(/[\r\n]+/g, ' ').trim();
+    const from = { name: fromName, address: fromEmail };
+
+    // The shared system transporter already logs every email (SENT + FAILED);
+    // log manually only for the dedicated blast transporter.
+    const logSent = async (to: string, html: string, status: 'SENT' | 'FAILED' = 'SENT', error?: string) => {
+      if (!isDedicatedTransporter) return;
+      await logEmailRecord({ to, subject: safeSubject, html, type: 'blast', status, error }).catch(() => {});
+    };
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
     const currentYear = new Date().getFullYear().toString();
 
@@ -48,16 +72,20 @@ export async function POST(req: Request) {
 
       const personalizedHtml = ensureFontWrapper(htmlContent
         .replace(/{name}/g, 'Admin (Test)')
-        .replace(/{email}/g, cleanTestEmail)
+        .replace(/{email}/g, escapeHtml(cleanTestEmail))
         .replace(/{app_url}/g, appUrl)
         .replace(/{year}/g, currentYear));
 
-      await blastTransporter.sendMail({
-        from: `"${fromName}" <${fromEmail}>`,
-        to: cleanTestEmail,
-        subject: `[TEST] ${subject}`,
-        html: personalizedHtml
-      });
+      try {
+        await blastTransporter.sendMail({
+          from,
+          to: cleanTestEmail,
+          subject: `[TEST] ${safeSubject}`,
+          html: personalizedHtml
+        });
+      } finally {
+        if (isDedicatedTransporter) blastTransporter.close();
+      }
 
       return NextResponse.json({
         success: true,
@@ -95,11 +123,14 @@ export async function POST(req: Request) {
         name: decryptDeterministic(u.name)
       }));
     } else if (targetType === 'selected') {
-      if (!Array.isArray(selectedUserIds) || selectedUserIds.length === 0) {
+      const ids = Array.isArray(selectedUserIds)
+        ? selectedUserIds.map((v: unknown) => Number(v)).filter((v: number) => Number.isInteger(v) && v > 0)
+        : [];
+      if (ids.length === 0) {
         return NextResponse.json({ error: 'No customers selected' }, { status: 400 });
       }
       const users = await prisma.user.findMany({
-        where: { id: { in: selectedUserIds } },
+        where: { id: { in: ids } },
         select: { id: true, email: true, name: true }
       });
       recipients = users.map(u => ({
@@ -108,7 +139,7 @@ export async function POST(req: Request) {
         name: decryptDeterministic(u.name)
       }));
     } else if (targetType === 'custom') {
-      const rawList = customEmails
+      const rawList = String(customEmails || '')
         .split(/[\n,;]+/)
         .map((e: string) => e.trim())
         .filter((e: string) => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
@@ -131,32 +162,37 @@ export async function POST(req: Request) {
 
     // Send in chunks of 5
     const CHUNK_SIZE = 5;
-    for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
-      const chunk = recipients.slice(i, i + CHUNK_SIZE);
-      await Promise.all(
-        chunk.map(async (recipient) => {
-          try {
+    try {
+      for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
+        const chunk = recipients.slice(i, i + CHUNK_SIZE);
+        await Promise.all(
+          chunk.map(async (recipient) => {
             const personalizedHtml = ensureFontWrapper(htmlContent
-              .replace(/{name}/g, recipient.name || 'Valued Customer')
-              .replace(/{email}/g, recipient.email)
+              .replace(/{name}/g, escapeHtml(recipient.name || 'Valued Customer'))
+              .replace(/{email}/g, escapeHtml(recipient.email))
               .replace(/{app_url}/g, appUrl)
               .replace(/{year}/g, currentYear));
+            try {
+              await blastTransporter.sendMail({
+                from,
+                to: recipient.email,
+                subject: safeSubject,
+                html: personalizedHtml
+              });
 
-            await blastTransporter.sendMail({
-              from: `"${fromName}" <${fromEmail}>`,
-              to: recipient.email,
-              subject,
-              html: personalizedHtml
-            });
-
-            sentCount++;
-          } catch (err: any) {
-            console.error(`Failed to send blast to ${recipient.email}:`, err);
-            failedCount++;
-            failedEmails.push(recipient.email);
-          }
-        })
-      );
+              sentCount++;
+              await logSent(recipient.email, personalizedHtml);
+            } catch (err: any) {
+              console.error(`Failed to send blast to ${recipient.email}:`, err);
+              failedCount++;
+              failedEmails.push(recipient.email);
+              await logSent(recipient.email, personalizedHtml, 'FAILED', err?.message);
+            }
+          })
+        );
+      }
+    } finally {
+      if (isDedicatedTransporter) blastTransporter.close();
     }
 
     return NextResponse.json({

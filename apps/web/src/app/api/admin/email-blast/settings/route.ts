@@ -46,13 +46,23 @@ export async function POST(req: Request) {
     } = body;
 
     const parsedPort = parseInt(String(port), 10) || 465;
+    const cleanHost = String(host).trim();
+    const cleanUser = String(user).trim();
+    const newPass = pass ? String(pass).trim() : '';
+
+    // If the server/account changes and no new password is given, never reuse the old
+    // password against the new server — clear it so the admin must re-enter it.
+    const existing = await getEmailBlastSmtpSettings();
+    const targetChanged = cleanHost.toLowerCase() !== (existing.host || '').toLowerCase() || cleanUser !== existing.user;
+    const clearPassword = targetChanged && !newPass && Boolean(existing.pass);
 
     await saveEmailBlastSmtpSettings({
-      host: String(host).trim(),
+      host: cleanHost,
       port: parsedPort,
       secure: Boolean(secure),
-      user: String(user).trim(),
-      pass: pass ? String(pass).trim() : undefined,
+      user: cleanUser,
+      pass: newPass || undefined,
+      clearPassword,
       fromName: String(fromName).trim() || 'Masdika.ID',
       fromEmail: String(fromEmail).trim() || 'info@masdika.id'
     });

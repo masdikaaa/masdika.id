@@ -68,7 +68,11 @@ export async function POST(req: Request) {
     // Update bandwidth pricing if ratePerHour is provided
     let updatedRate = DEFAULT_BANDWIDTH_RATE_PER_HOUR;
     if (ratePerHour !== undefined && ratePerHour !== null) {
-      const parsedRate = Math.max(0, Math.floor(Number(ratePerHour)));
+      const numericRate = Number(ratePerHour);
+      if (!Number.isFinite(numericRate)) {
+        return NextResponse.json({ error: "ratePerHour must be a valid number" }, { status: 400 });
+      }
+      const parsedRate = Math.max(0, Math.floor(numericRate));
       const maxItem = await prisma.vpsPricing.findFirst({ orderBy: { id: "desc" } });
       const pricing = await prisma.vpsPricing.upsert({
         where: { key: "bandwidth" },

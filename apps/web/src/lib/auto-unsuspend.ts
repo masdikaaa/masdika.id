@@ -23,6 +23,23 @@ async function startProxmoxVmSafely(node: string, vmid: number | null | undefine
 }
 
 /**
+ * Only services suspended by the billing system (insufficient balance / expired cycle)
+ * may be auto-reactivated. Suspensions made by an administrator (abuse, manual, resource
+ * finding, [ABUSE_LOCKED], etc.) must NEVER be reversed automatically.
+ */
+export function isBillingSuspension(reason: string | null | undefined): boolean {
+  if (!reason) return false;
+  const r = reason.toLowerCase();
+  if (r.includes('[abuse_locked]') || r.includes('administrator') || r.includes('abuse')) return false;
+  return (
+    r.includes('insufficient balance') ||
+    r.includes('auto-renew disabled') ||
+    r.includes('billing failed') ||
+    r.includes('expired due to insufficient balance')
+  );
+}
+
+/**
  * Attempts to unsuspend a VPS service if its autoRenew is enabled and user has sufficient balance.
  */
 export async function attemptAutoUnsuspendVps(vpsId: number) {
@@ -45,6 +62,10 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
 
     if (vps.status !== 'SUSPENDED') {
       return { success: true, unsuspended: false, message: 'VPS is already active' };
+    }
+
+    if (!isBillingSuspension(vps.suspendReason)) {
+      return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION', message: 'VPS was suspended for a non-billing reason' };
     }
 
     const hourlyRate = vps.hourlyRate || 0;
@@ -231,6 +252,10 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
       return { success: true, unsuspended: false, message: 'Subscription is already active' };
     }
 
+    if (!isBillingSuspension(sub.suspendReason)) {
+      return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION', message: 'Subscription was suspended for a non-billing reason' };
+    }
+
     if (!sub.autoRenew) {
       return { success: false, unsuspended: false, reason: 'AUTORENEW_DISABLED', message: 'Auto-renew is disabled for this subscription' };
     }
@@ -357,7 +382,7 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
       const res = await attemptAutoUnsuspendVps(vps.id);
       if (res.unsuspended) {
         vpsCount++;
-      } else if (res.reason !== 'INSUFFICIENT_BALANCE') {
+      } else if (res.reason !== 'INSUFFICIENT_BALANCE' && res.reason !== 'NON_BILLING_SUSPENSION') {
         errors.push({ type: 'VPS', id: vps.id, message: res.message });
       }
     }
@@ -374,7 +399,7 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
       const res = await attemptAutoUnsuspendSubscription(sub.id);
       if (res.unsuspended) {
         subCount++;
-      } else if (res.reason !== 'INSUFFICIENT_BALANCE') {
+      } else if (res.reason !== 'INSUFFICIENT_BALANCE' && res.reason !== 'NON_BILLING_SUSPENSION' && res.reason !== 'AUTORENEW_DISABLED') {
         errors.push({ type: 'SUBSCRIPTION', id: sub.id, message: res.message });
       }
     }

@@ -29,27 +29,6 @@ export async function GET(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Purge any dummy or auto-generated synthetic logs
-    await prisma.clientActivityLog.deleteMany({
-      where: {
-        userId,
-        OR: [
-          { description: { contains: 'm.dana.id' } },
-          { description: { contains: 'duitku_dana' } },
-          { description: { contains: 'Passed Fraud Check' } },
-          { description: { contains: 'Fraud Check Initiated' } },
-          { description: { contains: 'Order ID 33617' } },
-          { description: { contains: 'Invoice ID: 110761' } },
-          { description: { contains: 'SMS / WhatsApp Center' } },
-          { description: { startsWith: 'Client Account Registered' } },
-          { description: { startsWith: 'Created Invoice -' } },
-          { description: { startsWith: 'Payment Received for Invoice' } },
-          { description: { startsWith: 'Email Sent to' } },
-          { description: { startsWith: 'VPS Instance Provisioned:' } },
-        ]
-      }
-    }).catch(() => {});
-
     // Extract query parameters for filtering & pagination
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
@@ -169,21 +148,23 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
     const body = await req.json();
     const { description, category = 'system', ipAddress } = body;
+    const allowedCategories = ['order', 'invoice', 'payment', 'email', 'service', 'system', 'auth'];
+    const safeCategory = allowedCategories.includes(category) ? category : 'system';
 
-    if (!description || !description.trim()) {
+    if (typeof description !== 'string' || !description.trim()) {
       return NextResponse.json({ error: 'Description is required' }, { status: 400 });
     }
 
     const adminName = auth.user.name ? decryptDeterministic(auth.user.name) : 'Admin';
-    const clientIp = ipAddress || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
+    const clientIp = (typeof ipAddress === 'string' && ipAddress.trim()) || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
 
     const log = await prisma.clientActivityLog.create({
       data: {
         userId,
-        description: description.trim(),
+        description: description.trim().slice(0, 2000),
         username: adminName,
-        ipAddress: clientIp,
-        category: category || 'system',
+        ipAddress: clientIp.slice(0, 64),
+        category: safeCategory,
       }
     });
 

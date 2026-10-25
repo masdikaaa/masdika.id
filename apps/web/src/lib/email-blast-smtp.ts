@@ -64,6 +64,7 @@ export async function saveEmailBlastSmtpSettings(data: {
   secure: boolean;
   user: string;
   pass?: string;
+  clearPassword?: boolean;
   fromName: string;
   fromEmail: string;
 }) {
@@ -107,6 +108,14 @@ export async function saveEmailBlastSmtpSettings(data: {
         where: { key: 'email_blast_smtp_pass' },
         update: { value: encrypted },
         create: { key: 'email_blast_smtp_pass', value: encrypted }
+      })
+    );
+  } else if (data.clearPassword) {
+    upserts.push(
+      prisma.setting.upsert({
+        where: { key: 'email_blast_smtp_pass' },
+        update: { value: '' },
+        create: { key: 'email_blast_smtp_pass', value: '' }
       })
     );
   }

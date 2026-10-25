@@ -14,78 +14,17 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
   try {
     const userId = parseInt(params.id);
 
-    // Self-healing: Check if user has suspended services with sufficient balance or active PAYG VPS missing current cycle running invoice
+    if (isNaN(userId)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
+
+    // Self-healing (idempotent): reactivate billing-suspended services when balance is
+    // sufficient and rotate stale PAYG cycle invoices. Never touches admin/abuse suspensions.
     try {
       const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
+      const { healPaygCycleInvoicesForUser } = await import('@/lib/payg-cycle-heal');
       await attemptAutoUnsuspendAllForUser(userId);
-
-      // Verify active PAYG VPS have an active running invoice for current billing cycle
-      const vpsList = await prisma.vpsService.findMany({
-        where: {
-          userId,
-          status: { in: ['RUNNING', 'STOPPED'] },
-          hourlyRate: { gt: 0 }
-        },
-        include: {
-          invoices: {
-            where: { reference: 'PAYG_RUNNING', type: 'VPS' },
-            take: 1
-          }
-        }
-      });
-
-      for (const vps of vpsList) {
-        const now = new Date();
-        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const runningInvoice = vps.invoices[0];
-
-        // Need new invoice if no running invoice exists, or existing running invoice is from a previous month
-        const needsNewCycleInvoice = !runningInvoice || (new Date(runningInvoice.createdAt) < currentMonthStart);
-
-        if (needsNewCycleInvoice) {
-          if (runningInvoice) {
-            await prisma.invoice.update({
-              where: { id: runningInvoice.id },
-              data: { reference: 'PAYG_COMPLETED' }
-            });
-          }
-
-          // Ensure expiresAt is renewed into the future
-          const newExpires = new Date(vps.expiresAt || now);
-          if (newExpires < now) {
-            newExpires.setMonth(newExpires.getMonth() + 1);
-            if (newExpires < now) newExpires.setTime(now.getTime() + 30 * 24 * 3600 * 1000);
-          }
-
-          await prisma.vpsService.update({
-            where: { id: vps.id },
-            data: {
-              expiresAt: newExpires,
-              accumulatedCost: 0,
-              autoRenew: true
-            }
-          });
-
-          const timestamp = Date.now().toString();
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          const invoiceNumber = `INV-${timestamp}-${random}-VPS-PAYG`;
-          await prisma.invoice.create({
-            data: {
-              invoiceNumber,
-              userId,
-              vpsServiceId: vps.id,
-              amount: vps.isReseller ? (vps.hourlyRate || 0) * 730 : (vps.accumulatedCost || 0),
-              status: 'PAID',
-              paymentMethod: 'Account Balance',
-              merchantOrderId: invoiceNumber,
-              type: 'VPS',
-              paidAt: new Date(),
-              reference: 'PAYG_RUNNING',
-              details: JSON.stringify({ type: 'PAYG_MONTHLY_CYCLE', cycle: 'October 2026', hostname: vps.hostname, isReseller: vps.isReseller })
-            }
-          });
-        }
-      }
+      await healPaygCycleInvoicesForUser(userId);
     } catch (healErr) {
       console.warn("Self-healing check on user profile failed:", healErr);
     }

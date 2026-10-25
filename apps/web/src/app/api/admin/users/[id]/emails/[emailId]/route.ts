@@ -12,13 +12,17 @@ export async function DELETE(
 
   try {
     const emailId = parseInt(params.emailId);
-    if (isNaN(emailId)) {
+    const userId = parseInt(params.id);
+    if (isNaN(emailId) || isNaN(userId)) {
       return NextResponse.json({ error: 'Invalid email ID' }, { status: 400 });
     }
 
-    await prisma.emailLog.delete({
-      where: { id: emailId }
+    const result = await prisma.emailLog.deleteMany({
+      where: { id: emailId, OR: [{ userId }, { userId: null }] }
     });
+    if (result.count === 0) {
+      return NextResponse.json({ error: 'Email log not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, message: 'Email log deleted successfully' });
   } catch (error) {

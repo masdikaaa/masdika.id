@@ -13,11 +13,18 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const savedConfig = await getEmailBlastSmtpSettings();
 
-    const host = (body.host || savedConfig.host || '').trim();
+    const host = String(body.host || savedConfig.host || '').trim();
     const port = parseInt(String(body.port || savedConfig.port || '465'), 10);
     const secure = body.secure !== undefined ? Boolean(body.secure) : savedConfig.secure;
-    const user = (body.user || savedConfig.user || '').trim();
-    const pass = body.pass ? String(body.pass).trim() : savedConfig.pass;
+    const user = String(body.user || savedConfig.user || '').trim();
+    // Only reuse the stored password for the stored host+user; otherwise a new password
+    // must be typed. Prevents leaking the saved credential to an arbitrary SMTP server.
+    const sameTarget = host.toLowerCase() === (savedConfig.host || '').toLowerCase() && user === savedConfig.user;
+    const pass = body.pass ? String(body.pass).trim() : (sameTarget ? savedConfig.pass : '');
+
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      return NextResponse.json({ error: 'Invalid SMTP port' }, { status: 400 });
+    }
 
     if (!host || !user) {
       return NextResponse.json({

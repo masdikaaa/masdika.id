@@ -24,30 +24,20 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const decEmail = decryptDeterministic(user.email);
+    const decEmail = (decryptDeterministic(user.email) || '').trim();
 
-    // Clean up any previously seeded dummy sample emails
-    await prisma.emailLog.deleteMany({
-      where: {
-        userId: user.id,
-        subject: {
-          in: [
-            'Tagihan # 1462/INV/MASDIKA/10/2026',
-            'Konfirmasi Pesanan # 5302042067',
-            'Selamat Datang di Masdika Cloud'
-          ]
-        }
-      }
-    }).catch(() => {});
+    // Match by userId, or by the exact recipient address (plain or "Name <email>" format).
+    // A fuzzy `contains` would leak other customers' emails (e.g. "di@x.com" ⊂ "andi@x.com").
+    const recipientFilters: any[] = [{ userId: user.id }];
+    if (decEmail) {
+      recipientFilters.push(
+        { to: { equals: decEmail, mode: 'insensitive' } },
+        { to: { contains: `<${decEmail}>`, mode: 'insensitive' } }
+      );
+    }
 
     const emailLogs = await prisma.emailLog.findMany({
-      where: {
-        OR: [
-          { userId: user.id },
-          { to: { contains: decEmail, mode: 'insensitive' } },
-          { to: { contains: user.email, mode: 'insensitive' } }
-        ]
-      },
+      where: { OR: recipientFilters },
       orderBy: { createdAt: 'desc' }
     });
 
