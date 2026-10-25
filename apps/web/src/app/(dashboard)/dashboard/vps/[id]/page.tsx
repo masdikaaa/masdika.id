@@ -2128,15 +2128,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <div className="flex items-center gap-2">
                           <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>Main Disk Storage</label>
                           <span className={cn(
-                            "text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase",
+                            "text-xs px-2 py-0.5 rounded-md font-medium border",
                             isSsd
-                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                              : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                              ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                              : "bg-blue-500/10 text-blue-400 border-blue-500/20"
                           )}>
-                            {isSsd ? "SSD Storage" : "HDD Storage"} • Upgrade: {formatRupiah(diskRatePerGbMonthly)}/GB/bln
+                            {isSsd ? "SSD Storage" : "HDD Storage"} • Upgrade: {formatRupiah(diskRatePerGbMonthly)}/GB/mo
                           </span>
                         </div>
-                        <span className={cn("text-sm font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeDisk} GB</span>
+                        <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeDisk} GB</span>
                       </div>
                       <input
                         type="range"
@@ -2151,13 +2151,22 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <span>{maxSpecs.disk} GB Max</span>
                       </div>
                       {addedDiskGb > 0 && (
-                        <div className={cn("mt-2 p-2.5 rounded-lg text-xs flex items-center justify-between border", isDark ? "bg-cyan-500/5 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                        <div className={cn(
+                          "mt-2 p-2.5 rounded-xl text-xs flex items-center justify-between border transition-all",
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                        )}>
                           <span className="flex items-center gap-1.5">
-                            <HardDrive className="w-3.5 h-3.5" />
-                            Tambahan Disk: <strong>+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"}</strong> (@ {formatRupiah(diskRatePerGbMonthly)}/GB/bln)
+                            <HardDrive className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <span>Added Storage:</span>
+                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              +{addedDiskGb} GB {isSsd ? "SSD" : "HDD"}
+                            </strong>
+                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                              (@ {formatRupiah(diskRatePerGbMonthly)}/GB/mo)
+                            </span>
                           </span>
-                          <span className="font-mono font-bold">
-                            +{formatRupiah(additionalDiskMonthly)}/bln (~+{formatRupiah(additionalDiskHourly)}/jam)
+                          <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                            +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalDiskHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2297,18 +2306,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         </div>
 
                         <div className="relative z-10">
-                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", " font-medium mb-3 flex items-center gap-2")}>
+                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", "font-medium mb-3 flex items-center gap-2")}>
                             <Receipt className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                             Upgrade Cost Estimate
                           </h4>
 
                           {/* Itemized Upgrade Breakdown */}
-                          <div className={cn("mb-4 space-y-1.5 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-600")}>
+                          <div className={cn("mb-4 space-y-2 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-600")}>
                             {addedDiskGb > 0 && (
                               <div className="flex justify-between items-center">
                                 <span>Disk (+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"} @ {formatRupiah(diskRatePerGbMonthly)}/GB):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-cyan-300" : "text-cyan-700")}>
-                                  +{formatRupiah(additionalDiskMonthly)}/bln (+{formatRupiah(additionalDiskHourly)}/jam)
+                                <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                                  +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalDiskHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
@@ -2316,7 +2325,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div className="flex justify-between items-center">
                                 <span>CPU (+{upgradeCores - (vps.cpuCores || 0)} Core):</span>
                                 <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0) * 730)}/bln (+{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0))}/jam)
+                                  +{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
@@ -2324,7 +2333,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div className="flex justify-between items-center">
                                 <span>RAM (+{upgradeRam - (vps.ramGb || 0)} GB):</span>
                                 <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0) * 730)}/bln (+{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0))}/jam)
+                                  +{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
@@ -2332,7 +2341,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div className="flex justify-between items-center">
                                 <span>Backup (+{upgradeBackup - (vps.backupGb || 0)} GB):</span>
                                 <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0) * 730)}/bln (+{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0))}/jam)
+                                  +{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
@@ -2340,7 +2349,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div className="flex justify-between items-center">
                                 <span>IPv4 (+{addIpv4Count} IP):</span>
                                 <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/bln (+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/jam)
+                                  +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
@@ -2348,29 +2357,29 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div className="flex justify-between items-center">
                                 <span>IPv6 (+{addIpv6Count} IP):</span>
                                 <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah(addIpv6Count * (pricing.ipv6 || 0) * 730)}/bln (+{formatRupiah(addIpv6Count * (pricing.ipv6 || 0))}/jam)
+                                  +{formatRupiah(addIpv6Count * (pricing.ipv6 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(addIpv6Count * (pricing.ipv6 || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
-                            <div className="flex justify-between items-center pt-1 font-semibold border-t border-slate-500/10">
-                              <span>Total Tambahan Tarif:</span>
-                              <span className={isDark ? "text-cyan-400" : "text-cyan-700"}>
-                                +{formatRupiah(additionalHourlyRate)} / jam
+                            <div className="flex justify-between items-center pt-2 font-medium border-t border-slate-500/10">
+                              <span>Total Additional Rate:</span>
+                              <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                                +{formatRupiah(additionalHourlyRate)} / hr
                               </span>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 gap-3">
                             <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                              <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Tarif Baru (New Hourly Rate)</p>
-                              <p className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
-                                {formatRupiah(newHourlyPrice)} <span className={cn("text-xs font-normal", isDark ? "text-zinc-500" : "text-slate-400")}>/ hr</span>
+                              <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>New Hourly Rate</p>
+                              <p className={cn("text-lg font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
+                                {formatRupiah(newHourlyPrice)} <span className={cn("text-xs font-normal font-sans", isDark ? "text-zinc-500" : "text-slate-400")}>/ hr</span>
                               </p>
                             </div>
                             <div className={cn("p-3.5 rounded-xl border shadow-sm", isDark ? "bg-[#0b162c] border-cyan-500/30" : "bg-white border-cyan-600/30 shadow-sm")}>
-                              <p className={cn("text-xs mb-1 font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Estimasi Total Bulanan</p>
-                              <p className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
-                                {formatRupiah(newMonthlyPrice)} <span className={cn("text-xs font-normal", isDark ? "text-zinc-500" : "text-slate-400")}>/ mo (~730h)</span>
+                              <p className={cn("text-xs mb-1 font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Estimated Monthly Cost</p>
+                              <p className={cn("text-xl font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
+                                {formatRupiah(newMonthlyPrice)} <span className={cn("text-xs font-normal font-sans", isDark ? "text-zinc-500" : "text-slate-400")}>/ mo (~730h)</span>
                               </p>
                             </div>
                           </div>
@@ -2389,12 +2398,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <div className="flex-1 min-w-0">
                           <div className={cn("text-base font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Account Balance</div>
                           <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <div className={cn("text-xs font-bold tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Tersedia: {formatRupiah(balance)}</div>
+                            <div className={cn("text-xs font-medium tracking-wide", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              Available: <span className="font-mono">{formatRupiah(balance)}</span>
+                            </div>
                           </div>
                           {balance < requiredBalance && (
-                            <div className="text-xs text-red-400 font-bold mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg w-fit flex items-center gap-2 border border-red-500/20">
-                              <X className="w-3.5 h-3.5" />
-                              <span>Saldo Kurang: Min. {formatRupiah(requiredBalance)} (1 bln)</span>
+                            <div className="text-xs text-red-400 font-medium mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg w-fit flex items-center gap-2 border border-red-500/20">
+                              <X className="w-3.5 h-3.5 shrink-0" />
+                              <span>Insufficient balance. Minimum required: {formatRupiah(requiredBalance)} (1 month)</span>
                             </div>
                           )}
                         </div>
