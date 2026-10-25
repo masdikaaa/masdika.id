@@ -401,41 +401,42 @@ export default function EmailBlastPage() {
             Manage registered audience email subscriptions and outbound campaign deliverability.
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className={cn("px-2.5 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border text-center flex items-center justify-center whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-            Total Audience: {getRecipientCount()}
+        <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+          <div className={cn("px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold text-xs border text-center flex items-center justify-center whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            <Users className="w-3.5 h-3.5 mr-1.5 shrink-0 hidden sm:inline" />
+            <span>Audience: <strong>{getRecipientCount()}</strong></span>
           </div>
           <button
             type="button"
             onClick={() => fetchRecipients()}
             className={cn(
-              "justify-center px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border cursor-pointer whitespace-nowrap",
+              "justify-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap",
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <RefreshCw className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0", loadingRecipients ? "animate-spin" : "")} />
+            <RefreshCw className={cn("w-3.5 h-3.5 shrink-0", loadingRecipients ? "animate-spin" : "")} />
             <span>Refresh</span>
           </button>
           <button
             type="button"
             onClick={() => setShowPreviewModal(true)}
             className={cn(
-              "justify-center px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border cursor-pointer whitespace-nowrap",
+              "justify-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap",
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
+            <Eye className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
             <span>Preview</span>
           </button>
           <button
             type="button"
             onClick={() => setShowTestModal(true)}
             className={cn(
-              "justify-center px-2.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border cursor-pointer whitespace-nowrap",
+              "justify-center px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap",
               isDark ? "border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400" : "border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800"
             )}
           >
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>Send Test</span>
           </button>
         </div>
@@ -638,7 +639,7 @@ export default function EmailBlastPage() {
                   type="button"
                   onClick={() => setTargetType("all")}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap",
                     targetType === "all"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
                       : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
@@ -650,13 +651,13 @@ export default function EmailBlastPage() {
                   type="button"
                   onClick={() => setTargetType("vps")}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap",
                     targetType === "vps"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
                       : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
-                  Active VPS Clients ({recipientsData.vpsCustomers})
+                  Active VPS ({recipientsData.vpsCustomers})
                 </button>
                 <button
                   type="button"
@@ -665,26 +666,26 @@ export default function EmailBlastPage() {
                     setShowRecipientModal(true);
                   }}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1",
+                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap",
                     targetType === "selected"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
                       : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
-                  <span>Select Clients ({selectedUserIds.length})</span>
-                  <Users className="w-3 h-3" />
+                  <span>Select Specific ({selectedUserIds.length})</span>
+                  <Users className="w-3 h-3 shrink-0" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setTargetType("custom")}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap",
                     targetType === "custom"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
                       : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
-                  Custom Email List
+                  Custom List
                 </button>
               </div>
 
@@ -953,41 +954,46 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Bottom Action Bar matching Gambar 1 */}
-        <div className={cn("px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
-          <div className="flex items-center gap-3">
-            {/* Primary Cyan Send Button matching Gambar 1 */}
+        <div className={cn("px-3 sm:px-5 py-2.5 sm:py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {/* Primary Cyan Send Button */}
             <button
               type="button"
               disabled={sendingBlast}
               onClick={() => setShowSendConfirmModal(true)}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold text-xs bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-xs cursor-pointer disabled:opacity-50 whitespace-nowrap"
             >
-              {sendingBlast ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              <span>{sendingBlast ? "Sending Blast..." : "Send Campaign Blast"}</span>
+              {sendingBlast ? <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Send className="w-3.5 h-3.5 shrink-0" />}
+              <span>{sendingBlast ? "Sending..." : "Send Blast"}</span>
+              <span className="hidden md:inline">{sendingBlast ? "" : " Campaign"}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowTestModal(true)}
               className={cn(
-                "px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                "flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-xs whitespace-nowrap",
                 isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-300 text-slate-700 hover:bg-white"
               )}
             >
-              Send Test to Myself
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span>Send Test</span>
+              <span className="hidden md:inline"> to Myself</span>
             </button>
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-zinc-400">
-            <span>Target: <strong className={isDark ? "text-cyan-400" : "text-cyan-700"}>{getRecipientCount()} recipient(s)</strong></span>
+            <span className="text-[11px] sm:text-xs">
+              Target: <strong className={isDark ? "text-cyan-400 font-bold" : "text-cyan-700 font-bold"}>{getRecipientCount()} recipient(s)</strong>
+            </span>
             
             {/* Open in new window toggle */}
             <button
               type="button"
               onClick={() => setShowPreviewModal(true)}
-              className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-[11px] sm:text-xs hover:text-cyan-400 transition-colors cursor-pointer"
             >
-              <Maximize2 className="w-3.5 h-3.5" />
+              <Maximize2 className="w-3.5 h-3.5 shrink-0" />
               <span>Full Preview</span>
             </button>
           </div>
@@ -1123,7 +1129,7 @@ export default function EmailBlastPage() {
                 <button
                   type="button"
                   onClick={() => setShowRecipientModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all cursor-pointer shadow-xs"
+                  className="px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all cursor-pointer shadow-xs"
                 >
                   Done ({selectedUserIds.length} Selected)
                 </button>
@@ -1137,37 +1143,37 @@ export default function EmailBlastPage() {
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn("w-full max-w-5xl h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-            <div className={cn("px-6 py-3 border-b flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-100 border-slate-200")}>
-              <div className="flex items-center gap-3">
-                <Eye className="w-5 h-5 text-cyan-400" />
-                <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Email Preview</h3>
-                <span className="text-xs text-zinc-500 font-mono truncate max-w-xs">{subject}</span>
+            <div className={cn("px-3 sm:px-6 py-2.5 sm:py-3 border-b flex items-center justify-between gap-2", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-100 border-slate-200")}>
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
+                <h3 className={cn("font-bold text-xs sm:text-sm shrink-0", isDark ? "text-white" : "text-slate-900")}>Email Preview</h3>
+                <span className="text-[11px] text-zinc-500 font-mono truncate max-w-[120px] sm:max-w-xs hidden sm:inline">{subject}</span>
               </div>
 
               {/* Device Toggle */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <div className="flex items-center p-0.5 rounded-lg border bg-black/20 border-white/10 text-xs">
                   <button
                     type="button"
                     onClick={() => setPreviewDevice("desktop")}
                     className={cn(
-                      "flex items-center gap-1 px-3 py-1 rounded-md transition-all cursor-pointer font-semibold",
+                      "flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md transition-all cursor-pointer font-semibold text-[11px] sm:text-xs",
                       previewDevice === "desktop" ? "bg-cyan-500 text-slate-950 shadow-xs" : "text-zinc-400 hover:text-white"
                     )}
                   >
-                    <Monitor className="w-3.5 h-3.5" />
-                    <span>Desktop (600px)</span>
+                    <Monitor className="w-3.5 h-3.5 shrink-0" />
+                    <span>Desktop<span className="hidden sm:inline"> (600px)</span></span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setPreviewDevice("mobile")}
                     className={cn(
-                      "flex items-center gap-1 px-3 py-1 rounded-md transition-all cursor-pointer font-semibold",
+                      "flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md transition-all cursor-pointer font-semibold text-[11px] sm:text-xs",
                       previewDevice === "mobile" ? "bg-cyan-500 text-slate-950 shadow-xs" : "text-zinc-400 hover:text-white"
                     )}
                   >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    <span>Mobile (375px)</span>
+                    <Smartphone className="w-3.5 h-3.5 shrink-0" />
+                    <span>Mobile<span className="hidden sm:inline"> (375px)</span></span>
                   </button>
                 </div>
 
@@ -1232,11 +1238,11 @@ export default function EmailBlastPage() {
               </p>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowTestModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white"
+                className="px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -1244,9 +1250,9 @@ export default function EmailBlastPage() {
                 type="button"
                 disabled={sendingTest || !testEmailAddress}
                 onClick={handleSendTest}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                className="flex items-center gap-1.5 px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
               >
-                {sendingTest ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                {sendingTest ? <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Send className="w-3.5 h-3.5 shrink-0" />}
                 <span>{sendingTest ? "Sending..." : "Send Test Now"}</span>
               </button>
             </div>
