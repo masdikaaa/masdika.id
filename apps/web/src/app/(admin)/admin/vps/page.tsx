@@ -1697,10 +1697,10 @@ export default function VpsManagementPage() {
                 </div>
 
                 {/* Quick Add Presets */}
-                <div className={cn("flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-dashed", isDark ? "border-slate-800" : "border-slate-200")}>
-                  <span className={cn("text-xs font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>Preset Cepat:</span>
+                <div className={cn("flex flex-col sm:flex-row sm:items-start gap-2 pt-2 border-t border-dashed", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <span className={cn("text-xs font-semibold shrink-0 pt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Preset Cepat:</span>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {[150, 200, 250, 300, 400, 500, 750, 1000].map((preset) => {
+                    {[150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000].map((preset) => {
                       const alreadyHas = bandwidthOptions.includes(preset);
                       return (
                         <button
@@ -1709,7 +1709,7 @@ export default function VpsManagementPage() {
                           disabled={alreadyHas}
                           onClick={() => handleAddBandwidth(preset)}
                           className={cn(
-                            "px-2.5 py-1 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1",
+                            "px-2.5 py-1 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1 shrink-0",
                             alreadyHas
                               ? isDark ? "bg-white/5 border-white/5 text-zinc-600 cursor-not-allowed" : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
                               : isDark ? "bg-[#0b1322] border-slate-700 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/10 cursor-pointer" : "bg-white border-slate-300 text-cyan-800 hover:border-cyan-600 hover:bg-cyan-50 cursor-pointer shadow-xs"

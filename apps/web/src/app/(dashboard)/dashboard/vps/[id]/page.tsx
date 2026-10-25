@@ -699,7 +699,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     additionalRam,
     addedBandwidthMbps,
     currentBandwidthMbps,
-    safeUpgradeBandwidthMbps
+    safeUpgradeBandwidthMbps,
+    additionalBackupMonthly,
+    additionalBackupHourly,
+    additionalBackupGb,
+    backupRatePerHour,
+    backupMonthlyRate
   } = useMemo(() => {
     if (!vps) return {
       upgradeCostNow: 0,
@@ -712,6 +717,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       additionalRamHourly: 0,
       additionalBandwidthMonthly: 0,
       additionalBandwidthHourly: 0,
+      additionalBackupMonthly: 0,
+      additionalBackupHourly: 0,
+      additionalBackupGb: 0,
+      backupRatePerHour: 30,
+      backupMonthlyRate: 30 * 730,
       newMonthlyPrice: 0,
       newHourlyPrice: 0,
       requiredBalance: 0,
@@ -756,12 +766,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
     const bandwidthHourlyAdded = addedBandwidthSteps * bandwidthRatePerHour;
 
+    // Active VPS Backup upgrade pricing
+    const bRatePerHour = pricing.backup !== undefined ? pricing.backup : 30;
+    const bMonthlyRate = bRatePerHour * 730;
+    const backupMonthlyAdded = additionalBackup * bMonthlyRate;
+    const backupHourlyAdded = additionalBackup * bRatePerHour;
+
     let addRate = 0;
     addRate += cpuHourlyAdded;
     addRate += ramHourlyAdded;
     addRate += diskHourlyAdded;
     addRate += bandwidthHourlyAdded;
-    addRate += additionalBackup * (pricing.backup || 0);
+    addRate += backupHourlyAdded;
     addRate += addIpv4Count * (pricing.ipv4 || 0);
     addRate += addIpv6Count * (pricing.ipv6 || 0);
 
@@ -786,6 +802,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       additionalRamHourly: ramHourlyAdded,
       additionalBandwidthMonthly: bandwidthMonthlyAdded,
       additionalBandwidthHourly: bandwidthHourlyAdded,
+      additionalBackupMonthly: backupMonthlyAdded,
+      additionalBackupHourly: backupHourlyAdded,
+      additionalBackupGb: additionalBackup,
+      backupRatePerHour: bRatePerHour,
+      backupMonthlyRate: bMonthlyRate,
       newMonthlyPrice: finalHourly * 730,
       newHourlyPrice: finalHourly,
       requiredBalance: reqBalance,
@@ -2295,12 +2316,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{safeUpgradeBandwidthMbps} Mbps</span>
                       </div>
                       <div className="mb-2">
-                        <span className={cn(
-                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                        <div className={cn(
+                          "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg font-medium border leading-snug",
                           isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
                         )}>
-                          100 Mbps Base Free • Upgrade: Rp 50.000 / 50 Mbps / mo (~Rp 69/hr)
-                        </span>
+                          <span className="font-semibold">100 Mbps Base Free</span>
+                          <span className={cn("text-xs", isDark ? "text-cyan-500/50" : "text-cyan-300")}>•</span>
+                          <span>Upgrade: Rp 50.000 / 50 Mbps / mo (~Rp 69/hr)</span>
+                        </div>
                       </div>
                       {(() => {
                         const maxAllowedBandwidth = Math.max(currentBandwidthMbps, ...bandwidthOptions);
@@ -2324,16 +2347,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <span>{maxAllowedBandwidth} Mbps Max</span>
                             </div>
                             {/* Quick preset buttons from admin config */}
-                            <div className="flex flex-wrap gap-2 mt-2">
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2.5">
                               {bandwidthOptions.filter(speed => speed >= currentBandwidthMbps).map(speed => (
                                 <button
                                   key={speed}
                                   type="button"
                                   onClick={() => setUpgradeBandwidth(speed)}
                                   className={cn(
-                                    "px-2.5 py-1 text-xs font-mono rounded-lg border transition-all cursor-pointer",
+                                    "min-w-[48px] px-2.5 py-1 text-xs font-mono rounded-lg border transition-all cursor-pointer text-center",
                                     safeUpgradeBandwidthMbps === speed
-                                      ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-semibold"
+                                      ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold shadow-xs" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-bold shadow-xs"
                                       : isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20" : "bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300"
                                   )}
                                 >
@@ -2367,9 +2390,19 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     </div>
 
                     <div>
-                      <div className="flex justify-between mb-2">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium ")}>Backup Storage</label>
-                        <span className={cn("text-sm font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeBackup} GB</span>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium whitespace-nowrap")}>Backup Storage</label>
+                        <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeBackup} GB</span>
+                      </div>
+                      <div className="mb-2">
+                        <div className={cn(
+                          "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg font-medium border leading-snug",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                        )}>
+                          <span className="font-semibold">Snapshot & Backup Quota</span>
+                          <span className={cn("text-xs", isDark ? "text-cyan-500/50" : "text-cyan-300")}>•</span>
+                          <span>Upgrade: {formatRupiah(backupMonthlyRate)}/GB/mo (~{formatRupiah(backupRatePerHour)}/hr)</span>
+                        </div>
                       </div>
                       <input
                         type="range"
@@ -2379,10 +2412,30 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeBackup - (vps.backupGb || 0)) / Math.max(1, (maxSpecs.backup || 2000) - (vps.backupGb || 0))) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs  mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
                         <span>{vps.backupGb || 0} GB (Current)</span>
                         <span>{maxSpecs.backup || 2000} GB Max</span>
                       </div>
+                      {additionalBackupGb > 0 && (
+                        <div className={cn(
+                          "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                        )}>
+                          <span className="flex items-center gap-1.5 flex-wrap">
+                            <Archive className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <span>Added Backup Storage:</span>
+                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              +{additionalBackupGb} GB
+                            </strong>
+                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                              (@ {formatRupiah(backupMonthlyRate)}/GB/mo)
+                            </span>
+                          </span>
+                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                            +{formatRupiah(additionalBackupMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalBackupHourly)}/hr)</span>
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
