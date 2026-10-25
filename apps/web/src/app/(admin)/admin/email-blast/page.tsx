@@ -1036,41 +1036,71 @@ export default function EmailBlastPage() {
               ) : (
                 filteredCustomers.map(customer => {
                   const isChecked = selectedUserIds.includes(customer.id);
+                  const avatarUrl = customer.image || `/api/avatar?email=${encodeURIComponent(customer.email || '')}&name=${encodeURIComponent(customer.name || 'User')}`;
                   return (
-                    <label
+                    <div
                       key={customer.id}
+                      onClick={() => {
+                        if (isChecked) {
+                          setSelectedUserIds(prev => prev.filter(id => id !== customer.id));
+                        } else {
+                          setSelectedUserIds(prev => [...prev, customer.id]);
+                        }
+                      }}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-xl transition-colors cursor-pointer select-none",
-                        isChecked ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50")
+                        "group flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer select-none border",
+                        isChecked
+                          ? (isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")
+                          : (isDark ? "hover:bg-white/5 border-transparent" : "hover:bg-slate-50 border-transparent")
                       )}
                     >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {
-                            if (isChecked) {
-                              setSelectedUserIds(prev => prev.filter(id => id !== customer.id));
-                            } else {
-                              setSelectedUserIds(prev => [...prev, customer.id]);
-                            }
-                          }}
-                          className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
-                        />
-                        <div>
-                          <p className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>{customer.name}</p>
-                          <p className="text-[11px] text-zinc-500 font-mono">{customer.email}</p>
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {/* Custom Checkbox matching Gambar 2 */}
+                        <div
+                          className={cn(
+                            "w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all shadow-xs",
+                            isChecked
+                              ? "bg-cyan-500 border border-cyan-400 text-slate-950"
+                              : isDark
+                              ? "border border-slate-700 bg-[#060b14] group-hover:border-slate-500"
+                              : "border border-slate-300 bg-white group-hover:border-slate-400"
+                          )}
+                        >
+                          {isChecked && <CheckCircle className="w-3.5 h-3.5 stroke-[2.5]" />}
+                        </div>
+
+                        {/* Customer Profile Photo Avatar matching Customer Menu (Gambar 3) */}
+                        <div className={cn("w-9 h-9 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                          <img
+                            referrerPolicy="no-referrer"
+                            src={avatarUrl}
+                            alt={customer.name || "Customer"}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+
+                        {/* Name and Email */}
+                        <div className="min-w-0">
+                          <p className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                            {customer.name || "Customer"}
+                          </p>
+                          <p className="text-[11px] text-zinc-500 font-mono truncate">
+                            {customer.email}
+                          </p>
                         </div>
                       </div>
 
-                      <div className="text-right">
+                      {/* VPS Badge */}
+                      <div className="text-right shrink-0 ml-3">
                         {customer.vpsCount > 0 && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
                             {customer.vpsCount} VPS
                           </span>
                         )}
                       </div>
-                    </label>
+                    </div>
                   );
                 })
               )}

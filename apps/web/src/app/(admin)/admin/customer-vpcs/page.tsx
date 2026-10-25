@@ -725,8 +725,15 @@ export default function AdminCustomerVpcsPage() {
             )}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center border border-cyan-500/30 shrink-0">
-                {currentIsolatedCustomer.name?.charAt(0)?.toUpperCase() || "C"}
+              <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-cyan-500/30" : "border-cyan-200")}>
+                <img
+                  referrerPolicy="no-referrer"
+                  src={currentIsolatedCustomer.avatar || `/api/avatar?email=${encodeURIComponent(currentIsolatedCustomer.email || '')}&name=${encodeURIComponent(currentIsolatedCustomer.name || 'Customer')}`}
+                  alt={currentIsolatedCustomer.name || "Customer"}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -860,8 +867,15 @@ export default function AdminCustomerVpcsPage() {
                         {selectedCustomerId === "all" && (
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[11px] shrink-0">
-                                {vpc.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                              <div className={cn("w-8 h-8 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                                <img
+                                  referrerPolicy="no-referrer"
+                                  src={vpc.user?.avatar || `/api/avatar?email=${encodeURIComponent(vpc.user?.email || '')}&name=${encodeURIComponent(vpc.user?.name || 'Customer')}`}
+                                  alt={vpc.user?.name || "Customer"}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
                               </div>
                               <div className="min-w-0">
                                 <div className={cn("font-medium truncate max-w-[130px]", isDark ? "text-white" : "text-slate-900")}>
@@ -1065,8 +1079,15 @@ export default function AdminCustomerVpcsPage() {
                       {selectedCustomerId === "all" && (
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center font-bold text-[10px]">
-                              {peering.vpcA?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                            <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                              <img
+                                referrerPolicy="no-referrer"
+                                src={peering.vpcA?.user?.avatar || `/api/avatar?email=${encodeURIComponent(peering.vpcA?.user?.email || '')}&name=${encodeURIComponent(peering.vpcA?.user?.name || 'Customer')}`}
+                                alt={peering.vpcA?.user?.name || "Customer"}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                              />
                             </div>
                             <div className="min-w-0">
                               <div className={cn("font-medium truncate max-w-[120px]", isDark ? "text-white" : "text-slate-900")}>
@@ -1197,8 +1218,15 @@ export default function AdminCustomerVpcsPage() {
                       {selectedCustomerId === "all" && (
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-[10px]">
-                              {customer?.name?.charAt(0)?.toUpperCase() || "U"}
+                            <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                              <img
+                                referrerPolicy="no-referrer"
+                                src={customer?.avatar || `/api/avatar?email=${encodeURIComponent(customer?.email || '')}&name=${encodeURIComponent(customer?.name || 'Customer')}`}
+                                alt={customer?.name || "Customer"}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                              />
                             </div>
                             <span className={cn("font-medium truncate max-w-[120px]", isDark ? "text-white" : "text-slate-900")}>
                               {customer?.name || "Customer"}

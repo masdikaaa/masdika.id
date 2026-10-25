@@ -14,6 +14,7 @@ export async function GET() {
         id: true,
         email: true,
         name: true,
+        image: true,
         isSuspended: true,
         _count: {
           select: {
@@ -30,6 +31,7 @@ export async function GET() {
       id: u.id,
       email: decryptDeterministic(u.email),
       name: decryptDeterministic(u.name),
+      image: u.image,
       isSuspended: u.isSuspended,
       vpsCount: u._count.vpsServices,
       activeServices: u._count.vpsServices + u._count.subscriptions

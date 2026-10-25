@@ -116,6 +116,7 @@ export async function GET(req: NextRequest) {
           ...vpc.user,
           name: resolvedName,
           email: resolvedEmail,
+          avatar: vpc.user.image,
         } : null,
       };
     });
@@ -182,7 +183,7 @@ export async function GET(req: NextRequest) {
         } catch {
           email = u.email;
         }
-        return { ...u, name, email };
+        return { ...u, name, email, avatar: u.image };
       };
 
       return {
