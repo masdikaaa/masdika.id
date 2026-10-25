@@ -726,7 +726,8 @@ export class VpsProvisioningService {
             ? server.publicNetworkBridge
             : vps.networkBridge;
 
-          config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1`;
+          const speedMbps = vps.bandwidthMbps || 100;
+          config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1,rate=${speedMbps / 8}`;
           if (vps.cpuCores > 1) {
             config[`net${netIndex}`] += `,queues=${vps.cpuCores}`;
           }
@@ -737,7 +738,8 @@ export class VpsProvisioningService {
 
       if (vps.vpc) {
         const cidrSuffix = vps.vpc.cidr.split('/')[1] || '24';
-        config[`net1`] = `model=virtio,bridge=${vps.vpc.router.proxmoxBridge},tag=${vps.vpc.vlanId},firewall=1`;
+        const speedMbps = vps.bandwidthMbps || 100;
+        config[`net1`] = `model=virtio,bridge=${vps.vpc.router.proxmoxBridge},tag=${vps.vpc.vlanId},firewall=1,rate=${speedMbps / 8}`;
         if (vps.cpuCores > 1) {
           config[`net1`] += `,queues=${vps.cpuCores}`;
         }
