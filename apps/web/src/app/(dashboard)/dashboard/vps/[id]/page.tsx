@@ -2073,7 +2073,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {activeTab === "upgrade" && (
               <div className="animate-in fade-in duration-500 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-8 space-y-6">
-                  <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl">
                       <Activity className="w-6 h-6" />
@@ -2086,9 +2086,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   <div className="space-y-8">
                     <div>
-                      <div className="flex justify-between mb-2">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium ")}>CPU Cores</label>
-                        <span className={cn("text-sm font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeCores} Core(s)</span>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>CPU Cores</label>
+                        <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeCores} Core(s)</span>
                       </div>
                       <input
                         type="range"
@@ -2098,16 +2098,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeCores - vps.cpuCores) / Math.max(1, maxSpecs.cpu - vps.cpuCores)) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs  mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
                         <span>{vps.cpuCores} (Current)</span>
                         <span>{maxSpecs.cpu} Max</span>
                       </div>
                     </div>
 
                     <div>
-                      <div className="flex justify-between mb-2">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium ")}>RAM Memory</label>
-                        <span className={cn("text-sm font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeRam} GB</span>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>RAM Memory</label>
+                        <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeRam} GB</span>
                       </div>
                       <input
                         type="range"
@@ -2117,26 +2117,28 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeRam - vps.ramGb) / Math.max(1, maxSpecs.ram - vps.ramGb)) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs  mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
                         <span>{vps.ramGb} GB (Current)</span>
                         <span>{maxSpecs.ram} GB Max</span>
                       </div>
                     </div>
 
                     <div>
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
                         <div className="flex items-center gap-2">
-                          <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>Main Disk Storage</label>
-                          <span className={cn(
-                            "text-xs px-2 py-0.5 rounded-md font-medium border",
-                            isSsd
-                              ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                              : "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                          )}>
-                            {isSsd ? "SSD Storage" : "HDD Storage"} • Upgrade: {formatRupiah(diskRatePerGbMonthly)}/GB/mo
-                          </span>
+                          <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium whitespace-nowrap")}>Main Disk Storage</label>
                         </div>
-                        <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeDisk} GB</span>
+                        <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeDisk} GB</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className={cn(
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                          isSsd
+                            ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                            : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                        )}>
+                          {isSsd ? "SSD Storage" : "HDD Storage"} • Upgrade: {formatRupiah(diskRatePerGbMonthly)}/GB/mo
+                        </span>
                       </div>
                       <input
                         type="range"
@@ -2152,11 +2154,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       </div>
                       {addedDiskGb > 0 && (
                         <div className={cn(
-                          "mt-2 p-2.5 rounded-xl text-xs flex items-center justify-between border transition-all",
+                          "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
                           isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
                         )}>
-                          <span className="flex items-center gap-1.5">
-                            <HardDrive className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                          <span className="flex items-center gap-1.5 flex-wrap">
+                            <HardDrive className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                             <span>Added Storage:</span>
                             <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
                               +{addedDiskGb} GB {isSsd ? "SSD" : "HDD"}
@@ -2165,7 +2167,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               (@ {formatRupiah(diskRatePerGbMonthly)}/GB/mo)
                             </span>
                           </span>
-                          <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
                             +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalDiskHourly)}/hr)</span>
                           </span>
                         </div>
@@ -2296,12 +2298,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 </div>
 
               <div className="lg:col-span-4 space-y-6">
-                  <div className={cn("border rounded-2xl p-6 shadow-md sticky top-6 flex flex-col gap-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-md sticky top-6 flex flex-col gap-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     {/* Cost Estimator Box (AWS Style) */}
                     {hasUpgrades && (
-                      <div className={cn("p-5 rounded-2xl border relative overflow-hidden", isDark ? "bg-[#060b14] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-200 shadow-sm")}>
+                      <div className={cn("p-4 sm:p-5 rounded-2xl border relative overflow-hidden", isDark ? "bg-[#060b14] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-200 shadow-sm")}>
                         {/* Decorative Background Icon */}
-                        <div className="absolute -right-6 -top-6 text-cyan-500/5">
+                        <div className="absolute -right-6 -top-6 text-cyan-500/5 pointer-events-none">
                           <Activity className="w-48 h-48" />
                         </div>
 
@@ -2312,64 +2314,64 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           </h4>
 
                           {/* Itemized Upgrade Breakdown */}
-                          <div className={cn("mb-4 space-y-2 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-600")}>
+                          <div className={cn("mb-4 space-y-2.5 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-600")}>
                             {addedDiskGb > 0 && (
-                              <div className="flex justify-between items-center">
-                                <span>Disk (+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"} @ {formatRupiah(diskRatePerGbMonthly)}/GB):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">Disk (+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"} @ {formatRupiah(diskRatePerGbMonthly)}/GB):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
                                   +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalDiskHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {upgradeCores > (vps.cpuCores || 0) && (
-                              <div className="flex justify-between items-center">
-                                <span>CPU (+{upgradeCores - (vps.cpuCores || 0)} Core):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">CPU (+{upgradeCores - (vps.cpuCores || 0)} Core):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
                                   +{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {upgradeRam > (vps.ramGb || 0) && (
-                              <div className="flex justify-between items-center">
-                                <span>RAM (+{upgradeRam - (vps.ramGb || 0)} GB):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">RAM (+{upgradeRam - (vps.ramGb || 0)} GB):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
                                   +{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {upgradeBackup > (vps.backupGb || 0) && (
-                              <div className="flex justify-between items-center">
-                                <span>Backup (+{upgradeBackup - (vps.backupGb || 0)} GB):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">Backup (+{upgradeBackup - (vps.backupGb || 0)} GB):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
                                   +{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {addIpv4Count > 0 && (
-                              <div className="flex justify-between items-center">
-                                <span>IPv4 (+{addIpv4Count} IP):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">IPv4 (+{addIpv4Count} IP):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
                                   +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {addIpv6Count > 0 && (
-                              <div className="flex justify-between items-center">
-                                <span>IPv6 (+{addIpv6Count} IP):</span>
-                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">IPv6 (+{addIpv6Count} IP):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
                                   +{formatRupiah(addIpv6Count * (pricing.ipv6 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(addIpv6Count * (pricing.ipv6 || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
-                            <div className="flex justify-between items-center pt-2 font-medium border-t border-slate-500/10">
-                              <span>Total Additional Rate:</span>
-                              <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 font-medium border-t border-slate-500/10">
+                              <span className="font-semibold text-slate-800 dark:text-zinc-200">Total Additional Rate:</span>
+                              <span className={cn("font-mono font-bold text-sm shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")}>
                                 +{formatRupiah(additionalHourlyRate)} / hr
                               </span>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                             <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
                               <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>New Hourly Rate</p>
                               <p className={cn("text-lg font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
@@ -2387,25 +2389,30 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       </div>
                     )}
 
-                    <div className="flex flex-col items-end gap-4 w-full mt-6">
+                    <div className="flex flex-col items-stretch sm:items-end gap-4 w-full">
                       <div className={cn(
-                        "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-sm",
-                        balance < requiredBalance ? "opacity-50 border-red-500/30 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-600/40 shadow-sm"
+                        "w-full flex items-start sm:items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all text-left shadow-sm",
+                        hasUpgrades && balance < requiredBalance ? "border-red-500/40 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-600/40 shadow-sm"
                       )}>
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-sm">
-                          <Wallet className="w-6 h-6 text-cyan-600" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-sm">
+                          <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className={cn("text-base font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Account Balance</div>
-                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <div className={cn("text-sm sm:text-base font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Account Balance</div>
+                          <div className="flex flex-wrap items-center gap-2 mt-0.5">
                             <div className={cn("text-xs font-medium tracking-wide", isDark ? "text-zinc-400" : "text-slate-500")}>
-                              Available: <span className="font-mono">{formatRupiah(balance)}</span>
+                              Available: <span className="font-mono font-semibold text-slate-800 dark:text-zinc-200">{formatRupiah(balance)}</span>
                             </div>
                           </div>
-                          {balance < requiredBalance && (
-                            <div className="text-xs text-red-400 font-medium mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg w-fit flex items-center gap-2 border border-red-500/20">
-                              <X className="w-3.5 h-3.5 shrink-0" />
-                              <span>Insufficient balance. Minimum required: {formatRupiah(requiredBalance)} (1 month)</span>
+                          {hasUpgrades && balance < requiredBalance && (
+                            <div className="text-[11px] sm:text-xs text-red-400 font-medium mt-2.5 bg-red-500/10 p-2.5 sm:px-3 sm:py-2 rounded-xl flex items-start gap-2 border border-red-500/20 leading-relaxed">
+                              <X className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                              <div className="space-y-0.5">
+                                <p className="font-semibold text-red-400">Insufficient balance</p>
+                                <p className="text-zinc-300 dark:text-zinc-400 text-[11px]">
+                                  Minimum required: <strong className="font-mono text-white">{formatRupiah(requiredBalance)}</strong> (1 month reserve)
+                                </p>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -2413,10 +2420,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                       <button
                         onClick={handleUpgradeSpecs}
-                        disabled={isUpgrading || balance < requiredBalance || vps.status === 'SUSPENDED' || !hasUpgrades}
-                        className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-slate-950 text-sm"
+                        disabled={isUpgrading || (hasUpgrades && balance < requiredBalance) || vps.status === 'SUSPENDED' || !hasUpgrades}
+                        className="w-full sm:w-auto justify-center px-6 py-3 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-slate-950 text-sm"
                       >
-                        {isUpgrading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Activity className="w-5 h-5" />}
+                        {isUpgrading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
                         {isUpgrading ? "Upgrading..." : "Confirm Upgrade"}
                       </button>
                     </div>
@@ -2429,7 +2436,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* ADDON DISKS TAB */}
             {activeTab === "addon" && (
               <div className="animate-in fade-in duration-500 max-w-3xl space-y-6">
-                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl">
                       <HardDrive className="w-6 h-6" />
@@ -2534,7 +2541,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <button
                               type="submit"
                               disabled={isAddingDisk || allowedAddonStorages.length === 0}
-                              className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950 text-sm"
+                              className="w-full sm:w-auto justify-center px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950 text-sm"
                             >
                               {isAddingDisk ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
                               {isAddingDisk ? "Attaching Disk..." : "Attach New Disk"}
