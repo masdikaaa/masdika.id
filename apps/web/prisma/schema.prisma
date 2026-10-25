@@ -57,6 +57,7 @@ model User {
   vpsServices        VpsService[]
   withdrawalRequests WithdrawalRequest[]
   emailLogs          EmailLog[]
+  activityLogs       ClientActivityLog[]
 
   @@index([createdAt])
 }
@@ -1100,3 +1101,21 @@ model EmailLog {
   @@index([to])
   @@index([createdAt])
 }
+
+model ClientActivityLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  description String   @db.Text
+  username    String?  @default("System")
+  ipAddress   String?  @default("127.0.0.1")
+  category    String?  @default("system")
+  metadata    String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([createdAt])
+}
+

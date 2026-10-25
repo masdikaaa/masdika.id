@@ -42,7 +42,7 @@ export const logEmailRecord = async ({
       if (user) resolvedUserId = user.id;
     }
 
-    return await prisma.emailLog.create({
+    const emailLog = await prisma.emailLog.create({
       data: {
         userId: resolvedUserId || null,
         to: recipientStr,
@@ -53,6 +53,20 @@ export const logEmailRecord = async ({
         error: error || null,
       }
     });
+
+    if (resolvedUserId && status === 'SENT') {
+      await prisma.clientActivityLog.create({
+        data: {
+          userId: resolvedUserId,
+          description: `Email Sent to ${recipientStr} (${subject || 'No Subject'}) - Client ID: ${resolvedUserId}`,
+          username: "System",
+          ipAddress: "127.0.0.1",
+          category: "email",
+        }
+      }).catch(() => {});
+    }
+
+    return emailLog;
   } catch (err) {
     console.warn('Failed to log email to database:', err);
     return null;
