@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Layers, ArrowUpCircle, AlertTriangle, CheckCircle2, Clock, XCircle, Box, Server, Database, Activity, PackageOpen, RefreshCw, Terminal, HardDrive, UploadCloud, Code } from "lucide-react";
+import { Layers, ArrowUpCircle, AlertTriangle, CheckCircle2, Clock, XCircle, Box, Server, Database, Activity, PackageOpen, RefreshCw, Terminal, HardDrive, UploadCloud, Code, CreditCard } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ export default function MyServicesPage() {
   const [page, setPage] = useUrlNumber("page", 1);
   const [terminateModal, setTerminateModal] = useState<{ id: number, name: string, service: string } | null>(null);
   const [terminateLoading, setTerminateLoading] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const itemsPerPage = 6;
 
   const fetchServices = async () => {
@@ -57,6 +58,35 @@ export default function MyServicesPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleAutoRenew = async (serviceId: number | string, serviceType: string, currentStatus: boolean) => {
+    const toggleId = `${serviceType}-${serviceId}`;
+    if (togglingId === toggleId) return;
+    setTogglingId(toggleId);
+    const toastId = toast.loading("Updating auto-renew setting...");
+    try {
+      const res = await fetch("/api/user/billing/toggle-autorenew", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serviceId, serviceType, autoRenew: !currentStatus })
+      });
+      const json = await res.json();
+      if (res.ok) {
+        if (json.warning === 'INSUFFICIENT_BALANCE') {
+          toast.warning(json.message, { id: toastId, duration: 6000 });
+        } else {
+          toast.success(json.message || "Auto-renew setting updated!", { id: toastId });
+        }
+        await fetchServices(); // Refresh data
+      } else {
+        toast.error(json.error || "Failed to update setting", { id: toastId });
+      }
+    } catch (error) {
+      toast.error("An error occurred", { id: toastId });
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -277,9 +307,18 @@ export default function MyServicesPage() {
                         <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-sm">
                           <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                            <div>
+                            <div className="flex-1">
                               <p className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-0.5">Suspension Reason</p>
                               <p className="text-xs font-semibold text-red-300">{vps.suspendReason || "Service suspended by system/administrator."}</p>
+                              {!vps.autoRenew ? (
+                                <p className="text-[11px] text-cyan-300 mt-2 font-medium">
+                                  💡 Tip: Aktifkan <strong>Auto-Renew</strong> agar VPS ini otomatis aktif kembali jika saldo mencukupi.
+                                </p>
+                              ) : (
+                                <p className="text-[11px] text-amber-300 mt-2 font-medium">
+                                  💡 Tip: Auto-Renew telah aktif. Silakan Top Up saldo Anda agar VPS langsung otomatis aktif kembali.
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -288,6 +327,26 @@ export default function MyServicesPage() {
 
                     {/* Actions */}
                     <div className="mt-6 pt-4 flex gap-3 relative z-10">
+                      {vps.status === 'SUSPENDED' && (
+                        !vps.autoRenew ? (
+                          <button
+                            onClick={() => handleToggleAutoRenew(vps.id, 'VPS', false)}
+                            disabled={togglingId === `VPS-${vps.id}`}
+                            className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                          >
+                            <RefreshCw className={cn("w-3.5 h-3.5", togglingId === `VPS-${vps.id}` && "animate-spin")} />
+                            Enable Auto-Renew
+                          </button>
+                        ) : (
+                          <Link
+                            href="/dashboard/billing/topup"
+                            className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                          >
+                            <CreditCard className="w-3.5 h-3.5" />
+                            Top Up Saldo
+                          </Link>
+                        )
+                      )}
                       {vps.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/vps/${vps.id}`}
@@ -441,9 +500,18 @@ export default function MyServicesPage() {
                         <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-sm">
                           <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                            <div>
+                            <div className="flex-1">
                               <p className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-0.5">Suspension Reason</p>
                               <p className="text-xs font-semibold text-red-300">{sub.suspendReason || "Service suspended by system/administrator."}</p>
+                              {!sub.autoRenew ? (
+                                <p className="text-[11px] text-cyan-300 mt-2 font-medium">
+                                  💡 Tip: Aktifkan <strong>Auto-Renew</strong> agar layanan ini otomatis aktif kembali jika saldo mencukupi.
+                                </p>
+                              ) : (
+                                <p className="text-[11px] text-amber-300 mt-2 font-medium">
+                                  💡 Tip: Auto-Renew telah aktif. Silakan Top Up saldo Anda agar layanan langsung otomatis aktif kembali.
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -454,6 +522,26 @@ export default function MyServicesPage() {
                     <div className="mt-6 pt-4 flex gap-3 relative z-10">
                       {sub.status !== 'TERMINATED' && sub.status !== 'CANCELLED' ? (
                         <>
+                          {sub.status === 'SUSPENDED' && (
+                            !sub.autoRenew ? (
+                              <button
+                                onClick={() => handleToggleAutoRenew(sub.id, 'SUBSCRIPTION', false)}
+                                disabled={togglingId === `SUBSCRIPTION-${sub.id}`}
+                                className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                              >
+                                <RefreshCw className={cn("w-3.5 h-3.5", togglingId === `SUBSCRIPTION-${sub.id}` && "animate-spin")} />
+                                Enable Auto-Renew
+                              </button>
+                            ) : (
+                              <Link
+                                href="/dashboard/billing/topup"
+                                className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                              >
+                                <CreditCard className="w-3.5 h-3.5" />
+                                Top Up Saldo
+                              </Link>
+                            )
+                          )}
                           <button
                             onClick={() => setTerminateModal({ id: sub.id, name: sub.plan.name, service: sub.plan.service })}
                             className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-2.5 rounded-lg flex items-center justify-center transition-all shadow-sm shrink-0"

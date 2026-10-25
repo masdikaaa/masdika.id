@@ -670,35 +670,79 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [nowTime, setNowTime] = useState(0);
   useEffect(() => { setNowTime(Date.now()); }, []);
 
-  const { upgradeCostNow, newMonthlyPrice, newHourlyPrice, hasUpgrades, remainingHours } = useMemo(() => {
-    if (!vps) return { upgradeCostNow: 0, newMonthlyPrice: 0, newHourlyPrice: 0, hasUpgrades: false, remainingHours: 1 };
+  const {
+    upgradeCostNow,
+    additionalHourlyRate,
+    additionalDiskMonthly,
+    additionalDiskHourly,
+    newMonthlyPrice,
+    newHourlyPrice,
+    requiredBalance,
+    hasUpgrades,
+    remainingHours,
+    isSsd,
+    diskRatePerGbMonthly,
+    addedDiskGb
+  } = useMemo(() => {
+    if (!vps) return {
+      upgradeCostNow: 0,
+      additionalHourlyRate: 0,
+      additionalDiskMonthly: 0,
+      additionalDiskHourly: 0,
+      newMonthlyPrice: 0,
+      newHourlyPrice: 0,
+      requiredBalance: 0,
+      hasUpgrades: false,
+      remainingHours: 1,
+      isSsd: false,
+      diskRatePerGbMonthly: 4000,
+      addedDiskGb: 0
+    };
 
     const additionalCpu = Math.max(0, upgradeCores - (vps.cpuCores || 0));
     const additionalRam = Math.max(0, upgradeRam - (vps.ramGb || 0));
-    const additionalDisk = Math.max(0, upgradeDisk - (vps.diskGb || 0));
+    const addedDisk = Math.max(0, upgradeDisk - (vps.diskGb || 0));
     const additionalBackup = Math.max(0, upgradeBackup - (vps.backupGb || 0));
 
-    let additionalHourlyRate = 0;
-    additionalHourlyRate += additionalCpu * (pricing.vcpu || 0);
-    additionalHourlyRate += additionalRam * (pricing.ram || 0);
-    const currentDiskPrice = vps.diskType === "SSD" ? (pricing.diskSsd || pricing.disk || 0) : (pricing.disk || 0);
-    additionalHourlyRate += additionalDisk * currentDiskPrice;
-    additionalHourlyRate += additionalBackup * (pricing.backup || 0);
-    additionalHourlyRate += addIpv4Count * (pricing.ipv4 || 0);
-    additionalHourlyRate += addIpv6Count * (pricing.ipv6 || 0);
+    // Active VPS disk upgrade rate: HDD = Rp 4.000 / GB / month, SSD = Rp 5.000 / GB / month
+    const isSsdDisk = (vps.diskType || "").toUpperCase() === "SSD";
+    const diskMonthlyRate = isSsdDisk ? 5000 : 4000;
+    const diskMonthlyAdded = addedDisk * diskMonthlyRate;
+    const diskHourlyAdded = Math.ceil(diskMonthlyAdded / 730);
+
+    let addRate = 0;
+    addRate += additionalCpu * (pricing.vcpu || 0);
+    addRate += additionalRam * (pricing.ram || 0);
+    addRate += diskHourlyAdded;
+    addRate += additionalBackup * (pricing.backup || 0);
+    addRate += addIpv4Count * (pricing.ipv4 || 0);
+    addRate += addIpv6Count * (pricing.ipv6 || 0);
 
     const currentTime = nowTime || 1700000000000;
     const expiresAtTime = vps.expiresAt ? new Date(vps.expiresAt).getTime() : currentTime + (30 * 24 * 60 * 60 * 1000);
     const rHours = Math.max(1, Math.ceil((expiresAtTime - currentTime) / (1000 * 60 * 60)));
 
+    const baseHourly = Number(vps.hourlyRate) || 0;
+    const finalHourly = baseHourly + addRate;
+    const reqBalance = finalHourly * 730;
+
+    const hasAnyChange = addRate > 0 || addedDisk > 0 || additionalCpu > 0 || additionalRam > 0 || additionalBackup > 0 || addIpv4Count > 0 || addIpv6Count > 0;
+
     return {
-      upgradeCostNow: additionalHourlyRate * rHours,
-      newMonthlyPrice: (vps.monthlyPrice || (vps.hourlyRate * 720) || 0) + (additionalHourlyRate * 720),
-      newHourlyPrice: (vps.hourlyPrice || 0) + additionalHourlyRate,
-      hasUpgrades: additionalHourlyRate > 0,
-      remainingHours: rHours
+      upgradeCostNow: reqBalance,
+      additionalHourlyRate: addRate,
+      additionalDiskMonthly: diskMonthlyAdded,
+      additionalDiskHourly: diskHourlyAdded,
+      newMonthlyPrice: finalHourly * 730,
+      newHourlyPrice: finalHourly,
+      requiredBalance: reqBalance,
+      hasUpgrades: hasAnyChange,
+      remainingHours: rHours,
+      isSsd: isSsdDisk,
+      diskRatePerGbMonthly: diskMonthlyRate,
+      addedDiskGb: addedDisk
     };
-  }, [vps, upgradeCores, upgradeRam, upgradeDisk, upgradeBackup, addIpv4Count, addIpv6Count, pricing]);
+  }, [vps, upgradeCores, upgradeRam, upgradeDisk, upgradeBackup, addIpv4Count, addIpv6Count, pricing, nowTime]);
 
   const handleUpgradeSpecs = async () => {
     setIsUpgrading(true);
@@ -2080,8 +2124,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     </div>
 
                     <div>
-                      <div className="flex justify-between mb-2">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium ")}>Main Disk Storage</label>
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center gap-2">
+                          <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>Main Disk Storage</label>
+                          <span className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase",
+                            isSsd
+                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                              : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                          )}>
+                            {isSsd ? "SSD Storage" : "HDD Storage"} • Upgrade: {formatRupiah(diskRatePerGbMonthly)}/GB/bln
+                          </span>
+                        </div>
                         <span className={cn("text-sm font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeDisk} GB</span>
                       </div>
                       <input
@@ -2092,10 +2146,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeDisk - vps.diskGb) / Math.max(1, maxSpecs.disk - vps.diskGb)) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs  mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
-                        <span>{vps.diskGb} GB {vps.diskType || "HDD"} (Current)</span>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                        <span>{vps.diskGb} GB {isSsd ? "SSD" : "HDD"} (Current)</span>
                         <span>{maxSpecs.disk} GB Max</span>
                       </div>
+                      {addedDiskGb > 0 && (
+                        <div className={cn("mt-2 p-2.5 rounded-lg text-xs flex items-center justify-between border", isDark ? "bg-cyan-500/5 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                          <span className="flex items-center gap-1.5">
+                            <HardDrive className="w-3.5 h-3.5" />
+                            Tambahan Disk: <strong>+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"}</strong> (@ {formatRupiah(diskRatePerGbMonthly)}/GB/bln)
+                          </span>
+                          <span className="font-mono font-bold">
+                            +{formatRupiah(additionalDiskMonthly)}/bln (~+{formatRupiah(additionalDiskHourly)}/jam)
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -2232,21 +2297,83 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         </div>
 
                         <div className="relative z-10">
-                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", " font-medium mb-4 flex items-center gap-2")}>
+                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", " font-medium mb-3 flex items-center gap-2")}>
                             <Receipt className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                             Upgrade Cost Estimate
                           </h4>
 
-                            <div className="grid grid-cols-1 gap-4">
-                              <div className={cn("p-4 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                                <p className={cn("text-xs  mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>New Hourly Rate</p>
-                                <p className={cn("text-lg font-bold ", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(newHourlyPrice)} <span className={cn("text-sm font-normal ", isDark ? "text-zinc-500" : "text-slate-400")}>/ hr</span></p>
+                          {/* Itemized Upgrade Breakdown */}
+                          <div className={cn("mb-4 space-y-1.5 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-600")}>
+                            {addedDiskGb > 0 && (
+                              <div className="flex justify-between items-center">
+                                <span>Disk (+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"} @ {formatRupiah(diskRatePerGbMonthly)}/GB):</span>
+                                <span className={cn("font-mono font-semibold", isDark ? "text-cyan-300" : "text-cyan-700")}>
+                                  +{formatRupiah(additionalDiskMonthly)}/bln (+{formatRupiah(additionalDiskHourly)}/jam)
+                                </span>
                               </div>
-                              <div className={cn("p-4 rounded-xl border shadow-sm", isDark ? "bg-[#0b162c] border-cyan-500/30" : "bg-white border-cyan-600/30 shadow-sm")}>
-                                <p className={cn("text-xs mb-1 font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Estimated Monthly Cost</p>
-                                <p className={cn("text-xl font-bold ", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(newHourlyPrice * 730)} <span className={cn("text-sm font-normal ", isDark ? "text-zinc-500" : "text-slate-400")}>/ mo (~730h)</span></p>
+                            )}
+                            {upgradeCores > (vps.cpuCores || 0) && (
+                              <div className="flex justify-between items-center">
+                                <span>CPU (+{upgradeCores - (vps.cpuCores || 0)} Core):</span>
+                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                                  +{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0) * 730)}/bln (+{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0))}/jam)
+                                </span>
                               </div>
+                            )}
+                            {upgradeRam > (vps.ramGb || 0) && (
+                              <div className="flex justify-between items-center">
+                                <span>RAM (+{upgradeRam - (vps.ramGb || 0)} GB):</span>
+                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                                  +{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0) * 730)}/bln (+{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0))}/jam)
+                                </span>
+                              </div>
+                            )}
+                            {upgradeBackup > (vps.backupGb || 0) && (
+                              <div className="flex justify-between items-center">
+                                <span>Backup (+{upgradeBackup - (vps.backupGb || 0)} GB):</span>
+                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                                  +{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0) * 730)}/bln (+{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0))}/jam)
+                                </span>
+                              </div>
+                            )}
+                            {addIpv4Count > 0 && (
+                              <div className="flex justify-between items-center">
+                                <span>IPv4 (+{addIpv4Count} IP):</span>
+                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                                  +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/bln (+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/jam)
+                                </span>
+                              </div>
+                            )}
+                            {addIpv6Count > 0 && (
+                              <div className="flex justify-between items-center">
+                                <span>IPv6 (+{addIpv6Count} IP):</span>
+                                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                                  +{formatRupiah(addIpv6Count * (pricing.ipv6 || 0) * 730)}/bln (+{formatRupiah(addIpv6Count * (pricing.ipv6 || 0))}/jam)
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center pt-1 font-semibold border-t border-slate-500/10">
+                              <span>Total Tambahan Tarif:</span>
+                              <span className={isDark ? "text-cyan-400" : "text-cyan-700"}>
+                                +{formatRupiah(additionalHourlyRate)} / jam
+                              </span>
                             </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3">
+                            <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                              <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Tarif Baru (New Hourly Rate)</p>
+                              <p className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                                {formatRupiah(newHourlyPrice)} <span className={cn("text-xs font-normal", isDark ? "text-zinc-500" : "text-slate-400")}>/ hr</span>
+                              </p>
+                            </div>
+                            <div className={cn("p-3.5 rounded-xl border shadow-sm", isDark ? "bg-[#0b162c] border-cyan-500/30" : "bg-white border-cyan-600/30 shadow-sm")}>
+                              <p className={cn("text-xs mb-1 font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Estimasi Total Bulanan</p>
+                              <p className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+                                {formatRupiah(newMonthlyPrice)} <span className={cn("text-xs font-normal", isDark ? "text-zinc-500" : "text-slate-400")}>/ mo (~730h)</span>
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -2254,7 +2381,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <div className="flex flex-col items-end gap-4 w-full mt-6">
                       <div className={cn(
                         "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-sm",
-                        balance < upgradeCostNow ? "opacity-50 border-red-500/30 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-600/40 shadow-sm"
+                        balance < requiredBalance ? "opacity-50 border-red-500/30 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-600/40 shadow-sm"
                       )}>
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-sm">
                           <Wallet className="w-6 h-6 text-cyan-600" />
@@ -2262,11 +2389,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <div className="flex-1 min-w-0">
                           <div className={cn("text-base font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Account Balance</div>
                           <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <div className={cn("text-xs  font-bold tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Tersedia: {formatRupiah(balance)}</div>
+                            <div className={cn("text-xs font-bold tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Tersedia: {formatRupiah(balance)}</div>
                           </div>
-                          {balance < upgradeCostNow && (
-                            <div className="text-xs text-red-400 font-bold mt-2 bg-red-500/10 px-3 py-1 rounded-lg w-fit flex items-center gap-2">
-                              <X className="w-3 h-3" /> Saldo Tidak Cukup
+                          {balance < requiredBalance && (
+                            <div className="text-xs text-red-400 font-bold mt-2 bg-red-500/10 px-3 py-1.5 rounded-lg w-fit flex items-center gap-2 border border-red-500/20">
+                              <X className="w-3.5 h-3.5" />
+                              <span>Saldo Kurang: Min. {formatRupiah(requiredBalance)} (1 bln)</span>
                             </div>
                           )}
                         </div>
@@ -2274,7 +2402,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                       <button
                         onClick={handleUpgradeSpecs}
-                        disabled={isUpgrading || balance < upgradeCostNow || vps.status === 'SUSPENDED' || (upgradeCores === vps.cpuCores && upgradeRam === vps.ramGb && upgradeDisk === vps.diskGb && upgradeBackup === (vps.backupGb || 0) && addIpv4Count === 0 && addIpv6Count === 0)}
+                        disabled={isUpgrading || balance < requiredBalance || vps.status === 'SUSPENDED' || !hasUpgrades}
                         className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-slate-950 text-sm"
                       >
                         {isUpgrading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Activity className="w-5 h-5" />}

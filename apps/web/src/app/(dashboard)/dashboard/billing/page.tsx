@@ -112,7 +112,11 @@ export default function CustomerBillingPage() {
       });
       const json = await res.json();
       if (res.ok) {
-        toast.success("Auto-renew setting updated!", { id: toastId });
+        if (json.warning === 'INSUFFICIENT_BALANCE') {
+          toast.warning(json.message, { id: toastId, duration: 6000 });
+        } else {
+          toast.success(json.message || "Auto-renew setting updated!", { id: toastId });
+        }
         await fetchBilling(); // Refresh data
       } else {
         toast.error(json.error || "Failed to update setting", { id: toastId });
@@ -124,8 +128,8 @@ export default function CustomerBillingPage() {
     }
   };
 
-  const activeSubscriptions = data.subscriptions.filter(s => s.status === 'ACTIVE');
-  const activeVps = data.vpsServices.filter(s => s.status === 'RUNNING' || s.status === 'STOPPED');
+  const activeSubscriptions = data.subscriptions.filter(s => s.status === 'ACTIVE' || s.status === 'SUSPENDED');
+  const activeVps = data.vpsServices.filter(s => s.status === 'RUNNING' || s.status === 'STOPPED' || s.status === 'SUSPENDED');
   const activeIps = data.reservedIps;
   const totalActive = activeSubscriptions.length + activeVps.length + activeIps.length;
 
@@ -183,7 +187,7 @@ export default function CustomerBillingPage() {
             <Layers className="w-5 h-5 text-cyan-400" /> Services Summary
           </h2>
           <p className={cn("text-xs mb-6 relative z-10 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Manage your active services and their auto-renewal preferences. Services with auto-renew enabled will automatically bill your account balance or default payment method.
+            Manage your active and suspended services and their auto-renewal preferences. Services with auto-renew enabled will automatically bill your account balance or default payment method.
           </p>
           <div className="flex-1 relative z-10">
             {loading ? (
@@ -196,7 +200,7 @@ export default function CustomerBillingPage() {
             ) : (
               <div className={cn("flex flex-col h-full rounded-2xl border shadow-sm overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90")}>
                 <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50/60")}>
-                  <span className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Active Services</span>
+                  <span className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Services & Auto-Renew</span>
                   <span className={cn("text-xs font-bold px-2 py-1 rounded-full border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-800 bg-cyan-500/10 border-cyan-500/20")}>{totalActive} Total</span>
                 </div>
                 <div className="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar p-2">
@@ -206,12 +210,20 @@ export default function CustomerBillingPage() {
                     
                     if (type === 'SUBSCRIPTION') {
                       const s = item.data;
+                      const isSuspended = s.status === 'SUSPENDED';
                       return (
                         <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
                           <div className="flex items-center gap-3 overflow-hidden">
                             <div className="shrink-0">{getServiceIcon(s.plan?.service)}</div>
                             <div className="min-w-0">
-                              <div className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{s.plan?.name}</div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{s.plan?.name}</span>
+                                {isSuspended && (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30">
+                                    Suspended
+                                  </span>
+                                )}
+                              </div>
                               <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{formatRupiah(s.plan?.price)}</div>
                             </div>
                           </div>
@@ -240,12 +252,20 @@ export default function CustomerBillingPage() {
                       );
                     } else if (type === 'VPS') {
                       const v = item.data;
+                      const isSuspended = v.status === 'SUSPENDED';
                       return (
                         <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-slate-800/40 border-transparent hover:border-slate-800" : "hover:bg-slate-50 border-transparent hover:border-slate-200")}>
                           <div className="flex items-center gap-3 overflow-hidden">
                             <Server className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
-                              <div className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{v.hostname}</div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{v.hostname}</span>
+                                {isSuspended && (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30">
+                                    Suspended
+                                  </span>
+                                )}
+                              </div>
                               <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{v.billingMode === 'PAYG' ? 'PAYG' : formatRupiah(v.monthlyPrice || (v.hourlyRate * 720))}</div>
                             </div>
                           </div>

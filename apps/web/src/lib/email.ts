@@ -175,17 +175,56 @@ export const sendSuspensionEmail = async (email: string, userName: string, planN
     <h2 style="color: #ef4444; margin-bottom: 20px;">Service Suspended</h2>
     <p>Hello <strong>${userName}</strong>,</p>
     <p>Your subscription for <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has expired and your service has been automatically suspended.</p>
-    <p>During suspension, your service access is disabled. To reactivate your service, you must complete your payment. Please note that a late fee of <strong>Rp 15.000</strong> will be applied upon reactivation.</p>
-    <div style="text-align: center; margin: 35px 0;">
+    <p>During suspension, your service access is disabled. To reactivate your service, you can complete your pending payment or ensure your account balance is sufficient and enable <strong>Auto-Renewal</strong>.</p>
+    <div style="background-color: #0c1a2e; border: 1px solid #1e3a8a; border-radius: 8px; padding: 16px; margin: 20px 0;">
+      <p style="color: #38bdf8; margin: 0 0 8px 0; font-weight: bold; font-size: 14px;">💡 Auto-Unsuspend Tips:</p>
+      <p style="color: #e2e8f0; margin: 0; font-size: 13px; line-height: 1.5;">
+        If your account balance is sufficient, simply enable the <strong>Auto-Renew</strong> toggle in your dashboard to immediately and automatically reactivate (unsuspend) your service without any additional fees.
+      </p>
+    </div>
+    <div style="text-align: center; margin: 30px 0;">
       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/dashboard/billing" style="background-color: #ef4444; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Reactivate Service</a>
     </div>
-    <p>If payment is not received within 3 days, your service data will be permanently terminated.</p>
+    <p style="color: #94a3b8; font-size: 13px;">If payment or reactivation is not completed within 3 days, your service data will be permanently terminated.</p>
   `;
   
   await getTransporter().sendMail({
     from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
     to: email,
     subject: `Notice: Your ${serviceName.replace('_', ' ')} Service has been Suspended`,
+    html: getBaseHtml(content),
+  });
+};
+
+export const sendAutoRenewDisabledSuspensionEmail = async (email: string, userName: string, planName: string, serviceName: string) => {
+  const content = `
+    <h2 style="color: #f97316; margin-bottom: 20px;">Service Suspended: Auto-Renewal Disabled</h2>
+    <p>Hello <strong>${userName}</strong>,</p>
+    <p>Your subscription for <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has reached the end of its billing period and has been suspended because <strong>Auto-Renewal is disabled</strong>.</p>
+    
+    <div style="background-color: #0c1a2e; border: 1px solid #0284c7; border-radius: 8px; padding: 18px; margin: 25px 0;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 12px; font-size: 15px;">💡 How to Reactivate Your Service (Auto-Unsuspend):</h3>
+      <ul style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+        <li style="margin-bottom: 8px;">
+          <strong>If your account balance is sufficient:</strong> Simply re-enable the <strong>Auto-Renew</strong> toggle in your dashboard. Our system will immediately and automatically reactivate (unsuspend) your service without any late fees.
+        </li>
+        <li>
+          <strong>If your account balance is insufficient:</strong> Please <strong>Top Up</strong> your account balance first via the Billing dashboard, then turn on the <strong>Auto-Renew</strong> toggle to automatically resume your service.
+        </li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/dashboard/billing" style="background-color: #0284c7; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Enable Auto-Renew in Dashboard</a>
+    </div>
+
+    <p style="color: #94a3b8; font-size: 13px;"><em>Note: Your service data will be retained for a 3-day grace period. If not reactivated within 3 days, the service and its data will be permanently terminated.</em></p>
+  `;
+  
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: email,
+    subject: `Notice: Your ${serviceName.replace('_', ' ')} Service has been Suspended (Auto-Renew Disabled)`,
     html: getBaseHtml(content),
   });
 };

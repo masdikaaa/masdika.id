@@ -110,102 +110,12 @@ export async function POST(req: NextRequest) {
 
 
 
-        // Auto-Resume Suspended PAYG Services
+        // Auto-Resume Suspended Services (VPS, CDN, File Storage, etc.) with Auto-Renew enabled
         try {
-          const updatedUser = await prisma.user.findUnique({ where: { id: invoice.userId } });
-          if (updatedUser && updatedUser.balance >= 50000) {
-            
-            // 1. Resume Suspended VPS
-            const suspendedVps = await prisma.vpsService.findMany({
-              where: { userId: invoice.userId, status: 'SUSPENDED', suspendReason: { contains: 'balance' } }
-            });
-
-            if (suspendedVps.length > 0) {
-              const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
-              let proxmox: any = null;
-              if (server) {
-                const { ProxmoxClient } = await import('@/lib/proxmox');
-                proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
-              }
-
-              for (const vps of suspendedVps) {
-                const now = new Date();
-                const newExpires = new Date(vps.expiresAt || now);
-                if (newExpires < now) newExpires.setTime(now.getTime());
-                newExpires.setMonth(newExpires.getMonth() + 1);
-
-                if (proxmox && vps.vmid) {
-                  try {
-                    await proxmox.startVm(vps.node, vps.vmid);
-                  } catch (e: any) {
-                    console.error(`Failed to auto-resume VPS ${vps.vmid}:`, e);
-                    continue; // Skip updating DB if Proxmox fails
-                  }
-                }
-
-                await prisma.vpsService.update({
-                  where: { id: vps.id },
-                  data: { status: 'RUNNING', suspendReason: null, expiresAt: newExpires }
-                });
-
-                if (customerEmail) {
-                  sendReactivatedEmail(customerEmail, customerName, vps.hostname || "VPS Server", "VPS").catch(console.error);
-                  sendAdminServiceReactivatedEmail(customerName, customerEmail, vps.hostname || "VPS Server", "VPS").catch(console.error);
-                }
-              }
-            }
-
-            // 2. Resume Suspended Subscriptions
-            const suspendedSubs = await prisma.subscription.findMany({
-              where: { userId: invoice.userId, status: 'SUSPENDED', suspendReason: { contains: 'balance' } },
-              include: { plan: true }
-            });
-
-            for (const sub of suspendedSubs) {
-              const now = new Date();
-              const newExpires = new Date(sub.expiresAt || now);
-              if (newExpires < now) newExpires.setTime(now.getTime());
-              
-              // HOURLY subscriptions extend by 1 hour, others by 1 month
-              if (sub.cycle === 'HOURLY') {
-                newExpires.setTime(newExpires.getTime() + 60 * 60 * 1000);
-              } else {
-                newExpires.setMonth(newExpires.getMonth() + 1);
-              }
-
-              await prisma.subscription.update({
-                where: { id: sub.id },
-                data: { status: 'ACTIVE', suspendReason: null, expiresAt: newExpires }
-              });
-
-              // For HOURLY subs: create a PAYG_RUNNING invoice so hourly billing can resume tracking
-              if (sub.cycle === 'HOURLY') {
-                const timestamp = Date.now().toString();
-                const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-                const runningInvoiceNumber = `INV-${timestamp}-${random}-PAYG`;
-                await prisma.invoice.create({
-                  data: {
-                    invoiceNumber: runningInvoiceNumber,
-                    userId: invoice.userId,
-                    subscriptionId: sub.id,
-                    amount: 0,
-                    status: 'PAID',
-                    paymentMethod: 'Account Balance',
-                    merchantOrderId: runningInvoiceNumber,
-                    paidAt: new Date(),
-                    type: 'SUBSCRIPTION',
-                    reference: 'PAYG_RUNNING'
-                  }
-                });
-              }
-
-              if (customerEmail) {
-                sendReactivatedEmail(customerEmail, customerName, sub.plan.name, sub.plan.service).catch(console.error);
-              }
-            }
-          }
+          const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
+          await attemptAutoUnsuspendAllForUser(invoice.userId);
         } catch (resumeErr) {
-          console.error('Failed to auto-resume PAYG services after topup:', resumeErr);
+          console.error('Failed to auto-resume services after topup:', resumeErr);
         }
 
         // Send emails for top-up (fire-and-forget)

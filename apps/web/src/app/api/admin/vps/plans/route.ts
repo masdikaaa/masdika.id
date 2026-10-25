@@ -2,12 +2,6 @@ import { NextResponse } from "next/server";
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 
-const DEFAULT_PLANS = [
-  { name: "Starter", cpuCores: 1, ramGb: 1, diskGb: 20, diskType: "HDD", monthlyPrice: 50000, isActive: true },
-  { name: "Standard", cpuCores: 2, ramGb: 4, diskGb: 50, diskType: "HDD", monthlyPrice: 150000, isActive: true },
-  { name: "Pro", cpuCores: 4, ramGb: 8, diskGb: 100, diskType: "HDD", monthlyPrice: 300000, isActive: true },
-];
-
 export async function GET(req: Request) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -16,15 +10,9 @@ export async function GET(req: Request) {
     }
     const user = auth.user!;
 
-    let plans = await prisma.vpsPlan.findMany({
+    const plans = await prisma.vpsPlan.findMany({
       orderBy: { order: "asc" },
     });
-
-    // Auto-seed if empty
-    if (plans.length === 0) {
-      await prisma.vpsPlan.createMany({ data: DEFAULT_PLANS.map((p, i) => ({ ...p, order: i })) });
-      plans = await prisma.vpsPlan.findMany({ orderBy: { order: "asc" } });
-    }
 
     return NextResponse.json(plans);
   } catch (error) {

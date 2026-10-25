@@ -44,6 +44,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Downgrading specifications is not allowed" }, { status: 400 });
     }
 
+    const hasChanges = safeCpu > vps.cpuCores || safeRam > vps.ramGb || safeDisk > vps.diskGb || safeBackup > (vps.backupGb || 0) || safeAddIpv4 > 0 || safeAddIpv6 > 0;
+    if (!hasChanges) {
+      return NextResponse.json({ error: "No specification changes requested" }, { status: 400 });
+    }
+
     // Calculate new pricing FIRST
     const pricingItems = await prisma.vpsPricing.findMany();
     const pricing: Record<string, number> = {};
@@ -60,9 +65,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       additionalHourlyRate += (safeRam - vps.ramGb) * (pricing.ram || 0);
     }
     if (safeDisk > vps.diskGb) {
-      const currentDiskPrice = vps.diskType === "SSD" ? (pricing.diskSsd || pricing.disk || 0) : (pricing.disk || 0);
-      additionalHourlyRate += (safeDisk - vps.diskGb) * currentDiskPrice;
-      additionalStorageRate += (safeDisk - vps.diskGb) * currentDiskPrice;
+      const addedDiskGb = safeDisk - vps.diskGb;
+      // Active VPS disk upgrade pricing: HDD Rp 4.000 / GB / month, SSD Rp 5.000 / GB / month
+      // Determine diskType strictly from database record (cannot be forged by client payload)
+      const isSsd = (vps.diskType || "").toUpperCase() === "SSD";
+      const diskRateMonthlyPerGb = isSsd ? 5000 : 4000;
+      const addedDiskMonthly = addedDiskGb * diskRateMonthlyPerGb;
+      // Standard hours per month is 730; Math.ceil ensures host never suffers fractional loss
+      const addedDiskHourly = Math.ceil(addedDiskMonthly / 730);
+      additionalHourlyRate += addedDiskHourly;
+      additionalStorageRate += addedDiskHourly;
     }
     if (safeBackup > (vps.backupGb || 0)) {
       additionalHourlyRate += (safeBackup - (vps.backupGb || 0)) * (pricing.backup || 0);
@@ -112,6 +124,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Upgrade Disk if changed
     if (safeDisk > vps.diskGb) {
       const addedGb = safeDisk - vps.diskGb;
+
+      // Anti-manipulation / fail-safe: Check Proxmox node storage capacity before executing resize
+      try {
+        const storages = await proxmox.getStorages(vps.node);
+        const targetStorage = storages.find((s: any) => s.storage === (vps.storageId || server.mainDiskStorage || 'local-lvm'));
+        if (targetStorage && typeof targetStorage.avail === 'number') {
+          const neededBytes = addedGb * 1024 * 1024 * 1024;
+          if (neededBytes > targetStorage.avail) {
+            await prisma.vpsService.update({
+              where: { id: vpsId },
+              data: { status: vps.status }
+            });
+            return NextResponse.json({
+              error: `Insufficient storage space on node. Available: ${Math.floor(targetStorage.avail / (1024 * 1024 * 1024))} GB, requested: ${addedGb} GB.`
+            }, { status: 400 });
+          }
+        }
+      } catch (capErr: any) {
+        console.warn("[VPS Upgrade] Could not verify Proxmox storage capacity pre-flight:", capErr?.message);
+      }
       
       const config = await proxmox.getVmConfig(vps.node, vps.vmid);
       
@@ -183,18 +215,41 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       throw new Error(proxmoxErr.message || "Failed to upgrade VPS in Proxmox");
     }
 
-    // Update Database and unlock VPS state
-    const updatedVps = await prisma.vpsService.update({
-      where: { id: vps.id },
-      data: {
-        cpuCores: safeCpu,
-        ramGb: safeRam,
-        diskGb: safeDisk,
-        backupGb: safeBackup,
-        hourlyRate: newHourlyRate,
-        stoppedRate: newStoppedRate,
-        status: vps.status, // Restore original status
+    // Update Database and unlock VPS state atomically
+    const updatedVps = await prisma.$transaction(async (tx) => {
+      if (additionalHourlyRate > 0) {
+        // Deduct initial hour of the upgraded rate
+        await tx.user.updateMany({
+          where: { id: user.id, balance: { gte: additionalHourlyRate } },
+          data: { balance: { decrement: additionalHourlyRate } }
+        });
+
+        // Update running invoice
+        const runningInvoice = await tx.invoice.findFirst({
+          where: { vpsServiceId: vps.id, reference: 'PAYG_RUNNING' },
+          orderBy: { createdAt: 'desc' }
+        });
+        if (runningInvoice) {
+          await tx.invoice.update({
+            where: { id: runningInvoice.id },
+            data: { amount: { increment: additionalHourlyRate } }
+          });
+        }
       }
+
+      return await tx.vpsService.update({
+        where: { id: vps.id },
+        data: {
+          cpuCores: safeCpu,
+          ramGb: safeRam,
+          diskGb: safeDisk,
+          backupGb: safeBackup,
+          hourlyRate: newHourlyRate,
+          stoppedRate: newStoppedRate,
+          ...(additionalHourlyRate > 0 ? { accumulatedCost: { increment: additionalHourlyRate } } : {}),
+          status: vps.status, // Restore original status
+        }
+      });
     });
 
     return NextResponse.json({ message: "Specifications upgraded successfully", vps: updatedVps });

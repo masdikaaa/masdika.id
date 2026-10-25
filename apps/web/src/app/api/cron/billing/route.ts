@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendBillingReminderEmail, sendSuspensionEmail, sendTerminationEmail, sendRenewalInvoiceEmail, sendAdminServiceSuspendedEmail } from '@/lib/email';
+import { sendBillingReminderEmail, sendSuspensionEmail, sendAutoRenewDisabledSuspensionEmail, sendTerminationEmail, sendRenewalInvoiceEmail, sendAdminServiceSuspendedEmail } from '@/lib/email';
 import { decryptDeterministic } from '@/lib/encryption';
 import { ProxmoxClient } from '@/lib/proxmox';
 import { createDuitkuTransaction } from '@/lib/duitku';
+import { attemptAutoUnsuspendAll } from '@/lib/auto-unsuspend';
 
 
 function generateOrderId() {
@@ -167,17 +168,27 @@ export async function GET(req: Request) {
         const defaultTermination = new Date(now);
         defaultTermination.setDate(defaultTermination.getDate() + 3);
 
+        const isAutoRenewDisabled = !sub.autoRenew;
+        const reason = isAutoRenewDisabled 
+          ? 'Canceled by user (Auto-renew disabled)' 
+          : 'Insufficient balance for subscription renewal';
+
         await prisma.subscription.update({
           where: { id: sub.id },
           data: { 
             status: 'SUSPENDED', 
-            suspendReason: 'Expired subscription',
+            suspendReason: reason,
             terminationDate: defaultTermination
           }
         });
         const email = decryptDeterministic(sub.user.email) || sub.user.email;
         const name = decryptDeterministic(sub.user.name) || sub.user.name;
-        await sendSuspensionEmail(email, name, sub.plan.name, sub.plan.service).catch(e => console.error(e));
+        
+        if (isAutoRenewDisabled) {
+          await sendAutoRenewDisabledSuspensionEmail(email, name, sub.plan.name, sub.plan.service).catch(e => console.error(e));
+        } else {
+          await sendSuspensionEmail(email, name, sub.plan.name, sub.plan.service).catch(e => console.error(e));
+        }
         await sendAdminServiceSuspendedEmail(name, email, sub.plan.name, sub.plan.service).catch(e => console.error(e));
 
 
@@ -463,7 +474,7 @@ export async function GET(req: Request) {
           
           const email = decryptDeterministic(vps.user.email) || vps.user.email;
           const name = decryptDeterministic(vps.user.name) || vps.user.name;
-          await sendSuspensionEmail(email, name, "VPS Server", "VPS").catch(e => console.error(e));
+          await sendAutoRenewDisabledSuspensionEmail(email, name, "VPS Server", "VPS").catch(e => console.error(e));
           await sendAdminServiceSuspendedEmail(name, email, "VPS Server", "VPS").catch(e => console.error(e));
           
           try {
@@ -481,89 +492,11 @@ export async function GET(req: Request) {
       }
     }
 
-    // 1.5 Reseller VPS Auto-Unsuspend
-    // If a reseller tops up, we should automatically unsuspend their VPS and deduct balance.
-    const suspendedResellerVps = await prisma.vpsService.findMany({
-      where: {
-        status: 'SUSPENDED',
-        isReseller: true,
-        suspendReason: { contains: 'Insufficient balance for Reseller monthly renewal' }
-      },
-      include: { user: true, invoices: { where: { reference: 'PAYG_RUNNING' }, orderBy: { createdAt: 'desc' as const }, take: 1 } }
-    });
-
-    for (const vps of suspendedResellerVps) {
-      try {
-        const monthlyCost = (vps.hourlyRate || 0) * 730;
-        if (monthlyCost > 0 && vps.user.balance >= monthlyCost) {
-          // Deduct balance and unsuspend atomically
-          await prisma.$transaction(async (tx) => {
-            const updateResult = await tx.user.updateMany({
-              where: { id: vps.userId, balance: { gte: monthlyCost } },
-              data: { balance: { decrement: monthlyCost } }
-            });
-            
-            if (updateResult.count === 0) {
-              throw new Error("Insufficient balance during atomic update");
-            }
-
-            // Finalize old invoice if exists
-            const runningInvoice = vps.invoices[0];
-            if (runningInvoice) {
-              await tx.invoice.update({
-                where: { id: runningInvoice.id },
-                data: { reference: 'PAYG_COMPLETED' }
-              });
-            }
-
-            // Set new expiry to 1 month from NOW (since they paid late)
-            const newExpires = new Date();
-            newExpires.setMonth(newExpires.getMonth() + 1);
-
-            await tx.vpsService.update({
-              where: { id: vps.id },
-              data: {
-                status: 'RUNNING',
-                suspendReason: null,
-                terminationDate: null,
-                expiresAt: newExpires,
-                accumulatedCost: 0
-              }
-            });
-
-            // Create new invoice
-            const merchantOrderId = generateOrderId() + '-VPS-PAYG';
-            await tx.invoice.create({
-              data: {
-                invoiceNumber: merchantOrderId,
-                userId: vps.userId,
-                vpsServiceId: vps.id,
-                amount: monthlyCost,
-                status: 'PAID',
-                paymentMethod: 'Account Balance',
-                merchantOrderId: merchantOrderId,
-                type: 'VPS',
-                paidAt: new Date(),
-                reference: 'PAYG_RUNNING',
-                details: JSON.stringify({ type: 'PAYG_MONTHLY_CYCLE_UNSUSPEND', isReseller: true })
-              }
-            });
-          });
-
-          // Start VM on Proxmox
-          try {
-            const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
-            if (server && vps.vmid) {
-              const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
-              await proxmox.startVm(vps.node, vps.vmid);
-            }
-          } catch (e) {
-            console.error(`Failed to start VM ${vps.vmid} for unsuspend:`, e);
-          }
-        }
-      } catch (e) {
-        console.error(`Failed reseller auto-unsuspend for VPS ${vps.id}:`, e);
-      }
+    // 1.5 Auto-Unsuspend for all suspended services with autoRenew enabled & sufficient balance
+    try {
+      await attemptAutoUnsuspendAll();
+    } catch (e) {
+      console.error('Failed batch auto-unsuspend in cron:', e);
     }
 
     // 2. VPS Terminations (H+3)

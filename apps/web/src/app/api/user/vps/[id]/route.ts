@@ -37,6 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         expiresAt: true, createdAt: true, updatedAt: true, suspendReason: true,
         osTemplate: true, vpcId: true, vpcIp: true, autoRenew: true,
         kubernetesClusterId: true, kubernetesRole: true,
+        diskType: true,
         assignedIps: true,
         // rootPassword and sshKey intentionally excluded from API response
       }
