@@ -390,7 +390,7 @@ export default function EmailBlastPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="w-full space-y-6 pb-12">
       {/* Top Header matching Gambar 1 */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
@@ -941,15 +941,13 @@ export default function EmailBlastPage() {
             />
           ) : (
             /* Visual Rich Canvas Preview (Live Sandboxed Iframe with full HTML support) */
-            <div className={cn("flex-1 flex flex-col min-h-[500px] p-4 overflow-auto", isDark ? "bg-[#030712]" : "bg-slate-200/60")}>
-              <div className={cn("max-w-[700px] w-full mx-auto rounded-xl shadow-lg border overflow-hidden flex flex-col min-h-[460px]", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300")}>
-                <iframe
-                  title="Roundcube Live Editor Preview"
-                  srcDoc={htmlContent}
-                  sandbox="allow-same-origin allow-popups"
-                  className="w-full flex-1 border-none min-h-[500px]"
-                />
-              </div>
+            <div className={cn("flex-1 flex flex-col min-h-[580px] w-full overflow-hidden", isDark ? "bg-[#030712]" : "bg-slate-200/60")}>
+              <iframe
+                title="Roundcube Live Editor Preview"
+                srcDoc={htmlContent}
+                sandbox="allow-same-origin allow-popups"
+                className="w-full flex-1 border-none min-h-[580px]"
+              />
             </div>
           )}
         </div>

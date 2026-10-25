@@ -105,7 +105,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
           description: invDesc,
           username: 'System',
           ipAddress: '127.0.0.1',
-          category: 'invoice',
+          category: 'invoice'
           createdAt: inv.createdAt
         });
         existingDescSet.add(invDesc);
