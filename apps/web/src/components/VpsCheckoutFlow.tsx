@@ -1162,16 +1162,21 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <span className={cn("font-bold text-sm sm:text-base", isDark ? "text-white" : "text-slate-900")}>Port Speed Rate Limit</span>
-                      <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Dedicated VM traffic shaper on Proxmox node. 100 Mbps is included for free.</p>
+                      <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Dedicated network port traffic rate shaper. 100 Mbps base speed is included for free.</p>
                     </div>
                     <div className="flex items-center gap-2 self-start sm:self-auto">
-                      <span className={cn("px-3 py-1 rounded-full text-xs font-bold border", bandwidthMbps === 100 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20")}>
+                      <span className={cn(
+                        "px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border transition-colors",
+                        bandwidthMbps === 100
+                          ? (isDark ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border-cyan-200")
+                          : (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")
+                      )}>
                         {bandwidthMbps} Mbps {bandwidthMbps === 100 ? "(Free)" : `(+${formatRupiah(Math.floor((bandwidthMbps - 100) / 50) * 50000)}/mo)`}
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1">
                     {bandwidthOptions.map((speed) => {
                       const isSelected = bandwidthMbps === speed;
                       const extraSteps = Math.floor(Math.max(0, speed - 100) / 50);
@@ -1182,14 +1187,19 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                           type="button"
                           onClick={() => setBandwidthMbps(speed)}
                           className={cn(
-                            "flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer relative",
+                            "flex flex-col items-center justify-center py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl border text-center transition-all cursor-pointer relative",
                             isSelected
                               ? (isDark ? "bg-cyan-500/20 border-cyan-400 text-white shadow-sm ring-1 ring-cyan-400" : "bg-cyan-50 border-cyan-600 text-cyan-900 shadow-sm ring-2 ring-cyan-600/30")
                               : (isDark ? "bg-[#060b14] border-slate-800 text-zinc-300 hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300")
                           )}
                         >
-                          <span className="font-bold text-sm sm:text-base font-mono">{speed} Mbps</span>
-                          <span className={cn("text-[10px] mt-1 font-medium", speed === 100 ? "text-emerald-400 font-bold" : (isDark ? "text-zinc-400" : "text-slate-500"))}>
+                          <span className="font-bold text-xs sm:text-sm font-mono tracking-tight">{speed} Mbps</span>
+                          <span className={cn(
+                            "text-[10px] sm:text-[11px] mt-0.5 font-semibold",
+                            speed === 100
+                              ? (isSelected ? "text-cyan-300 font-bold" : (isDark ? "text-cyan-400" : "text-cyan-600"))
+                              : (isSelected ? (isDark ? "text-cyan-200" : "text-cyan-800") : (isDark ? "text-zinc-400" : "text-slate-500"))
+                          )}>
                             {speed === 100 ? "FREE" : `+${formatRupiah(monthlyPrice)}/mo`}
                           </span>
                         </button>
