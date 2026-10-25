@@ -41,7 +41,7 @@ export async function getBandwidthOptions(): Promise<number[]> {
     const setting = await prisma.setting.findUnique({ where: { key: BANDWIDTH_SETTING_KEY } });
     if (!setting?.value) return [...DEFAULT_BANDWIDTH_OPTIONS];
     const parsed = sanitizeBandwidthOptions(JSON.parse(setting.value));
-    return parsed.length > 1 ? parsed : [...DEFAULT_BANDWIDTH_OPTIONS];
+    return parsed.length > 0 ? parsed : [...DEFAULT_BANDWIDTH_OPTIONS];
   } catch {
     return [...DEFAULT_BANDWIDTH_OPTIONS];
   }

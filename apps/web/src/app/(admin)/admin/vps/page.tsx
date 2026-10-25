@@ -2,13 +2,14 @@
 
 import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical } from "lucide-react";
+import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Reorder } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
+import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
 type VpsService = {
   id: number;
@@ -147,6 +148,26 @@ export default function VpsManagementPage() {
     }
   };
 
+  const fetchBandwidth = async () => {
+    setLoadingBandwidth(true);
+    try {
+      const res = await fetch("/api/admin/vps/bandwidth");
+      const data = await res.json();
+      if (!data.error && Array.isArray(data.bandwidthOptions)) {
+        setBandwidthOptions(data.bandwidthOptions);
+        if (data.ratePerHour !== undefined) {
+          setBandwidthRatePerHour(data.ratePerHour);
+          setNewBandwidthRateInput(String(data.ratePerHour));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch bandwidth options:", error);
+    } finally {
+      setLoadingBandwidth(false);
+      setInitialLoad(false);
+    }
+  };
+
   const fetchPlans = async () => {
     setLoadingPlans(true);
     try {
@@ -195,6 +216,72 @@ export default function VpsManagementPage() {
   const [pricing, setPricing] = useState<any[]>([]);
   const [loadingPricing, setLoadingPricing] = useState(false);
   const [savingPricing, setSavingPricing] = useState(false);
+
+  // Bandwidth Speed State
+  const [bandwidthOptions, setBandwidthOptions] = useState<number[]>([100, 150, 200, 250, 300]);
+  const [bandwidthRatePerHour, setBandwidthRatePerHour] = useState<number>(69);
+  const [newBandwidthRateInput, setNewBandwidthRateInput] = useState<string>("69");
+  const [loadingBandwidth, setLoadingBandwidth] = useState(false);
+  const [savingBandwidth, setSavingBandwidth] = useState(false);
+  const [newBandwidthInput, setNewBandwidthInput] = useState<string>("");
+  const [showDeleteBandwidthModal, setShowDeleteBandwidthModal] = useState<number | null>(null);
+
+  const handleSaveBandwidth = async () => {
+    setSavingBandwidth(true);
+    try {
+      const res = await fetch("/api/admin/vps/bandwidth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bandwidthOptions,
+          ratePerHour: Number(newBandwidthRateInput) || bandwidthRatePerHour,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || "Bandwidth options saved");
+        setBandwidthOptions(data.bandwidthOptions);
+        if (data.ratePerHour !== undefined) setBandwidthRatePerHour(data.ratePerHour);
+      } else {
+        toast.error(data.error || "Failed to save bandwidth options");
+      }
+    } catch (err) {
+      toast.error("Failed to connect to server");
+    } finally {
+      setSavingBandwidth(false);
+    }
+  };
+
+  const handleAddBandwidth = (speedToAdd?: number) => {
+    const val = speedToAdd !== undefined ? speedToAdd : parseInt(newBandwidthInput);
+    if (isNaN(val) || val < 100) {
+      toast.error("Bandwidth speed must be at least 100 Mbps");
+      return;
+    }
+    if (val % 50 !== 0) {
+      toast.error("Bandwidth speed must be a multiple of 50 Mbps (e.g. 150, 200, 250, 300, 500)");
+      return;
+    }
+    if (bandwidthOptions.includes(val)) {
+      toast.error(`Bandwidth ${val} Mbps is already in the list`);
+      return;
+    }
+    const updated = [...bandwidthOptions, val].sort((a, b) => a - b);
+    setBandwidthOptions(updated);
+    setNewBandwidthInput("");
+    toast.success(`Added ${val} Mbps tier (click Save Changes to apply)`);
+  };
+
+  const handleRemoveBandwidth = (speed: number) => {
+    if (speed === 100) {
+      toast.error("Base 100 Mbps tier is required and cannot be removed");
+      return;
+    }
+    const updated = bandwidthOptions.filter((s) => s !== speed);
+    setBandwidthOptions(updated);
+    setShowDeleteBandwidthModal(null);
+    toast.info(`Removed ${speed} Mbps (click Save Changes to apply)`);
+  };
 
   // Fixed Plans State
   const [plans, setPlans] = useState<any[]>([]);
@@ -431,6 +518,7 @@ export default function VpsManagementPage() {
     if (activeTab === "templates") fetchTemplates();
     if (activeTab === "pools") fetchPools();
     if (activeTab === "pricing") fetchPricing();
+    if (activeTab === "bandwidth") fetchBandwidth();
     if (activeTab === "reserved-ips") fetchReservedIps();
   }, [activeTab]);
 
@@ -799,6 +887,7 @@ export default function VpsManagementPage() {
               if (activeTab === "pools") fetchPools();
               if (activeTab === "templates") fetchTemplates();
               if (activeTab === "pricing") fetchPricing();
+              if (activeTab === "bandwidth") fetchBandwidth();
               if (activeTab === "services" || activeTab === "k3s") fetchVpsServices();
               if (activeTab === "reserved-ips") fetchReservedIps();
               toast.success("Refreshed data");
@@ -822,6 +911,7 @@ export default function VpsManagementPage() {
             { id: "pools", label: "IP Pools", icon: Network },
             { id: "templates", label: "OS Templates", icon: HardDrive },
             { id: "pricing", label: "Pricing", icon: Receipt },
+            { id: "bandwidth", label: "Bandwidth Speed", icon: Gauge },
             { id: "services", label: "User VPS Services", icon: Server },
             { id: "k3s", label: "Managed K3s", icon: Server },
             { id: "reserved-ips", label: "Reserved IPs", icon: Network },
@@ -849,10 +939,7 @@ export default function VpsManagementPage() {
           <h2 className={cn("text-xl font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Proxmox Server Configuration</h2>
 
           {loadingSettings ? (
-            <div className={cn("flex items-center gap-3", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
-              Loading settings...
-            </div>
+            <PremiumLoader inline />
           ) : (
             <form onSubmit={handleSaveSettings} className="space-y-6">
               {/* API Configuration */}
@@ -1235,11 +1322,8 @@ export default function VpsManagementPage() {
               <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                 {loadingPools ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
-                      <div className="flex flex-col items-center justify-center gap-3">
-                        <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                        <p className="text-sm">Loading IP pools...</p>
-                      </div>
+                    <td colSpan={6} className="px-6 py-6 text-center">
+                      <PremiumLoader inline />
                     </td>
                   </tr>
                 ) : pools.length === 0 ? (
@@ -1321,9 +1405,8 @@ export default function VpsManagementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loadingTemplates ? (
-              <div className="col-span-full py-12 flex flex-col items-center justify-center gap-3 text-zinc-500">
-                <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
-                <p className="text-sm font-medium">Loading templates...</p>
+              <div className="col-span-full py-4">
+                <PremiumLoader inline />
               </div>
             ) : templates.length === 0 ? (
               <div className={cn("col-span-full text-center py-8 glass rounded-xl border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>
@@ -1425,9 +1508,7 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingPricing ? (
-            <div className="flex justify-center py-12">
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            </div>
+            <PremiumLoader inline />
           ) : (
             <form onSubmit={handleSavePricing}>
               <div className="grid gap-4 mb-6">
@@ -1465,6 +1546,258 @@ export default function VpsManagementPage() {
                 </button>
               </div>
             </form>
+          )}
+        </div>
+      )}
+
+      {/* Bandwidth Speed Tab */}
+      {activeTab === "bandwidth" && (
+        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md space-y-6", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <Gauge className="w-5 h-5 text-cyan-400" />
+                Network Bandwidth Speed Management
+              </h2>
+              <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Atur paket kecepatan port speed VPS (100 Mbps, 150 Mbps, 200 Mbps, dst.) yang tersedia untuk pelanggan di formulir order & upgrade.
+              </p>
+            </div>
+            <button
+              onClick={handleSaveBandwidth}
+              disabled={savingBandwidth}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm cursor-pointer disabled:opacity-50 self-start md:self-auto"
+            >
+              {savingBandwidth ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>{savingBandwidth ? "Saving..." : "Save Changes"}</span>
+            </button>
+          </div>
+
+          {loadingBandwidth ? (
+            <PremiumLoader inline />
+          ) : (
+            <div className="space-y-6">
+              {/* Stats & Pricing Banner */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className={cn("p-4 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Base Free Tier</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-emerald-400" : "text-emerald-600")}>100</span>
+                    <span className="text-xs font-bold text-zinc-500">Mbps (Gratis)</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-1">Bawaan standar tiap VPS</p>
+                </div>
+
+                <div className={cn("p-4 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Rate per 50 Mbps Step</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                      Rp {Number(newBandwidthRateInput) || bandwidthRatePerHour}
+                    </span>
+                    <span className="text-xs font-bold text-zinc-500">/ jam</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    ≈ Rp {((Number(newBandwidthRateInput) || bandwidthRatePerHour) * 730).toLocaleString("id-ID")} / bulan
+                  </p>
+                </div>
+
+                <div className={cn("p-4 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Max Slider Cap</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-white" : "text-slate-900")}>
+                      {Math.max(...bandwidthOptions)}
+                    </span>
+                    <span className="text-xs font-bold text-zinc-500">Mbps</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-1">Batas maksimal di slider customer</p>
+                </div>
+
+                <div className={cn("p-4 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Total Active Tiers</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                      {bandwidthOptions.length}
+                    </span>
+                    <span className="text-xs font-bold text-zinc-500">Paket Kecepatan</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-1">Siap dipilih pelanggan</p>
+                </div>
+              </div>
+
+              {/* Add New Speed Tier */}
+              <div className={cn("p-5 rounded-xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Plus className="w-4 h-4" />
+                  Tambah Paket Kecepatan Bandwidth
+                </h3>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                  <div className="relative flex-1">
+                    <input
+                      type="number"
+                      step={50}
+                      min={100}
+                      value={newBandwidthInput}
+                      onChange={(e) => setNewBandwidthInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddBandwidth();
+                        }
+                      }}
+                      placeholder="Contoh: 150, 200, 350, 500, 1000 (kelipatan 50)"
+                      className={cn(
+                        "w-full px-4 py-2.5 rounded-xl border outline-none font-mono text-sm transition-all focus:border-cyan-500",
+                        isDark ? "bg-[#0b1322] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                      )}
+                    />
+                    <span className="absolute right-3.5 top-2.5 text-xs font-bold text-zinc-500 pointer-events-none">Mbps</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddBandwidth()}
+                    disabled={!newBandwidthInput}
+                    className="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Tambah Tier</span>
+                  </button>
+                </div>
+
+                {/* Quick Add Presets */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold text-zinc-500 mr-1">Quick Presets:</span>
+                  {[150, 200, 250, 300, 400, 500, 750, 1000].map((preset) => {
+                    const alreadyHas = bandwidthOptions.includes(preset);
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        disabled={alreadyHas}
+                        onClick={() => handleAddBandwidth(preset)}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1",
+                          alreadyHas
+                            ? isDark ? "bg-white/5 border-white/5 text-zinc-600 cursor-not-allowed" : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                            : isDark ? "bg-[#0b1322] border-slate-700 text-cyan-300 hover:border-cyan-500 hover:bg-cyan-500/10 cursor-pointer" : "bg-white border-slate-300 text-cyan-700 hover:border-cyan-600 hover:bg-cyan-50 cursor-pointer"
+                        )}
+                      >
+                        <span>+{preset}M</span>
+                        {alreadyHas && <CheckCircle className="w-3 h-3 text-emerald-500" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Active Tiers List */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    Daftar Paket Kecepatan Aktif ({bandwidthOptions.length} Tiers)
+                  </h3>
+                  <span className="text-xs text-zinc-500">Urut otomatis dari terkecil ke terbesar</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {bandwidthOptions.map((speed) => {
+                    const isBase = speed === 100;
+                    const extraSteps = Math.max(0, Math.floor((speed - 100) / 50));
+                    const stepRate = Number(newBandwidthRateInput) || bandwidthRatePerHour;
+                    const hourlyPrice = extraSteps * stepRate;
+                    const monthlyPrice = hourlyPrice * 730;
+                    const proxmoxRateMBs = speed / 8;
+
+                    return (
+                      <div
+                        key={speed}
+                        className={cn(
+                          "p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 relative group",
+                          isBase
+                            ? isDark ? "bg-[#060b14] border-emerald-500/30" : "bg-emerald-50/40 border-emerald-300/60"
+                            : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40" : "bg-white border-slate-200 hover:border-cyan-400"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className={cn("text-xl font-black font-mono", isBase ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-white" : "text-slate-900"))}>
+                                {speed} Mbps
+                              </span>
+                              {isBase && (
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-100 text-emerald-800 border-emerald-200")}>
+                                  Free Base
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-mono text-zinc-500 block mt-0.5">
+                              Proxmox rate: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{proxmoxRateMBs} MB/s</strong>
+                            </span>
+                          </div>
+
+                          {!isBase && (
+                            <button
+                              type="button"
+                              onClick={() => setShowDeleteBandwidthModal(speed)}
+                              className={cn(
+                                "p-1.5 rounded-lg border transition-all cursor-pointer opacity-80 group-hover:opacity-100",
+                                isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-zinc-400 hover:text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-slate-400 hover:text-red-600"
+                              )}
+                              title={`Hapus paket ${speed} Mbps`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className={cn("pt-2.5 border-t text-xs flex items-center justify-between", isDark ? "border-slate-800/80" : "border-slate-100")}>
+                          <span className="text-zinc-500 text-[11px]">Harga Pelanggan</span>
+                          <span className={cn("font-bold font-mono", isBase ? "text-emerald-500" : (isDark ? "text-cyan-400" : "text-cyan-700"))}>
+                            {isBase ? "GRATIS" : `+Rp ${monthlyPrice.toLocaleString("id-ID")}/bln (~+Rp ${hourlyPrice}/jam)`}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Live Customer Preview */}
+              <div className={cn("p-5 rounded-2xl border space-y-3", isDark ? "bg-[#060b14] border-cyan-500/30" : "bg-cyan-50/50 border-cyan-200")}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <h3 className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-cyan-300" : "text-cyan-900")}>
+                      Live Customer Preview (Tampilan di Panel Pelanggan)
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-zinc-500">Otomatis sync dengan pilihan di atas</span>
+                </div>
+
+                <div className={cn("p-4 rounded-xl border space-y-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                  <div className="flex items-center justify-between text-xs font-medium">
+                    <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Network Bandwidth (Speed Limit)</span>
+                    <span className="font-mono font-bold text-cyan-400">Pilihan: {bandwidthOptions.join(", ")} Mbps</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {bandwidthOptions.map((speed) => (
+                      <span
+                        key={speed}
+                        className={cn(
+                          "px-3 py-1 rounded-lg text-xs font-mono font-bold border",
+                          speed === 100
+                            ? isDark ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" : "bg-emerald-50 text-emerald-800 border-emerald-300"
+                            : isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40" : "bg-cyan-50 text-cyan-800 border-cyan-300"
+                        )}
+                      >
+                        {speed} Mbps {speed === 100 ? "(Free)" : `(+Rp ${(Math.floor((speed - 100) / 50) * 50000).toLocaleString("id-ID")}/mo)`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -1592,10 +1925,7 @@ export default function VpsManagementPage() {
           )}
 
           {loadingPlans ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 text-zinc-500">
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
-              <p className="text-sm font-medium">Loading plans...</p>
-            </div>
+            <PremiumLoader inline />
           ) : (
             <div className="grid gap-4">
               {filteredPlans.length > 0 && (
@@ -1728,9 +2058,7 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingServices ? (
-            <div className="flex justify-center py-12">
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            </div>
+            <PremiumLoader inline />
           ) : (
             <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
@@ -1979,9 +2307,7 @@ export default function VpsManagementPage() {
           </div>
 
           {loadingReservedIps ? (
-            <div className="flex justify-center py-12">
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            </div>
+            <PremiumLoader inline />
           ) : (
             <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
@@ -2516,6 +2842,14 @@ export default function VpsManagementPage() {
         description="Are you sure you want to remove this IP? The VPS will instantly lose access to it via Proxmox Firewall."
         onConfirm={executeRemoveIp}
         onClose={() => setRemoveIpConfirm(null)}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteBandwidthModal !== null}
+        title="Remove Bandwidth Speed Tier"
+        description={`Are you sure you want to remove ${showDeleteBandwidthModal} Mbps from the available speed options? Existing VPS will remain unaffected, but customers will no longer be able to select or upgrade to this speed.`}
+        onConfirm={() => showDeleteBandwidthModal && handleRemoveBandwidth(showDeleteBandwidthModal)}
+        onClose={() => setShowDeleteBandwidthModal(null)}
       />
     </div>
   );

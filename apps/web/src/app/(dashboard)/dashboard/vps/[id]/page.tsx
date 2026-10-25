@@ -149,6 +149,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [upgradeDisk, setUpgradeDisk] = useState(0);
   const [upgradeBackup, setUpgradeBackup] = useState(0);
   const [upgradeBandwidth, setUpgradeBandwidth] = useState(0);
+  const [bandwidthOptions, setBandwidthOptions] = useState<number[]>([100, 150, 200, 250, 300]);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [maxSpecs, setMaxSpecs] = useState({ cpu: 32, ram: 128, disk: 2000, backup: 2000 });
 
@@ -319,6 +320,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         if (data.hasIpv4Pool !== undefined) setHasIpv4Pool(data.hasIpv4Pool);
         if (data.hasIpv6Pool !== undefined) setHasIpv6Pool(data.hasIpv6Pool);
         if (data.pricing) setPricing(data.pricing);
+        if (data.bandwidthOptions && Array.isArray(data.bandwidthOptions) && data.bandwidthOptions.length > 0) {
+          setBandwidthOptions(data.bandwidthOptions);
+        }
 
         // Init upgrade sliders (using functional update to avoid stale closures in setInterval)
         setUpgradeCores(prev => prev === 0 ? data.vps.cpuCores : prev);
@@ -2298,36 +2302,48 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           100 Mbps Base Free • Upgrade: Rp 50.000 / 50 Mbps / mo (~Rp 69/hr)
                         </span>
                       </div>
-                      <input
-                        type="range"
-                        min={currentBandwidthMbps} max={Math.max(1000, currentBandwidthMbps)} step={50}
-                        value={safeUpgradeBandwidthMbps}
-                        onChange={(e) => setUpgradeBandwidth(parseInt(e.target.value))}
-                        style={{ backgroundSize: `${((safeUpgradeBandwidthMbps - currentBandwidthMbps) / Math.max(1, Math.max(1000, currentBandwidthMbps) - currentBandwidthMbps)) * 100}% 100%` }}
-                        className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
-                      />
-                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
-                        <span>{currentBandwidthMbps} Mbps (Current)</span>
-                        <span>{Math.max(1000, currentBandwidthMbps)} Mbps Max</span>
-                      </div>
-                      {/* Quick preset buttons */}
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {[100, 150, 200, 250, 300, 500, 1000].filter(speed => speed >= currentBandwidthMbps).map(speed => (
-                          <button
-                            key={speed}
-                            type="button"
-                            onClick={() => setUpgradeBandwidth(speed)}
-                            className={cn(
-                              "px-2.5 py-1 text-xs font-mono rounded-lg border transition-all",
-                              safeUpgradeBandwidthMbps === speed
-                                ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-semibold"
-                                : isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20" : "bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300"
-                            )}
-                          >
-                            {speed}M
-                          </button>
-                        ))}
-                      </div>
+                      {(() => {
+                        const maxAllowedBandwidth = Math.max(currentBandwidthMbps, ...bandwidthOptions);
+                        const displayedBandwidth = Math.min(Math.max(safeUpgradeBandwidthMbps, currentBandwidthMbps), maxAllowedBandwidth);
+                        const rangeSpan = Math.max(1, maxAllowedBandwidth - currentBandwidthMbps);
+                        const progressPct = ((displayedBandwidth - currentBandwidthMbps) / rangeSpan) * 100;
+                        return (
+                          <>
+                            <input
+                              type="range"
+                              min={currentBandwidthMbps}
+                              max={maxAllowedBandwidth}
+                              step={50}
+                              value={displayedBandwidth}
+                              onChange={(e) => setUpgradeBandwidth(parseInt(e.target.value))}
+                              style={{ backgroundSize: `${progressPct}% 100%` }}
+                              className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
+                            />
+                            <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                              <span>{currentBandwidthMbps} Mbps (Current)</span>
+                              <span>{maxAllowedBandwidth} Mbps Max</span>
+                            </div>
+                            {/* Quick preset buttons from admin config */}
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {bandwidthOptions.filter(speed => speed >= currentBandwidthMbps).map(speed => (
+                                <button
+                                  key={speed}
+                                  type="button"
+                                  onClick={() => setUpgradeBandwidth(speed)}
+                                  className={cn(
+                                    "px-2.5 py-1 text-xs font-mono rounded-lg border transition-all cursor-pointer",
+                                    safeUpgradeBandwidthMbps === speed
+                                      ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-semibold"
+                                      : isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20" : "bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300"
+                                  )}
+                                >
+                                  {speed}M
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                       {addedBandwidthMbps > 0 && (
                         <div className={cn(
                           "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",

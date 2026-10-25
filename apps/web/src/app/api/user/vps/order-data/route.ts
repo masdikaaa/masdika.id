@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { getBandwidthOptions } from "@/lib/vps-bandwidth";
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -146,7 +147,7 @@ export async function GET(req: Request) {
       templates,
       plans,
       pricing: pricingMap,
-      bandwidthOptions: [100, 150, 200, 250, 300],
+      bandwidthOptions: await getBandwidthOptions(),
       hasIpv4Pool: ipv4PoolsCount > 0,
       hasIpv6Pool: ipv6PoolsCount > 0,
       maxSpecs,

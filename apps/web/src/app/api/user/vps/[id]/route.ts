@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { getBandwidthOptions } from "@/lib/vps-bandwidth";
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -172,7 +173,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       maxSpecs,
       hasIpv4Pool: ipv4PoolsCount > 0,
       hasIpv6Pool: ipv6PoolsCount > 0,
-      pricing
+      pricing,
+      bandwidthOptions: await getBandwidthOptions()
     });
   } catch (error) {
     console.error("GET VPS detail error:", error);
