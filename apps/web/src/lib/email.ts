@@ -1,14 +1,66 @@
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
-import { decryptDeterministic } from '@/lib/encryption';
+import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
 
 const FROM_EMAIL = process.env.SMTP_FROM_EMAIL || 'no-reply@masdika.id';
 const FROM_NAME = process.env.SMTP_FROM_NAME || 'Masdika.ID';
 
 let transporterInstance: nodemailer.Transporter | null = null;
 
+export const logEmailRecord = async ({
+  userId,
+  to,
+  subject,
+  html,
+  type = 'system',
+  status = 'SENT',
+  error,
+}: {
+  userId?: number | null;
+  to: string;
+  subject: string;
+  html: string;
+  type?: string;
+  status?: string;
+  error?: string;
+}) => {
+  try {
+    let resolvedUserId = userId;
+    const recipientStr = (to || '').trim();
+    const cleanEmail = /<([^>]+)>/.exec(recipientStr)?.[1] || recipientStr;
+
+    if (!resolvedUserId && cleanEmail) {
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: cleanEmail },
+            { email: encryptDeterministic(cleanEmail) }
+          ]
+        },
+        select: { id: true }
+      });
+      if (user) resolvedUserId = user.id;
+    }
+
+    return await prisma.emailLog.create({
+      data: {
+        userId: resolvedUserId || null,
+        to: recipientStr,
+        subject: subject || '(No Subject)',
+        body: html || '',
+        type,
+        status,
+        error: error || null,
+      }
+    });
+  } catch (err) {
+    console.warn('Failed to log email to database:', err);
+    return null;
+  }
+};
+
 // Create a transporter config based on .env
-const getTransporter = () => {
+export const getTransporter = () => {
   if (!transporterInstance) {
     const port = parseInt(process.env.SMTP_PORT || '465', 10);
     transporterInstance = nodemailer.createTransport({
@@ -30,6 +82,26 @@ const getTransporter = () => {
         minVersion: 'TLSv1.2',
       },
     });
+
+    // Wrap sendMail to automatically record email logs
+    const originalSendMail = transporterInstance.sendMail.bind(transporterInstance);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (transporterInstance as any).sendMail = async function (mailOptions: any, callback?: any) {
+      try {
+        const result = await originalSendMail(mailOptions, callback);
+        const to = Array.isArray(mailOptions.to) ? mailOptions.to.join(', ') : (mailOptions.to || '');
+        const subject = mailOptions.subject || '';
+        const html = (mailOptions.html || mailOptions.text || '').toString();
+        logEmailRecord({ to, subject, html, status: 'SENT' }).catch(() => {});
+        return result;
+      } catch (err: any) {
+        const to = Array.isArray(mailOptions.to) ? mailOptions.to.join(', ') : (mailOptions.to || '');
+        const subject = mailOptions.subject || '';
+        const html = (mailOptions.html || mailOptions.text || '').toString();
+        logEmailRecord({ to, subject, html, status: 'FAILED', error: err?.message || String(err) }).catch(() => {});
+        throw err;
+      }
+    };
 
     // Background verify connection pool to warm up sockets
     transporterInstance.verify().catch((err) => {

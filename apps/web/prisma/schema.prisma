@@ -56,6 +56,7 @@ model User {
   vpcNetworks        VpcNetwork[]
   vpsServices        VpsService[]
   withdrawalRequests WithdrawalRequest[]
+  emailLogs          EmailLog[]
 
   @@index([createdAt])
 }
@@ -1080,4 +1081,22 @@ model VpsSchedule {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   vps       VpsService @relation(fields: [vpsId], references: [id], onDelete: Cascade)
+}
+
+model EmailLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  to        String
+  subject   String
+  body      String   @db.Text
+  type      String?  @default("system")
+  status    String   @default("SENT")
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([to])
+  @@index([createdAt])
 }

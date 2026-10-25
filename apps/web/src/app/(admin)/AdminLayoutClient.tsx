@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, Wallet, Sun, Moon, Globe, Star, UploadCloud, Boxes } from "lucide-react";
+import { LayoutDashboard, FolderGit2, FileText, MessageSquare, Settings, LogOut, Search, Bell, MessageCircle, Briefcase, ShieldBan, ShieldAlert, Heart, Mail, Users, HardDrive, Calendar, BookOpen, LayoutList, Bot, Key, Receipt, CreditCard, Ticket, Network, Terminal, Activity, Gift, Wallet, Sun, Moon, Globe, Star, UploadCloud, Boxes, Send } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
@@ -24,6 +24,7 @@ const SIDEBAR_LINKS = [
   { name: "Live Chat", href: "/admin/live-chat", icon: MessageSquare, color: "text-cyan-300", group: "Engagement & Community" },
   { name: "Chat History", href: "/admin/chat-history", icon: Bot, color: "text-rose-400", group: "Engagement & Community" },
   { name: "Newsletter", href: "/admin/newsletter", icon: Mail, color: "text-orange-400", group: "Engagement & Community" },
+  { name: "Email Blast", href: "/admin/email-blast", icon: Send, color: "text-cyan-400", group: "Engagement & Community" },
   { name: "Community", href: "/admin/community", icon: Users, color: "text-fuchsia-400", group: "Engagement & Community" },
   { name: "Media Reviews", href: "/admin/media-reviews", icon: Star, color: "text-cyan-400", group: "Engagement & Community" },
 

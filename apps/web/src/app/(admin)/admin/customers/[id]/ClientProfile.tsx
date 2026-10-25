@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
-import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud } from 'lucide-react';
+import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { SiKubernetes } from 'react-icons/si';
 import { toast } from 'sonner';
@@ -119,6 +119,65 @@ export default function ClientProfile({ userId }: { userId: string }) {
   // Edit Service Modal
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
+
+  // Email Logs State (WHMCS-style)
+  const [emailLogs, setEmailLogs] = useState<any[]>([]);
+  const [loadingEmails, setLoadingEmails] = useState(false);
+  const [viewingEmail, setViewingEmail] = useState<any | null>(null);
+  const [deleteEmailId, setDeleteEmailId] = useState<number | null>(null);
+  const [isDeletingEmail, setIsDeletingEmail] = useState(false);
+  const [emailCurrentPage, setEmailCurrentPage] = useUrlNumber("emailPage", 1);
+  const emailsPerPage = 10;
+
+  const fetchEmailLogs = async () => {
+    setLoadingEmails(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/emails`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setEmailLogs(data.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to load email logs:", err);
+    } finally {
+      setLoadingEmails(false);
+    }
+  };
+
+  const handleDeleteEmailLog = async () => {
+    if (!deleteEmailId) return;
+    setIsDeletingEmail(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/emails/${deleteEmailId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        toast.success("Email log deleted successfully");
+        setEmailLogs(prev => prev.filter(e => e.id !== deleteEmailId));
+        setDeleteEmailId(null);
+      } else {
+        toast.error("Failed to delete email log");
+      }
+    } catch {
+      toast.error("An error occurred while deleting email log");
+    } finally {
+      setIsDeletingEmail(false);
+    }
+  };
+
+  const formatEmailDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      return `${day}/${month}/${year} ${hours}:${mins}`;
+    } catch {
+      return dateStr;
+    }
+  };
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -241,6 +300,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
   useEffect(() => {
     fetchUserData();
   }, [userId]);
+
+  useEffect(() => {
+    if (activeTab === 'emails') {
+      fetchEmailLogs();
+    }
+  }, [activeTab, userId]);
 
 
 
@@ -394,7 +459,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
           {[
             { key: 'summary', label: 'Summary', icon: User },
             { key: 'services', label: 'Products/Services', icon: Server },
-            { key: 'invoices', label: 'Invoices', icon: FileText }
+            { key: 'invoices', label: 'Invoices', icon: FileText },
+            { key: 'emails', label: 'Emails', icon: Mail }
           ].map(tab => (
             <button
               key={tab.key}
@@ -611,6 +677,155 @@ export default function ClientProfile({ userId }: { userId: string }) {
           </div>
         )}
 
+        {/* EMAILS TAB (WHMCS-style Email Log) */}
+        {activeTab === 'emails' && (
+          <div className="space-y-4">
+            {/* Header Toolbar matching WHMCS Image 1 */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+              <div className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                {emailLogs.length} Records Found, Page {emailCurrentPage} of {Math.max(1, Math.ceil(emailLogs.length / emailsPerPage))}
+              </div>
+              <div className="flex items-center gap-3">
+                {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Jump to Page:</span>
+                    <select
+                      value={emailCurrentPage}
+                      onChange={(e) => setEmailCurrentPage(Number(e.target.value))}
+                      className={cn(
+                        "px-2 py-1 rounded border text-xs outline-none transition-colors",
+                        isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-800"
+                      )}
+                    >
+                      {Array.from({ length: Math.ceil(emailLogs.length / emailsPerPage) }, (_, i) => i + 1).map(p => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => router.push(`/admin/email-blast?userId=${userId}`)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-xs cursor-pointer"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Send Email</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Table matching WHMCS Image 1 */}
+            <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className={cn("text-xs font-semibold border-b", isDark ? "bg-[#0c1f38] text-cyan-200 border-slate-800" : "bg-[#0284c7] text-white border-sky-600")}>
+                      <th className="py-3 px-4 w-44 font-semibold whitespace-nowrap">Date ▼</th>
+                      <th className="py-3 px-4 font-semibold">Subject</th>
+                      <th className="py-3 px-4 w-24 text-right font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className={cn("divide-y text-sm", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
+                    {loadingEmails ? (
+                      <tr>
+                        <td colSpan={3} className="py-16 text-center">
+                          <div className="flex justify-center items-center h-48">
+                            <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
+                          </div>
+                        </td>
+                      </tr>
+                    ) : emailLogs.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className={cn("p-12 text-center text-sm", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          No email logs found for this customer.
+                        </td>
+                      </tr>
+                    ) : (
+                      emailLogs.slice((emailCurrentPage - 1) * emailsPerPage, emailCurrentPage * emailsPerPage).map((log) => (
+                        <tr key={log.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
+                          <td className={cn("py-3.5 px-4 text-xs font-mono whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>
+                            {formatEmailDate(log.createdAt)}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <button
+                              type="button"
+                              onClick={() => setViewingEmail(log)}
+                              className={cn(
+                                "text-left font-medium hover:underline flex items-center gap-1.5 transition-colors cursor-pointer",
+                                isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-700 hover:text-cyan-800"
+                              )}
+                            >
+                              <span>{log.subject}</span>
+                              <Paperclip className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                            </button>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setViewingEmail(log)}
+                                title="View Message"
+                                className={cn(
+                                  "p-1.5 rounded-lg border transition-all cursor-pointer",
+                                  isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700 shadow-xs"
+                                )}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteEmailId(log.id)}
+                                title="Delete Email Log"
+                                className={cn(
+                                  "p-1.5 rounded-lg border transition-all cursor-pointer",
+                                  isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-red-600 shadow-xs"
+                                )}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination matching WHMCS Image 1 */}
+              {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
+                <div className={cn("p-3 px-4 border-t flex items-center justify-between", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                  <button
+                    type="button"
+                    disabled={emailCurrentPage === 1}
+                    onClick={() => setEmailCurrentPage(p => Math.max(1, p - 1))}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
+                      isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                    )}
+                  >
+                    « Previous Page
+                  </button>
+                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    Page {emailCurrentPage} of {Math.ceil(emailLogs.length / emailsPerPage)}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={emailCurrentPage >= Math.ceil(emailLogs.length / emailsPerPage)}
+                    onClick={() => setEmailCurrentPage(p => Math.min(Math.ceil(emailLogs.length / emailsPerPage), p + 1))}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
+                      isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                    )}
+                  >
+                    Next Page »
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
 
       <AdminEditServiceModal 
@@ -717,6 +932,78 @@ export default function ClientProfile({ userId }: { userId: string }) {
         isLoading={isDeleting}
       />
 
+      {/* Delete Email Log Modal */}
+      <ConfirmModal
+        isOpen={deleteEmailId !== null}
+        onClose={() => setDeleteEmailId(null)}
+        onConfirm={handleDeleteEmailLog}
+        title="Delete Email Log"
+        description="Are you sure you want to delete this email message record? This action cannot be undone."
+        confirmText="Delete Log"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isDeletingEmail}
+      />
+
+      {/* Viewing Email Message Modal (matching WHMCS Image 3) */}
+      {viewingEmail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={cn("w-full max-w-4xl max-h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+            {/* Header */}
+            <div className={cn("px-6 py-3.5 border-b flex items-center justify-between", isDark ? "bg-[#0c1f38] border-slate-800" : "bg-[#0284c7] text-white border-sky-600")}>
+              <h3 className="font-bold text-base text-white flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Viewing Email Message
+              </h3>
+              <button
+                type="button"
+                onClick={() => setViewingEmail(null)}
+                className="text-white/80 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Email Metadata Details */}
+            <div className={cn("px-6 py-4 border-b text-xs space-y-1.5", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <Mail className="w-4 h-4 text-cyan-500 shrink-0" />
+                <span className={isDark ? "text-white" : "text-slate-900"}>{viewingEmail.subject}</span>
+              </div>
+              <div className="text-xs">
+                <span className="font-semibold text-zinc-500">To:</span> {viewingEmail.to}
+              </div>
+              <div className="text-xs text-zinc-500 font-mono">
+                <span className="font-semibold">Date:</span> {formatEmailDate(viewingEmail.createdAt)}
+              </div>
+            </div>
+
+            {/* Email Body Iframe */}
+            <div className="flex-1 p-3 sm:p-4 overflow-hidden bg-slate-100 flex flex-col min-h-[380px]">
+              <iframe
+                title="Email Message Preview"
+                srcDoc={viewingEmail.body}
+                sandbox="allow-same-origin allow-popups"
+                className="w-full flex-1 rounded-xl bg-white border border-slate-300 shadow-inner min-h-[420px]"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className={cn("px-6 py-3.5 border-t flex justify-end gap-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <button
+                type="button"
+                onClick={() => setViewingEmail(null)}
+                className={cn(
+                  "px-6 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-xs",
+                  isDark ? "border-slate-700 text-zinc-300 hover:bg-white/5" : "border-slate-300 text-slate-700 hover:bg-white"
+                )}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
