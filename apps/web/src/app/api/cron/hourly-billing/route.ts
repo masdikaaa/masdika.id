@@ -26,6 +26,14 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: true, message: "Skipped (Runs hourly at minute 0)" });
     }
 
+    // Auto-unsuspend any eligible suspended services with sufficient balance
+    try {
+      const { attemptAutoUnsuspendAll } = await import('@/lib/auto-unsuspend');
+      await attemptAutoUnsuspendAll();
+    } catch (unsuspendErr) {
+      console.warn("Auto-unsuspend in hourly-billing error:", unsuspendErr);
+    }
+
     // Find all ACTIVE PAYG subscriptions whose hour has expired
     const dueSubscriptions = await prisma.subscription.findMany({
       where: {

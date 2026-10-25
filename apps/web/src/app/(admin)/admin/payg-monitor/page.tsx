@@ -122,7 +122,7 @@ export default function PaygMonitorPage() {
             PAYG Billing Monitor
           </h1>
           <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Pantau kecukupan saldo customer, estimasi masa aktif, potongan otomatis per jam, dan siklus bulanan.
+            Monitor customer balance sufficiency, estimated runtime, hourly burn rate, and billing cycle rotation.
           </p>
         </div>
         <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -147,7 +147,7 @@ export default function PaygMonitorPage() {
         {/* Card 1: PAYG Customers */}
         <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Customer</span>
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Customers</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
@@ -156,7 +156,7 @@ export default function PaygMonitorPage() {
             {customers.length}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            Akun PAYG Terdaftar
+            Registered PAYG Accounts
           </div>
         </div>
 
@@ -166,7 +166,7 @@ export default function PaygMonitorPage() {
           className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-emerald-500/40" : "bg-white border-slate-200 shadow-sm hover:border-emerald-500/40")}
         >
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Saldo Cukup</span>
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Healthy Balance</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600")}>
               <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
@@ -175,7 +175,7 @@ export default function PaygMonitorPage() {
             {sufficientCount}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-emerald-500 truncate")}>
-            Aman & Operasional
+            Safe & Operational
           </div>
         </div>
 
@@ -185,7 +185,7 @@ export default function PaygMonitorPage() {
           className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-amber-500/40" : "bg-white border-slate-200 shadow-sm hover:border-amber-500/40")}
         >
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Perlu Top-up</span>
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Needs Top-up</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600")}>
               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
@@ -194,7 +194,7 @@ export default function PaygMonitorPage() {
             {lowCount + exhaustedCount}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-amber-500 truncate")}>
-            {exhaustedCount > 0 ? `${exhaustedCount} Habis, ${lowCount} Menipis` : 'Menipis (<24 jam)'}
+            {exhaustedCount > 0 ? `${exhaustedCount} Exhausted, ${lowCount} Low` : 'Low (<24 hrs)'}
           </div>
         </div>
 
@@ -210,7 +210,7 @@ export default function PaygMonitorPage() {
             {formatRupiah(customers.reduce((acc, c) => acc + c.totalAccumulatedCost, 0))}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            Akumulasi Siklus Berjalan
+            Current Cycle Accumulated
           </div>
         </div>
       </div>
@@ -265,7 +265,7 @@ export default function PaygMonitorPage() {
                   Active PAYG Customers ({filteredCustomers.length})
                 </h2>
                 <p className={cn("text-xs font-normal mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  Monitoring saldo akun, tarif pemotongan per jam, dan kecukupan operasional
+                  Monitor account balances, hourly burn deductions, and service runtime
                 </p>
               </div>
               <div className="relative w-full sm:w-64 shrink-0">
@@ -283,10 +283,10 @@ export default function PaygMonitorPage() {
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
               {(
                 [
-                  { key: 'ALL' as const, label: 'Semua Status', count: customers.length },
-                  { key: 'SUFFICIENT' as const, label: '✓ Saldo Cukup', count: sufficientCount },
-                  { key: 'LOW' as const, label: '⚠ Saldo Menipis', count: lowCount },
-                  { key: 'EXHAUSTED' as const, label: '✕ Saldo Habis', count: exhaustedCount },
+                  { key: 'ALL' as const, label: 'All Status', count: customers.length },
+                  { key: 'SUFFICIENT' as const, label: '✓ Sufficient', count: sufficientCount },
+                  { key: 'LOW' as const, label: '⚠ Low Balance', count: lowCount },
+                  { key: 'EXHAUSTED' as const, label: '✕ Exhausted', count: exhaustedCount },
                 ]
               ).map((tab) => (
                 <button
@@ -328,11 +328,11 @@ export default function PaygMonitorPage() {
                   <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
                     <tr>
                       <th className="py-3 px-3 sm:px-4 rounded-l-lg font-semibold">Customer</th>
-                      <th className="py-3 px-3 sm:px-4 font-semibold text-right">Saldo Customer</th>
-                      <th className="py-3 px-3 sm:px-4 font-semibold text-right">Tarif / Jam</th>
-                      <th className="py-3 px-3 sm:px-4 font-semibold text-center">Status Saldo</th>
-                      <th className="py-3 px-2 sm:px-3 font-semibold text-center">Layanan</th>
-                      <th className="py-3 px-3 sm:px-4 rounded-r-lg font-semibold text-right">Unbilled Siklus</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold text-right">Customer Balance</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold text-right">Hourly Rate</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold text-center">Balance Status</th>
+                      <th className="py-3 px-2 sm:px-3 font-semibold text-center">Services</th>
+                      <th className="py-3 px-3 sm:px-4 rounded-r-lg font-semibold text-right">Unbilled Cycle</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -361,37 +361,37 @@ export default function PaygMonitorPage() {
                             {formatRupiah(cust.balance)}
                           </td>
                           <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-semibold text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                            {formatRupiah(cust.totalHourlyBurn)}<span className="text-[10px] font-normal text-zinc-500">/jam</span>
+                            {formatRupiah(cust.totalHourlyBurn)}<span className="text-[10px] font-normal text-zinc-500">/hr</span>
                           </td>
                           <td className="py-3 sm:py-4 px-3 sm:px-4 text-center">
                             {cust.balanceStatus === 'SUFFICIENT' ? (
                               <div className="inline-flex flex-col items-center">
                                 <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold", isDark ? "bg-emerald-500/15 border border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border border-emerald-200 text-emerald-700")}>
                                   <CheckCircle2 className="w-3 h-3 shrink-0" />
-                                  Saldo Cukup
+                                  Sufficient
                                 </span>
                                 <span className={cn("text-[9px] sm:text-[10px] mt-0.5", isDark ? "text-emerald-400/80" : "text-emerald-700")}>
-                                  ~{cust.remainingDays > 0 ? `${cust.remainingDays} hari` : `${cust.remainingHours} jam`}
+                                  ~{cust.remainingDays > 0 ? `${cust.remainingDays} days` : `${cust.remainingHours} hrs`}
                                 </span>
                               </div>
                             ) : cust.balanceStatus === 'LOW' ? (
                               <div className="inline-flex flex-col items-center">
                                 <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold", isDark ? "bg-amber-500/15 border border-amber-500/25 text-amber-400" : "bg-amber-50 border border-amber-200 text-amber-700")}>
                                   <AlertTriangle className="w-3 h-3 shrink-0" />
-                                  Saldo Menipis
+                                  Low Balance
                                 </span>
                                 <span className={cn("text-[9px] sm:text-[10px] mt-0.5", isDark ? "text-amber-400/80" : "text-amber-700")}>
-                                  Sisa ~{cust.remainingHours} jam
+                                  ~{cust.remainingHours} hrs left
                                 </span>
                               </div>
                             ) : (
                               <div className="inline-flex flex-col items-center">
                                 <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold", isDark ? "bg-rose-500/15 border border-rose-500/25 text-rose-400" : "bg-rose-50 border border-rose-200 text-rose-700")}>
                                   <XCircle className="w-3 h-3 shrink-0" />
-                                  Saldo Habis
+                                  Exhausted
                                 </span>
                                 <span className={cn("text-[9px] sm:text-[10px] mt-0.5", isDark ? "text-rose-400/80" : "text-rose-700")}>
-                                  Perlu Top-up
+                                  Top-up Required
                                 </span>
                               </div>
                             )}
@@ -415,9 +415,9 @@ export default function PaygMonitorPage() {
                                   <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800")}>
                                     <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
                                     <div>
-                                      <span className="font-bold text-emerald-400">Saldo Sangat Cukup & Operasional Aman. </span>
+                                      <span className="font-bold text-emerald-400">Healthy Balance & Normal Operation. </span>
                                       <span className={cn("leading-relaxed", isDark ? "text-emerald-200/90" : "text-slate-600")}>
-                                        Saldo saat ini <strong>{formatRupiah(cust.balance)}</strong> dengan estimasi burn rate <strong>{formatRupiah(cust.totalHourlyBurn)}/jam</strong>. Saldo mampu menopang operasional selama <strong>~{cust.remainingDays > 0 ? `${cust.remainingDays} hari (${cust.remainingHours} jam)` : `${cust.remainingHours} jam`}</strong> ke depan.
+                                        Current balance is <strong>{formatRupiah(cust.balance)}</strong> with an estimated burn rate of <strong>{formatRupiah(cust.totalHourlyBurn)}/hr</strong>. Balance is sufficient for <strong>~{cust.remainingDays > 0 ? `${cust.remainingDays} days (${cust.remainingHours} hrs)` : `${cust.remainingHours} hrs`}</strong> of continuous operation.
                                       </span>
                                     </div>
                                   </div>
@@ -426,9 +426,9 @@ export default function PaygMonitorPage() {
                                   <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
                                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
                                     <div>
-                                      <span className="font-bold text-amber-400">Peringatan: Saldo Customer Kritis (&lt; 24 Jam). </span>
+                                      <span className="font-bold text-amber-400">Warning: Critical Low Balance (&lt; 24 Hours). </span>
                                       <span className={cn("leading-relaxed", isDark ? "text-amber-200/90" : "text-slate-600")}>
-                                        Saldo tersisa <strong>{formatRupiah(cust.balance)}</strong> dan hanya cukup untuk sekitar <strong>~{cust.remainingHours} jam</strong> lagi dengan burn rate <strong>{formatRupiah(cust.totalHourlyBurn)}/jam</strong>. Sarankan customer untuk melakukan top-up saldo agar layanan tidak ter-suspend.
+                                        Remaining balance is <strong>{formatRupiah(cust.balance)}</strong>, sufficient for only <strong>~{cust.remainingHours} hrs</strong> at <strong>{formatRupiah(cust.totalHourlyBurn)}/hr</strong> burn rate. Recommend customer to top up soon to prevent service suspension.
                                       </span>
                                     </div>
                                   </div>
@@ -437,9 +437,9 @@ export default function PaygMonitorPage() {
                                   <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-rose-500/10 border-rose-500/25 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-800")}>
                                     <XCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
                                     <div>
-                                      <span className="font-bold text-rose-400">Perhatian: Saldo Habis (Rp 0 atau Kurang). </span>
+                                      <span className="font-bold text-rose-400">Alert: Balance Exhausted (Zero or Negative). </span>
                                       <span className={cn("leading-relaxed", isDark ? "text-rose-200/90" : "text-slate-600")}>
-                                        Saldo customer saat ini <strong>{formatRupiah(cust.balance)}</strong> tidak mencukupi untuk pemotongan jam berikutnya (kebutuhan: <strong>{formatRupiah(cust.totalHourlyBurn)}/jam</strong>). Layanan akan terhenti otomatis jika saldo tidak segera diisi.
+                                        Current balance of <strong>{formatRupiah(cust.balance)}</strong> is insufficient for the next hourly deduction (requires <strong>{formatRupiah(cust.totalHourlyBurn)}/hr</strong>). Services risk automatic suspension if balance is not topped up immediately.
                                       </span>
                                     </div>
                                   </div>
@@ -448,7 +448,7 @@ export default function PaygMonitorPage() {
                                 <div className="flex items-center justify-between mb-3">
                                   <h4 className={cn("text-xs sm:text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                                     <Layers className="w-4 h-4 text-cyan-400" />
-                                    Rincian Layanan PAYG ({cust.services.length})
+                                    PAYG Service Breakdown ({cust.services.length})
                                   </h4>
                                 </div>
                                 <table className="w-full text-left text-xs whitespace-nowrap">

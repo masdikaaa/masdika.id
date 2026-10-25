@@ -276,7 +276,7 @@ export default function EmailBlastPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success(data.message || "Pengaturan SMTP berhasil disimpan");
+        toast.success(data.message || "SMTP settings saved successfully");
         setSmtpConfig(prev => ({
           ...prev,
           isConfigured: Boolean(prev.host && prev.user),
@@ -287,10 +287,10 @@ export default function EmailBlastPage() {
         if (smtpConfig.fromName) setSenderName(smtpConfig.fromName);
         setShowSmtpModal(false);
       } else {
-        toast.error(data.error || "Gagal menyimpan pengaturan SMTP");
+        toast.error(data.error || "Failed to save SMTP settings");
       }
     } catch {
-      toast.error("Terjadi kesalahan saat menyimpan pengaturan");
+      toast.error("An error occurred while saving SMTP settings");
     } finally {
       setSavingSmtp(false);
     }
@@ -306,12 +306,12 @@ export default function EmailBlastPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success(data.message || "Koneksi SMTP Berhasil!");
+        toast.success(data.message || "SMTP Connection Successful!");
       } else {
-        toast.error(data.error || "Koneksi SMTP Gagal");
+        toast.error(data.error || "SMTP Connection Failed");
       }
     } catch {
-      toast.error("Gagal melakukan pengetesan koneksi SMTP");
+      toast.error("Failed to test SMTP connection");
     } finally {
       setTestingSmtp(false);
     }
@@ -1414,9 +1414,9 @@ export default function EmailBlastPage() {
                   <Server className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                 </div>
                 <div>
-                  <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Pengaturan SMTP Email Blast</h3>
+                  <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Email Blast SMTP Configuration</h3>
                   <p className={cn("text-[11px] sm:text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Server SMTP khusus pengiriman promosi & kampanye (info@masdika.id)
+                    Dedicated SMTP server for marketing campaigns & newsletters (info@masdika.id)
                   </p>
                 </div>
               </div>
@@ -1435,7 +1435,7 @@ export default function EmailBlastPage() {
               <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 text-xs", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
                 <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
                 <p className="leading-relaxed">
-                  Pengaturan ini digunakan khusus untuk modul <strong>Email Blast</strong>. Email transaksional utama (seperti OTP pendaftaran, invoice, dan notifikasi pesanan) tetap berjalan independen. Password disimpan terenkripsi di database.
+                  This configuration is used exclusively for the <strong>Email Blast</strong> module. Primary transactional emails (e.g. registration OTP, invoices, order notifications) continue running independently on the system SMTP. Passwords are encrypted.
                 </p>
               </div>
 
@@ -1448,7 +1448,7 @@ export default function EmailBlastPage() {
                     required
                     value={smtpConfig.host}
                     onChange={(e) => setSmtpConfig(prev => ({ ...prev, host: e.target.value }))}
-                    placeholder="mail.masdika.id atau smtp.gmail.com"
+                    placeholder="mail.masdika.id or smtp.gmail.com"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
                       isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
@@ -1476,7 +1476,7 @@ export default function EmailBlastPage() {
 
               {/* Security Mode */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1">Protokol Keamanan</label>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">Security Protocol</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -1525,7 +1525,7 @@ export default function EmailBlastPage() {
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">
                     SMTP Password
                     {smtpConfig.hasPassword && !smtpConfig.pass && (
-                      <span className="text-[10px] text-emerald-400 font-normal ml-1.5">(Tersimpan)</span>
+                      <span className="text-[10px] text-emerald-400 font-normal ml-1.5">(Saved)</span>
                     )}
                   </label>
                   <div className="relative">
@@ -1533,7 +1533,7 @@ export default function EmailBlastPage() {
                       type={showPassword ? "text" : "password"}
                       value={smtpConfig.pass}
                       onChange={(e) => setSmtpConfig(prev => ({ ...prev, pass: e.target.value }))}
-                      placeholder={smtpConfig.hasPassword ? "•••••••• (Biarkan jika tidak diubah)" : "Password email"}
+                      placeholder={smtpConfig.hasPassword ? "•••••••• (Leave blank to keep unchanged)" : "Email password"}
                       className={cn(
                         "w-full px-3.5 py-2 pr-10 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
                         isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
@@ -1553,7 +1553,7 @@ export default function EmailBlastPage() {
               {/* Sender Name & Sender Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Nama Pengirim Default</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Default Sender Name</label>
                   <input
                     type="text"
                     value={smtpConfig.fromName}
@@ -1566,7 +1566,7 @@ export default function EmailBlastPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Email Pengirim Default</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Default Sender Email</label>
                   <input
                     type="email"
                     value={smtpConfig.fromEmail}
@@ -1582,15 +1582,15 @@ export default function EmailBlastPage() {
 
               {/* Status Badge */}
               <div className="pt-2 flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Status SMTP Blast:</span>
+                <span className="text-zinc-400">Blast SMTP Status:</span>
                 {smtpConfig.isConfigured ? (
                   <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Terkonfigurasi Khusus ({smtpConfig.user})
+                    Custom Configured ({smtpConfig.user})
                   </span>
                 ) : (
                   <span className="text-zinc-500">
-                    Menggunakan Default Sistem (.env)
+                    Using System Default (.env)
                   </span>
                 )}
               </div>
@@ -1607,7 +1607,7 @@ export default function EmailBlastPage() {
                   )}
                 >
                   {testingSmtp ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <RefreshCw className="w-3.5 h-3.5 shrink-0" />}
-                  <span>{testingSmtp ? "Menguji Koneksi..." : "Test Koneksi SMTP"}</span>
+                  <span>{testingSmtp ? "Testing Connection..." : "Test SMTP Connection"}</span>
                 </button>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -1616,7 +1616,7 @@ export default function EmailBlastPage() {
                     onClick={() => setShowSmtpModal(false)}
                     className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
-                    Tutup
+                    Close
                   </button>
                   <button
                     type="submit"
@@ -1624,7 +1624,7 @@ export default function EmailBlastPage() {
                     className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {savingSmtp ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Save className="w-3.5 h-3.5 shrink-0" />}
-                    <span>{savingSmtp ? "Menyimpan..." : "Simpan Pengaturan"}</span>
+                    <span>{savingSmtp ? "Saving..." : "Save Settings"}</span>
                   </button>
                 </div>
               </div>

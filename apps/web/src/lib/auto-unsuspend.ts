@@ -348,8 +348,7 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
     const suspendedVps = await prisma.vpsService.findMany({
       where: {
         userId,
-        status: 'SUSPENDED',
-        autoRenew: true
+        status: 'SUSPENDED'
       },
       select: { id: true }
     });
@@ -366,8 +365,7 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
     const suspendedSubs = await prisma.subscription.findMany({
       where: {
         userId,
-        status: 'SUSPENDED',
-        autoRenew: true
+        status: 'SUSPENDED'
       },
       select: { id: true }
     });
