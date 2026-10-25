@@ -25,12 +25,12 @@ export async function GET(req: NextRequest) {
         status: { in: ['RUNNING', 'STOPPED'] },
         hourlyRate: { gt: 0 }
       },
-      include: { user: { select: { id: true, name: true, email: true, image: true } } }
+      include: { user: { select: { id: true, name: true, email: true, image: true, balance: true } } }
     });
 
     const activeIps = await prisma.reservedIp.findMany({
       where: { hourlyRate: { gt: 0 } },
-      include: { user: { select: { id: true, name: true, email: true, image: true } } }
+      include: { user: { select: { id: true, name: true, email: true, image: true, balance: true } } }
     });
 
     const activeSubscriptions = await prisma.subscription.findMany({
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       },
       include: { 
         plan: true,
-        user: { select: { id: true, name: true, email: true, image: true } },
+        user: { select: { id: true, name: true, email: true, image: true, balance: true } },
         invoices: {
           where: { reference: 'PAYG_RUNNING', type: 'SUBSCRIPTION' },
           orderBy: { createdAt: 'desc' as const },
@@ -59,14 +59,17 @@ export async function GET(req: NextRequest) {
           name: decryptDeterministic(user.name),
           email: decryptDeterministic(user.email),
           image: user.image,
+          balance: user.balance || 0,
           services: [],
           totalAccumulatedCost: 0,
+          totalHourlyBurn: 0,
           hasInvoiceThisMonth: false
         });
       }
       const customer = customersMap.get(userId);
       customer.services.push(service);
       customer.totalAccumulatedCost += service.accumulatedCost || 0;
+      customer.totalHourlyBurn += service.hourlyRate || 0;
     };
 
     const pricingItems = await prisma.vpsPricing.findMany();
@@ -141,9 +144,49 @@ export async function GET(req: NextRequest) {
 
     const customers = Array.from(customersMap.values());
 
+    // 5. Calculate Balance Sufficiency & Projected Runtime for each customer
+    for (const customer of customers) {
+      const balance = customer.balance || 0;
+      const hourlyBurn = customer.totalHourlyBurn || 0;
+
+      let balanceStatus: 'SUFFICIENT' | 'LOW' | 'EXHAUSTED' = 'SUFFICIENT';
+      let remainingHours = 0;
+      let remainingDays = 0;
+
+      if (hourlyBurn > 0) {
+        remainingHours = Math.floor(balance / hourlyBurn);
+        remainingDays = Math.floor(remainingHours / 24);
+      } else {
+        remainingHours = balance > 0 ? 999999 : 0;
+        remainingDays = balance > 0 ? 99999 : 0;
+      }
+
+      if (balance <= 0 || (hourlyBurn > 0 && balance < hourlyBurn)) {
+        balanceStatus = 'EXHAUSTED'; // Saldo Habis / Kritis (Segera Suspend)
+      } else if (remainingHours < 24) {
+        balanceStatus = 'LOW'; // Saldo Menipis (<24 jam)
+      } else {
+        balanceStatus = 'SUFFICIENT'; // Saldo Cukup
+      }
+
+      customer.balanceStatus = balanceStatus;
+      customer.remainingHours = remainingHours;
+      customer.remainingDays = remainingDays;
+    }
+
+    const stats = {
+      totalCustomers: customers.length,
+      sufficientCustomers: customers.filter(c => c.balanceStatus === 'SUFFICIENT').length,
+      lowCustomers: customers.filter(c => c.balanceStatus === 'LOW').length,
+      exhaustedCustomers: customers.filter(c => c.balanceStatus === 'EXHAUSTED').length,
+      totalUnbilled: customers.reduce((acc, c) => acc + c.totalAccumulatedCost, 0),
+      totalServices: customers.reduce((acc, c) => acc + c.services.length, 0),
+    };
+
     return NextResponse.json({
       interval,
-      customers
+      customers,
+      stats
     });
 
   } catch (error: any) {

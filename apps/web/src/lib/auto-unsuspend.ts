@@ -47,12 +47,17 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
       return { success: true, unsuspended: false, message: 'VPS is already active' };
     }
 
-    if (!vps.autoRenew) {
-      return { success: false, unsuspended: false, reason: 'AUTORENEW_DISABLED', message: 'Auto-renew is disabled for this VPS' };
+    const hourlyRate = vps.hourlyRate || 0;
+    const user = vps.user;
+    const hasSufficientBalance = vps.isReseller
+      ? user.balance >= (hourlyRate * 730)
+      : (user.balance >= hourlyRate && user.balance > 0);
+
+    if (!vps.autoRenew && !hasSufficientBalance) {
+      return { success: false, unsuspended: false, reason: 'AUTORENEW_DISABLED', message: 'Auto-renew is disabled and balance is insufficient' };
     }
 
     const now = new Date();
-    const user = vps.user;
 
     if (vps.isReseller) {
       const monthlyCost = (vps.hourlyRate || 0) * 730;
@@ -151,7 +156,8 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
             suspendReason: null,
             terminationDate: null,
             expiresAt: newExpires,
-            accumulatedCost: 0
+            accumulatedCost: 0,
+            autoRenew: true
           }
         });
 
@@ -394,8 +400,7 @@ export async function attemptAutoUnsuspendAll() {
   try {
     const suspendedVps = await prisma.vpsService.findMany({
       where: {
-        status: 'SUSPENDED',
-        autoRenew: true
+        status: 'SUSPENDED'
       },
       select: { id: true }
     });
@@ -407,8 +412,7 @@ export async function attemptAutoUnsuspendAll() {
 
     const suspendedSubs = await prisma.subscription.findMany({
       where: {
-        status: 'SUSPENDED',
-        autoRenew: true
+        status: 'SUSPENDED'
       },
       select: { id: true }
     });

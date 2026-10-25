@@ -372,7 +372,14 @@ export async function GET(req: Request) {
 
     for (const vps of expiredVps) {
       try {
-        if (vps.autoRenew) {
+        const hourlyRate = vps.hourlyRate || 0;
+        const hasSufficientBalance = vps.isReseller
+          ? vps.user.balance >= (hourlyRate * 730)
+          : (vps.user.balance >= hourlyRate && vps.user.balance > 0);
+
+        // A PAYG customer with sufficient balance must have their monthly cycle rotated
+        // and keep running smoothly as an existing customer!
+        if (vps.autoRenew || (!vps.isReseller && hasSufficientBalance)) {
           let paymentSuccess = true;
           
           if (vps.isReseller) {
@@ -401,13 +408,15 @@ export async function GET(req: Request) {
   
               // Extend the billing cycle by 1 month
               const newExpires = new Date(vps.expiresAt || now);
+              if (newExpires < now) newExpires.setTime(now.getTime());
               newExpires.setMonth(newExpires.getMonth() + 1);
   
               await tx.vpsService.update({
                 where: { id: vps.id },
                 data: { 
                   expiresAt: newExpires,
-                  accumulatedCost: 0 
+                  accumulatedCost: 0,
+                  autoRenew: true
                 }
               });
   
@@ -459,7 +468,7 @@ export async function GET(req: Request) {
             }
           }
         } else {
-          // autoRenew is off → suspend
+          // autoRenew is off AND balance is insufficient → suspend
           const defaultTermination = new Date(now);
           defaultTermination.setDate(defaultTermination.getDate() + 3);
 
@@ -467,7 +476,7 @@ export async function GET(req: Request) {
             where: { id: vps.id },
             data: { 
               status: 'SUSPENDED', 
-              suspendReason: 'Canceled by user (Auto-renew disabled)',
+              suspendReason: 'Insufficient balance for Pay as You Go monthly renewal',
               terminationDate: defaultTermination
             }
           });

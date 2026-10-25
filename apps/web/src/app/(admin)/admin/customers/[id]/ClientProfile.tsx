@@ -695,26 +695,26 @@ export default function ClientProfile({ userId }: { userId: string }) {
       </div>
 
       {/* Tabs */}
-      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-2 sm:p-4 rounded-2xl border flex items-center justify-between gap-4 w-full overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border w-full overflow-x-auto scrollbar-none", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
           {[
             { key: 'summary', label: 'Summary', icon: User },
-            { key: 'services', label: 'Products/Services', icon: Server },
+            { key: 'services', label: 'Services', icon: Server },
             { key: 'invoices', label: 'Invoices', icon: FileText },
             { key: 'emails', label: 'Emails', icon: Mail },
-            { key: 'logs', label: 'Log', icon: History }
+            { key: 'logs', label: 'Logs', icon: History }
           ].map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
                 activeTab === tab.key
                   ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-400 shadow-sm" : "bg-cyan-50 text-cyan-700 border border-cyan-500 shadow-sm")
                   : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent"
               )}
             >
-              <tab.icon className="w-3.5 h-3.5" />
+              <tab.icon className="w-3.5 h-3.5 shrink-0" />
               <span>{tab.label}</span>
             </button>
           ))}

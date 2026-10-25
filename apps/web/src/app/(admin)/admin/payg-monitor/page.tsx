@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, Fragment } from "react";
 import { toast } from "sonner";
-import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info, Users, Layers, Wallet } from "lucide-react";
+import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -25,6 +25,11 @@ interface CustomerInfo {
   name: string;
   email: string;
   image?: string | null;
+  balance: number;
+  totalHourlyBurn: number;
+  balanceStatus: 'SUFFICIENT' | 'LOW' | 'EXHAUSTED';
+  remainingHours: number;
+  remainingDays: number;
   services: ServiceInfo[];
   totalAccumulatedCost: number;
   hasInvoiceThisMonth: boolean;
@@ -39,6 +44,7 @@ export default function PaygMonitorPage() {
   const [customerPage, setCustomerPage] = useUrlNumber("customerPage", 1);
   const customersPerPage = 5;
   const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'SUFFICIENT' | 'LOW' | 'EXHAUSTED'>('ALL');
   const [servicePageMap, setServicePageMap] = useState<Record<number, number>>({});
   const servicesPerPage = 5;
   
@@ -56,7 +62,7 @@ export default function PaygMonitorPage() {
       } else {
         toast.error(data.error);
       }
-    } catch (e) {
+    } catch {
       toast.error("Failed to load data");
     } finally {
       setLoading(false);
@@ -81,7 +87,7 @@ export default function PaygMonitorPage() {
       } else {
         toast.error(data.error);
       }
-    } catch (e) {
+    } catch {
       toast.error("Failed to save settings");
     } finally {
       setSaving(false);
@@ -90,101 +96,121 @@ export default function PaygMonitorPage() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'VPS': return <Terminal className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
-      case 'Reserved IP': return <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
-      default: return <Package className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-700")} />;
+      case 'VPS': return <Terminal className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
+      case 'Reserved IP': return <Network className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
+      default: return <Package className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-purple-400" : "text-purple-700")} />;
     }
   };
 
-  const filteredCustomers = customers.filter(c => 
-    (c.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
-    (c.email || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCustomers = customers.filter(c => {
+    const matchesSearch = (c.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (c.email || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || c.balanceStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const sufficientCount = customers.filter(c => c.balanceStatus === 'SUFFICIENT').length;
+  const lowCount = customers.filter(c => c.balanceStatus === 'LOW').length;
+  const exhaustedCount = customers.filter(c => c.balanceStatus === 'EXHAUSTED').length;
 
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-2">
         <div>
           <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             PAYG Billing Monitor
           </h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage and monitor Pay-As-You-Go automated deductions, cron cycles, and unbilled charges.</p>
+          <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Pantau kecukupan saldo customer, estimasi masa aktif, potongan otomatis per jam, dan siklus bulanan.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-            Total Customers: {customers.length}
+        <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className={cn("px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold text-xs border text-center flex items-center justify-center whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            <Users className="w-3.5 h-3.5 mr-1.5 shrink-0 hidden sm:inline" />
+            <span>Total: <strong>{customers.length}</strong></span>
           </div>
           <button 
+            type="button"
             onClick={fetchData}
             disabled={loading}
-            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border disabled:opacity-50", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+            className={cn("justify-center px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap disabled:opacity-50", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            <RefreshCw className={cn("w-3.5 h-3.5 shrink-0", loading ? 'animate-spin' : '')} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>PAYG Customers</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Users className="w-4 h-4" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        {/* Card 1: PAYG Customers */}
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Customer</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {customers.length}
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            Active enrolled accounts
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Akun PAYG Terdaftar
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Services</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Layers className="w-4 h-4" />
+        {/* Card 2: Saldo Cukup (Sufficient) */}
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'SUFFICIENT' ? 'ALL' : 'SUFFICIENT'); setCustomerPage(1); }}
+          className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-emerald-500/40" : "bg-white border-slate-200 shadow-sm hover:border-emerald-500/40")}
+        >
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Saldo Cukup</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600")}>
+              <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            {customers.reduce((acc, c) => acc + c.services.length, 0)}
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-400")}>
+            {sufficientCount}
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            VPS & Reserved IPs
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-emerald-500 truncate")}>
+            Aman & Operasional
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Unbilled Balance</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Wallet className="w-4 h-4" />
+        {/* Card 3: Saldo Kritis / Menipis */}
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'LOW' ? 'ALL' : 'LOW'); setCustomerPage(1); }}
+          className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-amber-500/40" : "bg-white border-slate-200 shadow-sm hover:border-amber-500/40")}
+        >
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Perlu Top-up</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600")}>
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-400")}>
+            {lowCount + exhaustedCount}
+          </div>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-amber-500 truncate")}>
+            {exhaustedCount > 0 ? `${exhaustedCount} Habis, ${lowCount} Menipis` : 'Menipis (<24 jam)'}
+          </div>
+        </div>
+
+        {/* Card 4: Total Unbilled */}
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Unbilled Cycle</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            </div>
+          </div>
+          <div className={cn("text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
             {formatRupiah(customers.reduce((acc, c) => acc + c.totalAccumulatedCost, 0))}
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            Accumulated this cycle
-          </div>
-        </div>
-
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Cron Interval</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight capitalize", isDark ? "text-white" : "text-slate-900")}>
-            {interval}
-          </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            {interval === 'hourly' ? '1-hour cycle' : '1-minute fast cycle'}
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Akumulasi Siklus Berjalan
           </div>
         </div>
       </div>
@@ -231,21 +257,60 @@ export default function PaygMonitorPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className={cn("border rounded-2xl p-6 h-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                Active PAYG Customers ({filteredCustomers.length})
-              </h2>
+          <div className={cn("border rounded-2xl p-4 sm:p-6 h-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+              <div>
+                <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                  <Activity className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                  Active PAYG Customers ({filteredCustomers.length})
+                </h2>
+                <p className={cn("text-xs font-normal mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Monitoring saldo akun, tarif pemotongan per jam, dan kecukupan operasional
+                </p>
+              </div>
               <div className="relative w-full sm:w-64 shrink-0">
                 <input
                   type="text"
                   placeholder="Search name or email..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setCustomerPage(1); }}
-                  className={cn("w-full border rounded-lg pl-3 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-lg pl-3 pr-4 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
+            </div>
+
+            {/* Status Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
+              {(
+                [
+                  { key: 'ALL' as const, label: 'Semua Status', count: customers.length },
+                  { key: 'SUFFICIENT' as const, label: '✓ Saldo Cukup', count: sufficientCount },
+                  { key: 'LOW' as const, label: '⚠ Saldo Menipis', count: lowCount },
+                  { key: 'EXHAUSTED' as const, label: '✕ Saldo Habis', count: exhaustedCount },
+                ]
+              ).map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => { setStatusFilter(tab.key); setCustomerPage(1); }}
+                  className={cn(
+                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all border flex items-center gap-1.5 cursor-pointer",
+                    statusFilter === tab.key
+                      ? (isDark ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-sm" : "bg-cyan-50 border-cyan-400 text-cyan-800 shadow-sm")
+                      : (isDark ? "bg-[#060b14] border-slate-800/80 text-zinc-400 hover:text-white hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900")
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  <span className={cn(
+                    "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                    statusFilter === tab.key
+                      ? (isDark ? "bg-cyan-500/30 text-cyan-200" : "bg-cyan-200 text-cyan-900")
+                      : (isDark ? "bg-slate-800 text-zinc-400" : "bg-slate-200 text-slate-700")
+                  )}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
             </div>
             
             {loading ? (
@@ -255,66 +320,137 @@ export default function PaygMonitorPage() {
               </div>
             ) : filteredCustomers.length === 0 ? (
               <div className={cn("flex flex-col items-center justify-center h-48 border border-dashed rounded-lg", isDark ? "text-zinc-500 border-slate-800" : "text-slate-500 border-slate-300")}>
-                <p>No active Pay-As-You-Go customers found.</p>
+                <p>No active Pay-As-You-Go customers found matching filter.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className={cn("text-xs uppercase", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
+              <div className="overflow-x-auto scrollbar-none">
+                <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                  <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
                     <tr>
-                      <th className="py-3 px-4 rounded-l-lg font-semibold">Customer</th>
-                      <th className="py-3 px-4 font-semibold text-center">Active Services</th>
-                      <th className="py-3 px-4 font-semibold text-right">Total Accumulated</th>
-                      <th className="py-3 px-4 rounded-r-lg font-semibold text-center">Invoice Status</th>
+                      <th className="py-3 px-3 sm:px-4 rounded-l-lg font-semibold">Customer</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold text-right">Saldo Customer</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold text-right">Tarif / Jam</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold text-center">Status Saldo</th>
+                      <th className="py-3 px-2 sm:px-3 font-semibold text-center">Layanan</th>
+                      <th className="py-3 px-3 sm:px-4 rounded-r-lg font-semibold text-right">Unbilled Siklus</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                     {filteredCustomers.slice((customerPage - 1) * customersPerPage, customerPage * customersPerPage).map((cust) => (
                       <Fragment key={cust.id}>
                         <tr 
-                          className={cn("transition-colors cursor-pointer group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}
+                          className={cn("transition-colors cursor-pointer group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", expandedCustomerId === cust.id ? (isDark ? "bg-white/[0.03]" : "bg-slate-50/60") : "")}
                           onClick={() => setExpandedCustomerId(expandedCustomerId === cust.id ? null : cust.id)}
                         >
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                          <td className="py-3 sm:py-4 px-3 sm:px-4">
+                            <div className="flex items-center gap-2.5 sm:gap-3">
+                              <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                                 <img referrerPolicy="no-referrer" 
                                   src={cust.image || `/api/avatar?email=${encodeURIComponent(cust.email || '')}&name=${encodeURIComponent(cust.name || 'User')}`} 
                                   alt={cust.name} 
                                   className="w-full h-full object-cover" 
                                 loading="lazy" decoding="async" />
                               </div>
-                              <div>
-                                <div className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{cust.name}</div>
-                                <div className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>{cust.email}</div>
+                              <div className="min-w-0">
+                                <div className={cn("font-bold text-xs sm:text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{cust.name}</div>
+                                <div className={cn("text-[10px] sm:text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{cust.email}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-center">
-                            <span className={cn("inline-flex items-center justify-center w-8 h-8 rounded-full font-bold border", isDark ? "bg-cyan-500/20 border-cyan-500/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                          <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-extrabold text-xs sm:text-sm", cust.balance <= 0 ? "text-rose-400" : cust.balanceStatus === 'LOW' ? "text-amber-400" : (isDark ? "text-slate-100" : "text-slate-900"))}>
+                            {formatRupiah(cust.balance)}
+                          </td>
+                          <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-semibold text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                            {formatRupiah(cust.totalHourlyBurn)}<span className="text-[10px] font-normal text-zinc-500">/jam</span>
+                          </td>
+                          <td className="py-3 sm:py-4 px-3 sm:px-4 text-center">
+                            {cust.balanceStatus === 'SUFFICIENT' ? (
+                              <div className="inline-flex flex-col items-center">
+                                <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold", isDark ? "bg-emerald-500/15 border border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border border-emerald-200 text-emerald-700")}>
+                                  <CheckCircle2 className="w-3 h-3 shrink-0" />
+                                  Saldo Cukup
+                                </span>
+                                <span className={cn("text-[9px] sm:text-[10px] mt-0.5", isDark ? "text-emerald-400/80" : "text-emerald-700")}>
+                                  ~{cust.remainingDays > 0 ? `${cust.remainingDays} hari` : `${cust.remainingHours} jam`}
+                                </span>
+                              </div>
+                            ) : cust.balanceStatus === 'LOW' ? (
+                              <div className="inline-flex flex-col items-center">
+                                <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold", isDark ? "bg-amber-500/15 border border-amber-500/25 text-amber-400" : "bg-amber-50 border border-amber-200 text-amber-700")}>
+                                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                                  Saldo Menipis
+                                </span>
+                                <span className={cn("text-[9px] sm:text-[10px] mt-0.5", isDark ? "text-amber-400/80" : "text-amber-700")}>
+                                  Sisa ~{cust.remainingHours} jam
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="inline-flex flex-col items-center">
+                                <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold", isDark ? "bg-rose-500/15 border border-rose-500/25 text-rose-400" : "bg-rose-50 border border-rose-200 text-rose-700")}>
+                                  <XCircle className="w-3 h-3 shrink-0" />
+                                  Saldo Habis
+                                </span>
+                                <span className={cn("text-[9px] sm:text-[10px] mt-0.5", isDark ? "text-rose-400/80" : "text-rose-700")}>
+                                  Perlu Top-up
+                                </span>
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3 sm:py-4 px-2 sm:px-3 text-center">
+                            <span className={cn("inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full font-bold text-xs border", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                               {cust.services.length}
                             </span>
                           </td>
-                          <td className={cn("py-4 px-4 text-right font-bold", isDark ? "text-slate-200" : "text-slate-900")}>
+                          <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-bold text-xs sm:text-sm", isDark ? "text-slate-300" : "text-slate-900")}>
                             {formatRupiah(cust.totalAccumulatedCost)}
-                          </td>
-                          <td className="py-4 pl-4 text-center">
-                            {cust.hasInvoiceThisMonth ? (
-                              <span className={cn("inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
-                                Tracking Active
-                              </span>
-                            ) : (
-                              <span className={cn("inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
-                                Tracking Active
-                              </span>
-                            )}
                           </td>
                         </tr>
                         {expandedCustomerId === cust.id && (
                           <tr className={cn(isDark ? "bg-[#060b14]/50" : "bg-slate-50/70")}>
-                            <td colSpan={4} className={cn("p-4 border-b", isDark ? "border-slate-800/80" : "border-slate-200")}>
-                              <div className={cn("border rounded-xl p-4", isDark ? "bg-[#0b1322] border-slate-800 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
-                                <h4 className={cn("text-sm font-bold mb-3", isDark ? "text-white" : "text-slate-900")}>Service Details</h4>
+                            <td colSpan={6} className={cn("p-3 sm:p-4 border-b", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                              <div className={cn("border rounded-xl p-3.5 sm:p-5", isDark ? "bg-[#0b1322] border-slate-800 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
+                                
+                                {/* Sufficiency Health Banner */}
+                                {cust.balanceStatus === 'SUFFICIENT' && (
+                                  <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300" : "bg-emerald-50 border-emerald-200 text-emerald-800")}>
+                                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                                    <div>
+                                      <span className="font-bold text-emerald-400">Saldo Sangat Cukup & Operasional Aman. </span>
+                                      <span className={cn("leading-relaxed", isDark ? "text-emerald-200/90" : "text-slate-600")}>
+                                        Saldo saat ini <strong>{formatRupiah(cust.balance)}</strong> dengan estimasi burn rate <strong>{formatRupiah(cust.totalHourlyBurn)}/jam</strong>. Saldo mampu menopang operasional selama <strong>~{cust.remainingDays > 0 ? `${cust.remainingDays} hari (${cust.remainingHours} jam)` : `${cust.remainingHours} jam`}</strong> ke depan.
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                                {cust.balanceStatus === 'LOW' && (
+                                  <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
+                                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                                    <div>
+                                      <span className="font-bold text-amber-400">Peringatan: Saldo Customer Kritis (&lt; 24 Jam). </span>
+                                      <span className={cn("leading-relaxed", isDark ? "text-amber-200/90" : "text-slate-600")}>
+                                        Saldo tersisa <strong>{formatRupiah(cust.balance)}</strong> dan hanya cukup untuk sekitar <strong>~{cust.remainingHours} jam</strong> lagi dengan burn rate <strong>{formatRupiah(cust.totalHourlyBurn)}/jam</strong>. Sarankan customer untuk melakukan top-up saldo agar layanan tidak ter-suspend.
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                                {cust.balanceStatus === 'EXHAUSTED' && (
+                                  <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-rose-500/10 border-rose-500/25 text-rose-300" : "bg-rose-50 border-rose-200 text-rose-800")}>
+                                    <XCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+                                    <div>
+                                      <span className="font-bold text-rose-400">Perhatian: Saldo Habis (Rp 0 atau Kurang). </span>
+                                      <span className={cn("leading-relaxed", isDark ? "text-rose-200/90" : "text-slate-600")}>
+                                        Saldo customer saat ini <strong>{formatRupiah(cust.balance)}</strong> tidak mencukupi untuk pemotongan jam berikutnya (kebutuhan: <strong>{formatRupiah(cust.totalHourlyBurn)}/jam</strong>). Layanan akan terhenti otomatis jika saldo tidak segera diisi.
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="flex items-center justify-between mb-3">
+                                  <h4 className={cn("text-xs sm:text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                                    <Layers className="w-4 h-4 text-cyan-400" />
+                                    Rincian Layanan PAYG ({cust.services.length})
+                                  </h4>
+                                </div>
                                 <table className="w-full text-left text-xs whitespace-nowrap">
                                   <thead className={cn("text-xs uppercase", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
                                     <tr>

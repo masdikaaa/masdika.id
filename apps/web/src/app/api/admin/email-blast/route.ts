@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
-import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
-import { getTransporter, logEmailRecord } from '@/lib/email';
+import { decryptDeterministic } from '@/lib/encryption';
+import { createEmailBlastTransporter, getEmailBlastSmtpSettings } from '@/lib/email-blast-smtp';
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -26,8 +26,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Subject and email content are required' }, { status: 400 });
     }
 
-    const fromName = senderName || process.env.SMTP_FROM_NAME || 'Masdika.ID';
-    const fromEmail = senderEmail || process.env.SMTP_FROM_EMAIL || 'no-reply@masdika.id';
+    const smtpConfig = await getEmailBlastSmtpSettings();
+    const blastTransporter = await createEmailBlastTransporter();
+
+    const fromName = senderName || smtpConfig.fromName || process.env.SMTP_FROM_NAME || 'Masdika.ID';
+    const fromEmail = senderEmail || smtpConfig.fromEmail || 'info@masdika.id';
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
     const currentYear = new Date().getFullYear().toString();
 
@@ -49,7 +52,7 @@ export async function POST(req: Request) {
         .replace(/{app_url}/g, appUrl)
         .replace(/{year}/g, currentYear));
 
-      await getTransporter().sendMail({
+      await blastTransporter.sendMail({
         from: `"${fromName}" <${fromEmail}>`,
         to: cleanTestEmail,
         subject: `[TEST] ${subject}`,
@@ -139,7 +142,7 @@ export async function POST(req: Request) {
               .replace(/{app_url}/g, appUrl)
               .replace(/{year}/g, currentYear));
 
-            await getTransporter().sendMail({
+            await blastTransporter.sendMail({
               from: `"${fromName}" <${fromEmail}>`,
               to: recipient.email,
               subject,

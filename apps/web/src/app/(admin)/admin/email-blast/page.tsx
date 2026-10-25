@@ -26,7 +26,13 @@ import {
   Mail,
   FileText,
   Calendar,
-  Server
+  Server,
+  Settings,
+  Key,
+  EyeOff,
+  CheckCircle2,
+  Loader2,
+  Info
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -179,7 +185,7 @@ export default function EmailBlastPage() {
 
   // Form Fields
   const [senderName, setSenderName] = useState("Masdika.ID");
-  const [senderEmail, setSenderEmail] = useState("me@masdika.id");
+  const [senderEmail, setSenderEmail] = useState("info@masdika.id");
   const [isEditingSender, setIsEditingSender] = useState(false);
   const [targetType, setTargetType] = useState<"all" | "vps" | "selected" | "custom">("all");
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -213,6 +219,103 @@ export default function EmailBlastPage() {
   const [showSendConfirmModal, setShowSendConfirmModal] = useState(false);
   const [sendingBlast, setSendingBlast] = useState(false);
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
+
+  // Dedicated SMTP Configuration State
+  const [showSmtpModal, setShowSmtpModal] = useState(false);
+  const [smtpConfig, setSmtpConfig] = useState({
+    host: "",
+    port: 465,
+    secure: true,
+    user: "info@masdika.id",
+    pass: "",
+    fromName: "Masdika.ID",
+    fromEmail: "info@masdika.id",
+    hasPassword: false,
+    isConfigured: false
+  });
+  const [loadingSmtp, setLoadingSmtp] = useState(false);
+  const [savingSmtp, setSavingSmtp] = useState(false);
+  const [testingSmtp, setTestingSmtp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const fetchSmtpSettings = useCallback(async () => {
+    setLoadingSmtp(true);
+    try {
+      const res = await fetch("/api/admin/email-blast/settings");
+      const data = await res.json();
+      if (res.ok && data.success && data.settings) {
+        setSmtpConfig({
+          host: data.settings.host || "",
+          port: data.settings.port || 465,
+          secure: data.settings.secure !== undefined ? data.settings.secure : true,
+          user: data.settings.user || "info@masdika.id",
+          pass: "",
+          fromName: data.settings.fromName || "Masdika.ID",
+          fromEmail: data.settings.fromEmail || "info@masdika.id",
+          hasPassword: Boolean(data.settings.hasPassword),
+          isConfigured: Boolean(data.settings.isConfigured)
+        });
+        if (data.settings.fromEmail) setSenderEmail(data.settings.fromEmail);
+        if (data.settings.fromName) setSenderName(data.settings.fromName);
+      }
+    } catch (err) {
+      console.error("Failed to load SMTP settings:", err);
+    } finally {
+      setLoadingSmtp(false);
+    }
+  }, []);
+
+  const handleSaveSmtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSavingSmtp(true);
+    try {
+      const res = await fetch("/api/admin/email-blast/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(smtpConfig)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || "Pengaturan SMTP berhasil disimpan");
+        setSmtpConfig(prev => ({
+          ...prev,
+          isConfigured: Boolean(prev.host && prev.user),
+          hasPassword: Boolean(prev.pass || prev.hasPassword),
+          pass: ""
+        }));
+        if (smtpConfig.fromEmail) setSenderEmail(smtpConfig.fromEmail);
+        if (smtpConfig.fromName) setSenderName(smtpConfig.fromName);
+        setShowSmtpModal(false);
+      } else {
+        toast.error(data.error || "Gagal menyimpan pengaturan SMTP");
+      }
+    } catch {
+      toast.error("Terjadi kesalahan saat menyimpan pengaturan");
+    } finally {
+      setSavingSmtp(false);
+    }
+  };
+
+  const handleTestSmtp = async () => {
+    setTestingSmtp(true);
+    try {
+      const res = await fetch("/api/admin/email-blast/test-smtp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(smtpConfig)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || "Koneksi SMTP Berhasil!");
+      } else {
+        toast.error(data.error || "Koneksi SMTP Gagal");
+      }
+    } catch {
+      toast.error("Gagal melakukan pengetesan koneksi SMTP");
+    } finally {
+      setTestingSmtp(false);
+    }
+  };
 
   const formatBlastPreviewHtml = (raw: string) => {
     const rendered = raw
@@ -260,10 +363,11 @@ export default function EmailBlastPage() {
     }
   }, []);
 
-  // Fetch recipients on mount
+  // Fetch recipients and SMTP settings on mount
   useEffect(() => {
     fetchRecipients();
-  }, [fetchRecipients]);
+    fetchSmtpSettings();
+  }, [fetchRecipients, fetchSmtpSettings]);
 
   // Pre-select customer if userId query param is provided
   useEffect(() => {
@@ -439,6 +543,23 @@ export default function EmailBlastPage() {
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>Send Test</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setShowSmtpModal(true)}
+            className={cn(
+              "justify-center px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap",
+              smtpConfig.isConfigured
+                ? (isDark ? "border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400" : "border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800")
+                : (isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")
+            )}
+            title="Configure dedicated SMTP for Email Blast (info@masdika.id)"
+          >
+            <Server className="w-3.5 h-3.5 shrink-0" />
+            <span>SMTP Server</span>
+            {smtpConfig.isConfigured && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+            )}
+          </button>
         </div>
       </div>
 
@@ -572,6 +693,16 @@ export default function EmailBlastPage() {
                 </div>
               )}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setShowSmtpModal(true)}
+              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
+              title="Configure SMTP Server & Credentials"
+            >
+              <Server className="w-4 h-4" />
+              <span className="text-[10px]">SMTP</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -602,7 +733,7 @@ export default function EmailBlastPage() {
                     type="email"
                     value={senderEmail}
                     onChange={(e) => setSenderEmail(e.target.value)}
-                    placeholder="me@masdika.id"
+                    placeholder="info@masdika.id"
                     className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1 font-mono", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
                   />
                   <button
@@ -1272,6 +1403,235 @@ export default function EmailBlastPage() {
         variant="warning"
         isLoading={sendingBlast}
       />
+      {/* MODAL 5: SMTP Server Configuration Modal */}
+      {showSmtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={cn("w-full max-w-xl rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80 mb-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className={cn("w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <Server className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                </div>
+                <div>
+                  <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Pengaturan SMTP Email Blast</h3>
+                  <p className={cn("text-[11px] sm:text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Server SMTP khusus pengiriman promosi & kampanye (info@masdika.id)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSmtpModal(false)}
+                className="p-1 rounded-lg text-zinc-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveSmtp} className="flex-1 overflow-y-auto space-y-3.5 pr-1 scrollbar-none">
+              {/* Info Alert */}
+              <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 text-xs", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
+                <p className="leading-relaxed">
+                  Pengaturan ini digunakan khusus untuk modul <strong>Email Blast</strong>. Email transaksional utama (seperti OTP pendaftaran, invoice, dan notifikasi pesanan) tetap berjalan independen. Password disimpan terenkripsi di database.
+                </p>
+              </div>
+
+              {/* Host & Port */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">SMTP Host / Server</label>
+                  <input
+                    type="text"
+                    required
+                    value={smtpConfig.host}
+                    onChange={(e) => setSmtpConfig(prev => ({ ...prev, host: e.target.value }))}
+                    placeholder="mail.masdika.id atau smtp.gmail.com"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Port</label>
+                  <input
+                    type="number"
+                    required
+                    value={smtpConfig.port}
+                    onChange={(e) => {
+                      const p = parseInt(e.target.value, 10) || 465;
+                      setSmtpConfig(prev => ({ ...prev, port: p, secure: p === 465 }));
+                    }}
+                    placeholder="465"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Security Mode */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">Protokol Keamanan</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSmtpConfig(prev => ({ ...prev, secure: true, port: 465 }))}
+                    className={cn(
+                      "px-3 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer",
+                      smtpConfig.secure
+                        ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold"
+                        : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                    )}
+                  >
+                    <span>SSL / TLS (Port 465)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSmtpConfig(prev => ({ ...prev, secure: false, port: 587 }))}
+                    className={cn(
+                      "px-3 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer",
+                      !smtpConfig.secure
+                        ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold"
+                        : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                    )}
+                  >
+                    <span>STARTTLS (Port 587)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Username & Password */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">SMTP Username / Email</label>
+                  <input
+                    type="text"
+                    required
+                    value={smtpConfig.user}
+                    onChange={(e) => setSmtpConfig(prev => ({ ...prev, user: e.target.value, fromEmail: e.target.value }))}
+                    placeholder="info@masdika.id"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">
+                    SMTP Password
+                    {smtpConfig.hasPassword && !smtpConfig.pass && (
+                      <span className="text-[10px] text-emerald-400 font-normal ml-1.5">(Tersimpan)</span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={smtpConfig.pass}
+                      onChange={(e) => setSmtpConfig(prev => ({ ...prev, pass: e.target.value }))}
+                      placeholder={smtpConfig.hasPassword ? "•••••••• (Biarkan jika tidak diubah)" : "Password email"}
+                      className={cn(
+                        "w-full px-3.5 py-2 pr-10 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
+                        isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(p => !p)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sender Name & Sender Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Nama Pengirim Default</label>
+                  <input
+                    type="text"
+                    value={smtpConfig.fromName}
+                    onChange={(e) => setSmtpConfig(prev => ({ ...prev, fromName: e.target.value }))}
+                    placeholder="Masdika.ID"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Email Pengirim Default</label>
+                  <input
+                    type="email"
+                    value={smtpConfig.fromEmail}
+                    onChange={(e) => setSmtpConfig(prev => ({ ...prev, fromEmail: e.target.value }))}
+                    placeholder="info@masdika.id"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className="pt-2 flex items-center justify-between text-xs">
+                <span className="text-zinc-400">Status SMTP Blast:</span>
+                {smtpConfig.isConfigured ? (
+                  <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Terkonfigurasi Khusus ({smtpConfig.user})
+                  </span>
+                ) : (
+                  <span className="text-zinc-500">
+                    Menggunakan Default Sistem (.env)
+                  </span>
+                )}
+              </div>
+
+              {/* Modal Actions */}
+              <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+                <button
+                  type="button"
+                  disabled={testingSmtp || (!smtpConfig.host || !smtpConfig.user)}
+                  onClick={handleTestSmtp}
+                  className={cn(
+                    "w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                    isDark ? "border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400" : "border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800"
+                  )}
+                >
+                  {testingSmtp ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <RefreshCw className="w-3.5 h-3.5 shrink-0" />}
+                  <span>{testingSmtp ? "Menguji Koneksi..." : "Test Koneksi SMTP"}</span>
+                </button>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowSmtpModal(false)}
+                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingSmtp || loadingSmtp}
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                  >
+                    {savingSmtp ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Save className="w-3.5 h-3.5 shrink-0" />}
+                    <span>{savingSmtp ? "Menyimpan..." : "Simpan Pengaturan"}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
