@@ -392,113 +392,113 @@ export default function EmailBlastPage() {
   return (
     <div className="w-full space-y-6 pb-12">
       {/* Top Header matching Gambar 1 */}
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
-        <div>
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-2">
+        <div className="min-w-0">
           <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Newsletter & Email Blast
           </h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
             Manage registered audience email subscriptions and outbound campaign deliverability.
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+        <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className={cn("px-2.5 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border text-center flex items-center justify-center whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
             Total Audience: {getRecipientCount()}
           </div>
           <button
             type="button"
             onClick={() => fetchRecipients()}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
+              "justify-center px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border cursor-pointer whitespace-nowrap",
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <RefreshCw className={cn("w-4 h-4", loadingRecipients ? "animate-spin" : "")} />
+            <RefreshCw className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0", loadingRecipients ? "animate-spin" : "")} />
             <span>Refresh</span>
           </button>
           <button
             type="button"
             onClick={() => setShowPreviewModal(true)}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
+              "justify-center px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border cursor-pointer whitespace-nowrap",
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <Eye className="w-4 h-4 text-cyan-400" />
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
             <span>Preview</span>
           </button>
           <button
             type="button"
             onClick={() => setShowTestModal(true)}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
+              "justify-center px-2.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border cursor-pointer whitespace-nowrap",
               isDark ? "border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400" : "border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800"
             )}
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span>Send Test</span>
           </button>
         </div>
       </div>
 
       {/* Stat Cards matching Gambar 1 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Subscribers</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Mail className="w-4 h-4" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Subscribers</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {recipientsData.totalCustomers}
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
             Verified recipient emails
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Service Clients</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Server className="w-4 h-4" />
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Service Clients</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Server className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {recipientsData.vpsCustomers}
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
             Active cloud instances
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Audience Reach</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <Users className="w-4 h-4" />
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Audience Reach</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {getRecipientCount()}
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
             Instant campaign audience
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Deliverability</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <CheckCircle className="w-4 h-4" />
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Deliverability</span>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             100%
           </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
             Zero bounce rate
           </div>
         </div>
@@ -508,12 +508,12 @@ export default function EmailBlastPage() {
       <div className={cn("rounded-2xl border overflow-hidden shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
         {/* Action Bar Header */}
-        <div className={cn("px-4 py-3 border-b flex items-center justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
-          <div className="flex items-center gap-6 text-xs font-semibold">
+        <div className={cn("px-3 sm:px-4 py-2.5 sm:py-3 border-b flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+          <div className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto scrollbar-none">
             <button
               type="button"
               onClick={() => toast.success("Draft automatically saved to local session")}
-              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
             >
               <Save className="w-4 h-4" />
               <span className="text-[10px]">Save</span>
@@ -521,7 +521,7 @@ export default function EmailBlastPage() {
             <button
               type="button"
               onClick={() => toast.info("Attachments are embedded directly via images or URLs in HTML.")}
-              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
             >
               <Paperclip className="w-4 h-4" />
               <span className="text-[10px]">Attach</span>
@@ -533,14 +533,14 @@ export default function EmailBlastPage() {
                 setHtmlContent(prev => prev + sig);
                 toast.success("Signature appended to email");
               }}
-              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
             >
               <PenTool className="w-4 h-4" />
               <span className="text-[10px]">Signature</span>
             </button>
 
             {/* Templates Dropdown */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setShowTemplatesDropdown(prev => !prev)}
@@ -573,10 +573,10 @@ export default function EmailBlastPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className={cn("text-[11px] font-mono px-3 py-1 rounded-lg border flex items-center gap-1.5 font-bold", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-              <Users className="w-3.5 h-3.5" />
-              {getRecipientCount()} Recipients
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={cn("text-[11px] font-mono px-2.5 sm:px-3 py-1 rounded-lg border flex items-center gap-1.5 font-bold", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+              <Users className="w-3.5 h-3.5 shrink-0" />
+              <span>{getRecipientCount()} Recipients</span>
             </span>
           </div>
         </div>
