@@ -468,7 +468,7 @@ export default function MyVpsPage() {
                             </div>
                             <div className="space-y-1.5">
                               <div className="flex items-center gap-2"><HardDrive className={cn("w-3.5 h-3.5 ", isDark ? "text-zinc-500" : "text-slate-400")} /> {vps.diskGb} GB</div>
-                              <div className="flex items-center gap-2"><Network className={cn("w-3.5 h-3.5 ", isDark ? "text-zinc-500" : "text-slate-400")} /> ∞</div>
+                              <div className="flex items-center gap-2" title="Network Bandwidth Limit"><Network className={cn("w-3.5 h-3.5 ", isDark ? "text-zinc-500" : "text-slate-400")} /> {vps.bandwidthMbps ? `${vps.bandwidthMbps} Mbps` : '100 Mbps'}</div>
                             </div>
                           </div>
                         </td>

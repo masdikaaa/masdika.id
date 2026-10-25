@@ -764,6 +764,7 @@ model VpsService {
   cpuCores            Int
   ramGb               Int
   diskGb              Int
+  bandwidthMbps       Int                @default(100)
   backupGb            Int                @default(0)
   backupSchedule      String             @default("NONE")
   lastBackupRun       DateTime?

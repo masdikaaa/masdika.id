@@ -11,6 +11,7 @@ const DEFAULT_PRICING = [
   { key: "backup", name: "Backup Storage", pricePerHour: 30, unit: "GB" },
   { key: "addon_disk", name: "Add-on Disk", pricePerHour: 10, unit: "GB" },
   { key: "diskSsd", name: "SSD Storage", pricePerHour: 100, unit: "GB" },
+  { key: "bandwidth", name: "Bandwidth (+50 Mbps over 100M)", pricePerHour: 69, unit: "50 Mbps" },
 ];
 
 export async function GET(req: Request) {
@@ -49,6 +50,17 @@ export async function GET(req: Request) {
           where: { key: "diskSsd" },
           update: {},
           create: { id: (maxItem?.id || 0) + 1, key: "diskSsd", name: "SSD Storage", pricePerHour: 100, unit: "GB" }
+        });
+        pricing = await prisma.vpsPricing.findMany({ orderBy: { id: "asc" } });
+      }
+
+      const hasBandwidth = pricing.find(p => p.key === "bandwidth");
+      if (!hasBandwidth) {
+        const maxItem = await prisma.vpsPricing.findFirst({ orderBy: { id: 'desc' } });
+        await prisma.vpsPricing.upsert({
+          where: { key: "bandwidth" },
+          update: {},
+          create: { id: (maxItem?.id || 0) + 1, key: "bandwidth", name: "Bandwidth (+50 Mbps over 100M)", pricePerHour: 69, unit: "50 Mbps" }
         });
         pricing = await prisma.vpsPricing.findMany({ orderBy: { id: "asc" } });
       }

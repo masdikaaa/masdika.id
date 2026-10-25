@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
         osTemplate: true, vpcId: true, vpcIp: true, autoRenew: true,
         kubernetesClusterId: true, kubernetesRole: true,
         diskType: true,
+        bandwidthMbps: true,
         assignedIps: true,
         // rootPassword and sshKey intentionally excluded
       },

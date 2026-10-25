@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     let { 
       hostname, username, rootPassword, password, sshKey, templateId, billingMode, planId, 
-      cpuCores, ramGb, diskGb, diskType, backupGb, ipv4Count = 1, ipv6Count = 0, paymentMethodCode,
+      cpuCores, ramGb, diskGb, diskType, backupGb, bandwidthMbps, ipv4Count = 1, ipv6Count = 0, paymentMethodCode,
       useIpv4, useIpv6, isKubernetes, kubernetesVersion, action, kubernetesClusterId, billingCycle = 1, reservedIpId, firewallRules, vpcId, privateIpAddress, targetNode
     } = await req.json();
     
@@ -101,6 +101,12 @@ export async function POST(req: NextRequest) {
     const ipCost = (ipv4Count > 0 ? ipv4Count * (pricing.ipv4 || 0) : 0)
                  + (ipv6Count > 0 ? ipv6Count * (pricing.ipv6 || 0) : 0);
 
+    const safeBandwidth = Math.min(Math.max(Math.floor(Number(bandwidthMbps) || 100), 100), 10000);
+    const bandwidthExtra = Math.max(0, safeBandwidth - 100);
+    const bandwidthSteps = Math.floor(bandwidthExtra / 50);
+    const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
+    const bandwidthCost = bandwidthSteps * bandwidthRatePerHour;
+
     let vpsData: any = {
       userId,
       hostname,
@@ -114,6 +120,7 @@ export async function POST(req: NextRequest) {
       storageId: defaultStorage,
       diskType: diskType || "HDD",
       backupGb: safeBackup,
+      bandwidthMbps: safeBandwidth,
       vpcId: vpcId ? Number(vpcId) : undefined,
       vpcIp: privateIpAddress ? privateIpAddress.trim() : null
     };
@@ -217,8 +224,8 @@ export async function POST(req: NextRequest) {
       const currentDiskPrice = diskType === "SSD" ? (pricing.diskSsd || pricing.disk || 0) : (pricing.disk || 0);
       const diskCost = safeDisk * currentDiskPrice;
 
-      // stoppedRate: costs that accrue even when VM is powered off (disk, backup, IPs)
-      const stoppedRate = diskCost + backupCost + ipCost;
+      // stoppedRate: costs that accrue even when VM is powered off (disk, backup, IPs, bandwidth rate)
+      const stoppedRate = diskCost + backupCost + ipCost + bandwidthCost;
 
       // hourlyRate: full cost when VM is running (adds CPU + RAM on top)
       const cpuCost = safeCpu * (pricing.vcpu || 0);

@@ -138,10 +138,15 @@ export async function GET(req: Request) {
       orderBy: { name: "asc" }
     });
 
+    if (pricingMap.bandwidth === undefined) {
+      pricingMap.bandwidth = 69;
+    }
+
     return NextResponse.json({
       templates,
       plans,
       pricing: pricingMap,
+      bandwidthOptions: [100, 150, 200, 250, 300],
       hasIpv4Pool: ipv4PoolsCount > 0,
       hasIpv6Pool: ipv6PoolsCount > 0,
       maxSpecs,

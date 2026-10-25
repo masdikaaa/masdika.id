@@ -4,7 +4,7 @@ import { useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect, use, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Server, Play, Square, Power, RotateCcw, Activity,
+  Server, Play, Square, Power, RotateCcw, Activity, Cpu,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
   ArrowLeft, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
 } from "lucide-react";
@@ -148,6 +148,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [upgradeRam, setUpgradeRam] = useState(0);
   const [upgradeDisk, setUpgradeDisk] = useState(0);
   const [upgradeBackup, setUpgradeBackup] = useState(0);
+  const [upgradeBandwidth, setUpgradeBandwidth] = useState(0);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [maxSpecs, setMaxSpecs] = useState({ cpu: 32, ram: 128, disk: 2000, backup: 2000 });
 
@@ -324,6 +325,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         setUpgradeRam(prev => prev === 0 ? data.vps.ramGb : prev);
         setUpgradeDisk(prev => prev === 0 ? data.vps.diskGb : prev);
         setUpgradeBackup(prev => prev === 0 ? (data.vps.backupGb || 0) : prev);
+        setUpgradeBandwidth(prev => prev === 0 ? (data.vps.bandwidthMbps || 100) : prev);
         if (data.vps.backupSchedule) {
           setBackupSchedule(data.vps.backupSchedule);
         }
@@ -675,6 +677,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     additionalHourlyRate,
     additionalDiskMonthly,
     additionalDiskHourly,
+    additionalCpuMonthly,
+    additionalCpuHourly,
+    additionalRamMonthly,
+    additionalRamHourly,
+    additionalBandwidthMonthly,
+    additionalBandwidthHourly,
     newMonthlyPrice,
     newHourlyPrice,
     requiredBalance,
@@ -682,13 +690,24 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     remainingHours,
     isSsd,
     diskRatePerGbMonthly,
-    addedDiskGb
+    addedDiskGb,
+    additionalCpu,
+    additionalRam,
+    addedBandwidthMbps,
+    currentBandwidthMbps,
+    safeUpgradeBandwidthMbps
   } = useMemo(() => {
     if (!vps) return {
       upgradeCostNow: 0,
       additionalHourlyRate: 0,
       additionalDiskMonthly: 0,
       additionalDiskHourly: 0,
+      additionalCpuMonthly: 0,
+      additionalCpuHourly: 0,
+      additionalRamMonthly: 0,
+      additionalRamHourly: 0,
+      additionalBandwidthMonthly: 0,
+      additionalBandwidthHourly: 0,
       newMonthlyPrice: 0,
       newHourlyPrice: 0,
       requiredBalance: 0,
@@ -696,13 +715,31 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       remainingHours: 1,
       isSsd: false,
       diskRatePerGbMonthly: 4000,
-      addedDiskGb: 0
+      addedDiskGb: 0,
+      additionalCpu: 0,
+      additionalRam: 0,
+      addedBandwidthMbps: 0,
+      currentBandwidthMbps: 100,
+      safeUpgradeBandwidthMbps: 100
     };
 
-    const additionalCpu = Math.max(0, upgradeCores - (vps.cpuCores || 0));
-    const additionalRam = Math.max(0, upgradeRam - (vps.ramGb || 0));
+    const currentBandwidth = vps.bandwidthMbps || 100;
+    const safeUpgradeBandwidth = Math.max(currentBandwidth, upgradeBandwidth || currentBandwidth);
+    const addedBandwidth = safeUpgradeBandwidth - currentBandwidth;
+    const addedBandwidthSteps = Math.floor(addedBandwidth / 50);
+
+    const additionalCpuCores = Math.max(0, upgradeCores - (vps.cpuCores || 0));
+    const additionalRamGb = Math.max(0, upgradeRam - (vps.ramGb || 0));
     const addedDisk = Math.max(0, upgradeDisk - (vps.diskGb || 0));
     const additionalBackup = Math.max(0, upgradeBackup - (vps.backupGb || 0));
+
+    // Active VPS CPU upgrade pricing: Rp 50.000 / Core / month
+    const cpuMonthlyAdded = additionalCpuCores * 50000;
+    const cpuHourlyAdded = Math.ceil(cpuMonthlyAdded / 730);
+
+    // Active VPS RAM upgrade pricing: Rp 25.000 / GB / month
+    const ramMonthlyAdded = additionalRamGb * 25000;
+    const ramHourlyAdded = Math.ceil(ramMonthlyAdded / 730);
 
     // Active VPS disk upgrade rate: HDD = Rp 4.000 / GB / month, SSD = Rp 5.000 / GB / month
     const isSsdDisk = (vps.diskType || "").toUpperCase() === "SSD";
@@ -710,10 +747,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     const diskMonthlyAdded = addedDisk * diskMonthlyRate;
     const diskHourlyAdded = Math.ceil(diskMonthlyAdded / 730);
 
+    // Active VPS Bandwidth upgrade pricing: Rp 50.000 per 50 Mbps step / month
+    const bandwidthMonthlyAdded = addedBandwidthSteps * 50000;
+    const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
+    const bandwidthHourlyAdded = addedBandwidthSteps * bandwidthRatePerHour;
+
     let addRate = 0;
-    addRate += additionalCpu * (pricing.vcpu || 0);
-    addRate += additionalRam * (pricing.ram || 0);
+    addRate += cpuHourlyAdded;
+    addRate += ramHourlyAdded;
     addRate += diskHourlyAdded;
+    addRate += bandwidthHourlyAdded;
     addRate += additionalBackup * (pricing.backup || 0);
     addRate += addIpv4Count * (pricing.ipv4 || 0);
     addRate += addIpv6Count * (pricing.ipv6 || 0);
@@ -726,13 +769,19 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     const finalHourly = baseHourly + addRate;
     const reqBalance = finalHourly * 730;
 
-    const hasAnyChange = addRate > 0 || addedDisk > 0 || additionalCpu > 0 || additionalRam > 0 || additionalBackup > 0 || addIpv4Count > 0 || addIpv6Count > 0;
+    const hasAnyChange = addRate > 0 || addedDisk > 0 || additionalCpuCores > 0 || additionalRamGb > 0 || addedBandwidth > 0 || additionalBackup > 0 || addIpv4Count > 0 || addIpv6Count > 0;
 
     return {
       upgradeCostNow: reqBalance,
       additionalHourlyRate: addRate,
       additionalDiskMonthly: diskMonthlyAdded,
       additionalDiskHourly: diskHourlyAdded,
+      additionalCpuMonthly: cpuMonthlyAdded,
+      additionalCpuHourly: cpuHourlyAdded,
+      additionalRamMonthly: ramMonthlyAdded,
+      additionalRamHourly: ramHourlyAdded,
+      additionalBandwidthMonthly: bandwidthMonthlyAdded,
+      additionalBandwidthHourly: bandwidthHourlyAdded,
       newMonthlyPrice: finalHourly * 730,
       newHourlyPrice: finalHourly,
       requiredBalance: reqBalance,
@@ -740,9 +789,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       remainingHours: rHours,
       isSsd: isSsdDisk,
       diskRatePerGbMonthly: diskMonthlyRate,
-      addedDiskGb: addedDisk
+      addedDiskGb: addedDisk,
+      additionalCpu: additionalCpuCores,
+      additionalRam: additionalRamGb,
+      addedBandwidthMbps: addedBandwidth,
+      currentBandwidthMbps: currentBandwidth,
+      safeUpgradeBandwidthMbps: safeUpgradeBandwidth
     };
-  }, [vps, upgradeCores, upgradeRam, upgradeDisk, upgradeBackup, addIpv4Count, addIpv6Count, pricing, nowTime]);
+  }, [vps, upgradeCores, upgradeRam, upgradeDisk, upgradeBackup, upgradeBandwidth, addIpv4Count, addIpv6Count, pricing, nowTime]);
 
   const handleUpgradeSpecs = async () => {
     setIsUpgrading(true);
@@ -755,6 +809,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
           ramGb: upgradeRam,
           diskGb: upgradeDisk,
           backupGb: upgradeBackup,
+          bandwidthMbps: upgradeBandwidth || (vps.bandwidthMbps || 100),
           addIpv4Count,
           addIpv6Count,
           paymentMethodCode: "BALANCE"
@@ -2086,9 +2141,17 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   <div className="space-y-8">
                     <div>
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-1.5">
                         <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>CPU Cores</label>
                         <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeCores} Core(s)</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className={cn(
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                        )}>
+                          Upgrade: Rp 50.000/Core/mo (~Rp 69/hr)
+                        </span>
                       </div>
                       <input
                         type="range"
@@ -2099,15 +2162,43 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
                       <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
-                        <span>{vps.cpuCores} (Current)</span>
-                        <span>{maxSpecs.cpu} Max</span>
+                        <span>{vps.cpuCores} Core (Current)</span>
+                        <span>{maxSpecs.cpu} Core Max</span>
                       </div>
+                      {additionalCpu > 0 && (
+                        <div className={cn(
+                          "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                        )}>
+                          <span className="flex items-center gap-1.5 flex-wrap">
+                            <Activity className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <span>Added CPU:</span>
+                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              +{additionalCpu} Core
+                            </strong>
+                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                              (@ Rp 50.000/Core/mo)
+                            </span>
+                          </span>
+                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                            +{formatRupiah(additionalCpuMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalCpuHourly)}/hr)</span>
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div>
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-1.5">
                         <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>RAM Memory</label>
                         <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeRam} GB</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className={cn(
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                        )}>
+                          Upgrade: Rp 25.000/GB/mo (~Rp 35/hr)
+                        </span>
                       </div>
                       <input
                         type="range"
@@ -2121,6 +2212,26 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <span>{vps.ramGb} GB (Current)</span>
                         <span>{maxSpecs.ram} GB Max</span>
                       </div>
+                      {additionalRam > 0 && (
+                        <div className={cn(
+                          "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                        )}>
+                          <span className="flex items-center gap-1.5 flex-wrap">
+                            <Cpu className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <span>Added RAM:</span>
+                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              +{additionalRam} GB
+                            </strong>
+                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                              (@ Rp 25.000/GB/mo)
+                            </span>
+                          </span>
+                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                            +{formatRupiah(additionalRamMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalRamHourly)}/hr)</span>
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -2169,6 +2280,71 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           </span>
                           <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
                             +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalDiskHourly)}/hr)</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium whitespace-nowrap")}>Network Bandwidth (Speed Limit)</label>
+                        <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{safeUpgradeBandwidthMbps} Mbps</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className={cn(
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                        )}>
+                          100 Mbps Base Free • Upgrade: Rp 50.000 / 50 Mbps / mo (~Rp 69/hr)
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={currentBandwidthMbps} max={Math.max(1000, currentBandwidthMbps)} step={50}
+                        value={safeUpgradeBandwidthMbps}
+                        onChange={(e) => setUpgradeBandwidth(parseInt(e.target.value))}
+                        style={{ backgroundSize: `${((safeUpgradeBandwidthMbps - currentBandwidthMbps) / Math.max(1, Math.max(1000, currentBandwidthMbps) - currentBandwidthMbps)) * 100}% 100%` }}
+                        className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
+                      />
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                        <span>{currentBandwidthMbps} Mbps (Current)</span>
+                        <span>{Math.max(1000, currentBandwidthMbps)} Mbps Max</span>
+                      </div>
+                      {/* Quick preset buttons */}
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {[100, 150, 200, 250, 300, 500, 1000].filter(speed => speed >= currentBandwidthMbps).map(speed => (
+                          <button
+                            key={speed}
+                            type="button"
+                            onClick={() => setUpgradeBandwidth(speed)}
+                            className={cn(
+                              "px-2.5 py-1 text-xs font-mono rounded-lg border transition-all",
+                              safeUpgradeBandwidthMbps === speed
+                                ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-semibold" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-semibold"
+                                : isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20" : "bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300"
+                            )}
+                          >
+                            {speed}M
+                          </button>
+                        ))}
+                      </div>
+                      {addedBandwidthMbps > 0 && (
+                        <div className={cn(
+                          "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                        )}>
+                          <span className="flex items-center gap-1.5 flex-wrap">
+                            <Network className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <span>Added Bandwidth:</span>
+                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                              +{addedBandwidthMbps} Mbps
+                            </strong>
+                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                              (@ Rp 50.000 / 50 Mbps / mo)
+                            </span>
+                          </span>
+                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                            +{formatRupiah(additionalBandwidthMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalBandwidthHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2323,19 +2499,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 </span>
                               </div>
                             )}
-                            {upgradeCores > (vps.cpuCores || 0) && (
+                            {additionalCpu > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">CPU (+{upgradeCores - (vps.cpuCores || 0)} Core):</span>
+                                <span className="text-zinc-300 dark:text-zinc-400">CPU (+{additionalCpu} Core @ Rp 50.000/mo):</span>
                                 <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeCores - (vps.cpuCores || 0)) * (pricing.vcpu || 0))}/hr)</span>
+                                  +{formatRupiah(additionalCpuMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalCpuHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
-                            {upgradeRam > (vps.ramGb || 0) && (
+                            {additionalRam > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">RAM (+{upgradeRam - (vps.ramGb || 0)} GB):</span>
+                                <span className="text-zinc-300 dark:text-zinc-400">RAM (+{additionalRam} GB @ Rp 25.000/mo):</span>
                                 <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeRam - (vps.ramGb || 0)) * (pricing.ram || 0))}/hr)</span>
+                                  +{formatRupiah(additionalRamMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalRamHourly)}/hr)</span>
+                                </span>
+                              </div>
+                            )}
+                            {addedBandwidthMbps > 0 && (
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <span className="text-zinc-300 dark:text-zinc-400">Bandwidth (+{addedBandwidthMbps} Mbps @ Rp 50.000/50M):</span>
+                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                                  +{formatRupiah(additionalBandwidthMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalBandwidthHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}

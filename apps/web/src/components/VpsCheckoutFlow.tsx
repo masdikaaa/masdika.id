@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Server, HardDrive, Cpu, MemoryStick, Network, ShieldCheck, ArrowRight, Shield, XCircle, CheckCircle, Clock, Eye, EyeOff } from "lucide-react";
+import { Server, HardDrive, Cpu, MemoryStick, Network, Activity, ShieldCheck, ArrowRight, Shield, XCircle, CheckCircle, Clock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
@@ -221,6 +221,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [diskGb, setDiskGb] = useState(parseInt(searchParams.get("disk") || "20"));
   const [diskType, setDiskType] = useState<"HDD" | "SSD">((searchParams.get("diskType") as "HDD" | "SSD") || "HDD");
   const [backupGb, setBackupGb] = useState(0);
+  const [bandwidthMbps, setBandwidthMbps] = useState(100);
+  const [bandwidthOptions, setBandwidthOptions] = useState<number[]>([100, 150, 200, 250, 300]);
 
   const [maxSpecs, setMaxSpecs] = useState({ cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 });
 
@@ -296,6 +298,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         setTemplates(data.templates);
         setPlans(data.plans || []);
         setPricing(data.pricing);
+        if (data.bandwidthOptions && Array.isArray(data.bandwidthOptions)) {
+          setBandwidthOptions(data.bandwidthOptions);
+        }
         setHasIpv4Pool(data.hasIpv4Pool);
         setHasIpv6Pool(data.hasIpv6Pool);
 
@@ -383,6 +388,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
       if (ipv4Count > 0) total += ipv4Count * (pricing.ipv4 || 0);
       if (ipv6Count > 0) total += ipv6Count * (pricing.ipv6 || 0);
     }
+
+    // Bandwidth rate: 100 Mbps is free, 50k / 50 Mbps / mo above 100 Mbps
+    const bandwidthExtra = Math.max(0, bandwidthMbps - 100);
+    const bandwidthSteps = Math.floor(bandwidthExtra / 50);
+    const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
+    total += bandwidthSteps * bandwidthRatePerHour;
+
     return total;
   };
 
@@ -559,6 +571,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           diskGb,
           diskType,
           backupGb,
+          bandwidthMbps,
           useIpv4: useReservedIp ? false : (ipv4Count > 0),
           useIpv6: useReservedIp ? false : (ipv6Count > 0),
           reservedIpId: useReservedIp ? selectedReservedIpId : undefined,
@@ -1136,10 +1149,60 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </div>
               </div>
 
+              {/* Bandwidth Speed Limit Section */}
+              <div className="flex flex-col h-full w-full max-w-full min-w-0 md:col-span-2">
+                <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                  <Activity className="w-5 h-5 text-cyan-400 shrink-0" />
+                  6. Network Bandwidth (Speed Limit)
+                </h2>
+                <div className={cn(
+                  "flex flex-col p-4 sm:p-5 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-4",
+                  isDark ? "bg-[#0b162c] border-cyan-500/40 shadow-sm" : "bg-white border-cyan-600/30 shadow-sm"
+                )}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <span className={cn("font-bold text-sm sm:text-base", isDark ? "text-white" : "text-slate-900")}>Port Speed Rate Limit</span>
+                      <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Dedicated VM traffic shaper on Proxmox node. 100 Mbps is included for free.</p>
+                    </div>
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <span className={cn("px-3 py-1 rounded-full text-xs font-bold border", bandwidthMbps === 100 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20")}>
+                        {bandwidthMbps} Mbps {bandwidthMbps === 100 ? "(Free)" : `(+${formatRupiah(Math.floor((bandwidthMbps - 100) / 50) * 50000)}/mo)`}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+                    {bandwidthOptions.map((speed) => {
+                      const isSelected = bandwidthMbps === speed;
+                      const extraSteps = Math.floor(Math.max(0, speed - 100) / 50);
+                      const monthlyPrice = extraSteps * 50000;
+                      return (
+                        <button
+                          key={speed}
+                          type="button"
+                          onClick={() => setBandwidthMbps(speed)}
+                          className={cn(
+                            "flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer relative",
+                            isSelected
+                              ? (isDark ? "bg-cyan-500/20 border-cyan-400 text-white shadow-sm ring-1 ring-cyan-400" : "bg-cyan-50 border-cyan-600 text-cyan-900 shadow-sm ring-2 ring-cyan-600/30")
+                              : (isDark ? "bg-[#060b14] border-slate-800 text-zinc-300 hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300")
+                          )}
+                        >
+                          <span className="font-bold text-sm sm:text-base font-mono">{speed} Mbps</span>
+                          <span className={cn("text-[10px] mt-1 font-medium", speed === 100 ? "text-emerald-400 font-bold" : (isDark ? "text-zinc-400" : "text-slate-500"))}>
+                            {speed === 100 ? "FREE" : `+${formatRupiah(monthlyPrice)}/mo`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-col h-full w-full max-w-full min-w-0 md:col-span-2">
                 <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
                   <VpcIcon className="w-5 h-5 text-cyan-400 shrink-0" />
-                  6. Virtual Private Cloud
+                  7. Virtual Private Cloud
                 </h2>
                 <div className={cn(
                   "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-3 flex-1",
@@ -1557,7 +1620,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[5] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                         <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Settings2 className="w-5 h-5 text-cyan-400" />
-              8. Server Details
+              9. Server Details
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -1743,6 +1806,12 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Network className="w-3.5 h-3.5" /> Network IPs</span>
                 <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
                   {ipv4Count > 0 && ipv6Count > 0 ? `${ipv4Count} IPv4 + ${ipv6Count} IPv6` : ipv4Count > 0 ? `${ipv4Count} IPv4` : ipv6Count > 0 ? `${ipv6Count} IPv6` : "None"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm px-2">
+                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Activity className="w-3.5 h-3.5" /> Bandwidth</span>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
+                  {bandwidthMbps} Mbps {bandwidthMbps > 100 ? `(+${formatRupiah(Math.floor((bandwidthMbps - 100) / 50) * 50000)}/mo)` : "(Free)"}
                 </span>
               </div>
               {backupGb > 0 && (

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const vpsId = parseInt(id);
     const body = await req.json();
-    const { cpuCores, ramGb, diskGb, backupGb, addIpv4Count = 0, addIpv6Count = 0, paymentMethodCode } = body;
+    const { cpuCores, ramGb, diskGb, backupGb, bandwidthMbps, addIpv4Count = 0, addIpv6Count = 0, paymentMethodCode } = body;
 
     const safeAddIpv4 = Math.max(0, Math.floor(Number(addIpv4Count)));
     const safeAddIpv6 = Math.max(0, Math.floor(Number(addIpv6Count)));
@@ -35,16 +35,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // Security: Validate and sanitize resource inputs
+    const currentBandwidth = vps.bandwidthMbps || 100;
     const safeCpu = Math.min(Math.max(Math.floor(Number(cpuCores) || vps.cpuCores), 1), 32);
     const safeRam = Math.min(Math.max(Math.floor(Number(ramGb) || vps.ramGb), 1), 128);
     const safeDisk = Math.min(Math.max(Math.floor(Number(diskGb) || vps.diskGb), 10), 2000);
     const safeBackup = Math.min(Math.max(Math.floor(Number(backupGb) || vps.backupGb || 0), 0), 2000);
+    const safeBandwidth = Math.min(Math.max(Math.floor(Number(bandwidthMbps) || currentBandwidth), 100), 10000);
 
-    if (safeCpu < vps.cpuCores || safeRam < vps.ramGb || safeDisk < vps.diskGb || safeBackup < (vps.backupGb || 0)) {
+    if (safeCpu < vps.cpuCores || safeRam < vps.ramGb || safeDisk < vps.diskGb || safeBackup < (vps.backupGb || 0) || safeBandwidth < currentBandwidth) {
       return NextResponse.json({ error: "Downgrading specifications is not allowed" }, { status: 400 });
     }
 
-    const hasChanges = safeCpu > vps.cpuCores || safeRam > vps.ramGb || safeDisk > vps.diskGb || safeBackup > (vps.backupGb || 0) || safeAddIpv4 > 0 || safeAddIpv6 > 0;
+    const hasChanges = safeCpu > vps.cpuCores || safeRam > vps.ramGb || safeDisk > vps.diskGb || safeBackup > (vps.backupGb || 0) || safeBandwidth > currentBandwidth || safeAddIpv4 > 0 || safeAddIpv6 > 0;
     if (!hasChanges) {
       return NextResponse.json({ error: "No specification changes requested" }, { status: 400 });
     }
@@ -59,10 +61,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     let additionalHourlyRate = 0;
     let additionalStorageRate = 0;
     if (safeCpu > vps.cpuCores) {
-      additionalHourlyRate += (safeCpu - vps.cpuCores) * (pricing.vcpu || 0);
+      const addedCpuCores = safeCpu - vps.cpuCores;
+      // Active VPS CPU upgrade pricing: Rp 50.000 / Core / month
+      const addedCpuMonthly = addedCpuCores * 50000;
+      const addedCpuHourly = Math.ceil(addedCpuMonthly / 730);
+      additionalHourlyRate += addedCpuHourly;
     }
     if (safeRam > vps.ramGb) {
-      additionalHourlyRate += (safeRam - vps.ramGb) * (pricing.ram || 0);
+      const addedRamGb = safeRam - vps.ramGb;
+      // Active VPS RAM upgrade pricing: Rp 25.000 / GB / month
+      const addedRamMonthly = addedRamGb * 25000;
+      const addedRamHourly = Math.ceil(addedRamMonthly / 730);
+      additionalHourlyRate += addedRamHourly;
     }
     if (safeDisk > vps.diskGb) {
       const addedDiskGb = safeDisk - vps.diskGb;
@@ -79,6 +89,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (safeBackup > (vps.backupGb || 0)) {
       additionalHourlyRate += (safeBackup - (vps.backupGb || 0)) * (pricing.backup || 0);
       additionalStorageRate += (safeBackup - (vps.backupGb || 0)) * (pricing.backup || 0);
+    }
+    if (safeBandwidth > currentBandwidth) {
+      const addedBandwidthSteps = Math.floor((safeBandwidth - currentBandwidth) / 50);
+      // Rp 50.000 per 50 Mbps step monthly, or pricing.bandwidth if set by admin
+      const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
+      const addedBandwidthHourly = addedBandwidthSteps * bandwidthRatePerHour;
+      additionalHourlyRate += addedBandwidthHourly;
+      additionalStorageRate += addedBandwidthHourly;
     }
     if (safeAddIpv4 > 0) {
       additionalHourlyRate += safeAddIpv4 * (pricing.ipv4 || 0);
@@ -119,6 +137,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           cores: safeCpu,
           memory: safeRam * 1024,
         });
+      }
+
+      // Upgrade Bandwidth rate limit if changed
+      if (safeBandwidth > currentBandwidth) {
+        const rateMBs = safeBandwidth / 8;
+        const currentConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
+        const netConfigUpdates: Record<string, string> = {};
+        for (let i = 0; i < 5; i++) {
+          const netKey = `net${i}`;
+          if (currentConfig[netKey]) {
+            let netStr = currentConfig[netKey];
+            if (netStr.includes("rate=")) {
+              netStr = netStr.replace(/rate=[0-9.]+/g, `rate=${rateMBs}`);
+            } else {
+              netStr = `${netStr},rate=${rateMBs}`;
+            }
+            netConfigUpdates[netKey] = netStr;
+          }
+        }
+        if (Object.keys(netConfigUpdates).length > 0) {
+          await proxmox.configVm(vps.node, vps.vmid, netConfigUpdates);
+        }
       }
 
     // Upgrade Disk if changed
@@ -244,6 +284,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           ramGb: safeRam,
           diskGb: safeDisk,
           backupGb: safeBackup,
+          bandwidthMbps: safeBandwidth,
           hourlyRate: newHourlyRate,
           stoppedRate: newStoppedRate,
           ...(additionalHourlyRate > 0 ? { accumulatedCost: { increment: additionalHourlyRate } } : {}),

@@ -351,7 +351,10 @@ export class VpsProvisioningService {
           ? server.publicNetworkBridge
           : vps.networkBridge;
 
-        config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1`;
+        const speedMbps = vps.bandwidthMbps || 100;
+        const rateMBs = speedMbps / 8;
+
+        config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1,rate=${rateMBs}`;
         if (vps.cpuCores > 1) {
           config[`net${netIndex}`] += `,queues=${vps.cpuCores}`;
         }
@@ -362,8 +365,10 @@ export class VpsProvisioningService {
 
     if (vpcConfig && allocatedVpcIp) {
       const cidrSuffix = vpcConfig.cidr.split('/')[1] || '24';
+      const speedMbps = vps.bandwidthMbps || 100;
+      const rateMBs = speedMbps / 8;
       // VPC ALWAYS uses net1
-      config[`net1`] = `model=virtio,bridge=${vpcConfig.router.proxmoxBridge},tag=${vpcConfig.vlanId},firewall=1`;
+      config[`net1`] = `model=virtio,bridge=${vpcConfig.router.proxmoxBridge},tag=${vpcConfig.vlanId},firewall=1,rate=${rateMBs}`;
       if (vps.cpuCores > 1) {
         config[`net1`] += `,queues=${vps.cpuCores}`;
       }

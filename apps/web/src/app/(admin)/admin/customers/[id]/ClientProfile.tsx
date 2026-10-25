@@ -197,7 +197,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
           </div>
           <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
-            {vps.cpuCores}C • {vps.ramGb}G • {vps.diskGb}G • IP: {vps.assignedIps?.length ? (vps.assignedIps.length > 1 ? `${vps.assignedIps[0].ipAddress} (+${vps.assignedIps.length - 1})` : vps.assignedIps[0].ipAddress) : 'Unassigned'}
+            {vps.cpuCores}C • {vps.ramGb}G • {vps.diskGb}G • {vps.bandwidthMbps || 100} Mbps • IP: {vps.assignedIps?.length ? (vps.assignedIps.length > 1 ? `${vps.assignedIps[0].ipAddress} (+${vps.assignedIps.length - 1})` : vps.assignedIps[0].ipAddress) : 'Unassigned'}
           </div>
         </div>
       ),
