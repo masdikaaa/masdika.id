@@ -22,34 +22,14 @@ export async function GET(req: NextRequest, context: RouteContext) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-        invoices: {
-          take: 10,
-          orderBy: { createdAt: 'desc' }
-        },
-        vpsServices: {
-          take: 5,
-          orderBy: { createdAt: 'desc' }
-        },
-        emailLogs: {
-          take: 10,
-          orderBy: { createdAt: 'desc' }
-        }
-      }
+      select: { id: true }
     });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const decName = user.name ? decryptDeterministic(user.name) : 'Customer';
-    const decEmail = decryptDeterministic(user.email);
-
-    // 1. Purge any previously seeded dummy logs
+    // Purge any dummy or auto-generated synthetic logs
     await prisma.clientActivityLog.deleteMany({
       where: {
         userId,
@@ -60,110 +40,15 @@ export async function GET(req: NextRequest, context: RouteContext) {
           { description: { contains: 'Fraud Check Initiated' } },
           { description: { contains: 'Order ID 33617' } },
           { description: { contains: 'Invoice ID: 110761' } },
-          { description: { contains: 'SMS / WhatsApp Center - order confirmation' } },
+          { description: { contains: 'SMS / WhatsApp Center' } },
+          { description: { startsWith: 'Client Account Registered' } },
+          { description: { startsWith: 'Created Invoice -' } },
+          { description: { startsWith: 'Payment Received for Invoice' } },
+          { description: { startsWith: 'Email Sent to' } },
+          { description: { startsWith: 'VPS Instance Provisioned:' } },
         ]
       }
     }).catch(() => {});
-
-    // 2. Fetch existing logs to avoid duplicates
-    const existingLogs = await prisma.clientActivityLog.findMany({
-      where: { userId },
-      select: { description: true }
-    });
-    const existingDescSet = new Set(existingLogs.map(l => l.description));
-
-    const realLogsToCreate: {
-      userId: number;
-      description: string;
-      username: string;
-      ipAddress: string;
-      category: 'order' | 'invoice' | 'payment' | 'email' | 'service' | 'system' | 'auth';
-      createdAt: Date;
-    }[] = [];
-
-    // Real Account Registration Event
-    const regDesc = `Client Account Registered - Email: ${decEmail}`;
-    if (!existingDescSet.has(regDesc)) {
-      realLogsToCreate.push({
-        userId,
-        description: regDesc,
-        username: decName,
-        ipAddress: '127.0.0.1',
-        category: 'auth',
-        createdAt: user.createdAt || new Date()
-      });
-      existingDescSet.add(regDesc);
-    }
-
-    // Real Invoice Events
-    for (const inv of user.invoices) {
-      const invNum = inv.invoiceNumber || String(inv.id);
-      const invDesc = `Created Invoice - #${invNum} (Total: Rp ${Number(inv.amount || 0).toLocaleString('id-ID')})`;
-      if (!existingDescSet.has(invDesc)) {
-        realLogsToCreate.push({
-          userId,
-          description: invDesc,
-          username: 'System',
-          ipAddress: '127.0.0.1',
-          category: 'invoice'
-          createdAt: inv.createdAt
-        });
-        existingDescSet.add(invDesc);
-      }
-
-      if (inv.status === 'PAID') {
-        const payDesc = `Payment Received for Invoice #${invNum} (Rp ${Number(inv.amount || 0).toLocaleString('id-ID')}) via ${inv.paymentMethod || 'Payment Gateway'}`;
-        if (!existingDescSet.has(payDesc)) {
-          realLogsToCreate.push({
-            userId,
-            description: payDesc,
-            username: 'System',
-            ipAddress: '127.0.0.1',
-            category: 'payment',
-            createdAt: inv.paidAt || inv.updatedAt || inv.createdAt
-          });
-          existingDescSet.add(payDesc);
-        }
-      }
-    }
-
-    // Real Email Events
-    for (const em of user.emailLogs) {
-      const emDesc = `Email Sent to ${em.to} (${em.subject})`;
-      if (!existingDescSet.has(emDesc)) {
-        realLogsToCreate.push({
-          userId,
-          description: emDesc,
-          username: 'System',
-          ipAddress: '127.0.0.1',
-          category: 'email',
-          createdAt: em.createdAt
-        });
-        existingDescSet.add(emDesc);
-      }
-    }
-
-    // Real VPS Service Events
-    for (const vps of user.vpsServices) {
-      const vpsDesc = `VPS Instance Provisioned: ${vps.hostname || 'Cloud VPS'} (${vps.cpuCores || 1} vCPU, ${vps.ramGb || 1} GB RAM) - Status: ${vps.status}`;
-      if (!existingDescSet.has(vpsDesc)) {
-        realLogsToCreate.push({
-          userId,
-          description: vpsDesc,
-          username: 'System',
-          ipAddress: '127.0.0.1',
-          category: 'service',
-          createdAt: vps.createdAt
-        });
-        existingDescSet.add(vpsDesc);
-      }
-    }
-
-    if (realLogsToCreate.length > 0) {
-      await prisma.clientActivityLog.createMany({
-        data: realLogsToCreate
-      });
-    }
 
     // Extract query parameters for filtering & pagination
     const { searchParams } = new URL(req.url);

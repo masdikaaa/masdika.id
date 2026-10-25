@@ -961,10 +961,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className={cn("text-xs font-semibold border-b", isDark ? "bg-[#0c1f38] text-cyan-200 border-slate-800" : "bg-[#0284c7] text-white border-sky-600")}>
-                      <th className="py-3 px-4 w-44 font-semibold whitespace-nowrap">Date ▼</th>
-                      <th className="py-3 px-4 font-semibold">Subject</th>
-                      <th className="py-3 px-4 w-24 text-right font-semibold">Actions</th>
+                    <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                      <th className="py-3.5 px-4 w-44 font-semibold whitespace-nowrap">Date</th>
+                      <th className="py-3.5 px-4 font-semibold">Subject</th>
+                      <th className="py-3.5 px-4 w-24 text-right font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y text-sm", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -1246,14 +1246,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className={cn("text-xs font-semibold border-b", isDark ? "bg-[#0c1f38] text-white border-slate-800" : "bg-[#0284c7] text-white border-sky-600")}>
-                      <th className={cn("py-3 px-4 font-semibold w-44 whitespace-nowrap", isDark ? "text-cyan-400" : "text-white")}>Date ▼</th>
-                      <th className="py-3 px-4 font-semibold">Description</th>
-                      <th className="py-3 px-3 font-semibold w-28 text-center">Username</th>
-                      <th className="py-3 px-3 font-semibold w-36 text-center">IP Address</th>
+                    <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                      <th className="py-3.5 px-4 font-semibold w-44 whitespace-nowrap">Date</th>
+                      <th className="py-3.5 px-4 font-semibold">Description</th>
+                      <th className="py-3.5 px-3 font-semibold w-28 text-center whitespace-nowrap">Username</th>
+                      <th className="py-3.5 px-3 font-semibold w-36 text-center whitespace-nowrap">IP Address</th>
                     </tr>
                   </thead>
-                  <tbody className={cn("divide-y", isDark ? "divide-slate-800/60 bg-[#09111e]" : "divide-slate-200 bg-white")}>
+                  <tbody className={cn("divide-y", isDark ? "divide-slate-800/60" : "divide-slate-200")}>
                     {loadingLogs ? (
                       <tr>
                         <td colSpan={4} className="py-12 text-center">
