@@ -24,7 +24,9 @@ import {
   Monitor,
   Sparkles,
   Mail,
-  FileText
+  FileText,
+  Calendar,
+  Server
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -389,49 +391,124 @@ export default function EmailBlastPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Top Banner & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Top Header matching Gambar 1 */}
+      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-xl sm:text-2xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-            <Mail className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-700")} />
-            Email Blast & Customer Promotions
+          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Newsletter & Email Blast
           </h1>
-          <p className={cn("text-xs sm:text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Compose and broadcast high-converting HTML promotional campaigns directly to your customers.
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage registered audience email subscriptions and outbound campaign deliverability.
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className={cn("px-4 py-2 rounded-lg font-medium text-sm border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            Total Audience: {getRecipientCount()}
+          </div>
+          <button
+            type="button"
+            onClick={() => fetchRecipients()}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            )}
+          >
+            <RefreshCw className={cn("w-4 h-4", loadingRecipients ? "animate-spin" : "")} />
+            <span>Refresh</span>
+          </button>
           <button
             type="button"
             onClick={() => setShowPreviewModal(true)}
             className={cn(
-              "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs",
-              isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:text-white hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <Eye className="w-3.5 h-3.5 text-cyan-500" />
-            <span>Preview Mode</span>
+            <Eye className="w-4 h-4 text-cyan-400" />
+            <span>Preview</span>
           </button>
           <button
             type="button"
             onClick={() => setShowTestModal(true)}
             className={cn(
-              "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs",
-              isDark ? "bg-[#0b1322] border-slate-700 text-cyan-300 hover:border-cyan-500 hover:bg-cyan-500/10" : "bg-white border-slate-300 text-cyan-800 hover:border-cyan-600 hover:bg-cyan-50"
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
+              isDark ? "border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400" : "border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800"
             )}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Send Test Email</span>
+            <Sparkles className="w-4 h-4" />
+            <span>Send Test</span>
           </button>
         </div>
       </div>
 
-      {/* Roundcube Main Window Container matching Image 4 */}
-      <div className={cn("rounded-2xl border overflow-hidden shadow-xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300")}>
+      {/* Stat Cards matching Gambar 1 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Subscribers</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Mail className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {recipientsData.totalCustomers}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Verified recipient emails
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Service Clients</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Server className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {recipientsData.vpsCustomers}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Active cloud instances
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Audience Reach</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {getRecipientCount()}
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Instant campaign audience
+          </div>
+        </div>
+
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Deliverability</span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+              <CheckCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            100%
+          </div>
+          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            Zero bounce rate
+          </div>
+        </div>
+      </div>
+
+      {/* Main Campaign Composer Container matching Gambar 1 styling */}
+      <div className={cn("rounded-2xl border overflow-hidden shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
         
-        {/* Roundcube Action Bar Header matching Image 4 top icons */}
-        <div className={cn("px-4 py-2.5 border-b flex items-center justify-between gap-4", isDark ? "bg-[#0c1626] border-slate-800" : "bg-[#1e293b] text-white border-slate-700")}>
+        {/* Action Bar Header */}
+        <div className={cn("px-4 py-3 border-b flex items-center justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
           <div className="flex items-center gap-6 text-xs font-semibold">
             <button
               type="button"
@@ -462,7 +539,7 @@ export default function EmailBlastPage() {
               <span className="text-[10px]">Signature</span>
             </button>
 
-            {/* Templates / Responses Dropdown */}
+            {/* Templates Dropdown */}
             <div className="relative">
               <button
                 type="button"
@@ -470,7 +547,7 @@ export default function EmailBlastPage() {
                 className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span className="text-[10px]">Responses</span>
+                <span className="text-[10px]">Templates</span>
               </button>
 
               {showTemplatesDropdown && (
@@ -497,15 +574,15 @@ export default function EmailBlastPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={cn("text-[11px] font-mono px-2.5 py-1 rounded-full border flex items-center gap-1.5 font-bold", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/30" : "bg-cyan-500/20 text-cyan-300 border-cyan-400/30")}>
-              <Users className="w-3 h-3" />
-              {getRecipientCount()} Recipient(s)
+            <span className={cn("text-[11px] font-mono px-3 py-1 rounded-lg border flex items-center gap-1.5 font-bold", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+              <Users className="w-3.5 h-3.5" />
+              {getRecipientCount()} Recipients
             </span>
           </div>
         </div>
 
-        {/* Roundcube Fields: From, To, Subject */}
-        <div className={cn("divide-y border-b text-xs sm:text-sm", isDark ? "divide-slate-800 bg-[#060b14]" : "divide-slate-200 bg-slate-50/70")}>
+        {/* Fields: From, To, Subject */}
+        <div className={cn("divide-y text-xs sm:text-sm border-b", isDark ? "divide-slate-800/80 border-slate-800/80 bg-[#0b1322]" : "divide-slate-200 border-slate-200 bg-slate-50/70")}>
           
           {/* FROM ROW */}
           <div className="flex items-center px-4 py-2.5 gap-3">
@@ -518,14 +595,14 @@ export default function EmailBlastPage() {
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
                     placeholder="Sender Name"
-                    className={cn("px-2.5 py-1 rounded border text-xs outline-none flex-1", isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-800")}
+                    className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
                   />
                   <input
                     type="email"
                     value={senderEmail}
                     onChange={(e) => setSenderEmail(e.target.value)}
                     placeholder="me@masdika.id"
-                    className={cn("px-2.5 py-1 rounded border text-xs outline-none flex-1 font-mono", isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-800")}
+                    className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1 font-mono", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
                   />
                   <button
                     type="button"
@@ -555,16 +632,16 @@ export default function EmailBlastPage() {
           <div className="flex flex-col sm:flex-row sm:items-center px-4 py-2.5 gap-2 sm:gap-3">
             <span className={cn("w-16 sm:w-20 font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>To</span>
             <div className="flex-1 flex flex-wrap items-center gap-2">
-              {/* Target Type Selector */}
+              {/* Target Type Selector Pills */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setTargetType("all")}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
                     targetType === "all"
-                      ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-xs"
-                      : isDark ? "bg-[#0b1322] border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
+                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   All Customers ({recipientsData.totalCustomers})
@@ -573,10 +650,10 @@ export default function EmailBlastPage() {
                   type="button"
                   onClick={() => setTargetType("vps")}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
                     targetType === "vps"
-                      ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-xs"
-                      : isDark ? "bg-[#0b1322] border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
+                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   Active VPS Clients ({recipientsData.vpsCustomers})
@@ -588,10 +665,10 @@ export default function EmailBlastPage() {
                     setShowRecipientModal(true);
                   }}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1",
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1",
                     targetType === "selected"
-                      ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-xs"
-                      : isDark ? "bg-[#0b1322] border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
+                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   <span>Select Clients ({selectedUserIds.length})</span>
@@ -601,10 +678,10 @@ export default function EmailBlastPage() {
                   type="button"
                   onClick={() => setTargetType("custom")}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
                     targetType === "custom"
-                      ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-xs"
-                      : isDark ? "bg-[#0b1322] border-slate-700 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
+                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   Custom Email List
@@ -621,14 +698,14 @@ export default function EmailBlastPage() {
                     placeholder="Enter recipient emails separated by comma or newlines (e.g. client1@domain.com, client2@domain.com)..."
                     className={cn(
                       "w-full p-2.5 rounded-xl border text-xs font-mono outline-none transition-colors",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
               )}
             </div>
 
-            {/* Contact modal trigger matching Image 4 icon */}
+            {/* Contact modal trigger */}
             <div className="flex items-center gap-1 self-end sm:self-auto">
               <button
                 type="button"
@@ -654,7 +731,7 @@ export default function EmailBlastPage() {
                 className={cn(
                   "flex-1 px-3 py-1.5 rounded-xl border text-sm font-medium outline-none transition-all",
                   isDark
-                    ? "bg-[#0b1322] border-slate-700 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20"
+                    ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20"
                     : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600/20"
                 )}
               />
@@ -850,19 +927,22 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Editor Workspace Canvas */}
-        <div className="min-h-[480px] bg-white flex flex-col relative">
+        <div className={cn("min-h-[480px] flex flex-col relative", isDark ? "bg-[#060b14]" : "bg-white")}>
           {sourceMode ? (
             /* Raw HTML/CSS Code Editor */
             <textarea
               value={htmlContent}
               onChange={(e) => setHtmlContent(e.target.value)}
               placeholder="Paste raw responsive HTML and inline CSS code here..."
-              className="w-full flex-1 p-4 font-mono text-xs text-slate-900 bg-slate-50 border-none outline-none resize-y min-h-[500px] leading-relaxed"
+              className={cn(
+                "w-full flex-1 p-4 font-mono text-xs border-none outline-none resize-y min-h-[500px] leading-relaxed",
+                isDark ? "bg-[#060b14] text-zinc-200 placeholder:text-zinc-600" : "bg-slate-50 text-slate-900 placeholder:text-slate-400"
+              )}
             />
           ) : (
             /* Visual Rich Canvas Preview (Live Sandboxed Iframe with full HTML support) */
-            <div className="flex-1 flex flex-col min-h-[500px] bg-slate-200/60 p-4 overflow-auto">
-              <div className="max-w-[700px] w-full mx-auto bg-white rounded-xl shadow-lg border border-slate-300 overflow-hidden flex flex-col min-h-[460px]">
+            <div className={cn("flex-1 flex flex-col min-h-[500px] p-4 overflow-auto", isDark ? "bg-[#030712]" : "bg-slate-200/60")}>
+              <div className={cn("max-w-[700px] w-full mx-auto rounded-xl shadow-lg border overflow-hidden flex flex-col min-h-[460px]", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300")}>
                 <iframe
                   title="Roundcube Live Editor Preview"
                   srcDoc={htmlContent}
@@ -874,15 +954,15 @@ export default function EmailBlastPage() {
           )}
         </div>
 
-        {/* Roundcube Bottom Action Bar matching Image 4 */}
-        <div className={cn("px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3", isDark ? "bg-[#0c1626] border-slate-800" : "bg-slate-100 border-slate-200")}>
+        {/* Bottom Action Bar matching Gambar 1 */}
+        <div className={cn("px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
           <div className="flex items-center gap-3">
-            {/* Primary Cyan Send Button matching Image 4 */}
+            {/* Primary Cyan Send Button matching Gambar 1 */}
             <button
               type="button"
               disabled={sendingBlast}
               onClick={() => setShowSendConfirmModal(true)}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-bold text-xs bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50"
             >
               {sendingBlast ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               <span>{sendingBlast ? "Sending Blast..." : "Send Campaign Blast"}</span>
@@ -892,8 +972,8 @@ export default function EmailBlastPage() {
               type="button"
               onClick={() => setShowTestModal(true)}
               className={cn(
-                "px-4 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-xs",
-                isDark ? "border-slate-700 text-zinc-300 hover:bg-white/5" : "border-slate-300 text-slate-700 hover:bg-white"
+                "px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-300 text-slate-700 hover:bg-white"
               )}
             >
               Send Test to Myself
@@ -903,14 +983,14 @@ export default function EmailBlastPage() {
           <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-zinc-400">
             <span>Target: <strong className={isDark ? "text-cyan-400" : "text-cyan-700"}>{getRecipientCount()} recipient(s)</strong></span>
             
-            {/* Open in new window toggle matching Image 4 */}
+            {/* Open in new window toggle */}
             <button
               type="button"
               onClick={() => setShowPreviewModal(true)}
               className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors cursor-pointer"
             >
               <Maximize2 className="w-3.5 h-3.5" />
-              <span>Open in new window</span>
+              <span>Full Preview</span>
             </button>
           </div>
         </div>
@@ -1028,10 +1108,10 @@ export default function EmailBlastPage() {
       {/* MODAL 2: Fullscreen / Responsive Preview Modal */}
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-5xl h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-            <div className={cn("px-6 py-3 border-b flex items-center justify-between", isDark ? "bg-[#0c1626] border-slate-800" : "bg-slate-100 border-slate-200")}>
+          <div className={cn("w-full max-w-5xl h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+            <div className={cn("px-6 py-3 border-b flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-100 border-slate-200")}>
               <div className="flex items-center gap-3">
-                <Eye className="w-5 h-5 text-cyan-500" />
+                <Eye className="w-5 h-5 text-cyan-400" />
                 <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Email Preview</h3>
                 <span className="text-xs text-zinc-500 font-mono truncate max-w-xs">{subject}</span>
               </div>
@@ -1073,10 +1153,11 @@ export default function EmailBlastPage() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto bg-slate-300/80 p-4 sm:p-6 flex justify-center items-start">
+            <div className={cn("flex-1 overflow-auto p-4 sm:p-6 flex justify-center items-start", isDark ? "bg-[#030712]" : "bg-slate-200/80")}>
               <div
                 className={cn(
-                  "bg-white rounded-xl shadow-2xl overflow-hidden transition-all border border-slate-400",
+                  "rounded-xl shadow-2xl overflow-hidden transition-all border",
+                  isDark ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-300",
                   previewDevice === "desktop" ? "w-[650px] min-h-[500px]" : "w-[375px] min-h-[600px]"
                 )}
               >
