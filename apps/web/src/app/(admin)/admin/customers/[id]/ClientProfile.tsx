@@ -284,7 +284,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       </style>
     `;
 
-    // If it's already a full HTML document (e.g. email blasts, templates, or system emails with HTML structure)
+    // If it's already a full HTML document (e.g. templates, email blasts, system emails)
     const isFullHtml = /<!DOCTYPE|<html|<body|<table/i.test(rawBody);
     if (isFullHtml) {
       if (rawBody.includes("<head>")) {
@@ -296,16 +296,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       return `${fontInject}${rawBody}`;
     }
 
-    // Strip legacy white wrappers or gradients if any
-    let cleanContent = rawBody;
-    if (cleanContent.includes("padding: 30px 25px;")) {
-      const match = /<div style="padding: 30px 25px;">([\s\S]*?)<\/div>\s*<div style="background: #f8fafc; border-top:/i.exec(cleanContent);
-      if (match && match[1]) {
-        cleanContent = match[1];
-      }
-    }
-
-    // For plain fragments or simple text, wrap cleanly without any artificial logo header
+    // For plain text or simple snippets, render original body directly without any container or wrapper
     return `<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -315,51 +306,15 @@ export default function ClientProfile({ userId }: { userId: string }) {
   <style>
     body {
       margin: 0;
-      padding: 30px 15px;
-      background-color: #030712;
-      color: #f8fafc;
-    }
-    .email-container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #0f172a;
-      border-radius: 16px;
-      border: 1px solid #1e293b;
-      overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-    }
-    .email-content {
-      padding: 36px 32px 28px 32px;
-      color: #e2e8f0;
-      font-size: 15px;
-      line-height: 1.65;
-    }
-    .email-footer {
-      padding: 24px;
-      border-top: 1px solid #1e293b;
-      background-color: #030712;
-      text-align: center;
-      font-size: 13px;
-      color: #94a3b8;
-      border-bottom-left-radius: 16px;
-      border-bottom-right-radius: 16px;
-    }
-    a {
-      color: #38bdf8;
-      text-decoration: none;
+      padding: 16px;
+      line-height: 1.6;
+      background-color: #ffffff;
+      color: #0f172a;
     }
   </style>
 </head>
 <body>
-  <div class="email-container">
-    <div class="email-content">
-      ${cleanContent}
-    </div>
-    <div class="email-footer">
-      <p style="margin: 0 0 6px 0; font-weight: 500;">&copy; ${new Date().getFullYear()} Masdika.ID. All Rights Reserved.</p>
-      <p style="margin: 0; color: #64748b; font-size: 12px;">Surabaya, Indonesia</p>
-    </div>
-  </div>
+  ${rawBody}
 </body>
 </html>`;
   };
