@@ -1113,17 +1113,6 @@ export default function EmailBlastPage() {
           </button>
           <button
             type="button"
-            onClick={() => setShowTestModal(true)}
-            className={cn(
-              "justify-center px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap",
-              isDark ? "border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400" : "border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800"
-            )}
-          >
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span>Send Test</span>
-          </button>
-          <button
-            type="button"
             onClick={() => setShowSmtpModal(true)}
             className={cn(
               "justify-center px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer whitespace-nowrap",
