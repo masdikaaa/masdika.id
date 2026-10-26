@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Link2, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Link2, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2 } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -102,7 +102,9 @@ export default function DashboardLayoutClient({
   userEmail,
   userImage,
   userBalance,
-  promos
+  promos,
+  isImpersonating = false,
+  impersonatorAdminName = 'Admin',
 }: {
   children: React.ReactNode;
   userName: string;
@@ -110,8 +112,29 @@ export default function DashboardLayoutClient({
   userImage?: string | null;
   userBalance?: number;
   promos?: any[];
+  isImpersonating?: boolean;
+  impersonatorAdminName?: string;
 }) {
   const pathname = usePathname();
+  const [isStoppingImpersonation, setIsStoppingImpersonation] = useState(false);
+
+  const handleStopImpersonation = async () => {
+    setIsStoppingImpersonation(true);
+    try {
+      const res = await fetch('/api/admin/impersonate/stop', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || 'Kembali ke sesi admin');
+        window.location.href = data.redirectUrl || '/admin/customers';
+      } else {
+        toast.error(data.error || 'Gagal mengakhiri impersonasi');
+        setIsStoppingImpersonation(false);
+      }
+    } catch {
+      toast.error('Terjadi kesalahan saat mengakhiri impersonasi');
+      setIsStoppingImpersonation(false);
+    }
+  };
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -292,6 +315,26 @@ export default function DashboardLayoutClient({
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {isImpersonating && (
+          <div className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-slate-950 px-4 py-2 text-xs font-semibold flex flex-wrap items-center justify-between gap-2 shadow-md sticky top-0 z-40">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-slate-950 animate-bounce" />
+              <span>
+                Mode Impersonasi: Anda sedang mengelola akun <strong>{userName}</strong> ({userEmail}) sebagai <strong>{impersonatorAdminName}</strong>.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleStopImpersonation}
+              disabled={isStoppingImpersonation}
+              className="bg-slate-950 hover:bg-slate-900 active:bg-black text-amber-300 hover:text-amber-200 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1.5 shrink-0"
+            >
+              {isStoppingImpersonation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+              <span>Kembali ke Admin Panel</span>
+            </button>
+          </div>
+        )}
+
         {/* Topbar */}
         <header className={cn("h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "bg-[#0c0c0e]/90 backdrop-blur-md border-white/10" : "bg-white/90 backdrop-blur-md border-slate-200/80 shadow-sm")}>
           <button

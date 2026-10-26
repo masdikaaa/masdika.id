@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
-import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History } from 'lucide-react';
+import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, KeyRound, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { SiKubernetes } from 'react-icons/si';
 import { toast } from 'sonner';
@@ -568,6 +568,29 @@ export default function ClientProfile({ userId }: { userId: string }) {
     }
   };
 
+  const [isImpersonating, setIsImpersonating] = useState(false);
+  const handleImpersonateClient = async () => {
+    if (!user) return;
+    setIsImpersonating(true);
+    const toastId = toast.loading(`Masuk sebagai ${user.name}...`);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/impersonate`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || `Berhasil masuk sebagai ${user.name}`, { id: toastId });
+        window.location.href = data.redirectUrl || '/dashboard';
+      } else {
+        toast.error(data.error || 'Gagal masuk sebagai klien', { id: toastId });
+        setIsImpersonating(false);
+      }
+    } catch {
+      toast.error('Terjadi kesalahan saat impersonasi', { id: toastId });
+      setIsImpersonating(false);
+    }
+  };
+
   if (loading) {
     return <AdminLoader />;
   }
@@ -606,10 +629,20 @@ export default function ClientProfile({ userId }: { userId: string }) {
             <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className={cn("px-4 py-2 rounded-xl border text-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
             <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Balance:</span> <span className={cn("font-bold ml-1", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(user.balance)}</span>
           </div>
+          <button
+            type="button"
+            onClick={handleImpersonateClient}
+            disabled={isImpersonating}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
+            title="Masuk ke portal pelanggan sebagai user ini"
+          >
+            {isImpersonating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
+            <span>Login as Client</span>
+          </button>
         </div>
       </div>
 

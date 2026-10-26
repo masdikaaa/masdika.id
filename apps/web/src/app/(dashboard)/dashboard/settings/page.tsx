@@ -4,7 +4,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect, useRef } from 'react';
-import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2 } from 'lucide-react';
+import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2, History, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -112,6 +112,44 @@ export default function SettingsPage() {
   const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
   const [disable2FACode, setDisable2FACode] = useState('');
 
+  // Login Logs State
+  const [loginLogs, setLoginLogs] = useState<any[]>([]);
+  const [loadingLoginLogs, setLoadingLoginLogs] = useState(false);
+  const [currentIp, setCurrentIp] = useState('');
+
+  const fetchLoginLogs = async () => {
+    setLoadingLoginLogs(true);
+    try {
+      const res = await fetch('/api/user/security/login-logs');
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLoginLogs(data.logs || []);
+        setCurrentIp(data.currentIp || '');
+      }
+    } catch (err) {
+      console.error('Failed to fetch login logs:', err);
+    } finally {
+      setLoadingLoginLogs(false);
+    }
+  };
+
+  const formatDateTime = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      return {
+        date: `${day}/${month}/${year}`,
+        time: `${hours}:${mins}`
+      };
+    } catch {
+      return { date: dateStr, time: '' };
+    }
+  };
+
   const fetchProfile = async () => {
     try {
       const res = await fetch('/api/dashboard/settings/profile');
@@ -138,6 +176,12 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'security') {
+      fetchLoginLogs();
+    }
+  }, [activeTab]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -760,6 +804,111 @@ export default function SettingsPage() {
                   <p className={cn("text-xs leading-relaxed relative z-10", isDark ? "text-slate-400" : "text-slate-500")}>
                     When 2FA is enabled, you will be prompted for a secure token during login. Retrieve this from your phone's Google Authenticator or Authy application.
                   </p>
+                </div>
+
+                {/* Security & Login History Card */}
+                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                        <History className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Riwayat Sesi & Login Pengguna</h3>
+                        <p className={cn("text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Pantau aktivitas login dan perangkat yang mengakses akun Anda.</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={fetchLoginLogs}
+                      disabled={loadingLoginLogs}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer self-start sm:self-auto",
+                        isDark ? "border-slate-800 hover:border-slate-700 bg-[#060b14] text-zinc-300 hover:text-white" : "border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      )}
+                    >
+                      <RefreshCw className={cn("w-3.5 h-3.5", loadingLoginLogs && "animate-spin text-cyan-400")} />
+                      <span>Segarkan Riwayat</span>
+                    </button>
+                  </div>
+
+                  {/* Logs Table / List */}
+                  <div className={cn("relative z-10 rounded-2xl border overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")}>
+                    {loadingLoginLogs ? (
+                      <div className="py-12 flex flex-col items-center justify-center gap-2">
+                        <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" />
+                        <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Memuat riwayat login...</span>
+                      </div>
+                    ) : loginLogs.length === 0 ? (
+                      <div className={cn("py-10 text-center text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        Belum ada riwayat aktivitas login yang tercatat.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead>
+                            <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#0b1322] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                              <th className="py-3 px-3 sm:px-4 w-28 sm:w-36 whitespace-nowrap">Waktu</th>
+                              <th className="py-3 px-3 sm:px-4 w-36 whitespace-nowrap">Alamat IP</th>
+                              <th className="py-3 px-3 sm:px-4">Keterangan / Metode</th>
+                              <th className="py-3 px-3 sm:px-4 w-24 text-right whitespace-nowrap">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
+                            {loginLogs.map((log) => {
+                              const dt = formatDateTime(log.createdAt);
+                              return (
+                                <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
+                                  <td className={cn("py-3 px-3 sm:px-4 font-mono text-[11px] whitespace-nowrap align-middle", isDark ? "text-zinc-300" : "text-slate-700")}>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 leading-tight">
+                                      <span>{dt.date}</span>
+                                      <span className={cn("text-[10px] sm:text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>{dt.time}</span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-3 sm:px-4 align-middle whitespace-nowrap">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
+                                      <span className={cn("font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-800")}>{log.ipAddress}</span>
+                                      {log.isCurrentDevice && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 w-fit">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                          Perangkat Ini
+                                        </span>
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className={cn("py-3 px-3 sm:px-4 align-middle text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
+                                    <div className="flex flex-col">
+                                      <span className={cn("font-medium", isDark ? "text-zinc-200" : "text-slate-800")}>{log.method}</span>
+                                      <span className="text-[11px] opacity-75">{log.description}</span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-3 sm:px-4 text-right align-middle whitespace-nowrap">
+                                    {log.status === 'SUCCESS' ? (
+                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+                                        <CheckCircle2 className="w-3 h-3" /> Berhasil
+                                      </span>
+                                    ) : (
+                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
+                                        <AlertTriangle className="w-3 h-3" /> {log.status === 'BLOCKED' ? 'Diblokir' : 'Gagal'}
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={cn("mt-4 p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
+                    <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed">
+                      <strong>Tip Keamanan Akun:</strong> Jika Anda melihat alamat IP atau jam login yang mencurigakan atau tidak Anda kenali, segera perbarui kata sandi Anda dan aktifkan <em>Two-Factor Authentication (2FA)</em> pada kartu di atas.
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -1,5 +1,7 @@
 import { requireAuth } from '@/lib/auth-middleware';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { verifySessionToken } from '@/lib/session';
 import DashboardLayoutClient from './DashboardLayoutClient';
 import BlockedScreen from './BlockedScreen';
 import { prisma } from '@/lib/prisma';
@@ -87,6 +89,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
     reasonBorder: "border-amber-500/10", reasonTitle: "text-amber-400/80"
   };
 
+  // Check for active admin impersonation
+  const cookieStore = await cookies();
+  const impersonatorToken = cookieStore.get('masdika_impersonator_token')?.value;
+  let isImpersonating = false;
+  let impersonatorAdminName = 'Admin';
+
+  if (impersonatorToken) {
+    const adminId = verifySessionToken(impersonatorToken);
+    if (adminId) {
+      const adminUser = await prisma.user.findUnique({
+        where: { id: adminId },
+        select: { id: true, role: true, name: true }
+      });
+      if (adminUser && adminUser.role === 'ADMIN') {
+        isImpersonating = true;
+        impersonatorAdminName = adminUser.name ? decryptDeterministic(adminUser.name) : 'Admin';
+      }
+    }
+  }
+
   return (
     <DashboardLayoutClient 
       userName={decryptDeterministic(user.name) || "User"} 
@@ -94,6 +116,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       userImage={user.image}
       userBalance={user.balance}
       promos={promos}
+      isImpersonating={isImpersonating}
+      impersonatorAdminName={impersonatorAdminName}
     >
       {isBlocked ? (
         <BlockedScreen
