@@ -26,9 +26,41 @@ async function start() {
   });
   // ---------------------------
 
+  // 🛡️ Graceful Shutdown handling for zero-disruption CI/CD deployments
+  let isShuttingDown = false;
+  let isCurrentlyProcessing = false;
+
+  const handleShutdown = (signal: string) => {
+    console.log(`[Worker] Received ${signal}. Preparing graceful shutdown...`);
+    isShuttingDown = true;
+    if (!isCurrentlyProcessing) {
+      console.log(`[Worker] Idle. Exiting immediately on ${signal}.`);
+      process.exit(0);
+    } else {
+      console.log(`[Worker] Waiting for in-flight job to finish before exiting...`);
+    }
+  };
+
+  process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+  process.on("SIGINT", () => handleShutdown("SIGINT"));
+
+  // Auto-recover any jobs left in PROCESSING by previous container crash / restart
+  await JobQueueService.recoverStaleJobs(5).then(count => {
+    if (count > 0) {
+      console.log(`> [Worker] Auto-recovered ${count} stuck background job(s) after restart`);
+    }
+  }).catch(err => {
+    console.warn("> [Worker] Stale job recovery check note:", err?.message || err);
+  });
+
   console.log("Worker started. Waiting for jobs...");
 
   while (true) {
+    if (isShuttingDown) {
+      console.log("[Worker] Shutdown signaled. Exiting job loop cleanly.");
+      break;
+    }
+
     try {
       const job = await JobQueueService.processNextJob();
 
@@ -37,6 +69,7 @@ async function start() {
         continue;
       }
 
+      isCurrentlyProcessing = true;
       console.log(`Processing job ${job.id} of type ${job.type}`);
       const payload = JSON.parse(job.payload);
 
@@ -75,9 +108,16 @@ async function start() {
       } catch (error: any) {
         console.error(`Job ${job.id} failed:`, error);
         await JobQueueService.failJob(job.id, error.message || "Unknown error");
+      } finally {
+        isCurrentlyProcessing = false;
+        if (isShuttingDown) {
+          console.log(`[Worker] Finished in-flight job #${job.id}. Exiting process cleanly.`);
+          process.exit(0);
+        }
       }
 
     } catch (err) {
+      isCurrentlyProcessing = false;
       console.error("Worker error:", err);
       await new Promise(resolve => setTimeout(resolve, 5000));
     }

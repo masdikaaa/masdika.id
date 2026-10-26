@@ -54,4 +54,48 @@ export class JobQueueService {
       data: { status: 'FAILED', error }
     });
   }
+
+  /**
+   * Recovers jobs that got stuck in 'PROCESSING' state due to a worker container restart or crash.
+   * - Jobs with attempts < 3 are reset to 'PENDING' so they can be re-executed.
+   * - Jobs with attempts >= 3 are marked 'FAILED' to avoid endless loops.
+   */
+  static async recoverStaleJobs(staleMinutes: number = 10): Promise<number> {
+    const cutoff = new Date(Date.now() - staleMinutes * 60 * 1000);
+
+    const staleJobs = await prisma.backgroundJob.findMany({
+      where: {
+        status: 'PROCESSING',
+        updatedAt: { lt: cutoff }
+      }
+    });
+
+    if (staleJobs.length === 0) return 0;
+
+    let recovered = 0;
+    for (const job of staleJobs) {
+      if (job.attempts < 3) {
+        await prisma.backgroundJob.update({
+          where: { id: job.id },
+          data: {
+            status: 'PENDING',
+            updatedAt: new Date()
+          }
+        });
+        console.log(`[JobQueue] Auto-recovered stuck job #${job.id} (${job.type}) -> PENDING for retry`);
+        recovered++;
+      } else {
+        await prisma.backgroundJob.update({
+          where: { id: job.id },
+          data: {
+            status: 'FAILED',
+            error: 'Job exceeded maximum retry attempts after unexpected worker restart'
+          }
+        });
+        console.warn(`[JobQueue] Marked stuck job #${job.id} (${job.type}) as FAILED (max attempts reached)`);
+      }
+    }
+
+    return recovered;
+  }
 }

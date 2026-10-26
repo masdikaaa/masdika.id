@@ -144,3 +144,74 @@ export async function recoverStaleReinstalls(): Promise<number> {
   }
 }
 
+/**
+ * Auto-recover any K3s clusters stuck in installing/provisioning state
+ * if an unexpected restart occurred during cluster deployment.
+ */
+export async function recoverStaleK3sClusters(): Promise<number> {
+  try {
+    const STALE_K3S_MS = 20 * 60 * 1000; // 20 minutes
+    const cutoffTime = new Date(Date.now() - STALE_K3S_MS);
+
+    const stuckClusters = await prisma.kubernetesCluster.findMany({
+      where: {
+        status: { in: ["PENDING", "WAITING_FOR_CLOUD_INIT", "INSTALLING_K3S", "CONFIGURING_WORKERS", "PROVISIONING", "INSTALLING", "REINSTALLING"] },
+        updatedAt: { lt: cutoffTime }
+      },
+      include: {
+        nodes: {
+          where: { kubernetesRole: "MASTER" }
+        }
+      }
+    });
+
+    if (stuckClusters.length === 0) return 0;
+
+    const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+    const proxmox = server ? new ProxmoxClient(server.host, server.tokenId, server.tokenSecret) : null;
+
+    let recovered = 0;
+    for (const cluster of stuckClusters) {
+      try {
+        const masterNode = cluster.nodes[0];
+        if (proxmox && masterNode && masterNode.vmid && masterNode.node) {
+          const vmStatus = await proxmox.getVmStatus(masterNode.node, masterNode.vmid).catch(() => null);
+          if (vmStatus && vmStatus.status === "running") {
+            // Check if k3s finished installing on the master node
+            const tokenRes = await proxmox.agentFileRead(masterNode.node, masterNode.vmid, "/var/lib/rancher/k3s/server/node-token").catch(() => null);
+            if (tokenRes && tokenRes.content) {
+              await prisma.kubernetesCluster.update({
+                where: { id: cluster.id },
+                data: { status: "RUNNING" }
+              });
+              await prisma.vpsService.update({
+                where: { id: masterNode.id },
+                data: { status: "RUNNING" }
+              });
+              console.log(`[K3sRecovery] Auto-restored K3s cluster #${cluster.id} (${cluster.name}) to RUNNING`);
+              recovered++;
+              continue;
+            }
+          }
+        }
+
+        // If not running or timed out, mark as FAILED so user is not stuck
+        await prisma.kubernetesCluster.update({
+          where: { id: cluster.id },
+          data: { status: "FAILED" }
+        });
+        console.log(`[K3sRecovery] Unlocked stuck K3s cluster #${cluster.id} -> FAILED`);
+        recovered++;
+      } catch (err) {
+        console.error(`[K3sRecovery] Error recovering cluster #${cluster.id}:`, err);
+      }
+    }
+
+    return recovered;
+  } catch (err) {
+    console.error("[K3sRecovery] Critical error:", err);
+    return 0;
+  }
+}
+
+

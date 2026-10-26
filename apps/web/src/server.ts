@@ -214,8 +214,8 @@ app.prepare().then(async () => {
       console.warn('> [Invoice Standardizer] Failed to load module:', err?.message || err);
     });
 
-    // 🛡️ Auto-recover any cloud backups or reinstalls interrupted by previous container restart / deployment
-    import("./lib/cloud-backup-recovery").then(({ recoverStaleCloudBackups, recoverStaleReinstalls }) => {
+    // 🛡️ Auto-recover any cloud backups, reinstalls, K3s clusters, or background jobs interrupted by previous container restart / deployment
+    import("./lib/cloud-backup-recovery").then(({ recoverStaleCloudBackups, recoverStaleReinstalls, recoverStaleK3sClusters }) => {
       recoverStaleCloudBackups().then((count) => {
         if (count > 0) {
           console.log(`> [Cloud Backup Recovery] Safely recovered ${count} interrupted backup(s) after restart`);
@@ -230,6 +230,24 @@ app.prepare().then(async () => {
         }
       }).catch((err) => {
         console.warn('> [Reinstall Recovery] Startup check note:', err?.message || err);
+      });
+
+      recoverStaleK3sClusters().then((count) => {
+        if (count > 0) {
+          console.log(`> [K3s Recovery] Safely recovered ${count} stuck K3s cluster(s) after restart`);
+        }
+      }).catch((err) => {
+        console.warn('> [K3s Recovery] Startup check note:', err?.message || err);
+      });
+    }).catch(() => {});
+
+    import("./lib/job-queue").then(({ JobQueueService }) => {
+      JobQueueService.recoverStaleJobs(5).then((count) => {
+        if (count > 0) {
+          console.log(`> [Job Queue Recovery] Safely recovered ${count} stuck background job(s) after restart`);
+        }
+      }).catch((err) => {
+        console.warn('> [Job Queue Recovery] Startup check note:', err?.message || err);
       });
     }).catch(() => {});
   });

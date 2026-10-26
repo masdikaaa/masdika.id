@@ -102,14 +102,14 @@ jobs:
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
             docker compose pull app worker
 
-            # Zero-Disruption Safety Check: Wait if Reinstall, Snapshots, Backups, or Restores are in progress
-            echo "Checking if any critical operations (Reinstall / Snapshots / Backups / Restores) are in progress..."
+            # Zero-Disruption Safety Check: Wait if any Order Deployment (VPS / K3s / CDN / Jobs), Snapshot, or Backup is in progress
+            echo "Checking if any critical operations (VPS / K3s / CDN Orders / Deployments / Snapshots / Backups) are in progress..."
             for i in $(seq 1 30); do
               READINESS=$(curl -s http://127.0.0.1/api/health/deploy-readiness 2>/dev/null || curl -s http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || docker compose exec -T app wget -qO- http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || echo '{"safeToDeploy":true}')
               IS_SAFE=$(echo "$READINESS" | grep -o '"safeToDeploy":true' || true)
 
               if [ -n "$IS_SAFE" ]; then
-                echo "System is clear! No active reinstall, snapshot, backup, or restore in progress. Safe to deploy."
+                echo "System is clear! No active service order deployment, K3s installation, snapshot, or backup in progress. Safe to deploy."
                 break
               fi
 
