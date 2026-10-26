@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
-import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, History, Filter, Search, Plus } from 'lucide-react';
+import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { SiKubernetes } from 'react-icons/si';
 import { toast } from 'sonner';
@@ -180,10 +180,6 @@ export default function ClientProfile({ userId }: { userId: string }) {
   const [logFilterIp, setLogFilterIp] = useState("");
   const [distinctLogUsernames, setDistinctLogUsernames] = useState<string[]>(["Any", "System"]);
   const [jumpToLogPage, setJumpToLogPage] = useState("1");
-  const [showAddLogModal, setShowAddLogModal] = useState(false);
-  const [newLogDescription, setNewLogDescription] = useState("");
-  const [newLogCategory, setNewLogCategory] = useState("system");
-  const [isSubmittingLog, setIsSubmittingLog] = useState(false);
 
   const fetchActivityLogs = async (page = 1, limit = logPagination.limit) => {
     setLoadingLogs(true);
@@ -214,36 +210,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
     }
   };
 
-  const handleCreateActivityLog = async () => {
-    if (!newLogDescription.trim()) {
-      toast.error("Please enter a log description");
-      return;
-    }
-    setIsSubmittingLog(true);
-    try {
-      const res = await fetch(`/api/admin/users/${userId}/logs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          description: newLogDescription.trim(),
-          category: newLogCategory
-        })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        toast.success("Activity log entry added successfully");
-        setShowAddLogModal(false);
-        setNewLogDescription("");
-        fetchActivityLogs(1);
-      } else {
-        toast.error(data.error || "Failed to add activity log entry");
-      }
-    } catch {
-      toast.error("An error occurred while creating activity log");
-    } finally {
-      setIsSubmittingLog(false);
-    }
-  };
+
 
   const formatLogDescription = (desc: string) => {
     if (!desc) return "-";
@@ -703,21 +670,24 @@ export default function ClientProfile({ userId }: { userId: string }) {
             { key: 'invoices', label: 'Invoices', icon: FileText },
             { key: 'emails', label: 'Emails', icon: Mail },
             { key: 'logs', label: 'Logs', icon: History }
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
-                activeTab === tab.key
-                  ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-400 shadow-sm" : "bg-cyan-50 text-cyan-700 border border-cyan-500 shadow-sm")
-                  : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent"
-              )}
-            >
-              <tab.icon className="w-3.5 h-3.5 shrink-0" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0",
+                  activeTab === tab.key
+                    ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-400 shadow-sm" : "bg-cyan-50 text-cyan-700 border border-cyan-500 shadow-sm")
+                    : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent"
+                )}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1084,7 +1054,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         value={logFilterDate}
                         onChange={(e) => setLogFilterDate(e.target.value)}
                         className={cn(
-                          "w-full px-3 py-1.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500",
                           isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-300 text-slate-800"
                         )}
                       />
@@ -1098,7 +1068,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         value={logFilterUsername}
                         onChange={(e) => setLogFilterUsername(e.target.value)}
                         className={cn(
-                          "w-full px-3 py-1.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer",
+                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer",
                           isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-300 text-slate-800"
                         )}
                       >
@@ -1121,7 +1091,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         onChange={(e) => setLogFilterDescription(e.target.value)}
                         placeholder="Search description, order, payment..."
                         className={cn(
-                          "w-full px-3 py-1.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500",
                           isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
@@ -1137,7 +1107,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         onChange={(e) => setLogFilterIp(e.target.value)}
                         placeholder="e.g. 103.147..."
                         className={cn(
-                          "w-full px-3 py-1.5 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono",
+                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono",
                           isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
@@ -1147,44 +1117,30 @@ export default function ClientProfile({ userId }: { userId: string }) {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-4 pt-3 border-t flex flex-wrap items-center justify-between gap-3" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fetchActivityLogs(1)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <Filter className="w-3.5 h-3.5" />
-                    <span>Filter Logs</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLogFilterDate("");
-                      setLogFilterUsername("Any");
-                      setLogFilterDescription("");
-                      setLogFilterIp("");
-                      fetchActivityLogs(1);
-                    }}
-                    className={cn(
-                      "px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer",
-                      isDark ? "border-slate-800 text-zinc-400 hover:text-white hover:bg-white/5" : "border-slate-300 text-slate-600 hover:bg-slate-100"
-                    )}
-                  >
-                    Reset Filter
-                  </button>
-                </div>
-
+              <div className="mt-4 pt-3 border-t flex flex-wrap items-center justify-start gap-2" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
                 <button
                   type="button"
-                  onClick={() => setShowAddLogModal(true)}
+                  onClick={() => fetchActivityLogs(1)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>Filter Logs</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLogFilterDate("");
+                    setLogFilterUsername("Any");
+                    setLogFilterDescription("");
+                    setLogFilterIp("");
+                    fetchActivityLogs(1);
+                  }}
                   className={cn(
-                    "px-3.5 py-2 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer",
-                    isDark ? "border-slate-700 text-zinc-300 hover:bg-white/5" : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                    "px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer",
+                    isDark ? "border-slate-800 text-zinc-400 hover:text-white hover:bg-white/5" : "border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
-                  <Plus className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Add Log Entry</span>
+                  Reset Filter
                 </button>
               </div>
             </div>
@@ -1542,77 +1498,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         </div>
       )}
 
-      {/* Modal: Add Client Activity Log Entry */}
-      {showAddLogModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-lg rounded-2xl border p-6 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <History className="w-5 h-5 text-cyan-400" />
-                <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Add Client Activity Log</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAddLogModal(false)}
-                className="text-zinc-500 hover:text-white cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
 
-            <p className="text-xs text-zinc-500 mb-4">
-              Add a manual audit log or system note for this customer. It will appear immediately in the client activity history.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>Category</label>
-                <select
-                  value={newLogCategory}
-                  onChange={(e) => setNewLogCategory(e.target.value)}
-                  className={cn("w-full px-3 py-2 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-300 text-slate-800")}
-                >
-                  <option value="system">System Note / Action</option>
-                  <option value="order">Order Activity</option>
-                  <option value="invoice">Invoice / Billing</option>
-                  <option value="payment">Payment Gateway</option>
-                  <option value="service">Service / VPS Management</option>
-                  <option value="auth">Authentication / Security</option>
-                </select>
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>Description *</label>
-                <textarea
-                  rows={4}
-                  value={newLogDescription}
-                  onChange={(e) => setNewLogDescription(e.target.value)}
-                  placeholder="e.g. Phone verification confirmed by admin. Client requested IP change."
-                  className={cn("w-full p-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400")}
-                />
-              </div>
-            </div>
-
-            <div className={cn("flex items-center justify-end gap-3 mt-6 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
-              <button
-                type="button"
-                onClick={() => setShowAddLogModal(false)}
-                className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-slate-800 text-zinc-400 hover:text-white" : "border-slate-300 text-slate-600 hover:bg-slate-100")}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateActivityLog}
-                disabled={isSubmittingLog || !newLogDescription.trim()}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingLog ? "Saving..." : "Save Log Entry"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

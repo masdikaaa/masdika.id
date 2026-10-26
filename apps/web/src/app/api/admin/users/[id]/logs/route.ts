@@ -29,6 +29,26 @@ export async function GET(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Purge any legacy hardcoded dummy records that were seeded during development
+    await prisma.clientActivityLog.deleteMany({
+      where: {
+        userId,
+        OR: [
+          { description: { contains: 'Order ID: 33617' } },
+          { description: { contains: 'Order ID 33617' } },
+          { description: { contains: 'Cloud Service Initialized: High-Performance Proxmox VPS Container' } },
+          { description: { contains: 'Client Account Created & Verified - Registered via Web Portal' } },
+          { description: { startsWith: 'User Login Successful - Email:' } },
+          { description: { contains: 'Passed Fraud Check' } },
+          { description: { contains: 'Fraud Check Initiated' } },
+          { description: { contains: 'Invoice ID: 110761' } },
+          { description: { contains: 'SMS / WhatsApp Center' } },
+          { description: { contains: 'Konfirmasi Pesanan # 5302042067' } },
+          { description: { contains: 'Tagihan # 1462/INV/MASDIKA/10/2026' } },
+        ]
+      }
+    }).catch(() => {});
+
     // Extract query parameters for filtering & pagination
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));

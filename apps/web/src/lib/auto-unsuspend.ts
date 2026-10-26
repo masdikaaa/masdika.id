@@ -158,46 +158,60 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
       }
 
       await prisma.$transaction(async (tx) => {
-        const runningInvoice = vps.invoices[0];
-        if (runningInvoice) {
-          await tx.invoice.update({
-            where: { id: runningInvoice.id },
-            data: { reference: 'PAYG_COMPLETED' }
+        const isCycleExpired = !vps.expiresAt || new Date(vps.expiresAt) <= now;
+
+        if (isCycleExpired) {
+          const runningInvoice = vps.invoices[0];
+          if (runningInvoice) {
+            await tx.invoice.update({
+              where: { id: runningInvoice.id },
+              data: { reference: 'PAYG_COMPLETED' }
+            });
+          }
+
+          const newExpires = new Date(now);
+          newExpires.setMonth(newExpires.getMonth() + 1);
+
+          await tx.vpsService.update({
+            where: { id: vps.id },
+            data: {
+              status: 'RUNNING',
+              suspendReason: null,
+              terminationDate: null,
+              expiresAt: newExpires,
+              accumulatedCost: 0,
+              autoRenew: true
+            }
+          });
+
+          const merchantOrderId = generateOrderId('INV') + '-VPS-PAYG';
+          await tx.invoice.create({
+            data: {
+              invoiceNumber: merchantOrderId,
+              userId: user.id,
+              vpsServiceId: vps.id,
+              amount: 0,
+              status: 'PAID',
+              paymentMethod: 'Account Balance',
+              merchantOrderId,
+              type: 'VPS',
+              paidAt: new Date(),
+              reference: 'PAYG_RUNNING',
+              details: JSON.stringify({ type: 'PAYG_MONTHLY_CYCLE_UNSUSPEND', isReseller: false })
+            }
+          });
+        } else {
+          // Mid-cycle reactivated: cycle is still valid. Resume service and preserve current running invoice.
+          await tx.vpsService.update({
+            where: { id: vps.id },
+            data: {
+              status: 'RUNNING',
+              suspendReason: null,
+              terminationDate: null,
+              autoRenew: true
+            }
           });
         }
-
-        const newExpires = new Date(vps.expiresAt || now);
-        if (newExpires < now) newExpires.setTime(now.getTime());
-        newExpires.setMonth(newExpires.getMonth() + 1);
-
-        await tx.vpsService.update({
-          where: { id: vps.id },
-          data: {
-            status: 'RUNNING',
-            suspendReason: null,
-            terminationDate: null,
-            expiresAt: newExpires,
-            accumulatedCost: 0,
-            autoRenew: true
-          }
-        });
-
-        const merchantOrderId = generateOrderId('INV') + '-VPS-PAYG';
-        await tx.invoice.create({
-          data: {
-            invoiceNumber: merchantOrderId,
-            userId: user.id,
-            vpsServiceId: vps.id,
-            amount: 0,
-            status: 'PAID',
-            paymentMethod: 'Account Balance',
-            merchantOrderId,
-            type: 'VPS',
-            paidAt: new Date(),
-            reference: 'PAYG_RUNNING',
-            details: JSON.stringify({ type: 'PAYG_MONTHLY_CYCLE_UNSUSPEND', isReseller: false })
-          }
-        });
       });
     }
 

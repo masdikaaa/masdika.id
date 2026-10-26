@@ -420,6 +420,15 @@ export async function GET(req: Request) {
                 }
               });
   
+              // Track attached Reserved IPs baseline so hourly additions in the new cycle are exact
+              const attachedIps = await tx.reservedIp.findMany({
+                where: { vpsId: vps.id, isAttached: true }
+              });
+              const syncedIpCosts: Record<number, number> = {};
+              for (const ip of attachedIps) {
+                syncedIpCosts[ip.id] = ip.accumulatedCost;
+              }
+
               // Create a new running invoice for the next billing cycle
               const merchantOrderId = generateOrderId() + '-VPS-PAYG';
               const invoiceAmount = vps.isReseller ? (vps.hourlyRate || 0) * 730 : 0;
@@ -435,7 +444,11 @@ export async function GET(req: Request) {
                   type: 'VPS',
                   paidAt: new Date(),
                   reference: 'PAYG_RUNNING',
-                  details: JSON.stringify({ type: 'PAYG_MONTHLY_CYCLE', isReseller: vps.isReseller })
+                  details: JSON.stringify({
+                    type: 'PAYG_MONTHLY_CYCLE',
+                    isReseller: vps.isReseller,
+                    _syncedReservedIpCosts: syncedIpCosts
+                  })
                 }
               });
             });

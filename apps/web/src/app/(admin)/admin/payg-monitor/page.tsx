@@ -290,9 +290,9 @@ export default function PaygMonitorPage() {
           {(
             [
               { key: 'ALL' as const, label: 'All Status', count: customers.length },
-              { key: 'SUFFICIENT' as const, label: '✓ Sufficient', count: sufficientCount },
-              { key: 'LOW' as const, label: '⚠ Low Balance', count: lowCount },
-              { key: 'EXHAUSTED' as const, label: '✕ Exhausted', count: exhaustedCount },
+              { key: 'SUFFICIENT' as const, label: 'Sufficient', count: sufficientCount },
+              { key: 'LOW' as const, label: 'Low Balance', count: lowCount },
+              { key: 'EXHAUSTED' as const, label: 'Exhausted', count: exhaustedCount },
             ]
           ).map((tab) => (
             <button

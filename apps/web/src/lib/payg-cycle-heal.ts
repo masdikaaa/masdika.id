@@ -64,6 +64,14 @@ export async function healPaygCycleInvoicesForUser(userId: number) {
         const invoiceNumber = `INV-${timestamp}-${random}-VPS-PAYG`;
         const cycleLabel = now.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
+        const attachedIps = await tx.reservedIp.findMany({
+          where: { vpsId: vps.id, isAttached: true }
+        });
+        const syncedIpCosts: Record<number, number> = {};
+        for (const ip of attachedIps) {
+          syncedIpCosts[ip.id] = ip.accumulatedCost;
+        }
+
         await tx.invoice.create({
           data: {
             invoiceNumber,
@@ -76,7 +84,13 @@ export async function healPaygCycleInvoicesForUser(userId: number) {
             type: 'VPS',
             paidAt: now,
             reference: 'PAYG_RUNNING',
-            details: JSON.stringify({ type: 'PAYG_MONTHLY_CYCLE', cycle: cycleLabel, hostname: vps.hostname, isReseller: false })
+            details: JSON.stringify({
+              type: 'PAYG_MONTHLY_CYCLE',
+              cycle: cycleLabel,
+              hostname: vps.hostname,
+              isReseller: false,
+              _syncedReservedIpCosts: syncedIpCosts
+            })
           }
         });
         healed++;
