@@ -74,6 +74,7 @@ export async function POST(req: Request) {
         .replace(/{name}/g, 'Admin (Test)')
         .replace(/{email}/g, escapeHtml(cleanTestEmail))
         .replace(/{app_url}/g, appUrl)
+        .replace(/{web_version_url}/g, `${appUrl}/vps`)
         .replace(/{year}/g, currentYear));
 
       try {
@@ -171,6 +172,7 @@ export async function POST(req: Request) {
               .replace(/{name}/g, escapeHtml(recipient.name || 'Valued Customer'))
               .replace(/{email}/g, escapeHtml(recipient.email))
               .replace(/{app_url}/g, appUrl)
+              .replace(/{web_version_url}/g, `${appUrl}/vps`)
               .replace(/{year}/g, currentYear));
             try {
               await blastTransporter.sendMail({

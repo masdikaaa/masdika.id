@@ -49,6 +49,325 @@ const FONT_STACK = "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemF
 
 const PROMO_TEMPLATES = [
   {
+    id: "vps_upgrade_pricing",
+    name: "🚀 Update Harga Upgrade VPS & Bandwidth (Official)",
+    subject: "Update Harga Upgrade VPS Masdika Cloud",
+    html: `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Upgrade VPS - Masdika Cloud</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#eeeeee;">
+
+  <!-- Preheader -->
+  <div style="display:none;font-size:1px;color:#eeeeee;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    Informasi terbaru harga upgrade VPS Masdika Cloud dan bandwidth 100 Mbps gratis tanpa FUP.
+  </div>
+
+  <!-- Outer Background -->
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+    style="width:100%;background-color:#eeeeee;">
+    <tr>
+      <td align="center" style="padding:0 12px 35px;border-top:5px solid #087cf5;">
+
+        <!-- Online Version -->
+        <table role="presentation" width="650" cellspacing="0" cellpadding="0" border="0"
+          style="width:100%;max-width:650px;">
+          <tr>
+            <td align="right" style="padding:15px 5px;font-family:'Plus Jakarta Sans','Inter',Arial,sans-serif;font-size:11px;">
+              <a href="{web_version_url}" target="_blank"
+                style="color:#0756cf;text-decoration:underline;">
+                Lihat versi online
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Email Container -->
+        <table role="presentation" width="650" cellspacing="0" cellpadding="0" border="0"
+          style="width:100%;max-width:650px;background-color:#ffffff;">
+
+          <!-- NAVBAR -->
+          <tr>
+            <td style="padding:24px 25px 20px;background-color:#ffffff;">
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <!-- Official Logo -->
+                  <td valign="middle" style="width:48%;padding:0;">
+                    <a href="https://www.masdika.id" target="_blank"
+                      style="text-decoration:none;display:inline-block;">
+                      <img
+                        src="https://cdn.droptocdn.com/files/06f1876b-91d4-4ecf-86c8-4a3ff6257c4f/masdika-logo-light-mode.svg"
+                        alt="Masdika Cloud"
+                        width="175"
+                        style="display:block;width:175px;max-width:100%;height:auto;border:0;"
+                      >
+                    </a>
+                  </td>
+
+                  <!-- Navigation -->
+                  <td valign="middle" align="right"
+                    style="font-family:'Plus Jakarta Sans','Inter',Arial,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;">
+
+                    <a href="https://www.masdika.id/vps" target="_blank"
+                      style="display:inline-block;color:#16417e;text-decoration:none;padding:9px 8px;">
+                      CLOUD VPS
+                    </a>
+
+                    <a href="https://www.masdika.id/dashboard" target="_blank"
+                      style="display:inline-block;color:#16417e;text-decoration:none;padding:9px 8px;">
+                      DASHBOARD
+                    </a>
+
+                    <a href="https://www.masdika.id/promos" target="_blank"
+                      style="display:inline-block;color:#087cf5;text-decoration:none;font-weight:800;padding:9px 0 9px 8px;">
+                      PROMO
+                    </a>
+
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Navbar Divider -->
+          <tr>
+            <td style="padding:0 25px;">
+              <div style="height:1px;background-color:#e8edf5;font-size:1px;line-height:1px;">&nbsp;</div>
+            </td>
+          </tr>
+
+          <!-- Hero Banner -->
+          <tr>
+            <td style="padding:20px 25px 0;background-color:#ffffff;">
+              <a href="https://www.masdika.id/vps" target="_blank"
+                style="display:block;text-decoration:none;">
+                <img
+                  src="https://cdn.droptocdn.com/files/d7fe0d40-60e7-4f76-a21b-e2a7d355a366/Masdika_Cloud_VPS_Upgrade_Banner.png"
+                  alt="Pengumuman perubahan harga upgrade VPS Masdika Cloud"
+                  width="600"
+                  style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:8px;"
+                >
+              </a>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding:27px 25px 30px;font-family:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+
+              <h1 style="font-size:24px;line-height:1.4;font-weight:800;color:#102d68;margin:0 0 20px;">
+                Update Harga Upgrade VPS Masdika Cloud
+              </h1>
+
+              <p style="font-size:14px;line-height:1.8;color:#243b5b;margin:0 0 12px;">
+                Halo <strong>{name}</strong>,
+              </p>
+
+              <p style="font-size:14px;line-height:1.85;color:#475569;margin:0 0 18px;">
+                Kami punya informasi terbaru untuk kamu! Masdika Cloud menghadirkan penyesuaian harga upgrade resource VPS serta fleksibilitas peningkatan kecepatan bandwidth agar spesifikasi server bisa disesuaikan dengan kebutuhanmu.
+              </p>
+
+              <!-- Infrastructure Notice -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                style="background-color:#eff8ff;border:1px solid #c9e7ff;">
+                <tr>
+                  <td style="padding:18px 19px;border-left:4px solid #087cf5;">
+                    <div style="font-size:15px;font-weight:800;color:#0756cf;margin:0 0 8px;">
+                      Infrastruktur Lebih Baik, Performa Lebih Optimal
+                    </div>
+                    <p style="font-size:13px;line-height:1.8;color:#405775;margin:0;">
+                      Penyesuaian harga dilakukan untuk mendukung peningkatan kualitas infrastruktur Masdika Cloud agar layanan semakin stabil dan performa server terus berkembang.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Pricing -->
+              <h2 style="font-size:20px;line-height:1.4;font-weight:800;color:#102d68;margin:29px 0 8px;">
+                Daftar Harga Upgrade Resource
+              </h2>
+
+              <p style="font-size:13px;line-height:1.7;color:#64748b;margin:0 0 15px;">
+                Berikut biaya untuk setiap penambahan resource VPS.
+              </p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                style="border-collapse:collapse;font-family:'Plus Jakarta Sans','Inter',Arial,sans-serif;">
+
+                <tr>
+                  <td style="padding:14px 13px;background-color:#edf6ff;border-bottom:1px solid #dbeafe;">
+                    <div style="font-size:14px;font-weight:800;color:#102d68;">CPU</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">Per tambahan 1 CPU</div>
+                  </td>
+                  <td align="right" valign="middle" style="padding:14px 13px;background-color:#edf6ff;border-bottom:1px solid #dbeafe;white-space:nowrap;">
+                    <strong style="font-size:16px;color:#0756cf;">Rp50.000</strong>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 13px;border-bottom:1px solid #e2e8f0;">
+                    <div style="font-size:14px;font-weight:800;color:#102d68;">RAM</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">Per tambahan 1 GB</div>
+                  </td>
+                  <td align="right" valign="middle" style="padding:14px 13px;border-bottom:1px solid #e2e8f0;white-space:nowrap;">
+                    <strong style="font-size:16px;color:#0756cf;">Rp50.000</strong>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 13px;background-color:#edf6ff;border-bottom:1px solid #dbeafe;">
+                    <div style="font-size:14px;font-weight:800;color:#102d68;">Storage HDD</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">Per tambahan 1 GB</div>
+                  </td>
+                  <td align="right" valign="middle" style="padding:14px 13px;background-color:#edf6ff;border-bottom:1px solid #dbeafe;white-space:nowrap;">
+                    <strong style="font-size:16px;color:#0756cf;">Rp4.000</strong>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 13px;border-bottom:1px solid #e2e8f0;">
+                    <div style="font-size:14px;font-weight:800;color:#102d68;">Storage SSD</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">Per tambahan 1 GB</div>
+                  </td>
+                  <td align="right" valign="middle" style="padding:14px 13px;border-bottom:1px solid #e2e8f0;white-space:nowrap;">
+                    <strong style="font-size:16px;color:#0756cf;">Rp5.000</strong>
+                  </td>
+                </tr>
+
+              </table>
+
+              <!-- Bandwidth -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                style="margin-top:25px;background-color:#0756cf;border-collapse:separate;">
+                <tr>
+                  <td align="center" style="padding:24px 18px;">
+                    <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#bceaff;">
+                      VPS BANDWIDTH
+                    </div>
+                    <div style="font-size:30px;line-height:1.5;font-weight:900;color:#ffffff;margin-top:6px;">
+                      100 Mbps GRATIS
+                    </div>
+                    <div style="font-size:13px;line-height:1.8;color:#dbeafe;">
+                      Unlimited Bandwidth · No FUP
+                    </div>
+
+                    <div style="height:1px;background-color:#3986df;margin:18px 0;"></div>
+
+                    <div style="font-size:13px;color:#dbeafe;">
+                      Upgrade setiap kelipatan 50 Mbps
+                    </div>
+                    <div style="font-size:24px;line-height:1.6;font-weight:900;color:#ffffff;">
+                      Rp50.000
+                    </div>
+                    <div style="font-size:12px;color:#c4e3ff;">
+                      per tambahan 50 Mbps
+                    </div>
+
+                    <div style="margin-top:16px;padding:12px;background-color:#ffffff;color:#0756cf;font-size:13px;line-height:1.7;">
+                      <strong>Contoh:</strong> 150 Mbps = Rp50.000 biaya upgrade bandwidth.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Service Features -->
+              <h2 style="font-size:19px;line-height:1.4;font-weight:800;color:#102d68;margin:29px 0 13px;">
+                Pilihan VPS untuk Kebutuhanmu
+              </h2>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="padding:11px 0;border-bottom:1px solid #edf2f7;font-size:13px;line-height:1.8;color:#334155;">
+                    <strong style="color:#0756cf;">&#10003; VPS Windows & Linux</strong><br>
+                    Pilih sistem operasi yang sesuai dengan aplikasi kamu.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:11px 0;border-bottom:1px solid #edf2f7;font-size:13px;line-height:1.8;color:#334155;">
+                    <strong style="color:#0756cf;">&#10003; Dedicated Public IP</strong><br>
+                    IP publik dedicated tersedia untuk VPS kamu.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:11px 0;border-bottom:1px solid #edf2f7;font-size:13px;line-height:1.8;color:#334155;">
+                    <strong style="color:#0756cf;">&#10003; Region Sidoarjo</strong><br>
+                    Pilihan lokasi layanan VPS di Indonesia.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:11px 0;font-size:13px;line-height:1.8;color:#334155;">
+                    <strong style="color:#0756cf;">&#10003; Spesifikasi Fleksibel</strong><br>
+                    Sesuaikan CPU, RAM, storage, dan bandwidth sesuai kebutuhan.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <div style="text-align:center;margin:30px 0 12px;">
+                <h2 style="font-size:21px;line-height:1.4;font-weight:800;color:#102d68;margin:0 0 10px;">
+                  Siap Upgrade VPS Kamu?
+                </h2>
+
+                <p style="font-size:13px;line-height:1.8;color:#64748b;margin:0 0 20px;">
+                  Kunjungi website Masdika Cloud dan sesuaikan spesifikasi VPS dengan kebutuhanmu.
+                </p>
+
+                <a href="https://www.masdika.id/vps" target="_blank"
+                  style="display:inline-block;padding:15px 29px;background-color:#087cf5;color:#ffffff;text-decoration:none;font-size:14px;font-weight:800;border-radius:5px;">
+                  Lihat Layanan VPS &rarr;
+                </a>
+
+                <p style="font-size:12px;margin:17px 0 0;">
+                  <a href="https://www.masdika.id/vps" target="_blank"
+                    style="color:#087cf5;text-decoration:underline;">
+                    www.masdika.id/vps
+                  </a>
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:23px 22px;background-color:#f8fafc;border-top:1px solid #e2e8f0;font-family:'Plus Jakarta Sans','Inter',Arial,sans-serif;">
+              <a href="https://www.masdika.id" target="_blank" style="text-decoration:none;">
+                <img
+                  src="https://cdn.droptocdn.com/files/06f1876b-91d4-4ecf-86c8-4a3ff6257c4f/masdika-logo-light-mode.svg"
+                  alt="Masdika Cloud"
+                  width="135"
+                  style="display:block;width:135px;height:auto;border:0;margin:0 auto;"
+                >
+              </a>
+
+              <p style="font-size:11px;line-height:1.8;color:#64748b;margin:13px 0 8px;">
+                Infrastruktur cloud untuk bisnis, aplikasi, dan proyek digital kamu.
+              </p>
+
+              <p style="font-size:10px;line-height:1.8;color:#94a3b8;margin:0;">
+                Email ini dikirim ke akun terdaftar di Masdika Cloud Platform.<br>
+                © {year} PT Masdika Teknologi Indonesia. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`
+  },
+  {
     id: "graphic_banner_promo",
     name: "🎉 Marketing Banner Promo (IDwebhost-Style)",
     subject: "🇮🇩 Promo Spesial Masdika Cloud: Diskon Spesial & Kupon Terbatas!",
@@ -533,7 +852,8 @@ export default function EmailBlastPage() {
     const rendered = raw
       .replace(/{name}/g, "John Doe")
       .replace(/{year}/g, new Date().getFullYear().toString())
-      .replace(/{email}/g, "customer@example.com");
+      .replace(/{email}/g, "customer@example.com")
+      .replace(/{web_version_url}/g, "https://www.masdika.id/vps");
 
     const fontInject = `
       <link rel="preconnect" href="https://fonts.googleapis.com">
