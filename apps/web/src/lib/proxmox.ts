@@ -233,6 +233,24 @@ export class ProxmoxClient {
     return this.request<any>("GET", `/nodes/${node}/tasks?vmid=${vmid}&limit=${limit}`);
   }
 
+  async getClusterTasks(): Promise<any[]> {
+    try {
+      const res = await this.request<any>("GET", `/cluster/tasks`);
+      return Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+    } catch {
+      return [];
+    }
+  }
+
+  async getNodeTasks(node: string): Promise<any[]> {
+    try {
+      const res = await this.request<any>("GET", `/nodes/${node}/tasks`);
+      return Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+    } catch {
+      return [];
+    }
+  }
+
   // --- Backups ---
   async getBackups(node: string, storage: string, vmid: number) {
     return this.request<any>("GET", `/nodes/${node}/storage/${storage}/content?content=backup&vmid=${vmid}`);
