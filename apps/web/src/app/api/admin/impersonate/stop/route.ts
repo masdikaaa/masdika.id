@@ -9,8 +9,8 @@ import { cookies } from 'next/headers';
 export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const impersonatorToken = cookieStore.get('masdika_impersonator_token')?.value;
-    const infoRaw = cookieStore.get('masdika_impersonating_info')?.value;
+    const impersonatorToken = cookieStore.get('masdika_impersonator_token')?.value || req.cookies.get('masdika_impersonator_token')?.value;
+    const infoRaw = cookieStore.get('masdika_impersonating_info')?.value || req.cookies.get('masdika_impersonating_info')?.value;
 
     let targetId: number | null = null;
     let targetName = 'User';

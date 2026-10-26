@@ -143,8 +143,9 @@ export default function proxy(request: NextRequest) {
 
   let response: NextResponse | undefined;
 
-  // Skip middleware for public APIs (login, logout)
-  if (pathname === '/api/auth/login' || pathname === '/api/auth/logout') {
+  // Skip middleware for public APIs (login, logout) or impersonation stop
+  const isStopImpersonate = pathname === '/api/admin/impersonate/stop' || pathname === '/api/auth/impersonate/stop';
+  if (pathname === '/api/auth/login' || pathname === '/api/auth/logout' || isStopImpersonate) {
     response = NextResponse.next();
   }
 
@@ -168,8 +169,8 @@ export default function proxy(request: NextRequest) {
       }
     }
 
-    // For admin paths/APIs, also enforce ADMIN role (not just authenticated)
-    if (!response && (isAdminPath || isAdminApi) && session?.role !== 'ADMIN') {
+    // For admin paths/APIs, also enforce ADMIN role (not just authenticated), except when stopping impersonation
+    if (!response && (isAdminPath || isAdminApi) && session?.role !== 'ADMIN' && !isStopImpersonate) {
       if (isAdminApi) {
         response = NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
       } else {

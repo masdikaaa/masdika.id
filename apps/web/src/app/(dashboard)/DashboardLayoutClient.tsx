@@ -121,7 +121,10 @@ export default function DashboardLayoutClient({
   const handleStopImpersonation = async () => {
     setIsStoppingImpersonation(true);
     try {
-      const res = await fetch('/api/admin/impersonate/stop', { method: 'POST' });
+      let res = await fetch('/api/admin/impersonate/stop', { method: 'POST' });
+      if (!res.ok) {
+        res = await fetch('/api/auth/impersonate/stop', { method: 'POST' });
+      }
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success(data.message || 'Kembali ke sesi admin');
@@ -316,22 +319,31 @@ export default function DashboardLayoutClient({
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {isImpersonating && (
-          <div className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-slate-950 px-4 py-2 text-xs font-semibold flex flex-wrap items-center justify-between gap-2 shadow-md sticky top-0 z-40">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0 text-slate-950 animate-bounce" />
-              <span>
-                Mode Impersonasi: Anda sedang mengelola akun <strong>{userName}</strong> ({userEmail}) sebagai <strong>{impersonatorAdminName}</strong>.
-              </span>
+          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 px-3.5 py-2.5 sm:px-6 sm:py-2 text-xs font-medium shadow-md sticky top-0 z-40 border-b border-orange-600/30">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <span className="p-1 rounded-md bg-slate-950/10 shrink-0">
+                  <ShieldAlert className="w-4 h-4 text-slate-950" />
+                </span>
+                <p className="text-xs text-slate-950 leading-snug break-words">
+                  Mode Impersonasi: Mengelola akun <strong className="font-bold">{userName}</strong>{" "}
+                  <span className="hidden sm:inline opacity-85">({userEmail})</span> sebagai <strong className="font-bold">{impersonatorAdminName}</strong>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleStopImpersonation}
+                disabled={isStoppingImpersonation}
+                className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-900 active:scale-95 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                {isStoppingImpersonation ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <LogOut className="w-3.5 h-3.5" />
+                )}
+                <span>Kembali ke Admin Panel</span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleStopImpersonation}
-              disabled={isStoppingImpersonation}
-              className="bg-slate-950 hover:bg-slate-900 active:bg-black text-amber-300 hover:text-amber-200 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1.5 shrink-0"
-            >
-              {isStoppingImpersonation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
-              <span>Kembali ke Admin Panel</span>
-            </button>
           </div>
         )}
 
