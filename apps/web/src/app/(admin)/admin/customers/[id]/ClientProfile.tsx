@@ -265,34 +265,35 @@ export default function ClientProfile({ userId }: { userId: string }) {
   const formatEmailPreviewHtml = (rawBody: string) => {
     if (!rawBody) return "";
 
-    // If it already contains the official Masdika email header banner (logo-email.webp), inject font definitions
-    if (rawBody.includes("logo-email.webp")) {
-      const fontInject = `
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-        <style>
-          * {
-            -webkit-font-smoothing: antialiased !important;
-            -moz-osx-font-smoothing: grayscale !important;
-            text-rendering: optimizeLegibility !important;
-          }
-          body, table, td, p, span, div, a, li, strong, b, h1, h2, h3, h4, h5, h6 {
-            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-          }
-          code, pre {
-            font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
-          }
-        </style>
-      `;
+    const fontInject = `
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+      <style>
+        * {
+          -webkit-font-smoothing: antialiased !important;
+          -moz-osx-font-smoothing: grayscale !important;
+          text-rendering: optimizeLegibility !important;
+        }
+        body, table, td, p, span, div, a, li, strong, b, h1, h2, h3, h4, h5, h6 {
+          font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+        }
+        code, pre {
+          font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
+        }
+      </style>
+    `;
 
+    // If it's already a full HTML document (e.g. email blasts, templates, or system emails with HTML structure)
+    const isFullHtml = /<!DOCTYPE|<html|<body|<table/i.test(rawBody);
+    if (isFullHtml) {
       if (rawBody.includes("<head>")) {
         return rawBody.replace("<head>", `<head>${fontInject}`);
       }
       if (rawBody.includes("<html")) {
         return rawBody.replace(/<html[^>]*>/, `$&<head>${fontInject}</head>`);
       }
-      return rawBody;
+      return `${fontInject}${rawBody}`;
     }
 
     // Strip legacy white wrappers or gradients if any
@@ -304,23 +305,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
       }
     }
 
-    // Wrap cleanly in the official Masdika Dark Branded Template (Image 3)
+    // For plain fragments or simple text, wrap cleanly without any artificial logo header
     return `<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  ${fontInject}
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-font-smoothing: antialiased !important;
-      -moz-osx-font-smoothing: grayscale !important;
-      text-rendering: optimizeLegibility !important;
-      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
     body {
       margin: 0;
       padding: 30px 15px;
@@ -335,22 +327,6 @@ export default function ClientProfile({ userId }: { userId: string }) {
       border: 1px solid #1e293b;
       overflow: hidden;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-    }
-    .email-header {
-      width: 100%;
-      background-color: #0b132b;
-      text-align: center;
-      overflow: hidden;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-    }
-    .email-header img {
-      display: block;
-      width: 100%;
-      max-width: 600px;
-      height: auto;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
     }
     .email-content {
       padding: 36px 32px 28px 32px;
@@ -372,16 +348,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
       color: #38bdf8;
       text-decoration: none;
     }
-    code, pre {
-      font-family: 'JetBrains Mono', Consolas, Monaco, monospace !important;
-    }
   </style>
 </head>
 <body>
   <div class="email-container">
-    <div class="email-header">
-      <img src="https://masdika.id/logo-email.webp?v=2" alt="Masdika Logo Header" />
-    </div>
     <div class="email-content">
       ${cleanContent}
     </div>
