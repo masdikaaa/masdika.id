@@ -128,6 +128,63 @@ function GoogleDriveLogo({ className = "w-6 h-6" }: { className?: string }) {
   );
 }
 
+interface SetupStep {
+  step: number;
+  text: React.ReactNode;
+}
+
+function CloudSetupGuide({
+  title,
+  steps,
+  notice,
+  isDark,
+}: {
+  title: string;
+  steps: SetupStep[];
+  notice?: React.ReactNode;
+  isDark: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "p-3.5 sm:p-4 rounded-xl border text-xs relative overflow-hidden transition-all",
+        isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
+      )}
+    >
+      <div className={cn("flex items-center gap-2 font-semibold mb-3", isDark ? "text-cyan-400" : "text-cyan-700")}>
+        <Info className="w-4 h-4 shrink-0" />
+        <span>{title}</span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-stretch">
+        {steps.map((s) => (
+          <div
+            key={s.step}
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-xl border transition-all h-full min-h-[64px]",
+              isDark ? "bg-black/25 border-white/5" : "bg-white border-slate-200 shadow-2xs"
+            )}
+          >
+            <div
+              className={cn(
+                "w-6 h-6 rounded-full inline-flex items-center justify-center font-bold text-xs shrink-0 select-none shadow-2xs",
+                isDark
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                  : "bg-cyan-100 text-cyan-800 border border-cyan-300"
+              )}
+            >
+              <span className="inline-flex items-center justify-center leading-none text-center">{s.step}</span>
+            </div>
+            <div className={cn("text-xs leading-snug flex-1", isDark ? "text-slate-300" : "text-slate-700")}>
+              {s.text}
+            </div>
+          </div>
+        ))}
+      </div>
+      {notice && notice}
+    </div>
+  );
+}
+
 export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
   const vpsId = vps?.id;
   const vmid = vps?.vmid;
@@ -743,96 +800,145 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
         <div className="space-y-4">
           {/* Cloudflare R2 Form */}
           {selectedProvider === "R2" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Cloudflare Account ID or Endpoint URL <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 78a1b2c3d4e5f6... or https://<account_id>.r2.cloudflarestorage.com"
-                  value={config.endpoint || ""}
-                  onChange={(e) => setConfig({ ...config, endpoint: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  Found in Cloudflare Dashboard &gt; R2 &gt; Overview &gt; Account ID.
-                </p>
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Bucket Name <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. my-vps-backups"
-                  value={config.bucket || ""}
-                  onChange={(e) => setConfig({ ...config, bucket: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Subfolder / Prefix (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder={`vps-${vmid || vpsId || "backup"}`}
-                  value={config.pathPrefix || ""}
-                  onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Access Key ID <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="R2 API Token Access Key ID"
-                  value={config.accessKeyId || ""}
-                  onChange={(e) => setConfig({ ...config, accessKeyId: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Secret Access Key <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showSecretKey ? "text" : "password"}
-                    placeholder={config.hasSecretKey ? "•••••••••••••••• (Leave blank to keep saved key)" : "Enter Secret Access Key"}
-                    value={config.secretAccessKey || ""}
-                    onChange={(e) => setConfig({ ...config, secretAccessKey: e.target.value })}
+            <div className="space-y-4 animate-in fade-in duration-300">
+              <CloudSetupGuide
+                title="Setup Guide (Cloudflare R2):"
+                isDark={isDark}
+                steps={[
+                  {
+                    step: 1,
+                    text: (
+                      <span>
+                        Buat bucket di Cloudflare Dashboard &gt; <strong className={isDark ? "text-white" : "text-slate-900"}>R2 Object Storage</strong>.
+                      </span>
+                    ),
+                  },
+                  {
+                    step: 2,
+                    text: (
+                      <span>
+                        Buat API Token via <strong className={isDark ? "text-white" : "text-slate-900"}>Manage R2 API Tokens</strong> dengan izin Object Read &amp; Write.
+                      </span>
+                    ),
+                  },
+                  {
+                    step: 3,
+                    text: (
+                      <span>
+                        Salin <strong className={isDark ? "text-white" : "text-slate-900"}>Account ID, Access Key</strong>, &amp; Secret Key ke form di bawah.
+                      </span>
+                    ),
+                  },
+                ]}
+                notice={
+                  <div
                     className={cn(
-                      "w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
+                      isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                    )}
+                  >
+                    <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-600 dark:text-cyan-400" />
+                    <div className="space-y-0.5">
+                      <div className="font-bold text-cyan-900 dark:text-cyan-300">Keunggulan Cloudflare R2:</div>
+                      <p className="leading-relaxed text-[11px]">
+                        Cloudflare R2 menyediakan kuota penyimpanan gratis hingga <strong>10 GB/bulan</strong> dengan <strong>zero egress bandwidth fees</strong> (bebas biaya transfer download backup).
+                      </p>
+                    </div>
+                  </div>
+                }
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Cloudflare Account ID or Endpoint URL <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 78a1b2c3d4e5f6... or https://<account_id>.r2.cloudflarestorage.com"
+                    value={config.endpoint || ""}
+                    onChange={(e) => setConfig({ ...config, endpoint: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
                       isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
                     )}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowSecretKey(!showSecretKey)}
-                    className={cn("absolute right-3 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
-                  >
-                    {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Found in Cloudflare Dashboard &gt; R2 &gt; Overview &gt; Account ID.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Bucket Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. my-vps-backups"
+                    value={config.bucket || ""}
+                    onChange={(e) => setConfig({ ...config, bucket: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Subfolder / Prefix (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={`vps-${vmid || vpsId || "backup"}`}
+                    value={config.pathPrefix || ""}
+                    onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Access Key ID <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="R2 API Token Access Key ID"
+                    value={config.accessKeyId || ""}
+                    onChange={(e) => setConfig({ ...config, accessKeyId: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Secret Access Key <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showSecretKey ? "text" : "password"}
+                      placeholder={config.hasSecretKey ? "•••••••••••••••• (Leave blank to keep saved key)" : "Enter Secret Access Key"}
+                      value={config.secretAccessKey || ""}
+                      onChange={(e) => setConfig({ ...config, secretAccessKey: e.target.value })}
+                      className={cn(
+                        "w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                        isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                      className={cn("absolute right-3 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
+                    >
+                      {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -840,93 +946,142 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
           {/* AWS S3 Form */}
           {selectedProvider === "S3" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  AWS Region <span className="text-red-400">*</span>
-                </label>
-                <Select
-                  value={config.region || "ap-southeast-3"}
-                  onChange={(val) => setConfig({ ...config, region: val })}
-                  options={AWS_REGIONS}
-                  className={cn(
-                    "w-full px-3.5 py-2 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Bucket Name <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. my-vps-backups-bucket"
-                  value={config.bucket || ""}
-                  onChange={(e) => setConfig({ ...config, bucket: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Access Key ID <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="AKIA..."
-                  value={config.accessKeyId || ""}
-                  onChange={(e) => setConfig({ ...config, accessKeyId: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Secret Access Key <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showSecretKey ? "text" : "password"}
-                    placeholder={config.hasSecretKey ? "•••••••••••••••• (Leave blank to keep saved key)" : "Enter Secret Access Key"}
-                    value={config.secretAccessKey || ""}
-                    onChange={(e) => setConfig({ ...config, secretAccessKey: e.target.value })}
+            <div className="space-y-4 animate-in fade-in duration-300">
+              <CloudSetupGuide
+                title="Setup Guide (Amazon AWS S3):"
+                isDark={isDark}
+                steps={[
+                  {
+                    step: 1,
+                    text: (
+                      <span>
+                        Buat S3 Bucket di AWS Console pada <strong className={isDark ? "text-white" : "text-slate-900"}>Region</strong> yang diinginkan.
+                      </span>
+                    ),
+                  },
+                  {
+                    step: 2,
+                    text: (
+                      <span>
+                        Buat IAM User dengan permission <strong className={isDark ? "text-white" : "text-slate-900"}>AmazonS3FullAccess</strong> atau s3:PutObject.
+                      </span>
+                    ),
+                  },
+                  {
+                    step: 3,
+                    text: (
+                      <span>
+                        Generate <strong className={isDark ? "text-white" : "text-slate-900"}>Access Key</strong> di tab Security Credentials &amp; masukkan ke form.
+                      </span>
+                    ),
+                  },
+                ]}
+                notice={
+                  <div
                     className={cn(
-                      "w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-700"
+                    )}
+                  >
+                    <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-600 dark:text-cyan-400" />
+                    <div className="space-y-0.5">
+                      <div className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Tips Konfigurasi AWS S3:</div>
+                      <p className="leading-relaxed text-[11px]">
+                        Pastikan pilihan <strong>AWS Region</strong> di form sesuai dengan lokasi Region bucket dibuat (misal: <code>ap-southeast-3</code> untuk Jakarta).
+                      </p>
+                    </div>
+                  </div>
+                }
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    AWS Region <span className="text-red-400">*</span>
+                  </label>
+                  <Select
+                    value={config.region || "ap-southeast-3"}
+                    onChange={(val) => setConfig({ ...config, region: val })}
+                    options={AWS_REGIONS}
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900"
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Bucket Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. my-vps-backups-bucket"
+                    value={config.bucket || ""}
+                    onChange={(e) => setConfig({ ...config, bucket: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
                       isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
                     )}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowSecretKey(!showSecretKey)}
-                    className={cn("absolute right-3 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
-                  >
-                    {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
                 </div>
-              </div>
 
-              <div className="md:col-span-2">
-                <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
-                  Subfolder / Prefix (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder={`vps-${vmid || vpsId || "backup"}`}
-                  value={config.pathPrefix || ""}
-                  onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                    isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
-                  )}
-                />
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Access Key ID <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="AKIA..."
+                    value={config.accessKeyId || ""}
+                    onChange={(e) => setConfig({ ...config, accessKeyId: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Secret Access Key <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showSecretKey ? "text" : "password"}
+                      placeholder={config.hasSecretKey ? "•••••••••••••••• (Leave blank to keep saved key)" : "Enter Secret Access Key"}
+                      value={config.secretAccessKey || ""}
+                      onChange={(e) => setConfig({ ...config, secretAccessKey: e.target.value })}
+                      className={cn(
+                        "w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                        isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                      className={cn("absolute right-3 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
+                    >
+                      {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-700")}>
+                    Subfolder / Prefix (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={`vps-${vmid || vpsId || "backup"}`}
+                    value={config.pathPrefix || ""}
+                    onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900"
+                    )}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -974,57 +1129,52 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               </div>
 
               {/* 3-Step Setup Guide */}
-              <div
-                className={cn(
-                  "p-3.5 sm:p-4 rounded-xl border text-xs relative overflow-hidden",
-                  isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
-                )}
-              >
-                <div className={cn("flex items-center gap-2 font-semibold mb-2.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                  <Info className="w-4 h-4 shrink-0" />
-                  <span>Setup Guide (Google Drive / Shared Drive):</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className={cn("flex items-start gap-2.5 p-2.5 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-200 shadow-2xs")}>
-                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-800")}>
-                      1
+              <CloudSetupGuide
+                title="Setup Guide (Google Drive / Shared Drive):"
+                isDark={isDark}
+                steps={[
+                  {
+                    step: 1,
+                    text: (
+                      <span>
+                        Enable <strong className={isDark ? "text-white" : "text-slate-900"}>Google Drive API</strong> di Google Cloud Console.
+                      </span>
+                    ),
+                  },
+                  {
+                    step: 2,
+                    text: (
+                      <span>
+                        Buat Service Account &amp; unduh file <strong className={isDark ? "text-white" : "text-slate-900"}>JSON Key</strong> (bisa auto-fill di atas).
+                      </span>
+                    ),
+                  },
+                  {
+                    step: 3,
+                    text: (
+                      <span>
+                        Share folder di <strong className="text-emerald-600 dark:text-emerald-400">Shared Drive (Drive Bersama)</strong> ke email Service Account sebagai Content Manager.
+                      </span>
+                    ),
+                  },
+                ]}
+                notice={
+                  <div
+                    className={cn(
+                      "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
+                      isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
+                    )}
+                  >
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                    <div className="space-y-0.5">
+                      <div className="font-bold text-amber-900 dark:text-amber-300">Penting Mengenai Kuota Google Drive:</div>
+                      <p className="leading-relaxed text-[11px]">
+                        Akun Service Account memiliki kuota <strong>0 MB</strong> di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan <strong>Google Workspace Shared Drive (Drive Bersama / Team Drive)</strong> agar file backup dapat disimpan, atau gunakan <strong>Cloudflare R2</strong> / <strong>AWS S3</strong>.
+                      </p>
                     </div>
-                    <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-300" : "text-slate-700")}>
-                      Enable <strong className={isDark ? "text-white" : "text-slate-900"}>Google Drive API</strong> di Google Cloud Console.
-                    </p>
                   </div>
-                  <div className={cn("flex items-start gap-2.5 p-2.5 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-200 shadow-2xs")}>
-                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-800")}>
-                      2
-                    </div>
-                    <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-300" : "text-slate-700")}>
-                      Buat Service Account &amp; unduh file <strong className={isDark ? "text-white" : "text-slate-900"}>JSON Key</strong>.
-                    </p>
-                  </div>
-                  <div className={cn("flex items-start gap-2.5 p-2.5 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-200 shadow-2xs")}>
-                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-800")}>
-                      3
-                    </div>
-                    <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-300" : "text-slate-700")}>
-                      Share folder di <strong className="text-emerald-600 dark:text-emerald-400">Shared Drive (Drive Bersama)</strong> ke email Service Account sebagai Content Manager.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Important Notice Regarding Service Account Storage Quota */}
-                <div className={cn(
-                  "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
-                  isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
-                )}>
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-                  <div className="space-y-0.5">
-                    <div className="font-bold text-amber-900 dark:text-amber-300">Penting Mengenai Kuota Google Drive:</div>
-                    <p className="leading-relaxed text-[11px]">
-                      Akun Service Account memiliki kuota <strong>0 MB</strong> di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan <strong>Google Workspace Shared Drive (Drive Bersama / Team Drive)</strong> agar file backup dapat disimpan, atau gunakan <strong>Cloudflare R2</strong> / <strong>AWS S3</strong>.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                }
+              />
 
               {/* Form Input Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
