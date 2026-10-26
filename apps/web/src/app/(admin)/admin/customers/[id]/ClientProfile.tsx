@@ -607,37 +607,41 @@ export default function ClientProfile({ userId }: { userId: string }) {
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/admin/customers')} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-1">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <button
+            onClick={() => router.push('/admin/customers')}
+            className="p-1.5 sm:p-2 hover:bg-white/10 rounded-xl transition-colors shrink-0"
+            title="Back to Customers"
+          >
             <ArrowLeft className={cn("w-5 h-5", isDark ? "text-zinc-300" : "text-slate-600")} />
           </button>
           
-          <div className={cn("w-14 h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
+          <div className={cn("w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
             <img referrerPolicy="no-referrer" 
               src={user.image || `/api/avatar?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || 'User')}`} 
               alt="Profile" 
               className="w-full h-full object-cover" 
-            loading="lazy" decoding="async" />
+              loading="lazy" decoding="async" />
           </div>
           
-          <div>
-            <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              {user.name}
-              {user.isSuspended && <span className={cn("text-xs bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20", isDark ? "text-red-400" : "text-red-700")}>SUSPENDED</span>}
+          <div className="min-w-0 flex-1">
+            <h1 className={cn("text-base sm:text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+              <span className="truncate">{user.name}</span>
+              {user.isSuspended && <span className={cn("text-[10px] bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20 font-bold shrink-0", isDark ? "text-red-400" : "text-red-700")}>SUSPENDED</span>}
             </h1>
-            <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
+            <p className={cn("text-xs sm:text-sm truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className={cn("px-4 py-2 rounded-xl border text-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+        <div className="flex items-center gap-2 sm:gap-3 pl-11 sm:pl-0">
+          <div className={cn("px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border text-xs sm:text-sm shrink-0", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
             <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Balance:</span> <span className={cn("font-bold ml-1", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(user.balance)}</span>
           </div>
           <button
             type="button"
             onClick={handleImpersonateClient}
             disabled={isImpersonating}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
             title="Masuk ke portal pelanggan sebagai user ini"
           >
             {isImpersonating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
