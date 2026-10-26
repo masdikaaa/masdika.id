@@ -836,18 +836,17 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
                   <div className="flex items-center gap-1.5 text-xs">
                     <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Jump to Page:</span>
-                    <select
-                      value={emailCurrentPage}
-                      onChange={(e) => setEmailCurrentPage(Number(e.target.value))}
-                      className={cn(
-                        "px-2 py-1 rounded border text-xs outline-none transition-colors",
-                        isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-800"
-                      )}
-                    >
-                      {Array.from({ length: Math.ceil(emailLogs.length / emailsPerPage) }, (_, i) => i + 1).map(p => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
+                    <div className="w-20">
+                      <Select
+                        value={emailCurrentPage}
+                        onChange={(val) => setEmailCurrentPage(Number(val))}
+                        options={Array.from({ length: Math.ceil(emailLogs.length / emailsPerPage) }, (_, i) => ({
+                          value: i + 1,
+                          label: String(i + 1)
+                        }))}
+                        className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                      />
+                    </div>
                   </div>
                 )}
                 <button
@@ -989,8 +988,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         value={logFilterDate}
                         onChange={(e) => setLogFilterDate(e.target.value)}
                         className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-300 text-slate-800"
+                          "w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-300 text-slate-800 [color-scheme:light]"
                         )}
                       />
                     </div>
@@ -1003,7 +1002,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         value={logFilterUsername}
                         onChange={(val) => setLogFilterUsername(val)}
                         options={distinctLogUsernames.map(u => ({ value: u, label: u }))}
-                        className="!h-9 !py-0 !px-3 text-xs rounded-xl"
+                        className={cn(
+                          "!h-9 !py-0 !px-3 text-xs rounded-xl transition-all",
+                          isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-slate-50 !border-slate-300 hover:!border-slate-400 !text-slate-800"
+                        )}
                       />
                     </div>
                   </div>
@@ -1020,8 +1022,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         onChange={(e) => setLogFilterDescription(e.target.value)}
                         placeholder="Search description, order, payment..."
                         className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
+                          "w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
                     </div>
@@ -1036,8 +1038,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         onChange={(e) => setLogFilterIp(e.target.value)}
                         placeholder="e.g. 103.147..."
                         className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
+                          "w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono",
+                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
                     </div>
@@ -1083,45 +1085,40 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   <span className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>Show:</span>
-                  <select
-                    value={logPagination.limit}
-                    onChange={(e) => {
-                      const newLimit = parseInt(e.target.value);
-                      fetchActivityLogs(1, newLimit);
-                    }}
-                    className={cn(
-                      "px-2 py-1 rounded-lg border text-xs cursor-pointer",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900"
-                    )}
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
+                  <div className="w-20">
+                    <Select
+                      value={logPagination.limit}
+                      onChange={(val) => {
+                        const newLimit = parseInt(val);
+                        fetchActivityLogs(1, newLimit);
+                      }}
+                      options={[
+                        { value: 10, label: "10" },
+                        { value: 25, label: "25" },
+                        { value: 50, label: "50" },
+                        { value: 100, label: "100" },
+                      ]}
+                      className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   <span className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>Jump to Page:</span>
-                  <select
-                    value={jumpToLogPage}
-                    onChange={(e) => setJumpToLogPage(e.target.value)}
-                    className={cn(
-                      "px-2 py-1 rounded-lg border text-xs cursor-pointer",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900"
-                    )}
-                  >
-                    {Array.from({ length: logPagination.totalPages }, (_, i) => i + 1).map(p => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => fetchActivityLogs(parseInt(jumpToLogPage))}
-                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 cursor-pointer shadow-xs"
-                  >
-                    Go
-                  </button>
+                  <div className="w-20">
+                    <Select
+                      value={parseInt(jumpToLogPage) || 1}
+                      onChange={(val) => {
+                        setJumpToLogPage(String(val));
+                        fetchActivityLogs(parseInt(val));
+                      }}
+                      options={Array.from({ length: logPagination.totalPages }, (_, i) => ({
+                        value: i + 1,
+                        label: String(i + 1)
+                      }))}
+                      className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

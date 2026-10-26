@@ -5,6 +5,7 @@ import { X, Server, Save, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { Select } from '@/components/ui/Select';
 
 interface AdminEditServiceModalProps {
   isOpen: boolean;
@@ -184,19 +185,19 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
             <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
               <div>
                 <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>Status</label>
-                <select
-                  name="status"
-                  value={formData.status || ''}
-                  onChange={handleChange}
-                  className={cn("w-full border rounded-xl p-2.5 text-sm transition-all appearance-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="RUNNING">Running</option>
-                  <option value="STOPPED">Stopped</option>
-                  <option value="SUSPENDED">Suspended</option>
-                  <option value="TERMINATED">Terminated</option>
-                  <option value="PENDING">Pending</option>
-                </select>
+                <Select
+                  value={formData.status || 'ACTIVE'}
+                  onChange={(val) => setFormData((prev: any) => ({ ...prev, status: val }))}
+                  options={[
+                    { value: "ACTIVE", label: "Active" },
+                    { value: "RUNNING", label: "Running" },
+                    { value: "STOPPED", label: "Stopped" },
+                    { value: "SUSPENDED", label: "Suspended" },
+                    { value: "TERMINATED", label: "Terminated" },
+                    { value: "PENDING", label: "Pending" },
+                  ]}
+                  className={cn("w-full rounded-xl text-sm", isDark ? "!bg-[#060b14] !border-slate-800 !text-white" : "!bg-slate-50 !border-slate-200 !text-slate-900")}
+                />
               </div>
               <div>
                 <label className={cn("block text-xs font-semibold mb-1.5 uppercase tracking-wider flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
