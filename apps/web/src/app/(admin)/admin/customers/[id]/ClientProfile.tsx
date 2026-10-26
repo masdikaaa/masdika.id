@@ -828,15 +828,15 @@ export default function ClientProfile({ userId }: { userId: string }) {
         {activeTab === 'emails' && (
           <div className="space-y-4">
             {/* Header Toolbar matching WHMCS Image 1 */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 px-1">
               <div className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
-                {emailLogs.length} Records Found, Page {emailCurrentPage} of {Math.max(1, Math.ceil(emailLogs.length / emailsPerPage))}
+                <span className="font-bold text-cyan-400">{emailLogs.length}</span> Records Found, Page {emailCurrentPage} of {Math.max(1, Math.ceil(emailLogs.length / emailsPerPage))}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                 {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
                   <div className="flex items-center gap-1.5 text-xs">
-                    <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Jump to Page:</span>
-                    <div className="w-20">
+                    <span className={cn("whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>Jump to Page:</span>
+                    <div className="w-[72px] sm:w-20">
                       <Select
                         value={emailCurrentPage}
                         onChange={(val) => setEmailCurrentPage(Number(val))}
@@ -852,7 +852,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <button
                   type="button"
                   onClick={() => router.push(`/admin/email-blast?userId=${userId}`)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-xs cursor-pointer"
+                  className="h-8 flex items-center gap-1.5 px-3.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Send Email</span>
@@ -1077,15 +1077,15 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
 
             {/* Top Toolbar (Records count & Jump to page) */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs px-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs px-1">
               <div className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                 <span className="font-bold text-cyan-400">{logPagination.totalRecords}</span> Records Found, Page {logPagination.currentPage} of {logPagination.totalPages}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                 <div className="flex items-center gap-1.5">
-                  <span className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>Show:</span>
-                  <div className="w-20">
+                  <span className={cn("whitespace-nowrap text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Show:</span>
+                  <div className="w-[72px] sm:w-20">
                     <Select
                       value={logPagination.limit}
                       onChange={(val) => {
@@ -1104,8 +1104,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>Jump to Page:</span>
-                  <div className="w-20">
+                  <span className={cn("whitespace-nowrap text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Jump to Page:</span>
+                  <div className="w-[72px] sm:w-20">
                     <Select
                       value={parseInt(jumpToLogPage) || 1}
                       onChange={(val) => {
@@ -1119,6 +1119,13 @@ export default function ClientProfile({ userId }: { userId: string }) {
                       className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
                     />
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => fetchActivityLogs(parseInt(jumpToLogPage))}
+                    className="h-8 px-3.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-colors flex items-center justify-center shrink-0 cursor-pointer shadow-xs"
+                  >
+                    Go
+                  </button>
                 </div>
               </div>
             </div>
