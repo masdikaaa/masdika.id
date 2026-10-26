@@ -1419,20 +1419,20 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     {vps.hostname || `VPS-${vps.id}`}
                   </h1>
                   <div className={cn(
-                    "px-2.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 shrink-0",
+                    "px-2.5 py-1 text-xs font-bold rounded-full flex items-center gap-1.5 shrink-0",
                     vps.status === 'TERMINATED' ? "bg-red-500/20 text-red-400" :
-                      vps.status === 'SUSPENDED' ? "bg-orange-500/20 text-orange-400" : (isRunning ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-slate-100 text-cyan-700 border border-slate-200") : "bg-zinc-500/20 text-zinc-400")
+                      vps.status === 'SUSPENDED' ? "bg-orange-500/20 text-orange-400" : (isRunning ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-950 border border-cyan-300") : (isDark ? "bg-zinc-500/20 text-zinc-400" : "bg-slate-200 text-slate-800"))
                   )}>
                     <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", vps.status === 'TERMINATED' ? "bg-red-400" : vps.status === 'SUSPENDED' ? "bg-orange-400" : (isRunning ? "bg-cyan-400" : "bg-zinc-400"))}></div>
                     {vps.status === 'TERMINATED' ? "Terminated" : vps.status === 'SUSPENDED' ? "Suspended" : (isRunning ? "Online" : "Offline")}
                   </div>
                 </div>
-                <p className={cn("text-sm  mt-2 flex flex-wrap items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  <span className={cn("font-mono text-xs px-2 py-0.5 rounded border whitespace-nowrap", isDark ? "bg-black/30 border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-slate-700")}>ID: {vps.id}</span>
+                <p className={cn("text-sm mt-2 flex flex-wrap items-center gap-2 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
+                  <span className={cn("font-mono text-xs px-2 py-0.5 rounded border whitespace-nowrap font-bold", isDark ? "bg-black/30 border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-300 text-slate-900")}>ID: {vps.id}</span>
                   <span>•</span>
-                  <span className="whitespace-nowrap">{vps.osTemplate}</span>
+                  <span className={cn("whitespace-nowrap font-semibold", isDark ? "text-zinc-300" : "text-slate-900")}>{vps.osTemplate}</span>
                   <span>•</span>
-                  <span className={cn(" whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                  <span className={cn("whitespace-nowrap font-semibold", isDark ? "text-white" : "text-slate-950")}>
                     {vps.status === 'TERMINATED' 
                       ? "No IP (Terminated)" 
                       : (vps.assignedIps?.length > 0 
@@ -1449,8 +1449,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             <div className="flex flex-wrap md:flex-nowrap gap-2 z-10 w-full md:w-auto mt-4 md:mt-0 justify-start sm:justify-end">
               <button
                 onClick={() => handleAction("start")} disabled={actionLoading || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm",
-                  isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm",
+                  isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20 font-medium" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 font-bold"
                 )}
                 title="Start VPS"
               >
@@ -1458,8 +1458,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("shutdown")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm",
-                  isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm",
+                  isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20 font-medium" : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300 font-bold"
                 )}
                 title="Graceful Shutdown"
               >
@@ -1467,8 +1467,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("stop")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
-                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20" : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm",
+                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 font-medium" : "bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300 font-bold"
                 )}
                 title="Force Stop"
               >
@@ -1476,8 +1476,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("reboot")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm",
-                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20" : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
+                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm",
+                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20 font-medium" : "bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-300 font-bold"
                 )}
                 title="Restart"
               >
@@ -1485,7 +1485,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
               <button
                 onClick={() => handleAction("console")} disabled={actionLoading || vps.status === 'TERMINATED' || vps.status === 'SUSPENDED'}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                 title="NoVNC Console"
               >
                 <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Console</span>
@@ -1494,7 +1494,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Tabs Navigation */}
-          <div className={cn("border transition-colors shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200", "flex gap-1.5 p-1.5 rounded-2xl overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full")}>
+          <div className={cn("border transition-colors shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-300", "flex gap-1.5 p-1.5 rounded-2xl overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full")}>
             {[
               { id: "overview", label: "Overview", icon: Activity },
               { id: "graphs", label: "Graphs", icon: Activity },
@@ -1512,10 +1512,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                  "flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all whitespace-nowrap",
                   activeTab === tab.id
-                    ? (isDark ? "bg-cyan-500/15 text-cyan-300 font-semibold border border-cyan-500/30 shadow-sm" : "bg-white text-cyan-900 font-semibold border border-cyan-600 shadow-sm ring-1 ring-cyan-600/20")
-                    : (isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent")
+                    ? (isDark ? "bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30 shadow-sm" : "bg-cyan-50 text-cyan-950 font-bold border border-cyan-400 shadow-xs ring-1 ring-cyan-400/30")
+                    : (isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent font-medium" : "text-slate-700 font-bold hover:text-slate-950 hover:bg-slate-100 border border-transparent")
                 )}
               >
                 <tab.icon className="w-4 h-4" /> {tab.label}
@@ -1532,14 +1532,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <div className="space-y-6">
                   <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     <div className="flex justify-between items-end mb-4">
-                      <h3 className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>Disk Usage</h3>
-                      <span className={cn("text-sm font-mono ", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Disk Usage</h3>
+                      <span className={cn("text-sm font-mono font-semibold", isDark ? "text-zinc-400" : "text-slate-800")}>
                         {status?.disk ? (status.disk / 1024 / 1024 / 1024).toFixed(2) : 0} / {status?.maxdisk ? (status.maxdisk / 1024 / 1024 / 1024).toFixed(0) : vps.diskGb} GB {vps.diskType || "HDD"}
                       </span>
                     </div>
 
                     {/* Disk Progress Bar */}
-                    <div className={cn("w-full h-6 bg-black/40 rounded-full overflow-hidden border relative", isDark ? "border-white/5" : "border-slate-200")}>
+                    <div className={cn("w-full h-6 rounded-full overflow-hidden border relative", isDark ? "bg-black/40 border-white/5" : "bg-slate-100 border-slate-300")}>
                       <div
                         className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full flex items-center justify-end px-3 transition-all duration-500 min-w-fit"
                         style={{ width: `${status?.disk && status?.maxdisk ? Math.min((status.disk / status.maxdisk) * 100, 100) : 0}%` }}
@@ -1553,14 +1553,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     <div className="flex justify-between items-end mb-4">
-                      <h3 className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>Memory Usage</h3>
-                      <span className={cn("text-sm font-mono ", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Memory Usage</h3>
+                      <span className={cn("text-sm font-mono font-semibold", isDark ? "text-zinc-400" : "text-slate-800")}>
                         {status?.mem ? (status.mem / 1024 / 1024 / 1024).toFixed(2) : 0} / {status?.maxmem ? (status.maxmem / 1024 / 1024 / 1024).toFixed(2) : vps.ramGb} GB
                       </span>
                     </div>
 
                     {/* RAM Progress Bar */}
-                    <div className={cn("w-full h-6 bg-black/40 rounded-full overflow-hidden border relative", isDark ? "border-white/5" : "border-slate-200")}>
+                    <div className={cn("w-full h-6 rounded-full overflow-hidden border relative", isDark ? "bg-black/40 border-white/5" : "bg-slate-100 border-slate-300")}>
                       <div
                         className="h-full bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-full flex items-center justify-end px-3 transition-all duration-500 min-w-fit"
                         style={{ width: `${status?.mem && status?.maxmem ? Math.min((status.mem / status.maxmem) * 100, 100) : 0}%` }}
@@ -1574,23 +1574,28 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   {/* Server Info Card */}
                   <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                    <h3 className={cn(" font-medium mb-4", isDark ? "text-white" : "text-slate-900")}>Instance Details</h3>
+                    <h3 className={cn("font-bold mb-4", isDark ? "text-white" : "text-slate-950")}>Instance Details</h3>
                     <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>CPU Cores</span>
-                        <span className={cn(" text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{vps.cpuCores} vCPU</span>
+                      <div className="flex justify-between items-center">
+                        <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>CPU Cores</span>
+                        <span className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>{vps.cpuCores} vCPU</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Node</span>
-                        <span className={cn(" text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{vps.node}</span>
+                      <div className="flex justify-between items-center">
+                        <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Node</span>
+                        <span className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>{vps.node}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Billing</span>
-                        <span className="text-cyan-400 text-sm font-medium">PAYG</span>
+                      <div className="flex justify-between items-center">
+                        <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Billing</span>
+                        <span className={cn(
+                          "text-xs font-bold px-2.5 py-0.5 rounded-full border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300"
+                        )}>
+                          PAYG
+                        </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Created</span>
-                        <span className={cn(" text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{new Date(vps.createdAt).toLocaleDateString()}</span>
+                      <div className="flex justify-between items-center">
+                        <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Created</span>
+                        <span className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>{new Date(vps.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -1602,15 +1607,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   {/* CPU Chart */}
                   <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>CPU Usage (%)</h3>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>CPU Usage (%)</h3>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                        <span className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>Last Hour</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-cyan-500"></div>
+                        <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Last Hour</span>
                       </div>
                     </div>
                     <div className="h-[200px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
-                        <div className={cn("w-full h-full flex items-center justify-center  text-sm", isDark ? "text-zinc-500" : "text-slate-400")}>Loading graph...</div>
+                        <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
                       ) : isMounted ? (
                         <ResponsiveContainer width="100%" height={200} minWidth={1} minHeight={1}>
                           <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
@@ -1647,15 +1652,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   {/* Network Chart */}
                   <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>Network Speed (Bytes/s)</h3>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Network Speed (Bytes/s)</h3>
                       <div className="flex gap-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                          <span className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>Download</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Download</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                          <span className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>Upload</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Upload</span>
                         </div>
                       </div>
                     </div>
@@ -1715,21 +1720,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>Disk I/O (Bytes/s)</h3>
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Disk I/O (Bytes/s)</h3>
                       <div className="flex gap-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                          <span className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>Read</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Read</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                          <span className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>Write</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Write</span>
                         </div>
                       </div>
                     </div>
                     <div className="h-[250px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
-                        <div className={cn("w-full h-full flex items-center justify-center  text-sm", isDark ? "text-zinc-500" : "text-slate-400")}>Loading graph...</div>
+                        <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
                       ) : (
                         <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
                           <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
@@ -1760,10 +1765,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                    <h3 className={cn(" font-medium mb-6", isDark ? "text-white" : "text-slate-900")}>System Statistics</h3>
+                    <h3 className={cn("font-bold mb-6", isDark ? "text-white" : "text-slate-950")}>System Statistics</h3>
                     <div className="h-[250px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
-                        <div className={cn("w-full h-full flex items-center justify-center  text-sm", isDark ? "text-zinc-500" : "text-slate-400")}>Loading graph...</div>
+                        <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
                       ) : (
                         <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
                           <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
@@ -1793,15 +1798,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Firewall (Security Group)</h3>
-                      <p className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Manage inbound traffic rules for this instance.</p>
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Firewall (Security Group)</h3>
+                      <p className={cn("text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Manage inbound traffic rules for this instance.</p>
                     </div>
                     <button
                       onClick={() => {
                         setEditingRule(null);
                         setShowFirewallModal(true);
                       }}
-                      className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-slate-950 shadow-sm"
+                      className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg text-sm font-bold transition-all flex items-center gap-2 text-slate-950 shadow-sm"
                     >
                       <Plus className="w-4 h-4" /> Add Rule
                     </button>
@@ -1817,25 +1822,25 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     return (
                     <div className="space-y-4">
                       {selectedFirewallRules.length > 0 && (
-                        <div className="bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2">
-                          <span className="text-sm text-cyan-400 font-medium">
+                        <div className={cn("p-3 rounded-xl flex items-center justify-between border animate-in slide-in-from-top-2", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-300 text-cyan-950")}>
+                          <span className="text-sm font-bold">
                             {selectedFirewallRules.length} rule{selectedFirewallRules.length > 1 ? 's' : ''} selected
                           </span>
                           <button
                             onClick={handleBulkDeleteFirewallRules}
                             disabled={isDeletingRule}
-                            className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors text-xs font-medium flex items-center gap-1.5 border border-red-500/20 disabled:opacity-50"
+                            className={cn("px-3 py-1.5 rounded-lg transition-colors text-xs font-bold flex items-center gap-1.5 border disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-100 hover:bg-red-200 text-red-900 border-red-300 shadow-2xs")}
                           >
                             {isDeletingRule ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                             <span>Delete Selected</span>
                           </button>
                         </div>
                       )}
-                      <div className={cn("overflow-x-auto w-full rounded-xl border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-white")}>
-                        <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          <thead className={cn("text-xs uppercase rounded-t-xl", isDark ? "bg-[#0b1322] text-zinc-400" : "bg-slate-50 text-slate-500")}>
+                      <div className={cn("overflow-x-auto w-full rounded-xl border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-300 bg-white")}>
+                        <table className="w-full text-left text-sm">
+                          <thead className={cn("text-xs uppercase font-bold tracking-wider border-b", isDark ? "bg-[#0b1322] text-zinc-400 border-slate-800" : "bg-slate-100 text-slate-900 border-slate-300")}>
                             <tr>
-                              <th className="px-4 py-3 rounded-tl-xl font-medium w-[50px] text-center">
+                              <th className="px-4 py-3.5 rounded-tl-xl font-bold w-[50px] text-center">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -1855,21 +1860,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                   <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.length > 0 && selectedFirewallRules.length === firewallRules.length ? "text-[#0f172a]" : "text-transparent")} />
                                 </button>
                               </th>
-                              <th className="px-4 py-3 font-medium">Type</th>
-                              <th className="px-4 py-3 font-medium">Protocol</th>
-                              <th className="px-4 py-3 font-medium">Port Range</th>
-                              <th className="px-4 py-3 font-medium">Source IP</th>
-                              <th className="px-4 py-3 font-medium">Description</th>
-                              <th className="px-4 py-3 font-medium rounded-tr-xl text-right">Actions</th>
+                              <th className="px-4 py-3.5 font-bold">Type</th>
+                              <th className="px-4 py-3.5 font-bold">Protocol</th>
+                              <th className="px-4 py-3.5 font-bold">Port Range</th>
+                              <th className="px-4 py-3.5 font-bold">Source IP</th>
+                              <th className="px-4 py-3.5 font-bold">Description</th>
+                              <th className="px-4 py-3.5 font-bold rounded-tr-xl text-right">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-white/5">
+                          <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
                             {paginatedRules.map((rule: any, i: number) => {
                               const absoluteIndex = (rulePage - 1) * RULES_PER_PAGE + i;
                               const posStr = rule.pos?.toString() || absoluteIndex.toString();
                               const isSelected = selectedFirewallRules.includes(posStr);
                               return (
-                                <tr key={i} className={cn("transition-colors", isSelected ? "bg-cyan-500/5" : "bg-transparent hover:bg-white/5")}>
+                                <tr key={i} className={cn("transition-colors", isSelected ? "bg-cyan-500/5" : (isDark ? "bg-transparent hover:bg-white/5" : "bg-transparent hover:bg-slate-50"))}>
                                   <td className="px-4 py-4 text-center">
                                     <button
                                       type="button"
@@ -1888,13 +1893,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                       <CheckCircle className={cn("w-3.5 h-3.5", isSelected ? "text-[#0f172a]" : "text-transparent")} />
                                     </button>
                                   </td>
-                                  <td className={cn("px-4 py-4 font-medium ", isDark ? "text-white" : "text-slate-900")}>
+                                  <td className={cn("px-4 py-4 font-bold", isDark ? "text-white" : "text-slate-950")}>
                                     {rule.type === "in" ? "Inbound" : "Outbound"}
                                   </td>
-                                  <td className="px-4 py-4">{rule.proto?.toUpperCase() || "ALL"}</td>
-                                  <td className="px-4 py-4 font-mono">{rule.dport ? rule.dport.replace(/:/g, '-') : "ALL"}</td>
-                                  <td className="px-4 py-4 font-mono">{rule.source || "0.0.0.0/0"}</td>
-                                  <td className="px-4 py-4">{rule.comment || "-"}</td>
+                                  <td className={cn("px-4 py-4 font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>{rule.proto?.toUpperCase() || "ALL"}</td>
+                                  <td className={cn("px-4 py-4 font-mono font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>{rule.dport ? rule.dport.replace(/:/g, '-') : "ALL"}</td>
+                                  <td className={cn("px-4 py-4 font-mono font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>{rule.source || "0.0.0.0/0"}</td>
+                                  <td className={cn("px-4 py-4 font-medium", isDark ? "text-zinc-300" : "text-slate-800")}>{rule.comment || "-"}</td>
                                   <td className="px-4 py-4 text-right">
                                     <div className="flex items-center justify-end gap-2">
                                       <button
@@ -1902,13 +1907,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                           setEditingRule({ ...rule, pos: rule.pos || absoluteIndex });
                                           setShowFirewallModal(true);
                                         }}
-                                        className={cn("p-1.5  hover:text-cyan-400 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                                        className={cn("p-1.5 transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-600 hover:text-cyan-800")}
                                       >
                                         <Settings2 className="w-4 h-4" />
                                       </button>
                                       <button
                                         onClick={() => setDeletingRulePos(rule.pos?.toString() || absoluteIndex.toString())}
-                                        className={cn("p-1.5  hover:text-red-400 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                                        className={cn("p-1.5 transition-colors", isDark ? "text-zinc-400 hover:text-red-400" : "text-slate-600 hover:text-red-600")}
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </button>
@@ -1919,7 +1924,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             })}
                             {firewallRules.length === 0 && (
                               <tr>
-                                <td colSpan={7} className={cn("px-4 py-8 text-center ", isDark ? "text-zinc-500" : "text-slate-400")}>
+                                <td colSpan={7} className={cn("px-4 py-8 text-center font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>
                                   No firewall rules configured.
                                 </td>
                               </tr>
@@ -1958,10 +1963,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       key={item.id}
                       onClick={() => setSettingsMenu(item.id)}
                       className={cn(
-                        "px-4 py-3 text-sm font-medium rounded-xl text-left transition-colors",
+                        "px-4 py-3 text-sm rounded-xl text-left transition-colors",
                         settingsMenu === item.id
-                          ? (isDark ? "bg-white/10 text-white font-semibold" : "bg-slate-200 text-slate-900 font-bold")
-                          : (isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
+                          ? (isDark ? "bg-white/10 text-white font-bold" : "bg-cyan-100 text-cyan-950 font-bold border border-cyan-300 shadow-2xs")
+                          : (isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white font-medium" : "text-slate-700 hover:bg-slate-100 hover:text-slate-950 font-bold")
                       )}
                     >
                       {item.label}
@@ -1974,21 +1979,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   {settingsMenu === "hostname" && (
                     <div className="space-y-6 max-w-md">
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Change Hostname</h3>
-                      <p className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Current Hostname: <span className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>{vps.hostname}</span></p>
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Change Hostname</h3>
+                      <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Current Hostname: <span className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>{vps.hostname}</span></p>
                       <form onSubmit={handleSettingsSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>New Host Name</label>
+                          <label className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-900")}>New Host Name</label>
                           <input
                             type="text"
                             value={hostnameInput}
                             onChange={(e) => setHostnameInput(e.target.value)}
                             placeholder="new-hostname.example.com"
                             className={cn(
-                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all",
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all font-medium",
                               isDark
                                 ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500"
-                                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+                                : "bg-slate-50 border-slate-300 text-slate-950 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                             )}
                             required
                           />
@@ -1996,7 +2001,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           type="submit"
                           disabled={actionLoading || isSavingSettings}
-                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
+                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingSettings ? "Saving..." : "Change Hostname"}
                         </button>
@@ -2006,59 +2011,59 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   {settingsMenu === "password" && (
                     <div className="space-y-6 max-w-md">
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Change Root Password</h3>
-                      <div className={cn("p-3.5 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-                        <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                        <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
-                          <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Requires a VPS restart to apply via Cloud-Init.
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Change Root Password</h3>
+                      <div className={cn("p-3.5 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-2xs", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium")}>
+                        <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                        <p className="leading-relaxed">
+                          <strong className={cn("mr-1 font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>Note:</strong> Requires a VPS restart to apply via Cloud-Init.
                         </p>
                       </div>
                       <form onSubmit={handleSettingsSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>New Password</label>
+                          <label className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-900")}>New Password</label>
                           <input
                             type="password"
                             value={passwordInput}
                             onChange={(e) => setPasswordInput(e.target.value)}
                             placeholder="••••••••••••"
                             className={cn(
-                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all",
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all font-medium",
                               isDark
                                 ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500"
-                                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+                                : "bg-slate-50 border-slate-300 text-slate-950 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                             )}
                             required
                             minLength={8}
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Retype New Password</label>
+                          <label className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-900")}>Retype New Password</label>
                           <input
                             type="password"
                             value={passwordConfirmInput}
                             onChange={(e) => setPasswordConfirmInput(e.target.value)}
                             placeholder="••••••••••••"
                             className={cn(
-                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all",
-                              isDark ? "bg-[#060b14] text-white" : "bg-slate-50 text-slate-900",
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all font-medium",
+                              isDark ? "bg-[#060b14] text-white" : "bg-slate-50 text-slate-950",
                               passwordConfirmInput && passwordInput !== passwordConfirmInput
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                : isDark ? "border-slate-800 focus:border-cyan-500 focus:ring-cyan-500" : "border-slate-200 focus:border-cyan-500 focus:ring-cyan-500"
+                                : isDark ? "border-slate-800 focus:border-cyan-500 focus:ring-cyan-500" : "border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
                             )}
                             required
                             minLength={8}
                           />
                           {passwordConfirmInput && passwordInput !== passwordConfirmInput && (
-                            <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                            <p className="text-red-500 text-xs mt-1 font-bold">Passwords do not match</p>
                           )}
                           {passwordInput && passwordInput.length < 8 && (
-                            <p className="text-red-400 text-xs mt-1">Password must be at least 8 characters</p>
+                            <p className="text-red-500 text-xs mt-1 font-bold">Password must be at least 8 characters</p>
                           )}
                         </div>
                         <button
                           type="submit"
                           disabled={actionLoading || isSavingSettings || passwordInput.length < 8 || passwordInput !== passwordConfirmInput}
-                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
+                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingSettings ? "Saving..." : "Change Password"}
                         </button>
@@ -2068,24 +2073,24 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   {settingsMenu === "ssh" && (
                     <div className="space-y-6 max-w-xl">
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Change SSH Public Key</h3>
-                      <div className={cn("p-3.5 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-                        <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                        <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
-                          <strong className={cn("font-medium mr-1", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Requires a VPS restart to apply via Cloud-Init.
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Change SSH Public Key</h3>
+                      <div className={cn("p-3.5 rounded-xl border flex items-start gap-2.5 text-xs transition-all shadow-2xs", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium")}>
+                        <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                        <p className="leading-relaxed">
+                          <strong className={cn("mr-1 font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>Note:</strong> Requires a VPS restart to apply via Cloud-Init.
                         </p>
                       </div>
                       <form onSubmit={handleSettingsSubmit} className="space-y-4">
                         <div className="space-y-2">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                            <label className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>SSH Public Key</label>
+                            <label className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-900")}>SSH Public Key</label>
                             <button
                               type="button"
                               onClick={handleGenerateSSHKey}
                               disabled={isGeneratingKey}
                               className={cn(
-                                "w-full sm:w-auto text-xs flex items-center justify-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-lg transition-colors shrink-0 font-medium",
-                                isDark ? "text-cyan-400 hover:text-cyan-300 bg-cyan-500/10" : "text-slate-900 hover:text-black bg-slate-100 hover:bg-slate-200"
+                                "w-full sm:w-auto text-xs flex items-center justify-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-lg transition-colors shrink-0 font-bold border",
+                                isDark ? "text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 border-cyan-500/20" : "text-slate-950 hover:text-black bg-slate-100 hover:bg-slate-200 border-slate-300"
                               )}
                             >
                               {isGeneratingKey ? (
@@ -2101,10 +2106,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             onChange={(e) => setSshKeyInput(e.target.value)}
                             placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
                             className={cn(
-                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all font-mono text-xs min-h-[150px]",
+                              "w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 transition-all font-mono text-xs min-h-[150px] font-medium",
                               isDark
                                 ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500"
-                                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+                                : "bg-slate-50 border-slate-300 text-slate-950 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                             )}
                             required
                           />
@@ -2112,7 +2117,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           type="submit"
                           disabled={actionLoading || isSavingSettings}
-                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
+                          className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingSettings ? "Saving..." : "Change SSH Key"}
                         </button>
@@ -2126,12 +2131,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <AlertTriangle className="w-5 h-5 text-red-500" />
                         Delete Instance
                       </h3>
-                      <p className={cn("text-sm  mb-6 relative z-10", isDark ? "text-zinc-400" : "text-slate-500")}>These actions are permanent and cannot be undone. Proceed with extreme caution.</p>
+                      <p className={cn("text-sm mb-6 relative z-10 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>These actions are permanent and cannot be undone. Proceed with extreme caution.</p>
 
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-colors rounded-2xl gap-4">
                         <div>
-                          <h3 className="text-red-400 font-bold text-sm">Delete Instance</h3>
-                          <p className={cn(" text-xs mt-1.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          <h3 className="text-red-600 dark:text-red-400 font-bold text-sm">Delete Instance</h3>
+                          <p className={cn("text-xs mt-1.5 leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                             Completely destroy the VM, erase all its data, and release its IP addresses.
                             Your final usage will be billed up to the current hour.
                           </p>
@@ -2139,7 +2144,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <button
                           onClick={() => setShowTerminateModal(true)}
                           disabled={actionLoading}
-                          className="px-5 py-2.5 w-full sm:w-auto justify-center bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-500 border border-red-500/20 text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2"
+                          className="px-5 py-2.5 w-full sm:w-auto justify-center bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 border border-red-500/20 text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2"
                         >
                           <Trash2 className="w-4 h-4 shrink-0" />
                           Delete Instance
@@ -2161,21 +2166,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       <Activity className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Upgrade Specifications</h3>
-                      <p className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Increase your VPS resources. Note: Downgrades are not supported.</p>
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Upgrade Specifications</h3>
+                      <p className={cn("text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Increase your VPS resources. Note: Downgrades are not supported.</p>
                     </div>
                   </div>
 
                   <div className="space-y-8">
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>CPU Cores</label>
-                        <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeCores} Core(s)</span>
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-900", "text-sm font-bold")}>CPU Cores</label>
+                        <span className={cn("text-sm font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-800")}>{upgradeCores} Core(s)</span>
                       </div>
                       <div className="mb-2">
                         <span className={cn(
-                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
-                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300"
                         )}>
                           Upgrade: Rp 50.000/Core/mo (~Rp 69/hr)
                         </span>
@@ -2188,27 +2193,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeCores - vps.cpuCores) / Math.max(1, maxSpecs.cpu - vps.cpuCores)) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono font-semibold", isDark ? "text-zinc-500" : "text-slate-700")}>
                         <span>{vps.cpuCores} Core (Current)</span>
                         <span>{maxSpecs.cpu} Core Max</span>
                       </div>
                       {additionalCpu > 0 && (
                         <div className={cn(
                           "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
-                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium"
                         )}>
                           <span className="flex items-center gap-1.5 flex-wrap">
-                            <Activity className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <Activity className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             <span>Added CPU:</span>
-                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                            <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>
                               +{additionalCpu} Core
                             </strong>
-                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                               (@ Rp 50.000/Core/mo)
                             </span>
                           </span>
-                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                            +{formatRupiah(additionalCpuMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalCpuHourly)}/hr)</span>
+                          <span className={cn("font-mono font-bold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                            +{formatRupiah(additionalCpuMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(~+{formatRupiah(additionalCpuHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2216,13 +2221,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium")}>RAM Memory</label>
-                        <span className={cn("text-sm font-mono font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeRam} GB</span>
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-900", "text-sm font-bold")}>RAM Memory</label>
+                        <span className={cn("text-sm font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-800")}>{upgradeRam} GB</span>
                       </div>
                       <div className="mb-2">
                         <span className={cn(
-                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
-                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300"
                         )}>
                           Upgrade: Rp 25.000/GB/mo (~Rp 35/hr)
                         </span>
@@ -2235,27 +2240,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeRam - vps.ramGb) / Math.max(1, maxSpecs.ram - vps.ramGb)) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono font-semibold", isDark ? "text-zinc-500" : "text-slate-700")}>
                         <span>{vps.ramGb} GB (Current)</span>
                         <span>{maxSpecs.ram} GB Max</span>
                       </div>
                       {additionalRam > 0 && (
                         <div className={cn(
                           "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
-                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium"
                         )}>
                           <span className="flex items-center gap-1.5 flex-wrap">
-                            <Cpu className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <Cpu className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             <span>Added RAM:</span>
-                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                            <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>
                               +{additionalRam} GB
                             </strong>
-                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                               (@ Rp 25.000/GB/mo)
                             </span>
                           </span>
-                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                            +{formatRupiah(additionalRamMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalRamHourly)}/hr)</span>
+                          <span className={cn("font-mono font-bold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                            +{formatRupiah(additionalRamMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(~+{formatRupiah(additionalRamHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2264,16 +2269,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-1.5">
                         <div className="flex items-center gap-2">
-                          <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium whitespace-nowrap")}>Main Disk Storage</label>
+                          <label className={cn(isDark ? "text-zinc-300" : "text-slate-900", "text-sm font-bold whitespace-nowrap")}>Main Disk Storage</label>
                         </div>
-                        <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeDisk} GB</span>
+                        <span className={cn("text-sm font-mono font-bold shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-800")}>{upgradeDisk} GB</span>
                       </div>
                       <div className="mb-2">
                         <span className={cn(
-                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                          "inline-flex items-center text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold border",
                           isSsd
-                            ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                            : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                            ? isDark ? "bg-purple-500/10 text-purple-400 border-purple-500/20" : "bg-purple-50 text-purple-900 border-purple-300"
+                            : isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300"
                         )}>
                           {isSsd ? "SSD Storage" : "HDD Storage"} • Upgrade: {formatRupiah(diskRatePerGbMonthly)}/GB/mo
                         </span>
@@ -2286,27 +2291,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeDisk - vps.diskGb) / Math.max(1, maxSpecs.disk - vps.diskGb)) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono font-semibold", isDark ? "text-zinc-500" : "text-slate-700")}>
                         <span>{vps.diskGb} GB {isSsd ? "SSD" : "HDD"} (Current)</span>
                         <span>{maxSpecs.disk} GB Max</span>
                       </div>
                       {addedDiskGb > 0 && (
                         <div className={cn(
                           "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
-                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium"
                         )}>
                           <span className="flex items-center gap-1.5 flex-wrap">
-                            <HardDrive className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <HardDrive className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             <span>Added Storage:</span>
-                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                            <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>
                               +{addedDiskGb} GB {isSsd ? "SSD" : "HDD"}
                             </strong>
-                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                               (@ {formatRupiah(diskRatePerGbMonthly)}/GB/mo)
                             </span>
                           </span>
-                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                            +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalDiskHourly)}/hr)</span>
+                          <span className={cn("font-mono font-bold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                            +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(~+{formatRupiah(additionalDiskHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2314,16 +2319,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium whitespace-nowrap")}>Network Bandwidth (Speed Limit)</label>
-                        <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{safeUpgradeBandwidthMbps} Mbps</span>
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-900", "text-sm font-bold whitespace-nowrap")}>Network Bandwidth (Speed Limit)</label>
+                        <span className={cn("text-sm font-mono font-bold shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-800")}>{safeUpgradeBandwidthMbps} Mbps</span>
                       </div>
                       <div className="mb-2">
                         <div className={cn(
-                          "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg font-medium border leading-snug",
-                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                          "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg font-bold border leading-snug",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300"
                         )}>
-                          <span className="font-semibold">100 Mbps Base Free</span>
-                          <span className={cn("text-xs", isDark ? "text-cyan-500/50" : "text-cyan-300")}>•</span>
+                          <span>100 Mbps Base Free</span>
+                          <span className={cn("text-xs", isDark ? "text-cyan-500/50" : "text-cyan-600")}>•</span>
                           <span>Upgrade: Rp 50.000 / 50 Mbps / mo (~Rp 69/hr)</span>
                         </div>
                       </div>
@@ -2344,7 +2349,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               style={{ backgroundSize: `${progressPct}% 100%` }}
                               className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                             />
-                            <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            <div className={cn("flex justify-between text-xs mt-1 font-mono font-semibold", isDark ? "text-zinc-500" : "text-slate-700")}>
                               <span>{currentBandwidthMbps} Mbps (Current)</span>
                               <span>{maxAllowedBandwidth} Mbps Max</span>
                             </div>
@@ -2358,8 +2363,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                   className={cn(
                                     "min-w-[48px] px-2.5 py-1 text-xs font-mono rounded-lg border transition-all cursor-pointer text-center",
                                     safeUpgradeBandwidthMbps === speed
-                                      ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold shadow-xs" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-bold shadow-xs"
-                                      : isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20" : "bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300"
+                                      ? isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold shadow-xs" : "bg-cyan-100 text-cyan-950 border-cyan-400 font-bold shadow-xs"
+                                      : isDark ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20 font-medium" : "bg-slate-100 text-slate-800 border-slate-300 hover:border-slate-400 font-bold"
                                   )}
                                 >
                                   {speed}M
@@ -2372,20 +2377,20 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       {addedBandwidthMbps > 0 && (
                         <div className={cn(
                           "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
-                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium"
                         )}>
                           <span className="flex items-center gap-1.5 flex-wrap">
-                            <Network className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <Network className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             <span>Added Bandwidth:</span>
-                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                            <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>
                               +{addedBandwidthMbps} Mbps
                             </strong>
-                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                               (@ Rp 50.000 / 50 Mbps / mo)
                             </span>
                           </span>
-                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                            +{formatRupiah(additionalBandwidthMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalBandwidthHourly)}/hr)</span>
+                          <span className={cn("font-mono font-bold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                            +{formatRupiah(additionalBandwidthMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(~+{formatRupiah(additionalBandwidthHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2393,16 +2398,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "text-sm font-medium whitespace-nowrap")}>Backup Storage</label>
-                        <span className={cn("text-sm font-mono font-medium shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-600")}>{upgradeBackup} GB</span>
+                        <label className={cn(isDark ? "text-zinc-300" : "text-slate-900", "text-sm font-bold whitespace-nowrap")}>Backup Storage</label>
+                        <span className={cn("text-sm font-mono font-bold shrink-0 whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-800")}>{upgradeBackup} GB</span>
                       </div>
                       <div className="mb-2">
                         <div className={cn(
-                          "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg font-medium border leading-snug",
-                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                          "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg font-bold border leading-snug",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300"
                         )}>
-                          <span className="font-semibold">Snapshot & Backup Quota</span>
-                          <span className={cn("text-xs", isDark ? "text-cyan-500/50" : "text-cyan-300")}>•</span>
+                          <span>Snapshot & Backup Quota</span>
+                          <span className={cn("text-xs", isDark ? "text-cyan-500/50" : "text-cyan-600")}>•</span>
                           <span>Upgrade: {formatRupiah(backupMonthlyRate)}/GB/mo (~{formatRupiah(backupRatePerHour)}/hr)</span>
                         </div>
                       </div>
@@ -2414,27 +2419,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         style={{ backgroundSize: `${((upgradeBackup - (vps.backupGb || 0)) / Math.max(1, (maxSpecs.backup || 2000) - (vps.backupGb || 0))) * 100}% 100%` }}
                         className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600")}
                       />
-                      <div className={cn("flex justify-between text-xs mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      <div className={cn("flex justify-between text-xs mt-1 font-mono font-semibold", isDark ? "text-zinc-500" : "text-slate-700")}>
                         <span>{vps.backupGb || 0} GB (Current)</span>
                         <span>{maxSpecs.backup || 2000} GB Max</span>
                       </div>
                       {additionalBackupGb > 0 && (
                         <div className={cn(
                           "mt-2.5 p-3 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border transition-all",
-                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                          isDark ? "bg-[#0b162c] border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-300 text-slate-800 font-medium"
                         )}>
                           <span className="flex items-center gap-1.5 flex-wrap">
-                            <Archive className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <Archive className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             <span>Added Backup Storage:</span>
-                            <strong className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
+                            <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>
                               +{additionalBackupGb} GB
                             </strong>
-                            <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                               (@ {formatRupiah(backupMonthlyRate)}/GB/mo)
                             </span>
                           </span>
-                          <span className={cn("font-mono font-semibold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                            +{formatRupiah(additionalBackupMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(~+{formatRupiah(additionalBackupHourly)}/hr)</span>
+                          <span className={cn("font-mono font-bold self-start sm:self-auto shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                            +{formatRupiah(additionalBackupMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(~+{formatRupiah(additionalBackupHourly)}/hr)</span>
                           </span>
                         </div>
                       )}
@@ -2443,28 +2448,28 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                   {/* Network Upgrades */}
                   <div className={cn("mt-8 pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
-                    <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", " font-medium mb-4 flex items-center justify-between")}>
+                    <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-950", "font-bold text-base mb-4 flex items-center justify-between")}>
                       Network Add-ons
                     </h4>
 
                     {vps?.assignedIps && vps.assignedIps.length > 0 && (
-                      <div className={cn("mb-4 p-4 rounded-xl border", isDark ? "bg-black/20 border-white/5" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("mb-4 p-4 rounded-xl border", isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-300")}>
                         <div className="flex items-center justify-between mb-3">
-                          <p className={cn("text-xs font-bold  uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Current IP Addresses</p>
+                          <p className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-700")}>Current IP Addresses</p>
                           {vps.assignedIps.length > 5 && (
                             <div className="flex items-center gap-2">
                               <button
                                 disabled={ipPage === 1}
                                 onClick={() => setIpPage(p => p - 1)}
-                                className={cn("w-6 h-6 rounded flex items-center justify-center transition-colors border disabled:opacity-30", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900")}
+                                className={cn("w-6 h-6 rounded flex items-center justify-center transition-colors border disabled:opacity-30", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-900 font-bold")}
                               >
                                 &lt;
                               </button>
-                              <span className={cn("text-xs  font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>{ipPage} / {Math.ceil(vps.assignedIps.length / 5)}</span>
+                              <span className={cn("text-xs font-mono font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>{ipPage} / {Math.ceil(vps.assignedIps.length / 5)}</span>
                               <button
                                 disabled={ipPage === Math.ceil(vps.assignedIps.length / 5)}
                                 onClick={() => setIpPage(p => p + 1)}
-                                className={cn("w-6 h-6 rounded flex items-center justify-center transition-colors border disabled:opacity-30", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900")}
+                                className={cn("w-6 h-6 rounded flex items-center justify-center transition-colors border disabled:opacity-30", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-900 font-bold")}
                               >
                                 &gt;
                               </button>
@@ -2473,10 +2478,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {vps.assignedIps.slice((ipPage - 1) * 5, ipPage * 5).map((ip: any) => (
-                            <div key={ip.id} className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
-                              <div className="w-2 h-2 rounded-full bg-cyan-400" />
-                              <span className={cn("text-sm font-mono", isDark ? "text-cyan-100" : "text-cyan-700")} title={ip.publicIp ? `Internal IP: ${ip.ipAddress}` : undefined}>{ip.publicIp || ip.ipAddress}</span>
-                              {ip.isPrimary && <span className="text-[10px] uppercase font-bold text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded">Primary</span>}
+                            <div key={ip.id} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg border", isDark ? "bg-cyan-500/5 border-cyan-500/20" : "bg-cyan-50 border-cyan-300")}>
+                              <div className="w-2 h-2 rounded-full bg-cyan-500" />
+                              <span className={cn("text-sm font-mono font-bold", isDark ? "text-cyan-100" : "text-cyan-950")} title={ip.publicIp ? `Internal IP: ${ip.ipAddress}` : undefined}>{ip.publicIp || ip.ipAddress}</span>
+                              {ip.isPrimary && <span className={cn("text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-900 bg-cyan-100 border-cyan-300")}>Primary</span>}
                             </div>
                           ))}
                         </div>
@@ -2485,10 +2490,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {hasIpv4Pool && (
-                        <div className={cn("p-4 rounded-xl border flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800/80 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
+                        <div className={cn("p-4 rounded-xl border flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800/80 hover:border-slate-700" : "bg-slate-50 border-slate-300 hover:border-slate-400")}>
                           <div>
-                            <p className={cn(" font-medium text-sm", isDark ? "text-white" : "text-slate-900")}>Add IPv4 Address</p>
-                            <p className={cn("text-xs  mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Add IPv4 Address</p>
+                            <p className={cn("text-xs mt-0.5 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                               {pricing.ipv4
                                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(pricing.ipv4 * 730) + " / mo"
                                 : "Contact support"}
@@ -2497,14 +2502,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => setAddIpv4Count(Math.max(0, addIpv4Count - 1))}
-                              className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors border", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900")}
+                              className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors border font-bold", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-100 border-slate-300 text-slate-900")}
                             >
                               -
                             </button>
-                            <span className={cn(" font-mono w-4 text-center", isDark ? "text-white" : "text-slate-900")}>{addIpv4Count}</span>
+                            <span className={cn("font-mono font-bold w-4 text-center", isDark ? "text-white" : "text-slate-950")}>{addIpv4Count}</span>
                             <button
                               onClick={() => setAddIpv4Count(addIpv4Count + 1)}
-                              className="w-8 h-8 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-blue-400 flex items-center justify-center transition-colors border border-blue-500/30"
+                              className="w-8 h-8 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-800 dark:text-cyan-300 flex items-center justify-center transition-colors border border-cyan-400 font-bold"
                             >
                               +
                             </button>
@@ -2513,10 +2518,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       )}
 
                       {hasIpv6Pool && (
-                        <div className={cn("p-4 rounded-xl border flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800/80 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
+                        <div className={cn("p-4 rounded-xl border flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800/80 hover:border-slate-700" : "bg-slate-50 border-slate-300 hover:border-slate-400")}>
                           <div>
-                            <p className={cn(" font-medium text-sm", isDark ? "text-white" : "text-slate-900")}>Add IPv6 Address</p>
-                            <p className={cn("text-xs  mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Add IPv6 Address</p>
+                            <p className={cn("text-xs mt-0.5 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                               {pricing.ipv6
                                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(pricing.ipv6 * 730) + " / mo"
                                 : "Free or Contact support"}
@@ -2525,14 +2530,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => setAddIpv6Count(Math.max(0, addIpv6Count - 1))}
-                              className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors border", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900")}
+                              className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors border font-bold", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-100 border-slate-300 text-slate-900")}
                             >
                               -
                             </button>
-                            <span className={cn(" font-mono w-4 text-center", isDark ? "text-white" : "text-slate-900")}>{addIpv6Count}</span>
+                            <span className={cn("font-mono font-bold w-4 text-center", isDark ? "text-white" : "text-slate-950")}>{addIpv6Count}</span>
                             <button
                               onClick={() => setAddIpv6Count(addIpv6Count + 1)}
-                              className="w-8 h-8 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-blue-400 flex items-center justify-center transition-colors border border-blue-500/30"
+                              className="w-8 h-8 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-800 dark:text-cyan-300 flex items-center justify-center transition-colors border border-cyan-400 font-bold"
                             >
                               +
                             </button>
@@ -2548,95 +2553,95 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-md sticky top-6 flex flex-col gap-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                     {/* Cost Estimator Box (AWS Style) */}
                     {hasUpgrades && (
-                      <div className={cn("p-4 sm:p-5 rounded-2xl border relative overflow-hidden", isDark ? "bg-[#060b14] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-200 shadow-sm")}>
+                      <div className={cn("p-4 sm:p-5 rounded-2xl border relative overflow-hidden", isDark ? "bg-[#060b14] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-300 shadow-sm")}>
                         {/* Decorative Background Icon */}
                         <div className="absolute -right-6 -top-6 text-cyan-500/5 pointer-events-none">
                           <Activity className="w-48 h-48" />
                         </div>
 
                         <div className="relative z-10">
-                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", "font-medium mb-3 flex items-center gap-2")}>
-                            <Receipt className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                          <h4 className={cn(isDark ? "text-white" : "text-slate-950", "font-bold mb-3 flex items-center gap-2")}>
+                            <Receipt className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             Upgrade Cost Estimate
                           </h4>
 
                           {/* Itemized Upgrade Breakdown */}
-                          <div className={cn("mb-4 space-y-2.5 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-600")}>
+                          <div className={cn("mb-4 space-y-2.5 text-xs border-b pb-3", isDark ? "border-slate-800 text-zinc-400" : "border-slate-300 text-slate-700")}>
                             {addedDiskGb > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">Disk (+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"} @ {formatRupiah(diskRatePerGbMonthly)}/GB):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                                  +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalDiskHourly)}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>Disk (+{addedDiskGb} GB {isSsd ? "SSD" : "HDD"} @ {formatRupiah(diskRatePerGbMonthly)}/GB):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                                  +{formatRupiah(additionalDiskMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(additionalDiskHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {additionalCpu > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">CPU (+{additionalCpu} Core @ Rp 50.000/mo):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah(additionalCpuMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalCpuHourly)}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>CPU (+{additionalCpu} Core @ Rp 50.000/mo):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                                  +{formatRupiah(additionalCpuMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(additionalCpuHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {additionalRam > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">RAM (+{additionalRam} GB @ Rp 25.000/mo):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah(additionalRamMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalRamHourly)}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>RAM (+{additionalRam} GB @ Rp 25.000/mo):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                                  +{formatRupiah(additionalRamMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(additionalRamHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {addedBandwidthMbps > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">Bandwidth (+{addedBandwidthMbps} Mbps @ Rp 50.000/50M):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-                                  +{formatRupiah(additionalBandwidthMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(additionalBandwidthHourly)}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>Bandwidth (+{addedBandwidthMbps} Mbps @ Rp 50.000/50M):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                                  +{formatRupiah(additionalBandwidthMonthly)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(additionalBandwidthHourly)}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {upgradeBackup > (vps.backupGb || 0) && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">Backup (+{upgradeBackup - (vps.backupGb || 0)} GB):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0))}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>Backup (+{upgradeBackup - (vps.backupGb || 0)} GB):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                                  +{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah((upgradeBackup - (vps.backupGb || 0)) * (pricing.backup || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {addIpv4Count > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">IPv4 (+{addIpv4Count} IP):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>IPv4 (+{addIpv4Count} IP):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                                  +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
                             {addIpv6Count > 0 && (
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                <span className="text-zinc-300 dark:text-zinc-400">IPv6 (+{addIpv6Count} IP):</span>
-                                <span className={cn("font-mono font-semibold shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                                  +{formatRupiah(addIpv6Count * (pricing.ipv6 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(+{formatRupiah(addIpv6Count * (pricing.ipv6 || 0))}/hr)</span>
+                                <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>IPv6 (+{addIpv6Count} IP):</span>
+                                <span className={cn("font-mono font-bold shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                                  +{formatRupiah(addIpv6Count * (pricing.ipv6 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(addIpv6Count * (pricing.ipv6 || 0))}/hr)</span>
                                 </span>
                               </div>
                             )}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 font-medium border-t border-slate-500/10">
-                              <span className="font-semibold text-slate-800 dark:text-zinc-200">Total Additional Rate:</span>
-                              <span className={cn("font-mono font-bold text-sm shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 font-bold border-t border-slate-500/20">
+                              <span className="text-slate-900 dark:text-zinc-200">Total Additional Rate:</span>
+                              <span className={cn("font-mono font-bold text-sm shrink-0", isDark ? "text-cyan-400" : "text-cyan-800")}>
                                 +{formatRupiah(additionalHourlyRate)} / hr
                               </span>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
-                            <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                              <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>New Hourly Rate</p>
-                              <p className={cn("text-lg font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
-                                {formatRupiah(newHourlyPrice)} <span className={cn("text-xs font-normal font-sans", isDark ? "text-zinc-500" : "text-slate-400")}>/ hr</span>
+                            <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300 shadow-2xs")}>
+                              <p className={cn("text-xs mb-1 font-bold", isDark ? "text-zinc-400" : "text-slate-700")}>New Hourly Rate</p>
+                              <p className={cn("text-lg font-bold font-mono", isDark ? "text-white" : "text-slate-950")}>
+                                {formatRupiah(newHourlyPrice)} <span className={cn("text-xs font-normal font-sans", isDark ? "text-zinc-500" : "text-slate-600")}>/ hr</span>
                               </p>
                             </div>
-                            <div className={cn("p-3.5 rounded-xl border shadow-sm", isDark ? "bg-[#0b162c] border-cyan-500/30" : "bg-white border-cyan-600/30 shadow-sm")}>
-                              <p className={cn("text-xs mb-1 font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Estimated Monthly Cost</p>
-                              <p className={cn("text-xl font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
-                                {formatRupiah(newMonthlyPrice)} <span className={cn("text-xs font-normal font-sans", isDark ? "text-zinc-500" : "text-slate-400")}>/ mo (~730h)</span>
+                            <div className={cn("p-3.5 rounded-xl border shadow-sm", isDark ? "bg-[#0b162c] border-cyan-500/30" : "bg-white border-cyan-500 shadow-sm")}>
+                              <p className={cn("text-xs mb-1 font-bold", isDark ? "text-cyan-400" : "text-cyan-900")}>Estimated Monthly Cost</p>
+                              <p className={cn("text-xl font-bold font-mono", isDark ? "text-white" : "text-slate-950")}>
+                                {formatRupiah(newMonthlyPrice)} <span className={cn("text-xs font-normal font-sans", isDark ? "text-zinc-500" : "text-slate-600")}>/ mo (~730h)</span>
                               </p>
                             </div>
                           </div>
@@ -2647,25 +2652,25 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <div className="flex flex-col items-stretch sm:items-end gap-4 w-full">
                       <div className={cn(
                         "w-full flex items-start sm:items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all text-left shadow-sm",
-                        hasUpgrades && balance < requiredBalance ? "border-red-500/40 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-600/40 shadow-sm"
+                        hasUpgrades && balance < requiredBalance ? "border-red-500/40 bg-red-500/5" : isDark ? "bg-[#0b162c] border-cyan-500/40" : "bg-white border-cyan-500 shadow-sm"
                       )}>
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 bg-white border border-cyan-500/50 shadow-sm">
-                          <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 bg-cyan-50 border border-cyan-300 shadow-2xs">
+                          <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-700" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className={cn("text-sm sm:text-base font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Account Balance</div>
+                          <div className={cn("text-sm sm:text-base font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>Account Balance</div>
                           <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                            <div className={cn("text-xs font-medium tracking-wide", isDark ? "text-zinc-400" : "text-slate-500")}>
-                              Available: <span className="font-mono font-semibold text-slate-800 dark:text-zinc-200">{formatRupiah(balance)}</span>
+                            <div className={cn("text-xs font-medium tracking-wide", isDark ? "text-zinc-400" : "text-slate-700")}>
+                              Available: <span className="font-mono font-bold text-slate-950 dark:text-zinc-200">{formatRupiah(balance)}</span>
                             </div>
                           </div>
                           {hasUpgrades && balance < requiredBalance && (
-                            <div className="text-[11px] sm:text-xs text-red-400 font-medium mt-2.5 bg-red-500/10 p-2.5 sm:px-3 sm:py-2 rounded-xl flex items-start gap-2 border border-red-500/20 leading-relaxed">
-                              <X className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                            <div className="text-[11px] sm:text-xs text-red-600 dark:text-red-400 font-medium mt-2.5 bg-red-100 dark:bg-red-500/10 p-2.5 sm:px-3 sm:py-2 rounded-xl flex items-start gap-2 border border-red-300 dark:border-red-500/20 leading-relaxed">
+                              <X className="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
                               <div className="space-y-0.5">
-                                <p className="font-semibold text-red-400">Insufficient balance</p>
-                                <p className="text-zinc-300 dark:text-zinc-400 text-[11px]">
-                                  Minimum required: <strong className="font-mono text-white">{formatRupiah(requiredBalance)}</strong> (1 month reserve)
+                                <p className="font-bold text-red-700 dark:text-red-400">Insufficient balance</p>
+                                <p className="text-red-950 dark:text-zinc-300 text-[11px] font-medium">
+                                  Minimum required: <strong className="font-mono text-red-950 dark:text-white font-bold">{formatRupiah(requiredBalance)}</strong> (1 month reserve)
                                 </p>
                               </div>
                             </div>
@@ -2676,7 +2681,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       <button
                         onClick={handleUpgradeSpecs}
                         disabled={isUpgrading || (hasUpgrades && balance < requiredBalance) || vps.status === 'SUSPENDED' || !hasUpgrades}
-                        className="w-full sm:w-auto justify-center px-6 py-3 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-slate-950 text-sm"
+                        className="w-full sm:w-auto justify-center px-6 py-3 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-slate-950 text-sm"
                       >
                         {isUpgrading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
                         {isUpgrading ? "Upgrading..." : "Confirm Upgrade"}
@@ -2691,23 +2696,23 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* ADDON DISKS TAB */}
             {activeTab === "addon" && (
               <div className="animate-in fade-in duration-500 max-w-3xl space-y-6">
-                <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl">
                       <HardDrive className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Add-on Disks (EBS-style)</h3>
-                      <p className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Attach additional storage volumes to your VPS.</p>
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Add-on Disks (EBS-style)</h3>
+                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Attach additional storage volumes to your VPS.</p>
                     </div>
                   </div>
 
                   {allowedAddonStorages.length === 0 ? (
-                    <div className={cn("p-4 border rounded-xl text-sm flex items-start gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-                      <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                    <div className={cn("p-4 border rounded-xl text-sm flex items-start gap-3", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
+                      <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       <div>
-                        <p className={cn("font-medium mb-0.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Add-on Disks Notice:</p>
-                        <p className="text-xs leading-relaxed">Add-on disks are currently not available. No storage providers have been configured by the administrator.</p>
+                        <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Add-on Disks Notice:</p>
+                        <p className={cn("text-xs leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>Add-on disks are currently not available. No storage providers have been configured by the administrator.</p>
                       </div>
                     </div>
                   ) : (
@@ -2715,22 +2720,22 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       {/* Current Add-on Disks */}
                       {addonDisks.length > 0 && (
                         <div>
-                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", " font-medium mb-4")}>Attached Disks</h4>
+                          <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-950", "text-sm font-bold mb-4")}>Attached Disks</h4>
                           <div className="space-y-3">
                             {addonDisks.map((disk) => (
-                              <div key={disk.slot} className={cn("flex items-center justify-between p-4 border rounded-xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                              <div key={disk.slot} className={cn("flex items-center justify-between p-4 border rounded-xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
                                 <div className="flex items-center gap-4">
-                                  <div className="p-2 bg-cyan-500/10 text-blue-400 rounded-lg">
+                                  <div className="p-2 bg-cyan-500/10 text-cyan-500 rounded-lg">
                                     <HardDrive className="w-5 h-5" />
                                   </div>
                                   <div>
-                                    <p className={cn(" font-medium", isDark ? "text-white" : "text-slate-900")}>{disk.sizeGb} GB Disk</p>
-                                    <p className={cn("text-xs  mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Slot: {disk.slot} • Storage: {disk.storage}</p>
+                                    <p className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>{disk.sizeGb} GB Disk</p>
+                                    <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Slot: {disk.slot} • Storage: {disk.storage}</p>
                                   </div>
                                 </div>
                                 <button
                                   onClick={() => handleDeleteAddonDisk(disk.slot)}
-                                  className="px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors"
+                                  className={cn("px-4 py-2 rounded-lg text-sm font-bold transition-colors", isDark ? "bg-red-500/10 text-red-400 hover:bg-red-500/20" : "bg-red-100 text-red-950 border border-red-300 hover:bg-red-200")}
                                 >
                                   Delete
                                 </button>
@@ -2742,42 +2747,42 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                       {/* Add New Disk Form */}
                       <div>
-                        <h4 className={cn(isDark ? "text-zinc-300" : "text-slate-600", " font-medium mb-4 border-t border-white/5 pt-6")}>Attach New Disk</h4>
+                        <h4 className={cn(isDark ? "text-zinc-300 border-white/10" : "text-slate-950 border-slate-300", "font-bold mb-4 border-t pt-6")}>Attach New Disk</h4>
                         <form onSubmit={handleAddonDisk} className="space-y-6">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                              <label className={cn(isDark ? "text-zinc-300" : "text-slate-600", "block text-sm font-medium  mb-2")}>Disk Size (GB)</label>
+                              <label className={cn(isDark ? "text-zinc-300" : "text-slate-900", "block text-sm font-bold mb-2")}>Disk Size (GB)</label>
                               <input
                                 type="number"
                                 min={1} max={1000} required
                                 value={addonSize || ""}
                                 onChange={(e) => setAddonSize(e.target.value === "" ? 0 : parseInt(e.target.value))}
-                                className={cn("w-full rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono", isDark ? "bg-[#060b14] border border-slate-800 text-white" : "bg-slate-50 border border-slate-200 text-slate-900")}
+                                className={cn("w-full rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono", isDark ? "bg-[#060b14] border border-slate-800 text-white" : "bg-slate-50 border border-slate-300 text-slate-950 font-medium placeholder:text-slate-400")}
                               />
                             </div>
                           </div>
 
                           {/* Cost Calculator */}
                           {(addonSize || 0) > 0 && (pricing?.addon_disk || 0) > 0 && (
-                            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-6">
+                            <div className={cn("border rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-6", isDark ? "bg-cyan-500/5 border-cyan-500/20" : "bg-cyan-50/70 border-cyan-300")}>
                               <div className="flex items-start md:items-center gap-3">
                                 <div className="p-2.5 bg-cyan-500/20 rounded-lg shrink-0">
-                                  <Calculator className="w-5 h-5 text-cyan-400" />
+                                  <Calculator className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                                 </div>
                                 <div>
-                                  <h5 className={cn("text-sm font-semibold  mb-0.5", isDark ? "text-white" : "text-slate-900")}>Estimated Additional Cost</h5>
-                                  <p className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>
+                                  <h5 className={cn("text-sm font-bold mb-0.5", isDark ? "text-white" : "text-slate-950")}>Estimated Additional Cost</h5>
+                                  <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>
                                     This amount will be added to your hourly rate.
                                   </p>
                                 </div>
                               </div>
-                              <div className={cn("text-left md:text-right p-3 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-slate-50/50 border-slate-200")}>
+                              <div className={cn("text-left md:text-right p-3 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-300 shadow-xs")}>
                                   <>
-                                    <div className="text-lg font-bold text-cyan-400 flex items-center md:justify-end gap-1.5">
+                                    <div className={cn("text-lg font-bold flex items-center md:justify-end gap-1.5", isDark ? "text-cyan-400" : "text-cyan-950")}>
                                       Rp {((addonSize || 0) * pricing.addon_disk).toLocaleString('id-ID')}
-                                      <span className={cn("text-xs font-normal ", isDark ? "text-zinc-400" : "text-slate-500")}>/hour</span>
+                                      <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-600")}>/hour</span>
                                     </div>
-                                    <div className={cn("text-xs  mt-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                                    <div className={cn("text-xs mt-1 font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>
                                       ~Rp {((addonSize || 0) * pricing.addon_disk * 720).toLocaleString('id-ID')} /month
                                     </div>
                                   </>
@@ -2785,10 +2790,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             </div>
                           )}
 
-                          <div className={cn("p-4 rounded-xl flex items-start gap-3 border transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-                            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                            <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
-                              <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> Attached disks will appear as unformatted block devices (e.g., <code className="px-1 py-0.5 rounded bg-black/20 dark:bg-black/40 font-mono">/dev/sdb</code>) inside your VPS. You will need to partition and format them manually via the console or SSH.
+                          <div className={cn("p-4 rounded-xl flex items-start gap-3 border transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
+                            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                            <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
+                              <strong className={cn("font-bold mr-1.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Note:</strong> Attached disks will appear as unformatted block devices (e.g., <code className="px-1 py-0.5 rounded bg-black/20 dark:bg-black/40 font-mono text-slate-900 dark:text-slate-100 font-bold">/dev/sdb</code>) inside your VPS. You will need to partition and format them manually via the console or SSH.
                             </p>
                           </div>
 
@@ -2796,7 +2801,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <button
                               type="submit"
                               disabled={isAddingDisk || allowedAddonStorages.length === 0}
-                              className="w-full sm:w-auto justify-center px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950 text-sm"
+                              className="w-full sm:w-auto justify-center px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950 text-sm"
                             >
                               {isAddingDisk ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
                               {isAddingDisk ? "Attaching Disk..." : "Attach New Disk"}
@@ -2815,8 +2820,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in duration-500">
 
                 {/* Sidebar Reinstall Menu */}
-                <div className={cn("w-full lg:w-64 shrink-0 border rounded-2xl p-2 h-fit flex flex-col gap-1", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <button className={cn("w-full text-left px-4 py-3 text-sm font-semibold rounded-xl transition-all", isDark ? "bg-[#060b14] text-cyan-400 border border-slate-700 shadow-sm" : "bg-white text-cyan-800 border border-cyan-500/40 shadow-sm ring-1 ring-cyan-500/15")}>
+                <div className={cn("w-full lg:w-64 shrink-0 border rounded-2xl p-2 h-fit flex flex-col gap-1", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
+                  <button className={cn("w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all", isDark ? "bg-[#060b14] text-cyan-400 border border-slate-700 shadow-sm" : "bg-cyan-100 text-cyan-950 border border-cyan-400 shadow-xs ring-1 ring-cyan-400/30")}>
                     Reinstall OS
                   </button>
                 </div>
@@ -2825,8 +2830,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <div className="flex-1 space-y-6">
 
                   {/* OS Selection Grid */}
-                  <div className={cn("border rounded-2xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                    <h3 className={cn("font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Select OS:</h3>
+                  <div className={cn("border rounded-2xl p-6 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
+                    <h3 className={cn("font-bold mb-4", isDark ? "text-white" : "text-slate-950")}>Select OS:</h3>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                       {Object.entries(osGroups).map(([family, versions]: [string, any]) => {
@@ -2837,8 +2842,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             className={cn(
                               "relative rounded-2xl border p-4 flex flex-col items-center gap-3 transition-all cursor-pointer shadow-sm",
                               isActive 
-                                ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") 
-                                : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md")
+                                ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-cyan-50/60 border-cyan-500 shadow-sm ring-2 ring-cyan-500/20") 
+                                : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-300 hover:border-cyan-500 hover:shadow-md")
                             )}
                             onClick={() => {
                               setActiveOsFamily(family);
@@ -2867,7 +2872,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 </div>
                               );
                             })()}
-                            <span className={cn("text-sm font-medium ", isDark ? "text-white" : "text-slate-900")}>{family}</span>
+                            <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-950")}>{family}</span>
 
                             {isActive && (
                               <div className="w-full mt-2" onClick={(e) => e.stopPropagation()}>
@@ -2876,7 +2881,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                   onChange={(val) => setSelectedTemplate(val)}
                                   options={versions.map((v: any) => ({ value: v.name, label: v.name }))}
                                   placeholder="SELECT VERSION"
-                                  className="py-1.5 px-2 text-xs rounded"
+                                  className="py-1.5 px-2 text-xs rounded font-medium"
                                 />
                               </div>
                             )}
@@ -2893,33 +2898,33 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       selectedTemplate?.toLowerCase().includes("windows")
                     );
                     return (
-                      <div className={cn("border rounded-2xl overflow-hidden shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                        <div className={cn("border-b", isDark ? "border-white/10" : "border-slate-200", "bg-white/5 px-6 py-3 flex items-center justify-between")}>
-                          <h3 className={cn("font-medium text-sm", isDark ? "text-white" : "text-slate-900")}>Password for OS after reinstallation</h3>
+                      <div className={cn("border rounded-2xl overflow-hidden shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
+                        <div className={cn("border-b", isDark ? "border-white/10" : "border-slate-300", "bg-slate-50 dark:bg-white/5 px-6 py-3.5 flex items-center justify-between")}>
+                          <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Password for OS after reinstallation</h3>
                           <span className={cn(
-                            "text-xs px-2.5 py-1 rounded font-medium",
-                            isDark ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border border-cyan-200"
+                            "text-xs px-2.5 py-1 rounded font-bold",
+                            isDark ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border border-cyan-300"
                           )}>
                             Default user: <b>{isWindowsReinstall ? "Administrator" : "root"}</b>
                           </span>
                         </div>
                         <div className="p-6 space-y-4 max-w-md">
                           {isWindowsReinstall ? (
-                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
+                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                               <div>
-                                <p className={cn("font-medium mb-0.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Windows Access Note:</p>
-                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                                <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Windows Access Note:</p>
+                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
                                   The default user for Windows is <strong>Administrator</strong>. This new password will be used to log in as Administrator via RDP (Remote Desktop) or Web Console.
                                 </p>
                               </div>
                             </div>
                           ) : (
-                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
+                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                               <div>
-                                <p className={cn("font-medium mb-0.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Linux Access Note:</p>
-                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
+                                <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Linux Access Note:</p>
+                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
                                   The default user after reinstallation is <strong>root</strong>. This new password will be used to log in as root via SSH or Web Console.
                                 </p>
                               </div>
@@ -2933,12 +2938,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 placeholder="New Password"
                                 value={reinstallPassword}
                                 onChange={(e) => setReinstallPassword(e.target.value)}
-                                className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200 text-slate-900 focus:border-cyan-500")}
+                                className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-300 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
                               />
                               <button
                                 type="button"
                                 onClick={() => setShowReinstallPassword(!showReinstallPassword)}
-                                className={cn("absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded transition-colors text-slate-400 hover:text-cyan-500")}
+                                className={cn("absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded transition-colors text-slate-400 hover:text-cyan-600")}
                               >
                                 {showReinstallPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                               </button>
@@ -2952,7 +2957,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 8 ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
                             <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 10 && /[!@#$%^&*]/.test(reinstallPassword) ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
                           </div>
-                          <p className={cn("text-xs ", isDark ? "text-zinc-500" : "text-slate-400")}>Strength Indicator</p>
+                          <p className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Strength Indicator</p>
 
                           <div className="relative">
                             <input
@@ -2960,18 +2965,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               placeholder="Retype Password"
                               value={reinstallPasswordConfirm}
                               onChange={(e) => setReinstallPasswordConfirm(e.target.value)}
-                              className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200 text-slate-900 focus:border-cyan-500")}
+                              className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white focus:border-cyan-500/50" : "bg-slate-50 border border-slate-300 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
                             />
                           </div>
 
                           {reinstallPasswordError && (
-                            <p className="text-red-400 text-xs">{reinstallPasswordError}</p>
+                            <p className="text-red-500 font-bold text-xs">{reinstallPasswordError}</p>
                           )}
 
                           <button
                             onClick={handleReinstallClick}
                             disabled={reinstalling || !selectedTemplate || vps.status === 'SUSPENDED' || reinstallPassword.length < 8 || reinstallPassword !== reinstallPasswordConfirm}
-                            className="w-full mt-2 flex items-center justify-center gap-2 px-6 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 text-slate-950 text-sm"
+                            className="w-full mt-2 flex items-center justify-center gap-2 px-6 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-all shadow-sm disabled:opacity-50 text-slate-950 text-sm"
                           >
                             {reinstalling ? (
                               <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-slate-950"></div> Rebuilding...</>
@@ -2991,19 +2996,19 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {activeTab === "backups" && (
               <div className="animate-in fade-in duration-500 space-y-6">
                 {/* Backup Quota Widget */}
-                <div className={cn("border rounded-2xl p-6 shadow-lg relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                                    <div className="flex justify-between items-end mb-4 relative z-10">
-                    <h3 className={cn(" font-medium flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                      <ShieldCheck className="w-5 h-5 text-cyan-400" />
+                <div className={cn("border rounded-2xl p-6 shadow-lg relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
+                  <div className="flex justify-between items-end mb-4 relative z-10">
+                    <h3 className={cn("font-bold text-base flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                      <ShieldCheck className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       Offsite Backup Storage
                     </h3>
-                    <span className={cn("text-sm font-mono ", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    <span className={cn("text-sm font-mono font-bold", isDark ? "text-zinc-300" : "text-slate-950")}>
                       {backupQuota > 0 ? (backupUsed / 1024 / 1024 / 1024).toFixed(2) : 0} / {backupQuota} GB
                     </span>
                   </div>
 
                   {/* Backup Progress Bar */}
-                  <div className={cn("w-full h-4 bg-black/40 rounded-full overflow-hidden border relative z-10", isDark ? "border-white/5" : "border-slate-200")}>
+                  <div className={cn("w-full h-4 rounded-full overflow-hidden border relative z-10", isDark ? "bg-black/40 border-white/5" : "bg-slate-100 border-slate-300")}>
                     <div
                       className={cn(
                         "h-full rounded-full flex items-center px-2 transition-all",
@@ -3017,9 +3022,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   {backupQuota === 0 && (
-                    <div className={cn("mt-4 p-3 rounded-xl flex items-start gap-3 border", isDark ? "bg-amber-500/10 border-amber-500/20" : "bg-amber-50 border-amber-200")}>
-                      <ShieldAlert className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-amber-400" : "text-amber-600")} />
-                      <p className={cn("text-sm", isDark ? "text-amber-200" : "text-amber-800")}>
+                    <div className={cn("mt-4 p-3 rounded-xl flex items-start gap-3 border", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-200" : "bg-amber-50 border-amber-300 text-amber-950")}>
+                      <ShieldAlert className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-amber-400" : "text-amber-700")} />
+                      <p className={cn("text-sm", isDark ? "text-amber-200" : "text-amber-950 font-medium")}>
                         You have not purchased the Backup Addon. Upgrade your plan or purchase backup storage to enable offsite backups.
                       </p>
                     </div>
@@ -3029,7 +3034,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <button
                       onClick={handleCreateBackup}
                       disabled={backupQuota === 0 || isBackingUp || vps.status === 'SUSPENDED' || (backupUsed >= backupQuota * 1024 * 1024 * 1024)}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 font-bold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                     >
                       <Archive className="w-4 h-4" />
                       {isBackingUp ? "Creating Backup..." : "Create Backup Now"}
@@ -3039,11 +3044,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                 {/* Automated Backup Schedule */}
                 {backupQuota > 0 && (
-                  <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
-                        <h3 className={cn(" font-medium mb-1", isDark ? "text-white" : "text-slate-900")}>Automated Backup Schedule</h3>
-                        <p className={cn("text-sm ", isDark ? "text-zinc-400" : "text-slate-500")}>Configure how often your server should be backed up automatically. <strong className="text-cyan-400 font-medium">Note: System only keeps a maximum of 2 backups (2 rotations) per VPS. The oldest backup will be automatically deleted.</strong></p>
+                        <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-950")}>Automated Backup Schedule</h3>
+                        <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Configure how often your server should be backed up automatically. <strong className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>Note: System only keeps a maximum of 2 backups (2 rotations) per VPS. The oldest backup will be automatically deleted.</strong></p>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-[150px]">
@@ -3056,13 +3061,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               { value: "WEEKLY", label: "Weekly" },
                               { value: "MONTHLY", label: "Monthly" }
                             ]}
-                            className={cn("rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                            className={cn("rounded-xl px-4 py-2.5 text-sm font-semibold focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 text-slate-950 shadow-sm")}
                           />
                         </div>
                         <button
                           onClick={handleSaveSchedule}
                           disabled={isSettingSchedule}
-                          className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950"
+                          className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-sm font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 text-slate-950"
                         >
                           {isSettingSchedule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Settings className="w-4 h-4" />}
                           Save
@@ -3073,51 +3078,51 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 )}
 
                 {/* Backups List */}
-                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <h3 className={cn("text-lg font-medium  mb-6", isDark ? "text-white" : "text-slate-900")}>Backup Archives</h3>
+                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
+                  <h3 className={cn("text-lg font-bold mb-6", isDark ? "text-white" : "text-slate-950")}>Backup Archives</h3>
 
                   <div className="overflow-x-auto w-full">
                     <table className="w-full text-sm text-left min-w-[600px]">
-                      <thead className={cn("text-xs  uppercase bg-black/20", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <thead className={cn("text-xs uppercase", isDark ? "text-zinc-400 bg-black/20" : "bg-slate-100 text-slate-900 border-b border-slate-300 font-bold")}>
                         <tr>
-                          <th className="px-6 py-4 rounded-tl-xl">Volume Name</th>
-                          <th className="px-6 py-4">Created Date</th>
-                          <th className="px-6 py-4">Size</th>
-                          <th className="px-6 py-4 rounded-tr-xl text-right">Actions</th>
+                          <th className="px-6 py-4 rounded-tl-xl font-bold">Volume Name</th>
+                          <th className="px-6 py-4 font-bold">Created Date</th>
+                          <th className="px-6 py-4 font-bold">Size</th>
+                          <th className="px-6 py-4 rounded-tr-xl text-right font-bold">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {backupsLoading ? (
                           <tr>
-                            <td colSpan={4} className={cn("px-6 py-8 text-center ", isDark ? "text-zinc-500" : "text-slate-400")}>Loading backups...</td>
+                            <td colSpan={4} className={cn("px-6 py-8 text-center", isDark ? "text-zinc-500" : "text-slate-700 font-medium")}>Loading backups...</td>
                           </tr>
                         ) : backups.length === 0 ? (
                           <tr>
-                            <td colSpan={4} className={cn("px-6 py-8 text-center ", isDark ? "text-zinc-500" : "text-slate-400")}>No backups found.</td>
+                            <td colSpan={4} className={cn("px-6 py-8 text-center", isDark ? "text-zinc-500" : "text-slate-700 font-medium")}>No backups found.</td>
                           </tr>
                         ) : (
                           backups.map((backup: any) => (
                             <tr key={backup.volume} className={cn("border-b transition-colors", isDark ? "border-slate-800/60 hover:bg-slate-800/40" : "border-slate-200 hover:bg-slate-50")}>
-                              <td className={cn(isDark ? "text-zinc-300" : "text-slate-600", "px-6 py-4 font-mono text-xs ")}>
+                              <td className={cn(isDark ? "text-zinc-300" : "text-slate-950 font-bold", "px-6 py-4 font-mono text-xs")}>
                                 {backup.volume.split('/').pop()}
                               </td>
-                              <td className={cn(isDark ? "text-zinc-300" : "text-slate-600", "px-6 py-4 ")}>
+                              <td className={cn(isDark ? "text-zinc-400" : "text-slate-700 font-medium", "px-6 py-4")}>
                                 {new Date(backup.ctime * 1000).toLocaleString()}
                               </td>
-                              <td className="px-6 py-4 font-mono text-xs text-cyan-400">
+                              <td className={cn("px-6 py-4 font-mono text-xs font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>
                                 {formatBytesPerSecond(backup.size).replace('/s', '')}
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <div className="flex justify-end gap-2">
                                   <button
                                     onClick={() => { setSelectedBackup(backup.volume); setShowRestoreModal(true); }}
-                                    className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-blue-400 border border-blue-500/20 rounded-lg text-xs font-bold transition-all"
+                                    className={cn("px-3 py-1.5 rounded-lg text-xs font-bold border transition-all", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border-cyan-300")}
                                   >
                                     Restore
                                   </button>
                                   <button
                                     onClick={() => { setSelectedBackup(backup.volume); setShowDeleteModal(true); }}
-                                    className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs font-bold transition-all"
+                                    className={cn("px-3 py-1.5 rounded-lg text-xs font-bold border transition-all", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-100 hover:bg-red-200 text-red-950 border-red-300")}
                                   >
                                     Delete
                                   </button>
@@ -3136,23 +3141,23 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* SNAPSHOTS TAB */}
             {activeTab === "snapshots" && (
               <div className="animate-in fade-in duration-500 space-y-6">
-                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                    <div className={cn("text-lg font-medium flex flex-wrap items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                      <Copy className="w-5 h-5 text-cyan-400 shrink-0" />
+                    <div className={cn("text-lg font-bold flex flex-wrap items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                      <Copy className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       <span>VM Snapshots</span>
                       <button 
                         onClick={() => fetchSnapshots(true)}
                         disabled={snapshotsLoading}
                         className={cn("group p-1.5 sm:p-2 rounded-lg transition-all shrink-0 border ml-1", 
                           snapshotsLoading ? "opacity-50" : "",
-                          isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-500")}
+                          isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-800")}
                         title="Refresh Snapshots"
                       >
                         <RefreshCw className={cn("w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180", snapshotsLoading && "animate-spin")} />
                       </button>
                       {['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock) && (
-                        <span className="px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 text-xs font-medium border border-orange-500/20 animate-pulse flex items-center gap-1.5 whitespace-nowrap mt-2 sm:mt-0">
+                        <span className={cn("px-2.5 py-1 rounded-full text-xs font-bold border animate-pulse flex items-center gap-1.5 whitespace-nowrap mt-2 sm:mt-0", isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-orange-100 text-orange-950 border-orange-300")}>
                           <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" /> 
                           {status?.lock === 'rollback' ? 'Rolling back...' : status?.lock === 'snapshot-delete' ? 'Deleting...' : 'Processing Snapshot...'}
                         </span>
@@ -3161,7 +3166,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     <button
                       onClick={() => setShowSnapshotModal(true)}
                       disabled={snapshots.length >= 2 || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
-                      className="px-4 py-2.5 md:py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 w-full md:w-auto shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 shadow-sm"
+                      className="px-4 py-2.5 md:py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 w-full md:w-auto shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 shadow-sm"
                     >
                       <Plus className="w-4 h-4 shrink-0" />
                       Take Snapshot
@@ -3171,44 +3176,44 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   <div className="w-full overflow-x-auto pb-4">
                     <table className="w-full text-left text-sm min-w-[700px]">
                       <thead>
-                        <tr className={cn("border-b", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
-                          <th className="pb-3 font-medium whitespace-nowrap px-4 sm:px-0">Name</th>
-                          <th className="pb-3 font-medium whitespace-nowrap px-4 sm:px-0">Description</th>
-                          <th className="pb-3 font-medium whitespace-nowrap px-4 sm:px-0">RAM State</th>
-                          <th className="pb-3 font-medium whitespace-nowrap px-4 sm:px-0">Time</th>
-                          <th className="pb-3 font-medium text-right whitespace-nowrap px-4 sm:px-0">Actions</th>
+                        <tr className={cn("border-b", isDark ? "border-white/10 text-zinc-400" : "bg-slate-100 border-slate-300 text-slate-900")}>
+                          <th className="py-3 px-4 font-bold whitespace-nowrap">Name</th>
+                          <th className="py-3 px-4 font-bold whitespace-nowrap">Description</th>
+                          <th className="py-3 px-4 font-bold whitespace-nowrap">RAM State</th>
+                          <th className="py-3 px-4 font-bold whitespace-nowrap">Time</th>
+                          <th className="py-3 px-4 font-bold text-right whitespace-nowrap">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-100")}>
+                      <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-slate-200")}>
                         {snapshotsLoading ? (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center text-zinc-400">Loading snapshots...</td>
+                            <td colSpan={5} className={cn("py-8 text-center", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Loading snapshots...</td>
                           </tr>
                         ) : snapshots.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center text-zinc-500">No snapshots found. Max 2 snapshots allowed.</td>
+                            <td colSpan={5} className={cn("py-8 text-center", isDark ? "text-zinc-500" : "text-slate-700 font-medium")}>No snapshots found. Max 2 snapshots allowed.</td>
                           </tr>
                         ) : (
                           snapshots.map((snap, i) => (
-                            <tr key={i} className="group">
-                              <td className={cn("py-4 px-4 sm:px-0", isDark ? "text-zinc-300" : "text-slate-700")}>{snap.name}</td>
-                              <td className={cn("py-4 px-4 sm:px-0", isDark ? "text-zinc-400" : "text-slate-500")}>{snap.description || '-'}</td>
-                              <td className="py-4 px-4 sm:px-0">
+                            <tr key={i} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                              <td className={cn("py-4 px-4 font-bold", isDark ? "text-zinc-300" : "text-slate-950")}>{snap.name}</td>
+                              <td className={cn("py-4 px-4 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>{snap.description || '-'}</td>
+                              <td className="py-4 px-4">
                                 {snap.vmstate ? (
-                                  <span className={cn("px-2 py-1 text-xs font-medium rounded-full", isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-600 border border-emerald-200")}>Yes</span>
+                                  <span className={cn("px-2.5 py-1 text-xs font-bold rounded-full", isDark ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-emerald-100 text-emerald-950 border border-emerald-300")}>Yes</span>
                                 ) : (
-                                  <span className={cn("px-2 py-1 text-xs font-medium rounded-full", isDark ? "bg-zinc-500/10 text-zinc-400" : "bg-slate-50 text-slate-500 border border-slate-200")}>No</span>
+                                  <span className={cn("px-2.5 py-1 text-xs font-bold rounded-full", isDark ? "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20" : "bg-slate-100 text-slate-800 border border-slate-300")}>No</span>
                                 )}
                               </td>
-                              <td className={cn("py-4 px-4 sm:px-0", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              <td className={cn("py-4 px-4 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                                 {snap.snaptime ? new Date(snap.snaptime * 1000).toLocaleString() : '-'}
                               </td>
-                              <td className="py-4 px-4 sm:px-0 text-right">
+                              <td className="py-4 px-4 text-right">
                                 <div className="flex justify-end gap-2">
                                   <button
                                     onClick={() => setShowRollbackModal(snap.name)}
                                     disabled={snapshotActionLoading === snap.name || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
-                                    className="px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-xs font-medium disabled:opacity-50"
+                                    className={cn("px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border disabled:opacity-50", isDark ? "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 hover:bg-cyan-200 border-cyan-300")}
                                   >
                                     Rollback
                                   </button>
@@ -3218,14 +3223,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                       setShowEditSnapshotModal(snap.name);
                                     }}
                                     disabled={snapshotActionLoading === snap.name || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
-                                    className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors text-xs font-medium disabled:opacity-50"
+                                    className={cn("px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border disabled:opacity-50", isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20" : "bg-emerald-100 text-emerald-950 hover:bg-emerald-200 border-emerald-300")}
                                   >
                                     Edit
                                   </button>
                                   <button
                                     onClick={() => setShowDeleteSnapshotModal(snap.name)}
                                     disabled={snapshotActionLoading === snap.name || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
-                                    className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-medium disabled:opacity-50"
+                                    className={cn("px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border disabled:opacity-50", isDark ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20" : "bg-red-100 text-red-950 hover:bg-red-200 border-red-300")}
                                   >
                                     Delete
                                   </button>
@@ -3249,10 +3254,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* TASKS TAB */}
             {activeTab === "tasks" && (
               <div className="animate-in fade-in duration-500 space-y-6">
-                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h3 className={cn("text-lg font-medium  flex items-center gap-2 whitespace-nowrap shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                      <Terminal className="w-5 h-5 text-cyan-400" />
+                    <h3 className={cn("text-lg font-bold flex items-center gap-2 whitespace-nowrap shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                      <Terminal className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       Tasks and Logs
                     </h3>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -3261,11 +3266,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         placeholder="Search logs..."
                         value={taskFilter}
                         onChange={(e) => { setTaskFilter(e.target.value); setTaskPage(1); }}
-                        className={cn("border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500/50 flex-1 sm:w-48 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-slate-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                        className={cn("border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500/50 flex-1 sm:w-48 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-slate-500" : "bg-slate-50 border-slate-300 text-slate-950 font-medium placeholder:text-slate-400")}
                       />
                       <button
                         onClick={fetchTasks}
-                        className={cn("group p-2 bg-white/5 hover:bg-white/10 rounded-lg  transition-colors shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}
+                        className={cn("group p-2 rounded-lg transition-colors shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300")}
                         title="Refresh Tasks"
                       >
                         <RefreshCw className="w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180" />
@@ -3284,41 +3289,41 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     return (
                       <div className="space-y-4">
                         {filteredTasks.length === 0 ? (
-                          <div className={cn("text-center py-8  bg-white/5 rounded-xl border border-white/10", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <div className={cn("text-center py-8 rounded-xl border font-medium", isDark ? "text-zinc-500 bg-white/5 border-white/10" : "text-slate-700 bg-slate-50 border-slate-300")}>
                             {tasks.length === 0 ? "No recent tasks found." : "No tasks match your search filter."}
                           </div>
                         ) : (
                           <>
                             {filteredTasks.slice((taskPage - 1) * 10, taskPage * 10).map((task: any) => (
                               <div key={task.upid}>
-                                <div className={cn("p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-white/10", isDark ? "bg-[#060b14] border-slate-800/80 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
+                                <div className={cn("p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all", isDark ? "bg-[#060b14] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-300 hover:border-cyan-500 shadow-xs")}>
                                   <div>
                                     <div className="flex items-center gap-2 mb-1.5">
-                                      <span className={cn("font-mono text-[10px] sm:text-xs  bg-black/40 px-2 py-0.5 rounded truncate max-w-[200px] sm:max-w-xs", isDark ? "text-zinc-500" : "text-slate-400")}>{task.upid}</span>
+                                      <span className={cn("font-mono text-[10px] sm:text-xs px-2 py-0.5 rounded truncate max-w-[200px] sm:max-w-xs", isDark ? "bg-black/40 text-zinc-400" : "bg-slate-100 text-slate-800 border border-slate-300 font-bold")}>{task.upid}</span>
                                       <span className={cn(
                                         "px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold tracking-wide uppercase",
-                                        task.status === "OK" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" :
-                                          task.status ? "bg-red-500/10 text-red-400 border border-red-500/20" :
-                                            "bg-cyan-500/10 text-blue-400 border border-blue-500/20 animate-pulse"
+                                        task.status === "OK" ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border border-cyan-300") :
+                                          task.status ? (isDark ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-red-100 text-red-950 border border-red-300") :
+                                            (isDark ? "bg-cyan-500/10 text-blue-400 border border-blue-500/20 animate-pulse" : "bg-cyan-100 text-cyan-950 border border-cyan-300 animate-pulse")
                                       )}>
                                         {task.status || "RUNNING"}
                                       </span>
                                     </div>
-                                    <p className={cn(" text-sm font-medium capitalize flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                                    <p className={cn("text-sm font-bold capitalize flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
                                       {task.type}
                                       {!task.status && <span className="flex h-2 w-2 rounded-full bg-cyan-500"></span>}
                                     </p>
                                   </div>
                                   <div className="text-left md:text-right shrink-0">
-                                    <div className={cn("text-xs ", isDark ? "text-zinc-400" : "text-slate-500")}>Started: {new Date(task.starttime * 1000).toLocaleString()}</div>
+                                    <div className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Started: {new Date(task.starttime * 1000).toLocaleString()}</div>
                                     {task.endtime && (
-                                      <div className={cn("text-xs  mt-1 font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                                      <div className={cn("text-xs mt-1 font-mono font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                                         Duration: {task.endtime - task.starttime}s
                                       </div>
                                     )}
                                     <button
                                       onClick={() => setExpandedTaskUpid(expandedTaskUpid === task.upid ? null : task.upid)}
-                                      className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 underline font-medium"
+                                      className={cn("mt-2 text-xs underline font-bold transition-colors", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-800 hover:text-cyan-950")}
                                     >
                                       {expandedTaskUpid === task.upid ? "Hide Log" : "View Log"}
                                     </button>
@@ -3326,7 +3331,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 </div>
                                 {/* Log Viewer Expandable */}
                                 {expandedTaskUpid === task.upid && (
-                                  <div className={cn("mt-2 p-4 border rounded-xl animate-in fade-in slide-in-from-top-2", isDark ? "bg-[#040810] border-slate-800" : "bg-slate-100 border-slate-200")}>
+                                  <div className={cn("mt-2 p-4 border rounded-xl animate-in fade-in slide-in-from-top-2", isDark ? "bg-[#040810] border-slate-800" : "bg-slate-50 border-slate-300")}>
                                     {/* Progress Bar (if vzdump or restore) */}
                                     {(() => {
                                       const logStr = taskLog.map(l => l.t).join('\n');
@@ -3347,18 +3352,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                         return (
                                           <div className="mb-4">
                                             <div className="flex justify-between items-center mb-1.5">
-                                              <div className={cn("flex items-center gap-2 text-xs font-medium ", isDark ? "text-zinc-400" : "text-slate-500")}>
-                                                <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                                              <div className={cn("flex items-center gap-2 text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-800")}>
+                                                <Activity className="w-3.5 h-3.5 text-cyan-500" />
                                                 Task Progress
                                               </div>
                                               <div className="flex items-center gap-3">
-                                                <span className="text-cyan-400 text-xs font-bold">{progress}%</span>
-                                                <button onClick={() => fetchExpandedLog(true)} className={cn("p-1 hover:bg-white/10 rounded ", isDark ? "text-zinc-400" : "text-slate-500")} title="Refresh Log">
+                                                <span className={cn("text-xs font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>{progress}%</span>
+                                                <button onClick={() => fetchExpandedLog(true)} className={cn("p-1 rounded", isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-slate-200 text-slate-700")} title="Refresh Log">
                                                   <RefreshCw className={cn("w-3.5 h-3.5", taskLogLoading && "animate-spin")} />
                                                 </button>
                                               </div>
                                             </div>
-                                            <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                                            <div className="w-full bg-slate-200 dark:bg-white/5 rounded-full h-1.5 overflow-hidden">
                                               <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
                                             </div>
                                           </div>
@@ -3366,7 +3371,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                       }
                                       return (
                                         <div className="flex justify-end mb-2">
-                                          <button onClick={() => fetchExpandedLog(true)} className={cn("p-1 hover:bg-white/10 rounded  flex items-center gap-2 text-xs", isDark ? "text-zinc-400" : "text-slate-500")} title="Refresh Log">
+                                          <button onClick={() => fetchExpandedLog(true)} className={cn("px-2.5 py-1 rounded flex items-center gap-2 text-xs font-semibold", isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-slate-200 text-slate-800 border border-slate-300 bg-white")} title="Refresh Log">
                                             <RefreshCw className={cn("w-3 h-3", taskLogLoading && "animate-spin")} />
                                             Refresh Log
                                           </button>
@@ -3374,14 +3379,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                       );
                                     })()}
 
-                                    <div ref={logContainerRef} className={cn(isDark ? "text-slate-300 bg-[#020409] border border-slate-800/80" : "text-slate-700 bg-white border border-slate-200", "rounded-lg p-3 overflow-y-auto max-h-64 font-mono text-xs scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent")}>
+                                    <div ref={logContainerRef} className={cn(isDark ? "text-slate-300 bg-[#020409] border border-slate-800/80" : "text-slate-900 bg-white border border-slate-300", "rounded-lg p-3 overflow-y-auto max-h-64 font-mono text-xs scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent")}>
                                       {taskLogLoading && taskLog.length === 0 ? (
-                                        <div className={cn("flex items-center gap-2 ", isDark ? "text-zinc-500" : "text-slate-400")}>
+                                        <div className={cn("flex items-center gap-2", isDark ? "text-zinc-500" : "text-slate-700 font-medium")}>
                                           <RefreshCw className="w-3 h-3 animate-spin" />
                                           Loading log...
                                         </div>
                                       ) : taskLog.length === 0 ? (
-                                        <span className={cn("", isDark ? "text-zinc-500" : "text-slate-400")}>No log output yet.</span>
+                                        <span className={cn(isDark ? "text-zinc-500" : "text-slate-700 font-medium")}>No log output yet.</span>
                                       ) : (
                                         taskLog.map((line, i) => (
                                           <div key={i} className="whitespace-pre-wrap">{line.t}</div>
@@ -3395,22 +3400,22 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                             {/* Pagination Controls */}
                             {filteredTasks.length > 10 && (
-                              <div className={cn("flex items-center justify-between pt-4 border-t", isDark ? "border-white/5" : "border-slate-200")}>
-                                <span className={cn("text-xs ", isDark ? "text-zinc-500" : "text-slate-400")}>
+                              <div className={cn("flex items-center justify-between pt-4 border-t", isDark ? "border-white/5" : "border-slate-300")}>
+                                <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                                   Showing {(taskPage - 1) * 10 + 1} to {Math.min(taskPage * 10, filteredTasks.length)} of {filteredTasks.length}
                                 </span>
                                 <div className="flex gap-2">
                                   <button
                                     onClick={() => setTaskPage(Math.max(1, taskPage - 1))}
                                     disabled={taskPage === 1}
-                                    className={cn("px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs  disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                                    className={cn("px-3 py-1 rounded-lg text-xs font-bold disabled:opacity-50 transition-colors", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300")}
                                   >
                                     Previous
                                   </button>
                                   <button
                                     onClick={() => setTaskPage(taskPage + 1)}
                                     disabled={taskPage * 10 >= filteredTasks.length}
-                                    className={cn("px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs  disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                                    className={cn("px-3 py-1 rounded-lg text-xs font-bold disabled:opacity-50 transition-colors", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300")}
                                   >
                                     Next
                                   </button>
@@ -3429,14 +3434,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* ALERTS TAB */}
             {activeTab === "alerts" && (
               <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
-                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("border rounded-2xl p-6 shadow-lg", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm")}>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
-                      <AlertTriangle className="w-5 h-5 text-cyan-400" />
+                      <AlertTriangle className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                     </div>
                     <div>
-                      <h3 className={cn(" font-medium text-lg", isDark ? "text-white" : "text-slate-900")}>Resource Alerts (CloudWatch-like)</h3>
-                      <p className={cn(" text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Receive email notifications when resource usage exceeds the defined threshold. Checks are performed every 5 minutes.</p>
+                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Resource Alerts (CloudWatch-like)</h3>
+                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>Receive email notifications when resource usage exceeds the defined threshold. Checks are performed every 5 minutes.</p>
                     </div>
                   </div>
 
@@ -3447,9 +3452,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   ) : (
                     <div className="mt-8 space-y-8">
                       {alertRules.map((rule, index) => (
-                        <div key={rule.metric} className={cn("border", isDark ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-200", "  rounded-xl p-5 relative overflow-hidden transition-all hover:border-cyan-500/30")}>
-                          {/* Background Glow */}
-                                                    
+                        <div key={rule.metric} className={cn("border rounded-xl p-5 relative overflow-hidden transition-all", isDark ? "bg-white/5 border-white/5 hover:border-cyan-500/30" : "bg-slate-50 border-slate-300 hover:border-cyan-500 shadow-xs")}>
                           <div className="flex flex-col sm:flex-row gap-6 relative z-10">
                             {/* Toggle & Title */}
                             <div className="sm:w-1/4 flex flex-col justify-center">
@@ -3465,11 +3468,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                       setAlertRules(newRules);
                                     }}
                                   />
-                                  <div className="w-11 h-6 bg-black/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                  <div className="w-11 h-6 bg-slate-300 dark:bg-black/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
                                 </label>
                                 <div>
-                                  <h4 className={cn(" font-bold", isDark ? "text-white" : "text-slate-900")}>{rule.metric}</h4>
-                                  <p className={cn("text-xs ", isDark ? "text-zinc-500" : "text-slate-400")}>{rule.isEnabled ? "Monitoring Active" : "Disabled"}</p>
+                                  <h4 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>{rule.metric}</h4>
+                                  <p className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>{rule.isEnabled ? "Monitoring Active" : "Disabled"}</p>
                                 </div>
                               </div>
                             </div>
@@ -3479,8 +3482,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               {/* Threshold Slider */}
                               <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                  <label className={cn("text-sm  font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Alert Threshold (%)</label>
-                                  <span className="text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded text-sm">{rule.threshold}%</span>
+                                  <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Alert Threshold (%)</label>
+                                  <span className={cn("font-bold px-2 py-0.5 rounded text-sm", isDark ? "text-cyan-400 bg-cyan-500/10" : "text-cyan-950 bg-cyan-100 border border-cyan-300")}>{rule.threshold}%</span>
                                 </div>
                                 <input 
                                   type="range" 
@@ -3491,9 +3494,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                     newRules[index].threshold = parseInt(e.target.value);
                                     setAlertRules(newRules);
                                   }}
-                                  className={cn("w-full", isDark ? "accent-cyan-500" : "accent-cyan-600", "w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer ")}
+                                  className={cn("w-full h-2 rounded-lg appearance-none cursor-pointer", isDark ? "accent-cyan-500 bg-black/40" : "accent-cyan-600 bg-slate-200")}
                                 />
-                                <div className={cn("flex justify-between text-xs font-mono", isDark ? "text-zinc-600" : "text-slate-900")}>
+                                <div className={cn("flex justify-between text-xs font-mono font-bold", isDark ? "text-zinc-400" : "text-slate-700")}>
                                   <span>1%</span>
                                   <span>100%</span>
                                 </div>
@@ -3501,7 +3504,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                               {/* Emails Input */}
                               <div className="space-y-2">
-                                <label className={cn("text-sm  font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Notification Emails</label>
+                                <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Notification Emails</label>
                                 <input 
                                   type="text" 
                                   placeholder="e.g. ops@company.com, admin@example.com"
@@ -3511,20 +3514,20 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                     newRules[index].notifyEmails = e.target.value;
                                     setAlertRules(newRules);
                                   }}
-                                  className={cn("w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm  focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "text-white" : "text-slate-900")}
+                                  className={cn("w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border border-slate-800 text-white placeholder:text-slate-500" : "bg-white border border-slate-300 text-slate-950 font-medium placeholder:text-slate-400")}
                                 />
-                                <p className={cn("text-xs ", isDark ? "text-zinc-500" : "text-slate-400")}>Separate multiple emails with commas. Leave blank to use your account email.</p>
+                                <p className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Separate multiple emails with commas. Leave blank to use your account email.</p>
                               </div>
                             </div>
                           </div>
                         </div>
                       ))}
 
-                      <div className={cn("pt-6 border-t flex justify-end", isDark ? "border-white/10" : "border-slate-200")}>
+                      <div className={cn("pt-6 border-t flex justify-end", isDark ? "border-white/10" : "border-slate-300")}>
                         <button
                           onClick={handleSaveAlerts}
                           disabled={isSavingAlerts}
-                          className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg font-semibold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 text-slate-950 text-sm"
+                          className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg font-bold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 text-slate-950 text-sm"
                         >
                           {isSavingAlerts ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                           {isSavingAlerts ? "Saving..." : "Save Configuration"}
@@ -3543,10 +3546,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       {/* Snapshot Modal */}
       {showSnapshotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200">
-          <div className={cn("relative w-full max-w-lg rounded-2xl p-6 overflow-hidden animate-in zoom-in-95 duration-200 shadow-xl", isDark ? "bg-[#0b1322] border border-slate-800" : "bg-white border border-slate-200")}>
+          <div className={cn("relative w-full max-w-lg rounded-2xl p-6 overflow-hidden animate-in zoom-in-95 duration-200 shadow-xl", isDark ? "bg-[#0b1322] border border-slate-800" : "bg-white border border-slate-300")}>
             <div className="flex justify-between items-center mb-5">
-              <h3 className={cn("text-xl font-extrabold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Copy className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                <Copy className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 Take Snapshot
               </h3>
               <button onClick={() => setShowSnapshotModal(false)} className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100")}>
@@ -3556,33 +3559,33 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             
             <div className="space-y-4">
               <div>
-                <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>Snapshot Name <span className="text-red-500">*</span></label>
+                <label className={cn("block text-sm font-bold mb-1.5", isDark ? "text-zinc-300" : "text-slate-900")}>Snapshot Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={snapshotName}
                   onChange={(e) => setSnapshotName(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
                   placeholder="e.g. beforeupdate (no spaces)"
                   className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2", 
-                    isDark ? "bg-[#0c1b2b] border-white/5 text-white placeholder-zinc-500 focus:ring-cyan-500/30" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-cyan-500 focus:border-cyan-500")}
+                    isDark ? "bg-[#0c1b2b] border-white/10 text-white placeholder-zinc-500 focus:ring-cyan-500/30" : "bg-white border-slate-300 text-slate-950 font-medium placeholder-slate-400 focus:ring-cyan-500 focus:border-cyan-500")}
                   disabled={isSnapshotting}
                 />
-                <p className={cn("text-xs mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Only alphanumeric characters allowed.</p>
+                <p className={cn("text-xs mt-1.5 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Only alphanumeric characters allowed.</p>
               </div>
 
               <div>
-                <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>Description (Optional)</label>
+                <label className={cn("block text-sm font-bold mb-1.5", isDark ? "text-zinc-300" : "text-slate-900")}>Description (Optional)</label>
                 <textarea
                   value={snapshotDesc}
                   onChange={(e) => setSnapshotDesc(e.target.value)}
                   placeholder="Describe this snapshot..."
                   className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 resize-none h-20", 
-                    isDark ? "bg-[#0c1b2b] border-white/5 text-white placeholder-zinc-500 focus:ring-cyan-500/30" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-cyan-500 focus:border-cyan-500")}
+                    isDark ? "bg-[#0c1b2b] border-white/10 text-white placeholder-zinc-500 focus:ring-cyan-500/30" : "bg-white border-slate-300 text-slate-950 font-medium placeholder-slate-400 focus:ring-cyan-500 focus:border-cyan-500")}
                   disabled={isSnapshotting}
                 ></textarea>
               </div>
 
               <label className={cn("flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-colors", 
-                isDark ? "bg-white/5 border-white/5 hover:border-cyan-500/50" : "bg-slate-50 border-slate-200 hover:border-cyan-400"
+                isDark ? "bg-white/5 border-white/5 hover:border-cyan-500/50" : "bg-slate-50 border-slate-300 hover:border-cyan-400"
               )}>
                 <div className="relative flex items-center justify-center shrink-0">
                   <input
@@ -3599,8 +3602,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   <CheckCircle className={cn("absolute w-3.5 h-3.5 text-white pointer-events-none transition-transform duration-200", snapshotIncludeRam ? "scale-100 opacity-100" : "scale-50 opacity-0")} />
                 </div>
                 <div className="flex flex-col">
-                  <span className={cn("text-sm font-medium", isDark ? "text-zinc-200" : "text-slate-800")}>Include RAM</span>
-                  <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Saves the active memory state (takes longer)</span>
+                  <span className={cn("text-sm font-bold", isDark ? "text-zinc-200" : "text-slate-950")}>Include RAM</span>
+                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Saves the active memory state (takes longer)</span>
                 </div>
               </label>
 
@@ -3608,14 +3611,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <button
                   onClick={() => setShowSnapshotModal(false)}
                   disabled={isSnapshotting}
-                  className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                  className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={takeSnapshot}
                   disabled={isSnapshotting || !snapshotName}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                 >
                   {isSnapshotting ? (
                     <><RefreshCw className="w-4 h-4 animate-spin" /> Processing...</>
@@ -3632,10 +3635,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       {/* Edit Snapshot Modal */}
       {showEditSnapshotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200">
-          <div className={cn("relative w-full max-w-lg rounded-2xl p-6 overflow-hidden animate-in zoom-in-95 duration-200 shadow-xl", isDark ? "bg-[#0b1322] border border-slate-800" : "bg-white border border-slate-200")}>
+          <div className={cn("relative w-full max-w-lg rounded-2xl p-6 overflow-hidden animate-in zoom-in-95 duration-200 shadow-xl", isDark ? "bg-[#0b1322] border border-slate-800" : "bg-white border border-slate-300")}>
             <div className="flex justify-between items-center mb-5">
-              <h3 className={cn("text-xl font-extrabold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Settings2 className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+              <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                <Settings2 className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 Edit Snapshot: {showEditSnapshotModal}
               </h3>
               <button onClick={() => setShowEditSnapshotModal(null)} className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100")}>
@@ -3645,13 +3648,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             
             <div className="space-y-4">
               <div>
-                <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>Description</label>
+                <label className={cn("block text-sm font-bold mb-1.5", isDark ? "text-zinc-300" : "text-slate-900")}>Description</label>
                 <textarea
                   value={editSnapshotDesc}
                   onChange={(e) => setEditSnapshotDesc(e.target.value)}
                   placeholder="Describe this snapshot..."
                   className={cn("w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-1 resize-none h-20", 
-                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:ring-cyan-500 focus:border-cyan-500")}
+                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500 focus:border-cyan-500" : "bg-white border-slate-300 text-slate-950 font-medium placeholder-slate-400 focus:ring-cyan-500 focus:border-cyan-500")}
                   disabled={snapshotActionLoading === showEditSnapshotModal}
                 ></textarea>
               </div>
@@ -3660,14 +3663,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <button
                   onClick={() => setShowEditSnapshotModal(null)}
                   disabled={snapshotActionLoading === showEditSnapshotModal}
-                  className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                  className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-800 border-slate-300")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={updateSnapshotDesc}
                   disabled={snapshotActionLoading === showEditSnapshotModal}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                 >
                   {snapshotActionLoading === showEditSnapshotModal ? (
                     <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
@@ -3792,9 +3795,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
       {showFirewallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-            <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/5" : "border-slate-200")}>
-              <h3 className={cn("text-xl font-bold  flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300")}>
+            <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/5" : "border-slate-300")}>
+              <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
                 <ShieldCheck className="w-5 h-5 text-cyan-500" />
                 {editingRule ? 'Edit Firewall Rule' : 'Add Firewall Rule'}
               </h3>
@@ -3808,7 +3811,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
             <form onSubmit={handleSaveFirewallRule} className="p-6 space-y-4 overflow-y-auto">
               <div className="space-y-2">
-                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Direction / Type</label>
+                <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Direction / Type</label>
                 <Select
                   value={ruleType}
                   onChange={setRuleType}
@@ -3817,12 +3820,12 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     { value: "out", label: "Outbound (Outgoing Traffic)" }
                   ]}
                   placeholder="Select Direction"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm transition-colors", isDark ? "bg-black/40 border-white/10 text-white hover:border-cyan-500/50" : "bg-white border-slate-300 text-slate-900 hover:border-cyan-500")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white hover:border-cyan-500/50" : "bg-white border-slate-300 text-slate-950 font-medium hover:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Protocol</label>
+                <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Protocol</label>
                 <Select
                   value={ruleProto}
                   onChange={setRuleProto}
@@ -3833,55 +3836,55 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     { value: "", label: "ALL" }
                   ]}
                   placeholder="Select Protocol"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm transition-colors", isDark ? "bg-black/40 border-white/10 text-white hover:border-cyan-500/50" : "bg-white border-slate-300 text-slate-900 hover:border-cyan-500")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white hover:border-cyan-500/50" : "bg-white border-slate-300 text-slate-950 font-medium hover:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Port Range</label>
+                <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Port Range</label>
                 <input
                   type="text"
                   value={rulePort}
                   onChange={(e) => setRulePort(e.target.value)}
                   placeholder="e.g. 22, 80, 443, 8000:9000 (leave blank for ALL)"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Source IP / CIDR</label>
+                <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Source IP / CIDR</label>
                 <input
                   type="text"
                   value={ruleSource}
                   onChange={(e) => setRuleSource(e.target.value)}
                   placeholder="e.g. 192.168.1.1 or 10.0.0.0/24 (leave blank for 0.0.0.0/0)"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Description</label>
+                <label className={cn("text-sm font-bold", isDark ? "text-zinc-300" : "text-slate-900")}>Description</label>
                 <input
                   type="text"
                   value={ruleComment}
                   onChange={(e) => setRuleComment(e.target.value)}
                   placeholder="e.g. Allow SSH from Home"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-black/40 border-white/10 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
                 />
               </div>
 
-              <div className={cn("pt-4 flex items-center justify-end gap-3 border-t mt-6", isDark ? "border-white/5" : "border-slate-200")}>
+              <div className={cn("pt-4 flex items-center justify-end gap-3 border-t mt-6", isDark ? "border-white/5" : "border-slate-300")}>
                 <button
                   type="button"
                   onClick={() => setShowFirewallModal(false)}
-                  className={cn("px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors", isDark ? "text-zinc-400 hover:text-white border-slate-800 hover:bg-white/5" : "text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50")}
+                  className={cn("px-4 py-2.5 rounded-lg text-sm font-bold border transition-colors", isDark ? "text-zinc-400 hover:text-white border-slate-800 hover:bg-white/5" : "text-slate-800 hover:text-slate-950 border-slate-300 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingRule}
-                  className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-colors flex items-center gap-2 text-slate-950 shadow-sm"
+                  className="px-5 py-2.5 rounded-lg text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-colors flex items-center gap-2 text-slate-950 shadow-sm"
                 >
                   {isSavingRule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   {isSavingRule ? 'Saving...' : 'Save Rule'}
