@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { Readable } from "stream";
 import {
-  uploadToS3,
+  uploadStreamToS3,
   getS3PresignedDownloadUrl,
-  uploadToGoogleDrive,
+  streamUploadToGoogleDrive,
   deleteFromS3,
   deleteFromGoogleDrive
 } from "@/lib/cloud-storage";
@@ -174,20 +175,23 @@ export async function POST(
           throw new Error(`Failed to download backup stream from Proxmox (${proxmoxRes.status}): ${errText}`);
         }
 
-        // Buffer the stream for reliable cloud upload
-        const arrayBuf = await proxmoxRes.arrayBuffer();
-        const fileBuffer = Buffer.from(arrayBuf);
+        if (!proxmoxRes.body) {
+          throw new Error("Proxmox response body stream is empty");
+        }
+
+        // Memory safe: Convert Web ReadableStream to Node.js Readable stream
+        // Pipes chunks directly to destination without holding the entire file in RAM
+        const proxmoxStream = Readable.fromWeb(proxmoxRes.body as any);
 
         let finalDownloadUrl: string | null = null;
-        let finalTargetKey = `${config.pathPrefix || `vps-${vps.vmid}`}/${realFilename}`;
+        let finalTargetKey = `${config.pathPrefix || `vps-${vmid}`}/${realFilename}`;
 
-        // Step 5: Upload to target provider
+        // Step 5: Upload to target provider via memory-safe streams
         if (config.provider === "R2" || config.provider === "S3") {
-          await uploadToS3(config, {
+          await uploadStreamToS3(config, {
             key: finalTargetKey,
-            body: fileBuffer,
-            contentType: "application/octet-stream",
-            contentLength: fileBuffer.length
+            body: proxmoxStream,
+            contentType: "application/octet-stream"
           });
 
           // Generate initial presigned URL
@@ -197,9 +201,10 @@ export async function POST(
             finalDownloadUrl = null;
           }
         } else if (config.provider === "GDRIVE") {
-          const driveResult = await uploadToGoogleDrive(config, {
+          const driveResult = await streamUploadToGoogleDrive(config, {
             filename: realFilename,
-            buffer: fileBuffer,
+            stream: proxmoxStream,
+            contentLength: Number(backupFileSize),
             mimeType: "application/octet-stream"
           });
           finalTargetKey = driveResult.fileId;
@@ -213,7 +218,7 @@ export async function POST(
             filename: realFilename,
             targetKey: finalTargetKey,
             downloadUrl: finalDownloadUrl,
-            fileSize: BigInt(fileBuffer.length),
+            fileSize: backupFileSize,
             status: "COMPLETED",
             error: null
           }

@@ -6,6 +6,7 @@ import {
   GetObjectCommand,
   ListObjectsV2Command
 } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 
@@ -78,6 +79,37 @@ export async function testS3Storage(config: CloudStorageConfig): Promise<{ succe
       message: `Connection failed: ${errorMsg}`
     };
   }
+}
+
+/**
+ * Stream upload to S3 / Cloudflare R2 (Memory safe: only holds ~10MB buffer chunks)
+ */
+export async function uploadStreamToS3(
+  config: CloudStorageConfig,
+  params: {
+    key: string;
+    body: any;
+    contentType?: string;
+  }
+): Promise<{ success: boolean; key: string }> {
+  const client = getS3Client(config);
+  const bucket = config.bucket?.trim();
+  if (!bucket) throw new Error("Bucket name is missing");
+
+  const parallelUploads3 = new Upload({
+    client,
+    params: {
+      Bucket: bucket,
+      Key: params.key,
+      Body: params.body,
+      ContentType: params.contentType || "application/octet-stream"
+    },
+    queueSize: 4,
+    partSize: 10 * 1024 * 1024 // 10MB chunk size
+  });
+
+  await parallelUploads3.done();
+  return { success: true, key: params.key };
 }
 
 /**
@@ -262,6 +294,81 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
       message: `Google Drive connection failed: ${err.message || String(err)}`
     };
   }
+}
+
+/**
+ * Stream file to Google Drive using Resumable Upload API
+ * Memory safe: streams data chunks directly without buffering full file in RAM
+ */
+export async function streamUploadToGoogleDrive(
+  config: CloudStorageConfig,
+  params: {
+    filename: string;
+    stream: any;
+    contentLength: number;
+    mimeType?: string;
+  }
+): Promise<{ success: boolean; fileId: string; webViewLink?: string }> {
+  const token = await getGoogleDriveAccessToken(config);
+  const folderId = config.gdriveFolderId?.trim();
+
+  const metadata: any = {
+    name: params.filename,
+    mimeType: params.mimeType || "application/octet-stream"
+  };
+
+  if (folderId && folderId.length > 5) {
+    metadata.parents = [folderId];
+  }
+
+  // Step 1: Initiate Resumable Upload Session
+  const initRes = await fetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,webViewLink,size",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json; charset=UTF-8",
+        "X-Upload-Content-Type": params.mimeType || "application/octet-stream",
+        "X-Upload-Content-Length": params.contentLength.toString()
+      },
+      body: JSON.stringify(metadata)
+    }
+  );
+
+  if (!initRes.ok) {
+    const errText = await initRes.text();
+    throw new Error(`Google Drive resumable session initiation failed (${initRes.status}): ${errText}`);
+  }
+
+  const uploadLocation = initRes.headers.get("Location");
+  if (!uploadLocation) {
+    throw new Error("Google Drive did not return a resumable upload location URL");
+  }
+
+  // Step 2: Stream bytes directly to the upload location
+  const uploadRes = await fetch(uploadLocation, {
+    method: "PUT",
+    headers: {
+      "Content-Length": params.contentLength.toString(),
+      "Content-Type": params.mimeType || "application/octet-stream"
+    },
+    // @ts-expect-error Node.js fetch streaming body requirement
+    duplex: "half",
+    body: params.stream
+  });
+
+  if (!uploadRes.ok) {
+    const errText = await uploadRes.text();
+    throw new Error(`Google Drive stream upload failed (${uploadRes.status}): ${errText}`);
+  }
+
+  const fileData = await uploadRes.json();
+  return {
+    success: true,
+    fileId: fileData.id,
+    webViewLink: fileData.webViewLink
+  };
 }
 
 /**
