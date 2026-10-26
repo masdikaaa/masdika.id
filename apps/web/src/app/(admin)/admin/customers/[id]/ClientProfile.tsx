@@ -1064,18 +1064,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <label className={cn("w-24 text-xs font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>Username</label>
                     <div className="flex-1">
-                      <select
+                      <Select
                         value={logFilterUsername}
-                        onChange={(e) => setLogFilterUsername(e.target.value)}
-                        className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-300 text-slate-800"
-                        )}
-                      >
-                        {distinctLogUsernames.map(u => (
-                          <option key={u} value={u}>{u}</option>
-                        ))}
-                      </select>
+                        onChange={(val) => setLogFilterUsername(val)}
+                        options={distinctLogUsernames.map(u => ({ value: u, label: u }))}
+                        className="!h-9 !py-0 !px-3 text-xs rounded-xl"
+                      />
                     </div>
                   </div>
                 </div>

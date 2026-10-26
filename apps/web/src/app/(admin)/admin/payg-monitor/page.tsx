@@ -325,8 +325,44 @@ export default function PaygMonitorPage() {
             <p>Loading data...</p>
           </div>
         ) : filteredCustomers.length === 0 ? (
-          <div className={cn("flex flex-col items-center justify-center h-48 border border-dashed rounded-lg", isDark ? "text-zinc-500 border-slate-800" : "text-slate-500 border-slate-300")}>
-            <p>No active Pay-As-You-Go customers found matching filter.</p>
+          <div className={cn(
+            "flex flex-col items-center justify-center text-center py-12 px-4 rounded-2xl border transition-all my-2",
+            isDark 
+              ? "bg-[#060b14]/60 border-slate-800/80 text-zinc-400" 
+              : "bg-slate-50/70 border-slate-200 text-slate-500"
+          )}>
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-inner",
+              isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 text-cyan-600 border border-cyan-200"
+            )}>
+              <Activity className="w-6 h-6 animate-pulse" />
+            </div>
+            <p className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-800")}>
+              No active Pay-As-You-Go customers found
+            </p>
+            <p className={cn("text-xs mt-1 max-w-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+              {searchQuery || statusFilter !== 'ALL'
+                ? "No customers matched your filter criteria. Try resetting the search or filter tab."
+                : "There are currently no customers with active Pay-As-You-Go services."}
+            </p>
+            {(searchQuery || statusFilter !== 'ALL') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setStatusFilter("ALL");
+                  setCustomerPage(1);
+                }}
+                className={cn(
+                  "mt-3 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                  isDark
+                    ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20"
+                    : "bg-cyan-50 border-cyan-300 text-cyan-700 hover:bg-cyan-100"
+                )}
+              >
+                Reset Filter
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto scrollbar-none">

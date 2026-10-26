@@ -55,6 +55,10 @@ export async function POST(
         where: { id: invoice.userId },
         data: { balance: { increment: netAmount } }
       });
+
+      // Auto-unsuspend any suspended services (VPS, Subscriptions) if balance is now sufficient
+      const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
+      await attemptAutoUnsuspendAllForUser(invoice.userId).catch(console.error);
     } else if (invoice.subscriptionId && invoice.subscription) {
       await prisma.subscription.update({
         where: { id: invoice.subscriptionId },

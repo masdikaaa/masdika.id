@@ -51,6 +51,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           details: JSON.stringify({ reason: reason || 'Manual balance adjustment by admin', adjustedBy: auth.userId, delta })
         }
       });
+
+      // Auto-unsuspend any suspended services if balance was credited
+      if (delta > 0) {
+        const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
+        await attemptAutoUnsuspendAllForUser(userId).catch(console.error);
+      }
     }
 
     return NextResponse.json({ success: true, balance: updatedUser.balance });

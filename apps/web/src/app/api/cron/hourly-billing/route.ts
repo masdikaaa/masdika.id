@@ -105,7 +105,7 @@ export async function GET(req: Request) {
             // Safety net: Create a running invoice if none exists (e.g. legacy subscriptions created before this fix)
             const timestamp = Date.now().toString();
             const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            const invoiceNumber = `INV-${timestamp}-${random}-PAYG`;
+            const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
             await tx.invoice.create({
               data: {
                 invoiceNumber,
@@ -328,7 +328,7 @@ export async function GET(req: Request) {
             } else {
               const timestamp = Date.now().toString();
               const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-              const invoiceNumber = `INV-${timestamp}-${random}-PAYG`;
+              const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
               await tx.invoice.create({
                 data: {
                   invoiceNumber,
@@ -450,7 +450,7 @@ export async function GET(req: Request) {
             } else {
               const timestamp = Date.now().toString();
               const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-              const invoiceNumber = `INV-${timestamp}-${random}-PAYG`;
+              const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
               await tx.invoice.create({
                 data: {
                   invoiceNumber,

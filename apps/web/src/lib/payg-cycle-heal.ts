@@ -61,7 +61,7 @@ export async function healPaygCycleInvoicesForUser(userId: number) {
 
         const timestamp = Date.now().toString();
         const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        const invoiceNumber = `INV-${timestamp}-${random}-VPS-PAYG`;
+        const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
         const cycleLabel = now.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
         const attachedIps = await tx.reservedIp.findMany({

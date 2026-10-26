@@ -126,7 +126,7 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
           }
         });
 
-        const merchantOrderId = generateOrderId('INV') + '-VPS-PAYG';
+        const merchantOrderId = generateOrderId('INV-PAYG');
         await tx.invoice.create({
           data: {
             invoiceNumber: merchantOrderId,
@@ -184,7 +184,7 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
             }
           });
 
-          const merchantOrderId = generateOrderId('INV') + '-VPS-PAYG';
+          const merchantOrderId = generateOrderId('INV-PAYG');
           await tx.invoice.create({
             data: {
               invoiceNumber: merchantOrderId,
@@ -316,7 +316,7 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
           }
         });
       } else {
-        const merchantOrderId = generateOrderId('INV');
+        const merchantOrderId = generateOrderId(isHourly ? 'INV-PAYG' : 'INV');
         await tx.invoice.create({
           data: {
             invoiceNumber: merchantOrderId,

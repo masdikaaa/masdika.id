@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
         totalAmount += toSync;
       } else {
         if (!dryRun) {
-          const invoiceNumber = `INV-${Date.now()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}-RESYNC`;
+          const invoiceNumber = `INV-PAYG-${Date.now()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
           await prisma.invoice.create({
             data: {
               invoiceNumber, userId: ip.userId, amount: ip.accumulatedCost,

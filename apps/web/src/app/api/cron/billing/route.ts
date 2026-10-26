@@ -7,10 +7,10 @@ import { createDuitkuTransaction } from '@/lib/duitku';
 import { attemptAutoUnsuspendAll } from '@/lib/auto-unsuspend';
 
 
-function generateOrderId() {
+function generateOrderId(prefix: string = 'INV') {
   const timestamp = Date.now().toString();
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `INV-${timestamp}-${random}`;
+  return `${prefix}-${timestamp}-${random}`;
 }
 
 export const dynamic = 'force-dynamic';
@@ -290,7 +290,7 @@ export async function GET(req: Request) {
           });
 
           // Create a new running invoice for the next billing cycle
-          const merchantOrderId = generateOrderId() + '-PAYG';
+          const merchantOrderId = generateOrderId('INV-PAYG');
           await tx.invoice.create({
             data: {
               invoiceNumber: merchantOrderId,
@@ -430,7 +430,7 @@ export async function GET(req: Request) {
               }
 
               // Create a new running invoice for the next billing cycle
-              const merchantOrderId = generateOrderId() + '-VPS-PAYG';
+              const merchantOrderId = generateOrderId('INV-PAYG');
               const invoiceAmount = vps.isReseller ? (vps.hourlyRate || 0) * 730 : 0;
               await tx.invoice.create({
                 data: {
