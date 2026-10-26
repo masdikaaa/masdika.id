@@ -79,6 +79,50 @@ const AWS_REGIONS = [
   { value: "auto", label: "Auto / Other" }
 ];
 
+// Official Original Provider Vector Logos
+function CloudflareLogo({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fill="#F38020"
+        d="M16.5088 16.8447c.1475-.5068.0908-.9707-.1553-1.3154-.2246-.3164-.6045-.499-1.0615-.5205l-8.6592-.1123a.1559.1559 0 0 1-.1333-.0713c-.0283-.042-.0351-.0986-.021-.1553.0278-.084.1123-.1484.2036-.1562l8.7359-.1123c1.0351-.0489 2.1601-.8868 2.5537-1.9136l.499-1.3013c.0215-.0561.0293-.1128.0147-.168-.5625-2.5463-2.835-4.4453-5.5499-4.4453-2.5039 0-4.6284 1.6177-5.3876 3.8614-.4927-.3658-1.1187-.5625-1.794-.499-1.2026.119-2.1665 1.083-2.2861 2.2856-.0283.31-.0069.6128.0635.894C1.5683 13.171 0 14.7754 0 16.752c0 .1748.0142.3515.0352.5273.0141.083.0844.1475.1689.1475h15.9814c.0909 0 .1758-.0645.2032-.1553l.12-.4268z"
+      />
+      <path
+        fill="#FAAD3F"
+        d="M19.2656 11.2813c-.0771 0-.1611 0-.2383.0112-.0566 0-.1054.0415-.127.0976l-.3378 1.1744c-.1475.5068-.0918.9707.1543 1.3164.2256.3164.6055.498 1.0625.5195l1.8437.1133c.0557 0 .1055.0263.1329.0703.0283.043.0351.1074.0214.1562-.0283.084-.1132.1485-.204.1553l-1.921.1123c-1.041.0488-2.1582.8867-2.5527 1.914l-.1406.3585c-.0283.0713.0215.1416.0986.1416h6.5977c.0771 0 .1474-.0489.169-.126.1122-.4082.1757-.837.1757-1.2803 0-2.6025-2.125-4.727-4.7344-4.727"
+      />
+    </svg>
+  );
+}
+
+function AwsS3Logo({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="-27 0 310 310" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid">
+      <path d="M20.624 53.686L0 64v181.02l20.624 10.254.124-.149V53.828l-.124-.142" fill="#8C3123"/>
+      <path d="M131 229L20.624 255.274V53.686L131 79.387V229" fill="#E05243"/>
+      <path d="M81.178 187.866l46.818 5.96.294-.678.263-76.77-.557-.6-46.818 5.874v66.214" fill="#8C3123"/>
+      <path d="M127.996 229.295l107.371 26.035.169-.269-.003-201.195-.17-.18-107.367 25.996v149.613" fill="#8C3123"/>
+      <path d="M174.827 187.866l-46.831 5.96v-78.048l46.831 5.874v66.214" fill="#E05243"/>
+      <path d="M174.827 89.631l-46.831 8.535-46.818-8.535 46.759-12.256 46.89 12.256" fill="#5E1F18"/>
+      <path d="M174.827 219.801l-46.831-8.591-46.818 8.591 46.761 13.053 46.888-13.053" fill="#F2B0A9"/>
+      <path d="M81.178 89.631l46.818-11.586.379-.117V.313L127.996 0 81.178 23.413v66.218" fill="#8C3123"/>
+      <path d="M174.827 89.631l-46.831-11.586V0l46.831 23.413v66.218" fill="#E05243"/>
+      <path d="M127.996 309.428l-46.823-23.405v-66.217l46.823 11.582.689.783-.187 75.906-.502 1.351" fill="#8C3123"/>
+      <path d="M127.996 309.428l46.827-23.405v-66.217l-46.827 11.582v78.04M235.367 53.686L256 64v181.02l-20.633 10.31V53.686" fill="#E05243"/>
+    </svg>
+  );
+}
+
+function GoogleDriveLogo({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.01 1.485c-2.082 0-3.754.02-3.743.047.01.02 1.708 3.001 3.774 6.62l3.76 6.574h3.76c2.081 0 3.753-.02 3.742-.047-.005-.02-1.708-3.001-3.775-6.62l-3.76-6.574z" fill="#FFBA00" />
+      <path d="M7.25 3.215a789.828 789.861 0 0 0-3.63 6.319L0 15.868l1.89 3.298 1.885 3.297 3.62-6.335 3.618-6.33-1.88-3.287C8.1 4.704 7.255 3.22 7.25 3.214z" fill="#00AC47" />
+      <path d="M9.509 15.867l-.203.348c-.114.198-.96 1.672-1.88 3.287a423.93 423.948 0 0 1-1.698 2.97c-.01.026 3.24.042 7.222.042h7.244l1.796-3.157c.992-1.734 1.85-3.23 1.906-3.323l.104-.167h-7.249z" fill="#2684FC" />
+    </svg>
+  );
+}
+
 export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
   const vpsId = vps?.id;
   const vmid = vps?.vmid;
@@ -301,50 +345,51 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Top Banner & Overview */}
       <div
         className={cn(
-          "border rounded-2xl p-6 shadow-lg relative overflow-hidden transition-all",
+          "border rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden transition-all",
           isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}
       >
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
                 <CloudUpload className="w-5 h-5" />
               </div>
-              <h3 className={cn("text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              <h3 className={cn("text-base sm:text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 Cloud Storage Backup (Bring Your Own Storage)
               </h3>
-              <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                 Free Feature
               </span>
             </div>
-            <p className={cn("text-sm max-w-2xl", isDark ? "text-zinc-400" : "text-slate-600")}>
+            <p className={cn("text-xs sm:text-sm max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
               Backup this entire virtual machine directly to your personal cloud storage without consuming local Proxmox storage quota. Supported providers: Cloudflare R2, AWS S3, and Google Drive.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto pt-1 sm:pt-0">
             <button
               onClick={() => fetchData()}
               disabled={isLoading}
               title="Refresh records"
               className={cn(
-                "p-2.5 rounded-xl border text-sm font-medium transition-all disabled:opacity-50",
+                "h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center shrink-0",
                 isDark
                   ? "bg-slate-900/60 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
                   : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
               )}
             >
               <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+              <span className="hidden sm:inline-block ml-2 text-xs">Refresh</span>
             </button>
 
             <button
               onClick={handleRunBackup}
               disabled={isBackingUp || Boolean(activeBackup) || vpsStatus === "SUSPENDED"}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+              className="flex-1 sm:flex-initial h-10 flex items-center justify-center gap-2 px-4 sm:px-5 rounded-xl transition-all disabled:opacity-50 font-semibold text-xs sm:text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm whitespace-nowrap"
             >
-              <CloudUpload className={cn("w-4 h-4", isBackingUp && "animate-bounce")} />
-              {activeBackup ? "Backup In Progress..." : isBackingUp ? "Starting Backup..." : "Backup Now to Cloud"}
+              <CloudUpload className={cn("w-4 h-4 shrink-0", isBackingUp && "animate-bounce")} />
+              <span>{activeBackup ? "Backup In Progress..." : isBackingUp ? "Starting Backup..." : "Backup Now to Cloud"}</span>
             </button>
           </div>
         </div>
@@ -427,7 +472,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Storage Provider Selection & Settings Card */}
       <div
         className={cn(
-          "border rounded-2xl p-6 shadow-lg transition-all",
+          "border rounded-2xl p-4 sm:p-6 shadow-lg transition-all",
           isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}
       >
@@ -435,7 +480,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           <h4 className={cn("text-base font-semibold mb-1", isDark ? "text-white" : "text-slate-900")}>
             Storage Provider Configuration
           </h4>
-          <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
             Select your preferred cloud storage provider and enter your API credentials.
           </p>
         </div>
@@ -447,27 +492,54 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("R2")}
             className={cn(
-              "p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 relative",
+              "p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between gap-3 relative group",
               selectedProvider === "R2"
                 ? isDark
-                  ? "bg-orange-500/10 border-orange-500/50 text-white shadow-sm ring-1 ring-orange-500/30"
-                  : "bg-orange-50/70 border-orange-500 text-slate-900 ring-1 ring-orange-500/30"
+                  ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
+                  : "bg-cyan-50/80 border-cyan-500 text-slate-900 ring-1 ring-cyan-500/40 shadow-sm"
                 : isDark
-                ? "bg-slate-900/40 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-                : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-slate-900/40 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-slate-800/30"
+                : "bg-slate-50/80 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             )}
           >
-            <div className="w-9 h-9 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0 font-bold text-xs">
-              R2
-            </div>
-            <div>
-              <div className="font-semibold text-sm flex items-center gap-1.5">
-                Cloudflare R2
-                {config.provider === "R2" && config.hasSecretKey && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" title="Configured" />
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={cn(
+                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                  isDark
+                    ? selectedProvider === "R2"
+                      ? "bg-cyan-500/10 border-cyan-500/30"
+                      : "bg-slate-800/60 border-slate-700/60 group-hover:border-slate-600"
+                    : selectedProvider === "R2"
+                    ? "bg-cyan-100/50 border-cyan-300"
+                    : "bg-white border-slate-200"
                 )}
+              >
+                <CloudflareLogo className="w-6 h-6 shrink-0" />
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Zero egress fees, S3 compatible</p>
+              <div className="min-w-0">
+                <div className="font-semibold text-sm flex items-center gap-1.5 truncate">
+                  <span>Cloudflare R2</span>
+                  {config.provider === "R2" && config.hasSecretKey && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Configured" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5 truncate">Zero egress fees, S3 API</p>
+              </div>
+            </div>
+
+            {/* Selection indicator radio dot */}
+            <div
+              className={cn(
+                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                selectedProvider === "R2"
+                  ? "border-cyan-400 bg-cyan-400"
+                  : isDark
+                  ? "border-slate-700 bg-transparent"
+                  : "border-slate-300 bg-transparent"
+              )}
+            >
+              {selectedProvider === "R2" && <div className="w-1.5 h-1.5 rounded-full bg-slate-950" />}
             </div>
           </button>
 
@@ -476,27 +548,54 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("S3")}
             className={cn(
-              "p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 relative",
+              "p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between gap-3 relative group",
               selectedProvider === "S3"
                 ? isDark
-                  ? "bg-amber-500/10 border-amber-500/50 text-white shadow-sm ring-1 ring-amber-500/30"
-                  : "bg-amber-50/70 border-amber-500 text-slate-900 ring-1 ring-amber-500/30"
+                  ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
+                  : "bg-cyan-50/80 border-cyan-500 text-slate-900 ring-1 ring-cyan-500/40 shadow-sm"
                 : isDark
-                ? "bg-slate-900/40 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-                : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-slate-900/40 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-slate-800/30"
+                : "bg-slate-50/80 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             )}
           >
-            <div className="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold text-xs">
-              S3
-            </div>
-            <div>
-              <div className="font-semibold text-sm flex items-center gap-1.5">
-                Amazon AWS S3
-                {config.provider === "S3" && config.hasSecretKey && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" title="Configured" />
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={cn(
+                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                  isDark
+                    ? selectedProvider === "S3"
+                      ? "bg-cyan-500/10 border-cyan-500/30"
+                      : "bg-slate-800/60 border-slate-700/60 group-hover:border-slate-600"
+                    : selectedProvider === "S3"
+                    ? "bg-cyan-100/50 border-cyan-300"
+                    : "bg-white border-slate-200"
                 )}
+              >
+                <AwsS3Logo className="w-6 h-6 shrink-0" />
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Industry standard object storage</p>
+              <div className="min-w-0">
+                <div className="font-semibold text-sm flex items-center gap-1.5 truncate">
+                  <span>Amazon AWS S3</span>
+                  {config.provider === "S3" && config.hasSecretKey && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Configured" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5 truncate">Industry standard storage</p>
+              </div>
+            </div>
+
+            {/* Selection indicator radio dot */}
+            <div
+              className={cn(
+                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                selectedProvider === "S3"
+                  ? "border-cyan-400 bg-cyan-400"
+                  : isDark
+                  ? "border-slate-700 bg-transparent"
+                  : "border-slate-300 bg-transparent"
+              )}
+            >
+              {selectedProvider === "S3" && <div className="w-1.5 h-1.5 rounded-full bg-slate-950" />}
             </div>
           </button>
 
@@ -505,27 +604,54 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("GDRIVE")}
             className={cn(
-              "p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 relative",
+              "p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between gap-3 relative group",
               selectedProvider === "GDRIVE"
                 ? isDark
-                  ? "bg-emerald-500/10 border-emerald-500/50 text-white shadow-sm ring-1 ring-emerald-500/30"
-                  : "bg-emerald-50/70 border-emerald-500 text-slate-900 ring-1 ring-emerald-500/30"
+                  ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
+                  : "bg-cyan-50/80 border-cyan-500 text-slate-900 ring-1 ring-cyan-500/40 shadow-sm"
                 : isDark
-                ? "bg-slate-900/40 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-                : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-slate-900/40 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-slate-800/30"
+                : "bg-slate-50/80 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             )}
           >
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-xs">
-              GD
-            </div>
-            <div>
-              <div className="font-semibold text-sm flex items-center gap-1.5">
-                Google Drive
-                {config.provider === "GDRIVE" && config.hasPrivateKey && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" title="Configured" />
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={cn(
+                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                  isDark
+                    ? selectedProvider === "GDRIVE"
+                      ? "bg-cyan-500/10 border-cyan-500/30"
+                      : "bg-slate-800/60 border-slate-700/60 group-hover:border-slate-600"
+                    : selectedProvider === "GDRIVE"
+                    ? "bg-cyan-100/50 border-cyan-300"
+                    : "bg-white border-slate-200"
                 )}
+              >
+                <GoogleDriveLogo className="w-6 h-6 shrink-0" />
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Personal or Shared Drive folder</p>
+              <div className="min-w-0">
+                <div className="font-semibold text-sm flex items-center gap-1.5 truncate">
+                  <span>Google Drive</span>
+                  {config.provider === "GDRIVE" && config.hasPrivateKey && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Configured" />
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5 truncate">Personal or Shared Drive</p>
+              </div>
+            </div>
+
+            {/* Selection indicator radio dot */}
+            <div
+              className={cn(
+                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                selectedProvider === "GDRIVE"
+                  ? "border-cyan-400 bg-cyan-400"
+                  : isDark
+                  ? "border-slate-700 bg-transparent"
+                  : "border-slate-300 bg-transparent"
+              )}
+            >
+              {selectedProvider === "GDRIVE" && <div className="w-1.5 h-1.5 rounded-full bg-slate-950" />}
             </div>
           </button>
         </div>
@@ -813,30 +939,30 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           )}
 
           {/* Action Buttons */}
-          <div className="pt-2 flex flex-wrap items-center justify-end gap-3">
+          <div className="pt-4 border-t border-slate-800/40 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 w-full">
             <button
               type="button"
               onClick={handleTestConnection}
               disabled={isTesting || isSaving}
               className={cn(
-                "px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-50",
+                "h-10 px-4 rounded-xl border text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 w-full sm:w-auto",
                 isDark
-                  ? "bg-slate-800/80 hover:bg-slate-800 text-white border-slate-700"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300"
+                  ? "bg-slate-800/80 hover:bg-slate-800 text-white border-slate-700/80 shadow-xs"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 shadow-xs"
               )}
             >
-              <RefreshCw className={cn("w-4 h-4", isTesting && "animate-spin")} />
-              {isTesting ? "Testing Connection..." : "Test Connection"}
+              <RefreshCw className={cn("w-4 h-4 shrink-0", isTesting && "animate-spin")} />
+              <span>{isTesting ? "Testing Connection..." : "Test Connection"}</span>
             </button>
 
             <button
               type="button"
               onClick={handleSaveConfig}
               disabled={isSaving || isTesting}
-              className="px-5 py-2.5 rounded-xl font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+              className="h-10 px-5 rounded-xl font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 w-full sm:w-auto"
             >
-              <CheckCircle className="w-4 h-4" />
-              {isSaving ? "Saving Settings..." : "Save Settings"}
+              <CheckCircle className="w-4 h-4 shrink-0" />
+              <span>{isSaving ? "Saving Settings..." : "Save Settings"}</span>
             </button>
           </div>
         </div>
@@ -845,7 +971,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Cloud Backups Table */}
       <div
         className={cn(
-          "border rounded-2xl p-6 shadow-lg transition-all",
+          "border rounded-2xl p-4 sm:p-6 shadow-lg transition-all",
           isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}
       >
@@ -904,7 +1030,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <td className="px-4 py-3.5">
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border",
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border",
                           rec.provider === "R2"
                             ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
                             : rec.provider === "S3"
@@ -912,7 +1038,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                             : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                         )}
                       >
-                        {rec.provider === "R2" ? "Cloudflare R2" : rec.provider === "S3" ? "AWS S3" : "Google Drive"}
+                        {rec.provider === "R2" && <CloudflareLogo className="w-3.5 h-3.5 shrink-0" />}
+                        {rec.provider === "S3" && <AwsS3Logo className="w-3.5 h-3.5 shrink-0" />}
+                        {rec.provider === "GDRIVE" && <GoogleDriveLogo className="w-3.5 h-3.5 shrink-0" />}
+                        <span>{rec.provider === "R2" ? "Cloudflare R2" : rec.provider === "S3" ? "AWS S3" : "Google Drive"}</span>
                       </span>
                     </td>
 
