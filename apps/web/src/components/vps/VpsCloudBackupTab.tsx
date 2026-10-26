@@ -41,6 +41,8 @@ interface BackupRecord {
   targetKey: string;
   downloadUrl: string | null;
   status: "COMPLETED" | "FAILED" | "CREATING_BACKUP" | "UPLOADING_TO_CLOUD" | "PREPARING";
+  progress?: number;
+  stageText?: string | null;
   error: string | null;
   createdAt: string;
 }
@@ -347,32 +349,79 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           </div>
         </div>
 
-        {/* Active Backup Status Banner */}
-        {activeBackup && (
-          <div
-            className={cn(
-              "mt-5 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-pulse",
-              isDark ? "bg-cyan-950/30 border-cyan-500/40" : "bg-cyan-50 border-cyan-200"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin shrink-0" />
-              <div>
-                <p className={cn("text-sm font-semibold", isDark ? "text-cyan-300" : "text-cyan-950")}>
-                  {activeBackup.status === "CREATING_BACKUP"
-                    ? "Step 1/2: Proxmox is creating a vzdump snapshot..."
-                    : "Step 2/2: Uploading backup archive to your cloud storage..."}
-                </p>
-                <p className={cn("text-xs", isDark ? "text-cyan-400/80" : "text-cyan-700")}>
-                  Target: {activeBackup.provider} • Filename: {activeBackup.filename}
-                </p>
+        {/* Active Backup Progress Bar & Live Status */}
+        {activeBackup && (() => {
+          const progressPct = Math.max(5, Math.min(100, activeBackup.progress || (activeBackup.status === "UPLOADING_TO_CLOUD" ? 60 : 20)));
+          return (
+            <div
+              className={cn(
+                "mt-5 p-5 rounded-2xl border transition-all relative overflow-hidden",
+                isDark
+                  ? "bg-slate-900/90 border-cyan-500/40 shadow-[0_4px_28px_rgba(34,211,238,0.14)]"
+                  : "bg-cyan-50/70 border-cyan-300 shadow-sm"
+              )}
+            >
+              {/* Header: Stage info + Live Percentage Counter */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                        {activeBackup.status === "CREATING_BACKUP" ? "Step 1/2: Snapshot" : "Step 2/2: Cloud Upload"}
+                      </span>
+                      <span className="text-xs text-slate-400 hidden sm:inline">•</span>
+                      <span className="text-xs text-slate-400 font-mono truncate hidden sm:inline" title={activeBackup.filename}>
+                        {activeBackup.filename}
+                      </span>
+                    </div>
+                    <h5 className={cn("text-sm font-semibold tracking-tight mt-1 truncate", isDark ? "text-white" : "text-slate-900")}>
+                      {activeBackup.stageText ||
+                        (activeBackup.status === "CREATING_BACKUP"
+                          ? "Proxmox is creating VM disk snapshot archive..."
+                          : `Streaming backup archive directly to ${activeBackup.provider}...`)}
+                    </h5>
+                  </div>
+                </div>
+
+                {/* Big Live Percentage Display */}
+                <div className="flex items-baseline gap-1.5 self-end sm:self-center shrink-0">
+                  <span className="text-3xl font-extrabold text-cyan-400 font-mono tracking-tight drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+                    {progressPct}%
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-bold uppercase">Done</span>
+                </div>
+              </div>
+
+              {/* Glowing Progress Bar Track */}
+              <div className="w-full h-3 sm:h-3.5 bg-black/40 rounded-full overflow-hidden border border-white/10 relative p-0.5">
+                <div
+                  className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 shadow-[0_0_14px_rgba(34,211,238,0.6)] relative overflow-hidden"
+                  style={{ width: `${progressPct}%` }}
+                >
+                  {/* Subtle animated shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full animate-[pulse_2s_infinite]" />
+                </div>
+              </div>
+
+              {/* Sub-details telemetries */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mt-3 text-xs text-slate-400">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+                  </span>
+                  <span>Streaming directly to {activeBackup.provider} (Zero-RAM pipe)</span>
+                </div>
+                <span className="text-[11px] font-mono text-slate-400">
+                  Compressed vzdump archive • Auto-cleaning local storage
+                </span>
               </div>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-              Live Processing
-            </span>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Storage Provider Selection & Settings Card */}

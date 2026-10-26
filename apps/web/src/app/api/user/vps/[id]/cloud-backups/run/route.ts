@@ -94,7 +94,9 @@ export async function POST(
         provider: config.provider,
         filename: tempFilename,
         targetKey: targetKey,
-        status: "CREATING_BACKUP"
+        status: "CREATING_BACKUP",
+        progress: 10,
+        stageText: "Initializing Proxmox vzdump snapshot..."
       }
     });
 
@@ -117,10 +119,20 @@ export async function POST(
         const maxWaitMs = 20 * 60 * 1000;
         const startTime = Date.now();
         let taskCompleted = false;
+        let currentProgress = 15;
 
         while (Date.now() - startTime < maxWaitMs) {
-          await sleep(4000);
+          await sleep(3000);
           const taskStatus = await proxmox.getTaskStatus(vps.node, upid);
+
+          currentProgress = Math.min(50, currentProgress + 4);
+          await prisma.vpsCloudBackupRecord.update({
+            where: { id: record.id },
+            data: {
+              progress: currentProgress,
+              stageText: `Creating VM snapshot archive (${currentProgress}%)...`
+            }
+          }).catch(() => {});
 
           if (taskStatus && taskStatus.status === "stopped") {
             if (taskStatus.exitstatus === "OK") {
@@ -155,7 +167,9 @@ export async function POST(
           data: {
             filename: realFilename,
             fileSize: backupFileSize,
-            status: "UPLOADING_TO_CLOUD"
+            status: "UPLOADING_TO_CLOUD",
+            progress: 55,
+            stageText: `Streaming backup archive directly to ${config.provider === 'R2' ? 'Cloudflare R2' : config.provider === 'S3' ? 'AWS S3' : 'Google Drive'}...`
           }
         });
 
@@ -220,6 +234,8 @@ export async function POST(
             downloadUrl: finalDownloadUrl,
             fileSize: backupFileSize,
             status: "COMPLETED",
+            progress: 100,
+            stageText: "Backup completed and stored in cloud successfully!",
             error: null
           }
         });

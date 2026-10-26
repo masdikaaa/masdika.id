@@ -1160,6 +1160,8 @@ model VpsCloudBackupRecord {
   targetKey   String
   downloadUrl String?               @db.Text
   status      String                @default("COMPLETED") // "COMPLETED" | "FAILED" | "IN_PROGRESS"
+  progress    Int                   @default(0)
+  stageText   String?
   error       String?
   createdAt   DateTime              @default(now())
   updatedAt   DateTime              @updatedAt
