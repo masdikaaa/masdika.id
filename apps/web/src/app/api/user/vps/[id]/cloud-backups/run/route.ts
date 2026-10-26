@@ -264,7 +264,10 @@ export async function POST(
         }
       } catch (err: any) {
         console.error("Cloud backup execution error:", err);
-        const errMsg = err?.message || String(err);
+        let errMsg = err?.message || String(err);
+        if (errMsg.includes("storageQuotaExceeded") || errMsg.includes("do not have storage quota")) {
+          errMsg = "Kuota Google Drive Tidak Cukup: Akun Google Service Account memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.";
+        }
 
         await prisma.vpsCloudBackupRecord.update({
           where: { id: record.id },

@@ -254,9 +254,9 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
     const folderId = config.gdriveFolderId?.trim();
 
     if (folderId && folderId.length > 5) {
-      // Validate folder access
+      // Validate folder access with Shared Drive support
       const folderRes = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(folderId)}?fields=id,name,mimeType,capabilities`,
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(folderId)}?supportsAllDrives=true&fields=id,name,mimeType,capabilities,driveId`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -264,13 +264,57 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
 
       if (!folderRes.ok) {
         const errText = await folderRes.text();
-        throw new Error(`Folder verification failed (${folderRes.status}): Ensure the folder is shared with the Service Account email. Error: ${errText}`);
+        throw new Error(`Folder verification failed (${folderRes.status}): Pastikan folder ID benar dan sudah dibagikan (share) ke email Service Account (${config.gdriveClientEmail}). Detail: ${errText}`);
       }
 
       const folderData = await folderRes.json();
+
+      // Check write capabilities
+      if (folderData.capabilities && folderData.capabilities.canAddChildren === false) {
+        throw new Error(`Service Account tidak memiliki izin menulis di folder "${folderData.name || folderId}". Berikan hak akses 'Editor' atau 'Content Manager' pada folder/Shared Drive.`);
+      }
+
+      // Perform a 1-byte probe write to ensure Service Account quota is valid (Shared Drive verification)
+      const probeBoundary = "-------ProbeGoogleDriveBoundary";
+      const probeMeta = JSON.stringify({
+        name: ".backup_write_probe.tmp",
+        parents: [folderId],
+        mimeType: "text/plain"
+      });
+      const probeBody = `--${probeBoundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${probeMeta}\r\n--${probeBoundary}\r\nContent-Type: text/plain\r\n\r\nprobe\r\n--${probeBoundary}--`;
+
+      const probeRes = await fetch(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": `multipart/related; boundary=${probeBoundary}`
+          },
+          body: probeBody
+        }
+      );
+
+      if (!probeRes.ok) {
+        const probeErr = await probeRes.text();
+        if (probeErr.includes("storageQuotaExceeded") || probeErr.includes("do not have storage quota")) {
+          throw new Error("Kuota Google Drive Tidak Cukup: Service Account Google Cloud memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.");
+        }
+        throw new Error(`Izin tulis folder gagal (${probeRes.status}): ${probeErr}`);
+      }
+
+      const probeFile = await probeRes.json().catch(() => null);
+      if (probeFile?.id) {
+        // Clean up probe file
+        await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(probeFile.id)}?supportsAllDrives=true`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => {});
+      }
+
       return {
         success: true,
-        message: `Successfully connected to Google Drive folder "${folderData.name || folderId}"`
+        message: `Koneksi & izin tulis berhasil terverifikasi ke folder "${folderData.name || folderId}"!`
       };
     } else {
       // Validate general Drive access
@@ -285,13 +329,13 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
 
       return {
         success: true,
-        message: "Successfully authenticated with Google Drive Service Account (Root Folder)"
+        message: "Autentikasi Service Account Google Drive berhasil! (Catatan: Masukkan Folder ID dari Google Workspace Shared Drive untuk lokasi backup)"
       };
     }
   } catch (err: any) {
     return {
       success: false,
-      message: `Google Drive connection failed: ${err.message || String(err)}`
+      message: err.message || String(err)
     };
   }
 }
@@ -321,9 +365,9 @@ export async function streamUploadToGoogleDrive(
     metadata.parents = [folderId];
   }
 
-  // Step 1: Initiate Resumable Upload Session
+  // Step 1: Initiate Resumable Upload Session with Shared Drive support
   const initRes = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,webViewLink,size",
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,name,webViewLink,size",
     {
       method: "POST",
       headers: {
@@ -338,6 +382,9 @@ export async function streamUploadToGoogleDrive(
 
   if (!initRes.ok) {
     const errText = await initRes.text();
+    if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
+      throw new Error("Kuota Google Drive Tidak Cukup: Service Account Google Cloud memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.");
+    }
     throw new Error(`Google Drive resumable session initiation failed (${initRes.status}): ${errText}`);
   }
 
@@ -360,6 +407,9 @@ export async function streamUploadToGoogleDrive(
 
   if (!uploadRes.ok) {
     const errText = await uploadRes.text();
+    if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
+      throw new Error("Kuota Google Drive Tidak Cukup: Service Account tidak memiliki kuota penyimpanan di Google Drive pribadi. Gunakan Google Workspace Shared Drive (Drive Bersama).");
+    }
     throw new Error(`Google Drive stream upload failed (${uploadRes.status}): ${errText}`);
   }
 
@@ -411,7 +461,7 @@ export async function uploadToGoogleDrive(
   ]);
 
   const uploadRes = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,size",
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink,size",
     {
       method: "POST",
       headers: {
@@ -425,6 +475,9 @@ export async function uploadToGoogleDrive(
 
   if (!uploadRes.ok) {
     const errText = await uploadRes.text();
+    if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
+      throw new Error("Kuota Google Drive Tidak Cukup: Service Account Google Cloud memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.");
+    }
     throw new Error(`Google Drive upload failed (${uploadRes.status}): ${errText}`);
   }
 
@@ -442,7 +495,7 @@ export async function uploadToGoogleDrive(
 export async function deleteFromGoogleDrive(config: CloudStorageConfig, fileId: string): Promise<boolean> {
   const token = await getGoogleDriveAccessToken(config);
 
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`, {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?supportsAllDrives=true`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` }
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Cloud,
   CloudUpload,
@@ -23,7 +23,9 @@ import {
   Info,
   Lock,
   Copy,
-  Sparkles
+  Sparkles,
+  Zap,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -159,6 +161,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<BackupRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [errorModal, setErrorModal] = useState<{ title: string; provider: string; error: string } | null>(null);
+  const prevActiveIdRef = useRef<number | null>(null);
 
   // Fetch data
   const fetchData = useCallback(async (quiet = false) => {
@@ -181,7 +185,26 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             setSelectedProvider(data.config.provider);
           }
         }
-        setRecords(data.records || []);
+        const newRecords: BackupRecord[] = data.records || [];
+        setRecords(newRecords);
+
+        // Auto-detect if a previously active backup failed
+        const currentActive = newRecords.find(
+          (r) => r.status === "CREATING_BACKUP" || r.status === "UPLOADING_TO_CLOUD" || r.status === "PREPARING"
+        );
+
+        if (prevActiveIdRef.current) {
+          const finishedRec = newRecords.find((r) => r.id === prevActiveIdRef.current);
+          if (finishedRec && finishedRec.status === "FAILED") {
+            setErrorModal({
+              title: "Cloud Backup Gagal",
+              provider: finishedRec.provider,
+              error: finishedRec.error || "Proses backup terhenti sebelum selesai."
+            });
+          }
+        }
+
+        prevActiveIdRef.current = currentActive ? currentActive.id : null;
       }
     } catch (err) {
       console.error("Failed to fetch cloud backups:", err);
@@ -333,10 +356,22 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
         toast.success("Cloud backup initiated! vzdump snapshot is being prepared.");
         fetchData(true);
       } else {
-        toast.error(data.error || "Failed to start cloud backup");
+        const errorMsg = data.error || "Failed to start cloud backup";
+        toast.error(errorMsg);
+        setErrorModal({
+          title: "Gagal Memulai Cloud Backup",
+          provider: selectedProvider,
+          error: errorMsg
+        });
       }
     } catch (err: any) {
-      toast.error(err?.message || "Network error");
+      const errorMsg = err?.message || "Network error";
+      toast.error(errorMsg);
+      setErrorModal({
+        title: "Gagal Memulai Cloud Backup",
+        provider: selectedProvider,
+        error: errorMsg
+      });
     } finally {
       setIsBackingUp(false);
     }
@@ -436,22 +471,28 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 "mt-5 p-5 rounded-2xl border transition-all relative overflow-hidden",
                 isDark
                   ? "bg-slate-900/90 border-cyan-500/40 shadow-[0_4px_28px_rgba(34,211,238,0.14)]"
-                  : "bg-cyan-50/70 border-cyan-300 shadow-sm"
+                  : "bg-cyan-50/80 border-cyan-300 shadow-sm"
               )}
             >
               {/* Header: Stage info + Live Percentage Counter */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
+                    isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-cyan-100/80 border-cyan-300 text-cyan-700"
+                  )}>
                     <RefreshCw className="w-5 h-5 animate-spin" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                      <span className={cn(
+                        "text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border",
+                        isDark ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-800 border-cyan-300"
+                      )}>
                         {activeBackup.status === "CREATING_BACKUP" ? "Step 1/2: Snapshot" : "Step 2/2: Cloud Upload"}
                       </span>
-                      <span className="text-xs text-slate-400 hidden sm:inline">•</span>
-                      <span className="text-xs text-slate-400 font-mono truncate hidden sm:inline" title={activeBackup.filename}>
+                      <span className={cn("text-xs hidden sm:inline", isDark ? "text-slate-400" : "text-slate-500")}>•</span>
+                      <span className={cn("text-xs font-mono truncate hidden sm:inline", isDark ? "text-slate-400" : "text-slate-600")} title={activeBackup.filename}>
                         {activeBackup.filename}
                       </span>
                     </div>
@@ -466,15 +507,21 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
                 {/* Big Live Percentage Display */}
                 <div className="flex items-baseline gap-1.5 self-end sm:self-center shrink-0">
-                  <span className="text-3xl font-extrabold text-cyan-400 font-mono tracking-tight drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+                  <span className={cn(
+                    "text-3xl font-extrabold font-mono tracking-tight",
+                    isDark ? "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]" : "text-cyan-700"
+                  )}>
                     {progressPct}%
                   </span>
-                  <span className="text-[11px] text-slate-400 font-bold uppercase">Done</span>
+                  <span className={cn("text-[11px] font-bold uppercase", isDark ? "text-slate-400" : "text-slate-600")}>Done</span>
                 </div>
               </div>
 
               {/* Glowing Progress Bar Track */}
-              <div className="w-full h-3 sm:h-3.5 bg-black/40 rounded-full overflow-hidden border border-white/10 relative p-0.5">
+              <div className={cn(
+                "w-full h-3 sm:h-3.5 rounded-full overflow-hidden relative p-0.5 border",
+                isDark ? "bg-black/40 border-white/10" : "bg-slate-200 border-slate-300"
+              )}>
                 <div
                   className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 shadow-[0_0_14px_rgba(34,211,238,0.6)] relative overflow-hidden"
                   style={{ width: `${progressPct}%` }}
@@ -485,7 +532,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               </div>
 
               {/* Sub-details telemetries */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mt-3 text-xs text-slate-400">
+              <div className={cn(
+                "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mt-3 text-xs",
+                isDark ? "text-slate-400" : "text-slate-600"
+              )}>
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
@@ -493,7 +543,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   </span>
                   <span>Streaming directly to {activeBackup.provider} (Zero-RAM pipe)</span>
                 </div>
-                <span className="text-[11px] font-mono text-slate-400">
+                <span className={cn("text-[11px] font-mono", isDark ? "text-slate-400" : "text-slate-600")}>
                   Compressed vzdump archive • Auto-cleaning local storage
                 </span>
               </div>
@@ -557,7 +607,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">Zero egress fees, S3 API</p>
+                <p className={cn("text-xs mt-0.5 truncate", isDark ? "text-slate-400" : "text-slate-500")}>Zero egress fees, S3 API</p>
               </div>
             </div>
 
@@ -613,7 +663,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">Industry standard storage</p>
+                <p className={cn("text-xs mt-0.5 truncate", isDark ? "text-slate-400" : "text-slate-500")}>Industry standard storage</p>
               </div>
             </div>
 
@@ -669,7 +719,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">Personal or Shared Drive</p>
+                <p className={cn("text-xs mt-0.5 truncate", isDark ? "text-slate-400" : "text-slate-500")}>Workspace Shared Drive</p>
               </div>
             </div>
 
@@ -779,7 +829,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   <button
                     type="button"
                     onClick={() => setShowSecretKey(!showSecretKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    className={cn("absolute right-3 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
                   >
                     {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -856,7 +906,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   <button
                     type="button"
                     onClick={() => setShowSecretKey(!showSecretKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    className={cn("absolute right-3 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
                   >
                     {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -885,7 +935,12 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           {selectedProvider === "GDRIVE" && (
             <div className="space-y-4 animate-in fade-in duration-300">
               {/* Quick Auto-Fill via JSON Key File */}
-              <div className="relative border border-dashed border-cyan-500/30 hover:border-cyan-400/60 rounded-2xl p-4 transition-all bg-cyan-500/[0.03] hover:bg-cyan-500/[0.06] group cursor-pointer text-center">
+              <div className={cn(
+                "relative border border-dashed rounded-2xl p-4 transition-all group cursor-pointer text-center",
+                isDark
+                  ? "border-cyan-500/30 hover:border-cyan-400/60 bg-cyan-500/[0.03] hover:bg-cyan-500/[0.06]"
+                  : "border-cyan-300 hover:border-cyan-400 bg-cyan-50/60 hover:bg-cyan-50"
+              )}>
                 <input
                   type="file"
                   accept=".json,application/json"
@@ -894,18 +949,25 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   title="Upload Google Cloud Service Account JSON Key"
                 />
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pointer-events-none">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all shrink-0">
-                    <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                    isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-100 border-cyan-300 text-cyan-700"
+                  )}>
+                    <Key className="w-5 h-5" />
                   </div>
                   <div className="text-center sm:text-left">
-                    <div className="text-xs sm:text-sm font-semibold text-white flex items-center justify-center sm:justify-start gap-2">
+                    <div className={cn("text-xs sm:text-sm font-semibold flex items-center justify-center sm:justify-start gap-2", isDark ? "text-white" : "text-slate-900")}>
                       <span>Auto-Fill from Service Account JSON</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30 uppercase tracking-wider">
-                        ⚡ Instant
+                      <span className={cn(
+                        "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border flex items-center gap-1",
+                        isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-800 border-cyan-300"
+                      )}>
+                        <Zap className="w-2.5 h-2.5" />
+                        <span>Instant</span>
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Drop your downloaded <code className="text-cyan-300 font-mono">.json</code> key file here to auto-fill Email &amp; RSA Key.
+                    <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-600")}>
+                      Drop your downloaded <code className={cn("px-1.5 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-cyan-500/10 text-cyan-300" : "bg-slate-200 text-slate-800")}>.json</code> key file here to auto-fill Email &amp; RSA Key.
                     </p>
                   </div>
                 </div>
@@ -918,33 +980,47 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
                 )}
               >
-                <div className="flex items-center gap-2 font-semibold text-cyan-400 mb-2.5">
+                <div className={cn("flex items-center gap-2 font-semibold mb-2.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Info className="w-4 h-4 shrink-0" />
-                  <span>Setup Guide (Only 3 Steps):</span>
+                  <span>Setup Guide (Google Drive / Shared Drive):</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-black/20 border border-white/5">
-                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                  <div className={cn("flex items-start gap-2.5 p-2.5 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-200 shadow-2xs")}>
+                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-800")}>
                       1
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Enable <strong className="text-white">Google Drive API</strong> in Google Cloud Console.
+                    <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-300" : "text-slate-700")}>
+                      Enable <strong className={isDark ? "text-white" : "text-slate-900"}>Google Drive API</strong> di Google Cloud Console.
                     </p>
                   </div>
-                  <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-black/20 border border-white/5">
-                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                  <div className={cn("flex items-start gap-2.5 p-2.5 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-200 shadow-2xs")}>
+                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-800")}>
                       2
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Create Service Account &amp; download its <strong className="text-white">JSON Key</strong>.
+                    <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-300" : "text-slate-700")}>
+                      Buat Service Account &amp; unduh file <strong className={isDark ? "text-white" : "text-slate-900"}>JSON Key</strong>.
                     </p>
                   </div>
-                  <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-black/20 border border-white/5">
-                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                  <div className={cn("flex items-start gap-2.5 p-2.5 rounded-lg border", isDark ? "bg-black/20 border-white/5" : "bg-white border-slate-200 shadow-2xs")}>
+                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-cyan-100 text-cyan-800")}>
                       3
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Share target folder with the email as <strong className="text-emerald-400">Editor</strong>.
+                    <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-300" : "text-slate-700")}>
+                      Share folder di <strong className="text-emerald-600 dark:text-emerald-400">Shared Drive (Drive Bersama)</strong> ke email Service Account sebagai Content Manager.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Important Notice Regarding Service Account Storage Quota */}
+                <div className={cn(
+                  "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
+                  isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
+                )}>
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                  <div className="space-y-0.5">
+                    <div className="font-bold text-amber-900 dark:text-amber-300">Penting Mengenai Kuota Google Drive:</div>
+                    <p className="leading-relaxed text-[11px]">
+                      Akun Service Account memiliki kuota <strong>0 MB</strong> di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan <strong>Google Workspace Shared Drive (Drive Bersama / Team Drive)</strong> agar file backup dapat disimpan, atau gunakan <strong>Cloudflare R2</strong> / <strong>AWS S3</strong>.
                     </p>
                   </div>
                 </div>
@@ -1098,16 +1174,22 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     </div>
                   ) : (
                     /* Case 2: Terminal / PEM Code Editor for entering Key */
-                    <div className="rounded-xl border border-slate-800 bg-[#080d1a] overflow-hidden shadow-lg transition-all focus-within:border-cyan-500/60 focus-within:ring-1 focus-within:ring-cyan-500/30">
+                    <div className={cn(
+                      "rounded-xl border overflow-hidden shadow-sm transition-all focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500",
+                      isDark ? "border-slate-800 bg-[#080d1a]" : "border-slate-300 bg-white"
+                    )}>
                       {/* Terminal Window Header Bar */}
-                      <div className="px-3.5 py-2 border-b border-slate-800/80 bg-slate-900/80 flex items-center justify-between">
+                      <div className={cn(
+                        "px-3.5 py-2 border-b flex items-center justify-between",
+                        isDark ? "border-slate-800/80 bg-slate-900/80 text-slate-400" : "border-slate-200 bg-slate-100 text-slate-600"
+                      )}>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1.5">
                             <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
                             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
                             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
                           </div>
-                          <span className="text-[11px] font-mono text-slate-400 ml-2">service_account_private_key.pem</span>
+                          <span className="text-[11px] font-mono ml-2">service_account_private_key.pem</span>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -1118,7 +1200,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                                 setShowPrivateKey(false);
                                 setConfig((prev) => ({ ...prev, gdrivePrivateKey: "" }));
                               }}
-                              className="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded transition-colors"
+                              className={cn(
+                                "text-[11px] px-2 py-0.5 rounded transition-colors",
+                                isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                              )}
                             >
                               Cancel &amp; Keep Saved Key
                             </button>
@@ -1153,16 +1238,22 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                             }
                             setConfig({ ...config, gdrivePrivateKey: val });
                           }}
-                          className="w-full p-2.5 bg-transparent border-0 text-xs font-mono text-cyan-200/90 placeholder-slate-600 focus:outline-none resize-y leading-relaxed"
+                          className={cn(
+                            "w-full p-2.5 bg-transparent border-0 text-xs font-mono focus:outline-none resize-y leading-relaxed",
+                            isDark ? "text-cyan-200/90 placeholder-slate-600" : "text-slate-900 placeholder-slate-400"
+                          )}
                           spellCheck={false}
                         />
                       </div>
 
                       {/* Textarea Footer Help */}
-                      <div className="px-3 py-1.5 border-t border-slate-800/60 bg-black/40 flex items-center justify-between text-[11px] text-slate-500">
+                      <div className={cn(
+                        "px-3 py-1.5 border-t flex items-center justify-between text-[11px]",
+                        isDark ? "border-slate-800/60 bg-black/40 text-slate-500" : "border-slate-200 bg-slate-50 text-slate-600"
+                      )}>
                         <span>Format: Standard PKCS#8 RSA PEM (Starts with BEGIN PRIVATE KEY)</span>
                         {config.gdrivePrivateKey && (
-                          <span className="text-cyan-400 font-mono">
+                          <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
                             {config.gdrivePrivateKey.length} characters
                           </span>
                         )}
@@ -1246,19 +1337,19 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
         </div>
 
         {records.length === 0 ? (
-          <div className="text-center py-12 px-4 rounded-xl border border-dashed border-slate-800/80">
-            <Cloud className="w-10 h-10 mx-auto text-slate-500 mb-3 opacity-60" />
+          <div className={cn("text-center py-12 px-4 rounded-xl border border-dashed", isDark ? "border-slate-800/80" : "border-slate-200")}>
+            <Cloud className="w-10 h-10 mx-auto text-slate-400 mb-3 opacity-60" />
             <h5 className={cn("font-medium text-sm mb-1", isDark ? "text-white" : "text-slate-800")}>
               No Cloud Backups Yet
             </h5>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
+            <p className={cn("text-xs max-w-sm mx-auto mb-4", isDark ? "text-slate-400" : "text-slate-500")}>
               Configure your cloud credentials above and click &quot;Backup Now to Cloud&quot; to create your first free offsite backup.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-800/60">
+          <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-slate-800/60" : "border-slate-200")}>
             <table className="w-full text-left text-sm">
-              <thead className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+              <thead className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-600 border-slate-200")}>
                 <tr>
                   <th className="px-4 py-3.5">Backup Archive</th>
                   <th className="px-4 py-3.5">Storage</th>
@@ -1268,7 +1359,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   <th className="px-4 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/40">
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/40" : "divide-slate-200")}>
                 {records.map((rec) => (
                   <tr
                     key={rec.id}
@@ -1279,7 +1370,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   >
                     <td className="px-4 py-3.5 font-mono text-xs">
                       <div className="flex items-center gap-2">
-                        <HardDrive className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <HardDrive className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                         <span className={cn("font-medium truncate max-w-[240px]", isDark ? "text-slate-200" : "text-slate-800")} title={rec.filename}>
                           {rec.filename}
                         </span>
@@ -1291,10 +1382,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         className={cn(
                           "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border",
                           rec.provider === "R2"
-                            ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                            ? isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-orange-50 text-orange-700 border-orange-200"
                             : rec.provider === "S3"
-                            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                            : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            ? isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200"
+                            : isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                         )}
                       >
                         {rec.provider === "R2" && <CloudflareLogo className="w-3.5 h-3.5 shrink-0" />}
@@ -1304,25 +1395,36 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                       </span>
                     </td>
 
-                    <td className="px-4 py-3.5 text-xs font-mono text-slate-400">
+                    <td className={cn("px-4 py-3.5 text-xs font-mono", isDark ? "text-slate-400" : "text-slate-600")}>
                       {formatFileSize(rec.fileSize)}
                     </td>
 
-                    <td className="px-4 py-3.5 text-xs text-slate-400">
+                    <td className={cn("px-4 py-3.5 text-xs", isDark ? "text-slate-400" : "text-slate-600")}>
                       {new Date(rec.createdAt).toLocaleString()}
                     </td>
 
                     <td className="px-4 py-3.5">
                       {rec.status === "COMPLETED" ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                           <CheckCircle className="w-3.5 h-3.5" /> Completed
                         </span>
                       ) : rec.status === "FAILED" ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-400" title={rec.error || "Failed"}>
-                          <XCircle className="w-3.5 h-3.5" /> Failed
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setErrorModal({
+                            title: "Detail Error Cloud Backup",
+                            provider: rec.provider,
+                            error: rec.error || "Proses cloud backup gagal dilakukan."
+                          })}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all cursor-pointer"
+                          title="Klik untuk melihat detail error"
+                        >
+                          <XCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>Failed</span>
+                          <Info className="w-3 h-3 shrink-0 ml-0.5 opacity-80" />
+                        </button>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan-400">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-700 dark:text-cyan-400">
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" /> In Progress
                         </span>
                       )}
@@ -1381,6 +1483,122 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
         confirmText={isDeleting ? "Deleting..." : "Delete Permanently"}
         variant="danger"
       />
+
+      {/* Cloud Backup Diagnostic Error Modal */}
+      {errorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto",
+              isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-cyan-950/20" : "bg-white border-slate-200 text-slate-900 shadow-xl"
+            )}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setErrorModal(null)}
+              className={cn(
+                "absolute right-4 top-4 p-1.5 rounded-lg transition-colors",
+                isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+              )}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-start gap-3.5 mb-4 pr-6">
+              <div
+                className={cn(
+                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border",
+                  errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                    : "bg-red-500/10 border-red-500/30 text-red-500"
+                )}
+              >
+                {errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") ? (
+                  <AlertTriangle className="w-6 h-6" />
+                ) : (
+                  <XCircle className="w-6 h-6" />
+                )}
+              </div>
+              <div>
+                <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                  {errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")
+                    ? "Kapasitas Penyimpanan / Kuota Tidak Cukup"
+                    : errorModal.title}
+                </h3>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-600")}>
+                  Provider: <span className="font-semibold">{errorModal.provider}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Quota-specific explanation if applicable */}
+            {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")) ? (
+              <div className="space-y-3 mb-5">
+                <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed space-y-2", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-200/90" : "bg-amber-50 border-amber-200 text-amber-900")}>
+                  <div className="font-bold flex items-center gap-1.5 text-amber-800 dark:text-amber-300">
+                    <Info className="w-4 h-4 shrink-0" />
+                    <span>Penyebab Masalah:</span>
+                  </div>
+                  <p>
+                    Akun <strong>Google Cloud Service Account</strong> secara default memiliki kuota penyimpanan <strong>0 MB</strong> di Google Drive pribadi (Personal My Drive). Google melarang pengunggahan file dari Service Account ke akun Google Drive perorangan non-workspace.
+                  </p>
+                </div>
+
+                <div className={cn("p-3.5 rounded-xl border text-xs space-y-2.5", isDark ? "bg-slate-900/60 border-slate-800 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                  <div className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Solusi yang Dapat Dilakukan:</div>
+                  <ul className="space-y-2 pl-4 list-disc text-[11px] leading-relaxed">
+                    <li>
+                      <strong>Gunakan Google Workspace Shared Drive:</strong> Buat folder di Shared Drive (Drive Bersama / Team Drive), lalu invite email Service Account sebagai <em>Content Manager</em>. Di Shared Drive, kuota dihitung dari akun workspace, bukan Service Account.
+                    </li>
+                    <li>
+                      <strong>Gunakan Cloudflare R2 (Rekomendasi Terbaik):</strong> Gratis 10 GB/bulan tanpa biaya download (egress), setup sangat mudah menggunakan Account ID dan S3 API Keys.
+                    </li>
+                    <li>
+                      <strong>Gunakan AWS S3:</strong> Buat bucket S3 dan gunakan IAM user dengan hak akses write.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 mb-5">
+                <p className={cn("text-xs leading-relaxed", isDark ? "text-slate-300" : "text-slate-700")}>
+                  Terjadi kesalahan saat memproses cloud backup. Detail pesan error sistem:
+                </p>
+                <div className={cn("p-3 rounded-xl border font-mono text-[11px] leading-relaxed break-all max-h-48 overflow-y-auto", isDark ? "bg-black/50 border-slate-800 text-red-300" : "bg-red-50/70 border-red-200 text-red-800")}>
+                  {errorModal.error}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-800/40">
+              <button
+                type="button"
+                onClick={() => setErrorModal(null)}
+                className={cn(
+                  "w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold border transition-all",
+                  isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                )}
+              >
+                Tutup
+              </button>
+              {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSelectProvider("R2");
+                    setErrorModal(null);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-xs"
+                >
+                  Pindah ke Cloudflare R2
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
