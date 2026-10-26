@@ -795,6 +795,8 @@ model VpsService {
   alertRules          VpsAlertRule[]
   assignedIps         VpsIpAssignment[]
   schedule            VpsSchedule?
+  cloudBackupConfig   VpsCloudBackupConfig?
+  cloudBackupRecords  VpsCloudBackupRecord[]
   kubernetesCluster   KubernetesCluster? @relation(fields: [kubernetesClusterId], references: [id])
   subscription        Subscription?      @relation(fields: [subscriptionId], references: [id])
   user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1116,6 +1118,53 @@ model ClientActivityLog {
 
   @@index([userId])
   @@index([category])
+  @@index([createdAt])
+}
+
+model VpsCloudBackupConfig {
+  id                 Int                    @id @default(autoincrement())
+  vpsId              Int                    @unique
+  vps                VpsService             @relation(fields: [vpsId], references: [id], onDelete: Cascade)
+  provider           String                 @default("R2") // "R2" | "S3" | "GDRIVE"
+  enabled            Boolean                @default(true)
+  endpoint           String?
+  bucket             String?
+  region             String?                @default("auto")
+  accessKeyId        String?
+  secretAccessKey    String?
+  pathPrefix         String?                @default("masdika-backups")
+  gdriveFolderId     String?
+  gdriveClientEmail  String?
+  gdrivePrivateKey   String?                @db.Text
+  gdriveRefreshToken String?                @db.Text
+  autoSchedule       String?                @default("DISABLED") // "DISABLED" | "DAILY" | "WEEKLY"
+  lastBackupAt       DateTime?
+  lastStatus         String?
+  lastError          String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  backups            VpsCloudBackupRecord[]
+
+  @@index([vpsId])
+}
+
+model VpsCloudBackupRecord {
+  id          Int                   @id @default(autoincrement())
+  configId    Int?
+  config      VpsCloudBackupConfig? @relation(fields: [configId], references: [id], onDelete: SetNull)
+  vpsId       Int
+  vps         VpsService            @relation(fields: [vpsId], references: [id], onDelete: Cascade)
+  provider    String                // "R2" | "S3" | "GDRIVE"
+  filename    String
+  fileSize    BigInt                @default(0)
+  targetKey   String
+  downloadUrl String?               @db.Text
+  status      String                @default("COMPLETED") // "COMPLETED" | "FAILED" | "IN_PROGRESS"
+  error       String?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([vpsId])
   @@index([createdAt])
 }
 
