@@ -101,6 +101,22 @@ jobs:
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
             docker compose pull app worker
+
+            # Zero-Disruption Safety Check: Wait if Reinstall, Provisioning, or Cloud Backup is actively running
+            echo "Checking if any critical operations (Reinstall / Cloud Backup) are in progress..."
+            for i in $(seq 1 18); do
+              READINESS=$(curl -s http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || echo '{"safeToDeploy":true}')
+              IS_SAFE=$(echo "$READINESS" | grep -o '"safeToDeploy":true' || true)
+
+              if [ -n "$IS_SAFE" ]; then
+                echo "System is clear! No active reinstall or cloud backup in progress. Safe to deploy."
+                break
+              fi
+
+              echo "Waiting for active operations to complete before recreating container (Attempt $i/18, waiting 10s)..."
+              sleep 10
+            done
+
             docker compose up -d --force-recreate app worker
             docker compose up -d --no-recreate
             docker image prune -f

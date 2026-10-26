@@ -214,14 +214,22 @@ app.prepare().then(async () => {
       console.warn('> [Invoice Standardizer] Failed to load module:', err?.message || err);
     });
 
-    // 🛡️ Auto-recover any cloud backups interrupted by previous container restart / deployment
-    import("./lib/cloud-backup-recovery").then(({ recoverStaleCloudBackups }) => {
+    // 🛡️ Auto-recover any cloud backups or reinstalls interrupted by previous container restart / deployment
+    import("./lib/cloud-backup-recovery").then(({ recoverStaleCloudBackups, recoverStaleReinstalls }) => {
       recoverStaleCloudBackups().then((count) => {
         if (count > 0) {
           console.log(`> [Cloud Backup Recovery] Safely recovered ${count} interrupted backup(s) after restart`);
         }
       }).catch((err) => {
         console.warn('> [Cloud Backup Recovery] Startup check note:', err?.message || err);
+      });
+
+      recoverStaleReinstalls().then((count) => {
+        if (count > 0) {
+          console.log(`> [Reinstall Recovery] Safely recovered ${count} stuck provisioning VM(s) after restart`);
+        }
+      }).catch((err) => {
+        console.warn('> [Reinstall Recovery] Startup check note:', err?.message || err);
       });
     }).catch(() => {});
   });

@@ -74,6 +74,9 @@ export default function proxy(request: NextRequest) {
   if (pathname === '/api/health') {
     return new NextResponse('OK', { status: 200 });
   }
+  if (pathname.startsWith('/api/health/')) {
+    return NextResponse.next();
+  }
 
   // Log incoming requests for ELK
   if (pathname.startsWith('/api')) {
