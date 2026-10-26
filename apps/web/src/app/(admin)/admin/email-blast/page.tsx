@@ -33,10 +33,8 @@ import {
   CheckCircle2,
   Loader2,
   Info,
-  Image as ImageIcon,
-  UploadCloud,
-  Link as LinkIcon,
-  Trash2
+  Trash2,
+  Bookmark
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -626,129 +624,141 @@ export default function EmailBlastPage() {
   const [sendingTest, setSendingTest] = useState(false);
   const [showSendConfirmModal, setShowSendConfirmModal] = useState(false);
   const [sendingBlast, setSendingBlast] = useState(false);
-  const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
+  // Saved Custom Templates & Signature State
+  const SAVED_TEMPLATES_STORAGE_KEY = "masdika_email_blast_saved_templates";
+  const SIGNATURE_STORAGE_KEY = "masdika_email_blast_signature";
 
-  // Image Insert Modal State
-  const [showImageModal, setShowImageModal] = useState(false);
-  const [imageTab, setImageTab] = useState<"upload" | "url">("upload");
-  const [imageUrlInput, setImageUrlInput] = useState("");
-  const [imageLinkInput, setImageLinkInput] = useState("https://masdika.id/vps");
-  const [imageAltInput, setImageAltInput] = useState("Promo Spesial Masdika Cloud");
-  const [imageMaxWidth, setImageMaxWidth] = useState("600px");
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [deletingImage, setDeletingImage] = useState(false);
-  const imageFileInputRef = useRef<HTMLInputElement>(null);
+  const [savedTemplates, setSavedTemplates] = useState<{
+    id: string;
+    name: string;
+    subject: string;
+    html: string;
+    createdAt: string;
+  }[]>([]);
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState("");
+  const [newTemplateSubject, setNewTemplateSubject] = useState("");
+  const [templateTab, setTemplateTab] = useState<"all" | "saved" | "system">("all");
+  const [templateSearch, setTemplateSearch] = useState("");
 
-  const BANNER_WIDTH_OPTIONS = [
-    { value: "600px", label: "Full Width (600px - Recommended for Hero Banner)" },
-    { value: "450px", label: "Medium (450px)" },
-    { value: "300px", label: "Small (300px)" },
-    { value: "180px", label: "Logo / Icon (180px)" },
-  ];
+  // Signature Modal State
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [signatureData, setSignatureData] = useState({
+    name: "Masdika Cloud Team",
+    title: "Customer Care & Operations",
+    company: "PT Masdika Teknologi Indonesia",
+    website: "https://www.masdika.id",
+    email: "support@masdika.id",
+    phone: "+62 812-3456-7890"
+  });
 
-  const handleDeleteUploadedImage = async () => {
-    if (!imageUrlInput) return;
+  // Load saved templates and signature from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SAVED_TEMPLATES_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setSavedTemplates(parsed);
+        }
+      }
+      const storedSig = localStorage.getItem(SIGNATURE_STORAGE_KEY);
+      if (storedSig) {
+        const parsedSig = JSON.parse(storedSig);
+        if (parsedSig && typeof parsedSig === "object") {
+          setSignatureData(prev => ({ ...prev, ...parsedSig }));
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load local blast settings:", e);
+    }
+  }, []);
 
-    // If external URL, just clear without calling delete API
-    if (!imageUrlInput.includes("/uploads/")) {
-      setImageUrlInput("");
+  // Save current email as custom template
+  const handleSaveCurrentAsTemplate = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newTemplateName.trim()) {
+      toast.error("Silakan masukkan nama template");
       return;
     }
 
-    setDeletingImage(true);
-    const toastId = toast.loading("Menghapus gambar dari storage server...");
+    const templateToSave = {
+      id: `custom_${Date.now()}`,
+      name: newTemplateName.trim(),
+      subject: newTemplateSubject.trim() || subject,
+      html: htmlContent,
+      createdAt: new Date().toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      })
+    };
+
+    const updated = [templateToSave, ...savedTemplates];
+    setSavedTemplates(updated);
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imageUrlInput })
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Gagal menghapus file dari storage");
-      }
-      setImageUrlInput("");
-      toast.success("Gambar berhasil dihapus permanen dari storage server!", { id: toastId });
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus dari storage", { id: toastId });
-    } finally {
-      setDeletingImage(false);
+      localStorage.setItem(SAVED_TEMPLATES_STORAGE_KEY, JSON.stringify(updated));
+    } catch (err) {
+      console.error("Failed to save template to localStorage:", err);
     }
+
+    toast.success(`Template "${templateToSave.name}" berhasil disimpan!`);
+    setShowSaveTemplateModal(false);
+    setNewTemplateName("");
   };
 
-  const handleUploadImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file (PNG, JPG, WebP, GIF)");
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image file size exceeds the 10MB limit");
-      return;
-    }
-
-    setUploadingImage(true);
-    const toastId = toast.loading("Uploading image banner to server...");
-
+  // Delete custom saved template
+  const handleDeleteSavedTemplate = (id: string, name: string) => {
+    const updated = savedTemplates.filter(t => t.id !== id);
+    setSavedTemplates(updated);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "email-blast");
-
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Failed to upload image");
-      }
-
-      // Convert to full absolute URL required for email delivery
-      const fullUrl = window.location.origin + data.url;
-      setImageUrlInput(fullUrl);
-      toast.success("Image uploaded! Ready to insert into email.", { id: toastId });
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload image", { id: toastId });
-    } finally {
-      setUploadingImage(false);
-      if (imageFileInputRef.current) {
-        imageFileInputRef.current.value = "";
-      }
+      localStorage.setItem(SAVED_TEMPLATES_STORAGE_KEY, JSON.stringify(updated));
+    } catch (err) {
+      console.error("Failed to update localStorage:", err);
     }
+    toast.success(`Template "${name}" berhasil dihapus`);
   };
 
-  const handleInsertImage = () => {
-    if (!imageUrlInput.trim()) {
-      toast.error("Please upload an image or provide an image URL");
-      return;
-    }
+  // Insert signature into email HTML
+  const handleInsertSignature = () => {
+    try {
+      localStorage.setItem(SIGNATURE_STORAGE_KEY, JSON.stringify(signatureData));
+    } catch {}
 
-    const cleanUrl = imageUrlInput.trim();
-    const cleanLink = imageLinkInput.trim();
-    const cleanAlt = imageAltInput.trim() || "Promotional Banner";
-    const maxWidth = imageMaxWidth || "600px";
-
-    const imageHtml = `
-<!-- Promotional Banner Image -->
-<div style="text-align: center; margin: 24px 0;">
-  ${cleanLink ? `<a href="${cleanLink}" target="_blank" style="text-decoration: none; display: inline-block; width: 100%; max-width: ${maxWidth};">` : ''}
-    <img src="${cleanUrl}" alt="${cleanAlt}" style="width: 100%; max-width: ${maxWidth}; height: auto; display: block; margin: 0 auto; border-radius: 12px; border: 0;" />
-  ${cleanLink ? `</a>` : ''}
-</div>`;
+    const sigHtml = `
+<!-- Professional Email Signature -->
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top: 28px; padding-top: 18px; border-top: 1px dashed #cbd5e1; font-family: ${FONT_STACK}; width: 100%;">
+  <tr>
+    <td style="vertical-align: top; padding-right: 14px; width: 44px;">
+      <div style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: #ffffff; text-align: center; line-height: 42px; font-weight: 800; font-size: 16px;">
+        M
+      </div>
+    </td>
+    <td style="vertical-align: top; font-size: 13px; line-height: 1.6; color: #475569;">
+      <div style="font-weight: 800; color: #0f172a; font-size: 14px;">${signatureData.name}</div>
+      <div style="color: #0891b2; font-weight: 600; font-size: 12px;">${signatureData.title} · ${signatureData.company}</div>
+      <div style="margin-top: 4px; font-size: 12px;">
+        🌐 <a href="${signatureData.website}" target="_blank" style="color: #087cf5; text-decoration: none;">${signatureData.website.replace(/^https?:\/\//, '')}</a>
+        &nbsp;|&nbsp; ✉️ <a href="mailto:${signatureData.email}" style="color: #087cf5; text-decoration: none;">${signatureData.email}</a>
+        ${signatureData.phone ? `&nbsp;|&nbsp; 📞 <span style="color: #334155;">${signatureData.phone}</span>` : ''}
+      </div>
+    </td>
+  </tr>
+</table>`;
 
     if (htmlContent.includes("<!-- Footer -->")) {
-      setHtmlContent(prev => prev.replace("<!-- Footer -->", `${imageHtml}\n\n    <!-- Footer -->`));
+      setHtmlContent(prev => prev.replace("<!-- Footer -->", `${sigHtml}\n\n    <!-- Footer -->`));
+    } else if (htmlContent.includes("<!-- CTA -->")) {
+      setHtmlContent(prev => prev.replace("<!-- CTA -->", `<!-- CTA -->\n${sigHtml}`));
     } else {
-      setHtmlContent(prev => prev + imageHtml);
+      setHtmlContent(prev => prev + sigHtml);
     }
 
-    setShowImageModal(false);
-    toast.success("Banner image inserted into email successfully!");
+    setShowSignatureModal(false);
+    toast.success("Signature berhasil disisipkan ke dalam email!");
   };
 
   // Dedicated SMTP Configuration State
@@ -929,10 +939,10 @@ export default function EmailBlastPage() {
   };
 
   // Template switch
-  const handleSelectTemplate = (template: typeof PROMO_TEMPLATES[0]) => {
+  const handleSelectTemplate = (template: { name: string; subject: string; html: string }) => {
     setSubject(template.subject);
     setHtmlContent(template.html);
-    setShowTemplatesDropdown(false);
+    setShowTemplatesModal(false);
     toast.success(`Loaded "${template.name}" template`);
   };
 
@@ -1166,65 +1176,49 @@ export default function EmailBlastPage() {
           <div className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto scrollbar-none">
             <button
               type="button"
-              onClick={() => toast.success("Draft automatically saved to local session")}
+              onClick={() => {
+                setNewTemplateName("");
+                setNewTemplateSubject(subject);
+                setShowSaveTemplateModal(true);
+              }}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
+              title="Simpan email saat ini sebagai template baru"
             >
               <Save className="w-4 h-4" />
               <span className="text-[10px]">Save</span>
             </button>
             <button
               type="button"
-              onClick={() => toast.info("Attachments are embedded directly via images or URLs in HTML.")}
+              onClick={() => toast.info("Attachment dapat disisipkan langsung melalui link URL dokumen di isi email.")}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
+              title="Informasi Attachment"
             >
               <Paperclip className="w-4 h-4" />
               <span className="text-[10px]">Attach</span>
             </button>
             <button
               type="button"
-              onClick={() => {
-                const sig = `<br/><br/>--<br/><strong>Masdika Cloud Team</strong><br/>Website: <a href="https://masdika.id">masdika.id</a><br/>Support: support@masdika.id`;
-                setHtmlContent(prev => prev + sig);
-                toast.success("Signature appended to email");
-              }}
+              onClick={() => setShowSignatureModal(true)}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
+              title="Atur & Sisipkan Signature Email"
             >
               <PenTool className="w-4 h-4" />
               <span className="text-[10px]">Signature</span>
             </button>
 
-            {/* Templates Dropdown */}
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowTemplatesDropdown(prev => !prev)}
-                className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span className="text-[10px]">Templates</span>
-              </button>
-
-              {showTemplatesDropdown && (
-                <div className={cn("absolute left-0 top-full mt-2 w-72 rounded-xl border shadow-2xl z-30 p-1.5 space-y-1 animate-in fade-in duration-150", isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-200 text-slate-800")}>
-                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-b border-white/5">
-                    Choose Promotional Template
-                  </div>
-                  {PROMO_TEMPLATES.map(tpl => (
-                    <button
-                      key={tpl.id}
-                      type="button"
-                      onClick={() => handleSelectTemplate(tpl)}
-                      className={cn(
-                        "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-between cursor-pointer",
-                        isDark ? "hover:bg-cyan-500/10 hover:text-cyan-300 text-zinc-300" : "hover:bg-cyan-50 hover:text-cyan-800 text-slate-700"
-                      )}
-                    >
-                      <span className="truncate">{tpl.name}</span>
-                    </button>
-                  ))}
-                </div>
+            {/* Templates Modal Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowTemplatesModal(true)}
+              className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0 relative"
+              title="Buka Daftar Template Email Tersimpan & Resmi"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span className="text-[10px]">Templates</span>
+              {(savedTemplates.length > 0) && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-cyan-400"></span>
               )}
-            </div>
+            </button>
 
             <button
               type="button"
@@ -1569,24 +1563,6 @@ export default function EmailBlastPage() {
               className="p-1.5 rounded hover:bg-white/10 text-zinc-300 hover:text-white cursor-pointer"
             >
               ⛓✕
-            </button>
-
-            <span className="w-px h-4 bg-slate-700 mx-1" />
-
-            {/* Insert Image Button */}
-            <button
-              type="button"
-              onClick={() => setShowImageModal(true)}
-              title="Insert Image / Upload Banner"
-              className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-xs",
-                isDark
-                  ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
-                  : "bg-cyan-50 border-cyan-300 text-cyan-800 hover:bg-cyan-100"
-              )}
-            >
-              <ImageIcon className="w-3.5 h-3.5" />
-              <span>Insert Image</span>
             </button>
           </div>
 
@@ -1941,230 +1917,447 @@ export default function EmailBlastPage() {
         </div>
       )}
 
-      {/* MODAL: Insert Image / Banner Modal */}
-      {showImageModal && (
+      {/* MODAL: Templates Library Modal */}
+      {showTemplatesModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn(
-            "w-full max-w-lg rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
+            "w-full max-w-2xl rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
             isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
           )}>
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80 mb-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
-                  <ImageIcon className="w-4 h-4" />
+                  <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base">Insert Promo Image / Banner</h3>
-                  <p className="text-xs text-zinc-500">Insert responsive graphic banner into your promotional email.</p>
+                  <h3 className="font-bold text-sm sm:text-base">Daftar Template Email</h3>
+                  <p className="text-xs text-zinc-500">Pilih template siap pakai atau gunakan template yang telah kamu simpan.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewTemplateName("");
+                    setNewTemplateSubject(subject);
+                    setShowSaveTemplateModal(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Simpan Draf Ini</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowTemplatesModal(false)}
+                  className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Tabs & Search */}
+            <div className="space-y-3 mb-3 shrink-0">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/20 border border-white/5 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setTemplateTab("all")}
+                    className={cn(
+                      "py-1.5 px-3 rounded-lg transition-all cursor-pointer",
+                      templateTab === "all" ? "bg-cyan-500 text-slate-950 font-bold shadow-xs" : "text-zinc-400 hover:text-white"
+                    )}
+                  >
+                    Semua ({PROMO_TEMPLATES.length + savedTemplates.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTemplateTab("saved")}
+                    className={cn(
+                      "py-1.5 px-3 rounded-lg transition-all cursor-pointer flex items-center gap-1",
+                      templateTab === "saved" ? "bg-cyan-500 text-slate-950 font-bold shadow-xs" : "text-zinc-400 hover:text-white"
+                    )}
+                  >
+                    <Bookmark className="w-3 h-3" />
+                    <span>Tersimpan ({savedTemplates.length})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTemplateTab("system")}
+                    className={cn(
+                      "py-1.5 px-3 rounded-lg transition-all cursor-pointer",
+                      templateTab === "system" ? "bg-cyan-500 text-slate-950 font-bold shadow-xs" : "text-zinc-400 hover:text-white"
+                    )}
+                  >
+                    Resmi Sistem ({PROMO_TEMPLATES.length})
+                  </button>
+                </div>
+
+                <div className="relative flex-1 min-w-[180px]">
+                  <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={templateSearch}
+                    onChange={(e) => setTemplateSearch(e.target.value)}
+                    placeholder="Cari nama template..."
+                    className={cn(
+                      "w-full pl-8 pr-3 py-1.5 rounded-xl border text-xs outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Templates List */}
+            <div className="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
+              {(() => {
+                // Combine and filter templates
+                const systemList = PROMO_TEMPLATES.map(t => ({
+                  ...t,
+                  isCustom: false,
+                  createdAt: "Bawaan Sistem"
+                }));
+                const customList = savedTemplates.map(t => ({
+                  ...t,
+                  isCustom: true
+                }));
+
+                let combined = [];
+                if (templateTab === "all") {
+                  combined = [...customList, ...systemList];
+                } else if (templateTab === "saved") {
+                  combined = customList;
+                } else {
+                  combined = systemList;
+                }
+
+                if (templateSearch.trim()) {
+                  const q = templateSearch.toLowerCase();
+                  combined = combined.filter(t => t.name.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q));
+                }
+
+                if (combined.length === 0) {
+                  return (
+                    <div className="text-center py-12 px-4 rounded-xl border border-dashed border-slate-800">
+                      <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs text-zinc-400 font-medium">Tidak ada template ditemukan</p>
+                      {templateTab === "saved" && (
+                        <p className="text-[11px] text-zinc-500 mt-1">
+                          Kamu belum menyimpan template kustom. Klik tombol <strong className="text-cyan-400">"Simpan Draf Ini"</strong> di atas untuk menyimpan draf email saat ini.
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+
+                return combined.map((tpl) => (
+                  <div
+                    key={tpl.id}
+                    className={cn(
+                      "p-3 sm:p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group",
+                      isDark
+                        ? "bg-[#060b14]/70 border-slate-800 hover:border-cyan-500/40 hover:bg-[#060b14]"
+                        : "bg-slate-50 border-slate-200 hover:border-cyan-400 hover:bg-white"
+                    )}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="font-bold text-xs sm:text-sm text-cyan-400 truncate">
+                          {tpl.name}
+                        </span>
+                        {tpl.isCustom ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                            <Bookmark className="w-2.5 h-2.5" />
+                            <span>Tersimpan · {tpl.createdAt}</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                            ⚡ Resmi Sistem
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-400 truncate font-mono">
+                        {tpl.subject || "(Tanpa Subject)"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                      {tpl.isCustom && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSavedTemplate(tpl.id, tpl.name)}
+                          title="Hapus template tersimpan ini"
+                          className="p-2 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSelectTemplate(tpl);
+                          setShowTemplatesModal(false);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Pakai Template Ini</span>
+                      </button>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+
+            {/* Footer */}
+            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-zinc-500 mt-2 shrink-0">
+              <span>Semua template tersimpan secara lokal dan aman di browser kamu.</span>
+              <button
+                type="button"
+                onClick={() => setShowTemplatesModal(false)}
+                className="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Save Current Email As Template */}
+      {showSaveTemplateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={cn(
+            "w-full max-w-md rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden flex flex-col",
+            isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+          )}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                  <Bookmark className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base">Simpan Sebagai Template</h3>
+                  <p className="text-xs text-zinc-500">Simpan draf email saat ini agar bisa dipakai ulang.</p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setShowImageModal(false)}
+                onClick={() => setShowSaveTemplateModal(false)}
                 className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Tab switch */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/20 border border-white/5 mb-4 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setImageTab("upload")}
-                className={cn(
-                  "flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer",
-                  imageTab === "upload"
-                    ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
-                    : "text-zinc-400 hover:text-white"
-                )}
-              >
-                <UploadCloud className="w-3.5 h-3.5" />
-                <span>Upload From Computer</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setImageTab("url")}
-                className={cn(
-                  "flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer",
-                  imageTab === "url"
-                    ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
-                    : "text-zinc-400 hover:text-white"
-                )}
-              >
-                <LinkIcon className="w-3.5 h-3.5" />
-                <span>External Image URL</span>
-              </button>
-            </div>
-
-            <div className="space-y-3.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
-              {/* Tab 1: Upload */}
-              {imageTab === "upload" && (
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">Select Banner File (PNG, JPG, WebP)</label>
-                  <div
-                    onClick={() => imageFileInputRef.current?.click()}
-                    className={cn(
-                      "border-2 border-dashed rounded-xl p-4 sm:p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2",
-                      isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/5" : "border-slate-300 hover:border-cyan-500 hover:bg-cyan-50"
-                    )}
-                  >
-                    <input
-                      ref={imageFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleUploadImageFile}
-                      className="hidden"
-                    />
-                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                      {uploadingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
-                    </div>
-                    <div className="text-xs">
-                      <span className="font-semibold text-cyan-400">Click to upload banner</span> or drag and drop
-                    </div>
-                    <p className="text-[11px] text-zinc-500">Max size 10MB. Automatically compressed to WebP for fast email loading.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: URL */}
-              {imageTab === "url" && (
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Image URL (Must start with https://)</label>
-                  <input
-                    type="url"
-                    value={imageUrlInput}
-                    onChange={(e) => setImageUrlInput(e.target.value)}
-                    placeholder="https://example.com/banner-promo.jpg"
-                    className={cn(
-                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-mono outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
-                    )}
-                  />
-                </div>
-              )}
-
-              {/* Uploaded / Current Image Preview */}
-              {imageUrlInput && (
-                <div className={cn(
-                  "p-3 rounded-xl border flex items-center justify-between gap-3 transition-all",
-                  isDark ? "border-cyan-500/20 bg-cyan-500/5" : "border-cyan-200 bg-cyan-50/50"
-                )}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <img
-                      src={imageUrlInput}
-                      alt="Preview"
-                      className="w-16 h-12 object-cover rounded-lg border border-white/10 shrink-0"
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                    />
-                    <div className="min-w-0 text-xs">
-                      <div className="font-bold text-cyan-400 truncate flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                        <span>Gambar Siap Di-insert</span>
-                      </div>
-                      <div className="text-[11px] text-zinc-400 font-mono truncate max-w-[240px] sm:max-w-xs">{imageUrlInput}</div>
-                      {imageUrlInput.includes("/uploads/") ? (
-                        <div className="text-[10px] text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
-                          <span>📁 Tersimpan di public/uploads/email-blast/</span>
-                        </div>
-                      ) : (
-                        <div className="text-[10px] text-zinc-500 font-medium mt-0.5">
-                          <span>🌐 External Image URL</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {imageUrlInput.includes("/uploads/") ? (
-                    <button
-                      type="button"
-                      disabled={deletingImage}
-                      onClick={handleDeleteUploadedImage}
-                      title="Hapus gambar permanen dari storage server"
-                      className="shrink-0 px-2.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer disabled:opacity-50"
-                    >
-                      {deletingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      <span className="hidden sm:inline">Hapus Storage</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setImageUrlInput("")}
-                      className="shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                      title="Clear URL"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Clickable Destination Link */}
+            <form onSubmit={handleSaveCurrentAsTemplate} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1">
-                  Destination Link (When recipient clicks the banner)
-                </label>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">Nama Template</label>
                 <input
-                  type="url"
-                  value={imageLinkInput}
-                  onChange={(e) => setImageLinkInput(e.target.value)}
-                  placeholder="https://masdika.id/vps"
+                  type="text"
+                  required
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  placeholder="Misal: Promo Akhir Tahun VPS NVMe"
                   className={cn(
-                    "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-mono outline-none transition-colors",
+                    "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
                     isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                   )}
                 />
               </div>
 
-              {/* Alt Text & Size */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">Subject Email</label>
+                <input
+                  type="text"
+                  value={newTemplateSubject}
+                  onChange={(e) => setNewTemplateSubject(e.target.value)}
+                  placeholder="Subject default untuk template ini"
+                  className={cn(
+                    "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
+                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                  )}
+                />
+              </div>
+
+              <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-xs text-zinc-400">
+                <span className="text-cyan-400 font-semibold block mb-0.5">💡 Tersimpan di Template Saya</span>
+                Template akan otomatis muncul di daftar menu <strong className="text-white">Templates</strong> dan dapat kamu pilih kapan saja.
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSaveTemplateModal(false)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer shadow-xs"
+                >
+                  Simpan Template
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Email Signature Editor & Inserter */}
+      {showSignatureModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={cn(
+            "w-full max-w-lg rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
+            isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+          )}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                  <PenTool className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base">Signature Email Masdika</h3>
+                  <p className="text-xs text-zinc-500">Sesuaikan identitas pengirim dan sisipkan ke isi email.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSignatureModal(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Alt Text (Image description)</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Nama Pengirim / Tim</label>
                   <input
                     type="text"
-                    value={imageAltInput}
-                    onChange={(e) => setImageAltInput(e.target.value)}
-                    placeholder="Promo Spesial Masdika Cloud"
+                    value={signatureData.name}
+                    onChange={(e) => setSignatureData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
-                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Banner Width</label>
-                  <Select
-                    value={imageMaxWidth}
-                    onChange={(val) => setImageMaxWidth(val)}
-                    options={BANNER_WIDTH_OPTIONS}
-                    direction="up"
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Jabatan / Divisi</label>
+                  <input
+                    type="text"
+                    value={signatureData.title}
+                    onChange={(e) => setSignatureData(prev => ({ ...prev, title: e.target.value }))}
                     className={cn(
-                      "py-2 px-3 text-xs sm:text-sm rounded-xl font-medium",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Perusahaan</label>
+                  <input
+                    type="text"
+                    value={signatureData.company}
+                    onChange={(e) => setSignatureData(prev => ({ ...prev, company: e.target.value }))}
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Website</label>
+                  <input
+                    type="text"
+                    value={signatureData.website}
+                    onChange={(e) => setSignatureData(prev => ({ ...prev, website: e.target.value }))}
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Email Support / Kontak</label>
+                  <input
+                    type="email"
+                    value={signatureData.email}
+                    onChange={(e) => setSignatureData(prev => ({ ...prev, email: e.target.value }))}
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors font-mono",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">No. WhatsApp / Telepon (Opsional)</label>
+                  <input
+                    type="text"
+                    value={signatureData.phone}
+                    onChange={(e) => setSignatureData(prev => ({ ...prev, phone: e.target.value }))}
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Live Signature Preview Card */}
+              <div className="mt-3">
+                <span className="block text-xs font-semibold text-zinc-400 mb-1.5">Preview Tampilan Signature:</span>
+                <div className="p-3.5 rounded-xl border border-white/10 bg-black/30 flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-cyan-400 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    M
+                  </div>
+                  <div className="text-xs space-y-0.5 min-w-0">
+                    <div className="font-bold text-white text-sm">{signatureData.name}</div>
+                    <div className="text-cyan-400 font-semibold">{signatureData.title} · {signatureData.company}</div>
+                    <div className="text-zinc-400 text-[11px] pt-1">
+                      <span>🌐 {signatureData.website}</span>
+                      <span className="mx-1.5">|</span>
+                      <span>✉️ {signatureData.email}</span>
+                      {signatureData.phone && (
+                        <>
+                          <span className="mx-1.5">|</span>
+                          <span>📞 {signatureData.phone}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Actions */}
+            {/* Modal Actions */}
             <div className="pt-4 border-t border-slate-800/80 flex items-center justify-end gap-2 shrink-0 mt-3">
               <button
                 type="button"
-                onClick={() => setShowImageModal(false)}
+                onClick={() => setShowSignatureModal(false)}
                 className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="button"
-                disabled={!imageUrlInput.trim() || uploadingImage}
-                onClick={handleInsertImage}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                onClick={handleInsertSignature}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
               >
-                <ImageIcon className="w-3.5 h-3.5 shrink-0" />
-                <span>Insert Banner into Email</span>
+                <PenTool className="w-3.5 h-3.5" />
+                <span>Sisipkan Signature ke Email</span>
               </button>
             </div>
           </div>
