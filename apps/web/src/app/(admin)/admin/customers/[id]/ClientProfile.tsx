@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
-import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, KeyRound, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, HardDrive, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History } from 'lucide-react';
+import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, KeyRound, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { SiKubernetes } from 'react-icons/si';
 import { toast } from 'sonner';
@@ -358,15 +358,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
       let serviceName = s.plan?.service || 'UNKNOWN';
       let icon = <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
 
-      if (serviceName === 'OBJECT_STORAGE') {
+      if (serviceName === 'CDN') {
         serviceName = 'File CDN';
-        icon = <HardDrive className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
+        icon = <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       } else if (serviceName === 'SHORTENER') {
         serviceName = 'URL Shortener';
         icon = <Link2 className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
-      } else if (serviceName === 'CDN') {
-        serviceName = 'CDN';
-        icon = <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       } else if (serviceName === 'SPOTIFY') {
         icon = <Music className="w-4 h-4 text-green-400" />;
       } else if (serviceName === 'BMKG_EARTHQUAKE') {

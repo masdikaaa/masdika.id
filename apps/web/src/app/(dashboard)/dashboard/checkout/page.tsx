@@ -172,7 +172,7 @@ function CheckoutContent() {
       }
       setPaymentMethods(pms);
 
-      const defaultServicePlans = plansRes.data.filter((p: any) => p.service === "OBJECT_STORAGE" && p.price > 0);
+      const defaultServicePlans = plansRes.data.filter((p: any) => p.service === "CDN" && p.price > 0);
       if (defaultServicePlans.length > 0) {
         setSelectedPlanId(defaultServicePlans[0].id);
       }
@@ -299,7 +299,7 @@ function CheckoutContent() {
     }
     const specs: string[] = [];
 
-    if (plan.service === 'OBJECT_STORAGE' || plan.service === 'CDN') {
+    if (plan.service === 'CDN') {
       if (limits.storageGB) specs.push(`${limits.storageGB} GB Storage`);
       if (limits.transferGB) specs.push(`${limits.transferGB} GB Bandwidth / mo`);
       if (limits.requests && limits.requests !== 'unlimited') specs.push(`${limits.requests.toString().toUpperCase()} API Requests`);

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  * - K3s Kubernetes Clusters (Master & Worker nodes)
  * - Background Job Queue (PROVISION_VPS, INSTALL_K3S, REINSTALL_K3S)
  * - VPC Networks (MicroTik & Proxmox VLANs)
- * - Subscriptions & Plan Orders (File CDN, Edge CDN, Object Storage, API Hub)
+ * - Subscriptions & Plan Orders (File CDN, Edge CDN, API Hub)
  * - Cloud Backups (Drive, S3, R2 streaming)
  * - Proxmox Hypervisor Tasks (vzdump, qmrestore, qmsnapshot, qmrollback, qmdelsnapshot, qmclone)
  * are NEVER interrupted mid-flight by a container restart.

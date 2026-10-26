@@ -33,9 +33,7 @@ export default function DashboardApiKeys() {
         const json = await res.json();
         if (json.success && json.data?.subscriptions) {
           const allActiveSubs = json.data.subscriptions.filter((s: any) => s.status === 'ACTIVE');
-          const apiSubs = allActiveSubs.filter((s: any) => s.plan.service !== 'OBJECT_STORAGE');
-          
-          const uniqueApiServices = Array.from(new Set(apiSubs.map((s: any) => s.plan.service))) as string[];
+          const uniqueApiServices = Array.from(new Set(allActiveSubs.map((s: any) => s.plan.service))) as string[];
           setServices(uniqueApiServices);
           
           if (uniqueApiServices.length > 0) {

@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Layers, ArrowUpCircle, AlertTriangle, CheckCircle2, Clock, XCircle, Box, Server, Database, Activity, PackageOpen, RefreshCw, Terminal, HardDrive, UploadCloud, Code, CreditCard } from "lucide-react";
+import { Layers, ArrowUpCircle, AlertTriangle, CheckCircle2, Clock, XCircle, Box, Server, Database, Activity, PackageOpen, RefreshCw, Terminal, UploadCloud, Code, CreditCard } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -145,7 +145,6 @@ export default function MyServicesPage() {
 
   const getServiceIcon = (service: string) => {
     switch (service) {
-      case 'OBJECT_STORAGE': return <HardDrive className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
       case 'CDN': return <UploadCloud className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
       case 'API_HUB': return <Code className="w-6 h-6 text-fuchsia-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
       case 'VPS': return <Terminal className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
@@ -156,7 +155,6 @@ export default function MyServicesPage() {
 
   const getServiceColor = (service: string) => {
     switch (service) {
-      case 'OBJECT_STORAGE': return "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
       case 'API_HUB': return "from-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30";
       case 'VPS': return "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
       default: return "from-cyan-500/20 text-cyan-400 border-cyan-500/30";

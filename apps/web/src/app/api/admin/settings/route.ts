@@ -39,7 +39,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, object_storage_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate } = body;
+    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate } = body;
 
     // Update user
     const user = await prisma.user.findUnique({ where: { id: auth.userId } });
@@ -82,7 +82,6 @@ export async function PUT(req: Request) {
     if (maintenance_message !== undefined) settingsToUpdate.push({ key: 'maintenance_message', value: maintenance_message });
     if (vps_enabled !== undefined) settingsToUpdate.push({ key: 'vps_enabled', value: String(vps_enabled) });
     if (k3s_enabled !== undefined) settingsToUpdate.push({ key: 'k3s_enabled', value: String(k3s_enabled) });
-    if (object_storage_enabled !== undefined) settingsToUpdate.push({ key: 'object_storage_enabled', value: String(object_storage_enabled) });
     if (cdn_enabled !== undefined) settingsToUpdate.push({ key: 'cdn_enabled', value: String(cdn_enabled) });
     if (promo_banner_image !== undefined) settingsToUpdate.push({ key: 'promo_banner_image', value: promo_banner_image });
     if (promo_banner_url !== undefined) settingsToUpdate.push({ key: 'promo_banner_url', value: promo_banner_url });

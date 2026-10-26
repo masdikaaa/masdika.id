@@ -21,7 +21,7 @@ interface Plan {
   isActive: boolean;
 }
 const getDefaultLimitFields = (service: string) => {
-  if (service === 'OBJECT_STORAGE' || service === 'CDN') {
+  if (service === 'CDN') {
     return [{key: 'storageGB', value: '10'}, {key: 'transferGB', value: '50'}, {key: 'requests', value: 'unlimited'}];
   } else if (service === 'SHORTENER') {
     return [{key: 'links', value: '500'}];
@@ -62,10 +62,10 @@ export default function AdminPlansPage() {
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
   // Form states
-  const [limitFields, setLimitFields] = useState<{key: string, value: string}[]>(getDefaultLimitFields("OBJECT_STORAGE"));
+  const [limitFields, setLimitFields] = useState<{key: string, value: string}[]>(getDefaultLimitFields("CDN"));
   const [formData, setFormData] = useState({
     name: "",
-    service: "OBJECT_STORAGE",
+    service: "CDN",
     description: "",
     price: 0,
     hourlyPrice: 0,
@@ -77,10 +77,10 @@ export default function AdminPlansPage() {
   }, []);
   const openAddModal = () => {
     setEditingPlan(null);
-    setLimitFields(getDefaultLimitFields("OBJECT_STORAGE"));
+    setLimitFields(getDefaultLimitFields("CDN"));
     setFormData({
       name: "",
-      service: "OBJECT_STORAGE",
+      service: "CDN",
       description: "",
       price: 0,
       hourlyPrice: 0,
@@ -175,7 +175,6 @@ export default function AdminPlansPage() {
   };
   const getServiceIcon = (service: string) => {
     switch (service) {
-      case 'OBJECT_STORAGE': return <Database className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'CDN': return <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'SHORTENER': return <LinkIcon className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-700")} />;
       case 'TIKTOK': return <FileVideo className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-700")} />;
@@ -345,7 +344,7 @@ export default function AdminPlansPage() {
       {/* Filter and Control Bar (GAMBAR 1 Style) */}
       <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
-          {["ALL", "OBJECT_STORAGE", "CDN", "SHORTENER", "PASTEBIN", "LINK_BIO"].map((srv) => {
+          {["ALL", "CDN", "SHORTENER", "PASTEBIN", "LINK_BIO"].map((srv) => {
             const count = srv === "ALL" ? plans.length : plans.filter(p => p.service === srv).length;
             return (
               <button

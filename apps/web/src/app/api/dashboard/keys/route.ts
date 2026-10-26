@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
   try {
     const { name, service } = await req.json();
 
-    if (!service || service === 'OBJECT_STORAGE') {
-      return NextResponse.json({ error: "Invalid service or service not permitted for API Hub keys" }, { status: 400 });
+    if (!service) {
+      return NextResponse.json({ error: "Service is required for API keys" }, { status: 400 });
     }
 
     // Check if user has an active subscription for this service

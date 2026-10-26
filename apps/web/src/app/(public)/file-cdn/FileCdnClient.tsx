@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -67,7 +67,7 @@ const CDN_FAQS = [
   },
   {
     q: "What is the maximum file size supported?",
-    a: "The standard temporary storage ingestion allows up to 100MB per file. For persistent object storage and higher media workloads, you can easily upgrade to our dedicated Object Storage or Pro CDN tiers."
+    a: "The standard temporary storage ingestion allows up to 100MB per file. For persistent storage and higher media workloads, you can easily upgrade to our Pro CDN tiers."
   },
   {
     q: "Why is local Indonesian peering beneficial for media delivery?",

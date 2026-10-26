@@ -52,9 +52,6 @@ export async function POST(req: NextRequest) {
       return s ? s.value : defaultValue;
     };
 
-    if (plan.service === 'OBJECT_STORAGE' && getSetting('object_storage_enabled') === 'false') {
-      return NextResponse.json({ error: "File CDN service is currently disabled." }, { status: 403 });
-    }
     if (plan.service === 'CDN' && getSetting('cdn_enabled') === 'false') {
       return NextResponse.json({ error: "CDN service is currently disabled." }, { status: 403 });
     }

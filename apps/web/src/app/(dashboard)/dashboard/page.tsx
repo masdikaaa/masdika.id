@@ -35,7 +35,6 @@ const VpcIcon = ({ className }: { className?: string }) => (
 export default function DashboardOverview() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [storageUsage, setStorageUsage] = useState<any>(null);
   const [cdnUsage, setCdnUsage] = useState<any>(null);
   const [vpsList, setVpsList] = useState<any[]>([]);
   const [k3sList, setK3sList] = useState<any[]>([]);
@@ -55,7 +54,6 @@ export default function DashboardOverview() {
 
     Promise.all([
       fetch("/api/user/billing").then(safeJson),
-      fetch("/api/user/storage-usage").then(safeJson),
       fetch("/api/user/cdn/quota").then(safeJson),  
       fetch("/api/user/vps").then(safeJson),
       fetch("/api/user/k3s").then(safeJson),
@@ -64,9 +62,8 @@ export default function DashboardOverview() {
       fetch("/api/announcements").then(safeJson),
       fetch("/api/banners").then(safeJson)
     ])
-      .then(([billingRes, storageData, cdnData, vpsData, k3sData, ipsData, vpcData, beritaData, bannersData]) => {
+      .then(([billingRes, cdnData, vpsData, k3sData, ipsData, vpcData, beritaData, bannersData]) => {
         if (billingRes?.success) setBillingData(billingRes.data);
-        if (storageData?.success) setStorageUsage(storageData.data);
         if (cdnData && !cdnData.error) setCdnUsage(cdnData);
         if (Array.isArray(vpsData)) setVpsList(vpsData);
         if (Array.isArray(k3sData)) setK3sList(k3sData);

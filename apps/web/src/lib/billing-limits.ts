@@ -47,11 +47,11 @@ export async function enforceApiLimit(userId: number, service: string) {
  * Calculates current storage usage in bytes for a user.
  */
 export async function getStorageUsage(userId: number) {
-  let sub = await getActiveSubscription(userId, 'OBJECT_STORAGE');
+  let sub = await getActiveSubscription(userId, 'CDN');
   let isSuspended = false;
   
   if (!sub) {
-    sub = await getSuspendedSubscription(userId, 'OBJECT_STORAGE');
+    sub = await getSuspendedSubscription(userId, 'CDN');
     isSuspended = !!sub;
   }
   
@@ -90,7 +90,11 @@ export async function getStorageUsage(userId: number) {
 
   const storageLimitString = isUnlimited ? 'Unlimited' : (storageGB !== undefined ? `${storageGB} GB` : (storageLimit || '0 GB'));
 
-  let currentTotalBytes = 0;
+  const aggregate = await prisma.secureMedia.aggregate({
+    where: { userId },
+    _sum: { size: true }
+  });
+  const currentTotalBytes = aggregate._sum.size || 0;
 
   return { usedBytes: currentTotalBytes, limitBytes, storageLimitString, isUnlimited, isSuspended };
 }
@@ -103,7 +107,7 @@ export async function enforceStorageLimit(userId: number, additionalBytes: numbe
   const usage = await getStorageUsage(userId);
   
   if (usage.storageLimitString === 'No Active Subscription' || usage.isSuspended) {
-    throw new Error('Active OBJECT_STORAGE subscription required');
+    throw new Error('Active CDN subscription required');
   }
 
   if (usage.isUnlimited) return true; // Explicitly Unlimited

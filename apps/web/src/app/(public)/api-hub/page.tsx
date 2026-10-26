@@ -45,7 +45,7 @@ export default async function ApiHubPage() {
     })
   ]);
 
-  const apiPlans = plans.filter((p: any) => !['OBJECT_STORAGE', 'CDN', 'SHORTENER'].includes(p.service));
+  const apiPlans = plans.filter((p: any) => !['CDN', 'SHORTENER'].includes(p.service));
 
   return <ApiHubClient initialProjects={projects} initialPlans={apiPlans} />;
 }

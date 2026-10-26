@@ -63,7 +63,6 @@ export default function ApiLabClient({ project }: { project: any }) {
               case 'youtube-downloader': return 'YOUTUBE';
               case 'tiktok-downloader': return 'TIKTOK';
               case 'spotify-downloader': return 'SPOTIFY';
-              case 'object-storage': return 'OBJECT_STORAGE';
               case 'cdn': return 'CDN';
               default: return slug.toUpperCase().replace('-', '_');
             }

@@ -31,7 +31,7 @@ Selamat datang di repositori resmi **Masdika.ID**. Proyek ini adalah aplikasi we
 
 ### 🛠️ Panel Kontrol Admin
 - **Manajemen Infrastruktur**: Dasbor terpusat untuk mengelola node server, memantau alert sistem, audit resource, dan mengelola pengguna.
-- **Alat Utilitas**: Dilengkapi fitur URL shortener, object storage / secure media manager, dan media review.
+- **Alat Utilitas**: Dilengkapi fitur URL shortener, File CDN / secure media manager, dan media review.
 
 ---
 

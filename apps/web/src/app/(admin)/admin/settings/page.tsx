@@ -79,7 +79,6 @@ export default function SettingsPage() {
 
     vps_enabled: true,
     k3s_enabled: true,
-    object_storage_enabled: true,
     cdn_enabled: true,
     tax_rate: "0"
   });
@@ -128,7 +127,6 @@ export default function SettingsPage() {
 
             vps_enabled: data.settings?.vps_enabled !== "false",
             k3s_enabled: data.settings?.k3s_enabled !== "false",
-            object_storage_enabled: data.settings?.object_storage_enabled !== "false",
             cdn_enabled: data.settings?.cdn_enabled !== "false",
             tax_rate: data.settings?.tax_rate || "0"
           });
