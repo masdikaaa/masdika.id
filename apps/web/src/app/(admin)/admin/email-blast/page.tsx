@@ -690,7 +690,7 @@ export default function EmailBlastPage() {
   const handleSaveCurrentAsTemplate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!newTemplateName.trim()) {
-      toast.error("Silakan masukkan nama template");
+      toast.error("Please enter a template name");
       return;
     }
 
@@ -699,7 +699,7 @@ export default function EmailBlastPage() {
       name: newTemplateName.trim(),
       subject: newTemplateSubject.trim() || subject,
       html: htmlContent,
-      createdAt: new Date().toLocaleDateString("id-ID", {
+      createdAt: new Date().toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -716,7 +716,7 @@ export default function EmailBlastPage() {
       console.error("Failed to save template to localStorage:", err);
     }
 
-    toast.success(`Template "${templateToSave.name}" berhasil disimpan!`);
+    toast.success(`Template "${templateToSave.name}" successfully saved!`);
     setShowSaveTemplateModal(false);
     setNewTemplateName("");
   };
@@ -731,16 +731,16 @@ export default function EmailBlastPage() {
         const updated = savedTemplates.filter(t => t.id !== templateToDelete.id);
         setSavedTemplates(updated);
         localStorage.setItem(SAVED_TEMPLATES_STORAGE_KEY, JSON.stringify(updated));
-        toast.success(`Template "${templateToDelete.name}" berhasil dihapus!`);
+        toast.success(`Template "${templateToDelete.name}" successfully deleted!`);
       } else {
         const updated = [...deletedSystemTemplateIds, templateToDelete.id];
         setDeletedSystemTemplateIds(updated);
         localStorage.setItem(DELETED_SYSTEM_TEMPLATES_KEY, JSON.stringify(updated));
-        toast.success(`Template "${templateToDelete.name}" berhasil dihapus dari daftar!`);
+        toast.success(`Template "${templateToDelete.name}" removed from library!`);
       }
     } catch (err) {
       console.error("Failed to delete template:", err);
-      toast.error("Gagal menghapus template");
+      toast.error("Failed to delete template");
     } finally {
       setIsDeletingTemplate(false);
       setTemplateToDelete(null);
@@ -752,10 +752,10 @@ export default function EmailBlastPage() {
     try {
       localStorage.removeItem(DELETED_SYSTEM_TEMPLATES_KEY);
       setDeletedSystemTemplateIds([]);
-      toast.success("Semua template resmi sistem berhasil dipulihkan!");
+      toast.success("All official templates restored successfully!");
     } catch (err) {
       console.error("Failed to restore templates:", err);
-      toast.error("Gagal memulihkan template");
+      toast.error("Failed to restore templates");
     }
   };
 
@@ -795,7 +795,7 @@ export default function EmailBlastPage() {
     }
 
     setShowSignatureModal(false);
-    toast.success("Signature berhasil disisipkan ke dalam email!");
+    toast.success("Signature successfully inserted into email!");
   };
 
   // Dedicated SMTP Configuration State
@@ -1219,16 +1219,16 @@ export default function EmailBlastPage() {
                 setShowSaveTemplateModal(true);
               }}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
-              title="Simpan email saat ini sebagai template baru"
+              title="Save current email as new template"
             >
               <Save className="w-4 h-4" />
               <span className="text-[10px]">Save</span>
             </button>
             <button
               type="button"
-              onClick={() => toast.info("Attachment dapat disisipkan langsung melalui link URL dokumen di isi email.")}
+              onClick={() => toast.info("Attachments can be shared via downloadable document links in the email body.")}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
-              title="Informasi Attachment"
+              title="Attachment Info"
             >
               <Paperclip className="w-4 h-4" />
               <span className="text-[10px]">Attach</span>
@@ -1237,7 +1237,7 @@ export default function EmailBlastPage() {
               type="button"
               onClick={() => setShowSignatureModal(true)}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
-              title="Atur & Sisipkan Signature Email"
+              title="Manage & Insert Email Signature"
             >
               <PenTool className="w-4 h-4" />
               <span className="text-[10px]">Signature</span>
@@ -1248,7 +1248,7 @@ export default function EmailBlastPage() {
               type="button"
               onClick={() => setShowTemplatesModal(true)}
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0 relative"
-              title="Buka Daftar Template Email Tersimpan & Resmi"
+              title="Browse Official & Saved Email Templates"
             >
               <MessageSquare className="w-4 h-4" />
               <span className="text-[10px]">Templates</span>
@@ -1968,9 +1968,9 @@ export default function EmailBlastPage() {
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-bold text-sm sm:text-base leading-tight">Daftar Template Email</h3>
+                  <h3 className="font-bold text-sm sm:text-base leading-tight">Email Templates</h3>
                   <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 leading-snug">
-                    Pilih template siap pakai atau kelola template tersimpan.
+                    Choose a ready-to-use template or manage your saved drafts.
                   </p>
                 </div>
               </div>
@@ -1978,7 +1978,7 @@ export default function EmailBlastPage() {
                 type="button"
                 onClick={() => setShowTemplatesModal(false)}
                 className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 -mr-1"
-                title="Tutup"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1993,10 +1993,10 @@ export default function EmailBlastPage() {
                   setNewTemplateSubject(subject);
                   setShowSaveTemplateModal(true);
                 }}
-                className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="w-full py-2.5 px-3.5 rounded-xl text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/25 hover:border-cyan-500/40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
-                <span>+ Simpan Draf Email Saat Ini Sebagai Template Baru</span>
+                <span>Save Draft as Template</span>
               </button>
             </div>
 
@@ -2019,7 +2019,7 @@ export default function EmailBlastPage() {
                           : "text-zinc-400 hover:text-white"
                       )}
                     >
-                      Semua ({totalCount})
+                      All ({totalCount})
                     </button>
                     <button
                       type="button"
@@ -2032,7 +2032,7 @@ export default function EmailBlastPage() {
                       )}
                     >
                       <Bookmark className="w-3 h-3 shrink-0 hidden sm:inline" />
-                      <span>Tersimpan ({savedTemplates.length})</span>
+                      <span>Saved ({savedTemplates.length})</span>
                     </button>
                     <button
                       type="button"
@@ -2044,7 +2044,7 @@ export default function EmailBlastPage() {
                           : "text-zinc-400 hover:text-white"
                       )}
                     >
-                      Resmi ({activeSystemList.length})
+                      Official ({activeSystemList.length})
                     </button>
                   </div>
 
@@ -2055,7 +2055,7 @@ export default function EmailBlastPage() {
                       type="text"
                       value={templateSearch}
                       onChange={(e) => setTemplateSearch(e.target.value)}
-                      placeholder="Cari nama template atau subject..."
+                      placeholder="Search templates by name or subject..."
                       className={cn(
                         "w-full pl-8 pr-8 py-2 rounded-xl border text-xs outline-none transition-colors",
                         isDark
@@ -2068,6 +2068,7 @@ export default function EmailBlastPage() {
                         type="button"
                         onClick={() => setTemplateSearch("")}
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white p-0.5 cursor-pointer"
+                        title="Clear search"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -2086,7 +2087,7 @@ export default function EmailBlastPage() {
                   .map(t => ({
                     ...t,
                     isCustom: false,
-                    createdAt: "Bawaan Sistem"
+                    createdAt: "Official System"
                   }));
 
                 const customList = savedTemplates.map(t => ({
@@ -2112,10 +2113,10 @@ export default function EmailBlastPage() {
                   return (
                     <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-800 space-y-2">
                       <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto opacity-50" />
-                      <p className="text-xs text-zinc-400 font-medium">Tidak ada template ditemukan</p>
+                      <p className="text-xs text-zinc-400 font-medium">No templates found</p>
                       {templateTab === "saved" && (
                         <p className="text-[11px] text-zinc-500 max-w-sm mx-auto">
-                          Kamu belum menyimpan template kustom. Klik tombol <strong className="text-cyan-400">"+ Simpan Draf Email"</strong> di atas untuk menyimpan draf email saat ini.
+                          You haven't saved any custom templates yet. Click <strong className="text-cyan-400">"Save Draft as Template"</strong> above to store your current email draft.
                         </p>
                       )}
                       {templateTab === "system" && deletedSystemTemplateIds.length > 0 && (
@@ -2125,7 +2126,7 @@ export default function EmailBlastPage() {
                           className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
-                          <span>Pulihkan {deletedSystemTemplateIds.length} Template Resmi yang Terhapus</span>
+                          <span>Restore {deletedSystemTemplateIds.length} Deleted Official Templates</span>
                         </button>
                       )}
                     </div>
@@ -2150,11 +2151,11 @@ export default function EmailBlastPage() {
                       {tpl.isCustom ? (
                         <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                           <Bookmark className="w-2.5 h-2.5" />
-                          <span>Tersimpan</span>
+                          <span>Saved</span>
                         </span>
                       ) : (
                         <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                          ⚡ Resmi
+                          ⚡ Official
                         </span>
                       )}
                     </div>
@@ -2163,13 +2164,13 @@ export default function EmailBlastPage() {
                     <div className="text-xs text-zinc-400 leading-relaxed break-words line-clamp-2">
                       <span className="text-zinc-500 font-medium mr-1.5">Subject:</span>
                       <span className={cn(isDark ? "text-zinc-300" : "text-slate-700")}>
-                        {tpl.subject || "(Tanpa Subject)"}
+                        {tpl.subject || "(No Subject)"}
                       </span>
                     </div>
 
                     {tpl.isCustom && tpl.createdAt && (
                       <div className="text-[10px] text-zinc-500">
-                        Disimpan: {tpl.createdAt}
+                        Saved: {tpl.createdAt}
                       </div>
                     )}
 
@@ -2178,11 +2179,11 @@ export default function EmailBlastPage() {
                       <button
                         type="button"
                         onClick={() => setTemplateToDelete({ id: tpl.id, name: tpl.name, isCustom: tpl.isCustom })}
-                        title="Hapus template ini"
+                        title="Delete template"
                         className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-all cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                        <span>Hapus</span>
+                        <span>Delete</span>
                       </button>
 
                       <button
@@ -2194,7 +2195,7 @@ export default function EmailBlastPage() {
                         className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all cursor-pointer shadow-xs"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
-                        <span>Pakai Template Ini</span>
+                        <span>Use Template</span>
                       </button>
                     </div>
                   </div>
@@ -2205,14 +2206,14 @@ export default function EmailBlastPage() {
             {/* Footer */}
             <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 mt-2 shrink-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span>Tersimpan aman di browser kamu.</span>
+                <span>Stored locally in your browser.</span>
                 {deletedSystemTemplateIds.length > 0 && (
                   <button
                     type="button"
                     onClick={handleRestoreSystemTemplates}
                     className="text-cyan-400 hover:underline cursor-pointer font-medium"
                   >
-                    Pulihkan ({deletedSystemTemplateIds.length}) template resmi
+                    Restore ({deletedSystemTemplateIds.length}) official templates
                   </button>
                 )}
               </div>
@@ -2221,7 +2222,7 @@ export default function EmailBlastPage() {
                 onClick={() => setShowTemplatesModal(false)}
                 className="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors cursor-pointer self-end sm:self-auto"
               >
-                Tutup
+                Close
               </button>
             </div>
           </div>
@@ -2241,14 +2242,15 @@ export default function EmailBlastPage() {
                   <Bookmark className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base">Simpan Sebagai Template</h3>
-                  <p className="text-xs text-zinc-500">Simpan draf email saat ini agar bisa dipakai ulang.</p>
+                  <h3 className="font-bold text-sm sm:text-base">Save as Template</h3>
+                  <p className="text-xs text-zinc-500">Save current email draft to reuse anytime.</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSaveTemplateModal(false)}
                 className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2256,13 +2258,13 @@ export default function EmailBlastPage() {
 
             <form onSubmit={handleSaveCurrentAsTemplate} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1">Nama Template</label>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">Template Name</label>
                 <input
                   type="text"
                   required
                   value={newTemplateName}
                   onChange={(e) => setNewTemplateName(e.target.value)}
-                  placeholder="Misal: Promo Akhir Tahun VPS NVMe"
+                  placeholder="e.g. VPS Upgrade & Promo Announcement"
                   className={cn(
                     "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
                     isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
@@ -2271,12 +2273,12 @@ export default function EmailBlastPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1">Subject Email</label>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">Email Subject</label>
                 <input
                   type="text"
                   value={newTemplateSubject}
                   onChange={(e) => setNewTemplateSubject(e.target.value)}
-                  placeholder="Subject default untuk template ini"
+                  placeholder="Default subject for this template"
                   className={cn(
                     "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
                     isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
@@ -2285,8 +2287,8 @@ export default function EmailBlastPage() {
               </div>
 
               <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-xs text-zinc-400">
-                <span className="text-cyan-400 font-semibold block mb-0.5">💡 Tersimpan di Template Saya</span>
-                Template akan otomatis muncul di daftar menu <strong className="text-white">Templates</strong> dan dapat kamu pilih kapan saja.
+                <span className="text-cyan-400 font-semibold block mb-0.5">💡 Saved to Custom Templates</span>
+                This template will appear in the <strong className="text-white">Templates</strong> library and can be loaded with one click.
               </div>
 
               <div className="pt-3 border-t border-slate-800/80 flex items-center justify-end gap-2">
@@ -2295,13 +2297,13 @@ export default function EmailBlastPage() {
                   onClick={() => setShowSaveTemplateModal(false)}
                   className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer shadow-xs"
                 >
-                  Simpan Template
+                  Save Template
                 </button>
               </div>
             </form>
@@ -2322,14 +2324,15 @@ export default function EmailBlastPage() {
                   <PenTool className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base">Signature Email Masdika</h3>
-                  <p className="text-xs text-zinc-500">Sesuaikan identitas pengirim dan sisipkan ke isi email.</p>
+                  <h3 className="font-bold text-sm sm:text-base">Email Signature</h3>
+                  <p className="text-xs text-zinc-500">Configure sender identity and insert signature into email.</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSignatureModal(false)}
                 className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2338,7 +2341,7 @@ export default function EmailBlastPage() {
             <div className="space-y-3.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Nama Pengirim / Tim</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Sender Name / Team</label>
                   <input
                     type="text"
                     value={signatureData.name}
@@ -2350,7 +2353,7 @@ export default function EmailBlastPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Jabatan / Divisi</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Title / Role</label>
                   <input
                     type="text"
                     value={signatureData.title}
@@ -2365,7 +2368,7 @@ export default function EmailBlastPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Perusahaan</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Company</label>
                   <input
                     type="text"
                     value={signatureData.company}
@@ -2392,7 +2395,7 @@ export default function EmailBlastPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Email Support / Kontak</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Contact Email</label>
                   <input
                     type="email"
                     value={signatureData.email}
@@ -2404,7 +2407,7 @@ export default function EmailBlastPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 mb-1">No. WhatsApp / Telepon (Opsional)</label>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Phone / WhatsApp (Optional)</label>
                   <input
                     type="text"
                     value={signatureData.phone}
@@ -2419,7 +2422,7 @@ export default function EmailBlastPage() {
 
               {/* Live Signature Preview Card */}
               <div className="mt-3">
-                <span className="block text-xs font-semibold text-zinc-400 mb-1.5">Preview Tampilan Signature:</span>
+                <span className="block text-xs font-semibold text-zinc-400 mb-1.5">Signature Live Preview:</span>
                 <div className="p-3.5 rounded-xl border border-white/10 bg-black/30 flex items-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-cyan-400 text-white flex items-center justify-center font-bold text-sm shrink-0">
                     M
@@ -2450,7 +2453,7 @@ export default function EmailBlastPage() {
                 onClick={() => setShowSignatureModal(false)}
                 className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
-                Batal
+                Cancel
               </button>
               <button
                 type="button"
@@ -2458,7 +2461,7 @@ export default function EmailBlastPage() {
                 className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <PenTool className="w-3.5 h-3.5" />
-                <span>Sisipkan Signature ke Email</span>
+                <span>Insert Signature into Email</span>
               </button>
             </div>
           </div>
@@ -2483,14 +2486,14 @@ export default function EmailBlastPage() {
         isOpen={!!templateToDelete}
         onClose={() => setTemplateToDelete(null)}
         onConfirm={handleConfirmDeleteTemplate}
-        title="Hapus Template Email?"
+        title="Delete Email Template?"
         description={
           templateToDelete?.isCustom
-            ? `Apakah Anda yakin ingin menghapus template tersimpan "${templateToDelete?.name}"? Tindakan ini tidak dapat dibatalkan.`
-            : `Apakah Anda yakin ingin menghapus template resmi "${templateToDelete?.name}" dari daftar template Anda? Anda dapat memulihkan template resmi kapan saja.`
+            ? `Are you sure you want to delete the saved template "${templateToDelete?.name}"? This action cannot be undone.`
+            : `Are you sure you want to remove the official template "${templateToDelete?.name}" from your template list? You can restore official templates at any time.`
         }
-        confirmText="Ya, Hapus Template"
-        cancelText="Batal"
+        confirmText="Yes, Delete Template"
+        cancelText="Cancel"
         variant="danger"
         isLoading={isDeletingTemplate}
       />
