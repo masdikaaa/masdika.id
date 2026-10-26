@@ -1176,26 +1176,29 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1">
-                    {bandwidthOptions.map((speed) => {
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 pt-1">
+                    {bandwidthOptions.map((speed, index) => {
                       const isSelected = bandwidthMbps === speed;
                       const extraSteps = Math.floor(Math.max(0, speed - 100) / 50);
                       const monthlyPrice = extraSteps * 50000;
+                      const isLastOdd = index === bandwidthOptions.length - 1 && bandwidthOptions.length % 2 === 1;
                       return (
                         <button
                           key={speed}
                           type="button"
                           onClick={() => setBandwidthMbps(speed)}
                           className={cn(
-                            "flex flex-col items-center justify-center py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl border text-center transition-all cursor-pointer relative",
+                            "flex items-center justify-center py-2.5 px-2.5 sm:py-2.5 sm:px-2 rounded-xl border text-center transition-all cursor-pointer relative min-w-0",
+                            isLastOdd ? "col-span-2 sm:col-span-1 flex-row gap-2 sm:flex-col sm:gap-0" : "col-span-1 flex-col",
                             isSelected
                               ? (isDark ? "bg-cyan-500/20 border-cyan-400 text-white shadow-sm ring-1 ring-cyan-400" : "bg-cyan-50 border-cyan-600 text-cyan-900 shadow-sm ring-2 ring-cyan-600/30")
                               : (isDark ? "bg-[#060b14] border-slate-800 text-zinc-300 hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300")
                           )}
                         >
-                          <span className="font-bold text-xs sm:text-sm font-mono tracking-tight">{speed} Mbps</span>
+                          <span className="font-bold text-xs sm:text-sm font-mono tracking-tight shrink-0">{speed} Mbps</span>
                           <span className={cn(
-                            "text-[10px] sm:text-[11px] mt-0.5 font-semibold",
+                            "text-[10px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap",
+                            isLastOdd ? "mt-0 sm:mt-0.5" : "mt-0.5",
                             speed === 100
                               ? (isSelected ? "text-cyan-300 font-bold" : (isDark ? "text-cyan-400" : "text-cyan-600"))
                               : (isSelected ? (isDark ? "text-cyan-200" : "text-cyan-800") : (isDark ? "text-zinc-400" : "text-slate-500"))
