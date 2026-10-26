@@ -118,9 +118,18 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
+    // Normalize URL: handle both absolute URLs (https://domain/uploads/...) and relative paths (/uploads/...)
+    let uploadPath = String(url).trim();
+    try {
+      if (uploadPath.startsWith('http://') || uploadPath.startsWith('https://')) {
+        const parsed = new URL(uploadPath);
+        uploadPath = parsed.pathname;
+      }
+    } catch {}
+
     // Only allow deletion of files in /uploads/
-    if (url.startsWith('/uploads/')) {
-      const filename = url.replace('/uploads/', '');
+    if (uploadPath.startsWith('/uploads/')) {
+      const filename = uploadPath.replace(/^\/uploads\//, '');
 
       // Bulletproof path traversal prevention (same pattern as file-utils.ts)
       const baseDir = path.resolve(process.cwd(), 'public', 'uploads');
@@ -134,7 +143,7 @@ export async function DELETE(req: Request) {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, message: 'File deleted from storage' });
     }
     
     return NextResponse.json({ error: 'Invalid URL path' }, { status: 400 });

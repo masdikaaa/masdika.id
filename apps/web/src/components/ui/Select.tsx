@@ -19,6 +19,7 @@ interface SelectProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  direction?: "up" | "down";
 }
 
 export function Select({
@@ -28,6 +29,7 @@ export function Select({
   placeholder = "Select an option...",
   className,
   disabled = false,
+  direction = "down",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -78,12 +80,13 @@ export function Select({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: direction === "up" ? 10 : -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: direction === "up" ? 10 : -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute z-[90] w-full mt-2 rounded-xl shadow-2xl overflow-hidden border",
+              "absolute z-[90] w-full rounded-xl shadow-2xl overflow-hidden border",
+              direction === "up" ? "bottom-full mb-2" : "mt-2",
               isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200/90 shadow-xl"
             )}
           >

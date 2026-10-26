@@ -35,12 +35,14 @@ import {
   Info,
   Image as ImageIcon,
   UploadCloud,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Trash2
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { Select } from "@/components/ui/Select";
 
 // Pre-designed Responsive Promotional Email Templates with Sharp Universal Typography
 const FONT_STACK = "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
@@ -315,7 +317,45 @@ export default function EmailBlastPage() {
   const [imageAltInput, setImageAltInput] = useState("Promo Spesial Masdika Cloud");
   const [imageMaxWidth, setImageMaxWidth] = useState("600px");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [deletingImage, setDeletingImage] = useState(false);
   const imageFileInputRef = useRef<HTMLInputElement>(null);
+
+  const BANNER_WIDTH_OPTIONS = [
+    { value: "600px", label: "Full Width (600px - Recommended for Hero Banner)" },
+    { value: "450px", label: "Medium (450px)" },
+    { value: "300px", label: "Small (300px)" },
+    { value: "180px", label: "Logo / Icon (180px)" },
+  ];
+
+  const handleDeleteUploadedImage = async () => {
+    if (!imageUrlInput) return;
+
+    // If external URL, just clear without calling delete API
+    if (!imageUrlInput.includes("/uploads/")) {
+      setImageUrlInput("");
+      return;
+    }
+
+    setDeletingImage(true);
+    const toastId = toast.loading("Menghapus gambar dari storage server...");
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: imageUrlInput })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Gagal menghapus file dari storage");
+      }
+      setImageUrlInput("");
+      toast.success("Gambar berhasil dihapus permanen dari storage server!", { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menghapus dari storage", { id: toastId });
+    } finally {
+      setDeletingImage(false);
+    }
+  };
 
   const handleUploadImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1687,24 +1727,56 @@ export default function EmailBlastPage() {
 
               {/* Uploaded / Current Image Preview */}
               {imageUrlInput && (
-                <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 flex items-center gap-3">
-                  <img
-                    src={imageUrlInput}
-                    alt="Preview"
-                    className="w-16 h-12 object-cover rounded-lg border border-white/10 shrink-0"
-                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                  />
-                  <div className="min-w-0 flex-1 text-xs">
-                    <div className="font-bold text-cyan-400 truncate">Image ready to insert</div>
-                    <div className="text-[11px] text-zinc-400 font-mono truncate">{imageUrlInput}</div>
+                <div className={cn(
+                  "p-3 rounded-xl border flex items-center justify-between gap-3 transition-all",
+                  isDark ? "border-cyan-500/20 bg-cyan-500/5" : "border-cyan-200 bg-cyan-50/50"
+                )}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={imageUrlInput}
+                      alt="Preview"
+                      className="w-16 h-12 object-cover rounded-lg border border-white/10 shrink-0"
+                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                    />
+                    <div className="min-w-0 text-xs">
+                      <div className="font-bold text-cyan-400 truncate flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                        <span>Gambar Siap Di-insert</span>
+                      </div>
+                      <div className="text-[11px] text-zinc-400 font-mono truncate max-w-[240px] sm:max-w-xs">{imageUrlInput}</div>
+                      {imageUrlInput.includes("/uploads/") ? (
+                        <div className="text-[10px] text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
+                          <span>📁 Tersimpan di public/uploads/email-blast/</span>
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-zinc-500 font-medium mt-0.5">
+                          <span>🌐 External Image URL</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setImageUrlInput("")}
-                    className="p-1 rounded text-zinc-400 hover:text-white"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+
+                  {imageUrlInput.includes("/uploads/") ? (
+                    <button
+                      type="button"
+                      disabled={deletingImage}
+                      onClick={handleDeleteUploadedImage}
+                      title="Hapus gambar permanen dari storage server"
+                      className="shrink-0 px-2.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer disabled:opacity-50"
+                    >
+                      {deletingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      <span className="hidden sm:inline">Hapus Storage</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setImageUrlInput("")}
+                      className="shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                      title="Clear URL"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -1733,7 +1805,7 @@ export default function EmailBlastPage() {
                     type="text"
                     value={imageAltInput}
                     onChange={(e) => setImageAltInput(e.target.value)}
-                    placeholder="Promo Spesial Cloud VPS"
+                    placeholder="Promo Spesial Masdika Cloud"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
                       isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
@@ -1742,19 +1814,16 @@ export default function EmailBlastPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-zinc-400 mb-1">Banner Width</label>
-                  <select
+                  <Select
                     value={imageMaxWidth}
-                    onChange={(e) => setImageMaxWidth(e.target.value)}
+                    onChange={(val) => setImageMaxWidth(val)}
+                    options={BANNER_WIDTH_OPTIONS}
+                    direction="up"
                     className={cn(
-                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors cursor-pointer",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      "py-2 px-3 text-xs sm:text-sm rounded-xl font-medium",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                     )}
-                  >
-                    <option value="600px">Full Width (600px - Recommended for Hero Banner)</option>
-                    <option value="450px">Medium (450px)</option>
-                    <option value="300px">Small (300px)</option>
-                    <option value="180px">Logo / Icon (180px)</option>
-                  </select>
+                  />
                 </div>
               </div>
             </div>
