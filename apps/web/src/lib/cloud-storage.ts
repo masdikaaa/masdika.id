@@ -264,14 +264,14 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
 
       if (!folderRes.ok) {
         const errText = await folderRes.text();
-        throw new Error(`Folder verification failed (${folderRes.status}): Pastikan folder ID benar dan sudah dibagikan (share) ke email Service Account (${config.gdriveClientEmail}). Detail: ${errText}`);
+        throw new Error(`Folder verification failed (${folderRes.status}): Ensure the folder ID is correct and shared with the Service Account email (${config.gdriveClientEmail}). Detail: ${errText}`);
       }
 
       const folderData = await folderRes.json();
 
       // Check write capabilities
       if (folderData.capabilities && folderData.capabilities.canAddChildren === false) {
-        throw new Error(`Service Account tidak memiliki izin menulis di folder "${folderData.name || folderId}". Berikan hak akses 'Editor' atau 'Content Manager' pada folder/Shared Drive.`);
+        throw new Error(`Service Account does not have write permissions for folder "${folderData.name || folderId}". Grant 'Editor' or 'Content Manager' permissions on the folder/Shared Drive.`);
       }
 
       // Perform a 1-byte probe write to ensure Service Account quota is valid (Shared Drive verification)
@@ -298,9 +298,9 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
       if (!probeRes.ok) {
         const probeErr = await probeRes.text();
         if (probeErr.includes("storageQuotaExceeded") || probeErr.includes("do not have storage quota")) {
-          throw new Error("Kuota Google Drive Tidak Cukup: Service Account Google Cloud memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.");
+          throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or use Cloudflare R2 / AWS S3.");
         }
-        throw new Error(`Izin tulis folder gagal (${probeRes.status}): ${probeErr}`);
+        throw new Error(`Folder write permission test failed (${probeRes.status}): ${probeErr}`);
       }
 
       const probeFile = await probeRes.json().catch(() => null);
@@ -314,7 +314,7 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
 
       return {
         success: true,
-        message: `Koneksi & izin tulis berhasil terverifikasi ke folder "${folderData.name || folderId}"!`
+        message: `Connection & write permissions successfully verified for folder "${folderData.name || folderId}"!`
       };
     } else {
       // Validate general Drive access
@@ -329,7 +329,7 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
 
       return {
         success: true,
-        message: "Autentikasi Service Account Google Drive berhasil! (Catatan: Masukkan Folder ID dari Google Workspace Shared Drive untuk lokasi backup)"
+        message: "Google Drive Service Account authentication successful! (Note: Enter a Folder ID from a Google Workspace Shared Drive for backup storage)"
       };
     }
   } catch (err: any) {
@@ -383,7 +383,7 @@ export async function streamUploadToGoogleDrive(
   if (!initRes.ok) {
     const errText = await initRes.text();
     if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
-      throw new Error("Kuota Google Drive Tidak Cukup: Service Account Google Cloud memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.");
+      throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or use Cloudflare R2 / AWS S3.");
     }
     throw new Error(`Google Drive resumable session initiation failed (${initRes.status}): ${errText}`);
   }
@@ -408,7 +408,7 @@ export async function streamUploadToGoogleDrive(
   if (!uploadRes.ok) {
     const errText = await uploadRes.text();
     if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
-      throw new Error("Kuota Google Drive Tidak Cukup: Service Account tidak memiliki kuota penyimpanan di Google Drive pribadi. Gunakan Google Workspace Shared Drive (Drive Bersama).");
+      throw new Error("Insufficient Google Drive Quota: Service Accounts do not have storage quota on personal Google Drive. Please use a Google Workspace Shared Drive (Team Drive) or Cloudflare R2 / AWS S3.");
     }
     throw new Error(`Google Drive stream upload failed (${uploadRes.status}): ${errText}`);
   }
@@ -476,7 +476,7 @@ export async function uploadToGoogleDrive(
   if (!uploadRes.ok) {
     const errText = await uploadRes.text();
     if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
-      throw new Error("Kuota Google Drive Tidak Cukup: Service Account Google Cloud memiliki kuota 0 MB di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan Google Workspace Shared Drive (Drive Bersama / Team Drive). Tambahkan Service Account ke Shared Drive sebagai Content Manager, atau gunakan Cloudflare R2 / AWS S3.");
+      throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or use Cloudflare R2 / AWS S3.");
     }
     throw new Error(`Google Drive upload failed (${uploadRes.status}): ${errText}`);
   }

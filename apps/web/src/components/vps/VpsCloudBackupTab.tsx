@@ -254,9 +254,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           const finishedRec = newRecords.find((r) => r.id === prevActiveIdRef.current);
           if (finishedRec && finishedRec.status === "FAILED") {
             setErrorModal({
-              title: "Cloud Backup Gagal",
+              title: "Cloud Backup Failed",
               provider: finishedRec.provider,
-              error: finishedRec.error || "Proses backup terhenti sebelum selesai."
+              error: finishedRec.error || "The backup process stopped before completion."
             });
           }
         }
@@ -416,7 +416,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
         const errorMsg = data.error || "Failed to start cloud backup";
         toast.error(errorMsg);
         setErrorModal({
-          title: "Gagal Memulai Cloud Backup",
+          title: "Failed to Start Cloud Backup",
           provider: selectedProvider,
           error: errorMsg
         });
@@ -425,7 +425,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       const errorMsg = err?.message || "Network error";
       toast.error(errorMsg);
       setErrorModal({
-        title: "Gagal Memulai Cloud Backup",
+        title: "Failed to Start Cloud Backup",
         provider: selectedProvider,
         error: errorMsg
       });
@@ -809,7 +809,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 1,
                     text: (
                       <span>
-                        Buat bucket di Cloudflare Dashboard &gt; <strong className={isDark ? "text-white" : "text-slate-900"}>R2 Object Storage</strong>.
+                        Create a bucket in Cloudflare Dashboard &gt; <strong className={isDark ? "text-white" : "text-slate-900"}>R2 Object Storage</strong>.
                       </span>
                     ),
                   },
@@ -817,7 +817,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 2,
                     text: (
                       <span>
-                        Buat API Token via <strong className={isDark ? "text-white" : "text-slate-900"}>Manage R2 API Tokens</strong> dengan izin Object Read &amp; Write.
+                        Create an API Token via <strong className={isDark ? "text-white" : "text-slate-900"}>Manage R2 API Tokens</strong> with Object Read &amp; Write permissions.
                       </span>
                     ),
                   },
@@ -825,7 +825,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 3,
                     text: (
                       <span>
-                        Salin <strong className={isDark ? "text-white" : "text-slate-900"}>Account ID, Access Key</strong>, &amp; Secret Key ke form di bawah.
+                        Copy your <strong className={isDark ? "text-white" : "text-slate-900"}>Account ID, Access Key</strong>, &amp; Secret Key into the form below.
                       </span>
                     ),
                   },
@@ -839,9 +839,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   >
                     <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-600 dark:text-cyan-400" />
                     <div className="space-y-0.5">
-                      <div className="font-bold text-cyan-950 dark:text-cyan-300">Keunggulan Cloudflare R2:</div>
+                      <div className="font-bold text-cyan-950 dark:text-cyan-300">Advantages of Cloudflare R2:</div>
                       <p className="leading-relaxed text-[11px] text-cyan-900/90 dark:text-cyan-200">
-                        Cloudflare R2 menyediakan kuota penyimpanan gratis hingga <strong>10 GB/bulan</strong> dengan <strong>zero egress bandwidth fees</strong> (bebas biaya transfer download backup).
+                        Cloudflare R2 provides up to <strong>10 GB/month</strong> of free storage with <strong>zero egress bandwidth fees</strong> (no bandwidth charges for downloading backups).
                       </p>
                     </div>
                   </div>
@@ -955,7 +955,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 1,
                     text: (
                       <span>
-                        Buat S3 Bucket di AWS Console pada <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Region</strong> yang diinginkan.
+                        Create an S3 Bucket in AWS Console in your desired <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Region</strong>.
                       </span>
                     ),
                   },
@@ -963,7 +963,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 2,
                     text: (
                       <span>
-                        Buat IAM User dengan permission <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>AmazonS3FullAccess</strong> atau s3:PutObject.
+                        Create an IAM User with <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>AmazonS3FullAccess</strong> or s3:PutObject permissions.
                       </span>
                     ),
                   },
@@ -971,7 +971,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 3,
                     text: (
                       <span>
-                        Generate <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Access Key</strong> di tab Security Credentials &amp; masukkan ke form.
+                        Generate an <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Access Key</strong> under the Security Credentials tab &amp; enter it into the form.
                       </span>
                     ),
                   },
@@ -985,9 +985,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   >
                     <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-600 dark:text-cyan-400" />
                     <div className="space-y-0.5">
-                      <div className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Tips Konfigurasi AWS S3:</div>
+                      <div className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>AWS S3 Configuration Tips:</div>
                       <p className="leading-relaxed text-[11px] text-slate-700 dark:text-slate-300">
-                        Pastikan pilihan <strong>AWS Region</strong> di form sesuai dengan lokasi Region bucket dibuat (misal: <code>ap-southeast-3</code> untuk Jakarta).
+                        Ensure the selected <strong>AWS Region</strong> matches the region where your bucket was created (e.g., <code>ap-southeast-3</code> for Jakarta).
                       </p>
                     </div>
                   </div>
@@ -1137,7 +1137,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 1,
                     text: (
                       <span>
-                        Enable <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Google Drive API</strong> di Google Cloud Console.
+                        Enable <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Google Drive API</strong> in Google Cloud Console.
                       </span>
                     ),
                   },
@@ -1145,7 +1145,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 2,
                     text: (
                       <span>
-                        Buat Service Account &amp; unduh file <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>JSON Key</strong> (bisa auto-fill di atas).
+                        Create a Service Account &amp; download the <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>JSON Key</strong> file (can auto-fill above).
                       </span>
                     ),
                   },
@@ -1153,7 +1153,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     step: 3,
                     text: (
                       <span>
-                        Share folder di <strong className="text-emerald-700 dark:text-emerald-400 font-bold">Shared Drive (Drive Bersama)</strong> ke email Service Account sebagai Content Manager.
+                        Share a folder in <strong className="text-emerald-700 dark:text-emerald-400 font-bold">Shared Drive (Team Drive)</strong> with the Service Account email as Content Manager.
                       </span>
                     ),
                   },
@@ -1167,9 +1167,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   >
                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                     <div className="space-y-0.5">
-                      <div className="font-bold text-amber-950 dark:text-amber-300">Penting Mengenai Kuota Google Drive:</div>
+                      <div className="font-bold text-amber-950 dark:text-amber-300">Important Note on Google Drive Storage Quota:</div>
                       <p className="leading-relaxed text-[11px] text-amber-900 dark:text-amber-200">
-                        Akun Service Account memiliki kuota <strong>0 MB</strong> di Google Drive pribadi (Personal My Drive). Google mewajibkan penggunaan <strong>Google Workspace Shared Drive (Drive Bersama / Team Drive)</strong> agar file backup dapat disimpan, atau gunakan <strong>Cloudflare R2</strong> / <strong>AWS S3</strong>.
+                        Google Cloud Service Accounts have a strict <strong>0 MB</strong> storage quota on personal Google Drive (Personal My Drive). Google requires using a <strong>Google Workspace Shared Drive (Team Drive)</strong> to store backup files, or use <strong>Cloudflare R2</strong> / <strong>AWS S3</strong> instead.
                       </p>
                     </div>
                   </div>
@@ -1565,12 +1565,12 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         <button
                           type="button"
                           onClick={() => setErrorModal({
-                            title: "Detail Error Cloud Backup",
+                            title: "Cloud Backup Error Details",
                             provider: rec.provider,
-                            error: rec.error || "Proses cloud backup gagal dilakukan."
+                            error: rec.error || "Cloud backup process failed to complete."
                           })}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-400 border border-red-300 dark:border-red-500/20 hover:bg-red-200 dark:hover:bg-red-500/20 transition-all cursor-pointer shadow-2xs"
-                          title="Klik untuk melihat detail error"
+                          title="Click to view error details"
                         >
                           <XCircle className="w-3.5 h-3.5 shrink-0" />
                           <span>Failed</span>
@@ -1663,12 +1663,12 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               <div
                 className={cn(
                   "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border",
-                  errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")
+                  errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota")
                     ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
                     : "bg-red-500/10 border-red-500/30 text-red-500"
                 )}
               >
-                {errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") ? (
+                {errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota") ? (
                   <AlertTriangle className="w-6 h-6" />
                 ) : (
                   <XCircle className="w-6 h-6" />
@@ -1676,8 +1676,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               </div>
               <div>
                 <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                  {errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")
-                    ? "Kapasitas Penyimpanan / Kuota Tidak Cukup"
+                  {errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota")
+                    ? "Storage Capacity / Quota Exceeded"
                     : errorModal.title}
                 </h3>
                 <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-700 font-medium")}>
@@ -1687,29 +1687,29 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             </div>
 
             {/* Quota-specific explanation if applicable */}
-            {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")) ? (
+            {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota")) ? (
               <div className="space-y-3 mb-5">
                 <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed space-y-2", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-200/90" : "bg-amber-50 border-amber-300 text-amber-950")}>
                   <div className="font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-300">
                     <Info className="w-4 h-4 shrink-0" />
-                    <span>Penyebab Masalah:</span>
+                    <span>Root Cause:</span>
                   </div>
                   <p className="font-medium">
-                    Akun <strong>Google Cloud Service Account</strong> secara default memiliki kuota penyimpanan <strong>0 MB</strong> di Google Drive pribadi (Personal My Drive). Google melarang pengunggahan file dari Service Account ke akun Google Drive perorangan non-workspace.
+                    A <strong>Google Cloud Service Account</strong> has a default storage quota of <strong>0 MB</strong> on personal Google Drive (Personal My Drive). Google prevents uploading files from Service Accounts to personal non-workspace Google Drive accounts.
                   </p>
                 </div>
 
                 <div className={cn("p-3.5 rounded-xl border text-xs space-y-2.5", isDark ? "bg-slate-900/60 border-slate-800 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-900")}>
-                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Solusi yang Dapat Dilakukan:</div>
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Recommended Solutions:</div>
                   <ul className="space-y-2 pl-4 list-disc text-xs font-medium leading-relaxed">
                     <li>
-                      <strong>Gunakan Google Workspace Shared Drive:</strong> Buat folder di Shared Drive (Drive Bersama / Team Drive), lalu invite email Service Account sebagai <em>Content Manager</em>. Di Shared Drive, kuota dihitung dari akun workspace, bukan Service Account.
+                      <strong>Use Google Workspace Shared Drive:</strong> Create a folder in a Shared Drive (Team Drive), then invite the Service Account email as <em>Content Manager</em>. In Shared Drive, storage is counted against the workspace domain, not the Service Account.
                     </li>
                     <li>
-                      <strong>Gunakan Cloudflare R2 (Rekomendasi Terbaik):</strong> Gratis 10 GB/bulan tanpa biaya download (egress), setup sangat mudah menggunakan Account ID dan S3 API Keys.
+                      <strong>Use Cloudflare R2 (Recommended):</strong> Free 10 GB/month with zero egress fees, fast setup using Account ID and S3 API Keys.
                     </li>
                     <li>
-                      <strong>Gunakan AWS S3:</strong> Buat bucket S3 dan gunakan IAM user dengan hak akses write.
+                      <strong>Use AWS S3:</strong> Create an S3 bucket and use an IAM user with write permissions.
                     </li>
                   </ul>
                 </div>
@@ -1717,7 +1717,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             ) : (
               <div className="space-y-3 mb-5">
                 <p className={cn("text-xs leading-relaxed font-medium", isDark ? "text-slate-300" : "text-slate-800")}>
-                  Terjadi kesalahan saat memproses cloud backup. Detail pesan error sistem:
+                  An error occurred while processing the cloud backup. System error details:
                 </p>
                 <div className={cn("p-3 rounded-xl border font-mono text-[11px] font-semibold leading-relaxed break-all max-h-48 overflow-y-auto", isDark ? "bg-black/50 border-slate-800 text-red-300" : "bg-red-50 border-red-300 text-red-950")}>
                   {errorModal.error}
@@ -1735,9 +1735,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300 shadow-2xs"
                 )}
               >
-                Tutup
+                Close
               </button>
-              {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup")) && (
+              {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota")) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1746,7 +1746,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   }}
                   className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 transition-all shadow-sm"
                 >
-                  Pindah ke Cloudflare R2
+                  Switch to Cloudflare R2
                 </button>
               )}
             </div>
