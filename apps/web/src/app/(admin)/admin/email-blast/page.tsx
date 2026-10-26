@@ -32,7 +32,10 @@ import {
   EyeOff,
   CheckCircle2,
   Loader2,
-  Info
+  Info,
+  Image as ImageIcon,
+  UploadCloud,
+  Link as LinkIcon
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -43,6 +46,90 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 const FONT_STACK = "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 const PROMO_TEMPLATES = [
+  {
+    id: "graphic_banner_promo",
+    name: "🎉 Marketing Banner Promo (IDwebhost-Style)",
+    subject: "🇮🇩 Promo Spesial Masdika Cloud: Diskon Spesial & Kupon Terbatas!",
+    html: `<div style="background-color: #f1f5f9; padding: 40px 15px; font-family: ${FONT_STACK};">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0;">
+    
+    <!-- Top Brand Navbar -->
+    <div style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; background: #ffffff;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="vertical-align: middle;">
+            <a href="https://masdika.id" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+              <span style="font-size: 20px; font-weight: 900; color: #0891b2; letter-spacing: -0.5px; font-family: ${FONT_STACK};">MASDIKA<span style="color: #06b6d4;">.ID</span></span>
+            </a>
+          </td>
+          <td style="text-align: right; vertical-align: middle; font-size: 12px; font-weight: 700; font-family: ${FONT_STACK};">
+            <a href="https://masdika.id/vps" target="_blank" style="color: #475569; text-decoration: none; margin-left: 14px;">CLOUD VPS</a>
+            <a href="https://masdika.id/dashboard" target="_blank" style="color: #475569; text-decoration: none; margin-left: 14px;">DASHBOARD</a>
+            <a href="https://masdika.id/promos" target="_blank" style="color: #0891b2; text-decoration: none; margin-left: 14px; font-weight: 800;">PROMO</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Hero Promotional Banner Image -->
+    <div style="padding: 0; text-align: center; background: #0f172a; line-height: 0;">
+      <a href="https://masdika.id/vps" target="_blank" style="display: block; text-decoration: none;">
+        <img 
+          src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&auto=format&fit=crop&q=80" 
+          alt="Promo Spesial Masdika Cloud" 
+          style="width: 100%; max-width: 600px; height: auto; display: block; border: 0;"
+        />
+      </a>
+    </div>
+
+    <!-- Main Content Body -->
+    <div style="padding: 32px 28px; font-family: ${FONT_STACK};">
+      <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 14px; line-height: 1.35; font-family: ${FONT_STACK};">
+        Rayakan Ekosistem Digital Indonesia Bersama Masdika Cloud 🇮🇩
+      </h2>
+      <p style="font-size: 15px; color: #1e293b; margin: 0 0 12px; font-weight: 600;">
+        Halo <strong>{name}</strong>,
+      </p>
+      <p style="font-size: 14px; color: #475569; line-height: 1.65; margin: 0 0 20px;">
+        Biar makin spesial, kami menghadirkan promo diskon eksklusif untuk layanan Cloud VPS NVMe, Dedicated IP, dan solusi infrastruktur digital terbaik untuk proyek dan bisnismu!
+      </p>
+
+      <!-- Coupon Voucher Box -->
+      <div style="background: #f0fdf4; border: 2px dashed #22c55e; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0;">
+        <span style="font-size: 12px; color: #166534; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Kode Kupon Spesial</span>
+        <div style="font-size: 26px; font-weight: 900; color: #15803d; font-family: 'JetBrains Mono', monospace; letter-spacing: 2px;">PROMOINDONESIA</div>
+        <p style="font-size: 12px; color: #16a34a; font-weight: 600; margin: 6px 0 0;">Periode: Terbatas untuk 50 pengguna pertama</p>
+      </div>
+
+      <!-- Feature Bullet Points -->
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #334155; margin: 24px 0; font-family: ${FONT_STACK};">
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">⚡ <strong style="color: #0f172a;">Performa Tinggi:</strong> Dedicated vCPU AMD EPYC & Storage Enterprise NVMe</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">🌐 <strong style="color: #0f172a;">Jaringan Indonesia:</strong> Port Speed hingga 1000 Mbps peering langsung ke OpenIXP</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0;">🛡️ <strong style="color: #0f172a;">Anti-DDoS Protection:</strong> Proteksi otomatis aktif 24/7 tanpa biaya tambahan</td>
+        </tr>
+      </table>
+
+      <!-- Big Call to Action Button -->
+      <div style="text-align: center; margin: 32px 0 10px;">
+        <a href="https://masdika.id/vps" target="_blank" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: #ffffff; padding: 16px 36px; text-decoration: none; border-radius: 10px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4); font-family: ${FONT_STACK};">
+          Klaim Promo Sekarang →
+        </a>
+      </div>
+    </div>
+
+    <!-- Email Footer -->
+    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 22px 24px; text-align: center; font-size: 12px; color: #64748b; line-height: 1.5; font-family: ${FONT_STACK};">
+      <p style="margin: 0 0 6px;">Email ini dikirim ke akun terdaftar di Masdika Cloud Platform.</p>
+      <p style="margin: 0;">© {year} PT Masdika Teknologi Indonesia. All rights reserved.</p>
+    </div>
+  </div>
+</div>`
+  },
   {
     id: "vps_sale",
     name: "⚡ VPS Cloud Flash Sale (50% OFF)",
@@ -219,6 +306,91 @@ export default function EmailBlastPage() {
   const [showSendConfirmModal, setShowSendConfirmModal] = useState(false);
   const [sendingBlast, setSendingBlast] = useState(false);
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
+
+  // Image Insert Modal State
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [imageTab, setImageTab] = useState<"upload" | "url">("upload");
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [imageLinkInput, setImageLinkInput] = useState("https://masdika.id/vps");
+  const [imageAltInput, setImageAltInput] = useState("Promo Spesial Masdika Cloud");
+  const [imageMaxWidth, setImageMaxWidth] = useState("600px");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (PNG, JPG, WebP, GIF)");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image file size exceeds the 10MB limit");
+      return;
+    }
+
+    setUploadingImage(true);
+    const toastId = toast.loading("Uploading image banner to server...");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "email-blast");
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      // Convert to full absolute URL required for email delivery
+      const fullUrl = window.location.origin + data.url;
+      setImageUrlInput(fullUrl);
+      toast.success("Image uploaded! Ready to insert into email.", { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload image", { id: toastId });
+    } finally {
+      setUploadingImage(false);
+      if (imageFileInputRef.current) {
+        imageFileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleInsertImage = () => {
+    if (!imageUrlInput.trim()) {
+      toast.error("Please upload an image or provide an image URL");
+      return;
+    }
+
+    const cleanUrl = imageUrlInput.trim();
+    const cleanLink = imageLinkInput.trim();
+    const cleanAlt = imageAltInput.trim() || "Promotional Banner";
+    const maxWidth = imageMaxWidth || "600px";
+
+    const imageHtml = `
+<!-- Promotional Banner Image -->
+<div style="text-align: center; margin: 24px 0;">
+  ${cleanLink ? `<a href="${cleanLink}" target="_blank" style="text-decoration: none; display: inline-block; width: 100%; max-width: ${maxWidth};">` : ''}
+    <img src="${cleanUrl}" alt="${cleanAlt}" style="width: 100%; max-width: ${maxWidth}; height: auto; display: block; margin: 0 auto; border-radius: 12px; border: 0;" />
+  ${cleanLink ? `</a>` : ''}
+</div>`;
+
+    if (htmlContent.includes("<!-- Footer -->")) {
+      setHtmlContent(prev => prev.replace("<!-- Footer -->", `${imageHtml}\n\n    <!-- Footer -->`));
+    } else {
+      setHtmlContent(prev => prev + imageHtml);
+    }
+
+    setShowImageModal(false);
+    toast.success("Banner image inserted into email successfully!");
+  };
 
   // Dedicated SMTP Configuration State
   const [showSmtpModal, setShowSmtpModal] = useState(false);
@@ -1038,6 +1210,24 @@ export default function EmailBlastPage() {
             >
               ⛓✕
             </button>
+
+            <span className="w-px h-4 bg-slate-700 mx-1" />
+
+            {/* Insert Image Button */}
+            <button
+              type="button"
+              onClick={() => setShowImageModal(true)}
+              title="Insert Image / Upload Banner"
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                isDark
+                  ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
+                  : "bg-cyan-50 border-cyan-300 text-cyan-800 hover:bg-cyan-100"
+              )}
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span>Insert Image</span>
+            </button>
           </div>
 
           {/* Right Mode Switch: HTML Source Code vs Visual Preview */}
@@ -1385,6 +1575,207 @@ export default function EmailBlastPage() {
               >
                 {sendingTest ? <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Send className="w-3.5 h-3.5 shrink-0" />}
                 <span>{sendingTest ? "Sending..." : "Send Test Now"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Insert Image / Banner Modal */}
+      {showImageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={cn(
+            "w-full max-w-lg rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
+            isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+          )}>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                  <ImageIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base">Insert Promo Image / Banner</h3>
+                  <p className="text-xs text-zinc-500">Insert responsive graphic banner into your promotional email.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowImageModal(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Tab switch */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/20 border border-white/5 mb-4 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setImageTab("upload")}
+                className={cn(
+                  "flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer",
+                  imageTab === "upload"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload From Computer</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageTab("url")}
+                className={cn(
+                  "flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer",
+                  imageTab === "url"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+                <span>External Image URL</span>
+              </button>
+            </div>
+
+            <div className="space-y-3.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
+              {/* Tab 1: Upload */}
+              {imageTab === "upload" && (
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5">Select Banner File (PNG, JPG, WebP)</label>
+                  <div
+                    onClick={() => imageFileInputRef.current?.click()}
+                    className={cn(
+                      "border-2 border-dashed rounded-xl p-4 sm:p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2",
+                      isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/5" : "border-slate-300 hover:border-cyan-500 hover:bg-cyan-50"
+                    )}
+                  >
+                    <input
+                      ref={imageFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadImageFile}
+                      className="hidden"
+                    />
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                      {uploadingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
+                    </div>
+                    <div className="text-xs">
+                      <span className="font-semibold text-cyan-400">Click to upload banner</span> or drag and drop
+                    </div>
+                    <p className="text-[11px] text-zinc-500">Max size 10MB. Automatically compressed to WebP for fast email loading.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: URL */}
+              {imageTab === "url" && (
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Image URL (Must start with https://)</label>
+                  <input
+                    type="url"
+                    value={imageUrlInput}
+                    onChange={(e) => setImageUrlInput(e.target.value)}
+                    placeholder="https://example.com/banner-promo.jpg"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-mono outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+              )}
+
+              {/* Uploaded / Current Image Preview */}
+              {imageUrlInput && (
+                <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 flex items-center gap-3">
+                  <img
+                    src={imageUrlInput}
+                    alt="Preview"
+                    className="w-16 h-12 object-cover rounded-lg border border-white/10 shrink-0"
+                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                  />
+                  <div className="min-w-0 flex-1 text-xs">
+                    <div className="font-bold text-cyan-400 truncate">Image ready to insert</div>
+                    <div className="text-[11px] text-zinc-400 font-mono truncate">{imageUrlInput}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setImageUrlInput("")}
+                    className="p-1 rounded text-zinc-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Clickable Destination Link */}
+              <div>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1">
+                  Destination Link (When recipient clicks the banner)
+                </label>
+                <input
+                  type="url"
+                  value={imageLinkInput}
+                  onChange={(e) => setImageLinkInput(e.target.value)}
+                  placeholder="https://masdika.id/vps"
+                  className={cn(
+                    "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-mono outline-none transition-colors",
+                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                  )}
+                />
+              </div>
+
+              {/* Alt Text & Size */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Alt Text (Image description)</label>
+                  <input
+                    type="text"
+                    value={imageAltInput}
+                    onChange={(e) => setImageAltInput(e.target.value)}
+                    placeholder="Promo Spesial Cloud VPS"
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1">Banner Width</label>
+                  <select
+                    value={imageMaxWidth}
+                    onChange={(e) => setImageMaxWidth(e.target.value)}
+                    className={cn(
+                      "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors cursor-pointer",
+                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                    )}
+                  >
+                    <option value="600px">Full Width (600px - Recommended for Hero Banner)</option>
+                    <option value="450px">Medium (450px)</option>
+                    <option value="300px">Small (300px)</option>
+                    <option value="180px">Logo / Icon (180px)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-end gap-2 shrink-0 mt-3">
+              <button
+                type="button"
+                onClick={() => setShowImageModal(false)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!imageUrlInput.trim() || uploadingImage}
+                onClick={handleInsertImage}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+              >
+                <ImageIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>Insert Banner into Email</span>
               </button>
             </div>
           </div>
