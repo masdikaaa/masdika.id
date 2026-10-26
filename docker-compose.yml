@@ -30,6 +30,7 @@ services:
     image: andikaferdialvianto/masdika-id:v1.0.1
     container_name: masdika_app
     restart: always
+    stop_grace_period: 60s
     depends_on:
       db:
         condition: service_healthy
@@ -73,6 +74,7 @@ services:
     image: andikaferdialvianto/masdika-id:v1.0.1
     container_name: masdika_worker
     restart: always
+    stop_grace_period: 60s
     depends_on:
       db:
         condition: service_healthy

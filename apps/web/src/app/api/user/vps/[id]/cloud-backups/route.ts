@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
+import { recoverStaleCloudBackups } from "@/lib/cloud-backup-recovery";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,9 @@ export async function GET(
     });
 
     if (!vps) return NextResponse.json({ error: "VPS not found" }, { status: 404 });
+
+    // Auto-recover any interrupted backups after server deployment
+    await recoverStaleCloudBackups(vps.id);
 
     const config = await prisma.vpsCloudBackupConfig.findUnique({
       where: { vpsId: vps.id }

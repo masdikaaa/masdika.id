@@ -213,6 +213,17 @@ app.prepare().then(async () => {
     }).catch((err) => {
       console.warn('> [Invoice Standardizer] Failed to load module:', err?.message || err);
     });
+
+    // 🛡️ Auto-recover any cloud backups interrupted by previous container restart / deployment
+    import("./lib/cloud-backup-recovery").then(({ recoverStaleCloudBackups }) => {
+      recoverStaleCloudBackups().then((count) => {
+        if (count > 0) {
+          console.log(`> [Cloud Backup Recovery] Safely recovered ${count} interrupted backup(s) after restart`);
+        }
+      }).catch((err) => {
+        console.warn('> [Cloud Backup Recovery] Startup check note:', err?.message || err);
+      });
+    }).catch(() => {});
   });
 
   // ========================================

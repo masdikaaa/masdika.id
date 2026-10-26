@@ -10,6 +10,7 @@ import {
   deleteFromS3,
   deleteFromGoogleDrive
 } from "@/lib/cloud-storage";
+import { recoverStaleCloudBackups } from "@/lib/cloud-backup-recovery";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,9 @@ export async function POST(
         );
       }
     }
+
+    // Auto-recover any stale backups if server was previously restarted during backup
+    await recoverStaleCloudBackups(vps.id);
 
     // Check if another backup is actively running for this VPS
     const existingActive = await prisma.vpsCloudBackupRecord.findFirst({
