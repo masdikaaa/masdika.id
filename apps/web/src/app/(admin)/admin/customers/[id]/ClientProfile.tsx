@@ -262,6 +262,23 @@ export default function ClientProfile({ userId }: { userId: string }) {
     }
   };
 
+  const splitDateTime = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      return {
+        date: `${day}/${month}/${year}`,
+        time: `${hours}:${mins}`
+      };
+    } catch {
+      return { date: dateStr, time: "" };
+    }
+  };
+
   const formatEmailPreviewHtml = (rawBody: string) => {
     if (!rawBody) return "";
 
@@ -828,15 +845,15 @@ export default function ClientProfile({ userId }: { userId: string }) {
         {activeTab === 'emails' && (
           <div className="space-y-4">
             {/* Header Toolbar matching WHMCS Image 1 */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 px-1">
+            <div className="flex items-center justify-between gap-2.5 px-1 flex-wrap">
               <div className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                 <span className="font-bold text-cyan-400">{emailLogs.length}</span> Records Found, Page {emailCurrentPage} of {Math.max(1, Math.ceil(emailLogs.length / emailsPerPage))}
               </div>
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
                   <div className="flex items-center gap-1.5 text-xs">
-                    <span className={cn("whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>Jump to Page:</span>
-                    <div className="w-[72px] sm:w-20">
+                    <span className={cn("whitespace-nowrap text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>Jump:</span>
+                    <div className="w-16 sm:w-20">
                       <Select
                         value={emailCurrentPage}
                         onChange={(val) => setEmailCurrentPage(Number(val))}
@@ -844,7 +861,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                           value: i + 1,
                           label: String(i + 1)
                         }))}
-                        className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                        className={cn("!h-8 !py-0 !px-2 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
                       />
                     </div>
                   </div>
@@ -852,7 +869,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <button
                   type="button"
                   onClick={() => router.push(`/admin/email-blast?userId=${userId}`)}
-                  className="h-8 flex items-center gap-1.5 px-3.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0"
+                  className="h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Send Email</span>
@@ -866,9 +883,9 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <table className="w-full text-left">
                   <thead>
                     <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                      <th className="py-3.5 px-4 w-44 font-semibold whitespace-nowrap">Date</th>
-                      <th className="py-3.5 px-4 font-semibold">Subject</th>
-                      <th className="py-3.5 px-4 w-24 text-right font-semibold">Actions</th>
+                      <th className="py-3 px-3 sm:px-4 w-24 sm:w-40 font-semibold whitespace-nowrap">Date</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold">Subject</th>
+                      <th className="py-3 px-2 sm:px-4 w-20 sm:w-24 text-center sm:text-right font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y text-sm", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -887,52 +904,58 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         </td>
                       </tr>
                     ) : (
-                      emailLogs.slice((emailCurrentPage - 1) * emailsPerPage, emailCurrentPage * emailsPerPage).map((log) => (
-                        <tr key={log.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                          <td className={cn("py-3.5 px-4 text-xs font-mono whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>
-                            {formatEmailDate(log.createdAt)}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <button
-                              type="button"
-                              onClick={() => setViewingEmail(log)}
-                              className={cn(
-                                "text-left font-medium hover:underline flex items-center gap-1.5 transition-colors cursor-pointer",
-                                isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-700 hover:text-cyan-800"
-                              )}
-                            >
-                              <span>{log.subject}</span>
-                              <Paperclip className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                            </button>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
+                      emailLogs.slice((emailCurrentPage - 1) * emailsPerPage, emailCurrentPage * emailsPerPage).map((log) => {
+                        const d = splitDateTime(log.createdAt);
+                        return (
+                          <tr key={log.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
+                            <td className={cn("py-3 px-3 sm:px-4 text-xs font-mono whitespace-nowrap align-middle", isDark ? "text-zinc-300" : "text-slate-600")}>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 leading-tight">
+                                <span>{d.date}</span>
+                                <span className={cn("text-[10px] sm:text-xs", isDark ? "text-zinc-500" : "text-slate-400")}>{d.time}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 sm:px-4 align-middle">
                               <button
                                 type="button"
                                 onClick={() => setViewingEmail(log)}
-                                title="View Message"
                                 className={cn(
-                                  "p-1.5 rounded-lg border transition-all cursor-pointer",
-                                  isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700 shadow-xs"
+                                  "text-left font-medium hover:underline inline-flex items-center gap-1.5 transition-colors cursor-pointer text-xs sm:text-sm group-hover:text-cyan-400",
+                                  isDark ? "text-cyan-400" : "text-cyan-700"
                                 )}
                               >
-                                <Eye className="w-3.5 h-3.5" />
+                                <span className="line-clamp-2 sm:line-clamp-1">{log.subject}</span>
+                                <Paperclip className="w-3.5 h-3.5 opacity-60 shrink-0" />
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteEmailId(log.id)}
-                                title="Delete Email Log"
-                                className={cn(
-                                  "p-1.5 rounded-lg border transition-all cursor-pointer",
-                                  isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-red-600 shadow-xs"
-                                )}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                            <td className="py-3 px-2 sm:px-4 text-center sm:text-right align-middle">
+                              <div className="flex items-center justify-center sm:justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setViewingEmail(log)}
+                                  title="View Message"
+                                  className={cn(
+                                    "w-7 h-7 sm:w-8 sm:h-8 rounded-lg border transition-all flex items-center justify-center cursor-pointer shrink-0",
+                                    isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700 shadow-xs"
+                                  )}
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteEmailId(log.id)}
+                                  title="Delete Email Log"
+                                  className={cn(
+                                    "w-7 h-7 sm:w-8 sm:h-8 rounded-lg border transition-all flex items-center justify-center cursor-pointer shrink-0",
+                                    isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-red-600 shadow-xs"
+                                  )}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -1136,10 +1159,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                      <th className="py-3.5 px-4 font-semibold w-44 whitespace-nowrap">Date</th>
-                      <th className="py-3.5 px-4 font-semibold">Description</th>
-                      <th className="py-3.5 px-3 font-semibold w-28 text-center whitespace-nowrap">Username</th>
-                      <th className="py-3.5 px-3 font-semibold w-36 text-center whitespace-nowrap">IP Address</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold w-24 sm:w-44 whitespace-nowrap">Date</th>
+                      <th className="py-3 px-3 sm:px-4 font-semibold">Description</th>
+                      <th className="py-3 px-2 sm:px-3 font-semibold w-24 sm:w-28 text-center whitespace-nowrap">Username</th>
+                      <th className="py-3 px-2 sm:px-3 font-semibold w-28 sm:w-36 text-center whitespace-nowrap">IP Address</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-slate-800/60" : "divide-slate-200")}>
@@ -1161,18 +1184,23 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         </td>
                       </tr>
                     ) : (
-                      activityLogs.map((log, idx) => (
-                        <tr
-                          key={log.id || idx}
-                          className={cn(
-                            "transition-colors",
-                            idx % 2 === 1 ? (isDark ? "bg-[#060b14]/50" : "bg-slate-50/70") : "",
-                            isDark ? "hover:bg-slate-800/40 text-zinc-300" : "hover:bg-slate-100/70 text-slate-800"
-                          )}
-                        >
-                          <td className="py-2.5 px-4 whitespace-nowrap font-mono text-[11px] text-zinc-400">
-                            {formatEmailDate(log.createdAt)}
-                          </td>
+                      activityLogs.map((log, idx) => {
+                        const d = splitDateTime(log.createdAt);
+                        return (
+                          <tr
+                            key={log.id || idx}
+                            className={cn(
+                              "transition-colors",
+                              idx % 2 === 1 ? (isDark ? "bg-[#060b14]/50" : "bg-slate-50/70") : "",
+                              isDark ? "hover:bg-slate-800/40 text-zinc-300" : "hover:bg-slate-100/70 text-slate-800"
+                            )}
+                          >
+                            <td className="py-2.5 px-3 sm:px-4 whitespace-nowrap font-mono text-[11px] text-zinc-400">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 leading-tight">
+                                <span>{d.date}</span>
+                                <span className="text-[10px] sm:text-[11px] text-zinc-500">{d.time}</span>
+                              </div>
+                            </td>
                           <td className="py-2.5 px-4 leading-relaxed font-normal">
                             {formatLogDescription(log.description)}
                           </td>
@@ -1190,7 +1218,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
                             {log.ipAddress || "-"}
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
