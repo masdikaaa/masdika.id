@@ -624,8 +624,9 @@ export default function EmailBlastPage() {
   const [sendingTest, setSendingTest] = useState(false);
   const [showSendConfirmModal, setShowSendConfirmModal] = useState(false);
   const [sendingBlast, setSendingBlast] = useState(false);
-  // Saved Custom Templates & Signature State
+  // Saved Custom Templates, System Template Filters & Signature State
   const SAVED_TEMPLATES_STORAGE_KEY = "masdika_email_blast_saved_templates";
+  const DELETED_SYSTEM_TEMPLATES_KEY = "masdika_email_blast_deleted_system_templates";
   const SIGNATURE_STORAGE_KEY = "masdika_email_blast_signature";
 
   const [savedTemplates, setSavedTemplates] = useState<{
@@ -635,6 +636,9 @@ export default function EmailBlastPage() {
     html: string;
     createdAt: string;
   }[]>([]);
+  const [deletedSystemTemplateIds, setDeletedSystemTemplateIds] = useState<string[]>([]);
+  const [templateToDelete, setTemplateToDelete] = useState<{ id: string; name: string; isCustom: boolean } | null>(null);
+  const [isDeletingTemplate, setIsDeletingTemplate] = useState(false);
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
@@ -661,6 +665,13 @@ export default function EmailBlastPage() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           setSavedTemplates(parsed);
+        }
+      }
+      const storedDeleted = localStorage.getItem(DELETED_SYSTEM_TEMPLATES_KEY);
+      if (storedDeleted) {
+        const parsedDeleted = JSON.parse(storedDeleted);
+        if (Array.isArray(parsedDeleted)) {
+          setDeletedSystemTemplateIds(parsedDeleted);
         }
       }
       const storedSig = localStorage.getItem(SIGNATURE_STORAGE_KEY);
@@ -710,16 +721,42 @@ export default function EmailBlastPage() {
     setNewTemplateName("");
   };
 
-  // Delete custom saved template
-  const handleDeleteSavedTemplate = (id: string, name: string) => {
-    const updated = savedTemplates.filter(t => t.id !== id);
-    setSavedTemplates(updated);
+  // Confirm delete handler for both custom and system templates
+  const handleConfirmDeleteTemplate = () => {
+    if (!templateToDelete) return;
+
+    setIsDeletingTemplate(true);
     try {
-      localStorage.setItem(SAVED_TEMPLATES_STORAGE_KEY, JSON.stringify(updated));
+      if (templateToDelete.isCustom) {
+        const updated = savedTemplates.filter(t => t.id !== templateToDelete.id);
+        setSavedTemplates(updated);
+        localStorage.setItem(SAVED_TEMPLATES_STORAGE_KEY, JSON.stringify(updated));
+        toast.success(`Template "${templateToDelete.name}" berhasil dihapus!`);
+      } else {
+        const updated = [...deletedSystemTemplateIds, templateToDelete.id];
+        setDeletedSystemTemplateIds(updated);
+        localStorage.setItem(DELETED_SYSTEM_TEMPLATES_KEY, JSON.stringify(updated));
+        toast.success(`Template "${templateToDelete.name}" berhasil dihapus dari daftar!`);
+      }
     } catch (err) {
-      console.error("Failed to update localStorage:", err);
+      console.error("Failed to delete template:", err);
+      toast.error("Gagal menghapus template");
+    } finally {
+      setIsDeletingTemplate(false);
+      setTemplateToDelete(null);
     }
-    toast.success(`Template "${name}" berhasil dihapus`);
+  };
+
+  // Restore deleted system templates
+  const handleRestoreSystemTemplates = () => {
+    try {
+      localStorage.removeItem(DELETED_SYSTEM_TEMPLATES_KEY);
+      setDeletedSystemTemplateIds([]);
+      toast.success("Semua template resmi sistem berhasil dipulihkan!");
+    } catch (err) {
+      console.error("Failed to restore templates:", err);
+      toast.error("Gagal memulihkan template");
+    }
   };
 
   // Insert signature into email HTML
@@ -1919,119 +1956,151 @@ export default function EmailBlastPage() {
 
       {/* MODAL: Templates Library Modal */}
       {showTemplatesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn(
             "w-full max-w-2xl rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
             isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
           )}>
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80 mb-4 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            {/* Header: Clean & uncluttered on mobile */}
+            <div className="flex items-start justify-between pb-3.5 border-b border-slate-800/80 mb-3 shrink-0 gap-3">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
                   <MessageSquare className="w-4 h-4" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm sm:text-base">Daftar Template Email</h3>
-                  <p className="text-xs text-zinc-500">Pilih template siap pakai atau gunakan template yang telah kamu simpan.</p>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm sm:text-base leading-tight">Daftar Template Email</h3>
+                  <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 leading-snug">
+                    Pilih template siap pakai atau kelola template tersimpan.
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewTemplateName("");
-                    setNewTemplateSubject(subject);
-                    setShowSaveTemplateModal(true);
-                  }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Simpan Draf Ini</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowTemplatesModal(false)}
-                  className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowTemplatesModal(false)}
+                className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 -mr-1"
+                title="Tutup"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Quick Action: Save Current Email Draft */}
+            <div className="mb-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewTemplateName("");
+                  setNewTemplateSubject(subject);
+                  setShowSaveTemplateModal(true);
+                }}
+                className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span>+ Simpan Draf Email Saat Ini Sebagai Template Baru</span>
+              </button>
             </div>
 
             {/* Filter Tabs & Search */}
-            <div className="space-y-3 mb-3 shrink-0">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/20 border border-white/5 text-xs font-semibold">
-                  <button
-                    type="button"
-                    onClick={() => setTemplateTab("all")}
-                    className={cn(
-                      "py-1.5 px-3 rounded-lg transition-all cursor-pointer",
-                      templateTab === "all" ? "bg-cyan-500 text-slate-950 font-bold shadow-xs" : "text-zinc-400 hover:text-white"
-                    )}
-                  >
-                    Semua ({PROMO_TEMPLATES.length + savedTemplates.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTemplateTab("saved")}
-                    className={cn(
-                      "py-1.5 px-3 rounded-lg transition-all cursor-pointer flex items-center gap-1",
-                      templateTab === "saved" ? "bg-cyan-500 text-slate-950 font-bold shadow-xs" : "text-zinc-400 hover:text-white"
-                    )}
-                  >
-                    <Bookmark className="w-3 h-3" />
-                    <span>Tersimpan ({savedTemplates.length})</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTemplateTab("system")}
-                    className={cn(
-                      "py-1.5 px-3 rounded-lg transition-all cursor-pointer",
-                      templateTab === "system" ? "bg-cyan-500 text-slate-950 font-bold shadow-xs" : "text-zinc-400 hover:text-white"
-                    )}
-                  >
-                    Resmi Sistem ({PROMO_TEMPLATES.length})
-                  </button>
-                </div>
+            {(() => {
+              const activeSystemList = PROMO_TEMPLATES.filter(t => !deletedSystemTemplateIds.includes(t.id));
+              const totalCount = activeSystemList.length + savedTemplates.length;
 
-                <div className="relative flex-1 min-w-[180px]">
-                  <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={templateSearch}
-                    onChange={(e) => setTemplateSearch(e.target.value)}
-                    placeholder="Cari nama template..."
-                    className={cn(
-                      "w-full pl-8 pr-3 py-1.5 rounded-xl border text-xs outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+              return (
+                <div className="space-y-2.5 mb-3 shrink-0">
+                  {/* Segmented 3-Column Tabs (Responsive Grid) */}
+                  <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-black/40 border border-white/5 text-xs font-semibold text-center">
+                    <button
+                      type="button"
+                      onClick={() => setTemplateTab("all")}
+                      className={cn(
+                        "py-1.5 px-1 sm:px-2 rounded-lg transition-all cursor-pointer truncate",
+                        templateTab === "all"
+                          ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      Semua ({totalCount})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTemplateTab("saved")}
+                      className={cn(
+                        "py-1.5 px-1 sm:px-2 rounded-lg transition-all cursor-pointer truncate flex items-center justify-center gap-1",
+                        templateTab === "saved"
+                          ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      <Bookmark className="w-3 h-3 shrink-0 hidden sm:inline" />
+                      <span>Tersimpan ({savedTemplates.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTemplateTab("system")}
+                      className={cn(
+                        "py-1.5 px-1 sm:px-2 rounded-lg transition-all cursor-pointer truncate",
+                        templateTab === "system"
+                          ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      Resmi ({activeSystemList.length})
+                    </button>
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="relative w-full">
+                    <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={templateSearch}
+                      onChange={(e) => setTemplateSearch(e.target.value)}
+                      placeholder="Cari nama template atau subject..."
+                      className={cn(
+                        "w-full pl-8 pr-8 py-2 rounded-xl border text-xs outline-none transition-colors",
+                        isDark
+                          ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500"
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      )}
+                    />
+                    {templateSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setTemplateSearch("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white p-0.5 cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     )}
-                  />
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Templates List */}
             <div className="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
               {(() => {
                 // Combine and filter templates
-                const systemList = PROMO_TEMPLATES.map(t => ({
-                  ...t,
-                  isCustom: false,
-                  createdAt: "Bawaan Sistem"
-                }));
+                const activeSystemList = PROMO_TEMPLATES
+                  .filter(t => !deletedSystemTemplateIds.includes(t.id))
+                  .map(t => ({
+                    ...t,
+                    isCustom: false,
+                    createdAt: "Bawaan Sistem"
+                  }));
+
                 const customList = savedTemplates.map(t => ({
                   ...t,
                   isCustom: true
                 }));
 
-                let combined = [];
+                let combined: { id: string; name: string; subject: string; html: string; isCustom: boolean; createdAt?: string }[] = [];
                 if (templateTab === "all") {
-                  combined = [...customList, ...systemList];
+                  combined = [...customList, ...activeSystemList];
                 } else if (templateTab === "saved") {
                   combined = customList;
                 } else {
-                  combined = systemList;
+                  combined = activeSystemList;
                 }
 
                 if (templateSearch.trim()) {
@@ -2041,13 +2110,23 @@ export default function EmailBlastPage() {
 
                 if (combined.length === 0) {
                   return (
-                    <div className="text-center py-12 px-4 rounded-xl border border-dashed border-slate-800">
-                      <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto mb-2 opacity-50" />
+                    <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-800 space-y-2">
+                      <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto opacity-50" />
                       <p className="text-xs text-zinc-400 font-medium">Tidak ada template ditemukan</p>
                       {templateTab === "saved" && (
-                        <p className="text-[11px] text-zinc-500 mt-1">
-                          Kamu belum menyimpan template kustom. Klik tombol <strong className="text-cyan-400">"Simpan Draf Ini"</strong> di atas untuk menyimpan draf email saat ini.
+                        <p className="text-[11px] text-zinc-500 max-w-sm mx-auto">
+                          Kamu belum menyimpan template kustom. Klik tombol <strong className="text-cyan-400">"+ Simpan Draf Email"</strong> di atas untuk menyimpan draf email saat ini.
                         </p>
+                      )}
+                      {templateTab === "system" && deletedSystemTemplateIds.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleRestoreSystemTemplates}
+                          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>Pulihkan {deletedSystemTemplateIds.length} Template Resmi yang Terhapus</span>
+                        </button>
                       )}
                     </div>
                   );
@@ -2057,53 +2136,64 @@ export default function EmailBlastPage() {
                   <div
                     key={tpl.id}
                     className={cn(
-                      "p-3 sm:p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group",
+                      "p-3.5 sm:p-4 rounded-xl border transition-all flex flex-col gap-2.5 group",
                       isDark
                         ? "bg-[#060b14]/70 border-slate-800 hover:border-cyan-500/40 hover:bg-[#060b14]"
                         : "bg-slate-50 border-slate-200 hover:border-cyan-400 hover:bg-white"
                     )}
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-bold text-xs sm:text-sm text-cyan-400 truncate">
-                          {tpl.name}
+                    {/* Top: Title & Badge */}
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-xs sm:text-sm text-cyan-400 break-words leading-snug flex-1">
+                        {tpl.name}
+                      </h4>
+                      {tpl.isCustom ? (
+                        <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                          <Bookmark className="w-2.5 h-2.5" />
+                          <span>Tersimpan</span>
                         </span>
-                        {tpl.isCustom ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                            <Bookmark className="w-2.5 h-2.5" />
-                            <span>Tersimpan · {tpl.createdAt}</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                            ⚡ Resmi Sistem
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-zinc-400 truncate font-mono">
-                        {tpl.subject || "(Tanpa Subject)"}
-                      </p>
+                      ) : (
+                        <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                          ⚡ Resmi
+                        </span>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                      {tpl.isCustom && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSavedTemplate(tpl.id, tpl.name)}
-                          title="Hapus template tersimpan ini"
-                          className="p-2 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                    {/* Middle: Subject preview */}
+                    <div className="text-xs text-zinc-400 leading-relaxed break-words line-clamp-2">
+                      <span className="text-zinc-500 font-medium mr-1.5">Subject:</span>
+                      <span className={cn(isDark ? "text-zinc-300" : "text-slate-700")}>
+                        {tpl.subject || "(Tanpa Subject)"}
+                      </span>
+                    </div>
+
+                    {tpl.isCustom && tpl.createdAt && (
+                      <div className="text-[10px] text-zinc-500">
+                        Disimpan: {tpl.createdAt}
+                      </div>
+                    )}
+
+                    {/* Bottom Action Row (Mobile & Desktop Friendly) */}
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60 mt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setTemplateToDelete({ id: tpl.id, name: tpl.name, isCustom: tpl.isCustom })}
+                        title="Hapus template ini"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-all cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>Hapus</span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => {
                           handleSelectTemplate(tpl);
                           setShowTemplatesModal(false);
                         }}
-                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                        className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all cursor-pointer shadow-xs"
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
                         <span>Pakai Template Ini</span>
                       </button>
                     </div>
@@ -2113,12 +2203,23 @@ export default function EmailBlastPage() {
             </div>
 
             {/* Footer */}
-            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-zinc-500 mt-2 shrink-0">
-              <span>Semua template tersimpan secara lokal dan aman di browser kamu.</span>
+            <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 mt-2 shrink-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>Tersimpan aman di browser kamu.</span>
+                {deletedSystemTemplateIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleRestoreSystemTemplates}
+                    className="text-cyan-400 hover:underline cursor-pointer font-medium"
+                  >
+                    Pulihkan ({deletedSystemTemplateIds.length}) template resmi
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => setShowTemplatesModal(false)}
-                className="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors cursor-pointer self-end sm:self-auto"
               >
                 Tutup
               </button>
@@ -2376,6 +2477,24 @@ export default function EmailBlastPage() {
         variant="warning"
         isLoading={sendingBlast}
       />
+
+      {/* MODAL: Confirm Delete Template Modal */}
+      <ConfirmModal
+        isOpen={!!templateToDelete}
+        onClose={() => setTemplateToDelete(null)}
+        onConfirm={handleConfirmDeleteTemplate}
+        title="Hapus Template Email?"
+        description={
+          templateToDelete?.isCustom
+            ? `Apakah Anda yakin ingin menghapus template tersimpan "${templateToDelete?.name}"? Tindakan ini tidak dapat dibatalkan.`
+            : `Apakah Anda yakin ingin menghapus template resmi "${templateToDelete?.name}" dari daftar template Anda? Anda dapat memulihkan template resmi kapan saja.`
+        }
+        confirmText="Ya, Hapus Template"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={isDeletingTemplate}
+      />
+
       {/* MODAL 5: SMTP Server Configuration Modal */}
       {showSmtpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
