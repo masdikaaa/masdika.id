@@ -78,6 +78,10 @@ const AWS_REGIONS = [
 ];
 
 export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
+  const vpsId = vps?.id;
+  const vmid = vps?.vmid;
+  const vpsStatus = vps?.status;
+
   const [selectedProvider, setSelectedProvider] = useState<"R2" | "S3" | "GDRIVE">("R2");
   const [config, setConfig] = useState<CloudConfig>({
     provider: "R2",
@@ -87,7 +91,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
     region: "auto",
     accessKeyId: "",
     secretAccessKey: "",
-    pathPrefix: `vps-${vps?.vmid || vps?.id || "backup"}`,
+    pathPrefix: `vps-${vmid || vpsId || "backup"}`,
     gdriveFolderId: "",
     gdriveClientEmail: "",
     gdrivePrivateKey: ""
@@ -109,10 +113,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
   // Fetch data
   const fetchData = useCallback(async (quiet = false) => {
-    if (!vps?.id) return;
+    if (!vpsId) return;
     if (!quiet) setIsLoading(true);
     try {
-      const res = await fetch(`/api/user/vps/${vps.id}/cloud-backups`);
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups`);
       const data = await res.json();
 
       if (data.success) {
@@ -135,7 +139,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
     } finally {
       if (!quiet) setIsLoading(false);
     }
-  }, [vps?.id]);
+  }, [vpsId]);
 
   useEffect(() => {
     fetchData();
@@ -168,10 +172,11 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
   // Test connection
   const handleTestConnection = async () => {
+    if (!vpsId) return;
     setIsTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch(`/api/user/vps/${vps.id}/cloud-backups/test`, {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -198,9 +203,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
   // Save config
   const handleSaveConfig = async () => {
+    if (!vpsId) return;
     setIsSaving(true);
     try {
-      const res = await fetch(`/api/user/vps/${vps.id}/cloud-backups/config`, {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -232,6 +238,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
   // Trigger Backup
   const handleRunBackup = async () => {
+    if (!vpsId) return;
     if (activeBackup) {
       toast.info("A backup is already running. Please wait for it to complete.");
       return;
@@ -239,7 +246,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
     setIsBackingUp(true);
     try {
-      const res = await fetch(`/api/user/vps/${vps.id}/cloud-backups/run`, {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/run`, {
         method: "POST"
       });
       const data = await res.json();
@@ -258,10 +265,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
   // Confirm delete
   const handleDeleteRecord = async () => {
-    if (!recordToDelete) return;
+    if (!recordToDelete || !vpsId) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/user/vps/${vps.id}/cloud-backups/${recordToDelete.id}`, {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/${recordToDelete.id}`, {
         method: "DELETE"
       });
       const data = await res.json();
@@ -331,7 +338,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
             <button
               onClick={handleRunBackup}
-              disabled={isBackingUp || Boolean(activeBackup) || vps?.status === "SUSPENDED"}
+              disabled={isBackingUp || Boolean(activeBackup) || vpsStatus === "SUSPENDED"}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
               <CloudUpload className={cn("w-4 h-4", isBackingUp && "animate-bounce")} />
@@ -520,7 +527,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 </label>
                 <input
                   type="text"
-                  placeholder={`vps-${vps?.vmid || "backup"}`}
+                  placeholder={`vps-${vmid || vpsId || "backup"}`}
                   value={config.pathPrefix || ""}
                   onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
                   className={cn(
@@ -654,7 +661,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 </label>
                 <input
                   type="text"
-                  placeholder={`vps-${vps?.vmid || "backup"}`}
+                  placeholder={`vps-${vmid || vpsId || "backup"}`}
                   value={config.pathPrefix || ""}
                   onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
                   className={cn(
@@ -888,7 +895,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                       <div className="flex items-center justify-end gap-2">
                         {rec.status === "COMPLETED" && (
                           <a
-                            href={`/api/user/vps/${vps.id}/cloud-backups/${rec.id}/download`}
+                            href={`/api/user/vps/${vpsId}/cloud-backups/${rec.id}/download`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={cn(
