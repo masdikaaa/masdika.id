@@ -8,10 +8,10 @@ import {
   sendAdminNewOrderEmail,
 } from "@/lib/email";
 
-function generateOrderId() {
+function generateOrderId(prefix: string = 'INV') {
   const timestamp = Date.now().toString();
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `INV-${timestamp}-${random}`;
+  return `${prefix}-${timestamp}-${random}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
 
         // For upgrades: create a separate PAYG_RUNNING invoice so hourly billing can track charges
         if (upgradeSubscriptionId && initialStatus === 'ACTIVE') {
-          const runningOrderId = merchantOrderId + '-PAYG';
+          const runningOrderId = generateOrderId('INV-PAYG');
           await tx.invoice.create({
             data: {
               invoiceNumber: runningOrderId,

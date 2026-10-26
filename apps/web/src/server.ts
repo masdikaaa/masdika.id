@@ -204,6 +204,15 @@ app.prepare().then(async () => {
     }).catch((err) => {
       console.warn('> [Cache Warmup] Failed to load cache module:', err?.message || err);
     });
+
+    // ⚡ Standardize legacy PAYG invoice numbers in background
+    import("./lib/invoice-standardizer").then(({ normalizeAllLegacyInvoices }) => {
+      normalizeAllLegacyInvoices().catch((err) => {
+        console.warn('> [Invoice Standardizer] Background migration note:', err?.message || err);
+      });
+    }).catch((err) => {
+      console.warn('> [Invoice Standardizer] Failed to load module:', err?.message || err);
+    });
   });
 
   // ========================================

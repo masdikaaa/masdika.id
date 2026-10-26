@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
         // Create the initial PAYG invoice
         const timestamp = Date.now().toString();
         const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        const invoiceNumber = `INV-${timestamp}-${random}-PAYG`;
+        const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
         
         await tx.invoice.create({
           data: {

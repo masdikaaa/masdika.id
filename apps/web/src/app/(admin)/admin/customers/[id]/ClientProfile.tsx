@@ -15,6 +15,16 @@ import { AdminEditServiceModal } from '@/components/ui/AdminEditServiceModal';
 import { AdminLoader } from '@/components/admin/AdminLoader';
 import { Select } from '@/components/ui/Select';
 
+const formatInvoiceNumber = (num: string) => {
+  if (!num) return num;
+  if (num.startsWith('INV-PAYG-')) return num;
+  const match = num.match(/^INV-(\d+)-(\d+)-(?:VPS-)?PAYG$/i);
+  if (match) return `INV-PAYG-${match[1]}-${match[2]}`;
+  if (num.endsWith('-VPS-PAYG')) return `INV-PAYG-${num.replace(/-VPS-PAYG$/i, '').replace(/^INV-/, '')}`;
+  if (num.endsWith('-PAYG') && !num.startsWith('INV-PAYG-')) return `INV-PAYG-${num.replace(/-PAYG$/i, '').replace(/^INV-/, '')}`;
+  return num;
+};
+
 const StatusBadge = ({ status }: { status: string }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -877,7 +887,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               ]}
               renderRow={(inv: any) => (
                 <tr key={inv.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                  <td className={cn("p-4 text-sm font-medium break-all max-w-[120px] sm:max-w-none", isDark ? "text-cyan-400" : "text-cyan-700")}>{inv.invoiceNumber}</td>
+                  <td className={cn("p-4 text-sm font-medium break-all max-w-[120px] sm:max-w-none", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatInvoiceNumber(inv.invoiceNumber)}</td>
                   <td className={cn("p-4 text-sm whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(inv.createdAt).toLocaleDateString()}</td>
                   <td className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-900")}>{formatRupiah(inv.amount)}</td>
                   <td className="p-4 text-right">

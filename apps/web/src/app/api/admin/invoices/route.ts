@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
 
+import { standardizeInvoiceNumber } from "@/lib/invoice-standardizer";
+
 export async function GET(req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -36,6 +38,7 @@ export async function GET(req: NextRequest) {
       }
       return {
         ...invoice,
+        invoiceNumber: standardizeInvoiceNumber(invoice.invoiceNumber),
         user: { ...invoice.user, email, name }
       };
     });

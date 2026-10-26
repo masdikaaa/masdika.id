@@ -19,6 +19,39 @@ export async function healPaygCycleInvoicesForUser(userId: number) {
   const now = new Date();
   let healed = 0;
 
+  // 1. Standardize any legacy invoice numbers for this user (e.g. INV-1792973371884-103-VPS-PAYG -> INV-PAYG-1792973371884-103)
+  try {
+    const { standardizeInvoiceNumber } = await import('@/lib/invoice-standardizer');
+    const legacyInvoices = await prisma.invoice.findMany({
+      where: {
+        userId,
+        OR: [
+          { invoiceNumber: { endsWith: '-VPS-PAYG' } },
+          { invoiceNumber: { endsWith: '-PAYG' } },
+          { merchantOrderId: { endsWith: '-VPS-PAYG' } },
+          { merchantOrderId: { endsWith: '-PAYG' } }
+        ]
+      },
+      select: { id: true, invoiceNumber: true, merchantOrderId: true }
+    });
+
+    for (const inv of legacyInvoices) {
+      if (inv.invoiceNumber.startsWith('INV-PAYG-') && (!inv.merchantOrderId || inv.merchantOrderId.startsWith('INV-PAYG-'))) {
+        continue;
+      }
+      const newInvoiceNumber = standardizeInvoiceNumber(inv.invoiceNumber);
+      const newMerchantOrderId = inv.merchantOrderId ? standardizeInvoiceNumber(inv.merchantOrderId) : newInvoiceNumber;
+      if (newInvoiceNumber !== inv.invoiceNumber || newMerchantOrderId !== inv.merchantOrderId) {
+        await prisma.invoice.update({
+          where: { id: inv.id },
+          data: { invoiceNumber: newInvoiceNumber, merchantOrderId: newMerchantOrderId }
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[PAYG Heal] Failed to normalize user legacy invoices:', err);
+  }
+
   const vpsList = await prisma.vpsService.findMany({
     where: {
       userId,
