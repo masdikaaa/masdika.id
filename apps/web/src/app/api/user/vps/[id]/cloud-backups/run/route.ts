@@ -85,10 +85,28 @@ export async function POST(
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
     if (!server) return NextResponse.json({ error: "No active Proxmox server configured" }, { status: 500 });
 
-    const backupStorage = server.backupStorage || "local";
-    const timestampStr = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
-    const targetKey = `${config.pathPrefix || `vps-${vps.vmid}`}/vzdump-qemu-${vps.vmid}-${timestampStr}.vma.zst`;
-    const tempFilename = `vzdump-qemu-${vps.vmid}-${timestampStr}.vma.zst`;
+    const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+
+    // For cloud backups, we need a directory-based storage (like 'local') that generates standalone .vma.zst archive files
+    // and supports direct streaming downloads via /storage/{storage}/download, NOT a chunked PBS (Proxmox Backup Server).
+    let cloudTempStorage = "local";
+    try {
+      const storages = await proxmox.getStorages(vps.node);
+      const dirStorage = (storages || []).find(
+        (s: any) => s.active && s.enabled && s.type !== "pbs" && typeof s.content === "string" && s.content.includes("backup")
+      );
+      if (dirStorage) {
+        cloudTempStorage = dirStorage.storage;
+      }
+    } catch {
+      cloudTempStorage = "local";
+    }
+
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const pveDateStr = `${now.getFullYear()}_${pad(now.getMonth() + 1)}_${pad(now.getDate())}-${pad(now.getHours())}_${pad(now.getMinutes())}_${pad(now.getSeconds())}`;
+    const standardFilename = `vzdump-qemu-${vps.vmid}-${pveDateStr}.vma.zst`;
+    const targetKey = `${config.pathPrefix || `vps-${vps.vmid}`}/${standardFilename}`;
 
     // Create tracking record
     const record = await prisma.vpsCloudBackupRecord.create({
@@ -96,7 +114,7 @@ export async function POST(
         vpsId: vps.id,
         configId: config.id,
         provider: config.provider,
-        filename: tempFilename,
+        filename: standardFilename,
         targetKey: targetKey,
         status: "CREATING_BACKUP",
         progress: 10,
@@ -109,12 +127,11 @@ export async function POST(
 
     // Start background process
     (async () => {
-      const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
       let createdVolume: string | null = null;
 
       try {
         // Step 1: Trigger Proxmox vzdump
-        const upid = await proxmox.createBackup(vps.node, vmid, backupStorage);
+        const upid = await proxmox.createBackup(vps.node, vmid, cloudTempStorage);
         if (!upid) {
           throw new Error("Failed to start backup task on Proxmox");
         }
@@ -153,7 +170,7 @@ export async function POST(
         }
 
         // Step 3: Find the newly created backup file
-        const backups = await proxmox.getBackups(vps.node, backupStorage, vmid);
+        const backups = await proxmox.getBackups(vps.node, cloudTempStorage, vmid);
         const sortedBackups = (backups || []).sort((a: any, b: any) => (b.ctime || 0) - (a.ctime || 0));
         const latestBackup = sortedBackups[0];
 
@@ -162,7 +179,8 @@ export async function POST(
         }
 
         createdVolume = latestBackup.volid as string;
-        const realFilename = createdVolume.split("/").pop() || tempFilename;
+        const rawFilename = createdVolume.split("/").pop() || standardFilename;
+        const realFilename = rawFilename.startsWith("vzdump-") ? rawFilename : standardFilename;
         const backupFileSize = BigInt(latestBackup.size || 0);
 
         // Update record status to UPLOADING_TO_CLOUD
@@ -178,7 +196,7 @@ export async function POST(
         });
 
         // Step 4: Stream download from Proxmox
-        const proxmoxDownloadUrl = `${server.host.replace(/\/$/, "")}/api2/extjs/nodes/${vps.node}/storage/${backupStorage}/download?volume=${encodeURIComponent(createdVolume)}`;
+        const proxmoxDownloadUrl = `${server.host.replace(/\/$/, "")}/api2/extjs/nodes/${vps.node}/storage/${cloudTempStorage}/download?volume=${encodeURIComponent(createdVolume)}`;
 
         const proxmoxRes = await fetch(proxmoxDownloadUrl, {
           method: "GET",
@@ -275,13 +293,21 @@ export async function POST(
           }
         });
 
-        // Step 7: Clean up temporary backup from Proxmox storage if user does NOT have paid backup quota
-        if (vps.backupGb <= 0 && createdVolume) {
-          try {
-            await proxmox.deleteBackup(vps.node, backupStorage, createdVolume);
-          } catch (delErr) {
-            console.warn("Failed to delete temp local backup from Proxmox:", delErr);
+        // Step 7: Keep the latest local copy on hypervisor storage so user can restore directly.
+        // Clean up older local cloud backups for this VPS if more than 2 exist to prevent filling up disk.
+        try {
+          const allLocal = await proxmox.getBackups(vps.node, cloudTempStorage, vmid);
+          const sorted = (allLocal || []).sort((a: any, b: any) => (b.ctime || 0) - (a.ctime || 0));
+          if (sorted.length > 2) {
+            const toDelete = sorted.slice(2);
+            for (const oldB of toDelete) {
+              if (oldB.volid && oldB.volid !== createdVolume) {
+                await proxmox.deleteBackup(vps.node, cloudTempStorage, oldB.volid).catch(() => {});
+              }
+            }
           }
+        } catch (cleanupErr) {
+          console.warn("Retention cleanup error:", cleanupErr);
         }
       } catch (err: any) {
         console.error("Cloud backup execution error:", err);
@@ -307,9 +333,9 @@ export async function POST(
         });
 
         // Clean up temp backup if failed
-        if (vps.backupGb <= 0 && createdVolume) {
+        if (createdVolume) {
           try {
-            await proxmox.deleteBackup(vps.node, backupStorage, createdVolume);
+            await proxmox.deleteBackup(vps.node, cloudTempStorage, createdVolume);
           } catch {}
         }
       }

@@ -32,7 +32,8 @@ import {
   LogOut,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -240,6 +241,17 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
   const [errorModal, setErrorModal] = useState<{ title: string; provider: string; error: string } | null>(null);
   const prevActiveIdRef = useRef<number | null>(null);
 
+  // Confirm backup modal state
+  const [isConfirmBackupOpen, setIsConfirmBackupOpen] = useState(false);
+
+  // Success popup modal state
+  const [successModalRecord, setSuccessModalRecord] = useState<BackupRecord | null>(null);
+
+  // Restore modal state
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [recordToRestore, setRecordToRestore] = useState<BackupRecord | null>(null);
+  const [isRestoring, setIsRestoring] = useState(false);
+
   // Check URL query parameters for Google OAuth callback result
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -319,12 +331,16 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
         if (prevActiveIdRef.current) {
           const finishedRec = newRecords.find((r) => r.id === prevActiveIdRef.current);
-          if (finishedRec && finishedRec.status === "FAILED") {
-            setErrorModal({
-              title: "Cloud Backup Failed",
-              provider: finishedRec.provider,
-              error: finishedRec.error || "The backup process stopped before completion."
-            });
+          if (finishedRec) {
+            if (finishedRec.status === "COMPLETED") {
+              setSuccessModalRecord(finishedRec);
+            } else if (finishedRec.status === "FAILED") {
+              setErrorModal({
+                title: "Cloud Backup Failed",
+                provider: finishedRec.provider,
+                error: finishedRec.error || "The backup process stopped before completion."
+              });
+            }
           }
         }
 
@@ -335,7 +351,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
     } finally {
       if (!quiet) setIsLoading(false);
     }
-  }, [vpsId, setErrorModal]);
+  }, [vpsId, setErrorModal, setSuccessModalRecord]);
 
   useEffect(() => {
     fetchData();
@@ -471,6 +487,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       return;
     }
 
+    setIsConfirmBackupOpen(false);
     setIsBackingUp(true);
     try {
       const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/run`, {
@@ -479,6 +496,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       const data = await res.json();
       if (data.success) {
         toast.success("Cloud backup initiated! vzdump snapshot is being prepared.");
+        if (data.record?.id) {
+          prevActiveIdRef.current = data.record.id;
+        }
         fetchData(true);
       } else {
         const errorMsg = data.error || "Failed to start cloud backup";
@@ -499,6 +519,30 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       });
     } finally {
       setIsBackingUp(false);
+    }
+  };
+
+  // Trigger Restore
+  const handleRestoreBackup = async () => {
+    if (!recordToRestore || !vpsId) return;
+    setIsRestoring(true);
+    try {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/${recordToRestore.id}/restore`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || "VPS restore initiated successfully!");
+        setIsRestoreModalOpen(false);
+        setRecordToRestore(null);
+        fetchData(true);
+      } else {
+        toast.error(data.error || "Failed to initiate VPS restore");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Network error while restoring");
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -577,9 +621,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             </button>
 
             <button
-              onClick={handleRunBackup}
+              onClick={() => setIsConfirmBackupOpen(true)}
               disabled={isBackingUp || Boolean(activeBackup) || vpsStatus === "SUSPENDED"}
-              className="flex-1 sm:flex-initial h-10 flex items-center justify-center gap-2 px-4 sm:px-5 rounded-xl transition-all disabled:opacity-50 font-semibold text-xs sm:text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm whitespace-nowrap"
+              className="flex-1 sm:flex-initial h-10 flex items-center justify-center gap-2 px-4 sm:px-5 rounded-xl transition-all disabled:opacity-50 font-semibold text-xs sm:text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm whitespace-nowrap cursor-pointer"
             >
               <CloudUpload className={cn("w-4 h-4 shrink-0", isBackingUp && "animate-bounce")} />
               <span>{activeBackup ? "Backup In Progress..." : isBackingUp ? "Starting Backup..." : "Backup Now to Cloud"}</span>
@@ -1943,19 +1987,40 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <td className="px-4 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {rec.status === "COMPLETED" && (
-                          <a
-                            href={`/api/user/vps/${vpsId}/cloud-backups/${rec.id}/download`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={cn(
-                              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-2xs",
-                              isDark
-                                ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20"
-                                : "bg-cyan-100 border-cyan-300 text-cyan-950 hover:bg-cyan-200"
-                            )}
-                          >
-                            <Download className="w-3.5 h-3.5" /> Download
-                          </a>
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRecordToRestore(rec);
+                                setIsRestoreModalOpen(true);
+                              }}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-2xs cursor-pointer",
+                                isDark
+                                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                                  : "bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100"
+                              )}
+                              title="Restore VPS from this cloud backup archive"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                              <span>Restore</span>
+                            </button>
+
+                            <a
+                              href={`/api/user/vps/${vpsId}/cloud-backups/${rec.id}/download`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-2xs",
+                                isDark
+                                  ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20"
+                                  : "bg-cyan-100 border-cyan-300 text-cyan-950 hover:bg-cyan-200"
+                              )}
+                            >
+                              <Download className="w-3.5 h-3.5 shrink-0" />
+                              <span>Download</span>
+                            </a>
+                          </>
                         )}
 
                         <button
@@ -2203,6 +2268,305 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   Switch to Cloudflare R2
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Backup Modal */}
+      {isConfirmBackupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 duration-200",
+              isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-xl"
+            )}
+          >
+            <button
+              onClick={() => setIsConfirmBackupOpen(false)}
+              className={cn(
+                "absolute right-4 top-4 p-1.5 rounded-lg transition-colors cursor-pointer",
+                isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+              )}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-start gap-3.5 mb-4 pr-6">
+              <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                <CloudUpload className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                  Confirm Cloud Backup
+                </h3>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-600 font-medium")}>
+                  Full snapshot backup of VPS #{vps?.id} ({vps?.name || `VM ${vmid}`})
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-5">
+              <p className={cn("text-xs leading-relaxed font-medium", isDark ? "text-slate-300" : "text-slate-700")}>
+                A complete live snapshot of this virtual machine will be generated using Proxmox vzdump (Zstandard compressed format) and streamed directly to your configured cloud storage.
+              </p>
+
+              <div className={cn("p-3.5 rounded-xl border text-xs space-y-2", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-300")}>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Destination Provider:</span>
+                  <span className="font-bold inline-flex items-center gap-1.5">
+                    {selectedProvider === "R2" && <CloudflareLogo className="w-3.5 h-3.5" />}
+                    {selectedProvider === "S3" && <AwsS3Logo className="w-3.5 h-3.5" />}
+                    {selectedProvider === "GDRIVE" && <GoogleDriveLogo className="w-3.5 h-3.5" />}
+                    <span>{selectedProvider === "R2" ? "Cloudflare R2" : selectedProvider === "S3" ? "AWS S3" : "Google Drive"}</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Target Location:</span>
+                  <span className={cn("font-mono font-bold truncate max-w-[240px]", isDark ? "text-cyan-300" : "text-cyan-900")}>
+                    {selectedProvider === "GDRIVE" ? (config.gdriveFolderId || "Root (My Drive)") : `${config.bucket || "bucket"}/${config.pathPrefix || `vps-${vmid}`}`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Archive Type:</span>
+                  <span className="font-mono font-bold text-emerald-400">.vma.zst (QEMU vzdump)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>VM Downtime:</span>
+                  <span className="font-bold text-emerald-400">Zero (Live Snapshot)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={cn("flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t", isDark ? "border-slate-800/60" : "border-slate-200")}>
+              <button
+                type="button"
+                onClick={() => setIsConfirmBackupOpen(false)}
+                className={cn(
+                  "w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer",
+                  isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300"
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRunBackup}
+                disabled={isBackingUp}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <CloudUpload className="w-4 h-4" />
+                <span>Confirm &amp; Backup Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Popup Modal */}
+      {successModalRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 duration-200",
+              isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-xl"
+            )}
+          >
+            <button
+              onClick={() => setSuccessModalRecord(null)}
+              className={cn(
+                "absolute right-4 top-4 p-1.5 rounded-lg transition-colors cursor-pointer",
+                isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+              )}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-start gap-3.5 mb-4 pr-6">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <CheckCircle2 className="w-7 h-7" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                    Cloud Backup Completed!
+                  </h3>
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                </div>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-600 font-medium")}>
+                  Your VPS archive is safely saved and ready for download or restore.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-5">
+              <div className={cn("p-4 rounded-xl border text-xs space-y-2.5", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-300")}>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Archive Filename:</span>
+                  <span className="font-mono font-bold text-xs truncate max-w-[240px]" title={successModalRecord.filename}>
+                    {successModalRecord.filename}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Archive Size:</span>
+                  <span className="font-mono font-bold text-emerald-400">
+                    {formatFileSize(successModalRecord.fileSize)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Cloud Storage:</span>
+                  <span className="font-bold inline-flex items-center gap-1.5">
+                    {successModalRecord.provider === "R2" && <CloudflareLogo className="w-3.5 h-3.5" />}
+                    {successModalRecord.provider === "S3" && <AwsS3Logo className="w-3.5 h-3.5" />}
+                    {successModalRecord.provider === "GDRIVE" && <GoogleDriveLogo className="w-3.5 h-3.5" />}
+                    <span>{successModalRecord.provider === "R2" ? "Cloudflare R2" : successModalRecord.provider === "S3" ? "AWS S3" : "Google Drive"}</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Date Created:</span>
+                  <span className="font-medium">
+                    {new Date(successModalRecord.createdAt).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={cn("flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t", isDark ? "border-slate-800/60" : "border-slate-200")}>
+              <button
+                type="button"
+                onClick={() => setSuccessModalRecord(null)}
+                className={cn(
+                  "w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer",
+                  isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300"
+                )}
+              >
+                Close
+              </button>
+              {successModalRecord.downloadUrl && (
+                <a
+                  href={`/api/user/vps/${vpsId}/cloud-backups/${successModalRecord.id}/download`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Archive</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Restore Confirmation Modal */}
+      {isRestoreModalOpen && recordToRestore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 duration-200",
+              isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-xl"
+            )}
+          >
+            <button
+              onClick={() => {
+                setIsRestoreModalOpen(false);
+                setRecordToRestore(null);
+              }}
+              disabled={isRestoring}
+              className={cn(
+                "absolute right-4 top-4 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50",
+                isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+              )}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-start gap-3.5 mb-4 pr-6">
+              <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                  Restore VPS from Cloud Backup
+                </h3>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-600 font-medium")}>
+                  Rollback VM #{vps?.id} to snapshot state
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-5">
+              <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed space-y-1.5", isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-950 font-medium")}>
+                <div className="font-bold flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>Warning: VM Overwrite &amp; Temporary Shutdown</span>
+                </div>
+                <p className="text-[11px]">
+                  Restoring this backup will temporarily power off the VPS and overwrite all current disk data and configuration with the snapshot state. Any uncommitted data created after this backup date will be replaced.
+                </p>
+              </div>
+
+              <div className={cn("p-3.5 rounded-xl border text-xs space-y-2", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-300")}>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Archive:</span>
+                  <span className="font-mono font-bold text-xs truncate max-w-[240px]" title={recordToRestore.filename}>
+                    {recordToRestore.filename}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Archive Size:</span>
+                  <span className="font-mono font-bold text-cyan-400">
+                    {formatFileSize(recordToRestore.fileSize)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Backup Provider:</span>
+                  <span className="font-bold">
+                    {recordToRestore.provider === "R2" ? "Cloudflare R2" : recordToRestore.provider === "S3" ? "AWS S3" : "Google Drive"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-slate-400" : "text-slate-600"}>Created At:</span>
+                  <span className="font-medium">
+                    {new Date(recordToRestore.createdAt).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={cn("flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t", isDark ? "border-slate-800/60" : "border-slate-200")}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRestoreModalOpen(false);
+                  setRecordToRestore(null);
+                }}
+                disabled={isRestoring}
+                className={cn(
+                  "w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer disabled:opacity-50",
+                  isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300"
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRestoreBackup}
+                disabled={isRestoring}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isRestoring ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Initiating Restore...</span>
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Confirm &amp; Restore VPS</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

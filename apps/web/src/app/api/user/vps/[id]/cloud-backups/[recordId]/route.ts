@@ -44,6 +44,16 @@ export async function DELETE(
       }
     }
 
+    // Also attempt cleanup from hypervisor local storage if present
+    try {
+      const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+      if (server && record.filename) {
+        const { ProxmoxClient } = await import("@/lib/proxmox");
+        const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+        await proxmox.deleteBackup(vps.node, "local", `local:backup/${record.filename}`).catch(() => {});
+      }
+    } catch {}
+
     await prisma.vpsCloudBackupRecord.delete({
       where: { id: record.id }
     });
