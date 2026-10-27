@@ -224,6 +224,56 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Delete a single log/session record from history
+    if (action === 'delete') {
+      if (!logId) {
+        return NextResponse.json({ error: 'Log ID is required' }, { status: 400 });
+      }
+
+      if (String(logId).startsWith('activity-')) {
+        const id = Number(String(logId).replace('activity-', ''));
+        await prisma.clientActivityLog.deleteMany({
+          where: { id, userId: auth.user.id }
+        });
+      } else {
+        const id = Number(String(logId).replace('login-', ''));
+        await prisma.loginLog.deleteMany({
+          where: {
+            id,
+            OR: [
+              { userId: auth.user.id },
+              { emailAttempt: plainEmail },
+              { emailAttempt: auth.user.email }
+            ]
+          }
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Login record removed successfully'
+      });
+    }
+
+    // Clear all login history (except current active session)
+    if (action === 'clear_history') {
+      await prisma.loginLog.deleteMany({
+        where: {
+          OR: [
+            { userId: auth.user.id },
+            { emailAttempt: plainEmail },
+            { emailAttempt: auth.user.email }
+          ],
+          ...(auth.sessionId ? { NOT: { sessionId: auth.sessionId } } : {})
+        }
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Login history cleared successfully'
+      });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error: any) {
     console.error('Revoke session error:', error);

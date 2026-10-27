@@ -64,17 +64,21 @@ export function parseUserAgent(userAgent: string | null | undefined): DeviceInfo
   }
 
   // 3. Detect Browser
-  let browser = 'Browser Web';
+  let browser = 'Other Browser';
   if (/edg\/|edge\//i.test(ua)) {
     browser = 'Edge';
   } else if (/opr\/|opera/i.test(ua)) {
     browser = 'Opera';
+  } else if (/vivaldi/i.test(ua)) {
+    browser = 'Vivaldi';
+  } else if (/brave/i.test(ua)) {
+    browser = 'Brave';
+  } else if (/arc\//i.test(ua)) {
+    browser = 'Arc';
   } else if (/samsungbrowser/i.test(ua)) {
     browser = 'Samsung Internet';
   } else if (/firefox|fxios/i.test(ua)) {
     browser = 'Firefox';
-  } else if (/brave/i.test(ua)) {
-    browser = 'Brave';
   } else if (/chrome|crios/i.test(ua)) {
     browser = 'Chrome';
   } else if (/safari/i.test(ua) && !/chrome|crios|android/i.test(ua)) {
