@@ -72,7 +72,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
   const formatPaymentMethod = (method?: string | null) => {
     if (!method) return 'Account Balance';
     const m = method.toUpperCase();
-    if (m === 'BALANCE' || m === 'ACCOUNT BALANCE') return 'Account Balance (Saldo Akun)';
+    if (m === 'BALANCE' || m === 'ACCOUNT BALANCE') return 'Account Balance';
     if (m === 'QRIS') return 'QRIS Instant Payment';
     if (m.includes('VA') || m.includes('VIRTUAL')) return `${method} Virtual Account`;
     return method;
@@ -82,11 +82,23 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
     if (!dateVal) return '-';
     const d = new Date(dateVal);
     if (isNaN(d.getTime())) return '-';
-    return d.toLocaleDateString('id-ID', {
-      day: '2-digit',
+    if (withTime) {
+      const datePart = d.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      const timePart = d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      return `${datePart} at ${timePart} WIB`;
+    }
+    return d.toLocaleDateString('en-US', {
       month: 'long',
-      year: 'numeric',
-      ...(withTime ? { hour: '2-digit', minute: '2-digit' } : {})
+      day: 'numeric',
+      year: 'numeric'
     });
   };
 
@@ -200,7 +212,8 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                 )}
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back</span>
+                <span className="hidden sm:inline">Back to Billing</span>
+                <span className="sm:hidden">Back</span>
               </Link>
 
               <button
@@ -231,7 +244,8 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                 )}
               >
                 {copiedShare ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-slate-400" />}
-                <span>Share</span>
+                <span className="hidden sm:inline">Share Link</span>
+                <span className="sm:hidden">Share</span>
               </button>
 
               <button
@@ -240,7 +254,8 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                 className="flex-1 sm:flex-none justify-center inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-sm cursor-pointer whitespace-nowrap"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print / PDF</span>
+                <span className="hidden sm:inline">Print / Download PDF</span>
+                <span className="sm:hidden">Print / PDF</span>
               </button>
             </div>
           </div>
@@ -264,7 +279,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
               <div className="hidden sm:block absolute top-16 right-10 md:right-14 pointer-events-none select-none rotate-[-12deg] z-0 opacity-15 dark:opacity-25 print:opacity-40">
                 <div className="border-[3px] border-emerald-500 rounded-2xl px-5 py-2 sm:px-6 sm:py-2.5 text-center">
                   <div className="text-[10px] tracking-[0.25em] font-extrabold text-emerald-500 uppercase">OFFICIAL RECEIPT</div>
-                  <div className="text-2xl sm:text-3xl font-black text-emerald-500 tracking-wider">LUNAS / PAID</div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-500 tracking-wider">PAID</div>
                   <div className="text-[9px] tracking-[0.15em] font-semibold text-emerald-500 uppercase">MASDIKA CLOUD BILLING</div>
                 </div>
               </div>
@@ -292,7 +307,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                 <div className={cn("text-xs leading-relaxed space-y-0.5 print-muted", isDark ? "text-slate-400" : "text-slate-500")}>
                   <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Masdika Cloud Infrastructure</p>
                   <p>PT Masdika Teknologi Indonesia • Automated Cloud Billing</p>
-                  <p>Sidoarjo, Jawa Timur 61256, Indonesia</p>
+                  <p>Sidoarjo, East Java 61256, Indonesia</p>
                   <p className="font-mono text-[11px] pt-0.5">billing@masdika.id • https://masdika.id</p>
                 </div>
               </div>
@@ -319,12 +334,12 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                       <>
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse print:hidden" />
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>PAID / LUNAS</span>
+                        <span>PAID</span>
                       </>
                     ) : (
                       <>
                         <Clock className="w-3.5 h-3.5" />
-                        <span>UNPAID / PENDING</span>
+                        <span>UNPAID</span>
                       </>
                     )}
                   </span>
@@ -652,7 +667,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
 
                 <div className="flex justify-between items-center text-xs sm:text-sm pb-3 border-b border-slate-800 dark:border-slate-800 border-dashed">
                   <span className={cn("print-muted", isDark ? "text-slate-400" : "text-slate-500")}>
-                    Tax / PPN ({taxRate}%)
+                    Tax / VAT ({taxRate}%)
                   </span>
                   <span className={cn("font-semibold font-mono print-dark", isDark ? "text-white" : "text-slate-900")}>
                     {formatRupiah(taxAmount)}
@@ -696,7 +711,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                   Thank you for choosing Masdika Cloud Infrastructure.
                 </p>
                 <p className={cn("text-[11px] leading-relaxed", isDark ? "text-slate-500" : "text-slate-400")}>
-                  PT Masdika Teknologi Indonesia • This is a computer-generated official tax invoice and electronic receipt. For corporate inquiries or Faktur Pajak, contact billing@masdika.id.
+                  PT Masdika Teknologi Indonesia • This is a computer-generated official tax invoice and electronic receipt. For corporate inquiries, tax invoices, or billing support, contact billing@masdika.id.
                 </p>
               </div>
 
