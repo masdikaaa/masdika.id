@@ -538,8 +538,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Top Banner & Overview */}
       <div
         className={cn(
-          "border rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden transition-all",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          "border rounded-2xl p-4 sm:p-6 relative overflow-hidden transition-all",
+          isDark ? "bg-[#080e1e] border-slate-800" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
@@ -572,7 +572,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
               )}
             >
-              <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+              <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin text-cyan-600 dark:text-cyan-400")} />
               <span className="hidden sm:inline-block ml-2 text-xs">Refresh</span>
             </button>
 
@@ -595,16 +595,18 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               className={cn(
                 "mt-5 p-5 rounded-2xl border transition-all relative overflow-hidden",
                 isDark
-                  ? "bg-slate-900/90 border-cyan-500/40 shadow-[0_4px_28px_rgba(34,211,238,0.14)]"
-                  : "bg-cyan-50/80 border-cyan-300 shadow-sm"
+                  ? "bg-[#0d172e] border-cyan-500/25 shadow-sm"
+                  : "bg-cyan-50/50 border-cyan-200 shadow-xs"
               )}
             >
               {/* Header: Stage info + Live Percentage Counter */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
-                    isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-cyan-100/80 border-cyan-300 text-cyan-700"
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                    isDark
+                      ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-400"
+                      : "bg-cyan-50 border-cyan-200/80 text-cyan-600"
                   )}>
                     <RefreshCw className="w-5 h-5 animate-spin" />
                   </div>
@@ -612,7 +614,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <div className="flex items-center gap-2">
                       <span className={cn(
                         "text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border",
-                        isDark ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-800 border-cyan-300"
+                        isDark
+                          ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/30"
+                          : "bg-cyan-50 text-cyan-700 border-cyan-200/80"
                       )}>
                         {activeBackup.status === "CREATING_BACKUP" ? "Step 1/2: Snapshot" : "Step 2/2: Cloud Upload"}
                       </span>
@@ -634,7 +638,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 <div className="flex items-baseline gap-1.5 self-end sm:self-center shrink-0">
                   <span className={cn(
                     "text-3xl font-extrabold font-mono tracking-tight",
-                    isDark ? "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]" : "text-cyan-700"
+                    isDark ? "text-cyan-400" : "text-cyan-600"
                   )}>
                     {progressPct}%
                   </span>
@@ -645,21 +649,21 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               {/* Glowing Progress Bar Track */}
               <div className={cn(
                 "w-full h-3 sm:h-3.5 rounded-full overflow-hidden relative p-0.5 border",
-                isDark ? "bg-black/40 border-white/10" : "bg-slate-200 border-slate-300"
+                isDark ? "bg-[#030712] border-slate-800" : "bg-slate-100 border-slate-200"
               )}>
                 <div
-                  className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 shadow-[0_0_14px_rgba(34,211,238,0.6)] relative overflow-hidden"
+                  className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 to-cyan-400 relative overflow-hidden"
                   style={{ width: `${progressPct}%` }}
                 >
                   {/* Subtle animated shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full animate-[pulse_2s_infinite]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[pulse_2s_infinite]" />
                 </div>
               </div>
 
               {/* Sub-details telemetries */}
               <div className={cn(
                 "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 mt-3 text-xs",
-                isDark ? "text-slate-400" : "text-slate-600"
+                isDark ? "text-zinc-400" : "text-slate-600"
               )}>
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
@@ -680,8 +684,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Storage Provider Selection & Settings Card */}
       <div
         className={cn(
-          "border rounded-2xl p-4 sm:p-6 shadow-lg transition-all",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          "border rounded-2xl p-4 sm:p-6 transition-all",
+          isDark ? "bg-[#080e1e] border-slate-800" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="mb-6">
@@ -1161,7 +1165,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               <div
                 className={cn(
                   "p-1 rounded-xl border grid grid-cols-2 gap-1",
-                  isDark ? "bg-[#060b14]/80 border-slate-800/80" : "bg-slate-100/90 border-slate-200"
+                  isDark ? "bg-[#080e1e] border-slate-800" : "bg-slate-100 border-slate-200"
                 )}
               >
                 <button
@@ -1329,7 +1333,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   {/* Google OAuth Callback URL Helper & Troubleshooting Card */}
                   <div className={cn(
                     "p-3 sm:p-3.5 rounded-xl border text-xs transition-all space-y-2",
-                    isDark ? "bg-[#070e1b] border-cyan-500/25 text-slate-300" : "bg-cyan-50/70 border-cyan-300 text-slate-800"
+                    isDark ? "bg-[#0d172e] border-cyan-500/25 text-slate-300" : "bg-cyan-50/70 border-cyan-200 text-slate-800"
                   )}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                       <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white text-xs">
@@ -1630,7 +1634,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         <div
                           className={cn(
                             "rounded-xl border p-4 transition-all relative overflow-hidden group",
-                            isDark ? "bg-[#080d1a] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-300 shadow-2xs"
+                            isDark ? "bg-[#0d172e] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-200 shadow-2xs"
                           )}
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1673,7 +1677,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         /* Case 2: Terminal / PEM Code Editor for entering Key */
                         <div className={cn(
                           "rounded-xl border overflow-hidden shadow-sm transition-all focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500",
-                          isDark ? "border-slate-800 bg-[#080d1a]" : "border-slate-300 bg-white"
+                          isDark ? "border-slate-800 bg-[#080e1e]" : "border-slate-200 bg-white"
                         )}>
                           {/* Terminal Window Header Bar */}
                           <div className={cn(
@@ -1819,8 +1823,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Cloud Backups Table */}
       <div
         className={cn(
-          "border rounded-2xl p-4 sm:p-6 shadow-lg transition-all",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          "border rounded-2xl p-4 sm:p-6 transition-all",
+          isDark ? "bg-[#080e1e] border-slate-800" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -1834,7 +1838,14 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           </div>
         </div>
 
-        {records.length === 0 ? (
+        {isLoading && records.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <RefreshCw className="w-8 h-8 mx-auto mb-3 animate-spin text-cyan-600 dark:text-cyan-400" />
+            <p className={cn("text-xs font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
+              Loading cloud backups...
+            </p>
+          </div>
+        ) : records.length === 0 ? (
           <div className={cn("text-center py-12 px-4 rounded-xl border border-dashed", isDark ? "border-slate-800/80" : "border-slate-300 bg-slate-50/50")}>
             <Cloud className={cn("w-10 h-10 mx-auto mb-3", isDark ? "text-slate-600" : "text-slate-400")} />
             <h5 className={cn("font-bold text-sm mb-1", isDark ? "text-white" : "text-slate-900")}>
@@ -2063,7 +2074,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           <div
             className={cn(
               "w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto",
-              isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-cyan-950/20" : "bg-white border-slate-200 text-slate-900 shadow-xl"
+              isDark ? "bg-[#080e1e] border-slate-800 text-white shadow-cyan-950/20" : "bg-white border-slate-200 text-slate-900 shadow-xl"
             )}
           >
             {/* Close button */}
