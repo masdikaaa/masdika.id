@@ -46,10 +46,9 @@ export async function GET(
     };
     const state = `gdrive_${Buffer.from(JSON.stringify(statePayload)).toString("base64url")}`;
 
-    // Scopes needed for Google Drive upload and account identification
+    // Scopes needed for Google Drive backup storage (drive.file avoids restricted scope verification blocks)
     const scopes = [
       "https://www.googleapis.com/auth/drive.file",
-      "https://www.googleapis.com/auth/drive",
       "email",
       "profile"
     ].join(" ");

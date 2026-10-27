@@ -30,7 +30,9 @@ import {
   CheckCircle2,
   ArrowRight,
   LogOut,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -227,6 +229,12 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
   const [isConnectingManual, setIsConnectingManual] = useState(false);
   const [copiedCallback, setCopiedCallback] = useState(false);
   const [showManualToken, setShowManualToken] = useState(false);
+
+  // Pagination for cloud backup records
+  const [backupPage, setBackupPage] = useState(1);
+  const backupPageSize = 5;
+  const totalBackupPages = Math.max(1, Math.ceil(records.length / backupPageSize));
+  const paginatedRecords = records.slice((backupPage - 1) * backupPageSize, backupPage * backupPageSize);
 
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -1506,18 +1514,18 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
                   {/* Destination Folder ID for Personal Google Drive */}
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <label className={cn("block text-xs font-bold uppercase tracking-wider truncate", isDark ? "text-slate-300" : "text-slate-900")}>
                         Google Drive Folder ID (Optional)
                       </label>
                       <a
                         href="https://drive.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 flex items-center gap-1 transition-colors"
+                        className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0"
                       >
                         <span>Open Drive</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                     </div>
                     <div className="relative">
@@ -1646,18 +1654,18 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Folder ID */}
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <label className={cn("block text-xs font-bold uppercase tracking-wider truncate", isDark ? "text-slate-300" : "text-slate-900")}>
                           Shared Drive Folder ID <span className="text-red-500 font-bold">*</span>
                         </label>
                         <a
                           href="https://drive.google.com"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 flex items-center gap-1 transition-colors"
+                          className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0"
                         >
                           <span>Open Drive</span>
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-3 h-3 shrink-0" />
                         </a>
                       </div>
                       <div className="relative">
@@ -1966,7 +1974,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             </p>
           </div>
         ) : (
-          <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-slate-800/60" : "border-slate-300")}>
+          <>
+            <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-slate-800/60" : "border-slate-300")}>
             <table className="w-full text-left text-sm">
               <thead className={cn("text-xs font-bold uppercase tracking-wider border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-900 border-slate-300")}>
                 <tr>
@@ -1979,7 +1988,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 </tr>
               </thead>
               <tbody className={cn("divide-y", isDark ? "divide-slate-800/40" : "divide-slate-200")}>
-                {records.map((rec) => (
+                {paginatedRecords.map((rec) => (
                   <tr
                     key={rec.id}
                     className={cn(
@@ -2087,8 +2096,81 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+
+          {/* Pagination Controls */}
+          {records.length > backupPageSize && (
+            <div className={cn(
+              "flex flex-col sm:flex-row items-center justify-between gap-3 pt-3.5 border-t mt-3 text-xs font-medium",
+              isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-600"
+            )}>
+              <div className="flex items-center gap-1 text-xs">
+                <span>Showing</span>
+                <span className={cn("font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
+                  {(backupPage - 1) * backupPageSize + 1}-{Math.min(backupPage * backupPageSize, records.length)}
+                </span>
+                <span>of</span>
+                <span className={cn("font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
+                  {records.length}
+                </span>
+                <span>backups</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setBackupPage((p) => Math.max(1, p - 1))}
+                  disabled={backupPage === 1}
+                  className={cn(
+                    "px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer",
+                    isDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300"
+                      : "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-2xs"
+                  )}
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Prev</span>
+                </button>
+
+                <div className="flex items-center gap-1 px-1">
+                  {Array.from({ length: totalBackupPages }, (_, i) => i + 1).map((pg) => (
+                    <button
+                      key={pg}
+                      type="button"
+                      onClick={() => setBackupPage(pg)}
+                      className={cn(
+                        "w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer",
+                        backupPage === pg
+                          ? "bg-cyan-500 text-slate-950 font-extrabold shadow-sm"
+                          : isDark
+                          ? "hover:bg-slate-800 text-slate-400 hover:text-white"
+                          : "hover:bg-slate-100 text-slate-600 hover:text-slate-950"
+                      )}
+                    >
+                      {pg}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setBackupPage((p) => Math.min(totalBackupPages, p + 1))}
+                  disabled={backupPage === totalBackupPages}
+                  className={cn(
+                    "px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer",
+                    isDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300"
+                      : "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-2xs"
+                  )}
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
