@@ -464,7 +464,7 @@ export async function streamUploadToGoogleDrive(
             "Content-Range": contentRange,
             "Content-Type": mimeType
           },
-          body: chunk
+          body: chunk as any
         });
 
         if (isLast) {
