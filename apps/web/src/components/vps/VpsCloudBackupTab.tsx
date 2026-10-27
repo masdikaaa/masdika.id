@@ -225,10 +225,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
   const [gdriveAuthType, setGdriveAuthType] = useState<"OAUTH" | "SERVICE_ACCOUNT">("OAUTH");
   const [isDisconnectingGDrive, setIsDisconnectingGDrive] = useState(false);
-  const [manualToken, setManualToken] = useState("");
-  const [isConnectingManual, setIsConnectingManual] = useState(false);
   const [copiedCallback, setCopiedCallback] = useState(false);
-  const [showManualToken, setShowManualToken] = useState(false);
 
   // Pagination for cloud backup records
   const [backupPage, setBackupPage] = useState(1);
@@ -287,61 +284,6 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
     }
   };
 
-  // Connect via manually pasted OAuth Refresh Token or Rclone JSON
-  const handleConnectManualToken = async () => {
-    if (!vpsId || !manualToken.trim()) {
-      toast.error("Please enter a Google OAuth Refresh Token or Rclone JSON");
-      return;
-    }
-    let token = manualToken.trim();
-    if (token.startsWith("{")) {
-      try {
-        const parsed = JSON.parse(token);
-        if (parsed.refresh_token) {
-          token = parsed.refresh_token;
-        } else if (parsed.token) {
-          const inner = typeof parsed.token === "string" ? JSON.parse(parsed.token) : parsed.token;
-          if (inner.refresh_token) token = inner.refresh_token;
-        }
-      } catch {
-        // Continue with raw text
-      }
-    }
-
-    setIsConnectingManual(true);
-    try {
-      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/config`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider: "GDRIVE",
-          gdriveRefreshToken: token,
-          gdriveFolderId: config.gdriveFolderId,
-          testNow: true
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success("Personal Google Drive token connected and verified!");
-        setConfig((prev) => ({
-          ...prev,
-          provider: "GDRIVE",
-          gdriveRefreshToken: token,
-          hasRefreshToken: true
-        }));
-        setSelectedProvider("GDRIVE");
-        setManualToken("");
-        setShowManualToken(false);
-        fetchData(true);
-      } else {
-        toast.error(data.error || "Failed to verify token with Google Drive");
-      }
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to connect token");
-    } finally {
-      setIsConnectingManual(false);
-    }
-  };
 
   // Fetch data
   const fetchData = useCallback(async (quiet = false) => {
@@ -1441,77 +1383,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     </p>
                   </div>
 
-                  {/* Alternative: Manual Refresh Token / Rclone JSON */}
-                  <div className={cn(
-                    "rounded-xl border transition-all overflow-hidden",
-                    isDark ? "bg-slate-900/30 border-slate-800/80" : "bg-white border-slate-200"
-                  )}>
-                    <button
-                      type="button"
-                      onClick={() => setShowManualToken(!showManualToken)}
-                      className={cn(
-                        "w-full px-3.5 py-2.5 flex items-center justify-between text-left transition-colors cursor-pointer",
-                        isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Key className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
-                        <div>
-                          <div className={cn("text-xs font-bold", isDark ? "text-slate-200" : "text-slate-900")}>
-                            Alternative: Enter Refresh Token or Rclone JSON Manually
-                          </div>
-                          <div className={cn("text-[10px] sm:text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
-                            Instant connection without opening OAuth consent
-                          </div>
-                        </div>
-                      </div>
-                      <span className={cn(
-                        "text-[10px] font-semibold px-2 py-0.5 rounded border shrink-0",
-                        isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-700"
-                      )}>
-                        {showManualToken ? "Hide" : "Show"}
-                      </span>
-                    </button>
-
-                    {showManualToken && (
-                      <div className={cn("p-3 border-t space-y-2.5", isDark ? "border-slate-800/80" : "border-slate-200")}>
-                        <div>
-                          <label className={cn("block text-[11px] font-bold uppercase tracking-wider mb-1", isDark ? "text-slate-300" : "text-slate-900")}>
-                            Google OAuth Refresh Token or Rclone Token JSON
-                          </label>
-                          <textarea
-                            rows={2}
-                            placeholder="Paste your 1//0... token or rclone token JSON: { &quot;refresh_token&quot;: &quot;1//0...&quot; }"
-                            value={manualToken}
-                            onChange={(e) => setManualToken(e.target.value)}
-                            className={cn(
-                              "w-full px-3 py-2 rounded-lg border text-xs font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                              isDark ? "bg-slate-950/60 border-slate-800 text-cyan-300 placeholder-slate-600" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
-                            )}
-                          />
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <span className={cn("text-[10px]", isDark ? "text-slate-400" : "text-slate-500")}>
-                            Auto-extracts <code className="font-mono">refresh_token</code> from raw tokens or Rclone config JSON
-                          </span>
-                          <button
-                            type="button"
-                            onClick={handleConnectManualToken}
-                            disabled={isConnectingManual || !manualToken.trim()}
-                            className="w-full sm:w-auto px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
-                          >
-                            {isConnectingManual ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                            <span>Connect Token</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
                   {/* Destination Folder ID for Personal Google Drive */}
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
                       <label className={cn("block text-xs font-bold uppercase tracking-wider truncate", isDark ? "text-slate-300" : "text-slate-900")}>
                         Google Drive Folder ID (Optional)
                       </label>
@@ -1525,10 +1399,16 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                     </div>
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
+                    <div className={cn(
+                      "flex items-stretch rounded-lg border overflow-hidden transition-all focus-within:ring-1 focus-within:ring-cyan-500 focus-within:border-cyan-500",
+                      isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-300"
+                    )}>
+                      <span className={cn(
+                        "px-3 py-2 text-xs sm:text-sm font-mono font-bold flex items-center select-none border-r shrink-0",
+                        isDark ? "bg-slate-800/60 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-300"
+                      )}>
                         folders/
-                      </div>
+                      </span>
                       <input
                         type="text"
                         placeholder="1A2b3C4d5E6f7G8h9I... (Leave blank to save in My Drive root)"
@@ -1543,8 +1423,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           setConfig({ ...config, gdriveFolderId: val });
                         }}
                         className={cn(
-                          "w-full px-3 py-2 sm:pl-16 rounded-lg border text-xs sm:text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                          isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                          "w-full min-w-0 px-3 py-2 bg-transparent text-xs sm:text-sm font-mono font-medium focus:outline-none",
+                          isDark ? "text-white placeholder-slate-500" : "text-slate-950 placeholder-slate-400"
                         )}
                       />
                     </div>
@@ -1665,10 +1545,16 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           <ExternalLink className="w-3 h-3 shrink-0" />
                         </a>
                       </div>
-                      <div className="relative">
-                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
+                      <div className={cn(
+                        "flex items-stretch rounded-xl border overflow-hidden transition-all focus-within:ring-1 focus-within:ring-cyan-500 focus-within:border-cyan-500",
+                        isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-300"
+                      )}>
+                        <span className={cn(
+                          "px-3.5 py-2.5 text-sm font-mono font-bold flex items-center select-none border-r shrink-0",
+                          isDark ? "bg-slate-800/60 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-300"
+                        )}>
                           folders/
-                        </div>
+                        </span>
                         <input
                           type="text"
                           placeholder="1A2b3C4d5E6f7G8h9I..."
@@ -1683,8 +1569,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                             setConfig({ ...config, gdriveFolderId: val });
                           }}
                           className={cn(
-                            "w-full px-3.5 sm:pl-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                            isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                            "w-full min-w-0 px-3.5 py-2.5 bg-transparent text-sm font-mono font-medium focus:outline-none",
+                            isDark ? "text-white placeholder-slate-500" : "text-slate-950 placeholder-slate-400"
                           )}
                         />
                       </div>
