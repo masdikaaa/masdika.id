@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
-import { testS3Storage, testGoogleDriveStorage } from "@/lib/cloud-storage";
+import { testS3Storage } from "@/lib/cloud-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -27,15 +27,14 @@ export async function POST(
     });
 
     const provider = body.provider || existing?.provider || "R2";
+    if (provider !== "R2" && provider !== "S3") {
+      return NextResponse.json({ success: false, message: "Unsupported provider. Only R2 and S3 are supported." }, { status: 400 });
+    }
+
     const secretAccessKey =
       body.secretAccessKey && !body.secretAccessKey.includes("••••")
         ? body.secretAccessKey.trim()
         : existing?.secretAccessKey;
-
-    const gdrivePrivateKey =
-      body.gdrivePrivateKey && !body.gdrivePrivateKey.includes("••••")
-        ? body.gdrivePrivateKey.trim()
-        : existing?.gdrivePrivateKey;
 
     const configToTest = {
       provider,
@@ -44,21 +43,10 @@ export async function POST(
       region: body.region !== undefined ? body.region : existing?.region,
       accessKeyId: body.accessKeyId !== undefined ? body.accessKeyId : existing?.accessKeyId,
       secretAccessKey,
-      pathPrefix: body.pathPrefix !== undefined ? body.pathPrefix : existing?.pathPrefix,
-      gdriveFolderId: body.gdriveFolderId !== undefined ? body.gdriveFolderId : existing?.gdriveFolderId,
-      gdriveClientEmail: body.gdriveClientEmail !== undefined ? body.gdriveClientEmail : existing?.gdriveClientEmail,
-      gdrivePrivateKey,
-      gdriveRefreshToken: existing?.gdriveRefreshToken || null
+      pathPrefix: body.pathPrefix !== undefined ? body.pathPrefix : existing?.pathPrefix
     };
 
-    let result: { success: boolean; message: string };
-    if (provider === "R2" || provider === "S3") {
-      result = await testS3Storage(configToTest);
-    } else if (provider === "GDRIVE") {
-      result = await testGoogleDriveStorage(configToTest);
-    } else {
-      return NextResponse.json({ error: "Unsupported provider" }, { status: 400 });
-    }
+    const result = await testS3Storage(configToTest);
 
     if (existing) {
       await prisma.vpsCloudBackupConfig.update({

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { getS3PresignedDownloadUrl } from "@/lib/cloud-storage";
+import { executeProxmoxHostCommand } from "@/lib/proxmox-exec";
 
 export const dynamic = "force-dynamic";
 
@@ -54,33 +56,49 @@ export async function POST(
       console.warn("Could not check/stop VM before restore (might already be stopped):", e);
     }
 
-    // Verify backup exists on hypervisor storage
-    const localBackups = await proxmox.getBackups(vps.node, "local", vps.vmid).catch(() => []);
-    const matchingBackup = (localBackups || []).find(
-      (b: any) => b.volid === `local:backup/${record.filename}` || (b.volid && b.volid.endsWith(record.filename))
-    );
+    // Check if backup archive exists on hypervisor storage /var/lib/vz/dump
+    const checkFile = await executeProxmoxHostCommand(
+      `test -f "/var/lib/vz/dump/${record.filename}" && echo "EXISTS" || echo "MISSING"`,
+      { node: vps.node, timeoutMs: 10000 }
+    ).catch(() => ({ stdout: "MISSING", exitCode: 1 }));
 
-    const volumeToRestore = matchingBackup ? matchingBackup.volid : `local:backup/${record.filename}`;
+    if (!checkFile.stdout.includes("EXISTS")) {
+      // Archive was pruned or moved, fetch from Cloudflare R2 / AWS S3
+      const config = await prisma.vpsCloudBackupConfig.findUnique({
+        where: { vpsId: vps.id }
+      });
+
+      if (!config) {
+        return NextResponse.json(
+          { error: "Cloud storage configuration missing. Cannot download archive from cloud." },
+          { status: 400 }
+        );
+      }
+
+      const downloadUrl = await getS3PresignedDownloadUrl(config, record.targetKey, 7200);
+      const downloadCmd = `curl -f -sS -o "/var/lib/vz/dump/${record.filename}" "${downloadUrl}"`;
+      const downloadExec = await executeProxmoxHostCommand(downloadCmd, {
+        node: vps.node,
+        timeoutMs: 30 * 60 * 1000 // 30 minutes max
+      });
+
+      if (downloadExec.exitCode !== 0) {
+        throw new Error(`Failed to download backup archive from cloud to hypervisor: ${downloadExec.stdout.slice(-300)}`);
+      }
+    }
+
+    const volumeToRestore = `local:backup/${record.filename}`;
 
     // Trigger Proxmox qemu restore
     try {
       const task = await proxmox.restoreBackup(vps.node, vps.vmid, volumeToRestore);
       return NextResponse.json({
         success: true,
-        message: "VPS restore initiated successfully. VM disk and configuration are being restored.",
+        message: "VPS restore initiated successfully. VM disk and configuration are being restored from backup.",
         upid: task?.data || task
       });
     } catch (restoreErr: any) {
       console.error("Proxmox restore error:", restoreErr);
-      const errStr = restoreErr?.message || String(restoreErr);
-      if (errStr.includes("does not exist") || errStr.includes("No such file")) {
-        return NextResponse.json(
-          {
-            error: `Arsip backup (${record.filename}) tidak ditemukan di storage lokal hypervisor. Silakan unduh file arsip dari cloud (${record.provider}) dan hubungi bantuan teknis.`
-          },
-          { status: 404 }
-        );
-      }
       return NextResponse.json({ error: restoreErr.message || "Failed to restore backup on Proxmox" }, { status: 500 });
     }
   } catch (error: any) {

@@ -40,11 +40,7 @@ export async function GET(
       ? {
           ...config,
           secretAccessKey: config.secretAccessKey ? "••••••••••••••••" : null,
-          hasSecretKey: Boolean(config.secretAccessKey),
-          gdrivePrivateKey: config.gdrivePrivateKey ? "••••••••••••••••" : null,
-          hasPrivateKey: Boolean(config.gdrivePrivateKey),
-          gdriveRefreshToken: config.gdriveRefreshToken ? "••••••••" : null,
-          hasRefreshToken: Boolean(config.gdriveRefreshToken)
+          hasSecretKey: Boolean(config.secretAccessKey)
         }
       : null;
 

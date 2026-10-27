@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
-import { testS3Storage, testGoogleDriveStorage } from "@/lib/cloud-storage";
+import { testS3Storage } from "@/lib/cloud-storage";
 
 export const dynamic = "force-dynamic";
 
 // POST /api/user/vps/[id]/cloud-backups/config
-// Saves cloud storage settings for the VPS
+// Saves cloud storage settings for the VPS (Cloudflare R2 or AWS S3)
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -31,18 +31,15 @@ export async function POST(
       accessKeyId,
       secretAccessKey,
       pathPrefix,
-      gdriveFolderId,
-      gdriveClientEmail,
-      gdrivePrivateKey,
       autoSchedule,
       testNow
     } = body;
 
-    if (!provider || !["R2", "S3", "GDRIVE"].includes(provider)) {
-      return NextResponse.json({ error: "Invalid storage provider. Must be R2, S3, or GDRIVE." }, { status: 400 });
+    if (!provider || !["R2", "S3"].includes(provider)) {
+      return NextResponse.json({ error: "Invalid storage provider. Must be R2 or S3." }, { status: 400 });
     }
 
-    // Get existing config to preserve unchanged passwords/keys
+    // Get existing config to preserve unchanged secret keys
     const existing = await prisma.vpsCloudBackupConfig.findUnique({
       where: { vpsId: vps.id }
     });
@@ -52,18 +49,6 @@ export async function POST(
         ? secretAccessKey.trim()
         : existing?.secretAccessKey || null;
 
-    const finalPrivateKey =
-      gdrivePrivateKey && !gdrivePrivateKey.includes("••••")
-        ? gdrivePrivateKey.trim()
-        : existing?.gdrivePrivateKey || null;
-
-    const finalRefreshToken =
-      body.gdriveRefreshToken !== undefined
-        ? body.gdriveRefreshToken && !body.gdriveRefreshToken.includes("••••")
-          ? body.gdriveRefreshToken.trim()
-          : existing?.gdriveRefreshToken || null
-        : existing?.gdriveRefreshToken || null;
-
     const configData = {
       provider,
       endpoint: endpoint ? endpoint.trim() : null,
@@ -72,21 +57,13 @@ export async function POST(
       accessKeyId: accessKeyId ? accessKeyId.trim() : null,
       secretAccessKey: finalSecretAccessKey,
       pathPrefix: pathPrefix ? pathPrefix.trim() : `vps-${vps.vmid || vps.id}`,
-      gdriveFolderId: gdriveFolderId ? gdriveFolderId.trim() : null,
-      gdriveClientEmail: gdriveClientEmail ? gdriveClientEmail.trim() : null,
-      gdrivePrivateKey: finalPrivateKey,
-      gdriveRefreshToken: finalRefreshToken,
       autoSchedule: autoSchedule || "DISABLED"
     };
 
     // Optional quick test if requested
     let testResult: { success: boolean; message: string } | null = null;
     if (testNow) {
-      if (provider === "R2" || provider === "S3") {
-        testResult = await testS3Storage(configData);
-      } else if (provider === "GDRIVE") {
-        testResult = await testGoogleDriveStorage(configData);
-      }
+      testResult = await testS3Storage(configData);
     }
 
     const savedConfig = await prisma.vpsCloudBackupConfig.upsert({
@@ -111,11 +88,7 @@ export async function POST(
       config: {
         ...savedConfig,
         secretAccessKey: savedConfig.secretAccessKey ? "••••••••••••••••" : null,
-        hasSecretKey: Boolean(savedConfig.secretAccessKey),
-        gdrivePrivateKey: savedConfig.gdrivePrivateKey ? "••••••••••••••••" : null,
-        hasPrivateKey: Boolean(savedConfig.gdrivePrivateKey),
-        gdriveRefreshToken: savedConfig.gdriveRefreshToken ? "••••••••" : null,
-        hasRefreshToken: Boolean(savedConfig.gdriveRefreshToken)
+        hasSecretKey: Boolean(savedConfig.secretAccessKey)
       }
     });
   } catch (error: any) {

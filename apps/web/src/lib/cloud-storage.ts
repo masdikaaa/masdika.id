@@ -161,6 +161,27 @@ export async function getS3PresignedDownloadUrl(
 }
 
 /**
+ * Generate Presigned Upload (PUT) URL for S3 / Cloudflare R2
+ * Allows uploading large files directly to R2 / S3 via curl or browser
+ */
+export async function getS3PresignedUploadUrl(
+  config: CloudStorageConfig,
+  key: string,
+  expiresInSeconds = 7200
+): Promise<string> {
+  const client = getS3Client(config);
+  const bucket = config.bucket?.trim();
+  if (!bucket) throw new Error("Bucket name is missing");
+
+  const cmd = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key
+  });
+
+  return await getSignedUrl(client, cmd, { expiresIn: expiresInSeconds });
+}
+
+/**
  * Delete object from S3 / Cloudflare R2
  */
 export async function deleteFromS3(config: CloudStorageConfig, key: string): Promise<boolean> {

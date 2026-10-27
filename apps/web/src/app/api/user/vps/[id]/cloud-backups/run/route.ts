@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
-import { Readable } from "stream";
 import {
-  uploadStreamToS3,
-  getS3PresignedDownloadUrl,
-  streamUploadToGoogleDrive,
-  deleteFromS3,
-  deleteFromGoogleDrive
+  getS3PresignedUploadUrl,
+  getS3PresignedDownloadUrl
 } from "@/lib/cloud-storage";
+import { executeProxmoxHostCommand } from "@/lib/proxmox-exec";
 import { recoverStaleCloudBackups } from "@/lib/cloud-backup-recovery";
 
 export const dynamic = "force-dynamic";
@@ -47,21 +44,19 @@ export async function POST(
       );
     }
 
-    // Validate provider credentials
-    if (config.provider === "R2" || config.provider === "S3") {
-      if (!config.bucket || !config.accessKeyId || !config.secretAccessKey) {
-        return NextResponse.json(
-          { error: `Missing credentials for ${config.provider === "R2" ? "Cloudflare R2" : "AWS S3"}. Please check your settings.` },
-          { status: 400 }
-        );
-      }
-    } else if (config.provider === "GDRIVE") {
-      if (!config.gdriveRefreshToken && (!config.gdriveClientEmail || !config.gdrivePrivateKey)) {
-        return NextResponse.json(
-          { error: "Missing Google Drive credentials. Please connect your Personal Google Drive or provide Service Account credentials." },
-          { status: 400 }
-        );
-      }
+    // Validate provider credentials (only Cloudflare R2 and AWS S3 supported)
+    if (config.provider !== "R2" && config.provider !== "S3") {
+      return NextResponse.json(
+        { error: "Google Drive is no longer supported. Please configure Cloudflare R2 or AWS S3." },
+        { status: 400 }
+      );
+    }
+
+    if (!config.bucket || !config.accessKeyId || !config.secretAccessKey) {
+      return NextResponse.json(
+        { error: `Missing credentials for ${config.provider === "R2" ? "Cloudflare R2" : "AWS S3"}. Please check your settings.` },
+        { status: 400 }
+      );
     }
 
     // Auto-recover any stale backups if server was previously restarted during backup
@@ -87,8 +82,7 @@ export async function POST(
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
 
-    // For cloud backups, we need a directory-based storage (like 'local') that generates standalone .vma.zst archive files
-    // and supports direct streaming downloads via /storage/{storage}/download, NOT a chunked PBS (Proxmox Backup Server).
+    // Default directory-based storage for standalone vzdump archives
     let cloudTempStorage = "local";
     try {
       const storages = await proxmox.getStorages(vps.node);
@@ -130,14 +124,14 @@ export async function POST(
       let createdVolume: string | null = null;
 
       try {
-        // Step 1: Trigger Proxmox vzdump
+        // Step 1: Trigger Proxmox vzdump snapshot
         const upid = await proxmox.createBackup(vps.node, vmid, cloudTempStorage);
         if (!upid) {
           throw new Error("Failed to start backup task on Proxmox");
         }
 
-        // Step 2: Poll Proxmox task until finished (max 20 minutes)
-        const maxWaitMs = 20 * 60 * 1000;
+        // Step 2: Poll Proxmox task until finished (max 25 minutes)
+        const maxWaitMs = 25 * 60 * 1000;
         const startTime = Date.now();
         let taskCompleted = false;
         let currentProgress = 15;
@@ -166,10 +160,10 @@ export async function POST(
         }
 
         if (!taskCompleted) {
-          throw new Error("Proxmox backup task timed out after 20 minutes");
+          throw new Error("Proxmox backup task timed out after 25 minutes");
         }
 
-        // Step 3: Find the newly created backup file
+        // Step 3: Find the newly created backup file on Proxmox storage
         const backups = await proxmox.getBackups(vps.node, cloudTempStorage, vmid);
         const sortedBackups = (backups || []).sort((a: any, b: any) => (b.ctime || 0) - (a.ctime || 0));
         const latestBackup = sortedBackups[0];
@@ -181,101 +175,69 @@ export async function POST(
         createdVolume = latestBackup.volid as string;
         const rawFilename = createdVolume.split("/").pop() || standardFilename;
         const realFilename = rawFilename.startsWith("vzdump-") ? rawFilename : standardFilename;
-        const backupFileSize = BigInt(latestBackup.size || 0);
 
-        // Update record status to UPLOADING_TO_CLOUD
+        // Verify accurate file size from Proxmox API or stat on host
+        let backupFileSize = BigInt(latestBackup.size || 0);
+
+        try {
+          const statResult = await executeProxmoxHostCommand(`stat -c %s "/var/lib/vz/dump/${realFilename}"`, {
+            node: vps.node,
+            timeoutMs: 10000
+          });
+          const match = statResult.stdout.match(/(\d+)\s*$/m);
+          if (match && parseInt(match[1], 10) > 0) {
+            backupFileSize = BigInt(match[1]);
+          }
+        } catch (statErr) {
+          console.warn("Could not stat backup file on host, using latestBackup.size:", statErr);
+        }
+
+        const finalTargetKey = `${config.pathPrefix || `vps-${vmid}`}/${realFilename}`;
+
+        // Update record status to UPLOADING_TO_CLOUD with genuine filename and file size
         await prisma.vpsCloudBackupRecord.update({
           where: { id: record.id },
           data: {
             filename: realFilename,
             fileSize: backupFileSize,
+            targetKey: finalTargetKey,
             status: "UPLOADING_TO_CLOUD",
             progress: 55,
-            stageText: `Streaming backup archive directly to ${config.provider === 'R2' ? 'Cloudflare R2' : config.provider === 'S3' ? 'AWS S3' : 'Google Drive'}...`
+            stageText: `Streaming backup archive directly from hypervisor to ${config.provider === 'R2' ? 'Cloudflare R2' : 'AWS S3'}...`
           }
         });
 
-        // Step 4: Stream download from Proxmox
-        const proxmoxDownloadUrl = `${server.host.replace(/\/$/, "")}/api2/extjs/nodes/${vps.node}/storage/${cloudTempStorage}/download?volume=${encodeURIComponent(createdVolume)}`;
+        // Step 4: Generate S3 Presigned PUT URL for direct hypervisor upload
+        const presignedPutUrl = await getS3PresignedUploadUrl(config, finalTargetKey, 7200);
 
-        const proxmoxRes = await fetch(proxmoxDownloadUrl, {
-          method: "GET",
-          headers: {
-            Authorization: `PVEAPIToken=${server.tokenId}=${server.tokenSecret}`,
-            Cookie: "PVEAuthCookie="
-          }
+        // Step 5: Execute curl direct upload from Proxmox host
+        // This streams NVMe disk bytes directly to Cloudflare R2 / AWS S3 at gigabit speeds with 0 web server RAM usage
+        const uploadCmd = `curl -f -sS -X PUT -T "/var/lib/vz/dump/${realFilename}" "${presignedPutUrl}"`;
+        const uploadExec = await executeProxmoxHostCommand(uploadCmd, {
+          node: vps.node,
+          timeoutMs: 30 * 60 * 1000 // 30 minutes max
         });
 
-        if (!proxmoxRes.ok) {
-          const errText = await proxmoxRes.text();
-          throw new Error(`Failed to download backup stream from Proxmox (${proxmoxRes.status}): ${errText}`);
+        if (uploadExec.exitCode !== 0) {
+          throw new Error(`Cloud upload curl failed with code ${uploadExec.exitCode}: ${uploadExec.stdout.slice(-300)}`);
         }
 
-        if (!proxmoxRes.body) {
-          throw new Error("Proxmox response body stream is empty");
-        }
-
-        // Get actual Content-Length from Proxmox download response if provided
-        const pveContentLength = proxmoxRes.headers.get("content-length");
-        const realBackupSize = pveContentLength ? BigInt(pveContentLength) : backupFileSize;
-
-        // Memory safe: Convert Web ReadableStream to Node.js Readable stream
-        // Pipes chunks directly to destination without holding the entire file in RAM
-        const proxmoxStream = Readable.fromWeb(proxmoxRes.body as any);
-
+        // Step 6: Generate Presigned GET download URL
         let finalDownloadUrl: string | null = null;
-        let finalTargetKey = `${config.pathPrefix || `vps-${vmid}`}/${realFilename}`;
-        let uploadedBytes = realBackupSize;
-
-        // Step 5: Upload to target provider via memory-safe streams
-        if (config.provider === "R2" || config.provider === "S3") {
-          await uploadStreamToS3(config, {
-            key: finalTargetKey,
-            body: proxmoxStream,
-            contentType: "application/octet-stream"
-          });
-
-          // Generate initial presigned URL
-          try {
-            finalDownloadUrl = await getS3PresignedDownloadUrl(config, finalTargetKey, 86400); // 24 hours
-          } catch (e) {
-            finalDownloadUrl = null;
-          }
-        } else if (config.provider === "GDRIVE") {
-          const estimatedSize = Number(realBackupSize);
-          const driveResult = await streamUploadToGoogleDrive(config, {
-            filename: realFilename,
-            stream: proxmoxStream,
-            contentLength: estimatedSize > 0 ? estimatedSize : undefined,
-            mimeType: "application/octet-stream",
-            onProgress: async (bytes) => {
-              if (estimatedSize > 0) {
-                const uploadPct = Math.min(95, 55 + Math.round((bytes / estimatedSize) * 40));
-                await prisma.vpsCloudBackupRecord.update({
-                  where: { id: record.id },
-                  data: {
-                    progress: uploadPct,
-                    stageText: `Streaming backup archive directly to Google Drive (${uploadPct}%)...`
-                  }
-                }).catch(() => {});
-              }
-            }
-          });
-          finalTargetKey = driveResult.fileId;
-          finalDownloadUrl = driveResult.webViewLink || `https://drive.google.com/file/d/${driveResult.fileId}/view`;
-          if (driveResult.uploadedSize > 0) {
-            uploadedBytes = BigInt(driveResult.uploadedSize);
-          }
+        try {
+          finalDownloadUrl = await getS3PresignedDownloadUrl(config, finalTargetKey, 86400); // 24 hours
+        } catch (e) {
+          finalDownloadUrl = null;
         }
 
-        // Step 6: Mark record as COMPLETED
+        // Step 7: Mark record as COMPLETED
         await prisma.vpsCloudBackupRecord.update({
           where: { id: record.id },
           data: {
             filename: realFilename,
             targetKey: finalTargetKey,
             downloadUrl: finalDownloadUrl,
-            fileSize: uploadedBytes,
+            fileSize: backupFileSize,
             status: "COMPLETED",
             progress: 100,
             stageText: "Backup completed and stored in cloud successfully!",
@@ -293,64 +255,47 @@ export async function POST(
           }
         });
 
-        // Step 7: Keep the latest local copy on hypervisor storage so user can restore directly.
-        // Clean up older local cloud backups for this VPS if more than 2 exist to prevent filling up disk.
+        // Step 8: Keep hypervisor storage tidy while retaining the latest local copy for fast direct restore
         try {
           const allLocal = await proxmox.getBackups(vps.node, cloudTempStorage, vmid);
           const sorted = (allLocal || []).sort((a: any, b: any) => (b.ctime || 0) - (a.ctime || 0));
           if (sorted.length > 2) {
-            const toDelete = sorted.slice(2);
-            for (const oldB of toDelete) {
-              if (oldB.volid && oldB.volid !== createdVolume) {
-                await proxmox.deleteBackup(vps.node, cloudTempStorage, oldB.volid).catch(() => {});
+            for (let i = 2; i < sorted.length; i++) {
+              const oldVol = sorted[i].volid;
+              if (oldVol && oldVol !== createdVolume) {
+                await proxmox.deleteBackup(vps.node, cloudTempStorage, oldVol).catch(() => {});
               }
             }
           }
-        } catch (cleanupErr) {
-          console.warn("Retention cleanup error:", cleanupErr);
-        }
+        } catch {}
       } catch (err: any) {
-        console.error("Cloud backup execution error:", err);
-        let errMsg = err?.message || String(err);
-        if (errMsg.includes("storageQuotaExceeded") || errMsg.includes("do not have storage quota")) {
-          errMsg = "Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or use Cloudflare R2 / AWS S3.";
-        }
-
+        console.error("Cloud backup process failed:", err);
         await prisma.vpsCloudBackupRecord.update({
           where: { id: record.id },
           data: {
             status: "FAILED",
-            error: errMsg
+            error: err.message || "Backup failed unexpectedly",
+            stageText: `Failed: ${err.message || "Unknown error"}`
           }
-        });
+        }).catch(() => {});
 
         await prisma.vpsCloudBackupConfig.update({
           where: { id: config.id },
           data: {
-            lastStatus: "ERROR",
-            lastError: errMsg
+            lastStatus: "FAILED",
+            lastError: err.message || "Backup failed"
           }
-        });
-
-        // Clean up temp backup if failed
-        if (createdVolume) {
-          try {
-            await proxmox.deleteBackup(vps.node, cloudTempStorage, createdVolume);
-          } catch {}
-        }
+        }).catch(() => {});
       }
     })();
 
     return NextResponse.json({
       success: true,
-      message: "Cloud backup started successfully",
-      record: {
-        ...record,
-        fileSize: Number(record.fileSize)
-      }
+      message: "Backup started successfully",
+      record
     });
   } catch (error: any) {
     console.error("Run cloud backup error:", error);
-    return NextResponse.json({ error: error.message || "Failed to start backup" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to initiate cloud backup" }, { status: 500 });
   }
 }
