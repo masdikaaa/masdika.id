@@ -361,9 +361,6 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             gdrivePrivateKey: data.config.hasPrivateKey ? "••••••••••••••••" : "",
             gdriveRefreshToken: data.config.hasRefreshToken ? "••••••••" : ""
           }));
-          if (data.config.provider) {
-            setSelectedProvider(data.config.provider);
-          }
           if (data.config.hasPrivateKey && !data.config.hasRefreshToken) {
             setGdriveAuthType("SERVICE_ACCOUNT");
           } else {
@@ -396,7 +393,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
     } finally {
       if (!quiet) setIsLoading(false);
     }
-  }, [vpsId]);
+  }, [vpsId, setErrorModal]);
 
   useEffect(() => {
     fetchData();
