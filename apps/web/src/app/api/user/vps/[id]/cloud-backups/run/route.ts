@@ -56,9 +56,9 @@ export async function POST(
         );
       }
     } else if (config.provider === "GDRIVE") {
-      if (!config.gdriveClientEmail || !config.gdrivePrivateKey) {
+      if (!config.gdriveRefreshToken && (!config.gdriveClientEmail || !config.gdrivePrivateKey)) {
         return NextResponse.json(
-          { error: "Missing Google Drive Service Account Email or Private Key. Please check your settings." },
+          { error: "Missing Google Drive credentials. Please connect your Personal Google Drive or provide Service Account credentials." },
           { status: 400 }
         );
       }

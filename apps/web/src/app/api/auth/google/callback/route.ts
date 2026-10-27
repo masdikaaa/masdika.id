@@ -11,6 +11,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+  const state = searchParams.get('state');
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.url;
 
   const ip = getClientIp(req);
@@ -19,12 +20,28 @@ export async function GET(req: Request) {
   }
 
   if (error || !code) {
+    if (state && state.startsWith('gdrive_')) {
+      return NextResponse.redirect(new URL('/dashboard/services?error=GoogleAuthFailed', baseUrl));
+    }
     return NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', baseUrl));
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`;
+  const rawOrigin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
+  const normalizedBase = rawOrigin.replace(/\/+$/, "");
+  let redirectUri = `${normalizedBase}/api/auth/google/callback`;
+
+  // If this is a GDrive OAuth flow and specified its exact redirectUri in state, match it
+  if (state && state.startsWith('gdrive_')) {
+    try {
+      const rawState = state.replace('gdrive_', '');
+      const stateData = JSON.parse(Buffer.from(rawState, 'base64url').toString('utf-8'));
+      if (stateData.redirectUri) {
+        redirectUri = stateData.redirectUri;
+      }
+    } catch {}
+  }
 
   if (!clientId || !clientSecret) {
     return NextResponse.redirect(new URL('/login?error=ConfigurationError', baseUrl));
@@ -47,7 +64,67 @@ export async function GET(req: Request) {
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok) {
       console.error('Google token error:', tokenData);
+      if (state && state.startsWith('gdrive_')) {
+        return NextResponse.redirect(new URL('/dashboard/services?error=GoogleTokenFailed', baseUrl));
+      }
       return NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', baseUrl));
+    }
+
+    // Handle Google Drive OAuth Connection for VPS Cloud Backup
+    if (state && state.startsWith('gdrive_')) {
+      try {
+        const rawState = state.replace('gdrive_', '');
+        const stateData = JSON.parse(Buffer.from(rawState, 'base64url').toString('utf-8'));
+        const vpsId = stateData.vpsId;
+
+        if (!vpsId) {
+          return NextResponse.redirect(new URL('/dashboard/services?error=InvalidState', baseUrl));
+        }
+
+        if (!tokenData.refresh_token) {
+          console.error('Google Drive token exchange did not return refresh_token:', tokenData);
+          return NextResponse.redirect(new URL(`/dashboard/vps/${vpsId}?tab=cloud-backup&error=NoRefreshToken`, baseUrl));
+        }
+
+        // Fetch user profile to get Google email
+        let googleEmail: string | null = null;
+        try {
+          const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` },
+          });
+          if (profileRes.ok) {
+            const profile = await profileRes.json();
+            googleEmail = profile.email || null;
+          }
+        } catch (e) {
+          console.warn('Failed to fetch profile email during GDrive connect:', e);
+        }
+
+        // Upsert VpsCloudBackupConfig with new refresh token and email
+        await prisma.vpsCloudBackupConfig.upsert({
+          where: { vpsId: parseInt(vpsId.toString()) },
+          create: {
+            vpsId: parseInt(vpsId.toString()),
+            provider: 'GDRIVE',
+            gdriveRefreshToken: tokenData.refresh_token,
+            gdriveClientEmail: googleEmail,
+            lastStatus: 'CONNECTED',
+            lastError: null
+          },
+          update: {
+            provider: 'GDRIVE',
+            gdriveRefreshToken: tokenData.refresh_token,
+            gdriveClientEmail: googleEmail,
+            lastStatus: 'CONNECTED',
+            lastError: null
+          }
+        });
+
+        return NextResponse.redirect(new URL(`/dashboard/vps/${vpsId}?tab=cloud-backup&gdrive=connected`, baseUrl));
+      } catch (gdriveErr: any) {
+        console.error('Error handling GDrive connect callback:', gdriveErr);
+        return NextResponse.redirect(new URL('/dashboard/services?error=GDriveConnectFailed', baseUrl));
+      }
     }
 
     // 2. Fetch user profile

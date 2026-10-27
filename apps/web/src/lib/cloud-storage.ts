@@ -178,18 +178,49 @@ export async function deleteFromS3(config: CloudStorageConfig, key: string): Pro
 }
 
 // ==========================================
-// Google Drive Helper (Service Account OAuth2 JWT)
+// Google Drive Helper (OAuth2 Refresh Token & Service Account JWT)
 // ==========================================
 
 /**
- * Generate Google OAuth2 Bearer Access Token using Service Account credentials
+ * Generate Google OAuth2 Bearer Access Token using User Refresh Token or Service Account credentials
  */
 export async function getGoogleDriveAccessToken(config: CloudStorageConfig): Promise<string> {
+  const refreshToken = config.gdriveRefreshToken?.trim();
   const clientEmail = config.gdriveClientEmail?.trim();
   let privateKey = config.gdrivePrivateKey?.trim();
 
+  // Mode 1: OAuth2 Refresh Token (Personal Google Drive / Rclone style)
+  if (refreshToken) {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error("Server error: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing");
+    }
+
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token"
+      })
+    });
+
+    if (!tokenRes.ok) {
+      const errorText = await tokenRes.text();
+      throw new Error(`Google OAuth Refresh Token exchange failed (${tokenRes.status}): ${errorText}. Please reconnect your Personal Google Drive.`);
+    }
+
+    const data = await tokenRes.json();
+    return data.access_token;
+  }
+
+  // Mode 2: Service Account JWT (Google Workspace Shared Drive)
   if (!clientEmail || !privateKey) {
-    throw new Error("Google Drive Service Account Email and Private Key are required");
+    throw new Error("Google Drive credentials missing: Please connect your Personal Google Drive or provide Service Account credentials.");
   }
 
   // Handle escaped newlines in private key
@@ -298,7 +329,10 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
       if (!probeRes.ok) {
         const probeErr = await probeRes.text();
         if (probeErr.includes("storageQuotaExceeded") || probeErr.includes("do not have storage quota")) {
-          throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or use Cloudflare R2 / AWS S3.");
+          if (config.gdriveRefreshToken) {
+            throw new Error("Your personal Google Drive storage quota is exceeded. Please free up space on your Google account or upgrade storage.");
+          }
+          throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive), or connect via Personal Google Drive (OAuth).");
         }
         throw new Error(`Folder write permission test failed (${probeRes.status}): ${probeErr}`);
       }
@@ -327,9 +361,14 @@ export async function testGoogleDriveStorage(config: CloudStorageConfig): Promis
         throw new Error(`Drive access failed: ${err}`);
       }
 
+      const aboutData = await aboutRes.json().catch(() => ({}));
+      const userEmail = aboutData?.user?.emailAddress || config.gdriveClientEmail;
+
       return {
         success: true,
-        message: "Google Drive Service Account authentication successful! (Note: Enter a Folder ID from a Google Workspace Shared Drive for backup storage)"
+        message: config.gdriveRefreshToken
+          ? `Personal Google Drive connected successfully (${userEmail || "Authorized"})!`
+          : "Google Drive Service Account authentication successful! (Note: Enter a Folder ID from a Google Workspace Shared Drive for backup storage)"
       };
     }
   } catch (err: any) {

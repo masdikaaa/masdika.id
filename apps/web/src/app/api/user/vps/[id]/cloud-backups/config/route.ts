@@ -57,6 +57,13 @@ export async function POST(
         ? gdrivePrivateKey.trim()
         : existing?.gdrivePrivateKey || null;
 
+    const finalRefreshToken =
+      body.gdriveRefreshToken !== undefined
+        ? body.gdriveRefreshToken && !body.gdriveRefreshToken.includes("••••")
+          ? body.gdriveRefreshToken.trim()
+          : existing?.gdriveRefreshToken || null
+        : existing?.gdriveRefreshToken || null;
+
     const configData = {
       provider,
       endpoint: endpoint ? endpoint.trim() : null,
@@ -68,6 +75,7 @@ export async function POST(
       gdriveFolderId: gdriveFolderId ? gdriveFolderId.trim() : null,
       gdriveClientEmail: gdriveClientEmail ? gdriveClientEmail.trim() : null,
       gdrivePrivateKey: finalPrivateKey,
+      gdriveRefreshToken: finalRefreshToken,
       autoSchedule: autoSchedule || "DISABLED"
     };
 
@@ -105,7 +113,9 @@ export async function POST(
         secretAccessKey: savedConfig.secretAccessKey ? "••••••••••••••••" : null,
         hasSecretKey: Boolean(savedConfig.secretAccessKey),
         gdrivePrivateKey: savedConfig.gdrivePrivateKey ? "••••••••••••••••" : null,
-        hasPrivateKey: Boolean(savedConfig.gdrivePrivateKey)
+        hasPrivateKey: Boolean(savedConfig.gdrivePrivateKey),
+        gdriveRefreshToken: savedConfig.gdriveRefreshToken ? "••••••••" : null,
+        hasRefreshToken: Boolean(savedConfig.gdriveRefreshToken)
       }
     });
   } catch (error: any) {

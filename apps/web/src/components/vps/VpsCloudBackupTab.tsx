@@ -25,7 +25,12 @@ import {
   Copy,
   Sparkles,
   Zap,
-  X
+  X,
+  Check,
+  CheckCircle2,
+  ArrowRight,
+  LogOut,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -67,6 +72,8 @@ interface CloudConfig {
   gdriveClientEmail?: string | null;
   gdrivePrivateKey?: string | null;
   hasPrivateKey?: boolean;
+  gdriveRefreshToken?: string | null;
+  hasRefreshToken?: boolean;
   autoSchedule?: string | null;
   lastBackupAt?: string | null;
   lastStatus?: string | null;
@@ -214,12 +221,119 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  const [gdriveAuthType, setGdriveAuthType] = useState<"OAUTH" | "SERVICE_ACCOUNT">("OAUTH");
+  const [isDisconnectingGDrive, setIsDisconnectingGDrive] = useState(false);
+  const [manualToken, setManualToken] = useState("");
+  const [isConnectingManual, setIsConnectingManual] = useState(false);
+  const [copiedCallback, setCopiedCallback] = useState(false);
+  const [showManualToken, setShowManualToken] = useState(false);
+
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<BackupRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorModal, setErrorModal] = useState<{ title: string; provider: string; error: string } | null>(null);
   const prevActiveIdRef = useRef<number | null>(null);
+
+  // Check URL query parameters for Google OAuth callback result
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("gdrive") === "connected") {
+        toast.success("Personal Google Drive connected successfully!");
+        setSelectedProvider("GDRIVE");
+        setGdriveAuthType("OAUTH");
+        const newUrl = window.location.pathname + (window.location.search.replace(/[?&]gdrive=connected/, "") || "");
+        window.history.replaceState({}, "", newUrl);
+      } else if (urlParams.get("error") === "NoRefreshToken") {
+        toast.error("Google did not return a refresh token. Please reconnect with full consent.");
+      } else if (urlParams.get("error") === "GDriveConnectFailed") {
+        toast.error("Failed to connect Google Drive. Please check your credentials.");
+      }
+    }
+  }, []);
+
+  const handleDisconnectGDrive = async () => {
+    if (!vpsId) return;
+    setIsDisconnectingGDrive(true);
+    try {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/gdrive/disconnect`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Personal Google Drive disconnected");
+        setConfig((prev) => ({
+          ...prev,
+          gdriveRefreshToken: null,
+          hasRefreshToken: false,
+          gdriveClientEmail: null
+        }));
+      } else {
+        toast.error(data.error || "Failed to disconnect Google Drive");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to disconnect Google Drive");
+    } finally {
+      setIsDisconnectingGDrive(false);
+    }
+  };
+
+  // Connect via manually pasted OAuth Refresh Token or Rclone JSON
+  const handleConnectManualToken = async () => {
+    if (!vpsId || !manualToken.trim()) {
+      toast.error("Please enter a Google OAuth Refresh Token or Rclone JSON");
+      return;
+    }
+    let token = manualToken.trim();
+    if (token.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(token);
+        if (parsed.refresh_token) {
+          token = parsed.refresh_token;
+        } else if (parsed.token) {
+          const inner = typeof parsed.token === "string" ? JSON.parse(parsed.token) : parsed.token;
+          if (inner.refresh_token) token = inner.refresh_token;
+        }
+      } catch {
+        // Continue with raw text
+      }
+    }
+
+    setIsConnectingManual(true);
+    try {
+      const res = await fetch(`/api/user/vps/${vpsId}/cloud-backups/config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: "GDRIVE",
+          gdriveRefreshToken: token,
+          gdriveFolderId: config.gdriveFolderId,
+          testNow: true
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Personal Google Drive token connected and verified!");
+        setConfig((prev) => ({
+          ...prev,
+          provider: "GDRIVE",
+          gdriveRefreshToken: token,
+          hasRefreshToken: true
+        }));
+        setSelectedProvider("GDRIVE");
+        setManualToken("");
+        setShowManualToken(false);
+        fetchData(true);
+      } else {
+        toast.error(data.error || "Failed to verify token with Google Drive");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to connect token");
+    } finally {
+      setIsConnectingManual(false);
+    }
+  };
 
   // Fetch data
   const fetchData = useCallback(async (quiet = false) => {
@@ -236,10 +350,16 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             ...data.config,
             // Keep user typed input if unmasked
             secretAccessKey: data.config.hasSecretKey ? "••••••••••••••••" : "",
-            gdrivePrivateKey: data.config.hasPrivateKey ? "••••••••••••••••" : ""
+            gdrivePrivateKey: data.config.hasPrivateKey ? "••••••••••••••••" : "",
+            gdriveRefreshToken: data.config.hasRefreshToken ? "••••••••" : ""
           }));
           if (data.config.provider) {
             setSelectedProvider(data.config.provider);
+          }
+          if (data.config.hasPrivateKey && !data.config.hasRefreshToken) {
+            setGdriveAuthType("SERVICE_ACCOUNT");
+          } else {
+            setGdriveAuthType("OAUTH");
           }
         }
         const newRecords: BackupRecord[] = data.records || [];
@@ -381,7 +501,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             ...prev,
             ...data.config,
             secretAccessKey: data.config.hasSecretKey ? "••••••••••••••••" : "",
-            gdrivePrivateKey: ""
+            gdrivePrivateKey: data.config.hasPrivateKey ? "••••••••••••••••" : "",
+            gdriveRefreshToken: data.config.hasRefreshToken ? "••••••••" : ""
           }));
           setShowPrivateKey(false);
         }
@@ -772,11 +893,11 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               <div className="min-w-0">
                 <div className={cn("text-sm flex items-center gap-1.5 truncate", selectedProvider === "GDRIVE" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
                   <span>Google Drive</span>
-                  {config.provider === "GDRIVE" && config.hasPrivateKey && (
+                  {config.provider === "GDRIVE" && (config.hasPrivateKey || config.hasRefreshToken) && (
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className={cn("text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Workspace Shared Drive</p>
+                <p className={cn("text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Personal &amp; Workspace</p>
               </div>
             </div>
 
@@ -1089,332 +1210,681 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           {/* Google Drive Form */}
           {selectedProvider === "GDRIVE" && (
             <div className="space-y-4 animate-in fade-in duration-300">
-              {/* Quick Auto-Fill via JSON Key File */}
-              <div className={cn(
-                "relative border border-dashed rounded-2xl p-4 transition-all group cursor-pointer text-center",
-                isDark
-                  ? "border-cyan-500/30 hover:border-cyan-400/60 bg-cyan-500/[0.03] hover:bg-cyan-500/[0.06]"
-                  : "border-cyan-400 hover:border-cyan-500 bg-cyan-50/70 hover:bg-cyan-50"
-              )}>
-                <input
-                  type="file"
-                  accept=".json,application/json"
-                  onChange={handleJsonFileUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                  title="Upload Google Cloud Service Account JSON Key"
-                />
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pointer-events-none">
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all",
-                    isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-100 border-cyan-400 text-cyan-900"
-                  )}>
-                    <Key className="w-5 h-5" />
+              {/* Account Type Selector: Personal (OAuth) vs Workspace (Service Account) */}
+              <div
+                className={cn(
+                  "p-1.5 rounded-2xl border grid grid-cols-1 sm:grid-cols-2 gap-1.5",
+                  isDark ? "bg-[#060b14]/80 border-slate-800/80" : "bg-slate-100/90 border-slate-200"
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => setGdriveAuthType("OAUTH")}
+                  className={cn(
+                    "flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                    gdriveAuthType === "OAUTH"
+                      ? isDark
+                        ? "bg-[#0b162c] text-cyan-400 shadow-md border border-cyan-500/40"
+                        : "bg-white text-cyan-900 shadow-xs border border-cyan-600/30"
+                      : isDark
+                      ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 border border-transparent"
+                  )}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <GoogleDriveLogo className="w-4 h-4 shrink-0" />
+                    <span className="truncate">Personal Google Drive</span>
                   </div>
-                  <div className="text-center sm:text-left">
-                    <div className={cn("text-xs sm:text-sm font-bold flex items-center justify-center sm:justify-start gap-2", isDark ? "text-white" : "text-slate-950")}>
-                      <span>Auto-Fill from Service Account JSON</span>
-                      <span className={cn(
-                        "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border flex items-center gap-1",
-                        isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border-cyan-300"
-                      )}>
-                        <Zap className="w-2.5 h-2.5" />
-                        <span>Instant</span>
-                      </span>
-                    </div>
-                    <p className={cn("text-xs mt-0.5 font-medium", isDark ? "text-slate-400" : "text-slate-700")}>
-                      Drop your downloaded <code className={cn("px-1.5 py-0.5 rounded font-mono text-[11px] font-bold", isDark ? "bg-cyan-500/10 text-cyan-300" : "bg-cyan-100 text-cyan-950 border border-cyan-300")}>.json</code> key file here to auto-fill Email &amp; RSA Key.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3-Step Setup Guide */}
-              <CloudSetupGuide
-                title="Setup Guide (Google Drive / Shared Drive):"
-                isDark={isDark}
-                steps={[
-                  {
-                    step: 1,
-                    text: (
-                      <span>
-                        Enable <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Google Drive API</strong> in Google Cloud Console.
-                      </span>
-                    ),
-                  },
-                  {
-                    step: 2,
-                    text: (
-                      <span>
-                        Create a Service Account &amp; download the <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>JSON Key</strong> file (can auto-fill above).
-                      </span>
-                    ),
-                  },
-                  {
-                    step: 3,
-                    text: (
-                      <span>
-                        Share a folder in <strong className="text-emerald-700 dark:text-emerald-400 font-bold">Shared Drive (Team Drive)</strong> with the Service Account email as Content Manager.
-                      </span>
-                    ),
-                  },
-                ]}
-                notice={
-                  <div
+                  <span
                     className={cn(
-                      "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
-                      isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50/90 border-amber-300 text-amber-950"
+                      "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0",
+                      gdriveAuthType === "OAUTH"
+                        ? isDark
+                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          : "bg-cyan-100 text-cyan-800 border border-cyan-300"
+                        : isDark
+                        ? "bg-slate-800/80 text-slate-400"
+                        : "bg-slate-200 text-slate-600"
                     )}
                   >
-                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-                    <div className="space-y-0.5">
-                      <div className="font-bold text-amber-950 dark:text-amber-300">Important Note on Google Drive Storage Quota:</div>
-                      <p className="leading-relaxed text-[11px] text-amber-900 dark:text-amber-200">
-                        Google Cloud Service Accounts have a strict <strong>0 MB</strong> storage quota on personal Google Drive (Personal My Drive). Google requires using a <strong>Google Workspace Shared Drive (Team Drive)</strong> to store backup files, or use <strong>Cloudflare R2</strong> / <strong>AWS S3</strong> instead.
-                      </p>
-                    </div>
-                  </div>
-                }
-              />
+                    OAuth 1-Click
+                  </span>
+                </button>
 
-              {/* Form Input Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Folder ID */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
-                      Google Drive Folder ID <span className="text-red-500 font-bold">*</span>
-                    </label>
-                    <a
-                      href="https://drive.google.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 flex items-center gap-1 transition-colors"
-                    >
-                      <span>Open Drive</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                <button
+                  type="button"
+                  onClick={() => setGdriveAuthType("SERVICE_ACCOUNT")}
+                  className={cn(
+                    "flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                    gdriveAuthType === "SERVICE_ACCOUNT"
+                      ? isDark
+                        ? "bg-[#0b162c] text-cyan-400 shadow-md border border-cyan-500/40"
+                        : "bg-white text-cyan-900 shadow-xs border border-cyan-600/30"
+                      : isDark
+                      ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 border border-transparent"
+                  )}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Key className="w-4 h-4 shrink-0" />
+                    <span className="truncate">Workspace Shared Drive</span>
                   </div>
-                  <div className="relative">
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
-                      folders/
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="1A2b3C4d5E6f7G8h9I..."
-                      value={config.gdriveFolderId || ""}
-                      onChange={(e) => {
-                        let val = e.target.value.trim();
-                        // Auto-extract ID if full browser URL is pasted
-                        const match = val.match(/folders\/([a-zA-Z0-9_-]+)/);
-                        if (match && match[1]) {
-                          val = match[1];
-                          toast.success("Folder ID extracted from URL!");
-                        }
-                        setConfig({ ...config, gdriveFolderId: val });
-                      }}
-                      className={cn(
-                        "w-full px-3.5 sm:pl-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                        isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
-                      )}
-                    />
-                  </div>
-                  <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
-                    Paste the Folder ID or full URL from your browser address bar.
-                  </p>
-                </div>
-
-                {/* Client Email */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
-                      Service Account Client Email <span className="text-red-500 font-bold">*</span>
-                    </label>
-                    {config.gdriveClientEmail && (
-                      <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">Ready to share</span>
+                  <span
+                    className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0",
+                      gdriveAuthType === "SERVICE_ACCOUNT"
+                        ? isDark
+                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          : "bg-cyan-100 text-cyan-800 border border-cyan-300"
+                        : isDark
+                        ? "bg-slate-800/80 text-slate-400"
+                        : "bg-slate-200 text-slate-600"
                     )}
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      placeholder="my-backup-bot@project-id.iam.gserviceaccount.com"
-                      value={config.gdriveClientEmail || ""}
-                      onChange={(e) => setConfig({ ...config, gdriveClientEmail: e.target.value.trim() })}
-                      className={cn(
-                        "w-full pl-3.5 pr-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                        isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
-                      )}
-                    />
-                    {config.gdriveClientEmail && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(config.gdriveClientEmail || "");
-                          toast.success("Email copied! Share your Google Drive folder with this email as Editor.");
-                        }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-100 text-cyan-950 hover:bg-cyan-200 border border-cyan-400 transition-all flex items-center gap-1 shadow-2xs"
-                        title="Copy email to share in Google Drive"
-                      >
-                        <Copy className="w-3 h-3" />
-                        <span>Copy</span>
-                      </button>
-                    )}
-                  </div>
-                  <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
-                    Share your Google Drive folder with this email and give it <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Editor</strong> permission.
-                  </p>
-                </div>
+                  >
+                    Service Account
+                  </span>
+                </button>
+              </div>
 
-                {/* Private Key - Cyber Vault vs Code Editor */}
-                <div className="md:col-span-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className={cn("flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
-                      <Key className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                      <span>Service Account Private Key (RSA PKCS#8)</span>
-                      <span className="text-red-500 font-bold">*</span>
-                    </label>
-
-                    {/* Security Badge */}
-                    {config.hasPrivateKey && !showPrivateKey && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-400 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">
-                        <ShieldCheck className="w-3 h-3" /> 2048-bit Key Saved
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Case 1: Key is already configured and user is not editing */}
-                  {config.hasPrivateKey && !showPrivateKey ? (
+              {/* Sub-View 1: Personal Google Drive (OAuth 2.0 Web) */}
+              {gdriveAuthType === "OAUTH" && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {config.hasRefreshToken ? (
+                    /* Connected State Card */
                     <div
                       className={cn(
-                        "rounded-xl border p-4 transition-all relative overflow-hidden group",
-                        isDark ? "bg-[#080d1a] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-300 shadow-2xs"
+                        "p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 transition-all",
+                        isDark
+                          ? "bg-emerald-500/[0.05] border-emerald-500/30 text-white"
+                          : "bg-emerald-50/80 border-emerald-300 text-slate-900"
                       )}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-inner", isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-cyan-100 border-cyan-400 text-cyan-900")}>
-                            <Lock className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className={cn("text-xs font-mono font-extrabold tracking-widest", isDark ? "text-slate-300" : "text-slate-950")}>
-                                ••••••••••••••••••••••••••••••••
-                              </span>
-                              <span className={cn("text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300")}>
-                                RSA-KEY
-                              </span>
-                            </div>
-                            <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-700")}>
-                              Encrypted RSA private key is securely stored. Click below if you want to replace it.
-                            </p>
-                          </div>
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                          <CheckCircle2 className="w-6 h-6" />
                         </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 font-bold text-sm">
+                            <span className="truncate">Connected to Personal Google Drive</span>
+                            <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider border border-emerald-500/30 font-bold shrink-0">
+                              Active
+                            </span>
+                          </div>
+                          <p className={cn("text-xs mt-0.5 font-medium truncate", isDark ? "text-slate-300" : "text-slate-600")}>
+                            Google Account: <strong className="font-semibold text-emerald-400">{config.gdriveClientEmail || "Authorized"}</strong> • Personal Drive quota (15 GB / Google One)
+                          </p>
+                        </div>
+                      </div>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowPrivateKey(true);
-                            setConfig((prev) => ({ ...prev, gdrivePrivateKey: "" }));
-                          }}
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                        <a
+                          href={`/api/user/vps/${vpsId}/cloud-backups/gdrive/authorize`}
                           className={cn(
-                            "px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 border shadow-2xs",
-                            isDark ? "bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/30" : "bg-cyan-100 text-cyan-950 hover:bg-cyan-200 border-cyan-400"
+                            "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-1.5 cursor-pointer",
+                            isDark
+                              ? "bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-700"
+                              : "bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-2xs"
                           )}
                         >
-                          <Key className="w-3.5 h-3.5" />
-                          <span>Replace / Enter New Key</span>
+                          <RefreshCw className="w-3.5 h-3.5" /> Reconnect
+                        </a>
+                        <button
+                          type="button"
+                          onClick={handleDisconnectGDrive}
+                          disabled={isDisconnectingGDrive}
+                          className="px-3.5 py-2 rounded-xl text-xs font-bold border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        >
+                          {isDisconnectingGDrive ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+                          Disconnect
                         </button>
                       </div>
                     </div>
                   ) : (
-                    /* Case 2: Terminal / PEM Code Editor for entering Key */
-                    <div className={cn(
-                      "rounded-xl border overflow-hidden shadow-sm transition-all focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500",
-                      isDark ? "border-slate-800 bg-[#080d1a]" : "border-slate-300 bg-white"
-                    )}>
-                      {/* Terminal Window Header Bar */}
-                      <div className={cn(
-                        "px-3.5 py-2 border-b flex items-center justify-between",
-                        isDark ? "border-slate-800/80 bg-slate-900/80 text-slate-400" : "border-slate-300 bg-slate-100 text-slate-800 font-semibold"
-                      )}>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-                          </div>
-                          <span className="text-[11px] font-mono ml-2">service_account_private_key.pem</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {config.hasPrivateKey && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowPrivateKey(false);
-                                setConfig((prev) => ({ ...prev, gdrivePrivateKey: "" }));
-                              }}
-                              className={cn(
-                                "text-[11px] px-2 py-0.5 rounded font-semibold transition-colors",
-                                isDark ? "text-slate-400 hover:text-white" : "text-slate-700 hover:text-slate-950"
-                              )}
-                            >
-                              Cancel &amp; Keep Saved Key
-                            </button>
-                          )}
-                        </div>
+                    /* Not Connected State Card */
+                    <div
+                      className={cn(
+                        "p-6 sm:p-8 rounded-2xl border text-center flex flex-col items-center justify-center gap-4 relative overflow-hidden",
+                        isDark ? "bg-slate-900/40 border-slate-800/90" : "bg-white border-slate-200 shadow-xs"
+                      )}
+                    >
+                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/30" : "bg-cyan-50 border-cyan-300")}>
+                        <GoogleDriveLogo className="w-8 h-8" />
                       </div>
 
-                      {/* Textarea Code Editor */}
-                      <div className="relative p-2">
-                        <textarea
-                          rows={6}
-                          placeholder={`-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\n-----END PRIVATE KEY-----`}
-                          value={config.gdrivePrivateKey || ""}
-                          onChange={(e) => {
-                            let val = e.target.value;
-                            // Smart auto-detect: Did the user accidentally paste the entire JSON?
-                            if (val.trim().startsWith("{") && val.includes("private_key")) {
-                              try {
-                                const parsed = JSON.parse(val);
-                                if (parsed.private_key) {
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    gdrivePrivateKey: parsed.private_key,
-                                    gdriveClientEmail: parsed.client_email || prev.gdriveClientEmail
-                                  }));
-                                  toast.success("Auto-extracted RSA Key and Client Email from JSON!");
-                                  return;
-                                }
-                              } catch {
-                                // Not valid JSON yet, continue normal flow
-                              }
-                            }
-                            setConfig({ ...config, gdrivePrivateKey: val });
-                          }}
-                          className={cn(
-                            "w-full p-2.5 bg-transparent border-0 text-xs font-mono font-medium focus:outline-none resize-y leading-relaxed",
-                            isDark ? "text-cyan-200/90 placeholder-slate-600" : "text-slate-950 placeholder-slate-400"
-                          )}
-                          spellCheck={false}
-                        />
+                      <div className="max-w-md">
+                        <h5 className={cn("text-base sm:text-lg font-bold mb-1.5", isDark ? "text-white" : "text-slate-950")}>
+                          Connect Personal Google Drive
+                        </h5>
+                        <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
+                          Authorize your personal Google account with one click, just like <strong>Rclone</strong>. Your VPS backups will be streamed directly into your Google Drive (15 GB free / Google One quota) with zero Service Account limits.
+                        </p>
                       </div>
 
-                      {/* Textarea Footer Help */}
-                      <div className={cn(
-                        "px-3 py-1.5 border-t flex items-center justify-between text-[11px]",
-                        isDark ? "border-slate-800/60 bg-black/40 text-slate-500" : "border-slate-300 bg-slate-100 text-slate-700 font-medium"
-                      )}>
-                        <span>Format: Standard PKCS#8 RSA PEM (Starts with BEGIN PRIVATE KEY)</span>
-                        {config.gdrivePrivateKey && (
-                          <span className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-800")}>
-                            {config.gdrivePrivateKey.length} characters
-                          </span>
-                        )}
+                      <a
+                        href={`/api/user/vps/${vpsId}/cloud-backups/gdrive/authorize`}
+                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm shadow-md transition-all cursor-pointer hover:shadow-cyan-500/20 active:scale-[0.98]"
+                      >
+                        <GoogleDriveLogo className="w-5 h-5 shrink-0" />
+                        <span>Connect Personal Google Drive</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
+
+                      <div className={cn("flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-medium pt-3 border-t w-full max-w-lg", isDark ? "border-slate-800/80 text-slate-400" : "border-slate-100 text-slate-600")}>
+                        <span className="flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-cyan-500" /> Personal 15 GB / Google One
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-cyan-500" /> No Service Account limit
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-cyan-500" /> 1-Click OAuth 2.0
+                        </span>
                       </div>
                     </div>
                   )}
+
+                  {/* Google OAuth Callback URL Helper & Troubleshooting Card */}
+                  <div className={cn(
+                    "p-4 rounded-2xl border text-xs transition-all space-y-2.5",
+                    isDark ? "bg-[#070e1b] border-cyan-500/25 text-slate-300" : "bg-cyan-50/70 border-cyan-300 text-slate-800"
+                  )}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Info className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          OAuth 2.0 Redirect Callback URI:
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const callback = `${typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/api/auth/google/callback`;
+                          navigator.clipboard.writeText(callback);
+                          setCopiedCallback(true);
+                          toast.success("Callback URL copied to clipboard!");
+                          setTimeout(() => setCopiedCallback(false), 2000);
+                        }}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg font-bold inline-flex items-center gap-1 text-[11px] border transition-all self-start sm:self-auto cursor-pointer",
+                          copiedCallback
+                            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                            : isDark
+                            ? "bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/30"
+                            : "bg-white text-cyan-950 hover:bg-cyan-100 border-cyan-400 shadow-2xs"
+                        )}
+                      >
+                        {copiedCallback ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedCallback ? "Copied!" : "Copy Callback URL"}</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <code className={cn(
+                        "px-2.5 py-1.5 rounded-lg font-mono text-[11px] font-semibold break-all border w-full select-all",
+                        isDark ? "bg-black/50 border-slate-800 text-cyan-300" : "bg-white border-slate-300 text-cyan-950"
+                      )}>
+                        {typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/api/auth/google/callback
+                      </code>
+                    </div>
+
+                    <p className={cn("text-[11px] leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
+                      <strong>Google Error 400 (redirect_uri_mismatch)?</strong> Add the URL above to{" "}
+                      <strong className={isDark ? "text-slate-200" : "text-slate-900"}>Authorized redirect URIs</strong> in your{" "}
+                      <a
+                        href="https://console.cloud.google.com/apis/credentials"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline text-cyan-600 dark:text-cyan-400 font-bold hover:underline"
+                      >
+                        Google Cloud Console
+                      </a>{" "}
+                      &gt; APIs &amp; Services &gt; Credentials &gt; OAuth 2.0 Client IDs.
+                    </p>
+                  </div>
+
+                  {/* Alternative: Manual Refresh Token / Rclone JSON */}
+                  <div className={cn(
+                    "rounded-2xl border transition-all overflow-hidden",
+                    isDark ? "bg-slate-900/30 border-slate-800/80" : "bg-white border-slate-200"
+                  )}>
+                    <button
+                      type="button"
+                      onClick={() => setShowManualToken(!showManualToken)}
+                      className={cn(
+                        "w-full px-4 py-3 flex items-center justify-between text-left transition-colors cursor-pointer",
+                        isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Key className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                        <div>
+                          <div className={cn("text-xs font-bold", isDark ? "text-slate-200" : "text-slate-900")}>
+                            Alternative: Enter Refresh Token or Rclone JSON Manually
+                          </div>
+                          <div className={cn("text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
+                            Instant connection without opening OAuth consent or modifying Google Cloud Console
+                          </div>
+                        </div>
+                      </div>
+                      <span className={cn(
+                        "text-xs font-semibold px-2 py-0.5 rounded border shrink-0",
+                        isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-700"
+                      )}>
+                        {showManualToken ? "Hide" : "Show"}
+                      </span>
+                    </button>
+
+                    {showManualToken && (
+                      <div className={cn("p-4 border-t space-y-3", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                        <div>
+                          <label className={cn("block text-xs font-bold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-900")}>
+                            Google OAuth Refresh Token or Rclone Token JSON
+                          </label>
+                          <textarea
+                            rows={3}
+                            placeholder="Paste your 1//0... token or rclone token JSON: {&#10;  &quot;access_token&quot;: &quot;...&quot;,&#10;  &quot;refresh_token&quot;: &quot;1//0...&quot;&#10;}"
+                            value={manualToken}
+                            onChange={(e) => setManualToken(e.target.value)}
+                            className={cn(
+                              "w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                              isDark ? "bg-slate-950/60 border-slate-800 text-cyan-300 placeholder-slate-600" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                            )}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className={cn("text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
+                            Auto-extracts <code className="font-mono">refresh_token</code> from raw tokens or Rclone config JSON
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleConnectManualToken}
+                            disabled={isConnectingManual || !manualToken.trim()}
+                            className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                          >
+                            {isConnectingManual ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                            <span>Connect Token</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Destination Folder ID for Personal Google Drive */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
+                        Google Drive Folder ID (Optional)
+                      </label>
+                      <a
+                        href="https://drive.google.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 flex items-center gap-1 transition-colors"
+                      >
+                        <span>Open Drive</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
+                        folders/
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="1A2b3C4d5E6f7G8h9I... (Leave blank to save in My Drive root)"
+                        value={config.gdriveFolderId || ""}
+                        onChange={(e) => {
+                          let val = e.target.value.trim();
+                          const match = val.match(/folders\/([a-zA-Z0-9_-]+)/);
+                          if (match && match[1]) {
+                            val = match[1];
+                            toast.success("Folder ID extracted from URL!");
+                          }
+                          setConfig({ ...config, gdriveFolderId: val });
+                        }}
+                        className={cn(
+                          "w-full px-3.5 sm:pl-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                        )}
+                      />
+                    </div>
+                    <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
+                      Paste the Folder ID or full URL from your browser address bar. If left blank, backups will be stored in your root Google Drive.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Sub-View 2: Google Workspace (Shared Drive / Service Account) */}
+              {gdriveAuthType === "SERVICE_ACCOUNT" && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* Quick Auto-Fill via JSON Key File */}
+                  <div className={cn(
+                    "relative border border-dashed rounded-2xl p-4 transition-all group cursor-pointer text-center",
+                    isDark
+                      ? "border-cyan-500/30 hover:border-cyan-400/60 bg-cyan-500/[0.03] hover:bg-cyan-500/[0.06]"
+                      : "border-cyan-400 hover:border-cyan-500 bg-cyan-50/70 hover:bg-cyan-50"
+                  )}>
+                    <input
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleJsonFileUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      title="Upload Google Cloud Service Account JSON Key"
+                    />
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pointer-events-none">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                        isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-100 border-cyan-400 text-cyan-900"
+                      )}>
+                        <Key className="w-5 h-5" />
+                      </div>
+                      <div className="text-center sm:text-left">
+                        <div className={cn("text-xs sm:text-sm font-bold flex items-center justify-center sm:justify-start gap-2", isDark ? "text-white" : "text-slate-950")}>
+                          <span>Auto-Fill from Service Account JSON</span>
+                          <span className={cn(
+                            "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border flex items-center gap-1",
+                            isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border-cyan-300"
+                          )}>
+                            <Zap className="w-2.5 h-2.5" />
+                            <span>Instant</span>
+                          </span>
+                        </div>
+                        <p className={cn("text-xs mt-0.5 font-medium", isDark ? "text-slate-400" : "text-slate-700")}>
+                          Drop your downloaded <code className={cn("px-1.5 py-0.5 rounded font-mono text-[11px] font-bold", isDark ? "bg-cyan-500/10 text-cyan-300" : "bg-cyan-100 text-cyan-950 border border-cyan-300")}>.json</code> key file here to auto-fill Email &amp; RSA Key.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3-Step Setup Guide */}
+                  <CloudSetupGuide
+                    title="Setup Guide (Google Workspace Shared Drive):"
+                    isDark={isDark}
+                    steps={[
+                      {
+                        step: 1,
+                        text: (
+                          <span>
+                            Enable <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Google Drive API</strong> in Google Cloud Console.
+                          </span>
+                        ),
+                      },
+                      {
+                        step: 2,
+                        text: (
+                          <span>
+                            Create a Service Account &amp; download the <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>JSON Key</strong> file (can auto-fill above).
+                          </span>
+                        ),
+                      },
+                      {
+                        step: 3,
+                        text: (
+                          <span>
+                            Share a folder in <strong className="text-emerald-700 dark:text-emerald-400 font-bold">Shared Drive (Team Drive)</strong> with the Service Account email as Content Manager.
+                          </span>
+                        ),
+                      },
+                    ]}
+                    notice={
+                      <div
+                        className={cn(
+                          "p-3 rounded-xl border text-xs flex items-start gap-2.5 mt-3",
+                          isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50/90 border-amber-300 text-amber-950"
+                        )}
+                      >
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                        <div className="space-y-0.5">
+                          <div className="font-bold text-amber-950 dark:text-amber-300">Important Note on Google Drive Storage Quota:</div>
+                          <p className="leading-relaxed text-[11px] text-amber-900 dark:text-amber-200">
+                            Google Cloud Service Accounts have a strict <strong>0 MB</strong> storage quota on personal Google Drive (Personal My Drive). Google requires using a <strong>Google Workspace Shared Drive (Team Drive)</strong> with Service Accounts, or switch to the <strong>Personal Google Drive (OAuth)</strong> tab above.
+                          </p>
+                        </div>
+                      </div>
+                    }
+                  />
+
+                  {/* Form Input Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Folder ID */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
+                          Shared Drive Folder ID <span className="text-red-500 font-bold">*</span>
+                        </label>
+                        <a
+                          href="https://drive.google.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 font-bold underline underline-offset-2 flex items-center gap-1 transition-colors"
+                        >
+                          <span>Open Drive</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
+                          folders/
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="1A2b3C4d5E6f7G8h9I..."
+                          value={config.gdriveFolderId || ""}
+                          onChange={(e) => {
+                            let val = e.target.value.trim();
+                            const match = val.match(/folders\/([a-zA-Z0-9_-]+)/);
+                            if (match && match[1]) {
+                              val = match[1];
+                              toast.success("Folder ID extracted from URL!");
+                            }
+                            setConfig({ ...config, gdriveFolderId: val });
+                          }}
+                          className={cn(
+                            "w-full px-3.5 sm:pl-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                            isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                          )}
+                        />
+                      </div>
+                      <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
+                        Paste the Folder ID from a Shared Drive (Team Drive).
+                      </p>
+                    </div>
+
+                    {/* Client Email */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
+                          Service Account Client Email <span className="text-red-500 font-bold">*</span>
+                        </label>
+                        {config.gdriveClientEmail && (
+                          <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">Ready to share</span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          placeholder="my-backup-bot@project-id.iam.gserviceaccount.com"
+                          value={config.gdriveClientEmail || ""}
+                          onChange={(e) => setConfig({ ...config, gdriveClientEmail: e.target.value.trim() })}
+                          className={cn(
+                            "w-full pl-3.5 pr-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                            isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                          )}
+                        />
+                        {config.gdriveClientEmail && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(config.gdriveClientEmail || "");
+                              toast.success("Email copied! Share your Google Drive folder with this email as Editor.");
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-100 text-cyan-950 hover:bg-cyan-200 border border-cyan-400 transition-all flex items-center gap-1 shadow-2xs"
+                            title="Copy email to share in Google Drive"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>Copy</span>
+                          </button>
+                        )}
+                      </div>
+                      <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
+                        Share your Google Drive folder with this email and give it <strong className={isDark ? "text-white" : "text-slate-950 font-bold"}>Editor</strong> permission.
+                      </p>
+                    </div>
+
+                    {/* Private Key - Cyber Vault vs Code Editor */}
+                    <div className="md:col-span-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className={cn("flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
+                          <Key className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                          <span>Service Account Private Key (RSA PKCS#8)</span>
+                          <span className="text-red-500 font-bold">*</span>
+                        </label>
+
+                        {/* Security Badge */}
+                        {config.hasPrivateKey && !showPrivateKey && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-400 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">
+                            <ShieldCheck className="w-3 h-3" /> 2048-bit Key Saved
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Case 1: Key is already configured and user is not editing */}
+                      {config.hasPrivateKey && !showPrivateKey ? (
+                        <div
+                          className={cn(
+                            "rounded-xl border p-4 transition-all relative overflow-hidden group",
+                            isDark ? "bg-[#080d1a] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-300 shadow-2xs"
+                          )}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-inner", isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-cyan-100 border-cyan-400 text-cyan-900")}>
+                                <Lock className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className={cn("text-xs font-mono font-extrabold tracking-widest", isDark ? "text-slate-300" : "text-slate-950")}>
+                                    ••••••••••••••••••••••••••••••••
+                                  </span>
+                                  <span className={cn("text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border-cyan-300")}>
+                                    RSA-KEY
+                                  </span>
+                                </div>
+                                <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-700")}>
+                                  Encrypted RSA private key is securely stored. Click below if you want to replace it.
+                                </p>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowPrivateKey(true);
+                                setConfig((prev) => ({ ...prev, gdrivePrivateKey: "" }));
+                              }}
+                              className={cn(
+                                "px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 border shadow-2xs",
+                                isDark ? "bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/30" : "bg-cyan-100 text-cyan-950 hover:bg-cyan-200 border-cyan-400"
+                              )}
+                            >
+                              <Key className="w-3.5 h-3.5" />
+                              <span>Replace / Enter New Key</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Case 2: Terminal / PEM Code Editor for entering Key */
+                        <div className={cn(
+                          "rounded-xl border overflow-hidden shadow-sm transition-all focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500",
+                          isDark ? "border-slate-800 bg-[#080d1a]" : "border-slate-300 bg-white"
+                        )}>
+                          {/* Terminal Window Header Bar */}
+                          <div className={cn(
+                            "px-3.5 py-2 border-b flex items-center justify-between",
+                            isDark ? "border-slate-800/80 bg-slate-900/80 text-slate-400" : "border-slate-300 bg-slate-100 text-slate-800 font-semibold"
+                          )}>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                              </div>
+                              <span className="text-[11px] font-mono ml-2">service_account_private_key.pem</span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {config.hasPrivateKey && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowPrivateKey(false);
+                                    setConfig((prev) => ({ ...prev, gdrivePrivateKey: "" }));
+                                  }}
+                                  className={cn(
+                                    "text-[11px] px-2 py-0.5 rounded font-semibold transition-colors",
+                                    isDark ? "text-slate-400 hover:text-white" : "text-slate-700 hover:text-slate-950"
+                                  )}
+                                >
+                                  Cancel &amp; Keep Saved Key
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Textarea Code Editor */}
+                          <div className="relative p-2">
+                            <textarea
+                              rows={6}
+                              placeholder={`-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\n-----END PRIVATE KEY-----`}
+                              value={config.gdrivePrivateKey || ""}
+                              onChange={(e) => {
+                                let val = e.target.value;
+                                if (val.trim().startsWith("{") && val.includes("private_key")) {
+                                  try {
+                                    const parsed = JSON.parse(val);
+                                    if (parsed.private_key) {
+                                      setConfig((prev) => ({
+                                        ...prev,
+                                        gdrivePrivateKey: parsed.private_key,
+                                        gdriveClientEmail: parsed.client_email || prev.gdriveClientEmail
+                                      }));
+                                      toast.success("Auto-extracted RSA Key and Client Email from JSON!");
+                                      return;
+                                    }
+                                  } catch {
+                                    // Not valid JSON yet, continue normal flow
+                                  }
+                                }
+                                setConfig({ ...config, gdrivePrivateKey: val });
+                              }}
+                              className={cn(
+                                "w-full p-2.5 bg-transparent border-0 text-xs font-mono font-medium focus:outline-none resize-y leading-relaxed",
+                                isDark ? "text-cyan-200/90 placeholder-slate-600" : "text-slate-950 placeholder-slate-400"
+                              )}
+                              spellCheck={false}
+                            />
+                          </div>
+
+                          {/* Textarea Footer Help */}
+                          <div className={cn(
+                            "px-3 py-1.5 border-t flex items-center justify-between text-[11px]",
+                            isDark ? "border-slate-800/60 bg-black/40 text-slate-500" : "border-slate-300 bg-slate-100 text-slate-700 font-medium"
+                          )}>
+                            <span>Format: Standard PKCS#8 RSA PEM (Starts with BEGIN PRIVATE KEY)</span>
+                            {config.gdrivePrivateKey && (
+                              <span className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-800")}>
+                                {config.gdrivePrivateKey.length} characters
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

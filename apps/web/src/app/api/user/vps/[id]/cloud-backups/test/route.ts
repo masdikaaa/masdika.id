@@ -47,7 +47,8 @@ export async function POST(
       pathPrefix: body.pathPrefix !== undefined ? body.pathPrefix : existing?.pathPrefix,
       gdriveFolderId: body.gdriveFolderId !== undefined ? body.gdriveFolderId : existing?.gdriveFolderId,
       gdriveClientEmail: body.gdriveClientEmail !== undefined ? body.gdriveClientEmail : existing?.gdriveClientEmail,
-      gdrivePrivateKey
+      gdrivePrivateKey,
+      gdriveRefreshToken: existing?.gdriveRefreshToken || null
     };
 
     let result: { success: boolean; message: string };
