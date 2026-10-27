@@ -19,7 +19,7 @@ interface SelectProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
-  direction?: "up" | "down";
+  direction?: "up" | "down" | "auto";
 }
 
 export function Select({
@@ -29,14 +29,35 @@ export function Select({
   placeholder = "Select an option...",
   className,
   disabled = false,
-  direction = "down",
+  direction = "auto",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [effectiveDirection, setEffectiveDirection] = useState<"up" | "down">(
+    direction === "up" ? "up" : "down"
+  );
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const selectedOption = options.find((opt) => opt.value === value);
+
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      if (direction === "up" || direction === "down") {
+        setEffectiveDirection(direction);
+      } else {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const estimatedHeight = Math.min(options.length * 40 + 16, 260);
+        if (spaceBelow < estimatedHeight && spaceAbove > spaceBelow) {
+          setEffectiveDirection("up");
+        } else {
+          setEffectiveDirection("down");
+        }
+      }
+    }
+  }, [isOpen, direction, options.length]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -51,7 +72,7 @@ export function Select({
   }, []);
 
   return (
-    <div className={cn("relative w-full", isOpen ? "z-[80]" : "z-auto")} ref={dropdownRef}>
+    <div className={cn("relative w-full", isOpen ? "z-[100]" : "z-auto")} ref={dropdownRef}>
       <button
         type="button"
         disabled={disabled}
@@ -80,13 +101,13 @@ export function Select({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: direction === "up" ? 10 : -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: effectiveDirection === "up" ? 10 : -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: direction === "up" ? 10 : -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: effectiveDirection === "up" ? 10 : -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute z-[90] w-full rounded-xl shadow-2xl overflow-hidden border",
-              direction === "up" ? "bottom-full mb-2" : "mt-2",
+              "absolute z-[110] w-full rounded-xl shadow-2xl overflow-hidden border",
+              effectiveDirection === "up" ? "bottom-full mb-2" : "mt-2",
               isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200/90 shadow-xl"
             )}
           >

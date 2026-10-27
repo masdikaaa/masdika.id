@@ -1251,7 +1251,7 @@ export function AIChat() {
       </AnimatePresence>
 
       {/* Floating Toggle Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         {/* Ping Animation Ring */}
         {!isOpen && (
           <span className="absolute inset-0 rounded-full border-2 border-cyan-400 animate-ping opacity-50"></span>
@@ -1260,9 +1260,9 @@ export function AIChat() {
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close AI chat" : "Open AI chat"}
           aria-expanded={isOpen}
-          className={cn("relative w-14 h-14 rounded-full flex items-center justify-center border-[3px] shadow-[4px_4px_0_#22d3ee] transition-colors cursor-pointer", isDark ? "bg-[#0F3B4A] text-cyan-400 border-cyan-400 hover:bg-[#164e63]" : "bg-white text-cyan-500 border-cyan-500 hover:bg-slate-50")}
+          className={cn("relative w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-[2.5px] sm:border-[3px] shadow-[3px_3px_0_#22d3ee] sm:shadow-[4px_4px_0_#22d3ee] transition-colors cursor-pointer", isDark ? "bg-[#0F3B4A] text-cyan-400 border-cyan-400 hover:bg-[#164e63]" : "bg-white text-cyan-500 border-cyan-500 hover:bg-slate-50")}
         >
-          {isOpen ? <X size={28} className="stroke-[3]" aria-hidden="true" /> : <Bot size={28} className="stroke-[2.5]" aria-hidden="true" />}
+          {isOpen ? <X className="w-5 h-5 sm:w-7 sm:h-7 stroke-[3]" aria-hidden="true" /> : <Bot className="w-5 h-5 sm:w-7 sm:h-7 stroke-[2.5]" aria-hidden="true" />}
         </button>
       </div>
     </div>

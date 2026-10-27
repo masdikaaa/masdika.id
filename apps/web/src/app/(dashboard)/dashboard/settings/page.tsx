@@ -580,9 +580,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div className="space-y-6 md:space-y-8 pb-24 sm:pb-16 max-w-full overflow-x-hidden" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-4 sm:p-7 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 sm:mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
@@ -639,14 +639,14 @@ export default function SettingsPage() {
                 className="space-y-6"
               >
                 {/* Profile Picture Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <Camera className="w-5 h-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Profile Picture</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Update your avatar and display photo.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Update your avatar and display photo.</p>
                     </div>
                   </div>
 
@@ -702,14 +702,14 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Personal Info Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <User className="w-5 h-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Personal Information</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Manage your display name and registered email address.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Manage your display name and registered email address.</p>
                     </div>
                   </div>
 
@@ -748,18 +748,18 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Billing Info Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <Building2 className="w-5 h-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Billing Information</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Address and company details used for invoices and billing.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Address and company details used for invoices and billing.</p>
                     </div>
                   </div>
 
-                  <div className="space-y-4 sm:space-y-5 relative z-10">
+                  <div className="space-y-4 sm:space-y-5 relative z-20">
                     {/* Company Name */}
                     <div>
                       <label className={labelClass}>Company Name <span className={cn("normal-case font-normal", isDark ? "text-slate-500" : "text-slate-400")}>(optional)</span></label>
@@ -801,7 +801,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Postal Code + Country */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-30">
                       <div>
                         <label className={labelClass}>Postal Code</label>
                         <input type="text" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="10110" className={inputClass} />
@@ -818,6 +818,7 @@ export default function SettingsPage() {
                           onChange={(val) => setCountry(val)}
                           options={COUNTRY_OPTIONS}
                           placeholder="Select country"
+                          direction="auto"
                           className={cn(inputClass, "cursor-pointer")}
                         />
                       </div>
@@ -849,15 +850,15 @@ export default function SettingsPage() {
                 className="space-y-6"
               >
                 {/* Change Password Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <Lock className="w-5 h-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Change Password</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
                     </div>
                   </div>
 
@@ -933,21 +934,21 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   {/* Subtle Accent Glow */}
                   <div className={cn("absolute -top-24 -right-24 w-60 h-60 rounded-full blur-3xl pointer-events-none", twoFactorEnabled ? "bg-emerald-500/10" : "bg-cyan-500/10")} />
 
                   {/* Header */}
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10 pb-4 border-b transition-colors", isDark ? "border-slate-800/80" : "border-slate-100")}>
-                    <div className="flex items-center gap-3.5">
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 relative z-10 pb-4 border-b transition-colors", isDark ? "border-slate-800/80" : "border-slate-100")}>
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0 transition-colors", twoFactorEnabled ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700") : (isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600"))}>
                         {twoFactorEnabled ? <ShieldCheck className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Two-Factor Authentication (2FA)</h3>
+                          <h3 className={cn("text-base md:text-lg font-bold leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>Two-Factor Authentication (2FA)</h3>
                         </div>
-                        <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
+                        <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>
                           Add an extra layer of security with Time-based One-Time Passwords (TOTP).
                         </p>
                       </div>
@@ -1096,15 +1097,15 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security & Login History Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                         <History className="w-5 h-5" />
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Sessions & Login History</h3>
-                        <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Monitor active devices and account login activity.</p>
+                        <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Monitor active devices and account login activity.</p>
                       </div>
                     </div>
 
