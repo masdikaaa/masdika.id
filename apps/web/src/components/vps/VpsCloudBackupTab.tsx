@@ -157,7 +157,7 @@ function CloudSetupGuide({
     <div
       className={cn(
         "p-3.5 sm:p-4 rounded-xl border text-xs relative overflow-hidden transition-all",
-        isDark ? "bg-slate-900/40 border-slate-800/80" : "bg-slate-50 border-slate-300"
+        isDark ? "bg-[#060b14]/70 border-slate-800/80" : "bg-slate-50 border-slate-300"
       )}
     >
       <div className={cn("flex items-center gap-2 font-bold mb-3 text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-800")}>
@@ -170,7 +170,7 @@ function CloudSetupGuide({
             key={s.step}
             className={cn(
               "flex items-center gap-3 p-3 rounded-xl border transition-all h-full min-h-[64px]",
-              isDark ? "bg-black/25 border-white/5" : "bg-white border-slate-300 shadow-2xs"
+              isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-300 shadow-2xs"
             )}
           >
             <div
@@ -538,8 +538,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Top Banner & Overview */}
       <div
         className={cn(
-          "border rounded-2xl p-4 sm:p-6 relative overflow-hidden transition-all",
-          isDark ? "bg-[#080e1e] border-slate-800" : "bg-white border-slate-200 shadow-sm"
+          "border rounded-2xl p-4 sm:p-6 shadow-lg relative overflow-hidden transition-all",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
@@ -548,14 +548,14 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
                 <CloudUpload className="w-5 h-5" />
               </div>
-              <h3 className={cn("text-base sm:text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              <h3 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 Cloud Storage Backup (Bring Your Own Storage)
               </h3>
               <span className="text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                 Free Feature
               </span>
             </div>
-            <p className={cn("text-xs sm:text-sm max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+            <p className={cn("text-xs sm:text-sm max-w-2xl leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
               Backup this entire virtual machine directly to your personal cloud storage without consuming local Proxmox storage quota. Supported providers: Cloudflare R2, AWS S3, and Google Drive.
             </p>
           </div>
@@ -568,7 +568,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               className={cn(
                 "h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center shrink-0",
                 isDark
-                  ? "bg-slate-900/60 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
+                  ? "bg-[#060b14] border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800"
                   : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
               )}
             >
@@ -595,7 +595,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               className={cn(
                 "mt-5 p-5 rounded-2xl border transition-all relative overflow-hidden",
                 isDark
-                  ? "bg-[#0d172e] border-cyan-500/25 shadow-sm"
+                  ? "bg-[#060b14] border-cyan-500/30 shadow-md"
                   : "bg-cyan-50/50 border-cyan-200 shadow-xs"
               )}
             >
@@ -649,7 +649,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               {/* Glowing Progress Bar Track */}
               <div className={cn(
                 "w-full h-3 sm:h-3.5 rounded-full overflow-hidden relative p-0.5 border",
-                isDark ? "bg-[#030712] border-slate-800" : "bg-slate-100 border-slate-200"
+                isDark ? "bg-black/40 border-white/5" : "bg-slate-100 border-slate-300"
               )}>
                 <div
                   className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 to-cyan-400 relative overflow-hidden"
@@ -684,14 +684,14 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Storage Provider Selection & Settings Card */}
       <div
         className={cn(
-          "border rounded-2xl p-4 sm:p-6 transition-all",
-          isDark ? "bg-[#080e1e] border-slate-800" : "bg-white border-slate-200 shadow-sm"
+          "border rounded-2xl p-4 sm:p-6 shadow-lg transition-all",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="mb-6">
-          <h4 className={cn("text-base font-bold mb-1", isDark ? "text-white" : "text-slate-950")}>
+          <h3 className={cn("text-base sm:text-lg font-bold mb-1", isDark ? "text-white" : "text-slate-950")}>
             Storage Provider Configuration
-          </h4>
+          </h3>
           <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
             Select your preferred cloud storage provider and enter your API credentials.
           </p>
@@ -704,13 +704,13 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("R2")}
             className={cn(
-              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group",
+              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group cursor-pointer",
               selectedProvider === "R2"
                 ? isDark
                   ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
                   : "bg-cyan-50/90 border-cyan-600 text-slate-950 ring-1 ring-cyan-600/40 shadow-xs"
                 : isDark
-                ? "bg-slate-900/40 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-slate-800/30"
+                ? "bg-[#060b14]/70 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-[#060b14]"
                 : "bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-50 shadow-2xs"
             )}
           >
@@ -721,7 +721,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   isDark
                     ? selectedProvider === "R2"
                       ? "bg-cyan-500/10 border-cyan-500/30"
-                      : "bg-slate-800/60 border-slate-700/60 group-hover:border-slate-600"
+                      : "bg-[#0b1322] border-slate-800 group-hover:border-slate-700"
                     : selectedProvider === "R2"
                     ? "bg-cyan-100/70 border-cyan-400"
                     : "bg-slate-50 border-slate-300"
@@ -760,13 +760,13 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("S3")}
             className={cn(
-              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group",
+              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group cursor-pointer",
               selectedProvider === "S3"
                 ? isDark
                   ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
                   : "bg-cyan-50/90 border-cyan-600 text-slate-950 ring-1 ring-cyan-600/40 shadow-xs"
                 : isDark
-                ? "bg-slate-900/40 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-slate-800/30"
+                ? "bg-[#060b14]/70 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-[#060b14]"
                 : "bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-50 shadow-2xs"
             )}
           >
@@ -777,7 +777,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   isDark
                     ? selectedProvider === "S3"
                       ? "bg-cyan-500/10 border-cyan-500/30"
-                      : "bg-slate-800/60 border-slate-700/60 group-hover:border-slate-600"
+                      : "bg-[#0b1322] border-slate-800 group-hover:border-slate-700"
                     : selectedProvider === "S3"
                     ? "bg-cyan-100/70 border-cyan-400"
                     : "bg-slate-50 border-slate-300"
@@ -816,13 +816,13 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("GDRIVE")}
             className={cn(
-              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group",
+              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group cursor-pointer",
               selectedProvider === "GDRIVE"
                 ? isDark
                   ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
                   : "bg-cyan-50/90 border-cyan-600 text-slate-950 ring-1 ring-cyan-600/40 shadow-xs"
                 : isDark
-                ? "bg-slate-900/40 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-slate-800/30"
+                ? "bg-[#060b14]/70 border-slate-800/80 text-slate-400 hover:text-white hover:border-slate-700/80 hover:bg-[#060b14]"
                 : "bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-50 shadow-2xs"
             )}
           >
@@ -833,7 +833,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   isDark
                     ? selectedProvider === "GDRIVE"
                       ? "bg-cyan-500/10 border-cyan-500/30"
-                      : "bg-slate-800/60 border-slate-700/60 group-hover:border-slate-600"
+                      : "bg-[#0b1322] border-slate-800 group-hover:border-slate-700"
                     : selectedProvider === "GDRIVE"
                     ? "bg-cyan-100/70 border-cyan-400"
                     : "bg-slate-50 border-slate-300"
@@ -932,7 +932,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, endpoint: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                   <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
@@ -951,7 +951,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, bucket: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                 </div>
@@ -967,7 +967,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                 </div>
@@ -983,7 +983,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, accessKeyId: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                 </div>
@@ -1000,7 +1000,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                       onChange={(e) => setConfig({ ...config, secretAccessKey: e.target.value })}
                       className={cn(
                         "w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                        isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                        isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                       )}
                     />
                     <button
@@ -1077,7 +1077,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     options={AWS_REGIONS}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white" : "bg-white border-slate-300 text-slate-950"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-300 text-slate-950"
                     )}
                   />
                 </div>
@@ -1093,7 +1093,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, bucket: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                 </div>
@@ -1109,7 +1109,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, accessKeyId: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                 </div>
@@ -1126,7 +1126,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                       onChange={(e) => setConfig({ ...config, secretAccessKey: e.target.value })}
                       className={cn(
                         "w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                        isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                        isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                       )}
                     />
                     <button
@@ -1150,7 +1150,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     onChange={(e) => setConfig({ ...config, pathPrefix: e.target.value })}
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                     )}
                   />
                 </div>
@@ -1165,7 +1165,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               <div
                 className={cn(
                   "p-1 rounded-xl border grid grid-cols-2 gap-1",
-                  isDark ? "bg-[#080e1e] border-slate-800" : "bg-slate-100 border-slate-200"
+                  isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
                 )}
               >
                 <button
@@ -1175,7 +1175,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     "flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
                     gdriveAuthType === "OAUTH"
                       ? isDark
-                        ? "bg-[#0b162c] text-cyan-400 shadow-xs border border-cyan-500/40"
+                        ? "bg-[#0b1322] text-cyan-400 shadow-xs border border-cyan-500/40"
                         : "bg-white text-cyan-900 shadow-2xs border border-cyan-600/30"
                       : isDark
                       ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent"
@@ -1207,7 +1207,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     "flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
                     gdriveAuthType === "SERVICE_ACCOUNT"
                       ? isDark
-                        ? "bg-[#0b162c] text-cyan-400 shadow-xs border border-cyan-500/40"
+                        ? "bg-[#0b1322] text-cyan-400 shadow-xs border border-cyan-500/40"
                         : "bg-white text-cyan-900 shadow-2xs border border-cyan-600/30"
                       : isDark
                       ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent"
@@ -1333,7 +1333,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   {/* Google OAuth Callback URL Helper & Troubleshooting Card */}
                   <div className={cn(
                     "p-3 sm:p-3.5 rounded-xl border text-xs transition-all space-y-2",
-                    isDark ? "bg-[#0d172e] border-cyan-500/25 text-slate-300" : "bg-cyan-50/70 border-cyan-200 text-slate-800"
+                    isDark ? "bg-[#060b14]/70 border-cyan-500/25 text-slate-300" : "bg-cyan-50/70 border-cyan-200 text-slate-800"
                   )}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                       <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white text-xs">
@@ -1422,7 +1422,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         }}
                         className={cn(
                           "w-full pl-24 pr-3 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                          isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                         )}
                       />
                     </div>
@@ -1562,7 +1562,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           }}
                           className={cn(
                             "w-full pl-24 pr-3.5 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                            isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                            isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                           )}
                         />
                       </div>
@@ -1589,7 +1589,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           onChange={(e) => setConfig({ ...config, gdriveClientEmail: e.target.value.trim() })}
                           className={cn(
                             "w-full pl-3.5 pr-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
-                            isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
+                            isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                           )}
                         />
                         {config.gdriveClientEmail && (
@@ -1634,7 +1634,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         <div
                           className={cn(
                             "rounded-xl border p-4 transition-all relative overflow-hidden group",
-                            isDark ? "bg-[#0d172e] border-slate-800 shadow-sm" : "bg-slate-50 border-slate-200 shadow-2xs"
+                            isDark ? "bg-[#060b14]/70 border-slate-800 shadow-sm" : "bg-slate-50 border-slate-200 shadow-2xs"
                           )}
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1677,12 +1677,12 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         /* Case 2: Terminal / PEM Code Editor for entering Key */
                         <div className={cn(
                           "rounded-xl border overflow-hidden shadow-sm transition-all focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500",
-                          isDark ? "border-slate-800 bg-[#080e1e]" : "border-slate-200 bg-white"
+                          isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-white"
                         )}>
                           {/* Terminal Window Header Bar */}
                           <div className={cn(
                             "px-3.5 py-2 border-b flex items-center justify-between",
-                            isDark ? "border-slate-800/80 bg-slate-900/80 text-slate-400" : "border-slate-300 bg-slate-100 text-slate-800 font-semibold"
+                            isDark ? "border-slate-800/80 bg-[#0b1322] text-slate-400" : "border-slate-300 bg-slate-100 text-slate-800 font-semibold"
                           )}>
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1.5">
@@ -1823,16 +1823,16 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
       {/* Cloud Backups Table */}
       <div
         className={cn(
-          "border rounded-2xl p-4 sm:p-6 transition-all",
-          isDark ? "bg-[#080e1e] border-slate-800" : "bg-white border-slate-200 shadow-sm"
+          "border rounded-2xl p-4 sm:p-6 shadow-lg transition-all",
+          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h4 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-950")}>
+            <h3 className={cn("text-base sm:text-lg font-bold", isDark ? "text-white" : "text-slate-950")}>
               Your Cloud Backups ({records.length})
-            </h4>
-            <p className={cn("text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-700 font-medium")}>
+            </h3>
+            <p className={cn("text-xs sm:text-sm mt-0.5 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
               Archives stored directly on your personal cloud storage.
             </p>
           </div>
@@ -1857,9 +1857,9 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           </div>
         ) : (
           <>
-            <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-slate-800/60" : "border-slate-300")}>
+            <div className={cn("overflow-x-auto rounded-xl border", isDark ? "border-slate-800/80 bg-[#060b14]/50" : "border-slate-300 bg-white")}>
             <table className="w-full text-left text-sm">
-              <thead className={cn("text-xs font-bold uppercase tracking-wider border-b", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-900 border-slate-300")}>
+              <thead className={cn("text-xs font-bold uppercase tracking-wider border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-100 text-slate-900 border-slate-300")}>
                 <tr>
                   <th className="px-4 py-3.5">Backup Archive</th>
                   <th className="px-4 py-3.5">Storage</th>
@@ -1869,13 +1869,13 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   <th className="px-4 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className={cn("divide-y", isDark ? "divide-slate-800/40" : "divide-slate-200")}>
+              <tbody className={cn("divide-y", isDark ? "divide-slate-800/60" : "divide-slate-200")}>
                 {paginatedRecords.map((rec) => (
                   <tr
                     key={rec.id}
                     className={cn(
                       "transition-colors",
-                      isDark ? "hover:bg-slate-900/40" : "hover:bg-slate-50"
+                      isDark ? "hover:bg-[#0b1322]/80" : "hover:bg-slate-50"
                     )}
                   >
                     <td className="px-4 py-3.5 font-mono text-xs">
@@ -2005,7 +2005,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer",
                     isDark
-                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300"
+                      ? "border-slate-800 bg-[#060b14] hover:bg-slate-800 text-slate-300"
                       : "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-2xs"
                   )}
                 >
@@ -2040,7 +2040,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer",
                     isDark
-                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300"
+                      ? "border-slate-800 bg-[#060b14] hover:bg-slate-800 text-slate-300"
                       : "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-2xs"
                   )}
                 >
@@ -2074,7 +2074,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
           <div
             className={cn(
               "w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto",
-              isDark ? "bg-[#080e1e] border-slate-800 text-white shadow-cyan-950/20" : "bg-white border-slate-200 text-slate-900 shadow-xl"
+              isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-xl"
             )}
           >
             {/* Close button */}
@@ -2137,7 +2137,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   </p>
                 </div>
 
-                <div className={cn("p-3.5 rounded-xl border text-xs space-y-2.5", isDark ? "bg-slate-900/60 border-slate-800 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-900")}>
+                <div className={cn("p-3.5 rounded-xl border text-xs space-y-2.5", isDark ? "bg-[#060b14] border-slate-800 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-900")}>
                   <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Recommended Solutions:</div>
                   <ul className="space-y-2 pl-4 list-disc text-xs font-medium leading-relaxed">
                     {Boolean(config.hasRefreshToken || config.gdriveRefreshToken || errorModal.error.includes("personal Google Drive")) ? (
