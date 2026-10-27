@@ -3,7 +3,7 @@
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { Server, Loader2, Database, ChevronRight, ChevronLeft, HardDrive, Cpu, Wallet, Network, Receipt, Globe, RefreshCw, Terminal, UploadCloud, Layers, Box, Cloud, Newspaper } from "lucide-react";
+import { Server, Loader2, Database, ChevronRight, ChevronLeft, HardDrive, Cpu, Wallet, Network, Receipt, Globe, RefreshCw, Terminal, UploadCloud, Layers, Box, Cloud, Newspaper, MessageSquare } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,7 @@ export default function DashboardOverview() {
   const [reservedIpsList, setReservedIpsList] = useState<any[]>([]);
   const [vpcList, setVpcList] = useState<any[]>([]);
   const [billingData, setBillingData] = useState<any>({ balance: 0, invoices: [] });
+  const [ticketsList, setTicketsList] = useState<any[]>([]);
   const [beritaList, setBeritaList] = useState<any[]>([]);
   const [bannersList, setBannersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,9 +61,10 @@ export default function DashboardOverview() {
       fetch("/api/user/reserved-ips").then(safeJson),
       fetch("/api/dashboard/vpc").then(safeJson),
       fetch("/api/announcements").then(safeJson),
-      fetch("/api/banners").then(safeJson)
+      fetch("/api/banners").then(safeJson),
+      fetch("/api/tickets").then(safeJson)
     ])
-      .then(([billingRes, cdnData, vpsData, k3sData, ipsData, vpcData, beritaData, bannersData]) => {
+      .then(([billingRes, cdnData, vpsData, k3sData, ipsData, vpcData, beritaData, bannersData, ticketsData]) => {
         if (billingRes?.success) setBillingData(billingRes.data);
         if (cdnData && !cdnData.error) setCdnUsage(cdnData);
         if (Array.isArray(vpsData)) setVpsList(vpsData);
@@ -71,6 +73,7 @@ export default function DashboardOverview() {
         if (Array.isArray(vpcData)) setVpcList(vpcData);
         if (Array.isArray(beritaData)) setBeritaList(beritaData);
         if (Array.isArray(bannersData)) setBannersList(bannersData);
+        if (ticketsData?.tickets && Array.isArray(ticketsData.tickets)) setTicketsList(ticketsData.tickets);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -81,6 +84,7 @@ export default function DashboardOverview() {
   const totalIps = reservedIpsList.length;
   const totalVpc = vpcList.length;
   const unpaidInvoices = billingData.invoices?.filter((i: any) => i.status === 'PENDING').length || 0;
+  const openTickets = ticketsList.filter((t: any) => t.status !== 'CLOSED' && t.status !== 'MERGED').length;
 
   const activeBanners = bannersList.filter(b => b.isActive && b.imageUrl);
   const newsList = beritaList;
@@ -324,6 +328,19 @@ export default function DashboardOverview() {
             </div>
             <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{unpaidInvoices}</p>
             <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Invoices pending payment</p>
+          </Link>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className={cn("border rounded-3xl relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-200 cursor-pointer", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md")}>
+          <Link href="/dashboard/tickets" className="block p-6 h-full w-full">
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <h3 className={cn("font-medium text-xs uppercase tracking-widest", isDark ? "text-slate-400" : "text-slate-500")}>Support Tickets</h3>
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center transition-all", isDark ? "bg-slate-800/80 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
+                <MessageSquare className="w-5 h-5" />
+              </div>
+            </div>
+            <p className={cn("text-4xl font-black tracking-tight relative z-10", isDark ? "text-white" : "text-slate-900")}>{openTickets}</p>
+            <p className={cn("text-xs mt-2 font-medium relative z-10", isDark ? "text-slate-400" : "text-slate-400")}>Open inquiries & requests</p>
           </Link>
         </motion.div>
       </div>
