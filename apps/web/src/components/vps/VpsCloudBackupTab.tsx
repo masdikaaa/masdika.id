@@ -1399,14 +1399,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                         <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                     </div>
-                    <div className={cn(
-                      "flex items-stretch rounded-lg border overflow-hidden transition-all focus-within:ring-1 focus-within:ring-cyan-500 focus-within:border-cyan-500",
-                      isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-300"
-                    )}>
-                      <span className={cn(
-                        "px-3 py-2 text-xs sm:text-sm font-mono font-bold flex items-center select-none border-r shrink-0",
-                        isDark ? "bg-slate-800/60 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-300"
-                      )}>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-mono text-xs sm:text-sm font-bold pointer-events-none select-none">
                         folders/
                       </span>
                       <input
@@ -1423,8 +1417,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           setConfig({ ...config, gdriveFolderId: val });
                         }}
                         className={cn(
-                          "w-full min-w-0 px-3 py-2 bg-transparent text-xs sm:text-sm font-mono font-medium focus:outline-none",
-                          isDark ? "text-white placeholder-slate-500" : "text-slate-950 placeholder-slate-400"
+                          "w-full pl-24 pr-3 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                         )}
                       />
                     </div>
@@ -1545,14 +1539,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           <ExternalLink className="w-3 h-3 shrink-0" />
                         </a>
                       </div>
-                      <div className={cn(
-                        "flex items-stretch rounded-xl border overflow-hidden transition-all focus-within:ring-1 focus-within:ring-cyan-500 focus-within:border-cyan-500",
-                        isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-300"
-                      )}>
-                        <span className={cn(
-                          "px-3.5 py-2.5 text-sm font-mono font-bold flex items-center select-none border-r shrink-0",
-                          isDark ? "bg-slate-800/60 text-slate-400 border-slate-800" : "bg-slate-100 text-slate-600 border-slate-300"
-                        )}>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-mono text-xs sm:text-sm font-bold pointer-events-none select-none">
                           folders/
                         </span>
                         <input
@@ -1569,8 +1557,8 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                             setConfig({ ...config, gdriveFolderId: val });
                           }}
                           className={cn(
-                            "w-full min-w-0 px-3.5 py-2.5 bg-transparent text-sm font-mono font-medium focus:outline-none",
-                            isDark ? "text-white placeholder-slate-500" : "text-slate-950 placeholder-slate-400"
+                            "w-full pl-24 pr-3.5 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                            isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                           )}
                         />
                       </div>
