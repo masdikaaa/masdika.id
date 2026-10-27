@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { Activity, Clock, ShieldAlert, Zap, Server, ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
@@ -92,7 +92,7 @@ export default function SLAPage() {
                       Uptime Guarantee
                     </div>
                     <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      99.9% Availability
+                      98.99% Availability
                     </div>
                   </div>
                 </div>
@@ -223,11 +223,11 @@ export default function SLAPage() {
               </div>
               <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
                 <p>
-                  Masdika provides a server and network connectivity uptime guarantee of <strong className="text-[var(--text-primary)] font-bold">99% per month</strong> for its entire ecosystem of services, including <strong className="text-[var(--text-primary)] font-bold">VPS, Managed K3s, CDN, and API Hub</strong>.
+                  Masdika provides a server and network connectivity uptime guarantee of <strong className="text-[var(--text-primary)] font-bold">98.99% per month</strong> for its entire ecosystem of services, including <strong className="text-[var(--text-primary)] font-bold">VPS, Managed K3s, CDN, and API Hub</strong>.
                 </p>
                 <ul className="list-disc pl-5 space-y-1.5 text-[var(--text-secondary)]">
                   <li>This guarantee excludes <em className="text-cyan-600 dark:text-cyan-400 font-medium">downtime</em> caused by previously announced routine maintenance.</li>
-                  <li>Uptime failures can be claimed if the <em className="text-cyan-600 dark:text-cyan-400 font-medium">downtime</em> exceeds the 1% tolerance limit in a single month and occurs within a single continuous timeframe (not an accumulation of micro-interruptions below reasonable limits).</li>
+                  <li>Uptime failures can be claimed if the <em className="text-cyan-600 dark:text-cyan-400 font-medium">downtime</em> exceeds the 1.01% tolerance limit in a single month and occurs within a single continuous timeframe (not an accumulation of micro-interruptions below reasonable limits).</li>
                 </ul>
               </div>
             </div>

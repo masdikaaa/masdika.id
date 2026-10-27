@@ -343,7 +343,7 @@ export default function FileCdnClient({
               { 
                 icon: ShieldCheck, 
                 title: "Enterprise Shielding", 
-                desc: "DDoS-mitigated infrastructure backed by redundant NVMe arrays and high-availability Anycast." 
+                desc: "DDoS-mitigated infrastructure backed by redundant enterprise SSD arrays and high-availability Anycast." 
               },
             ].map((pillar, i) => (
               <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">

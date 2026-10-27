@@ -607,42 +607,6 @@ export default function PaygMonitorPage() {
                   </Fragment>
                 ))}
               </tbody>
-              <tfoot className={cn("border-t-2 text-xs", isDark ? "bg-[#060b14] border-slate-700/80 text-white" : "bg-slate-100/90 border-slate-300 text-slate-900")}>
-                <tr>
-                  <td className="py-3.5 px-3 sm:px-4 font-bold">
-                    <div className="flex items-center gap-1.5">
-                      <span className="uppercase text-[11px] tracking-wider text-zinc-400">Total Keseluruhan</span>
-                      <span className="text-[10px] text-zinc-500 font-normal">({filteredCustomers.length} Users)</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-3 sm:px-4 text-right font-extrabold text-xs sm:text-sm">
-                    {formatRupiah(filteredCustomers.reduce((acc, c) => acc + c.balance, 0))}
-                  </td>
-                  <td className="py-3.5 px-3 sm:px-4 text-right font-extrabold text-xs sm:text-sm text-cyan-400 whitespace-nowrap">
-                    {formatRupiah(filteredCustomers.reduce((acc, c) => acc + c.totalHourlyBurn, 0))}<span className="text-[10px] font-normal text-zinc-400">/hr</span>
-                    <div className="text-[10px] font-normal text-zinc-500">
-                      ~{formatRupiah(filteredCustomers.reduce((acc, c) => acc + c.totalHourlyBurn, 0) * 720)}/bln
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-3 sm:px-4 text-center text-[10px] sm:text-xs text-zinc-400 font-medium">
-                    <span className="text-emerald-400 font-semibold">{sufficientCount} Healthy</span>
-                    {(lowCount + exhaustedCount) > 0 && (
-                      <span className="text-amber-400 ml-1.5 font-semibold">· {lowCount + exhaustedCount} Alert</span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-2 sm:px-3 text-center">
-                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full font-bold text-xs bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
-                      {filteredCustomers.reduce((acc, c) => acc + c.services.length, 0)}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 sm:px-4 text-right font-extrabold text-xs sm:text-sm text-emerald-400 whitespace-nowrap">
-                    {formatRupiah(filteredCustomers.reduce((acc, c) => acc + c.totalAccumulatedCost, 0))}
-                    <div className="text-[10px] font-normal text-zinc-500">
-                      Akumulasi Siklus Ini
-                    </div>
-                  </td>
-                </tr>
-              </tfoot>
             </table>
             {filteredCustomers.length > customersPerPage && (
               <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>

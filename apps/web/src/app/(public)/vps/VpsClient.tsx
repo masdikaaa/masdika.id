@@ -390,7 +390,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                       Availability
                     </div>
                     <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      99.99% Uptime SLA
+                      98.99% Uptime SLA
                     </div>
                   </div>
                 </div>
@@ -424,7 +424,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
-              { icon: Cloud, title: "99.99% Uptime SLA", desc: "Automated failover with redundant power and enterprise network backbone." },
+              { icon: Cloud, title: "98.99% Uptime SLA", desc: "Automated failover with redundant power and enterprise network backbone." },
               { icon: ShieldCheck, title: "Enterprise Anti-DDoS", desc: "Always-on multi-layered traffic scrubbing to protect mission-critical apps." },
               { icon: Terminal, title: "Full Root & VNC", desc: "Unrestricted root SSH access plus browser-based out-of-band VNC console." },
               { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX routing." },
@@ -469,7 +469,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                   {[
                     "Dual Socket Dell PowerEdge R630 Enterprise Servers",
                     "2x Intel Xeon E5-2673v4 High-Frequency Processors",
-                    "Choose between Enterprise NVMe/SATA SSD or SAS HDD",
+                    "Choose between Enterprise SATA SSD or SAS HDD",
                     "500Mbps High-Throughput Shared Local Bandwidth",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
@@ -526,7 +526,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-primary)]">
-                      99.99% Network Availability
+                      98.99% Network Availability
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       Carrier-neutral backbone with enterprise reliability
@@ -733,7 +733,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               { icon: Zap, title: "SSD & HDD Tiers", desc: "Choose high-speed SSD for databases or economical HDD for large backup stores." },
               { icon: ShieldCheck, title: "Automated Anti-DDoS", desc: "Carrier-level DDoS mitigation protecting all public-facing services." },
               { icon: Terminal, title: "SSH & VNC Console", desc: "Out-of-band console access directly from your browser even if network fails." },
-              { icon: Cloud, title: "99.99% Availability", desc: "Fault-tolerant infrastructure designed for mission-critical uptime." },
+              { icon: Cloud, title: "98.99% Availability", desc: "Fault-tolerant infrastructure designed for mission-critical uptime." },
               { icon: TrendingUp, title: "Seamless Scaling", desc: "Dynamically increase CPU, RAM, or storage anytime without data loss." },
               { icon: Network, title: "Virtual Private Cloud", desc: "Isolated internal network topology for internal service communication." },
               { icon: Server, title: "VPC Peering", desc: "Connect instances privately with zero bandwidth egress charges." },

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -54,7 +54,7 @@ const API_HUB_STATS = [
   { value: "Unlimited", label: "API KEYS" },
   { value: "<10ms", label: "MEDIAN TTFB" },
   { value: "Redis", label: "EDGE CACHING" },
-  { value: "99.99%", label: "UPTIME SLA" },
+  { value: "98.99%", label: "UPTIME SLA" },
 ];
 
 const API_HUB_FAQS = [
@@ -299,7 +299,7 @@ export default function ApiHubClient({
                       High Availability
                     </div>
                     <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      99.99% Uptime SLA
+                      98.99% Uptime SLA
                     </div>
                   </div>
                 </div>
@@ -840,7 +840,7 @@ export default function ApiHubClient({
                           <li className="flex items-start gap-3">
                             <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
                             <span className="text-sm text-[var(--text-primary)] font-medium">
-                              99.99% Uptime Guarantee
+                              98.99% Uptime Guarantee
                             </span>
                           </li>
                           <li className="flex items-start gap-3">

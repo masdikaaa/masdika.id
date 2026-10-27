@@ -362,7 +362,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             value={formData.keyResults}
             onChange={handleChange}
             rows={5}
-            placeholder="99.99% Uptime|Achieved high availability across multi-AZ deployments.&#10;80% Faster Deployments|Reduced deployment time from weeks to hours." 
+            placeholder="98.99% Uptime|Achieved high availability across multi-AZ deployments.&#10;80% Faster Deployments|Reduced deployment time from weeks to hours." 
             className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
           <p className="text-xs font-medium text-zinc-500">Separate title and description with <code className={cn("px-1.5 py-0.5 rounded font-mono text-xs border", isDark ? "bg-slate-800/60 text-cyan-400 border-slate-700" : "bg-slate-100 text-cyan-700 border-slate-200")}>|</code> character, press Enter for new result.</p>

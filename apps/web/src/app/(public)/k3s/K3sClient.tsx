@@ -350,7 +350,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-primary)]">
-                      99.99% Cluster Availability
+                      98.99% Cluster Availability
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       Multi-master control plane with automatic node failover

@@ -81,7 +81,7 @@ export function EnterpriseInfraBanner() {
                 </span>
               </div>
               <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
-                Engineered with genuine enterprise processors & carrier-grade routing for 99.99% uptime.
+                Engineered with genuine enterprise processors & carrier-grade routing for 98.99% uptime.
               </p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export function EnterpriseInfraSidebarCard() {
 
       <div className={cn("pt-2.5 border-t flex items-center justify-between text-[10px] font-medium", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-500")}>
         <span>Sidoarjo DC • 1 Gbps</span>
-        <span className="text-emerald-400 font-bold">99.99% SLA</span>
+        <span className="text-emerald-400 font-bold">98.99% SLA</span>
       </div>
     </div>
   );

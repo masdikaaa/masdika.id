@@ -410,7 +410,7 @@ const PROMO_TEMPLATES = [
         Halo <strong>{name}</strong>,
       </p>
       <p style="font-size: 14px; color: #475569; line-height: 1.65; margin: 0 0 20px;">
-        Biar makin spesial, kami menghadirkan promo diskon eksklusif untuk layanan Cloud VPS NVMe, Dedicated IP, dan solusi infrastruktur digital terbaik untuk proyek dan bisnismu!
+        Biar makin spesial, kami menghadirkan promo diskon eksklusif untuk layanan Cloud VPS SSD, Dedicated IP, dan solusi infrastruktur digital terbaik untuk proyek dan bisnismu!
       </p>
 
       <!-- Coupon Voucher Box -->
@@ -423,7 +423,7 @@ const PROMO_TEMPLATES = [
       <!-- Feature Bullet Points -->
       <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #334155; margin: 24px 0; font-family: ${FONT_STACK};">
         <tr>
-          <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">⚡ <strong style="color: #0f172a;">Performa Tinggi:</strong> Dedicated vCPU AMD EPYC & Storage Enterprise NVMe</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">⚡ <strong style="color: #0f172a;">Performa Tinggi:</strong> Dedicated vCPU Intel Xeon & Storage Enterprise SSD</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">🌐 <strong style="color: #0f172a;">Jaringan Indonesia:</strong> Port Speed hingga 1000 Mbps peering langsung ke OpenIXP</td>
@@ -466,7 +466,7 @@ const PROMO_TEMPLATES = [
     <div style="padding: 35px 30px; font-family: ${FONT_STACK};">
       <p style="font-size: 16px; color: #1e293b; margin-top: 0; font-weight: 600;">Hi <strong>{name}</strong>,</p>
       <p style="font-size: 15px; color: #334155; line-height: 1.65;">
-        We're thrilled to announce an exclusive limited-time promotion on our Enterprise Proxmox Cloud VPS. Upgrade your servers today and experience blazing-fast NVMe storage, dedicated vCPU performance, and flexible bandwidth speed tiers up to 1000 Mbps!
+        We're thrilled to announce an exclusive limited-time promotion on our Enterprise Proxmox Cloud VPS. Upgrade your servers today and experience blazing-fast SSD storage, dedicated vCPU performance, and flexible bandwidth speed tiers up to 1000 Mbps!
       </p>
 
       <!-- Promo Box -->

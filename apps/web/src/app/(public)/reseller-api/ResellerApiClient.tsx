@@ -64,7 +64,7 @@ const RESELLER_TERMINAL_LOGS = [
   { time: "00:01", module: "CONFIG", message: "POST /api/v1/instances (plan: vps-1gb, os: ubuntu-22.04)" },
   { time: "00:02", module: "AUTH", message: "Bearer token validated. Master deposit balance deducted." },
   { time: "00:03", module: "REGION", message: "Allocating KVM hypervisor slot in Sidoarjo Data Center..." },
-  { time: "00:05", module: "STORAGE", message: "Cloning OS image template to enterprise NVMe storage..." },
+  { time: "00:05", module: "STORAGE", message: "Cloning OS image template to enterprise SSD storage..." },
   { time: "00:07", module: "NET", message: "Attaching vmbr1 network bridge, configuring NAT & firewall..." },
   { time: "00:09", module: "BOOT", message: "Powering on virtual machine and initial health checks..." },
   { time: "00:10", module: "READY", message: '{"success":true,"status":"RUNNING","id":142}', isCommand: true },
@@ -73,7 +73,7 @@ const RESELLER_TERMINAL_LOGS = [
 const RESELLER_TERMINAL_STATS = [
   { value: "< 30s", label: "DEPLOY SPEED" },
   { value: "100%", label: "WHITE-LABEL" },
-  { value: "NVMe", label: "STORAGE" },
+  { value: "SSD/HDD", label: "STORAGE" },
   { value: "KVM", label: "HYPERVISOR" },
 ];
 
@@ -754,14 +754,14 @@ export default function ResellerApiClient() {
                   Enterprise Hardware Behind Your Custom Brand
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
-                  Deliver uncompromised cloud performance to your end clients. All virtual machines are backed by enterprise-grade Dell PowerEdge R630 servers, Intel Xeon processors, and high-IOPS NVMe/SSD storage located in Sidoarjo Datacenter.
+                  Deliver uncompromised cloud performance to your end clients. All virtual machines are backed by enterprise-grade Dell PowerEdge R630 servers, Intel Xeon processors, and high-IOPS SSD/HDD storage located in Sidoarjo Datacenter.
                 </p>
 
                 <div className="space-y-3.5">
                   {[
                     "Dell PowerEdge R630 Dual-Socket Hardware Architecture",
                     "Intel Xeon E5-2673v4 High-Thread Processors",
-                    "Enterprise NVMe & SSD Storage for High-Throughput I/O",
+                    "Enterprise SSD & SAS HDD Storage for High-Throughput I/O",
                     "Direct IIX & Local Routing with Under 20ms Latency across Indonesia",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
@@ -818,7 +818,7 @@ export default function ResellerApiClient() {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-primary)]">
-                      99.99% Network Availability
+                      98.99% Network Availability
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       Carrier-neutral backbone with enterprise reliability

@@ -390,7 +390,7 @@ export function AntiDdosWorkflowSection({ mode = "vps" }: AntiDdosWorkflowSectio
 
             <div className="p-3.5 sm:p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col justify-center">
               <span className="text-xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400 mb-0.5 sm:mb-1">
-                99.99%
+                98.99%
               </span>
               <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 Sidoarjo DC SLA

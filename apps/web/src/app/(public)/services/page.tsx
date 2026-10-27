@@ -215,7 +215,7 @@ export default function ServicesPage() {
                       SLA Guarantee
                     </div>
                     <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      99.9% Uptime
+                      98.99% Uptime
                     </div>
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function ServicesPage() {
                           </Badge>
                         )}
                         <Badge variant="success" size="sm" dot>
-                          99.9% SLA
+                          98.99% SLA
                         </Badge>
                       </div>
                     </div>

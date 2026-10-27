@@ -177,7 +177,7 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
               <span>Sub-20ms national latency across Indonesia</span>
             </div>
             <div className="flex items-center gap-3 font-mono font-medium shrink-0">
-              <span>99.99% Hardware SLA</span>
+              <span>98.99% Hardware SLA</span>
               <span>•</span>
               <span className="text-cyan-600 dark:text-cyan-400 font-bold">Anti-DDoS Shield Active</span>
             </div>
