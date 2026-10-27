@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Server, Play, Square, Power, RotateCcw, Activity, Cpu,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
-  ArrowLeft, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info, CloudUpload
+  ArrowLeft, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,6 @@ import { Select } from "@/components/ui/Select";
 import { useTheme } from "@/components/ThemeProvider";
 import { Pagination } from "@/components/ui/Pagination";
 import { formatRupiah } from "@/lib/billing";
-import { VpsCloudBackupTab } from "@/components/vps/VpsCloudBackupTab";
 
 const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
   const os = osTemplate?.toLowerCase() || "";
@@ -1532,7 +1531,6 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               { id: "install", label: "Install", icon: HardDrive },
               { id: "backups", label: "Backups", icon: ShieldCheck },
               { id: "snapshots", label: "Snapshots", icon: Copy },
-              { id: "cloud-backup", label: "Cloud Backup", icon: CloudUpload },
               { id: "tasks", label: "Tasks And Logs", icon: Terminal }
             ].map(tab => (
               <button
@@ -3271,11 +3269,6 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* CLOUD BACKUP TAB */}
-            {activeTab === "cloud-backup" && (
-              <VpsCloudBackupTab vps={vps} isDark={isDark} />
             )}
 
             {/* TASKS TAB */}

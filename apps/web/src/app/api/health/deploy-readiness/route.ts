@@ -28,7 +28,6 @@ export async function GET() {
       activeJobsList,
       activeVpcList,
       activeSubList,
-      activeCloudBackups,
       activeServer
     ] = await Promise.all([
       // 1. VPS currently ordering, provisioning, installing K3s, or reinstalling
@@ -79,15 +78,7 @@ export async function GET() {
         },
         select: { id: true, planId: true, status: true, updatedAt: true }
       }),
-      // 6. Active cloud backups currently creating snapshot or streaming to cloud (Drive/S3/R2)
-      prisma.vpsCloudBackupRecord.findMany({
-        where: {
-          status: { in: ["PREPARING", "CREATING_BACKUP", "UPLOADING_TO_CLOUD"] },
-          updatedAt: { gte: activeCutoff }
-        },
-        select: { id: true, vpsId: true, filename: true, status: true, progress: true, updatedAt: true }
-      }),
-      // 7. Active Proxmox server configuration
+      // 6. Active Proxmox server configuration
       prisma.proxmoxServer.findFirst({
         where: { isActive: true },
         select: { host: true, tokenId: true, tokenSecret: true }
@@ -149,7 +140,6 @@ export async function GET() {
       activeJobsList.length +
       activeVpcList.length +
       activeSubList.length +
-      activeCloudBackups.length +
       activeProxmoxTasks.length;
 
     const isSafeToDeploy = totalActive === 0;
@@ -183,12 +173,6 @@ export async function GET() {
         activeSubscriptions: activeSubList.map((s) => ({
           subscriptionId: s.id,
           planId: s.planId
-        })),
-        activeCloudBackups: activeCloudBackups.map((b) => ({
-          recordId: b.id,
-          vpsId: b.vpsId,
-          status: b.status,
-          progress: b.progress
         })),
         activeProxmoxTasks: activeProxmoxTasks.map((t) => ({
           type: t.type,
