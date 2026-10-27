@@ -522,8 +522,8 @@ export default function MyVpsPage() {
                               className={cn(
                                 "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
                                 isDark 
-                                  ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" 
-                                  : "bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border-cyan-300"
+                                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" 
+                                  : "bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border-emerald-300"
                               )}
                               title="Start"
                             >
@@ -572,7 +572,12 @@ export default function MyVpsPage() {
                               <button
                                 onClick={() => openConsole(vps.id)}
                                 disabled={consoleLoading === vps.id || vps.status === 'TERMINATED'}
-                                className="flex items-center gap-1.5 p-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-xs"
+                                className={cn(
+                                  "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
+                                  isDark
+                                    ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
+                                    : "bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border-cyan-300"
+                                )}
                                 title="Console"
                               >
                                 {consoleLoading === vps.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Terminal className="w-4 h-4" />}

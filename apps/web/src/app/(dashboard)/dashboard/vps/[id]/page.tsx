@@ -1448,47 +1448,74 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* Action Buttons */}
             <div className="flex flex-wrap md:flex-nowrap gap-2 z-10 w-full md:w-auto mt-4 md:mt-0 justify-start sm:justify-end">
               <button
-                onClick={() => handleAction("start")} disabled={actionLoading || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm",
-                  isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20 font-medium" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 font-bold"
+                onClick={() => handleAction("start")}
+                disabled={actionLoading || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+                  isDark
+                    ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20 focus-visible:ring-emerald-500/50"
+                    : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 focus-visible:ring-emerald-500"
                 )}
                 title="Start VPS"
               >
-                <Play className="w-4 h-4" /> <span className="hidden sm:inline">Start</span>
+                <Play className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Start</span>
               </button>
               <button
-                onClick={() => handleAction("shutdown")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm",
-                  isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20 font-medium" : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300 font-bold"
+                onClick={() => handleAction("shutdown")}
+                disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+                  isDark
+                    ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20 focus-visible:ring-amber-500/50"
+                    : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300 focus-visible:ring-amber-500"
                 )}
                 title="Graceful Shutdown"
               >
-                <Power className="w-4 h-4" /> <span className="hidden sm:inline">Shutdown</span>
+                <Power className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Shutdown</span>
               </button>
               <button
-                onClick={() => handleAction("stop")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm",
-                  isDark ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 font-medium" : "bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300 font-bold"
+                onClick={() => handleAction("stop")}
+                disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+                  isDark
+                    ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 focus-visible:ring-rose-500/50"
+                    : "bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300 focus-visible:ring-rose-500"
                 )}
                 title="Force Stop"
               >
-                <Square className="w-4 h-4" /> <span className="hidden sm:inline">Stop</span>
+                <Square className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Stop</span>
               </button>
               <button
-                onClick={() => handleAction("reboot")} disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
-                className={cn("flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm",
-                  isDark ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20 font-medium" : "bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-300 font-bold"
+                onClick={() => handleAction("reboot")}
+                disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+                  isDark
+                    ? "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border-sky-500/20 focus-visible:ring-sky-500/50"
+                    : "bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-300 focus-visible:ring-sky-500"
                 )}
                 title="Restart"
               >
-                <RotateCcw className="w-4 h-4" /> <span className="hidden sm:inline">Restart</span>
+                <RotateCcw className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Restart</span>
               </button>
               <button
-                onClick={() => handleAction("console")} disabled={actionLoading || vps.status === 'TERMINATED' || vps.status === 'SUSPENDED'}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
+                onClick={() => handleAction("console")}
+                disabled={actionLoading || vps.status === 'TERMINATED' || vps.status === 'SUSPENDED'}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+                  isDark
+                    ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20 focus-visible:ring-cyan-500/50"
+                    : "bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border-cyan-300 focus-visible:ring-cyan-500"
+                )}
                 title="NoVNC Console"
               >
-                <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Console</span>
+                <Terminal className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Console</span>
               </button>
             </div>
           </div>

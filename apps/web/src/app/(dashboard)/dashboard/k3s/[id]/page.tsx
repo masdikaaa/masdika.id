@@ -988,7 +988,7 @@ export default function K3sDetailPage() {
                           disabled={isRunning || isTerminated || isSuspended}
                           title="Start Cluster"
                           className={cn("p-2.5 rounded-xl transition-all border shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
-                            isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                            isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
                           )}
                         >
                           <Play className="w-4 h-4" />
@@ -1027,7 +1027,9 @@ export default function K3sDetailPage() {
                           onClick={() => openConsole(master.id)}
                           disabled={isTerminated}
                           title="Open Console"
-                          className="p-2.5 rounded-lg transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-semibold"
+                          className={cn("p-2.5 rounded-xl transition-all border shadow-sm disabled:opacity-40 disabled:cursor-not-allowed",
+                            isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                          )}
                         >
                           <Terminal className="w-4 h-4" />
                         </button>
