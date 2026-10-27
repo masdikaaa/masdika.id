@@ -30,8 +30,8 @@ const COUNTRY_OPTIONS = [
   { value: "OTHER", label: "🌐 Other" },
 ];
 
-const inputClassDark = 'w-full bg-[#060b14] border border-slate-800 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-sm';
-const inputClassLight = 'w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
+const inputClassDark = 'w-full max-w-full min-w-0 box-border bg-[#060b14] border border-slate-800 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-sm';
+const inputClassLight = 'w-full max-w-full min-w-0 box-border bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
 const labelClassDark = 'block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2';
 const labelClassLight = 'block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2';
 
@@ -580,11 +580,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <motion.div className="space-y-6 md:space-y-8 pb-24 sm:pb-16 max-w-full overflow-x-hidden" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div className="space-y-6 md:space-y-8 pb-24 sm:pb-16 w-full max-w-full min-w-0 overflow-x-hidden box-border" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-4 sm:p-7 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <motion.div variants={itemVariants} className={cn("w-full max-w-full min-w-0 relative overflow-hidden rounded-2xl sm:rounded-3xl border p-4 sm:p-7 md:p-8 group shadow-sm box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10">
+        <div className="relative z-10 w-full min-w-0">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 sm:mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
             <Settings className="w-3.5 h-3.5" /> Account Management
           </div>
@@ -597,17 +597,17 @@ export default function SettingsPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-8 items-start">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-8 items-stretch md:items-start w-full max-w-full min-w-0">
         {/* Navigation Sidebar (Sticky on desktop) */}
-        <div className="w-full md:w-60 shrink-0 md:sticky md:top-24 z-10">
-          <div className={cn("rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-md grid grid-cols-2 md:flex md:flex-col gap-1.5 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="w-full max-w-full md:w-60 shrink-0 md:sticky md:top-24 z-10 min-w-0">
+          <div className={cn("w-full max-w-full rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-md grid grid-cols-2 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as 'profile' | 'security')}
-                  className={`relative flex items-center justify-center md:justify-start gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl transition-all text-left shrink-0 w-full border cursor-pointer ${
+                  className={`relative flex items-center justify-center md:justify-start gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl transition-all text-left shrink-0 w-full min-w-0 border cursor-pointer ${
                     isActive
                       ? (isDark ? 'bg-slate-800/90 text-white border-slate-700 shadow-sm' : 'bg-slate-100 text-slate-900 border-slate-300 shadow-sm')
                       : (isDark ? 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50')
@@ -627,19 +627,19 @@ export default function SettingsPage() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 w-full max-w-full min-w-0">
           <AnimatePresence mode="wait">
             {activeTab === 'profile' && (
               <motion.div
                 key="profile"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6 w-full max-w-full min-w-0"
               >
                 {/* Profile Picture Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <Camera className="w-5 h-5" />
@@ -702,7 +702,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Personal Info Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <User className="w-5 h-5" />
@@ -748,7 +748,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Billing Info Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                       <Building2 className="w-5 h-5" />
@@ -843,14 +843,14 @@ export default function SettingsPage() {
             {activeTab === 'security' && (
               <motion.div
                 key="security"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6 w-full max-w-full min-w-0"
               >
                 {/* Change Password Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
@@ -934,13 +934,13 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   {/* Subtle Accent Glow */}
                   <div className={cn("absolute -top-24 -right-24 w-60 h-60 rounded-full blur-3xl pointer-events-none", twoFactorEnabled ? "bg-emerald-500/10" : "bg-cyan-500/10")} />
 
                   {/* Header */}
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 relative z-10 pb-4 border-b transition-colors", isDark ? "border-slate-800/80" : "border-slate-100")}>
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className={cn("flex flex-col sm:flex-row sm:items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 relative z-10 pb-4 border-b transition-colors w-full min-w-0", isDark ? "border-slate-800/80" : "border-slate-100")}>
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1 w-full">
                       <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0 transition-colors", twoFactorEnabled ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700") : (isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600"))}>
                         {twoFactorEnabled ? <ShieldCheck className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
                       </div>
@@ -969,7 +969,7 @@ export default function SettingsPage() {
 
                   {/* Main Authenticator Row (Locked Horizontal Alignment on ALL screens) */}
                   <div className={cn(
-                    "relative z-10 rounded-2xl border p-4 sm:p-5 flex items-center justify-between gap-4 mb-5 transition-all shadow-xs",
+                    "relative z-10 rounded-2xl border p-3.5 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 mb-5 transition-all shadow-xs w-full max-w-full min-w-0 box-border",
                     twoFactorEnabled
                       ? (isDark ? "bg-[#060b14] border-emerald-500/30" : "bg-white border-emerald-200 shadow-sm")
                       : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
@@ -1097,9 +1097,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security & Login History Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10 w-full min-w-0">
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1 w-full">
                       <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
                         <History className="w-5 h-5" />
                       </div>
@@ -1109,7 +1109,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap w-full sm:w-auto">
                       {loginLogs.length > 0 && (
                         <button
                           type="button"

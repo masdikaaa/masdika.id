@@ -479,8 +479,8 @@ export default function DashboardLayoutClient({
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
-          <div className="w-full p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex-1 min-w-0 w-full max-w-full overflow-y-auto overflow-x-hidden relative">
+          <div className="w-full max-w-full min-w-0 p-3.5 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 box-border">
             {children}
           </div>
         </div>
