@@ -42,6 +42,7 @@ export default function AdminAnnouncementsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   const [isLegacyHtml, setIsLegacyHtml] = useState(false);
    
@@ -362,8 +363,6 @@ export default function AdminAnnouncementsPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    const confirm = window.confirm(`Are you sure you want to delete ${selectedIds.length} items?`);
-    if (!confirm) return;
 
     setIsBulkDeleting(true);
     try {
@@ -371,6 +370,7 @@ export default function AdminAnnouncementsPage() {
       await Promise.all(selectedIds.map(id => fetch(`${base}/${id}`, { method: 'DELETE' })));
       toast.success(`${selectedIds.length} items deleted successfully`);
       setSelectedIds([]);
+      setShowBulkDeleteModal(false);
       if (activeTab === 'banner') fetchBanners();
       else fetchAnnouncements();
     } catch (err) {
@@ -529,7 +529,7 @@ export default function AdminAnnouncementsPage() {
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
           {selectedIds.length > 0 && (
             <button
-              onClick={handleBulkDelete}
+              onClick={() => setShowBulkDeleteModal(true)}
               disabled={isBulkDeleting}
               className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-colors border flex items-center gap-2", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}
             >
@@ -687,6 +687,18 @@ export default function AdminAnnouncementsPage() {
         confirmText="Delete"
         variant="danger"
         isLoading={isDeleting}
+      />
+
+      {/* Bulk Delete Modal */}
+      <ConfirmModal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+        onConfirm={handleBulkDelete}
+        title={activeTab === 'banner' ? `Delete ${selectedIds.length} Banners?` : `Delete ${selectedIds.length} Announcements?`}
+        description={`Are you sure you want to delete ${selectedIds.length} selected ${activeTab === 'banner' ? 'banners' : 'announcements'}? This action cannot be undone.`}
+        confirmText={`Delete (${selectedIds.length})`}
+        variant="danger"
+        isLoading={isBulkDeleting}
       />
 
       <ConfirmModal

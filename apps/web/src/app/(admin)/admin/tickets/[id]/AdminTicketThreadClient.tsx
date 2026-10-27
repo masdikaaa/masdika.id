@@ -120,7 +120,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
       const newFiles = Array.from(e.dataTransfer.files);
       const totalSize = [...attachments, ...newFiles].reduce((sum, file) => sum + file.size, 0);
       if (totalSize > 10 * 1024 * 1024) {
-        alert('Total attachments size exceeds 10MB limit');
+        toast.error('Total attachments size exceeds 10MB limit');
         return;
       }
       setAttachments(prev => [...prev, ...newFiles]);
@@ -167,7 +167,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
 
     } catch (err) {
       console.error(err);
-      alert('Action failed');
+      toast.error('Action failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -193,7 +193,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
       setShowMergeModal(false);
       mutate();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message || 'Merge failed');
     } finally {
       setIsMerging(false);
     }
@@ -209,7 +209,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
       }
       router.push('/admin/tickets');
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message || 'Delete failed');
       setIsDeleting(false);
     }
   };

@@ -67,6 +67,8 @@ export default function AdminVouchersPage() {
   const [showRemoveImageModal, setShowRemoveImageModal] = useState(false);
   const [selectedVoucherIds, setSelectedVoucherIds] = useState<number[]>([]);
   const [isBulkVoucherDeleting, setIsBulkVoucherDeleting] = useState(false);
+  const [showBulkVoucherDeleteModal, setShowBulkVoucherDeleteModal] = useState(false);
+  const [showBulkPromoDeleteModal, setShowBulkPromoDeleteModal] = useState(false);
   const [editingVoucherId, setEditingVoucherId] = useState<number | null>(null);
   const [newVoucher, setNewVoucher] = useState({
     code: "",
@@ -166,14 +168,13 @@ export default function AdminVouchersPage() {
 
   const handleBulkVoucherDelete = async () => {
     if (selectedVoucherIds.length === 0) return;
-    const confirm = window.confirm(`Are you sure you want to delete ${selectedVoucherIds.length} vouchers?`);
-    if (!confirm) return;
 
     setIsBulkVoucherDeleting(true);
     try {
       await Promise.all(selectedVoucherIds.map(id => fetch(`/api/admin/vouchers/${id}`, { method: 'DELETE' })));
       toast.success(`${selectedVoucherIds.length} vouchers deleted successfully`);
       setSelectedVoucherIds([]);
+      setShowBulkVoucherDeleteModal(false);
       fetchVouchers();
     } catch (err) {
       toast.error("Failed to delete some vouchers");
@@ -358,14 +359,13 @@ export default function AdminVouchersPage() {
 
   const handleBulkPromoDelete = async () => {
     if (selectedPromoIds.length === 0) return;
-    const confirm = window.confirm(`Are you sure you want to delete ${selectedPromoIds.length} promos?`);
-    if (!confirm) return;
 
     setIsBulkPromoDeleting(true);
     try {
       await Promise.all(selectedPromoIds.map(id => fetch(`/api/admin/promos/${id}`, { method: 'DELETE' })));
       toast.success(`${selectedPromoIds.length} promos deleted successfully`);
       setSelectedPromoIds([]);
+      setShowBulkPromoDeleteModal(false);
       fetchPromos();
     } catch (err) {
       toast.error("Failed to delete some promos");
@@ -510,7 +510,7 @@ export default function AdminVouchersPage() {
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               {selectedVoucherIds.length > 0 && (
                 <button
-                  onClick={handleBulkVoucherDelete}
+                  onClick={() => setShowBulkVoucherDeleteModal(true)}
                   disabled={isBulkVoucherDeleting}
                   className={cn("font-bold px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors w-full sm:w-auto disabled:opacity-50 border", isDark ? "bg-red-500/20 border-red-500/30 hover:bg-red-500/30 hover:text-red-300 text-red-400" : "bg-red-50 border-red-200 hover:bg-red-100 hover:text-red-800 text-red-700")}
                 >
@@ -643,7 +643,7 @@ export default function AdminVouchersPage() {
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               {selectedPromoIds.length > 0 && (
                 <button
-                  onClick={handleBulkPromoDelete}
+                  onClick={() => setShowBulkPromoDeleteModal(true)}
                   disabled={isBulkPromoDeleting}
                   className={cn("font-bold px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors w-full sm:w-auto disabled:opacity-50 border", isDark ? "bg-red-500/20 border-red-500/30 hover:bg-red-500/30 hover:text-red-300 text-red-400" : "bg-red-50 border-red-200 hover:bg-red-100 hover:text-red-800 text-red-700")}
                 >
@@ -982,58 +982,49 @@ export default function AdminVouchersPage() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {deletingVoucherId !== null && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className="p-6">
-              <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete Voucher</h3>
-              <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Are you sure you want to delete this voucher? This action cannot be undone.</p>
-
-              <div className="flex items-center gap-3 mt-6">
-                <button
-                  onClick={() => setDeletingVoucherId(null)}
-                  className={cn("flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-colors border", isDark ? "border-slate-800 text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeleteVoucher}
-                  className="flex-1 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-medium transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deletingVoucherId !== null}
+        onClose={() => setDeletingVoucherId(null)}
+        onConfirm={confirmDeleteVoucher}
+        title="Delete Voucher"
+        description="Are you sure you want to delete this voucher? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
 
       {/* Delete Promo Confirmation Modal */}
-      {deletingPromoId !== null && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className="p-6">
-              <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete Promo</h3>
-              <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Are you sure you want to delete this promo? This action cannot be undone.</p>
+      <ConfirmModal
+        isOpen={deletingPromoId !== null}
+        onClose={() => setDeletingPromoId(null)}
+        onConfirm={confirmDeletePromo}
+        title="Delete Promo"
+        description="Are you sure you want to delete this promo? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
 
-              <div className="flex items-center gap-3 mt-6">
-                <button
-                  onClick={() => setDeletingPromoId(null)}
-                  className={cn("flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-colors border", isDark ? "border-slate-800 text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeletePromo}
-                  className="flex-1 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-medium transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Bulk Delete Modals */}
+      <ConfirmModal
+        isOpen={showBulkVoucherDeleteModal}
+        onClose={() => setShowBulkVoucherDeleteModal(false)}
+        onConfirm={handleBulkVoucherDelete}
+        title={`Delete ${selectedVoucherIds.length} Vouchers?`}
+        description={`Are you sure you want to delete ${selectedVoucherIds.length} selected vouchers? This action cannot be undone.`}
+        confirmText={`Delete (${selectedVoucherIds.length})`}
+        variant="danger"
+        isLoading={isBulkVoucherDeleting}
+      />
+
+      <ConfirmModal
+        isOpen={showBulkPromoDeleteModal}
+        onClose={() => setShowBulkPromoDeleteModal(false)}
+        onConfirm={handleBulkPromoDelete}
+        title={`Delete ${selectedPromoIds.length} Promos?`}
+        description={`Are you sure you want to delete ${selectedPromoIds.length} selected promos? This action cannot be undone.`}
+        confirmText={`Delete (${selectedPromoIds.length})`}
+        variant="danger"
+        isLoading={isBulkPromoDeleting}
+      />
 
       <ConfirmModal
         isOpen={showRemoveImageModal}

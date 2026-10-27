@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { X, Server, Save, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { Select } from "@/components/ui/Select";
+import { toast } from "sonner";
 
 interface ImportVpsModalProps {
   isOpen: boolean;
@@ -83,10 +84,10 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
         onSuccess();
         onClose();
       } else {
-        alert(data.error || "Gagal mengimport VPS");
+        toast.error(data.error || "Gagal mengimport VPS");
       }
     } catch (error: any) {
-      alert("Terjadi kesalahan sistem saat menghubungi server.");
+      toast.error("Terjadi kesalahan sistem saat menghubungi server.");
     } finally {
       setLoading(false);
     }

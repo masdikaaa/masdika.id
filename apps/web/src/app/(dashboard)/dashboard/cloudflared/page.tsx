@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/ui/Select";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 type Step = 1 | 2 | 3;
 type OS = "windows" | "debian" | "redhat" | "docker";
@@ -234,6 +235,7 @@ export default function CloudflaredPage() {
   const [tunnelsLoading, setTunnelsLoading] = useState(true);
   const [deleteTunnelModal, setDeleteTunnelModal] = useState<Tunnel | null>(null);
   const [deleteTunnelLoading, setDeleteTunnelLoading] = useState(false);
+  const [deletingRouteRule, setDeletingRouteRule] = useState<any | null>(null);
 
   // Create tunnel flow
   const [showCreateTunnel, setShowCreateTunnel] = useState(false);
@@ -527,8 +529,6 @@ export default function CloudflaredPage() {
   };
 
   const handleDeleteRoute = async (rule: any) => {
-    if (!confirm(`Are you sure you want to delete the route for ${rule.hostname}?`)) return;
-    
     const deletePromise = fetch(`/api/tunnels/route?tunnelId=${tunnelId}&hostname=${rule.hostname}&path=${encodeURIComponent(rule.path || "")}`, {
       method: "DELETE"
     }).then(async (res) => {
@@ -824,7 +824,7 @@ export default function CloudflaredPage() {
                             <button onClick={() => handleEditRoute(rule)} className={cn("p-2 rounded-lg transition-colors", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-cyan-400" : "hover:bg-slate-200 text-slate-500 hover:text-cyan-600")} title="Edit route">
                               <Pencil className="w-4 h-4" />
                             </button>
-                            <button onClick={() => handleDeleteRoute(rule)} className={cn("p-2 rounded-lg transition-colors", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-red-400" : "hover:bg-slate-200 text-slate-500 hover:text-red-600")} title="Delete route">
+                            <button onClick={() => setDeletingRouteRule(rule)} className={cn("p-2 rounded-lg transition-colors", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-red-400" : "hover:bg-slate-200 text-slate-500 hover:text-red-600")} title="Delete route">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -1509,62 +1509,45 @@ export default function CloudflaredPage() {
       )}
 
       {/* ==================== DELETE DOMAIN MODAL ==================== */}
-      {deleteDomainModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Remove Domain</h3>
-                <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>This will remove the domain from Cloudflare.</p>
-              </div>
-            </div>
-            <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Are you sure you want to remove <strong className={cn(isDark ? "text-white" : "text-slate-900")}>{deleteDomainModal.domain}</strong>? All DNS records for this domain in Cloudflare will be deleted.
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button onClick={() => setDeleteDomainModal(null)} disabled={deleteDomainLoading}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors", isDark ? "text-zinc-300 bg-white/5 hover:bg-white/10" : "text-slate-600 bg-slate-100 hover:bg-slate-200")}>Cancel</button>
-              <button onClick={handleDeleteDomain} disabled={deleteDomainLoading}
-                className="px-4 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2">
-                {deleteDomainLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                {deleteDomainLoading ? "Removing..." : "Yes, Remove"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteDomainModal !== null}
+        title="Remove Domain"
+        description={`Are you sure you want to remove ${deleteDomainModal?.domain || ""}? All DNS records for this domain in Cloudflare will be deleted.`}
+        confirmText="Yes, Remove"
+        variant="danger"
+        isLoading={deleteDomainLoading}
+        onConfirm={handleDeleteDomain}
+        onClose={() => setDeleteDomainModal(null)}
+      />
 
       {/* ==================== DELETE TUNNEL MODAL ==================== */}
-      {deleteTunnelModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0f172a] border-white/10" : "bg-white border-slate-200")}>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Delete Tunnel</h3>
-                <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>This action cannot be undone.</p>
-              </div>
-            </div>
-            <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Are you sure you want to delete tunnel <strong className={cn(isDark ? "text-white" : "text-slate-900")}>{deleteTunnelModal.name}</strong>?
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button onClick={() => setDeleteTunnelModal(null)} disabled={deleteTunnelLoading}
-                className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors", isDark ? "text-zinc-300 bg-white/5 hover:bg-white/10" : "text-slate-600 bg-slate-100 hover:bg-slate-200")}>Cancel</button>
-              <button onClick={handleDeleteTunnel} disabled={deleteTunnelLoading}
-                className="px-4 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2">
-                {deleteTunnelLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                {deleteTunnelLoading ? "Deleting..." : "Yes, Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteTunnelModal !== null}
+        title="Delete Tunnel"
+        description={`Are you sure you want to delete tunnel ${deleteTunnelModal?.name || ""}? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        variant="danger"
+        isLoading={deleteTunnelLoading}
+        onConfirm={handleDeleteTunnel}
+        onClose={() => setDeleteTunnelModal(null)}
+      />
+
+      {/* ==================== DELETE ROUTE MODAL ==================== */}
+      <ConfirmModal
+        isOpen={deletingRouteRule !== null}
+        title="Delete Route"
+        description={`Are you sure you want to delete the route for ${deletingRouteRule?.hostname || ""}? This action cannot be undone.`}
+        confirmText="Delete Route"
+        variant="danger"
+        onConfirm={async () => {
+          if (deletingRouteRule) {
+            const rule = deletingRouteRule;
+            setDeletingRouteRule(null);
+            await handleDeleteRoute(rule);
+          }
+        }}
+        onClose={() => setDeletingRouteRule(null)}
+      />
     </div>
   );
 }

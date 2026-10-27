@@ -324,6 +324,7 @@ export default function VpsManagementPage() {
   const [editingReservedIpId, setEditingReservedIpId] = useState<number | null>(null);
   const [editingReservedIpValue, setEditingReservedIpValue] = useState("");
   const [reservedIpActionLoading, setReservedIpActionLoading] = useState<number | null>(null);
+  const [deleteReservedIpId, setDeleteReservedIpId] = useState<number | null>(null);
   const [reservedIpCurrentPage, setReservedIpCurrentPage] = useUrlNumber("reservedIpCurrentPage", 1);
   const reservedIpsPerPage = 10;
   const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
@@ -421,7 +422,6 @@ export default function VpsManagementPage() {
   };
 
   const handleDeleteReservedIp = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this reserved IP?")) return;
     try {
       setReservedIpActionLoading(id);
       const res = await fetch(`/api/admin/vps/reserved-ips?id=${id}`, {
@@ -430,6 +430,7 @@ export default function VpsManagementPage() {
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message || "Reserved IP deleted successfully");
+        setDeleteReservedIpId(null);
         fetchReservedIps();
       } else {
         toast.error(data.error || "Failed to delete Reserved IP");
@@ -2487,7 +2488,7 @@ export default function VpsManagementPage() {
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleDeleteReservedIp(ip.id)}
+                                onClick={() => setDeleteReservedIpId(ip.id)}
                                 title="Delete"
                                 className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors border border-red-500/20", isDark ? "text-red-500" : "text-red-700")}
                               >
@@ -2906,6 +2907,20 @@ export default function VpsManagementPage() {
         description={`Are you sure you want to remove ${showDeleteBandwidthModal} Mbps from the available speed options? Existing VPS will remain unaffected, but customers will no longer be able to select or upgrade to this speed.`}
         onConfirm={() => showDeleteBandwidthModal && handleRemoveBandwidth(showDeleteBandwidthModal)}
         onClose={() => setShowDeleteBandwidthModal(null)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteReservedIpId !== null}
+        title="Delete Reserved IP"
+        description="Are you sure you want to delete this reserved IP? This action cannot be undone."
+        onConfirm={() => {
+          if (deleteReservedIpId !== null) {
+            handleDeleteReservedIp(deleteReservedIpId);
+          }
+        }}
+        onClose={() => setDeleteReservedIpId(null)}
+        isLoading={reservedIpActionLoading === deleteReservedIpId}
+        variant="danger"
       />
     </div>
   );

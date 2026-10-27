@@ -12,6 +12,7 @@ import { mutate as globalMutate } from 'swr';
 import DOMPurify from 'isomorphic-dompurify';
 import 'react-quill-new/dist/quill.snow.css';
 import { useTheme } from "@/components/ThemeProvider";
+import { toast } from "sonner";
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
@@ -90,7 +91,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
       const newFiles = Array.from(e.target.files);
       setAttachments(prev => {
         if (prev.length + newFiles.length > 5) {
-          alert("You can only attach a maximum of 5 files.");
+          toast.error("You can only attach a maximum of 5 files.");
           return [...prev, ...newFiles].slice(0, 5);
         }
         return [...prev, ...newFiles];
@@ -120,7 +121,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
       const newFiles = Array.from(e.dataTransfer.files);
       const totalSize = [...attachments, ...newFiles].reduce((sum, file) => sum + file.size, 0);
       if (totalSize > 10 * 1024 * 1024) {
-        alert('Total attachments size exceeds 10MB limit');
+        toast.error('Total attachments size exceeds 10MB limit');
         return;
       }
       setAttachments(prev => [...prev, ...newFiles]);
@@ -166,7 +167,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
       );
     } catch (err) {
       console.error(err);
-      alert('Failed to send reply');
+      toast.error('Failed to send reply');
     } finally {
       setIsSubmitting(false);
     }
