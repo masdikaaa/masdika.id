@@ -197,12 +197,17 @@ export async function POST(
           throw new Error("Proxmox response body stream is empty");
         }
 
+        // Get actual Content-Length from Proxmox download response if provided
+        const pveContentLength = proxmoxRes.headers.get("content-length");
+        const realBackupSize = pveContentLength ? BigInt(pveContentLength) : backupFileSize;
+
         // Memory safe: Convert Web ReadableStream to Node.js Readable stream
         // Pipes chunks directly to destination without holding the entire file in RAM
         const proxmoxStream = Readable.fromWeb(proxmoxRes.body as any);
 
         let finalDownloadUrl: string | null = null;
         let finalTargetKey = `${config.pathPrefix || `vps-${vmid}`}/${realFilename}`;
+        let uploadedBytes = realBackupSize;
 
         // Step 5: Upload to target provider via memory-safe streams
         if (config.provider === "R2" || config.provider === "S3") {
@@ -219,14 +224,30 @@ export async function POST(
             finalDownloadUrl = null;
           }
         } else if (config.provider === "GDRIVE") {
+          const estimatedSize = Number(realBackupSize);
           const driveResult = await streamUploadToGoogleDrive(config, {
             filename: realFilename,
             stream: proxmoxStream,
-            contentLength: Number(backupFileSize),
-            mimeType: "application/octet-stream"
+            contentLength: estimatedSize > 0 ? estimatedSize : undefined,
+            mimeType: "application/octet-stream",
+            onProgress: async (bytes) => {
+              if (estimatedSize > 0) {
+                const uploadPct = Math.min(95, 55 + Math.round((bytes / estimatedSize) * 40));
+                await prisma.vpsCloudBackupRecord.update({
+                  where: { id: record.id },
+                  data: {
+                    progress: uploadPct,
+                    stageText: `Streaming backup archive directly to Google Drive (${uploadPct}%)...`
+                  }
+                }).catch(() => {});
+              }
+            }
           });
           finalTargetKey = driveResult.fileId;
           finalDownloadUrl = driveResult.webViewLink || `https://drive.google.com/file/d/${driveResult.fileId}/view`;
+          if (driveResult.uploadedSize > 0) {
+            uploadedBytes = BigInt(driveResult.uploadedSize);
+          }
         }
 
         // Step 6: Mark record as COMPLETED
@@ -236,7 +257,7 @@ export async function POST(
             filename: realFilename,
             targetKey: finalTargetKey,
             downloadUrl: finalDownloadUrl,
-            fileSize: backupFileSize,
+            fileSize: uploadedBytes,
             status: "COMPLETED",
             progress: 100,
             stageText: "Backup completed and stored in cloud successfully!",

@@ -388,16 +388,18 @@ export async function streamUploadToGoogleDrive(
   params: {
     filename: string;
     stream: any;
-    contentLength: number;
+    contentLength?: number;
     mimeType?: string;
+    onProgress?: (uploadedBytes: number) => void;
   }
-): Promise<{ success: boolean; fileId: string; webViewLink?: string }> {
+): Promise<{ success: boolean; fileId: string; webViewLink?: string; uploadedSize: number }> {
   const token = await getGoogleDriveAccessToken(config);
   const folderId = config.gdriveFolderId?.trim();
+  const mimeType = params.mimeType || "application/octet-stream";
 
   const metadata: any = {
     name: params.filename,
-    mimeType: params.mimeType || "application/octet-stream"
+    mimeType
   };
 
   if (folderId && folderId.length > 5) {
@@ -405,16 +407,21 @@ export async function streamUploadToGoogleDrive(
   }
 
   // Step 1: Initiate Resumable Upload Session with Shared Drive support
+  const initHeaders: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json; charset=UTF-8",
+    "X-Upload-Content-Type": mimeType
+  };
+
+  if (params.contentLength && params.contentLength > 0) {
+    initHeaders["X-Upload-Content-Length"] = params.contentLength.toString();
+  }
+
   const initRes = await fetch(
     "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,name,webViewLink,size",
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json; charset=UTF-8",
-        "X-Upload-Content-Type": params.mimeType || "application/octet-stream",
-        "X-Upload-Content-Length": params.contentLength.toString()
-      },
+      headers: initHeaders,
       body: JSON.stringify(metadata)
     }
   );
@@ -435,34 +442,80 @@ export async function streamUploadToGoogleDrive(
     throw new Error("Google Drive did not return a resumable upload location URL");
   }
 
-  // Step 2: Stream bytes directly to the upload location
-  const uploadRes = await fetch(uploadLocation, {
-    method: "PUT",
-    headers: {
-      "Content-Length": params.contentLength.toString(),
-      "Content-Type": params.mimeType || "application/octet-stream"
-    },
-    // @ts-expect-error Node.js fetch streaming body requirement
-    duplex: "half",
-    body: params.stream
-  });
+  // Step 2: Upload in 8MB chunks using explicit Buffer bodies
+  // Google Drive requires intermediate chunks to be a multiple of 256 KiB (262,144 bytes).
+  // 8MB = 8 * 1024 * 1024 = 8,388,608 bytes (32 * 256 KiB).
+  const CHUNK_SIZE = 8 * 1024 * 1024;
+  let buffer = Buffer.alloc(0);
+  let offset = 0;
+  let fileData: any = null;
 
-  if (!uploadRes.ok) {
-    const errText = await uploadRes.text();
-    if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
-      if (config.gdriveRefreshToken) {
-        throw new Error("Your personal Google Drive storage quota (15 GB) is full or exceeded. Please free up space in your Google account or use Cloudflare R2 / AWS S3.");
+  const uploadChunk = async (chunk: Buffer, isLast: boolean, totalLength: number | "*"): Promise<any> => {
+    const chunkEnd = offset + chunk.length - 1;
+    const contentRange = `bytes ${offset}-${chunkEnd}/${totalLength}`;
+
+    let lastError: any = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(uploadLocation, {
+          method: "PUT",
+          headers: {
+            "Content-Length": chunk.length.toString(),
+            "Content-Range": contentRange,
+            "Content-Type": mimeType
+          },
+          body: chunk
+        });
+
+        if (isLast) {
+          if (!res.ok) {
+            const err = await res.text();
+            throw new Error(`Google Drive final chunk upload failed (${res.status}): ${err}`);
+          }
+          return await res.json();
+        } else {
+          // Intermediate chunk returns 308 Resume Incomplete
+          if (res.status === 308 || res.ok) {
+            return null;
+          }
+          const err = await res.text();
+          throw new Error(`Google Drive chunk upload failed (${res.status}): ${err}`);
+        }
+      } catch (e: any) {
+        lastError = e;
+        if (attempt < 3) {
+          await new Promise((r) => setTimeout(r, 1500 * attempt));
+        }
       }
-      throw new Error("Insufficient Google Drive Quota: Service Accounts do not have storage quota on personal Google Drive. Please use a Google Workspace Shared Drive (Team Drive), connect via Personal Google Drive (OAuth), or use Cloudflare R2 / AWS S3.");
     }
-    throw new Error(`Google Drive stream upload failed (${uploadRes.status}): ${errText}`);
+    throw lastError;
+  };
+
+  // Stream data in chunks
+  for await (const dataChunk of params.stream) {
+    const chunkBuf = Buffer.isBuffer(dataChunk) ? dataChunk : Buffer.from(dataChunk);
+    buffer = Buffer.concat([buffer, chunkBuf]);
+
+    // Keep at least 1 byte in buffer so the final chunk can finalize with the exact total
+    while (buffer.length > CHUNK_SIZE) {
+      const sliceToUpload = buffer.subarray(0, CHUNK_SIZE);
+      buffer = buffer.subarray(CHUNK_SIZE);
+
+      await uploadChunk(sliceToUpload, false, params.contentLength || "*");
+      offset += sliceToUpload.length;
+      if (params.onProgress) params.onProgress(offset);
+    }
   }
 
-  const fileData = await uploadRes.json();
+  // Upload the remaining buffer as the final chunk
+  const totalUploaded = offset + buffer.length;
+  fileData = await uploadChunk(buffer, true, totalUploaded);
+
   return {
     success: true,
-    fileId: fileData.id,
-    webViewLink: fileData.webViewLink
+    fileId: fileData?.id,
+    webViewLink: fileData?.webViewLink,
+    uploadedSize: totalUploaded
   };
 }
 
