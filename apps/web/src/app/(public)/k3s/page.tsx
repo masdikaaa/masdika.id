@@ -34,6 +34,7 @@ export default async function K3sLandingPage() {
     disk: pricing.disk || 10,
     ipv4: pricing.ipv4 || 50,
     backup: pricing.backup || 10,
+    bandwidth: pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730),
   };
 
   return <K3sClient safePricing={safePricing} isK3sEnabled={isK3sEnabled} />;

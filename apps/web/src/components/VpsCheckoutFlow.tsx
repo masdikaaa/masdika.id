@@ -12,6 +12,7 @@ import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, ListChecks, 
 import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
+import { EnterpriseInfraSidebarCard, IntelCpuBadge, NetworkInfraBadge, IntelLogo } from "@/components/EnterpriseInfraBadges";
 
 const getOsIcon = (name: string, isDark: boolean = false) => {
   const lowerName = name.toLowerCase();
@@ -221,7 +222,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [diskGb, setDiskGb] = useState(parseInt(searchParams.get("disk") || "20"));
   const [diskType, setDiskType] = useState<"HDD" | "SSD">((searchParams.get("diskType") as "HDD" | "SSD") || "HDD");
   const [backupGb, setBackupGb] = useState(0);
-  const [bandwidthMbps, setBandwidthMbps] = useState(100);
+  const [bandwidthMbps, setBandwidthMbps] = useState(parseInt(searchParams.get("bandwidth") || searchParams.get("bandwidthMbps") || "100"));
   const [bandwidthOptions, setBandwidthOptions] = useState<number[]>([100, 150, 200, 250, 300]);
 
   const [maxSpecs, setMaxSpecs] = useState({ cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 });
@@ -778,12 +779,12 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
           {/* Compute Resources & Billing Mode */}
           <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[30] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 relative z-10">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3 relative z-10">
               <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Sliders className="w-5 h-5 text-cyan-400" />
                 3. Compute Resources
               </h2>
-
+              <IntelCpuBadge />
             </div>
             
             <div className="flex justify-start sm:justify-end mb-6">
@@ -867,10 +868,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
             <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[20] grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <div className="flex flex-col h-full w-full max-w-full min-w-0">
-                <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                  <Network className="w-5 h-5 text-cyan-400 shrink-0" />
-                  4. Networking
-                </h2>
+                <div className="flex flex-wrap items-center justify-between mb-3 sm:mb-4 gap-2 shrink-0">
+                  <h2 className={cn("text-lg sm:text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                    <Network className="w-5 h-5 text-cyan-400 shrink-0" />
+                    4. Networking
+                  </h2>
+                  <NetworkInfraBadge />
+                </div>
                 <div className="flex-1 flex flex-col gap-3 w-full max-w-full min-w-0">
 
                   {reservedIps.length > 0 && (
@@ -1175,6 +1179,33 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                   </div>
+
+                  {/* Range Slider */}
+                  {bandwidthOptions.length > 1 && (
+                    <div className="pt-1">
+                      <input
+                        type="range"
+                        min={bandwidthOptions[0]}
+                        max={bandwidthOptions[bandwidthOptions.length - 1]}
+                        step={50}
+                        value={bandwidthMbps}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          const closest = bandwidthOptions.reduce((prev, curr) =>
+                            Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev, bandwidthOptions[0]
+                          );
+                          setBandwidthMbps(closest);
+                        }}
+                        className={cn(
+                          "w-full max-w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none my-1",
+                          isDark ? "bg-white/10" : "bg-slate-200"
+                        )}
+                        style={{
+                          background: `linear-gradient(to right, #22d3ee ${((bandwidthMbps - bandwidthOptions[0]) / Math.max(1, bandwidthOptions[bandwidthOptions.length - 1] - bandwidthOptions[0])) * 100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${((bandwidthMbps - bandwidthOptions[0]) / Math.max(1, bandwidthOptions[bandwidthOptions.length - 1] - bandwidthOptions[0])) * 100}%)`
+                        }}
+                      />
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 pt-1">
                     {bandwidthOptions.map((speed, index) => {
@@ -1804,8 +1835,10 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>Pay As You Go</span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Cpu className="w-3.5 h-3.5" /> vCPU</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{cpuCores} Cores</span>
+                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Cpu className="w-3.5 h-3.5 text-cyan-400" /> Processor</span>
+                <span className={cn("font-bold px-2 py-1 rounded-lg border text-xs flex items-center gap-1.5", isDark ? "text-cyan-400 bg-slate-800/60 border-slate-700" : "text-cyan-700 bg-slate-100 border-slate-200")}>
+                  <IntelLogo className="w-3.5 h-3.5 shrink-0" /> Intel® Xeon® ({cpuCores}C)
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm px-2">
                 <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><MemoryStick className="w-3.5 h-3.5" /> RAM</span>
@@ -1947,12 +1980,17 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </>
               )}
             </button>
-            <div className="mt-6 flex flex-col items-center justify-center gap-2 relative z-10">
+
+            <div className="mt-5 relative z-10">
+              <EnterpriseInfraSidebarCard />
+            </div>
+
+            <div className="mt-4 flex flex-col items-center justify-center gap-1.5 relative z-10">
               <div className={cn("flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>
                 <ShieldCheck className="w-4 h-4 text-cyan-500" />
                 256-bit Encrypted Checkout
               </div>
-              <p className={cn("text-xs mt-1", isDark ? "text-zinc-600" : "text-slate-400")}>
+              <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-600" : "text-slate-400")}>
                 Provisioning typically takes up to 5 minutes.
               </p>
             </div>

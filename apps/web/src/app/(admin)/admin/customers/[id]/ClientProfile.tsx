@@ -638,8 +638,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
             type="button"
             onClick={handleImpersonateClient}
             disabled={isImpersonating}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
-            title="Masuk ke portal pelanggan sebagai user ini"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
+            title="Login to customer portal as this user"
           >
             {isImpersonating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
             <span>Login as Client</span>

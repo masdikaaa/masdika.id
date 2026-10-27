@@ -14,6 +14,7 @@ interface Pricing {
   diskSsd?: number;
   ipv4: number;
   backup?: number;
+  bandwidth?: number;
 }
 
 interface VpsSpecSliderProps {
@@ -33,6 +34,8 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
   const [diskType, setDiskType] = useState<"SSD" | "HDD">("HDD");
   const [backup, setBackup] = useState(0);
   const [includeIpv4, setIncludeIpv4] = useState(true);
+  const [bandwidth, setBandwidth] = useState(100);
+  const [bandwidthOptions, setBandwidthOptions] = useState<number[]>([100, 150, 200, 250, 300]);
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [maxSpecs, setMaxSpecs] = useState<Record<string, number>>({ cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 });
@@ -49,10 +52,13 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
       .finally(() => setLoading(false));
 
     fetch('/api/public/vps/max-specs')
-      .then(res => res.ok ? res.json() : { maxSpecs: null })
+      .then(res => res.ok ? res.json() : { maxSpecs: null, bandwidthOptions: null })
       .then(data => {
         if (data && data.maxSpecs) {
           setMaxSpecs(data.maxSpecs);
+        }
+        if (data && data.bandwidthOptions && Array.isArray(data.bandwidthOptions) && data.bandwidthOptions.length > 0) {
+          setBandwidthOptions(data.bandwidthOptions);
         }
       })
       .catch(() => { });
@@ -62,6 +68,12 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
   const currentMaxBackup = maxSpecs.backup || currentMaxDisk;
   const currentMaxCpu = maxSpecs.cpu || 16;
   const currentMaxRam = maxSpecs.ram || 64;
+
+  const minBandwidth = bandwidthOptions[0] || 100;
+  const maxBandwidth = bandwidthOptions[bandwidthOptions.length - 1] || 300;
+  const bandwidthExtraSteps = Math.max(0, Math.floor((bandwidth - 100) / 50));
+  const bandwidthRatePerHour = pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730);
+  const bandwidthHourlyCost = bandwidthExtraSteps * bandwidthRatePerHour;
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -79,7 +91,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
     const diskPrice = diskType === "SSD" ? (pricing.diskSsd || pricing.disk) : pricing.disk;
     const ipPrice = includeIpv4 ? pricing.ipv4 : 0;
     const backupPrice = backup * (pricing.backup || 0);
-    return (cpu * pricing.vcpu) + (ram * pricing.ram) + (disk * diskPrice) + ipPrice + backupPrice;
+    return (cpu * pricing.vcpu) + (ram * pricing.ram) + (disk * diskPrice) + ipPrice + backupPrice + bandwidthHourlyCost;
   };
 
   const calculateMonthlyPrice = () => {
@@ -92,9 +104,9 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
     const ipv4Param = includeIpv4 ? '1' : '0';
 
     if (session) {
-      router.push(`${targetUrl}?service=${serviceParam}&cpu=${cpu}&ram=${ram}&disk=${disk}&diskType=${diskType}&ipv4=${ipv4Param}`);
+      router.push(`${targetUrl}?service=${serviceParam}&cpu=${cpu}&ram=${ram}&disk=${disk}&diskType=${diskType}&ipv4=${ipv4Param}&bandwidth=${bandwidth}`);
     } else {
-      router.push(`/login?callbackUrl=${encodeURIComponent(`${targetUrl}?service=${serviceParam}&cpu=${cpu}&ram=${ram}&disk=${disk}&diskType=${diskType}&ipv4=${ipv4Param}`)}`);
+      router.push(`/login?callbackUrl=${encodeURIComponent(`${targetUrl}?service=${serviceParam}&cpu=${cpu}&ram=${ram}&disk=${disk}&diskType=${diskType}&ipv4=${ipv4Param}&bandwidth=${bandwidth}`)}`);
     }
   };
 
@@ -115,15 +127,10 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
 
   return (
     <div className={cn(
-      "backdrop-blur-md border rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0 transition-all",
+      "border rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0 transition-all",
       isDark ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-2xl shadow-black/50" : "bg-white border-cyan-200 shadow-xl"
     )}>
-      <div className={cn(
-        "absolute top-0 right-0 w-96 h-96 blur-[100px] rounded-full mix-blend-screen pointer-events-none",
-        isDark ? "bg-cyan-500/10" : "bg-cyan-100/60"
-      )} />
-
-      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 relative z-10">
+      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 relative z-10 items-start">
 
         {/* Sliders */}
         <div className="lg:col-span-7 xl:col-span-8 space-y-8 lg:space-y-10">
@@ -291,11 +298,46 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
             </div>
           )}
 
+          {/* Bandwidth Speed Slider */}
+          <div>
+            <div className="flex justify-between items-center mb-3 md:mb-4 gap-2">
+              <label className={cn("text-base md:text-lg font-bold flex items-center gap-2 whitespace-nowrap shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                <Wifi className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} /> Bandwidth Speed
+              </label>
+              <span className={cn(
+                "px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border shrink-0",
+                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+              )}>
+                {bandwidth} Mbps
+              </span>
+            </div>
+            <input
+              type="range"
+              min={minBandwidth}
+              max={maxBandwidth}
+              step="50"
+              value={bandwidth}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                const closest = bandwidthOptions.reduce((prev, curr) =>
+                  Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev, bandwidthOptions[0]
+                );
+                setBandwidth(closest);
+              }}
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-500 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-500 [&::-moz-range-thumb]:border-none hover:opacity-90 transition-opacity"
+              style={{ background: `linear-gradient(to right, #06b6d4 ${((bandwidth - minBandwidth) / Math.max(1, maxBandwidth - minBandwidth)) * 100}%, ${sliderTrackBg} ${((bandwidth - minBandwidth) / Math.max(1, maxBandwidth - minBandwidth)) * 100}%)` }}
+            />
+            <div className="flex justify-between items-center text-[10px] sm:text-xs font-mono font-medium text-[var(--text-muted)] mt-1.5 px-0.5">
+              <span>{minBandwidth} Mbps (Free)</span>
+              <span>{maxBandwidth} Mbps Port</span>
+            </div>
+          </div>
+
           {/* Bandwidth Banner */}
           <div className="pt-2 lg:pt-4">
             <div className={cn(
-              "p-4 backdrop-blur-md rounded-2xl flex items-start sm:items-center gap-4 border transition-colors",
-              isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] hover:border-cyan-500/50" : "bg-slate-50 border-slate-200"
+              "p-4 rounded-2xl flex items-start sm:items-center gap-4 border transition-colors",
+              isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200"
             )}>
               <div className={cn(
                 "w-12 h-12 rounded-xl border text-cyan-500 flex items-center justify-center shrink-0",
@@ -304,8 +346,8 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
                 <Wifi className="w-6 h-6" />
               </div>
               <div>
-                <h4 className={cn("font-bold text-sm md:text-base mb-1", isDark ? "text-white" : "text-slate-900")}>Unlimited Bandwidth Included</h4>
-                <p className={cn("text-xs md:text-sm leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>Enjoy unmetered traffic for your {serviceType === "K3S" ? "K3s" : "VPS"} deployments without worrying about overage charges.</p>
+                <h4 className={cn("font-bold text-sm md:text-base mb-1", isDark ? "text-white" : "text-slate-900")}>Unlimited Traffic Quota Included</h4>
+                <p className={cn("text-xs md:text-sm leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>All port speeds include unmetered traffic data transfer for your {serviceType === "K3S" ? "K3s" : "VPS"} workloads with zero bandwidth overage charges.</p>
               </div>
             </div>
           </div>
@@ -313,15 +355,13 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
 
         {/* Pricing Summary */}
         <div className={cn(
-          "lg:col-span-5 xl:col-span-4 border rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-8 flex flex-col justify-between relative overflow-hidden group shadow-xl",
+          "lg:col-span-5 xl:col-span-4 border rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group shadow-xl h-fit lg:sticky lg:top-24",
           isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200"
         )}>
-          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
           <div className="relative z-10">
-            <h3 className={cn("text-lg md:text-xl font-black mb-4 md:mb-6 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Estimated Cost</h3>
+            <h3 className={cn("text-lg md:text-xl font-black mb-4 sm:mb-5 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Estimated Cost</h3>
 
-            <div className="space-y-4 mb-6 md:mb-8 text-sm md:text-base font-medium">
+            <div className="space-y-3.5 mb-5 sm:mb-6 text-sm md:text-base font-medium">
               <div className={cn("flex justify-between gap-2 items-center", isDark ? "text-zinc-400" : "text-slate-500")}>
                 <span className="whitespace-nowrap flex items-center"><Cpu className="w-4 h-4 mr-2 text-cyan-500" /> {cpu} vCPU</span>
                 <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(cpu * pricing.vcpu * 730)}/mo</span>
@@ -344,21 +384,27 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
                 <span className="whitespace-nowrap flex items-center"><ShieldCheck className="w-4 h-4 mr-2 text-cyan-500" /> {includeIpv4 ? "1x IPv4" : "NAT (No IPv4)"}</span>
                 <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah((includeIpv4 ? pricing.ipv4 : 0) * 730)}/mo</span>
               </div>
+              <div className={cn("flex justify-between gap-2 items-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <span className="whitespace-nowrap flex items-center"><Wifi className="w-4 h-4 mr-2 text-cyan-500" /> {bandwidth} Mbps Port</span>
+                <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  {bandwidthHourlyCost > 0 ? `${formatRupiah(bandwidthHourlyCost * 730)}/mo` : "Included (Free)"}
+                </span>
+              </div>
             </div>
 
-            <div className={cn("pt-6 border-t", isDark ? "border-white/10" : "border-slate-200")}>
-              <div className="flex items-baseline flex-wrap gap-1 sm:gap-2 mb-2">
-                <span className={cn("text-3xl sm:text-4xl font-black bg-gradient-to-r bg-clip-text text-transparent drop-shadow-sm break-all sm:break-normal max-w-full", isDark ? "from-cyan-500 to-cyan-300" : "from-cyan-600 to-cyan-400")}>
+            <div className={cn("pt-5 border-t", isDark ? "border-white/10" : "border-slate-200")}>
+              <div className="flex items-baseline flex-wrap gap-1 sm:gap-2 mb-1.5">
+                <span className={cn("text-3xl sm:text-4xl font-black break-all sm:break-normal max-w-full tracking-tight", isDark ? "text-cyan-400" : "text-cyan-600")}>
                   {formatRupiah(calculateMonthlyPrice())}
                 </span>
                 <span className={cn("text-sm font-bold tracking-widest uppercase", isDark ? "text-zinc-500" : "text-slate-400")}>/MO</span>
               </div>
-              <p className={cn("text-xs font-medium mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <p className={cn("text-xs font-medium mb-3.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Or {formatRupiah(calculateHourlyPrice())}/hour (Pay-As-You-Go)
               </p>
 
-              <div className={cn("rounded-xl p-3 sm:p-4 text-[10px] sm:text-xs leading-relaxed mt-4 shadow-sm border", isDark ? "bg-cyan-950/30 border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-200 text-slate-600")}>
-                <p className="mb-2"><span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Free VPC:</span> Virtual Private Cloud (VPC) feature is available for free with no additional charges.</p>
+              <div className={cn("rounded-xl p-3 sm:p-3.5 text-[10px] sm:text-xs leading-relaxed shadow-sm border", isDark ? "bg-cyan-950/30 border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-200 text-slate-600")}>
+                <p className="mb-1.5"><span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Free VPC:</span> Virtual Private Cloud (VPC) feature is available for free with no additional charges.</p>
                 <p><span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Billing Policy:</span> Similar to global cloud providers, Storage, Backup Storage, and Reserved IPs are billed per hour even when your instance is Shutdown/Stopped or the IP is unused, as the resources are still allocated to your account.</p>
               </div>
             </div>
@@ -368,7 +414,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
             onClick={handleDeploy}
             disabled={loading || isDisabled}
             className={cn(
-              "w-full px-7 py-3.5 mt-8 rounded-lg font-semibold flex items-center justify-center gap-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500",
+              "w-full px-7 py-3.5 mt-5 sm:mt-6 rounded-xl font-semibold flex items-center justify-center gap-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer",
               isDisabled
                 ? (isDark ? "bg-white/5 text-zinc-500 border border-white/10 cursor-not-allowed" : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed")
                 : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm",

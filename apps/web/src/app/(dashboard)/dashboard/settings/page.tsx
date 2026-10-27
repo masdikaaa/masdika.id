@@ -4,15 +4,15 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect, useRef } from 'react';
-import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2, History, RefreshCw } from 'lucide-react';
+import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2, History, RefreshCw, Laptop, Tablet, Globe, LogOut, ChevronLeft, ChevronRight, Clock, Calendar, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const inputClassDark = 'w-full bg-[#060b14] border border-slate-800 rounded-2xl px-5 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-sm';
-  const inputClassLight = 'w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
-const labelClassDark = 'block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2';
-  const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
+const inputClassDark = 'w-full bg-[#060b14] border border-slate-800 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-sm';
+const inputClassLight = 'w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
+const labelClassDark = 'block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2';
+const labelClassLight = 'block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2';
 
 
 const OtpInput = ({ value, onChange, isDanger = false }: { value: string; onChange: (val: string) => void; isDanger?: boolean }) => {
@@ -112,19 +112,31 @@ export default function SettingsPage() {
   const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
   const [disable2FACode, setDisable2FACode] = useState('');
 
-  // Login Logs State
+  // Login Logs & Session State
   const [loginLogs, setLoginLogs] = useState<any[]>([]);
   const [loadingLoginLogs, setLoadingLoginLogs] = useState(false);
   const [currentIp, setCurrentIp] = useState('');
+  const [loginLogsPage, setLoginLogsPage] = useState(1);
+  const [loginLogsTotalPages, setLoginLogsTotalPages] = useState(1);
+  const [loginLogsTotal, setLoginLogsTotal] = useState(0);
+  const [revokingLogId, setRevokingLogId] = useState<number | null>(null);
+  const [isRevokingAll, setIsRevokingAll] = useState(false);
+  const [confirmRevokeModal, setConfirmRevokeModal] = useState<{ isOpen: boolean; log: any | null }>({ isOpen: false, log: null });
+  const [confirmRevokeAllModal, setConfirmRevokeAllModal] = useState(false);
 
-  const fetchLoginLogs = async () => {
+  const fetchLoginLogs = async (page = 1) => {
     setLoadingLoginLogs(true);
     try {
-      const res = await fetch('/api/user/security/login-logs');
+      const res = await fetch(`/api/user/security/login-logs?page=${page}&limit=5`);
       const data = await res.json();
       if (res.ok && data.success) {
         setLoginLogs(data.logs || []);
         setCurrentIp(data.currentIp || '');
+        if (data.pagination) {
+          setLoginLogsPage(data.pagination.page);
+          setLoginLogsTotalPages(data.pagination.totalPages);
+          setLoginLogsTotal(data.pagination.total);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch login logs:', err);
@@ -132,6 +144,73 @@ export default function SettingsPage() {
       setLoadingLoginLogs(false);
     }
   };
+
+  const handleRevokeSession = async (log: any) => {
+    if (!log?.rawId) return;
+    setRevokingLogId(log.rawId);
+    try {
+      const res = await fetch('/api/user/security/login-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'revoke', logId: log.rawId })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.isCurrentDevice) {
+          toast.success('Signed out of this session successfully.');
+          window.location.href = '/login';
+          return;
+        }
+        toast.success(data.message || 'Device session revoked successfully.');
+        fetchLoginLogs(loginLogsPage);
+      } else {
+        toast.error(data.error || 'Failed to revoke session.');
+      }
+    } catch {
+      toast.error('Something went wrong while revoking the session.');
+    } finally {
+      setRevokingLogId(null);
+      setConfirmRevokeModal({ isOpen: false, log: null });
+    }
+  };
+
+  const handleRevokeAllOther = async () => {
+    setIsRevokingAll(true);
+    try {
+      const res = await fetch('/api/user/security/login-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'revoke_all_other' })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || 'All other device sessions revoked successfully.');
+        fetchLoginLogs(1);
+      } else {
+        toast.error(data.error || 'Failed to revoke other sessions.');
+      }
+    } catch {
+      toast.error('Something went wrong while revoking other sessions.');
+    } finally {
+      setIsRevokingAll(false);
+      setConfirmRevokeAllModal(false);
+    }
+  };
+
+  const getDeviceIcon = (device?: string) => {
+    switch (device) {
+      case 'Mobile':
+        return <Smartphone className="w-3.5 h-3.5" />;
+      case 'Tablet':
+        return <Tablet className="w-3.5 h-3.5" />;
+      case 'Desktop':
+        return <Laptop className="w-3.5 h-3.5" />;
+      default:
+        return <Globe className="w-3.5 h-3.5" />;
+    }
+  };
+
+  const hasOtherActiveSessions = loginLogs.some((l) => l.isSession && !l.isRevoked && !l.isCurrentDevice);
 
   const formatDateTime = (dateStr: string) => {
     try {
@@ -430,43 +509,44 @@ export default function SettingsPage() {
   return (
     <motion.div className="space-y-6 md:space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        
+      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
-            <Settings className="w-3 h-3" /> Account Management
+          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 sm:mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
+            <Settings className="w-3.5 h-3.5" /> Account Management
           </div>
-          <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1.5 sm:mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Account <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Settings</span>
           </h1>
-          <p className={cn("text-sm max-w-md", isDark ? "text-slate-400" : "text-slate-500")}>Manage your profile information, email address, password, and account security.</p>
+          <p className={cn("text-xs sm:text-sm max-w-xl", isDark ? "text-slate-400" : "text-slate-500")}>
+            Manage your profile information, email address, password, and account security.
+          </p>
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-6 md:gap-8">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-8">
         {/* Navigation Sidebar */}
         <div className="w-full md:w-60 shrink-0">
-          <div className={cn("rounded-3xl p-2 shadow-md flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-md grid grid-cols-2 md:flex md:flex-col gap-1.5 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as 'profile' | 'security')}
-                  className={`relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all text-left shrink-0 w-full border ${
+                  className={`relative flex items-center justify-center md:justify-start gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl transition-all text-left shrink-0 w-full border cursor-pointer ${
                     isActive
                       ? (isDark ? 'bg-slate-800/90 text-white border-slate-700 shadow-sm' : 'bg-slate-100 text-slate-900 border-slate-300 shadow-sm')
                       : (isDark ? 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50')
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-white border-slate-300 text-cyan-700 shadow-sm') : (isDark ? 'bg-slate-800/60 border-slate-700/60 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-white border-slate-300 text-cyan-700 shadow-sm') : (isDark ? 'bg-slate-800/60 border-slate-700/60 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
                     <tab.icon className="w-4 h-4" />
                   </div>
-                  <div className="hidden md:block">
-                    <div className={`text-sm font-bold leading-none ${isActive ? (isDark ? 'text-white' : 'text-slate-900') : (isDark ? 'text-slate-300' : 'text-slate-600')}`}>{tab.label}</div>
-                    <div className={cn("text-[10px] mt-1.5", isDark ? "text-slate-400" : "text-slate-400")}>{tab.desc}</div>
+                  <div className="min-w-0">
+                    <div className={`text-xs sm:text-sm font-bold leading-none ${isActive ? (isDark ? 'text-white' : 'text-slate-900') : (isDark ? 'text-slate-300' : 'text-slate-600')}`}>{tab.label}</div>
+                    <div className={cn("hidden md:block text-[10px] mt-1.5 truncate", isDark ? "text-slate-400" : "text-slate-400")}>{tab.desc}</div>
                   </div>
-                  <span className="md:hidden text-sm font-bold">{tab.label}</span>
                 </button>
               );
             })}
@@ -485,21 +565,27 @@ export default function SettingsPage() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                {/* Avatar Card */}
-                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  
-                  <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
-                    <Camera className="w-5 h-5 text-cyan-400" /> Profile Picture
-                  </h3>
-                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
+                {/* Profile Picture Card */}
+                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className="flex items-center gap-3.5 mb-6 relative z-10">
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                      <Camera className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Profile Picture</h3>
+                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Update your avatar and display photo.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 relative z-10">
                     <div className="relative group shrink-0">
-                      <div className={cn("w-32 h-32 rounded-3xl overflow-hidden border-2 relative", isDark ? "border-slate-800 bg-[#060b14] shadow-sm" : "border-slate-200 bg-slate-100 shadow-sm")}>
+                      <div className={cn("w-28 h-28 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl overflow-hidden border-2 relative", isDark ? "border-slate-800 bg-[#060b14] shadow-sm" : "border-slate-200 bg-slate-100 shadow-sm")}>
                         {imagePreview ? (
                           <img referrerPolicy="no-referrer" src={imagePreview} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-600 to-blue-700">
-                            <span className="text-5xl font-bold text-white">
-                              {name ? name.charAt(0).toUpperCase() : <User className="w-16 h-16 text-white/80" />}
+                            <span className="text-4xl sm:text-5xl font-bold text-white">
+                              {name ? name.charAt(0).toUpperCase() : <User className="w-12 h-12 sm:w-16 sm:h-16 text-white/80" />}
                             </span>
                           </div>
                         )}
@@ -507,29 +593,33 @@ export default function SettingsPage() {
                           onClick={() => fileInputRef.current?.click()}
                           className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer"
                         >
-                          <Upload className="w-7 h-7 mb-1 text-white" />
-                          <span className="text-xs font-bold text-white">Change</span>
+                          <Upload className="w-6 h-6 sm:w-7 sm:h-7 mb-1 text-white" />
+                          <span className="text-[11px] sm:text-xs font-bold text-white">Change</span>
                         </div>
                       </div>
                       <div 
-                        className={cn("absolute -bottom-1 -right-1 w-8 h-8 rounded-lg flex items-center justify-center shadow-sm cursor-pointer transition-colors border-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950", isDark ? "border-[#0b1322]" : "border-white")} 
+                        className={cn("absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm cursor-pointer transition-colors border-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950", isDark ? "border-[#0b1322]" : "border-white")} 
                         onClick={() => fileInputRef.current?.click()}
                       >
-                        <Camera className="w-4 h-4" />
+                        <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </div>
                       <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
                     </div>
                     
-                    <div className="flex-1 text-center sm:text-left">
-                      <h4 className={cn("font-bold text-lg mb-1", isDark ? "text-white" : "text-slate-900")}>{name || 'Your Name'}</h4>
-                      <p className={cn("text-sm mb-3", isDark ? "text-slate-400" : "text-slate-500")}>{email}</p>
-                      <p className={cn("text-xs mb-4 rounded-xl px-3 py-1.5 border inline-block", isDark ? "text-slate-400 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>PNG or JPG · Max size 2MB</p>
-                      <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}>
-                          <Upload className="w-4 h-4" /> Upload Photo
+                    <div className="flex-1 text-center sm:text-left min-w-0">
+                      <h4 className={cn("font-bold text-base sm:text-lg mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{name || 'Your Name'}</h4>
+                      <p className={cn("text-xs sm:text-sm mb-2.5 truncate", isDark ? "text-slate-400" : "text-slate-500")}>{email}</p>
+                      <div className="mb-3.5">
+                        <span className={cn("text-[11px] rounded-lg px-2.5 py-1 border inline-block", isDark ? "text-slate-400 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>
+                          PNG or JPG · Max size 2MB
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2.5 justify-center sm:justify-start">
+                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-2 border shadow-sm cursor-pointer", isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}>
+                          <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Upload Photo
                         </button>
                         {imagePreview && (
-                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all border", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
+                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border shadow-sm cursor-pointer", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
                             Remove
                           </button>
                         )}
@@ -539,11 +629,18 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Personal Info Card */}
-                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
-                    <User className="w-5 h-5 text-cyan-400" /> Personal Information
-                  </h3>
-                  <div className="space-y-5 relative z-10">
+                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className="flex items-center gap-3.5 mb-6 relative z-10">
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Personal Information</h3>
+                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Manage your display name and registered email address.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 sm:space-y-5 relative z-10">
                     <div>
                       <label className={labelClass}>Full Name</label>
                       <input
@@ -561,7 +658,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => setShowEmailModal(true)}
-                          className={cn("text-xs font-semibold transition-colors px-3 py-1 rounded-lg border", isDark ? "text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-slate-700" : "text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-200")}
+                          className={cn("text-xs font-semibold transition-colors px-2.5 py-1 rounded-lg border cursor-pointer", isDark ? "text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-slate-700" : "text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-200")}
                         >
                           Change Email
                         </button>
@@ -570,7 +667,7 @@ export default function SettingsPage() {
                         type="email"
                         value={email}
                         disabled
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm cursor-not-allowed border", isDark ? "bg-[#060b14]/70 border-slate-800 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-400")}
+                        className={cn(inputClass, "opacity-75 cursor-not-allowed")}
                       />
                       <p className={cn("text-[11px] mt-1.5 ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Email can only be changed via OTP verification.</p>
                     </div>
@@ -578,11 +675,18 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Billing Info Card */}
-                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
-                    <Building2 className="w-5 h-5 text-cyan-400" /> Billing Information
-                  </h3>
-                  <div className="space-y-5 relative z-10">
+                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  <div className="flex items-center gap-3.5 mb-6 relative z-10">
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                      <Building2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Billing Information</h3>
+                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Address and company details used for invoices and billing.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 sm:space-y-5 relative z-10">
                     {/* Company Name */}
                     <div>
                       <label className={labelClass}>Company Name <span className={cn("normal-case font-normal", isDark ? "text-slate-500" : "text-slate-400")}>(optional)</span></label>
@@ -604,7 +708,7 @@ export default function SettingsPage() {
                     {/* Address 1 */}
                     <div>
                       <label className={labelClass}>Address</label>
-                      <div className="relative mb-2">
+                      <div className="relative mb-2.5">
                         <MapPin className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-slate-500" : "text-slate-400")} />
                         <input type="text" value={address1} onChange={(e) => setAddress1(e.target.value)} placeholder="Street address" className={inputClass + ' pl-11'} />
                       </div>
@@ -654,11 +758,11 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className={cn("pt-6 mt-6 border-t flex justify-end relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("pt-5 mt-6 border-t flex flex-col sm:flex-row justify-end items-stretch sm:items-center relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
                     <button
                       onClick={saveProfile}
                       disabled={isSavingProfile}
-                      className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 text-slate-950 disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500"
+                      className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
                     >
                       {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       Save Changes
@@ -679,15 +783,15 @@ export default function SettingsPage() {
                 className="space-y-6"
               >
                 {/* Change Password Card */}
-                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   
-                  <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
-                      <Lock className="w-6 h-6" />
+                  <div className="flex items-center gap-3.5 mb-6 relative z-10">
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                      <Lock className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Change Password</h3>
-                      <p className={cn("text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
+                      <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Change Password</h3>
+                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
                     </div>
                   </div>
 
@@ -703,7 +807,7 @@ export default function SettingsPage() {
                           className={inputClass + ' pr-12'}
                           required
                         />
-                        <button type="button" onClick={() => setShowOldPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                        <button type="button" onClick={() => setShowOldPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                           {showOldPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
@@ -720,7 +824,7 @@ export default function SettingsPage() {
                             className={inputClass + ' pr-12'}
                             required
                           />
-                          <button type="button" onClick={() => setShowNewPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                          <button type="button" onClick={() => setShowNewPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                             {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
@@ -736,7 +840,7 @@ export default function SettingsPage() {
                             className={`${inputClass} pr-12 ${confirmPassword && newPassword && confirmPassword !== newPassword ? 'border-rose-500/50 focus:ring-rose-500/20' : confirmPassword && confirmPassword === newPassword ? 'border-emerald-500/50 focus:ring-emerald-500/20' : ''}`}
                             required
                           />
-                          <button type="button" onClick={() => setShowConfirmPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                          <button type="button" onClick={() => setShowConfirmPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                             {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
@@ -749,11 +853,11 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className={cn("pt-4 border-t flex justify-end", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("pt-5 mt-5 border-t flex flex-col sm:flex-row justify-end items-stretch sm:items-center relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
                       <button
                         type="submit"
                         disabled={isPasswordLoading}
-                        className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 text-slate-950 disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500"
+                        className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
                       >
                         {isPasswordLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                         Update Password
@@ -763,150 +867,457 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA Card */}
-                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  
-                  <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
-                      <ShieldCheck className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Two-Factor Authentication</h3>
-                      <p className={cn("text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Add an extra layer of security with an authenticator app.</p>
-                    </div>
-                  </div>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                  {/* Subtle Accent Glow */}
+                  <div className={cn("absolute -top-24 -right-24 w-60 h-60 rounded-full blur-3xl pointer-events-none", twoFactorEnabled ? "bg-emerald-500/10" : "bg-cyan-500/10")} />
 
-                  <div className={`relative z-10 rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 ${twoFactorEnabled ? (isDark ? 'bg-[#060b14] border-emerald-500/30' : 'bg-white border-emerald-500/30 shadow-sm') : (isDark ? 'bg-[#060b14] border-slate-800' : 'bg-white border-slate-200/90 shadow-sm')}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-emerald-100 text-emerald-700 border-emerald-200') : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
-                        <Smartphone className="w-5 h-5" />
+                  {/* Header */}
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10 pb-4 border-b transition-colors", isDark ? "border-slate-800/80" : "border-slate-100")}>
+                    <div className="flex items-center gap-3.5">
+                      <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0 transition-colors", twoFactorEnabled ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700") : (isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600"))}>
+                        {twoFactorEnabled ? <ShieldCheck className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
                       </div>
                       <div>
-                        <h4 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Authenticator App</h4>
-                        <div className={`mt-1 text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-lg w-fit border ${twoFactorEnabled ? (isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700') : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
-                          {twoFactorEnabled ? '✓ Active & Configured' : 'Not configured'}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Two-Factor Authentication (2FA)</h3>
                         </div>
+                        <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
+                          Add an extra layer of security with Time-based One-Time Passwords (TOTP).
+                        </p>
                       </div>
                     </div>
-                    
-                    <button
-                      onClick={handle2FAToggle}
-                      disabled={is2FALoading}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all disabled:opacity-50 shrink-0 ${twoFactorEnabled ? 'bg-cyan-500' : (isDark ? 'bg-slate-700' : 'bg-slate-300')}`}
-                    >
-                      {is2FALoading ? (
-                        <Loader2 className={cn("w-4 h-4 animate-spin mx-auto", isDark ? "text-white" : "text-slate-900")} />
+
+                    <div className="self-start sm:self-auto shrink-0">
+                      {twoFactorEnabled ? (
+                        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Active &amp; Protected
+                        </span>
                       ) : (
-                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${twoFactorEnabled ? 'translate-x-8' : 'translate-x-1'}`} />
+                        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border", isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-200 text-slate-700")}>
+                          <span className="w-2 h-2 rounded-full bg-slate-400" /> Not Configured
+                        </span>
                       )}
-                    </button>
+                    </div>
                   </div>
 
-                  <p className={cn("text-xs leading-relaxed relative z-10", isDark ? "text-slate-400" : "text-slate-500")}>
-                    When 2FA is enabled, you will be prompted for a secure token during login. Retrieve this from your phone's Google Authenticator or Authy application.
-                  </p>
+                  {/* Main Authenticator Row (Locked Horizontal Alignment on ALL screens) */}
+                  <div className={cn(
+                    "relative z-10 rounded-2xl border p-4 sm:p-5 flex items-center justify-between gap-4 mb-5 transition-all shadow-xs",
+                    twoFactorEnabled
+                      ? (isDark ? "bg-[#060b14] border-emerald-500/30" : "bg-white border-emerald-200 shadow-sm")
+                      : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
+                  )}>
+                    <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+                      <div className={cn(
+                        "w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border shrink-0 transition-colors shadow-2xs",
+                        twoFactorEnabled
+                          ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-100 text-emerald-700 border-emerald-200")
+                          : (isDark ? "bg-slate-800/80 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")
+                      )}>
+                        <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className={cn("font-bold text-xs sm:text-sm", isDark ? "text-white" : "text-slate-900")}>
+                            Authenticator App
+                          </h4>
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border",
+                            twoFactorEnabled
+                              ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")
+                              : (isDark ? "bg-slate-800/90 border-slate-700 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600")
+                          )}>
+                            {twoFactorEnabled ? "Active" : "Disabled"}
+                          </span>
+                        </div>
+                        <p className={cn("text-xs mt-0.5 truncate sm:whitespace-normal", isDark ? "text-slate-400" : "text-slate-500")}>
+                          Google Authenticator, Microsoft Authenticator, Authy, or 1Password.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={twoFactorEnabled}
+                        aria-label="Toggle Two-Factor Authentication"
+                        onClick={handle2FAToggle}
+                        disabled={is2FALoading}
+                        className={cn(
+                          "relative inline-flex h-7 w-13 items-center rounded-full transition-all cursor-pointer border disabled:opacity-50 shadow-inner focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
+                          twoFactorEnabled
+                            ? "bg-cyan-500 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.35)]"
+                            : (isDark ? "bg-slate-800 border-slate-700 hover:border-slate-600" : "bg-slate-200 border-slate-300 hover:border-slate-400")
+                        )}
+                      >
+                        {is2FALoading ? (
+                          <Loader2 className={cn("w-3.5 h-3.5 animate-spin mx-auto", twoFactorEnabled ? "text-slate-950" : (isDark ? "text-white" : "text-slate-900"))} />
+                        ) : (
+                          <span className={cn(
+                            "inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md",
+                            twoFactorEnabled ? "translate-x-7" : "translate-x-1"
+                          )} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 3 Security Pillars / Specs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-5 relative z-10">
+                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-[#060b14]/60 border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                        <KeyRound className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className={cn("text-xs font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>6-Digit TOTP</div>
+                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Refreshed every 30s</div>
+                      </div>
+                    </div>
+
+                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-[#060b14]/60 border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                        <Lock className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className={cn("text-xs font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Brute-Force Guard</div>
+                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Protects password leaks</div>
+                      </div>
+                    </div>
+
+                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-[#060b14]/60 border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                        <Globe className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className={cn("text-xs font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Universal Support</div>
+                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>iOS, Android, macOS, Win</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Security Notice / Call to Action Alert Box */}
+                  <div className={cn(
+                    "p-3.5 sm:p-4 rounded-xl border text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10",
+                    twoFactorEnabled
+                      ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-200/90" : "bg-emerald-50 border-emerald-200 text-emerald-900")
+                      : (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200/90" : "bg-slate-50 border-slate-200 text-slate-700")
+                  )}>
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      {twoFactorEnabled ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      ) : (
+                        <ShieldAlert className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                      )}
+                      <p className="text-xs">
+                        {twoFactorEnabled
+                          ? "Two-Factor Authentication is active. Each new login requires a one-time verification token from your authenticator app."
+                          : "2FA is currently disabled. We strongly recommend enabling Two-Factor Authentication to protect your servers, VPS instances, and account balance."}
+                      </p>
+                    </div>
+
+                    {!twoFactorEnabled && (
+                      <button
+                        type="button"
+                        onClick={handle2FAToggle}
+                        disabled={is2FALoading}
+                        className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shrink-0 cursor-pointer shadow-xs self-start sm:self-auto"
+                      >
+                        Setup 2FA
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Security & Login History Card */}
-                <div className={cn("rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-md relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
-                        <History className="w-6 h-6" />
+                    <div className="flex items-center gap-3.5">
+                      <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                        <History className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Riwayat Sesi & Login Pengguna</h3>
-                        <p className={cn("text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Pantau aktivitas login dan perangkat yang mengakses akun Anda.</p>
+                        <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Sessions & Login History</h3>
+                        <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Monitor active devices and account login activity.</p>
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={fetchLoginLogs}
-                      disabled={loadingLoginLogs}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer self-start sm:self-auto",
-                        isDark ? "border-slate-800 hover:border-slate-700 bg-[#060b14] text-zinc-300 hover:text-white" : "border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                      {hasOtherActiveSessions && (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmRevokeAllModal(true)}
+                          disabled={isRevokingAll || loadingLoginLogs}
+                          className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer disabled:opacity-50",
+                            isDark
+                              ? "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                              : "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                          )}
+                        >
+                          {isRevokingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+                          <span>Revoke Other Sessions</span>
+                        </button>
                       )}
-                    >
-                      <RefreshCw className={cn("w-3.5 h-3.5", loadingLoginLogs && "animate-spin text-cyan-400")} />
-                      <span>Segarkan Riwayat</span>
-                    </button>
+
+                      <button
+                        type="button"
+                        onClick={() => fetchLoginLogs(loginLogsPage)}
+                        disabled={loadingLoginLogs}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer",
+                          isDark
+                            ? "border-slate-800 hover:border-slate-700 bg-[#060b14] text-zinc-300 hover:text-white"
+                            : "border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                        )}
+                      >
+                        <RefreshCw className={cn("w-3.5 h-3.5", loadingLoginLogs && "animate-spin text-cyan-400")} />
+                        <span>Refresh</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Logs Table / List */}
+                  {/* Logs Table / List Container */}
                   <div className={cn("relative z-10 rounded-2xl border overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")}>
                     {loadingLoginLogs ? (
                       <div className="py-12 flex flex-col items-center justify-center gap-2">
                         <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" />
-                        <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Memuat riwayat login...</span>
+                        <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Loading sessions & login history...</span>
                       </div>
                     ) : loginLogs.length === 0 ? (
                       <div className={cn("py-10 text-center text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        Belum ada riwayat aktivitas login yang tercatat.
+                        No login activity recorded yet.
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead>
-                            <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#0b1322] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                              <th className="py-3 px-3 sm:px-4 w-28 sm:w-36 whitespace-nowrap">Waktu</th>
-                              <th className="py-3 px-3 sm:px-4 w-36 whitespace-nowrap">Alamat IP</th>
-                              <th className="py-3 px-3 sm:px-4">Keterangan / Metode</th>
-                              <th className="py-3 px-3 sm:px-4 w-24 text-right whitespace-nowrap">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
-                            {loginLogs.map((log) => {
-                              const dt = formatDateTime(log.createdAt);
-                              return (
-                                <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                                  <td className={cn("py-3 px-3 sm:px-4 font-mono text-[11px] whitespace-nowrap align-middle", isDark ? "text-zinc-300" : "text-slate-700")}>
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 leading-tight">
-                                      <span>{dt.date}</span>
-                                      <span className={cn("text-[10px] sm:text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>{dt.time}</span>
+                      <>
+                        {/* ── Desktop View (md+) ── */}
+                        <div className="hidden md:block overflow-x-auto">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#0b1322] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                                <th className="py-3 px-4 whitespace-nowrap">Device & Browser</th>
+                                <th className="py-3 px-4 w-36 whitespace-nowrap">IP Address</th>
+                                <th className="py-3 px-4 w-32 whitespace-nowrap">Login Time</th>
+                                <th className="py-3 px-4">Details / Method</th>
+                                <th className="py-3 px-4 text-right whitespace-nowrap">Status & Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
+                              {loginLogs.map((log) => {
+                                const dt = formatDateTime(log.createdAt);
+                                return (
+                                  <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
+                                    <td className="py-3 px-4 align-middle">
+                                      <div className="flex items-center gap-2.5">
+                                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                                          {getDeviceIcon(log.device)}
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                          <span className={cn("text-xs font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>
+                                            {log.deviceLabel || 'Web Device'}
+                                          </span>
+                                          {log.isCurrentDevice && (
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 mt-0.5">
+                                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                              This Device (Active)
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4 font-mono text-xs align-middle whitespace-nowrap">
+                                      <span className={isDark ? "text-zinc-300" : "text-slate-700"}>{log.ipAddress}</span>
+                                    </td>
+                                    <td className="py-3 px-4 font-mono text-[11px] align-middle whitespace-nowrap">
+                                      <div className="flex flex-col leading-tight">
+                                        <span className={isDark ? "text-zinc-200" : "text-slate-800"}>{dt.date}</span>
+                                        <span className={cn("text-[10px]", isDark ? "text-zinc-500" : "text-slate-400")}>{dt.time}</span>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4 align-middle text-xs">
+                                      <div className="flex flex-col">
+                                        <span className={cn("font-medium text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>{log.method}</span>
+                                        <span className="text-[10px] opacity-75">{log.description}</span>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4 text-right align-middle whitespace-nowrap">
+                                      <div className="flex items-center justify-end gap-2">
+                                        {log.status === 'SUCCESS' ? (
+                                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+                                            <CheckCircle2 className="w-3 h-3" /> Active
+                                          </span>
+                                        ) : log.status === 'REVOKED' ? (
+                                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-slate-800 border-slate-700 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                                            Signed Out
+                                          </span>
+                                        ) : (
+                                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
+                                            <AlertTriangle className="w-3 h-3" /> Failed
+                                          </span>
+                                        )}
+
+                                        {log.isSession && log.status === 'SUCCESS' && (
+                                          <button
+                                            type="button"
+                                            onClick={() => setConfirmRevokeModal({ isOpen: true, log })}
+                                            disabled={revokingLogId === log.rawId}
+                                            className={cn(
+                                              "inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all cursor-pointer disabled:opacity-50",
+                                              log.isCurrentDevice
+                                                ? (isDark ? "border-slate-800 hover:border-slate-700 bg-slate-900 text-zinc-300 hover:text-white" : "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200")
+                                                : (isDark ? "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" : "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100")
+                                            )}
+                                          >
+                                            {revokingLogId === log.rawId ? (
+                                              <Loader2 className="w-3 h-3 animate-spin" />
+                                            ) : (
+                                              <LogOut className="w-3 h-3" />
+                                            )}
+                                            <span>Sign Out</span>
+                                          </button>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* ── Mobile View (<md) ── */}
+                        <div className="block md:hidden divide-y divide-slate-800/80">
+                          {loginLogs.map((log) => {
+                            const dt = formatDateTime(log.createdAt);
+                            return (
+                              <div key={log.id} className="p-3.5 space-y-2.5 transition-colors">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                                      {getDeviceIcon(log.device)}
                                     </div>
-                                  </td>
-                                  <td className="py-3 px-3 sm:px-4 align-middle whitespace-nowrap">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-                                      <span className={cn("font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-800")}>{log.ipAddress}</span>
-                                      {log.isCurrentDevice && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 w-fit">
+                                    <div className="min-w-0">
+                                      <h4 className={cn("text-xs font-bold leading-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+                                        {log.deviceLabel || 'Web Device'}
+                                      </h4>
+                                      {log.isCurrentDevice ? (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 mt-0.5">
                                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                          Perangkat Ini
+                                          This Device (Active)
+                                        </span>
+                                      ) : (
+                                        <span className={cn("text-[10px]", isDark ? "text-zinc-500" : "text-slate-400")}>
+                                          {log.device || 'Other Device'}
                                         </span>
                                       )}
                                     </div>
-                                  </td>
-                                  <td className={cn("py-3 px-3 sm:px-4 align-middle text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
-                                    <div className="flex flex-col">
-                                      <span className={cn("font-medium", isDark ? "text-zinc-200" : "text-slate-800")}>{log.method}</span>
-                                      <span className="text-[11px] opacity-75">{log.description}</span>
-                                    </div>
-                                  </td>
-                                  <td className="py-3 px-3 sm:px-4 text-right align-middle whitespace-nowrap">
+                                  </div>
+
+                                  <div className="shrink-0">
                                     {log.status === 'SUCCESS' ? (
                                       <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
-                                        <CheckCircle2 className="w-3 h-3" /> Berhasil
+                                        <CheckCircle2 className="w-3 h-3" /> Active
+                                      </span>
+                                    ) : log.status === 'REVOKED' ? (
+                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-slate-800 border-slate-700 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                                        Signed Out
                                       </span>
                                     ) : (
                                       <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
-                                        <AlertTriangle className="w-3 h-3" /> {log.status === 'BLOCKED' ? 'Diblokir' : 'Gagal'}
+                                        <AlertTriangle className="w-3 h-3" /> Failed
                                       </span>
                                     )}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                                  </div>
+                                </div>
+
+                                {/* Compact Mobile Details */}
+                                <div className={cn("rounded-xl p-2.5 text-[11px] space-y-1.5 border", isDark ? "bg-[#0b1322]/80 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className={cn("text-[10px]", isDark ? "text-zinc-400" : "text-slate-500")}>IP Address</span>
+                                    <span className={cn("font-mono font-medium break-all text-right text-[11px]", isDark ? "text-zinc-200" : "text-slate-800")}>{log.ipAddress}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className={cn("text-[10px]", isDark ? "text-zinc-400" : "text-slate-500")}>Login Time</span>
+                                    <span className={cn("font-mono text-[10px]", isDark ? "text-zinc-300" : "text-slate-700")}>{dt.date} • {dt.time}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className={cn("text-[10px]", isDark ? "text-zinc-400" : "text-slate-500")}>Method</span>
+                                    <span className={cn("text-[10px] truncate max-w-[170px]", isDark ? "text-zinc-300" : "text-slate-700")}>{log.method}</span>
+                                  </div>
+                                </div>
+
+                                {/* Mobile Action Button */}
+                                {log.isSession && log.status === 'SUCCESS' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfirmRevokeModal({ isOpen: true, log })}
+                                    disabled={revokingLogId === log.rawId}
+                                    className={cn(
+                                      "w-full py-1.5 px-3 rounded-xl text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                                      log.isCurrentDevice
+                                        ? (isDark ? "border-slate-700 bg-slate-800/80 text-zinc-200 hover:text-white" : "border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200")
+                                        : (isDark ? "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" : "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100")
+                                    )}
+                                  >
+                                    {revokingLogId === log.rawId ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <LogOut className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>{log.isCurrentDevice ? "Sign Out from This Session" : "Sign Out Device"}</span>
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* ── Pagination Bar ── */}
+                        <div className={cn("p-3 sm:p-3.5 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs", isDark ? "border-slate-800/80 bg-[#060b14]" : "border-slate-200 bg-slate-50/50")}>
+                          <span className={cn("text-[11px]", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            Showing <strong className={isDark ? "text-white" : "text-slate-900"}>{loginLogs.length}</strong> of <strong className={isDark ? "text-white" : "text-slate-900"}>{loginLogsTotal}</strong> login records
+                          </span>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => fetchLoginLogs(loginLogsPage - 1)}
+                              disabled={loginLogsPage <= 1 || loadingLoginLogs}
+                              className={cn(
+                                "px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
+                                isDark ? "border-slate-800 bg-slate-900/60 text-zinc-300 hover:text-white hover:border-slate-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                              )}
+                            >
+                              <ChevronLeft className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Previous</span>
+                            </button>
+
+                            <span className={cn("px-2 text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                              {loginLogsPage} / {loginLogsTotalPages}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => fetchLoginLogs(loginLogsPage + 1)}
+                              disabled={loginLogsPage >= loginLogsTotalPages || loadingLoginLogs}
+                              className={cn(
+                                "px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
+                                isDark ? "border-slate-800 bg-slate-900/60 text-zinc-300 hover:text-white hover:border-slate-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                              )}
+                            >
+                              <span className="hidden sm:inline">Next</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
 
                   <div className={cn("mt-4 p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
                     <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                     <p className="leading-relaxed">
-                      <strong>Tip Keamanan Akun:</strong> Jika Anda melihat alamat IP atau jam login yang mencurigakan atau tidak Anda kenali, segera perbarui kata sandi Anda dan aktifkan <em>Two-Factor Authentication (2FA)</em> pada kartu di atas.
+                      <strong>Account Security Tip:</strong> If you notice an unrecognized device or login time, immediately click <em>Sign Out</em> on that session and update your password.
                     </p>
                   </div>
                 </div>
@@ -921,21 +1332,21 @@ export default function SettingsPage() {
       {/* OTP Verify Password Modal */}
       <AnimatePresence>
         {showOtpModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-              <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+              <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
-                  <KeyRound className="w-8 h-8" />
+                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                  <KeyRound className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
-                <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Verify Password Change</h3>
-                <p className={cn("text-sm", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a 6-digit code to your email. Enter it below to confirm the change.</p>
+                <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>Verify Password Change</h3>
+                <p className={cn("text-xs sm:text-sm", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a 6-digit code to your email. Enter it below to confirm the change.</p>
               </div>
               <div className="space-y-4 relative z-10">
                 <OtpInput value={otpCode} onChange={setOtpCode} />
-                <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm font-semibold shadow-sm transition-all disabled:opacity-50">
+                <div className="flex gap-2.5 sm:gap-3 pt-2">
+                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 cursor-pointer">
                     {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                   </button>
                 </div>
@@ -948,38 +1359,38 @@ export default function SettingsPage() {
       {/* Email Change Modal */}
       <AnimatePresence>
         {showEmailModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-              <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+              <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
-                  <Mail className="w-8 h-8" />
+                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                  <Mail className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
-                <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Change Email Address</h3>
+                <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>Change Email Address</h3>
               </div>
 
               {!emailOtpStep ? (
                 <form onSubmit={handleEmailRequest} className="space-y-4 relative z-10">
-                  <p className={cn("text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>Enter your new email. We'll send a verification code to your <strong className={isDark ? "text-white" : "text-slate-900"}>current</strong> email.</p>
+                  <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>Enter your new email. We'll send a verification code to your <strong className={isDark ? "text-white" : "text-slate-900"}>current</strong> email.</p>
                   <div>
                     <label className={labelClass}>New Email Address</label>
                     <input type="email" required value={newEmailInput} onChange={(e) => setNewEmailInput(e.target.value)} className={inputClass} placeholder="new@example.com" />
                   </div>
-                  <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm font-semibold shadow-sm disabled:opacity-50 transition-all">
+                  <div className="flex gap-2.5 sm:gap-3 pt-2">
+                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer">
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Continue'}
                     </button>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-4 relative z-10">
-                  <p className={cn("text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
+                  <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
                   <OtpInput value={emailOtpCode} onChange={setEmailOtpCode} />
-                  <div className="flex gap-3">
-                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Back</button>
-                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm font-semibold shadow-sm disabled:opacity-50 transition-all">
+                  <div className="flex gap-2.5 sm:gap-3">
+                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Back</button>
+                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer">
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify & Save'}
                     </button>
                   </div>
@@ -993,21 +1404,21 @@ export default function SettingsPage() {
       {/* 2FA Setup Modal */}
       <AnimatePresence>
         {showTwoFactorModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-3xl border p-6 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-5 right-5 transition-colors p-2 rounded-xl", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
-                  <ShieldCheck className="w-8 h-8" />
+                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                  <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
-                <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Setup 2FA</h3>
-                <p className={cn("text-sm", isDark ? "text-slate-400" : "text-slate-500")}>Scan this QR code with Google Authenticator or Authy.</p>
+                <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>Setup 2FA</h3>
+                <p className={cn("text-xs sm:text-sm", isDark ? "text-slate-400" : "text-slate-500")}>Scan this QR code with Google Authenticator or Authy.</p>
               </div>
 
               <div className="flex justify-center mb-6 relative z-10">
-                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                  {qrCodeUrl && <img referrerPolicy="no-referrer" src={qrCodeUrl} alt="QR Code" className="w-48 h-48" loading="lazy" decoding="async" />}
+                <div className="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                  {qrCodeUrl && <img referrerPolicy="no-referrer" src={qrCodeUrl} alt="QR Code" className="w-40 h-40 sm:w-48 sm:h-48" loading="lazy" decoding="async" />}
                 </div>
               </div>
 
@@ -1016,9 +1427,9 @@ export default function SettingsPage() {
                   <label className={labelClass}>Verification Code</label>
                   <OtpInput value={twoFactorCode} onChange={setTwoFactorCode} />
                 </div>
-                <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm font-semibold shadow-sm disabled:opacity-50 transition-all">
+                <div className="flex gap-2.5 sm:gap-3 pt-2">
+                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer">
                     {is2FALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enable 2FA'}
                   </button>
                 </div>
@@ -1053,6 +1464,38 @@ export default function SettingsPage() {
       >
         <OtpInput value={disable2FACode} onChange={setDisable2FACode} isDanger={true} />
       </ConfirmModal>
+
+      {/* Revoke Session Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmRevokeModal.isOpen}
+        onClose={() => setConfirmRevokeModal({ isOpen: false, log: null })}
+        onConfirm={() => confirmRevokeModal.log && handleRevokeSession(confirmRevokeModal.log)}
+        title={confirmRevokeModal.log?.isCurrentDevice ? "Sign Out of This Session?" : "Sign Out Device?"}
+        description={
+          confirmRevokeModal.log?.isCurrentDevice
+            ? "You will be signed out of this browser session and redirected to the login page."
+            : `The login session on ${confirmRevokeModal.log?.deviceLabel || 'this device'} (IP: ${confirmRevokeModal.log?.ipAddress}) will be terminated immediately.`
+        }
+        confirmText={confirmRevokeModal.log?.isCurrentDevice ? "Sign Out Now" : "Sign Out"}
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={revokingLogId !== null}
+        icon={<LogOut className="w-8 h-8" />}
+      />
+
+      {/* Revoke All Other Sessions Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmRevokeAllModal}
+        onClose={() => setConfirmRevokeAllModal(false)}
+        onConfirm={handleRevokeAllOther}
+        title="Revoke All Other Sessions?"
+        description="All active login sessions on other devices will be terminated immediately. You will remain signed in on this current device."
+        confirmText="Revoke All"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isRevokingAll}
+        icon={<ShieldAlert className="w-8 h-8" />}
+      />
     </motion.div>
   );
 }

@@ -35,6 +35,8 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
+import { EnterpriseInfraSection } from "@/components/infra/EnterpriseInfraSection";
+import { AntiDdosWorkflowSection } from "@/components/infra/AntiDdosWorkflowSection";
 import { cn } from "@/lib/utils";
 
 const VPS_TERMINAL_LOGS = [
@@ -535,6 +537,12 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
             </div>
           </div>
         </section>
+ 
+        {/* ── 2.5. SUPPORT INFRA & CARRIER-GRADE ARCHITECTURE ──────────── */}
+        <EnterpriseInfraSection mode="vps" />
+
+        {/* ── 2.6. HOW ANTI-DDOS WORKS ANIMATED PIPELINE ───────────────── */}
+        <AntiDdosWorkflowSection mode="vps" />
 
         {/* ── 3. SPEC SLIDER & PRICING CALCULATOR ───────────────────────── */}
         <section id="pricing" className="scroll-mt-24 mb-16 lg:mb-24">

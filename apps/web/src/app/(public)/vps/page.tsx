@@ -35,6 +35,7 @@ export default async function VpsLandingPage() {
     diskSsd: pricing.diskSsd || pricing.disk || 15,
     ipv4: pricing.ipv4 || 50,
     backup: pricing.backup || 10,
+    bandwidth: pricing.bandwidth !== undefined ? pricing.bandwidth : Math.ceil(50000 / 730),
   };
 
   return <VpsClient safePricing={safePricing} isVpsEnabled={isVpsEnabled} />;

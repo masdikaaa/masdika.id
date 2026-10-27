@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { getBandwidthOptions } from "@/lib/vps-bandwidth";
 
 export const dynamic = 'force-dynamic'; // Disable cache to ensure real-time storage availability
 
 export async function GET() {
   try {
     let maxSpecs: Record<string, number> = { cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 };
+    const bandwidthOptions = await getBandwidthOptions();
     
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
     if (server) {
@@ -50,8 +52,11 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ maxSpecs });
+    return NextResponse.json({ maxSpecs, bandwidthOptions });
   } catch (error) {
-    return NextResponse.json({ maxSpecs: { cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 } });
+    return NextResponse.json({ 
+      maxSpecs: { cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 },
+      bandwidthOptions: [100, 150, 200, 250, 300]
+    });
   }
 }

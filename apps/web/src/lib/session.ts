@@ -5,9 +5,10 @@ const getSessionSecret = () => process.env.SESSION_SECRET || 'dev_fallback_sessi
 const DEFAULT_MAX_AGE = 60 * 60 * 24; // 24 hours
 const REMEMBER_ME_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
-interface SessionPayload {
+export interface SessionPayload {
   userId: number;
   role?: string;
+  sessionId?: string;
   iat: number; // issued at (epoch seconds)
   exp: number; // expiration (epoch seconds)
 }
@@ -16,7 +17,12 @@ interface SessionPayload {
  * Create a signed session token using HMAC-SHA256.
  * Token format: base64url(JSON payload) + "." + HMAC signature
  */
-export function createSessionToken(userId: number, role: string, rememberMe: boolean = false): { token: string; maxAge: number } {
+export function createSessionToken(
+  userId: number, 
+  role: string, 
+  rememberMe: boolean = false, 
+  sessionId?: string
+): { token: string; maxAge: number; sessionId: string } {
   // STRICT RUNTIME SECURITY CHECK: Ensure production doesn't use the fallback secret
   const secret = getSessionSecret();
   if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || secret === 'dev_fallback_session_secret_do_not_use_in_production')) {
@@ -25,10 +31,12 @@ export function createSessionToken(userId: number, role: string, rememberMe: boo
 
   const maxAge = rememberMe ? REMEMBER_ME_MAX_AGE : DEFAULT_MAX_AGE;
   const now = Math.floor(Date.now() / 1000);
+  const activeSessionId = sessionId || crypto.randomUUID();
 
   const payload: SessionPayload = {
     userId,
     role,
+    sessionId: activeSessionId,
     iat: now,
     exp: now + maxAge,
   };
@@ -42,13 +50,14 @@ export function createSessionToken(userId: number, role: string, rememberMe: boo
   return {
     token: `${payloadBase64}.${signature}`,
     maxAge,
+    sessionId: activeSessionId,
   };
 }
 
 /**
- * Verify a signed session token. Returns the userId if valid, null otherwise.
+ * Extract and securely verify full session payload from a signed session token.
  */
-export function verifySessionToken(token: string | undefined | null): number | null {
+export function getSessionPayload(token: string | undefined | null): SessionPayload | null {
   // STRICT RUNTIME SECURITY CHECK
   const secret = getSessionSecret();
   if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || secret === 'dev_fallback_session_secret_do_not_use_in_production')) {
@@ -88,8 +97,15 @@ export function verifySessionToken(token: string | undefined | null): number | n
     // Validate userId
     if (!payload.userId || typeof payload.userId !== 'number') return null;
 
-    return payload.userId;
+    return payload;
   } catch {
     return null;
   }
+}
+
+/**
+ * Verify a signed session token. Returns the userId if valid, null otherwise.
+ */
+export function verifySessionToken(token: string | undefined | null): number | null {
+  return getSessionPayload(token)?.userId ?? null;
 }

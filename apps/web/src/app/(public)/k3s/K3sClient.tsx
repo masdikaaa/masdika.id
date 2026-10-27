@@ -34,6 +34,8 @@ import { Badge } from "@/components/ui/Badge";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
+import { EnterpriseInfraSection } from "@/components/infra/EnterpriseInfraSection";
+import { AntiDdosWorkflowSection } from "@/components/infra/AntiDdosWorkflowSection";
 import { cn } from "@/lib/utils";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 
@@ -359,6 +361,12 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
             </div>
           </div>
         </section>
+ 
+        {/* ── 2.5. SUPPORT INFRA & CARRIER-GRADE ARCHITECTURE ──────────── */}
+        <EnterpriseInfraSection mode="k3s" />
+
+        {/* ── 2.6. HOW ANTI-DDOS WORKS ANIMATED PIPELINE ───────────────── */}
+        <AntiDdosWorkflowSection mode="k3s" />
 
         {/* ── 3. SPEC SLIDER & PRICING CALCULATOR ───────────────────────── */}
         <section id="pricing" className="scroll-mt-24 mb-16 lg:mb-24">

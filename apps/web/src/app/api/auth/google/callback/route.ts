@@ -5,6 +5,7 @@ import { createSessionToken } from '@/lib/session';
 import crypto from 'crypto';
 import { getClientIp } from '@/lib/get-ip';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { parseUserAgent } from '@/lib/device';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -91,7 +92,62 @@ export async function GET(req: Request) {
 
     // 4. Generate session token
     // Set rememberMe to true for Google logins by default
-    const { token, maxAge } = createSessionToken(user.id, user.role, true);
+    const { token, maxAge, sessionId } = createSessionToken(user.id, user.role, true);
+
+    // Record login log with device info and deduplication
+    try {
+      const userAgent = req.headers.get('user-agent') || '';
+      const deviceInfo = parseUserAgent(userAgent);
+      const normalizedEmail = String(email).trim().toLowerCase();
+
+      const existingLog = await prisma.loginLog.findFirst({
+        where: {
+          success: true,
+          ipAddress: ip,
+          OR: [
+            { userId: user.id },
+            { emailAttempt: normalizedEmail }
+          ],
+          device: deviceInfo.device,
+          browser: deviceInfo.browser,
+          os: deviceInfo.os
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (existingLog) {
+        await prisma.loginLog.update({
+          where: { id: existingLog.id },
+          data: {
+            sessionId,
+            userId: user.id,
+            emailAttempt: normalizedEmail,
+            userAgent,
+            isRevoked: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        });
+      } else {
+        await prisma.loginLog.create({
+          data: {
+            userId: user.id,
+            sessionId,
+            ipAddress: ip,
+            emailAttempt: normalizedEmail,
+            device: deviceInfo.device,
+            browser: deviceInfo.browser,
+            os: deviceInfo.os,
+            userAgent,
+            success: true,
+            isBanned: false,
+            isRevoked: false
+          }
+        });
+      }
+    } catch (logErr) {
+      console.error('Failed to record Google login log:', logErr);
+    }
 
     const redirectUrl = new URL(user.role === 'ADMIN' ? '/admin' : '/dashboard', baseUrl);
     const response = NextResponse.redirect(redirectUrl);

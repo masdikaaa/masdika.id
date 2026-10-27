@@ -8,10 +8,13 @@ import crypto from 'crypto';
 import { verify } from 'otplib';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import { parseUserAgent } from '@/lib/device';
 
 export async function POST(req: Request) {
   try {
     const ip = getClientIp(req);
+    const userAgent = req.headers.get('user-agent') || '';
+    const deviceInfo = parseUserAgent(userAgent);
 
     // Anti-Brute-Force & Race Condition Prevention: Max 15 attempts per 15 minutes per IP
     if (!(await checkRateLimit('LOGIN', ip, 15, 900))) {
@@ -79,6 +82,10 @@ export async function POST(req: Request) {
         data: {
           ipAddress: ip,
           emailAttempt: email ? String(email).trim() : 'unknown',
+          device: deviceInfo.device,
+          browser: deviceInfo.browser,
+          os: deviceInfo.os,
+          userAgent,
           success: false,
           isBanned: isBanned
         }
@@ -189,27 +196,59 @@ export async function POST(req: Request) {
       }
     }
 
-    // Login success
-    if (ip !== 'unknown') {
-      await prisma.loginLog.create({
-        data: {
-          ipAddress: ip,
-          emailAttempt: String(email).trim(),
-          success: true,
-          isBanned: false
-        }
-      });
-    }
-
-    logger.info('User logged in successfully', { 
-      event: 'auth.success', 
-      ip, 
-      userId: user.id, 
-      role: user.role 
-    });
-
     // Generate signed session token
-    const { token, maxAge } = createSessionToken(user.id, user.role, rememberMe);
+    const { token, maxAge, sessionId } = createSessionToken(user.id, user.role, rememberMe);
+
+    // Login success & log deduplication:
+    // If device and IP are the same, don't create duplicate rows. Update login timestamp & sessionId!
+    if (ip !== 'unknown') {
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const existingLog = await prisma.loginLog.findFirst({
+        where: {
+          success: true,
+          ipAddress: ip,
+          OR: [
+            { userId: user.id },
+            { emailAttempt: normalizedEmail }
+          ],
+          device: deviceInfo.device,
+          browser: deviceInfo.browser,
+          os: deviceInfo.os
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (existingLog) {
+        await prisma.loginLog.update({
+          where: { id: existingLog.id },
+          data: {
+            sessionId,
+            userId: user.id,
+            emailAttempt: normalizedEmail,
+            userAgent,
+            isRevoked: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        });
+      } else {
+        await prisma.loginLog.create({
+          data: {
+            userId: user.id,
+            sessionId,
+            ipAddress: ip,
+            emailAttempt: normalizedEmail,
+            device: deviceInfo.device,
+            browser: deviceInfo.browser,
+            os: deviceInfo.os,
+            userAgent,
+            success: true,
+            isBanned: false,
+            isRevoked: false
+          }
+        });
+      }
+    }
 
     const response = NextResponse.json({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
     

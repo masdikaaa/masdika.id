@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifySessionToken } from '@/lib/session';
+import { getSessionPayload } from '@/lib/session';
 import { cookies } from 'next/headers';
 
 import { decryptDeterministic } from '@/lib/encryption';
@@ -14,9 +14,22 @@ export async function GET() {
       return NextResponse.json({ user: null }, { status: 200 });
     }
 
-    const userId = verifySessionToken(token);
+    const payload = getSessionPayload(token);
+    const userId = payload?.userId;
     if (!userId) {
       return NextResponse.json({ user: null }, { status: 200 });
+    }
+
+    // Check if session has been revoked/signed out
+    if (payload?.sessionId) {
+      const sessionLog = await prisma.loginLog.findFirst({
+        where: { sessionId: payload.sessionId }
+      });
+      if (sessionLog && sessionLog.isRevoked) {
+        const response = NextResponse.json({ user: null }, { status: 200 });
+        response.cookies.delete('admin_session');
+        return response;
+      }
     }
 
     const user = await prisma.user.findUnique({

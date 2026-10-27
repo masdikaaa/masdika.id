@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   ArrowLeft, Check, ChevronRight, ChevronLeft, ShieldCheck,
@@ -16,8 +16,8 @@ import { formatRupiah } from "@/lib/billing";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Suspense } from "react";
 import VpsCheckoutFlow from "@/components/VpsCheckoutFlow";
+import { EnterpriseInfraBanner, EnterpriseInfraSidebarCard } from "@/components/EnterpriseInfraBadges";
 
 function Pager({
   page,
@@ -369,6 +369,11 @@ function CheckoutContent() {
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Select your desired premium tier and finalize your order.</p>
         </div>
+      </motion.div>
+
+      {/* Enterprise Infrastructure Trust Showcase (Intel, Juniper, MikroTik) */}
+      <motion.div variants={itemVariants} className="w-full max-w-full min-w-0">
+        <EnterpriseInfraBanner />
       </motion.div>
 
       <div className="space-y-6 md:space-y-8 w-full max-w-full min-w-0">
@@ -833,7 +838,11 @@ function CheckoutContent() {
                   {isProcessing ? "Processing..." : "Complete Secure Payment"}
                 </button>
 
-                <div className={cn("mt-5 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest relative z-10", isDark ? "text-zinc-500" : "text-slate-500")}>
+                <div className="mt-5 relative z-10">
+                  <EnterpriseInfraSidebarCard />
+                </div>
+
+                <div className={cn("mt-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest relative z-10", isDark ? "text-zinc-500" : "text-slate-500")}>
                   <ShieldCheck className="w-4 h-4 text-cyan-500" />
                   256-bit Encrypted Checkout
                 </div>

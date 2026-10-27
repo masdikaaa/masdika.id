@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { verifySessionToken } from './session';
+import { verifySessionToken, getSessionPayload } from './session';
 import { NextResponse } from 'next/server';
 import { prisma } from './prisma';
 
@@ -11,10 +11,21 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
     return { error: 'Unauthorized', status: 401 };
   }
 
-  const userId = verifySessionToken(token);
+  const payload = getSessionPayload(token);
+  const userId = payload?.userId;
   
   if (!userId) {
     return { error: 'Unauthorized', status: 401 };
+  }
+
+  // Check if session has been revoked/signed out
+  if (payload?.sessionId) {
+    const sessionLog = await prisma.loginLog.findFirst({
+      where: { sessionId: payload.sessionId }
+    });
+    if (sessionLog && sessionLog.isRevoked) {
+      return { error: 'Session has been revoked. Please log in again.', status: 401, isRevoked: true };
+    }
   }
 
   const user = await prisma.user.findUnique({
@@ -34,5 +45,5 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
     return { error: 'Forbidden: Insufficient role', status: 403 };
   }
 
-  return { userId, user };
+  return { userId, user, sessionId: payload?.sessionId };
 }
