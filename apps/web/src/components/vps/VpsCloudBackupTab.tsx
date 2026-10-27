@@ -2232,7 +2232,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             </div>
 
             {/* Quota-specific explanation if applicable */}
-            {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota")) ? (
+            {(errorModal.error.includes("storageQuotaExceeded") || errorModal.error.includes("do not have storage quota") || errorModal.error.includes("Kuota Google Drive Tidak Cukup") || errorModal.error.includes("Insufficient Google Drive Quota") || errorModal.error.includes("personal Google Drive storage quota")) ? (
               <div className="space-y-3 mb-5">
                 <div className={cn("p-3.5 rounded-xl border text-xs leading-relaxed space-y-2", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-200/90" : "bg-amber-50 border-amber-300 text-amber-950")}>
                   <div className="font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-300">
@@ -2240,22 +2240,46 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     <span>Root Cause:</span>
                   </div>
                   <p className="font-medium">
-                    A <strong>Google Cloud Service Account</strong> has a default storage quota of <strong>0 MB</strong> on personal Google Drive (Personal My Drive). Google prevents uploading files from Service Accounts to personal non-workspace Google Drive accounts.
+                    {Boolean(config.hasRefreshToken || config.gdriveRefreshToken || errorModal.error.includes("personal Google Drive")) ? (
+                      <>
+                        Your <strong>Personal Google Drive</strong> storage is <strong>full (15 GB quota exceeded)</strong>. Google accounts share 15 GB across Google Drive, Gmail, and Google Photos. Google rejected the backup upload because there is not enough free space on your Google Account.
+                      </>
+                    ) : (
+                      <>
+                        A <strong>Google Cloud Service Account</strong> has a default storage quota of <strong>0 MB</strong> on personal Google Drive (Personal My Drive). Google prevents uploading files from Service Accounts to personal non-workspace Google Drive accounts.
+                      </>
+                    )}
                   </p>
                 </div>
 
                 <div className={cn("p-3.5 rounded-xl border text-xs space-y-2.5", isDark ? "bg-slate-900/60 border-slate-800 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-900")}>
                   <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Recommended Solutions:</div>
                   <ul className="space-y-2 pl-4 list-disc text-xs font-medium leading-relaxed">
-                    <li>
-                      <strong>Use Google Workspace Shared Drive:</strong> Create a folder in a Shared Drive (Team Drive), then invite the Service Account email as <em>Content Manager</em>. In Shared Drive, storage is counted against the workspace domain, not the Service Account.
-                    </li>
-                    <li>
-                      <strong>Use Cloudflare R2 (Recommended):</strong> Free 10 GB/month with zero egress fees, fast setup using Account ID and S3 API Keys.
-                    </li>
-                    <li>
-                      <strong>Use AWS S3:</strong> Create an S3 bucket and use an IAM user with write permissions.
-                    </li>
+                    {Boolean(config.hasRefreshToken || config.gdriveRefreshToken || errorModal.error.includes("personal Google Drive")) ? (
+                      <>
+                        <li>
+                          <strong>Free up space in Google Drive:</strong> Go to <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="underline font-bold text-cyan-600 dark:text-cyan-400">drive.google.com</a>, delete unused files or empty your Trash to make room for VPS backups.
+                        </li>
+                        <li>
+                          <strong>Use Cloudflare R2 (Recommended):</strong> Free 10 GB/month with zero egress fees, fast setup using Account ID and S3 API Keys.
+                        </li>
+                        <li>
+                          <strong>Use AWS S3:</strong> Create an S3 bucket with unlimited scalable capacity.
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li>
+                          <strong>Connect Personal Google Drive:</strong> Switch to the <em>Personal Drive (OAuth)</em> tab to backup to your own personal Google Drive account.
+                        </li>
+                        <li>
+                          <strong>Use Google Workspace Shared Drive:</strong> Create a folder in a Shared Drive (Team Drive), then invite the Service Account email as <em>Content Manager</em>.
+                        </li>
+                        <li>
+                          <strong>Use Cloudflare R2 (Recommended):</strong> Free 10 GB/month with zero egress fees.
+                        </li>
+                      </>
+                    )}
                   </ul>
                 </div>
               </div>

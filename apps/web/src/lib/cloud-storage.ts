@@ -422,7 +422,10 @@ export async function streamUploadToGoogleDrive(
   if (!initRes.ok) {
     const errText = await initRes.text();
     if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
-      throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or use Cloudflare R2 / AWS S3.");
+      if (config.gdriveRefreshToken) {
+        throw new Error("Your personal Google Drive storage quota (15 GB) is full or exceeded. Please free up space in your Google account (Google Drive, Gmail, or Google Photos) or use Cloudflare R2 / AWS S3.");
+      }
+      throw new Error("Insufficient Google Drive Quota: Google Cloud Service Accounts have a 0 MB storage quota on personal Google Drive (Personal My Drive). Google requires using a Google Workspace Shared Drive (Team Drive). Add the Service Account to a Shared Drive as Content Manager, or connect via Personal Google Drive (OAuth).");
     }
     throw new Error(`Google Drive resumable session initiation failed (${initRes.status}): ${errText}`);
   }
@@ -447,7 +450,10 @@ export async function streamUploadToGoogleDrive(
   if (!uploadRes.ok) {
     const errText = await uploadRes.text();
     if (errText.includes("storageQuotaExceeded") || errText.includes("do not have storage quota")) {
-      throw new Error("Insufficient Google Drive Quota: Service Accounts do not have storage quota on personal Google Drive. Please use a Google Workspace Shared Drive (Team Drive) or Cloudflare R2 / AWS S3.");
+      if (config.gdriveRefreshToken) {
+        throw new Error("Your personal Google Drive storage quota (15 GB) is full or exceeded. Please free up space in your Google account or use Cloudflare R2 / AWS S3.");
+      }
+      throw new Error("Insufficient Google Drive Quota: Service Accounts do not have storage quota on personal Google Drive. Please use a Google Workspace Shared Drive (Team Drive), connect via Personal Google Drive (OAuth), or use Cloudflare R2 / AWS S3.");
     }
     throw new Error(`Google Drive stream upload failed (${uploadRes.status}): ${errText}`);
   }
