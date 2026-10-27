@@ -753,7 +753,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("R2")}
             className={cn(
-              "p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between gap-3 relative group",
+              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group",
               selectedProvider === "R2"
                 ? isDark
                   ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
@@ -763,10 +763,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 : "bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-50 shadow-2xs"
             )}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
                 className={cn(
-                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                  "w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-all",
                   isDark
                     ? selectedProvider === "R2"
                       ? "bg-cyan-500/10 border-cyan-500/30"
@@ -776,23 +776,23 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     : "bg-slate-50 border-slate-300"
                 )}
               >
-                <CloudflareLogo className="w-6 h-6 shrink-0" />
+                <CloudflareLogo className="w-5 h-5 shrink-0" />
               </div>
               <div className="min-w-0">
-                <div className={cn("text-sm flex items-center gap-1.5 truncate", selectedProvider === "R2" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
+                <div className={cn("text-xs sm:text-sm flex items-center gap-1.5 truncate", selectedProvider === "R2" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
                   <span>Cloudflare R2</span>
                   {config.provider === "R2" && config.hasSecretKey && (
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className={cn("text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Zero egress fees, S3 API</p>
+                <p className={cn("text-[11px] sm:text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Zero egress fees, S3 API</p>
               </div>
             </div>
 
             {/* Selection indicator radio dot */}
             <div
               className={cn(
-                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                "w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-all",
                 selectedProvider === "R2"
                   ? "border-cyan-500 bg-cyan-500"
                   : isDark
@@ -800,7 +800,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   : "border-slate-400 bg-white"
               )}
             >
-              {selectedProvider === "R2" && <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-slate-950" />}
+              {selectedProvider === "R2" && <div className="w-1 h-1 rounded-full bg-white dark:bg-slate-950" />}
             </div>
           </button>
 
@@ -809,7 +809,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("S3")}
             className={cn(
-              "p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between gap-3 relative group",
+              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group",
               selectedProvider === "S3"
                 ? isDark
                   ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
@@ -819,10 +819,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 : "bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-50 shadow-2xs"
             )}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
                 className={cn(
-                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                  "w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-all",
                   isDark
                     ? selectedProvider === "S3"
                       ? "bg-cyan-500/10 border-cyan-500/30"
@@ -832,23 +832,23 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     : "bg-slate-50 border-slate-300"
                 )}
               >
-                <AwsS3Logo className="w-6 h-6 shrink-0" />
+                <AwsS3Logo className="w-5 h-5 shrink-0" />
               </div>
               <div className="min-w-0">
-                <div className={cn("text-sm flex items-center gap-1.5 truncate", selectedProvider === "S3" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
+                <div className={cn("text-xs sm:text-sm flex items-center gap-1.5 truncate", selectedProvider === "S3" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
                   <span>Amazon AWS S3</span>
                   {config.provider === "S3" && config.hasSecretKey && (
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className={cn("text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Industry standard storage</p>
+                <p className={cn("text-[11px] sm:text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Industry standard storage</p>
               </div>
             </div>
 
             {/* Selection indicator radio dot */}
             <div
               className={cn(
-                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                "w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-all",
                 selectedProvider === "S3"
                   ? "border-cyan-500 bg-cyan-500"
                   : isDark
@@ -856,7 +856,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   : "border-slate-400 bg-white"
               )}
             >
-              {selectedProvider === "S3" && <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-slate-950" />}
+              {selectedProvider === "S3" && <div className="w-1 h-1 rounded-full bg-white dark:bg-slate-950" />}
             </div>
           </button>
 
@@ -865,7 +865,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
             type="button"
             onClick={() => handleSelectProvider("GDRIVE")}
             className={cn(
-              "p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between gap-3 relative group",
+              "p-2.5 sm:p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2.5 relative group",
               selectedProvider === "GDRIVE"
                 ? isDark
                   ? "bg-cyan-500/10 border-cyan-500/60 text-white shadow-[0_0_20px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/40"
@@ -875,10 +875,10 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 : "bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-50 shadow-2xs"
             )}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
                 className={cn(
-                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                  "w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-all",
                   isDark
                     ? selectedProvider === "GDRIVE"
                       ? "bg-cyan-500/10 border-cyan-500/30"
@@ -888,23 +888,23 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     : "bg-slate-50 border-slate-300"
                 )}
               >
-                <GoogleDriveLogo className="w-6 h-6 shrink-0" />
+                <GoogleDriveLogo className="w-5 h-5 shrink-0" />
               </div>
               <div className="min-w-0">
-                <div className={cn("text-sm flex items-center gap-1.5 truncate", selectedProvider === "GDRIVE" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
+                <div className={cn("text-xs sm:text-sm flex items-center gap-1.5 truncate", selectedProvider === "GDRIVE" ? "font-bold text-slate-950 dark:text-white" : "font-semibold text-slate-800 dark:text-slate-300")}>
                   <span>Google Drive</span>
                   {config.provider === "GDRIVE" && (config.hasPrivateKey || config.hasRefreshToken) && (
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Configured" />
                   )}
                 </div>
-                <p className={cn("text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Personal &amp; Workspace</p>
+                <p className={cn("text-[11px] sm:text-xs mt-0.5 truncate font-medium", isDark ? "text-slate-400" : "text-slate-600")}>Personal &amp; Workspace</p>
               </div>
             </div>
 
             {/* Selection indicator radio dot */}
             <div
               className={cn(
-                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                "w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-all",
                 selectedProvider === "GDRIVE"
                   ? "border-cyan-500 bg-cyan-500"
                   : isDark
@@ -912,7 +912,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   : "border-slate-400 bg-white"
               )}
             >
-              {selectedProvider === "GDRIVE" && <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-slate-950" />}
+              {selectedProvider === "GDRIVE" && <div className="w-1 h-1 rounded-full bg-white dark:bg-slate-950" />}
             </div>
           </button>
         </div>
@@ -1213,7 +1213,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
               {/* Account Type Selector: Personal (OAuth) vs Workspace (Service Account) */}
               <div
                 className={cn(
-                  "p-1.5 rounded-2xl border grid grid-cols-1 sm:grid-cols-2 gap-1.5",
+                  "p-1 rounded-xl border grid grid-cols-2 gap-1",
                   isDark ? "bg-[#060b14]/80 border-slate-800/80" : "bg-slate-100/90 border-slate-200"
                 )}
               >
@@ -1221,33 +1221,31 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   type="button"
                   onClick={() => setGdriveAuthType("OAUTH")}
                   className={cn(
-                    "flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                    "flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
                     gdriveAuthType === "OAUTH"
                       ? isDark
-                        ? "bg-[#0b162c] text-cyan-400 shadow-md border border-cyan-500/40"
-                        : "bg-white text-cyan-900 shadow-xs border border-cyan-600/30"
+                        ? "bg-[#0b162c] text-cyan-400 shadow-xs border border-cyan-500/40"
+                        : "bg-white text-cyan-900 shadow-2xs border border-cyan-600/30"
                       : isDark
                       ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 border border-transparent"
                   )}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <GoogleDriveLogo className="w-4 h-4 shrink-0" />
-                    <span className="truncate">Personal Google Drive</span>
-                  </div>
+                  <GoogleDriveLogo className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">Personal Drive</span>
                   <span
                     className={cn(
-                      "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0",
+                      "text-[9px] px-1.5 py-0.2 rounded font-mono uppercase tracking-wider hidden sm:inline-block",
                       gdriveAuthType === "OAUTH"
                         ? isDark
-                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                          : "bg-cyan-100 text-cyan-800 border border-cyan-300"
+                          ? "bg-cyan-500/20 text-cyan-300"
+                          : "bg-cyan-100 text-cyan-800"
                         : isDark
-                        ? "bg-slate-800/80 text-slate-400"
+                        ? "bg-slate-800 text-slate-400"
                         : "bg-slate-200 text-slate-600"
                     )}
                   >
-                    OAuth 1-Click
+                    OAuth
                   </span>
                 </button>
 
@@ -1255,29 +1253,27 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                   type="button"
                   onClick={() => setGdriveAuthType("SERVICE_ACCOUNT")}
                   className={cn(
-                    "flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+                    "flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
                     gdriveAuthType === "SERVICE_ACCOUNT"
                       ? isDark
-                        ? "bg-[#0b162c] text-cyan-400 shadow-md border border-cyan-500/40"
-                        : "bg-white text-cyan-900 shadow-xs border border-cyan-600/30"
+                        ? "bg-[#0b162c] text-cyan-400 shadow-xs border border-cyan-500/40"
+                        : "bg-white text-cyan-900 shadow-2xs border border-cyan-600/30"
                       : isDark
                       ? "text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 border border-transparent"
                   )}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Key className="w-4 h-4 shrink-0" />
-                    <span className="truncate">Workspace Shared Drive</span>
-                  </div>
+                  <Key className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">Workspace Drive</span>
                   <span
                     className={cn(
-                      "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0",
+                      "text-[9px] px-1.5 py-0.2 rounded font-mono uppercase tracking-wider hidden sm:inline-block",
                       gdriveAuthType === "SERVICE_ACCOUNT"
                         ? isDark
-                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                          : "bg-cyan-100 text-cyan-800 border border-cyan-300"
+                          ? "bg-cyan-500/20 text-cyan-300"
+                          : "bg-cyan-100 text-cyan-800"
                         : isDark
-                        ? "bg-slate-800/80 text-slate-400"
+                        ? "bg-slate-800 text-slate-400"
                         : "bg-slate-200 text-slate-600"
                     )}
                   >
@@ -1288,53 +1284,53 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
               {/* Sub-View 1: Personal Google Drive (OAuth 2.0 Web) */}
               {gdriveAuthType === "OAUTH" && (
-                <div className="space-y-4 animate-in fade-in duration-200">
+                <div className="space-y-3 sm:space-y-4 animate-in fade-in duration-200">
                   {config.hasRefreshToken ? (
                     /* Connected State Card */
                     <div
                       className={cn(
-                        "p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 transition-all",
+                        "p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all",
                         isDark
                           ? "bg-emerald-500/[0.05] border-emerald-500/30 text-white"
                           : "bg-emerald-50/80 border-emerald-300 text-slate-900"
                       )}
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                          <CheckCircle2 className="w-6 h-6" />
+                      <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                          <CheckCircle2 className="w-5 h-5" />
                         </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 font-bold text-sm">
-                            <span className="truncate">Connected to Personal Google Drive</span>
-                            <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider border border-emerald-500/30 font-bold shrink-0">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                            <span className="truncate">Connected to Personal Drive</span>
+                            <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded-full uppercase tracking-wider border border-emerald-500/30 font-bold shrink-0">
                               Active
                             </span>
                           </div>
-                          <p className={cn("text-xs mt-0.5 font-medium truncate", isDark ? "text-slate-300" : "text-slate-600")}>
-                            Google Account: <strong className="font-semibold text-emerald-400">{config.gdriveClientEmail || "Authorized"}</strong> • Personal Drive quota (15 GB / Google One)
+                          <p className={cn("text-[11px] sm:text-xs mt-0.5 font-medium truncate", isDark ? "text-slate-300" : "text-slate-600")}>
+                            Account: <strong className="font-semibold text-emerald-400">{config.gdriveClientEmail || "Authorized"}</strong> • 15 GB / Google One
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-emerald-500/20">
                         <a
                           href={`/api/user/vps/${vpsId}/cloud-backups/gdrive/authorize`}
                           className={cn(
-                            "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-1.5 cursor-pointer",
+                            "flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-bold border transition-all inline-flex items-center gap-1.5 cursor-pointer",
                             isDark
                               ? "bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-700"
                               : "bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-2xs"
                           )}
                         >
-                          <RefreshCw className="w-3.5 h-3.5" /> Reconnect
+                          <RefreshCw className="w-3 h-3" /> Reconnect
                         </a>
                         <button
                           type="button"
                           onClick={handleDisconnectGDrive}
                           disabled={isDisconnectingGDrive}
-                          className="px-3.5 py-2 rounded-xl text-xs font-bold border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          className="flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-bold border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                         >
-                          {isDisconnectingGDrive ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+                          {isDisconnectingGDrive ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-3 h-3" />}
                           Disconnect
                         </button>
                       </div>
@@ -1343,41 +1339,41 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     /* Not Connected State Card */
                     <div
                       className={cn(
-                        "p-6 sm:p-8 rounded-2xl border text-center flex flex-col items-center justify-center gap-4 relative overflow-hidden",
+                        "p-4 sm:p-5 rounded-xl border text-center flex flex-col items-center justify-center gap-2.5 relative overflow-hidden",
                         isDark ? "bg-slate-900/40 border-slate-800/90" : "bg-white border-slate-200 shadow-xs"
                       )}
                     >
-                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/30" : "bg-cyan-50 border-cyan-300")}>
-                        <GoogleDriveLogo className="w-8 h-8" />
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border shadow-xs", isDark ? "bg-cyan-500/10 border-cyan-500/30" : "bg-cyan-50 border-cyan-300")}>
+                        <GoogleDriveLogo className="w-5 h-5" />
                       </div>
 
                       <div className="max-w-md">
-                        <h5 className={cn("text-base sm:text-lg font-bold mb-1.5", isDark ? "text-white" : "text-slate-950")}>
+                        <h5 className={cn("text-sm sm:text-base font-bold mb-1", isDark ? "text-white" : "text-slate-950")}>
                           Connect Personal Google Drive
                         </h5>
-                        <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
-                          Authorize your personal Google account with one click, just like <strong>Rclone</strong>. Your VPS backups will be streamed directly into your Google Drive (15 GB free / Google One quota) with zero Service Account limits.
+                        <p className={cn("text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
+                          Authorize your personal Google account with 1-click (Rclone style). Backups stream directly to your Google Drive quota with zero Service Account limits.
                         </p>
                       </div>
 
                       <a
                         href={`/api/user/vps/${vpsId}/cloud-backups/gdrive/authorize`}
-                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm shadow-md transition-all cursor-pointer hover:shadow-cyan-500/20 active:scale-[0.98]"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer hover:shadow-cyan-500/20 active:scale-[0.98]"
                       >
-                        <GoogleDriveLogo className="w-5 h-5 shrink-0" />
+                        <GoogleDriveLogo className="w-4 h-4 shrink-0" />
                         <span>Connect Personal Google Drive</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </a>
 
-                      <div className={cn("flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-medium pt-3 border-t w-full max-w-lg", isDark ? "border-slate-800/80 text-slate-400" : "border-slate-100 text-slate-600")}>
-                        <span className="flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-cyan-500" /> Personal 15 GB / Google One
+                      <div className={cn("flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-medium pt-2 border-t w-full max-w-md", isDark ? "border-slate-800/80 text-slate-400" : "border-slate-100 text-slate-600")}>
+                        <span className="flex items-center gap-1">
+                          <Check className="w-3 h-3 text-cyan-500" /> 15 GB / Google One
                         </span>
-                        <span className="flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-cyan-500" /> No Service Account limit
+                        <span className="flex items-center gap-1">
+                          <Check className="w-3 h-3 text-cyan-500" /> No SA limits
                         </span>
-                        <span className="flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-cyan-500" /> 1-Click OAuth 2.0
+                        <span className="flex items-center gap-1">
+                          <Check className="w-3 h-3 text-cyan-500" /> OAuth 2.0
                         </span>
                       </div>
                     </div>
@@ -1385,15 +1381,13 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
                   {/* Google OAuth Callback URL Helper & Troubleshooting Card */}
                   <div className={cn(
-                    "p-4 rounded-2xl border text-xs transition-all space-y-2.5",
+                    "p-3 sm:p-3.5 rounded-xl border text-xs transition-all space-y-2",
                     isDark ? "bg-[#070e1b] border-cyan-500/25 text-slate-300" : "bg-cyan-50/70 border-cyan-300 text-slate-800"
                   )}>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <Info className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          OAuth 2.0 Redirect Callback URI:
-                        </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white text-xs">
+                        <Info className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                        <span>OAuth 2.0 Redirect Callback URI:</span>
                       </div>
                       <button
                         type="button"
@@ -1405,7 +1399,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           setTimeout(() => setCopiedCallback(false), 2000);
                         }}
                         className={cn(
-                          "px-2.5 py-1 rounded-lg font-bold inline-flex items-center gap-1 text-[11px] border transition-all self-start sm:self-auto cursor-pointer",
+                          "px-2 py-0.5 rounded-md font-bold inline-flex items-center gap-1 text-[10px] sm:text-[11px] border transition-all self-start sm:self-auto cursor-pointer",
                           copiedCallback
                             ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                             : isDark
@@ -1413,21 +1407,21 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                             : "bg-white text-cyan-950 hover:bg-cyan-100 border-cyan-400 shadow-2xs"
                         )}
                       >
-                        {copiedCallback ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedCallback ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         <span>{copiedCallback ? "Copied!" : "Copy Callback URL"}</span>
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <code className={cn(
-                        "px-2.5 py-1.5 rounded-lg font-mono text-[11px] font-semibold break-all border w-full select-all",
+                        "px-2.5 py-1 rounded-md font-mono text-[10px] sm:text-[11px] font-semibold break-all border w-full select-all",
                         isDark ? "bg-black/50 border-slate-800 text-cyan-300" : "bg-white border-slate-300 text-cyan-950"
                       )}>
                         {typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}/api/auth/google/callback
                       </code>
                     </div>
 
-                    <p className={cn("text-[11px] leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
+                    <p className={cn("text-[10px] sm:text-[11px] leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
                       <strong>Google Error 400 (redirect_uri_mismatch)?</strong> Add the URL above to{" "}
                       <strong className={isDark ? "text-slate-200" : "text-slate-900"}>Authorized redirect URIs</strong> in your{" "}
                       <a
@@ -1444,30 +1438,30 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
                   {/* Alternative: Manual Refresh Token / Rclone JSON */}
                   <div className={cn(
-                    "rounded-2xl border transition-all overflow-hidden",
+                    "rounded-xl border transition-all overflow-hidden",
                     isDark ? "bg-slate-900/30 border-slate-800/80" : "bg-white border-slate-200"
                   )}>
                     <button
                       type="button"
                       onClick={() => setShowManualToken(!showManualToken)}
                       className={cn(
-                        "w-full px-4 py-3 flex items-center justify-between text-left transition-colors cursor-pointer",
+                        "w-full px-3.5 py-2.5 flex items-center justify-between text-left transition-colors cursor-pointer",
                         isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50"
                       )}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Key className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Key className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
                         <div>
                           <div className={cn("text-xs font-bold", isDark ? "text-slate-200" : "text-slate-900")}>
                             Alternative: Enter Refresh Token or Rclone JSON Manually
                           </div>
-                          <div className={cn("text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
-                            Instant connection without opening OAuth consent or modifying Google Cloud Console
+                          <div className={cn("text-[10px] sm:text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
+                            Instant connection without opening OAuth consent
                           </div>
                         </div>
                       </div>
                       <span className={cn(
-                        "text-xs font-semibold px-2 py-0.5 rounded border shrink-0",
+                        "text-[10px] font-semibold px-2 py-0.5 rounded border shrink-0",
                         isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-300 text-slate-700"
                       )}>
                         {showManualToken ? "Hide" : "Show"}
@@ -1475,32 +1469,32 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                     </button>
 
                     {showManualToken && (
-                      <div className={cn("p-4 border-t space-y-3", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                      <div className={cn("p-3 border-t space-y-2.5", isDark ? "border-slate-800/80" : "border-slate-200")}>
                         <div>
-                          <label className={cn("block text-xs font-bold uppercase tracking-wider mb-1.5", isDark ? "text-slate-300" : "text-slate-900")}>
+                          <label className={cn("block text-[11px] font-bold uppercase tracking-wider mb-1", isDark ? "text-slate-300" : "text-slate-900")}>
                             Google OAuth Refresh Token or Rclone Token JSON
                           </label>
                           <textarea
-                            rows={3}
-                            placeholder="Paste your 1//0... token or rclone token JSON: {&#10;  &quot;access_token&quot;: &quot;...&quot;,&#10;  &quot;refresh_token&quot;: &quot;1//0...&quot;&#10;}"
+                            rows={2}
+                            placeholder="Paste your 1//0... token or rclone token JSON: { &quot;refresh_token&quot;: &quot;1//0...&quot; }"
                             value={manualToken}
                             onChange={(e) => setManualToken(e.target.value)}
                             className={cn(
-                              "w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                              "w-full px-3 py-2 rounded-lg border text-xs font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
                               isDark ? "bg-slate-950/60 border-slate-800 text-cyan-300 placeholder-slate-600" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                             )}
                           />
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <span className={cn("text-[11px]", isDark ? "text-slate-400" : "text-slate-500")}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <span className={cn("text-[10px]", isDark ? "text-slate-400" : "text-slate-500")}>
                             Auto-extracts <code className="font-mono">refresh_token</code> from raw tokens or Rclone config JSON
                           </span>
                           <button
                             type="button"
                             onClick={handleConnectManualToken}
                             disabled={isConnectingManual || !manualToken.trim()}
-                            className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                            className="w-full sm:w-auto px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                           >
                             {isConnectingManual ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
                             <span>Connect Token</span>
@@ -1512,7 +1506,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
 
                   {/* Destination Folder ID for Personal Google Drive */}
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center justify-between mb-1">
                       <label className={cn("block text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-900")}>
                         Google Drive Folder ID (Optional)
                       </label>
@@ -1527,7 +1521,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                       </a>
                     </div>
                     <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-500 font-mono text-xs font-bold pointer-events-none hidden sm:block">
                         folders/
                       </div>
                       <input
@@ -1544,13 +1538,13 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                           setConfig({ ...config, gdriveFolderId: val });
                         }}
                         className={cn(
-                          "w-full px-3.5 sm:pl-20 py-2.5 rounded-xl border text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          "w-full px-3 py-2 sm:pl-16 rounded-lg border text-xs sm:text-sm font-mono font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
                           isDark ? "bg-slate-900/60 border-slate-800 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-950 placeholder-slate-400"
                         )}
                       />
                     </div>
-                    <p className={cn("text-xs mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
-                      Paste the Folder ID or full URL from your browser address bar. If left blank, backups will be stored in your root Google Drive.
+                    <p className={cn("text-[11px] mt-1 font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
+                      Paste Folder ID or URL from browser address bar. If blank, backups store in My Drive root.
                     </p>
                   </div>
                 </div>
@@ -1561,7 +1555,7 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                 <div className="space-y-4 animate-in fade-in duration-200">
                   {/* Quick Auto-Fill via JSON Key File */}
                   <div className={cn(
-                    "relative border border-dashed rounded-2xl p-4 transition-all group cursor-pointer text-center",
+                    "relative border border-dashed rounded-xl p-3 sm:p-3.5 transition-all group cursor-pointer",
                     isDark
                       ? "border-cyan-500/30 hover:border-cyan-400/60 bg-cyan-500/[0.03] hover:bg-cyan-500/[0.06]"
                       : "border-cyan-400 hover:border-cyan-500 bg-cyan-50/70 hover:bg-cyan-50"
@@ -1573,26 +1567,28 @@ export function VpsCloudBackupTab({ vps, isDark }: VpsCloudBackupTabProps) {
                       className="absolute inset-0 opacity-0 cursor-pointer z-10"
                       title="Upload Google Cloud Service Account JSON Key"
                     />
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pointer-events-none">
+                    <div className="flex items-center gap-3 pointer-events-none">
                       <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                        "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all",
                         isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-100 border-cyan-400 text-cyan-900"
                       )}>
-                        <Key className="w-5 h-5" />
+                        <Key className="w-4 h-4" />
                       </div>
-                      <div className="text-center sm:text-left">
-                        <div className={cn("text-xs sm:text-sm font-bold flex items-center justify-center sm:justify-start gap-2", isDark ? "text-white" : "text-slate-950")}>
-                          <span>Auto-Fill from Service Account JSON</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-950")}>
+                            Auto-Fill from Service Account JSON
+                          </span>
                           <span className={cn(
-                            "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border flex items-center gap-1",
+                            "text-[9px] px-1.5 py-0.2 rounded font-bold uppercase border flex items-center gap-0.5",
                             isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border-cyan-300"
                           )}>
-                            <Zap className="w-2.5 h-2.5" />
+                            <Zap className="w-2 h-2" />
                             <span>Instant</span>
                           </span>
                         </div>
-                        <p className={cn("text-xs mt-0.5 font-medium", isDark ? "text-slate-400" : "text-slate-700")}>
-                          Drop your downloaded <code className={cn("px-1.5 py-0.5 rounded font-mono text-[11px] font-bold", isDark ? "bg-cyan-500/10 text-cyan-300" : "bg-cyan-100 text-cyan-950 border border-cyan-300")}>.json</code> key file here to auto-fill Email &amp; RSA Key.
+                        <p className={cn("text-[11px] mt-0.5 font-medium truncate", isDark ? "text-slate-400" : "text-slate-600")}>
+                          Drop your <code className={cn("px-1 py-0.2 rounded font-mono text-[10px] font-bold", isDark ? "bg-cyan-500/10 text-cyan-300" : "bg-cyan-100 text-cyan-950")}>.json</code> key file here to auto-fill credentials.
                         </p>
                       </div>
                     </div>
