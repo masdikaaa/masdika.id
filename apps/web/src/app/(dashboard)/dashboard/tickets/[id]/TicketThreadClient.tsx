@@ -187,62 +187,68 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
 
   return (
     <div className="space-y-6 pb-40 md:pb-48">
-      {/* Header Card */}
-      <div className={cn("border p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl shadow-md relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
-          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-            <Link href="/dashboard/tickets" className={cn("p-2 sm:p-2.5 border rounded-xl transition-all hover:-translate-x-1 shrink-0 mt-0.5", isDark ? "bg-slate-800/60 border-slate-700/80 text-zinc-300 hover:bg-slate-800" : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200")}>
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Link>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h1 className={cn("text-lg sm:text-xl md:text-2xl font-black tracking-tight break-words", isDark ? "text-white" : "text-slate-900")}>
-                  #{ticket.ticketId} - {ticket.subject}
-                </h1>
-                <StatusBadge status={ticket.status} />
-              </div>
-              <div className={cn("text-xs sm:text-sm flex flex-wrap items-center gap-1.5 sm:gap-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                {ticket.service && (
-                  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
-                    Service: <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.service.replace('_', ' ')}</span>
-                  </span>
-                )}
-                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] sm:text-[11px] font-bold uppercase tracking-wider",
-                  ticket.priority === 'CRITICAL' ? (isDark ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-200 text-red-700') : 
-                  ticket.priority === 'HIGH' ? (isDark ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-700') : 
-                  (isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-700')
-                )}>
-                  Priority: {ticket.priority}
-                </span>
-              </div>
-            </div>
+      {/* Compact Unboxed Header */}
+      <div className={cn("flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
+        <div className="space-y-1.5 min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight break-words", isDark ? "text-white" : "text-slate-900")}>
+              #{ticket.ticketId} - {ticket.subject}
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
+              Support Thread
+            </span>
+            <StatusBadge status={ticket.status} />
           </div>
-          
+          <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap items-center gap-2">
+            {ticket.service && (
+              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xl border text-xs font-medium", isDark ? "bg-[#111115] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-700")}>
+                Service: <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ticket.service.replace('_', ' ')}</span>
+              </span>
+            )}
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider",
+              ticket.priority === 'CRITICAL' ? (isDark ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-200 text-red-700') : 
+              ticket.priority === 'HIGH' ? (isDark ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-700') : 
+              (isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-700')
+            )}>
+              Priority: {ticket.priority}
+            </span>
+          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto shrink-0">
+          <Link 
+            href="/dashboard/tickets" 
+            className={cn(
+              "w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-medium px-4 py-2 rounded-xl transition-all border shrink-0",
+              isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300 hover:text-white" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-slate-700 hover:text-slate-900"
+            )}
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back to Tickets
+          </Link>
           {ticket.status !== 'MERGED' && (
-            <div className="w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-white/5 flex justify-end">
-              <button
-                onClick={async () => {
-                  try {
-                    const res = await fetch(`/api/tickets/${ticketId}`, {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: isClosed ? 'REOPEN' : 'CLOSE' })
-                    });
-                    if (res.ok) mutate();
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }}
-                className={cn(
-                  "w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all shrink-0 flex items-center justify-center gap-2 whitespace-nowrap",
-                  isClosed 
-                    ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm" 
-                    : isDark ? "bg-slate-800 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/30 text-zinc-300 hover:text-red-400 shadow-sm" : "bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-700 hover:text-red-600 shadow-sm"
-                )}
-              >
-                {isClosed ? 'Reopen Ticket' : 'Close Ticket'}
-              </button>
-            </div>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch(`/api/tickets/${ticketId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: isClosed ? 'REOPEN' : 'CLOSE' })
+                  });
+                  if (res.ok) mutate();
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
+              className={cn(
+                "w-full sm:w-auto px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 whitespace-nowrap",
+                isClosed 
+                  ? "bg-cyan-400 hover:bg-cyan-300 text-slate-950" 
+                  : isDark ? "bg-white/[0.02] hover:bg-red-500/10 border border-white/[0.08] hover:border-red-500/30 text-zinc-300 hover:text-red-400" : "bg-slate-50/80 hover:bg-red-50 border border-slate-200/90 hover:border-red-200 text-slate-700 hover:text-red-600"
+              )}
+            >
+              {isClosed ? 'Reopen Ticket' : 'Close Ticket'}
+            </button>
           )}
         </div>
       </div>
@@ -250,8 +256,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
       {/* Messages Area */}
       <div className="space-y-5 md:space-y-6 mt-6 sm:mt-8">
         {ticket.status === 'MERGED' && ticket.mergedInto && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 shadow-sm", isDark ? "bg-[#0b1322] border-purple-500/30 text-purple-200" : "bg-purple-50 border-purple-200 text-purple-900")}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4", isDark ? "bg-[#0a0a0c] border-purple-500/30 text-purple-200" : "bg-purple-50 border-purple-200 text-purple-900 shadow-2xs")}>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center shrink-0">
               <ShieldAlert className="w-5 h-5 text-cyan-400" />
             </div>
             <p className="text-xs sm:text-sm">This ticket has been merged into <Link href={`/dashboard/tickets/${ticket.mergedInto.ticketId.toLowerCase()}`} className="text-cyan-400 font-bold hover:underline">#{ticket.mergedInto.ticketId}</Link>. All further communication will happen there.</p>
@@ -265,7 +271,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
           if (isSystem) {
             return (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={msg.id} className="flex justify-center my-4 sm:my-6">
-                <span className={cn("bg-white/5 border text-xs px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-medium shadow-sm flex items-center gap-2", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
+                <span className={cn("border text-xs px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-medium flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-400" : "bg-slate-50/80 border-slate-200/90 text-slate-500")}>
                   <CheckCircle2 className="w-3.5 h-3.5 text-cyan-500" /> {msg.message}
                 </span>
               </motion.div>
@@ -280,7 +286,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               key={msg.id} 
               className={`flex gap-2.5 sm:gap-3 md:gap-4 ${isAdmin ? 'flex-row' : 'flex-row-reverse'}`}
             >
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 ${isAdmin ? 'border-cyan-500/50' : 'border-slate-700'} ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full shrink-0 flex items-center justify-center overflow-hidden border-2 ${isAdmin ? 'border-cyan-500/50' : (isDark ? 'border-white/[0.12]' : 'border-slate-300')} ${isDark ? 'bg-[#111115]' : 'bg-slate-200'}`}>
                 <img referrerPolicy="no-referrer" 
                   src={msg.user?.image || `/api/avatar?email=${encodeURIComponent(msg.user?.email || 'admin@masdika.id')}&name=${encodeURIComponent(msg.user?.name || 'User')}`} 
                   alt={msg.user?.name} 
@@ -289,14 +295,14 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               </div>
               <div className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] flex flex-col min-w-0 ${isAdmin ? 'items-start' : 'items-end'}`}>
                 <div className={`flex items-center gap-1.5 sm:gap-2 mb-1 px-1 flex-wrap ${isAdmin ? 'justify-start' : 'justify-end'}`}>
-                  {isAdmin && <span className="bg-cyan-500 text-slate-950 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Staff</span>}
+                  {isAdmin && <span className="bg-cyan-500 text-slate-950 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider">Staff</span>}
                   <span className={cn("font-semibold text-xs sm:text-sm", isDark ? "text-zinc-200" : "text-slate-900")}>{msg.user.name}</span>
                   <span className={cn("text-[10px] sm:text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>{new Date(msg.createdAt).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
                 </div>
                 
-                <div className={`px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-3xl shadow-md relative group max-w-full min-w-0 ${
+                <div className={`px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl relative group max-w-full min-w-0 ${
                   isAdmin 
-                    ? isDark ? 'bg-[#060b14] border border-slate-800 text-zinc-200 rounded-tl-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-sm'
+                    ? isDark ? 'bg-[#0a0a0c] border border-white/[0.08] text-zinc-200 rounded-tl-sm' : 'bg-white border border-slate-200/90 text-slate-800 rounded-tl-sm shadow-2xs'
                     : 'bg-cyan-600 text-white rounded-tr-sm border border-cyan-500/30'
                 }`}>
                   <div className="text-sm leading-relaxed break-words quill-message-content">
@@ -304,7 +310,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   </div>
                   
                   {msg.attachments?.length > 0 && (
-                    <div className={`mt-3 pt-3 sm:mt-4 sm:pt-4 border-t ${isAdmin ? (isDark ? 'border-white/10' : 'border-slate-200') : 'border-white/20'} space-y-2`}>
+                    <div className={`mt-3 pt-3 sm:mt-4 sm:pt-4 border-t ${isAdmin ? (isDark ? 'border-white/[0.08]' : 'border-slate-200/90') : 'border-white/20'} space-y-2`}>
                       <p className={`text-[10px] font-bold uppercase tracking-wider ${isAdmin ? (isDark ? 'text-zinc-500' : 'text-slate-500') : 'text-cyan-200'}`}>Attachments ({msg.attachments.length})</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full min-w-0">
                         {msg.attachments.map((att: any) => {
@@ -316,9 +322,9 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                                 onClick={(e) => { e.preventDefault(); setLightboxImage(`/api/tickets/attachments/${att.filename}`); setZoomLevel(1); }}
                                 className={`flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 ${
                                   isAdmin 
-                                    ? isDark ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-200' : 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800'
+                                    ? isDark ? 'bg-[#111115] hover:bg-white/[0.06] border border-white/[0.08] text-zinc-200' : 'bg-slate-50/80 hover:bg-slate-100 border border-slate-200/90 text-slate-800'
                                     : 'bg-black/20 hover:bg-black/30 border border-white/10 text-white'
-                                } hover:-translate-y-0.5 shadow-sm text-left`}
+                                } hover:-translate-y-0.5 text-left`}
                               >
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? (isDark ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-50 text-cyan-700') : 'bg-white/20 text-white'}`}>
                                   <ImageIcon className="w-4 h-4" />
@@ -333,9 +339,9 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                                 rel="noopener noreferrer"
                                 className={`flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-semibold transition-all w-full min-w-0 ${
                                   isAdmin 
-                                    ? isDark ? 'bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-200' : 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800'
+                                    ? isDark ? 'bg-[#111115] hover:bg-white/[0.06] border border-white/[0.08] text-zinc-200' : 'bg-slate-50/80 hover:bg-slate-100 border border-slate-200/90 text-slate-800'
                                     : 'bg-black/20 hover:bg-black/30 border border-white/10 text-white'
-                                } hover:-translate-y-0.5 shadow-sm`}
+                                } hover:-translate-y-0.5`}
                               >
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isAdmin ? (isDark ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-50 text-cyan-700') : 'bg-white/20 text-white'}`}>
                                   <FileText className="w-4 h-4" />
@@ -357,12 +363,12 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
 
       {/* Floating Sticky Input Area */}
       {!isClosed && (
-        <div className={cn("fixed bottom-0 left-0 right-0 md:left-64 z-40 pt-8 sm:pt-12 pb-3 sm:pb-4 md:pb-6 px-3 sm:px-4 md:px-6 pointer-events-none", isDark ? "bg-gradient-to-t from-[#050a12] via-[#050a12]/90 to-transparent" : "bg-gradient-to-t from-slate-100 via-slate-100/90 to-transparent")}>
+        <div className={cn("fixed bottom-0 left-0 right-0 md:left-64 z-40 pt-8 sm:pt-12 pb-3 sm:pb-4 md:pb-6 px-3 sm:px-4 md:px-6 pointer-events-none", isDark ? "bg-gradient-to-t from-[#050507] via-[#050507]/90 to-transparent" : "bg-gradient-to-t from-slate-100 via-slate-100/90 to-transparent")}>
           <div className="max-w-5xl mx-auto pointer-events-auto">
             <form 
               onSubmit={handleReply} 
-              className={cn("w-full relative border rounded-2xl sm:rounded-3xl transition-all duration-300 shadow-xl", 
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200",
+              className={cn("w-full relative border rounded-2xl transition-all duration-300 shadow-xl", 
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90",
                 isDragging ? "border-cyan-500 ring-4 ring-cyan-500/20" : "focus-within:border-cyan-500/50 focus-within:ring-2 focus-within:ring-cyan-500/10"
               )}
               onDragOver={handleDragOver}
@@ -370,7 +376,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
               onDrop={handleDrop}
             >
               {isDragging && (
-                <div className="absolute inset-0 z-50 bg-cyan-950/80 rounded-2xl sm:rounded-3xl flex items-center justify-center border-2 border-dashed border-cyan-400">
+                <div className="absolute inset-0 z-50 bg-cyan-950/80 rounded-2xl flex items-center justify-center border-2 border-dashed border-cyan-400">
                   <p className="text-cyan-400 font-bold flex items-center gap-2 text-base sm:text-lg"><Paperclip className="w-5 h-5 sm:w-6 sm:h-6" /> Drop files to attach here</p>
                 </div>
               )}
@@ -380,7 +386,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   /* Dark theme */
                   .quill-dark-theme .ql-toolbar {
                     border: none;
-                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
                     background: rgba(255,255,255,0.02);
                     border-top-left-radius: 1rem;
                     border-top-right-radius: 1rem;
@@ -480,8 +486,8 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     text-decoration: underline;
                   }
                   .quill-message-content pre, .quill-message-content .ql-syntax {
-                    background: ${isDark ? '#0f172a' : '#f8fafc'};
-                    border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'};
+                    background: ${isDark ? '#111115' : '#f8fafc'};
+                    border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'};
                     border-radius: 0.75rem;
                     padding: 2.25rem 1.25rem 1.25rem 1.25rem;
                     margin: 1rem 0;
@@ -505,7 +511,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                     box-shadow: 16px 0 0 #f59e0b, 32px 0 0 #10b981; /* yellow, green */
                   }
                   .quill-message-content code:not(pre code):not(.ql-syntax) {
-                    background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'};
+                    background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'};
                     padding: 0.1rem 0.3rem;
                     border-radius: 0.25rem;
                     font-size: 0.9em;
@@ -546,7 +552,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                 {attachments.length > 0 && (
                   <div className="px-4 sm:px-6 pb-2 flex flex-wrap gap-2">
                     {attachments.map((file, i) => (
-                      <div key={i} className={cn("px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg flex items-center gap-2 text-xs font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                      <div key={i} className={cn("px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-2 text-xs font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                         <Paperclip className="w-3.5 h-3.5" />
                         <span className="truncate max-w-[120px]">{file.name}</span>
                         <button type="button" onClick={() => removeAttachment(i)} className={cn("ml-1 rounded p-0.5 transition-colors", isDark ? "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20" : "text-cyan-600 hover:text-cyan-800 hover:bg-cyan-100")}>
@@ -557,7 +563,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   </div>
                 )}
                 
-                <div className={cn("px-3 pb-2.5 pt-1 flex justify-between items-center rounded-b-2xl sm:rounded-b-3xl mt-1", isDark ? "bg-[#060b14]" : "bg-slate-50")}>
+                <div className={cn("px-3 pb-2.5 pt-1 flex justify-between items-center rounded-b-2xl mt-1", isDark ? "bg-[#111115]" : "bg-slate-50/80")}>
                   <input
                     type="file"
                     multiple
@@ -568,7 +574,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={cn("hover:text-cyan-400 hover:bg-cyan-500/10 p-2 sm:p-2.5 rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 text-xs font-semibold ml-1 sm:ml-2", isDark ? "text-zinc-400" : "text-slate-500")}
+                    className={cn("hover:text-cyan-400 hover:bg-cyan-500/10 p-2 sm:p-2.5 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 text-xs font-semibold ml-1 sm:ml-2", isDark ? "text-zinc-400" : "text-slate-500")}
                   >
                     <Paperclip className="w-4 h-4" />
                     <span className="hidden sm:inline">Attach Files</span>
@@ -577,7 +583,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   <button
                     type="submit"
                     disabled={isSubmitting || ((!message || message === '<p><br></p>') && attachments.length === 0)}
-                    className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2"
+                    className="bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-slate-950 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shrink-0 group mr-1 sm:mr-2"
                   >
                     <span className="hidden sm:inline">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                     <Send className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform'}`} />

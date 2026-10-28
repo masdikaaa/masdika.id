@@ -197,61 +197,59 @@ export default function DashboardApiKeys() {
   };
 
   return (
-    <motion.div className="space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
-      {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
-        
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
-              <KeyRound className="w-3 h-3" /> Security & Access
-            </div>
-            <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              API <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Keys</span>
+    <motion.div className="space-y-6 pb-10" variants={containerVariants} initial="hidden" animate="visible">
+      {/* Compact Unboxed Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              API Keys
             </h1>
-            <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-600")}>Manage your API access tokens and service permissions to connect securely to Masdika endpoints.</p>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
+              Security & Access
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard/api-lab" className={cn("border px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-white" : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800")}>
-              <FlaskConical className="w-4 h-4 text-cyan-500" />
-              API Lab
-            </Link>
-            <Link href="/dashboard/api-stats" className="px-5 py-2.5 rounded-lg text-slate-950 font-semibold text-sm transition-all inline-flex items-center justify-center gap-2 shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm">
-              <Activity className="w-4 h-4" />
-              View API Stats
-            </Link>
-          </div>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Manage your API access tokens and service permissions to connect securely to Masdika endpoints.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <Link href="/dashboard/api-lab" className={cn("w-full sm:w-auto border px-4 py-2 rounded-xl font-medium text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shrink-0", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-white" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-slate-800")}>
+            <FlaskConical className="w-4 h-4 text-cyan-500" />
+            API Lab
+          </Link>
+          <Link href="/dashboard/api-stats" className="w-full sm:w-auto px-4 py-2 rounded-xl text-slate-950 font-bold text-xs sm:text-sm transition-all inline-flex items-center justify-center gap-2 shrink-0 bg-cyan-400 hover:bg-cyan-300">
+            <Activity className="w-4 h-4" />
+            View API Stats
+          </Link>
         </div>
       </motion.div>
 
       {services.length === 0 ? (
         <motion.div variants={itemVariants}>
-          <div className={cn(" border rounded-3xl p-12 text-center mt-8", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-black/5")}>
-            <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
-              <Key className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
+          <div className={cn("border rounded-2xl p-8 sm:p-12 text-center mt-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+              <Key className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-500")} />
             </div>
-            <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Active API Service</h4>
-            <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+            <h4 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Active API Service</h4>
+            <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
               You need an active subscription to any API service (like File CDN or URL Shortener) to generate and manage API keys.
             </p>
-            <Link href="/dashboard/checkout" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-2.5 px-5 rounded-lg text-sm transition-all shadow-sm">
+            <Link href="/dashboard/checkout" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold py-2.5 px-5 rounded-xl text-xs sm:text-sm transition-all">
               View Plans
             </Link>
           </div>
         </motion.div>
       ) : (
-        <motion.div className="w-full space-y-8" variants={itemVariants}>
+        <motion.div className="w-full space-y-6" variants={itemVariants}>
         {/* Generate Key Section */}
-        <div className={cn(" border rounded-3xl p-6 md:p-8 relative group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-black/5 shadow-sm")}>
-          <div className={cn("absolute inset-0 rounded-3xl bg-gradient-to-b pointer-events-none", isDark ? "from-transparent to-transparent" : "from-slate-50/50 to-transparent")} />
-          
+        <div className={cn("border rounded-2xl p-6 md:p-8 relative group", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10 flex flex-col md:flex-row gap-6 lg:gap-10">
             <div className="flex-1">
-              <h2 className={cn("text-xl font-bold mb-2 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+              <h2 className={cn("text-lg sm:text-xl font-bold mb-2 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 Create New API Key
               </h2>
-              <p className={cn("text-sm mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+              <p className={cn("text-xs sm:text-sm mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 Generate a new API key to access Masdika's public REST APIs. Keep your keys secure and do not share them publicly. 
                 <strong className="text-cyan-400 font-semibold block mt-1">One API key per service.</strong>
               </p>
@@ -261,7 +259,7 @@ export default function DashboardApiKeys() {
                   placeholder="Key Alias (e.g. Production Key)" 
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  className={cn("flex-1 border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 transition-all shadow-inner", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-slate-50 border-slate-200 text-slate-800 focus:border-cyan-400 focus:ring-cyan-400/20")}
+                  className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-slate-50/80 border-slate-200/90 text-slate-800 focus:border-cyan-400 focus:ring-cyan-400/20")}
                 />
                 <div className="w-full sm:w-fit sm:min-w-[220px] shrink-0 relative z-50">
                   <Select
@@ -276,13 +274,13 @@ export default function DashboardApiKeys() {
                       };
                     })}
                     placeholder="Select Service"
-                    className="py-3.5 px-5 rounded-2xl shadow-inner min-w-[220px]"
+                    className="py-3 px-4 rounded-xl min-w-[220px]"
                   />
                 </div>
                 <button 
                   onClick={generateKey}
                   disabled={generating || keys.some(k => (k.service || '').toLowerCase() === selectedService.toLowerCase())}
-                  className="px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 whitespace-nowrap transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 whitespace-nowrap transition-all bg-cyan-400 hover:bg-cyan-300 text-slate-950 disabled:opacity-50 disabled:pointer-events-none"
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Generate Key
@@ -291,7 +289,7 @@ export default function DashboardApiKeys() {
             </div>
             
             <div className="hidden lg:flex shrink-0 items-center justify-center w-32">
-               <div className="w-24 h-24 bg-cyan-500/10 rounded-3xl border border-cyan-500/20 flex items-center justify-center transform rotate-12 group-hover:rotate-6 transition-all duration-500">
+               <div className="w-24 h-24 bg-cyan-500/10 rounded-2xl border border-cyan-500/20 flex items-center justify-center transition-all duration-500">
                  <Key className="w-10 h-10 text-cyan-400" />
                </div>
             </div>
@@ -300,16 +298,16 @@ export default function DashboardApiKeys() {
 
         {/* Keys List */}
         <div>
-          <h3 className={cn("text-xl font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <h3 className={cn("text-lg sm:text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Activity className="w-5 h-5 text-cyan-500" /> Active Keys
           </h3>
           {keys.length === 0 ? (
-            <div className={cn("border rounded-3xl p-12 text-center ", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-black/5")}>
-              <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white border border-slate-200 shadow-sm")}>
-                <Key className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
+            <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                <Key className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-500")} />
               </div>
-              <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No API Keys Found</h4>
-              <p className={cn("text-sm max-w-sm mx-auto leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+              <h4 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No API Keys Found</h4>
+              <p className={cn("text-xs sm:text-sm max-w-sm mx-auto leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 You haven't generated any API keys yet. Create one above to start using Masdika API Hub securely.
               </p>
             </div>
@@ -333,7 +331,7 @@ export default function DashboardApiKeys() {
                   <button
                     onClick={() => setShowBulkDeleteModal(true)}
                     disabled={isBulkDeleting}
-                    className="bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 border border-red-500/20 w-fit"
+                    className="bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 border border-red-500/20 w-fit"
                   >
                     {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                     Delete Selected ({selectedKeys.length})
@@ -348,14 +346,12 @@ export default function DashboardApiKeys() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.07 }}
                   className={cn(
-                    " border rounded-3xl p-5 md:p-6 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group relative overflow-hidden",
+                    "border rounded-2xl p-5 md:p-6 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group relative overflow-hidden",
                     selectedKeys.includes(key.id) 
-                      ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20")
-                      : (isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200/90 hover:border-slate-300 shadow-sm")
+                      ? (isDark ? "bg-[#111115] border-cyan-500/50 ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-2xs ring-2 ring-cyan-600/20")
+                      : (isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14]" : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs")
                   )}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:to-cyan-500/[0.03] transition-colors pointer-events-none" />
-                  
                   <label className="hidden sm:flex items-center self-start lg:self-center mr-2 cursor-pointer relative z-10 group/checkbox shrink-0">
                     <div className="relative flex items-center justify-center">
                       <input 
@@ -382,31 +378,31 @@ export default function DashboardApiKeys() {
                           <CheckCircle2 className={cn("w-3.5 h-3.5 absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity", isDark ? "text-white" : "text-slate-900")} />
                         </div>
                       </label>
-                      <span className={cn("font-bold text-lg truncate max-w-[200px] md:max-w-xs", isDark ? "text-white" : "text-slate-900")}>{key.name || "Default Key"}</span>
+                      <span className={cn("font-bold text-base sm:text-lg truncate max-w-[200px] md:max-w-xs", isDark ? "text-white" : "text-slate-900")}>{key.name || "Default Key"}</span>
                       {key.service ? (
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-sm" : "bg-slate-100 border border-slate-200 text-cyan-700")}>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400" : "bg-slate-100 border border-slate-200/90 text-cyan-700")}>
                           {key.service.split('_').join(' ')}
                         </span>
                       ) : (
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-zinc-500/10 border border-zinc-500/20 text-zinc-400" : "bg-slate-100 border border-slate-200 text-slate-500")}>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-zinc-500/10 border border-zinc-500/20 text-zinc-400" : "bg-slate-100 border border-slate-200/90 text-slate-500")}>
                           Unknown
                         </span>
                       )}
                       {key.isSuspended && (
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-red-500/10 border border-red-500/20 text-red-400 shadow-sm" : "bg-red-50 border border-red-200 text-red-600")}>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", isDark ? "bg-red-500/10 border border-red-500/20 text-red-400" : "bg-red-50 border border-red-200 text-red-600")}>
                           Suspended
                         </span>
                       )}
                     </div>
                     
-                    <div className={cn("flex items-center gap-3 p-2 rounded-xl border w-full sm:w-fit shadow-sm", isDark ? "bg-[#011627] border-white/5" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("flex items-center gap-3 p-2 rounded-xl border w-full sm:w-fit", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <code className={cn("text-xs sm:text-sm font-mono select-all tracking-widest px-3 break-all overflow-hidden line-clamp-1", isDark ? "text-cyan-300" : "text-cyan-700")}>
                         {key.key}
                       </code>
                       <button 
                         onClick={() => copyToClipboard(key.key)}
                         disabled={key.isSuspended}
-                        className={cn("p-2 rounded-lg transition-colors shrink-0 disabled:opacity-50", isDark ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white border border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-900")}
+                        className={cn("p-2 rounded-xl transition-colors shrink-0 disabled:opacity-50", isDark ? "bg-white/[0.04] hover:bg-cyan-500/20 text-zinc-400 hover:text-cyan-400" : "bg-white border border-slate-200/90 hover:bg-slate-100 text-slate-500 hover:text-slate-900")}
                         title={key.isSuspended ? "Key is suspended" : "Copy Key"}
                       >
                         {copiedKey === key.key ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
@@ -414,7 +410,7 @@ export default function DashboardApiKeys() {
                     </div>
                   </div>
   
-                  <div className={cn("flex flex-wrap items-center gap-6 lg:gap-10 border-t lg:border-t-0 pt-4 lg:pt-0 w-full lg:w-auto", isDark ? "border-white/5" : "border-slate-200")}>
+                  <div className={cn("flex flex-wrap items-center gap-6 lg:gap-10 border-t lg:border-t-0 pt-4 lg:pt-0 w-full lg:w-auto", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                     <div className="flex flex-col gap-1.5 flex-1 lg:flex-none">
                       <span className={cn("text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>
                         <Activity className="w-3.5 h-3.5 text-blue-500" /> Usage
@@ -434,7 +430,7 @@ export default function DashboardApiKeys() {
                     <button 
                       onClick={() => setKeyToDelete(key.id)}
                       disabled={key.isSuspended}
-                      className={cn("p-2.5 rounded-lg transition-all ml-auto lg:ml-4 group/btn disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white" : "bg-red-50 hover:bg-red-500 border border-red-200 hover:border-red-500 text-red-500 hover:text-white")}
+                      className={cn("p-2.5 rounded-xl transition-all ml-auto lg:ml-4 group/btn disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white" : "bg-red-50 hover:bg-red-500 border border-red-200 hover:border-red-500 text-red-500 hover:text-white")}
                       title={key.isSuspended ? "Key is suspended" : "Revoke Key"}
                     >
                       <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
@@ -446,7 +442,7 @@ export default function DashboardApiKeys() {
           )}
           
           {!loading && totalPages > 1 && (
-            <div className={cn("mt-8 pt-6 border-t", isDark ? "border-white/5" : "border-slate-200")}>
+            <div className={cn("mt-8 pt-6 border-t", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}

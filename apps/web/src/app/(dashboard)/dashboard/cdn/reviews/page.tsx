@@ -185,15 +185,15 @@ export default function CustomerCdnReviewsPage() {
 
   return (
     <div className="w-full space-y-6 md:space-y-8 pb-10 relative z-10">
-      {/* ── BACK BUTTON (OUTSIDE / ABOVE CARD - MATCHING IMAGE 1) ─────────── */}
+      {/* ── BACK BUTTON ─────────── */}
       <div className="flex items-center">
         <Link 
           href="/dashboard/cdn" 
           className={cn(
-            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border",
             isDark 
-              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
-              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+              ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
           )}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -201,38 +201,37 @@ export default function CustomerCdnReviewsPage() {
         </Link>
       </div>
 
-      {/* ── HEADER ───────────────────────────────────────────────────────────── */}
-      <div className={cn(
-        "relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 border w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200"
-      )}>
-        <div className="relative z-10 flex-1 min-w-0">
-          <div className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border mb-4",
-            isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700"
-          )}>
-            <MessageSquareQuote className="w-3.5 h-3.5" /> Edge Delivery Feedback
+      {/* ── PAGE HEADER ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Media Reviews & Comments
+            </h1>
+            <span className={cn(
+              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
+              isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+            )}>
+              <MessageSquareQuote className="w-3 h-3" /> Edge Delivery Feedback
+            </span>
           </div>
-          <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            Media Reviews & <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Comments</span>
-          </h1>
-          <p className={cn("text-sm max-w-xl", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("text-xs sm:text-sm max-w-xl", isDark ? "text-zinc-400" : "text-slate-500")}>
             Inspect, monitor, and moderate star ratings and OTP-verified user comments on your CDN media files.
           </p>
         </div>
 
-        <div className="relative z-10 flex items-center gap-3 shrink-0 w-full md:w-auto justify-between md:justify-end">
-          <div className={cn("px-4 py-2 rounded-xl border font-semibold text-sm text-center", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+          <div className={cn("px-3.5 py-2 rounded-xl border font-semibold text-xs sm:text-sm text-center", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
             Total Reviews: {stats.totalComments + stats.totalRatings}
           </div>
           <button
             onClick={fetchData}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer",
               isDark
-                ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
-                : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
+                ? "border-white/[0.08] bg-[#111115] hover:bg-white/[0.06] text-zinc-300 hover:text-white"
+                : "border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-2xs"
             )}
           >
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin text-cyan-500")} />
@@ -245,10 +244,10 @@ export default function CustomerCdnReviewsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
         {/* Total Comments */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          "relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-colors",
           isDark
-            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
-            : "bg-white border-slate-200 shadow-sm"
+            ? "bg-[#0a0a0c] border-white/[0.08]"
+            : "bg-white border-slate-200/90 shadow-2xs"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -256,13 +255,13 @@ export default function CustomerCdnReviewsPage() {
             </span>
             <div className={cn(
               "w-9 h-9 rounded-xl border flex items-center justify-center",
-              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+              isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
               <MessageSquare className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-2xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
               {stats.totalComments}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>OTP Verified</span>
@@ -271,10 +270,10 @@ export default function CustomerCdnReviewsPage() {
 
         {/* Total Ratings */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          "relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-colors",
           isDark
-            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
-            : "bg-white border-slate-200 shadow-sm"
+            ? "bg-[#0a0a0c] border-white/[0.08]"
+            : "bg-white border-slate-200/90 shadow-2xs"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -282,13 +281,13 @@ export default function CustomerCdnReviewsPage() {
             </span>
             <div className={cn(
               "w-9 h-9 rounded-xl border flex items-center justify-center",
-              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+              isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
               <Star className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-2xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
               {stats.totalRatings}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Stars Cast</span>
@@ -297,10 +296,10 @@ export default function CustomerCdnReviewsPage() {
 
         {/* Platform Average */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          "relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-colors",
           isDark
-            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
-            : "bg-white border-slate-200 shadow-sm"
+            ? "bg-[#0a0a0c] border-white/[0.08]"
+            : "bg-white border-slate-200/90 shadow-2xs"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -308,13 +307,13 @@ export default function CustomerCdnReviewsPage() {
             </span>
             <div className={cn(
               "w-9 h-9 rounded-xl border flex items-center justify-center",
-              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+              isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
               <Star className="w-4 h-4 fill-cyan-400 text-cyan-400" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-2xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
               {stats.averageRating > 0 ? stats.averageRating : "-"}
             </span>
             <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-400")}>/ 5.0</span>
@@ -323,10 +322,10 @@ export default function CustomerCdnReviewsPage() {
 
         {/* Reviewed Media Files */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          "relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-colors",
           isDark
-            ? "bg-[#0b1322] border-slate-800/80 shadow-md"
-            : "bg-white border-slate-200 shadow-sm"
+            ? "bg-[#0a0a0c] border-white/[0.08]"
+            : "bg-white border-slate-200/90 shadow-2xs"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -334,13 +333,13 @@ export default function CustomerCdnReviewsPage() {
             </span>
             <div className={cn(
               "w-9 h-9 rounded-xl border flex items-center justify-center",
-              isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
+              isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
               <FileVideo className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-2xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
               {stats.totalMediaReviewed}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Unique Files</span>
@@ -351,21 +350,21 @@ export default function CustomerCdnReviewsPage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
       )}>
         {/* Tab switch */}
         <div className={cn(
           "inline-flex items-center gap-1 p-1 rounded-xl border shrink-0 w-full sm:w-auto",
-          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90"
         )}>
           <button
             onClick={() => setActiveTab("comments")}
             className={cn(
               "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
               activeTab === "comments"
-                ? "bg-cyan-500 text-white font-bold"
+                ? "bg-cyan-400 text-slate-950 font-bold"
                 : isDark
-                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                  ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
@@ -374,7 +373,7 @@ export default function CustomerCdnReviewsPage() {
             <span className={cn(
               "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
               activeTab === "comments"
-                ? "bg-white/20 text-white"
+                ? "bg-slate-950/15 text-slate-950"
                 : isDark
                   ? "bg-white/10 text-zinc-300"
                   : "bg-slate-200 text-slate-700"
@@ -388,9 +387,9 @@ export default function CustomerCdnReviewsPage() {
             className={cn(
               "flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap select-none",
               activeTab === "ratings"
-                ? "bg-cyan-500 text-white font-bold"
+                ? "bg-cyan-400 text-slate-950 font-bold"
                 : isDark
-                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
+                  ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
@@ -399,7 +398,7 @@ export default function CustomerCdnReviewsPage() {
             <span className={cn(
               "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
               activeTab === "ratings"
-                ? "bg-white/20 text-white"
+                ? "bg-slate-950/15 text-slate-950"
                 : isDark
                   ? "bg-white/10 text-zinc-300"
                   : "bg-slate-200 text-slate-700"
@@ -412,7 +411,7 @@ export default function CustomerCdnReviewsPage() {
         {/* Search & Rating Filter */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Star Filter Dropdown */}
-          <div className="w-40">
+          <div className="w-full sm:w-40">
             <Select
               value={ratingFilter}
               onChange={(val) => setRatingFilter(val === "all" ? "all" : Number(val))}
@@ -425,7 +424,7 @@ export default function CustomerCdnReviewsPage() {
                 { value: "1", label: "1 Star only" }
               ]}
               placeholder="Rating"
-              className={cn("w-full rounded-xl px-3 py-2 text-xs", isDark ? "border-white/10" : "border-slate-200")}
+              className={cn("w-full rounded-xl px-3 py-2 text-xs", isDark ? "border-white/[0.08]" : "border-slate-200/90")}
             />
           </div>
 
@@ -440,8 +439,8 @@ export default function CustomerCdnReviewsPage() {
               className={cn(
                 "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
                 isDark
-                  ? "bg-black/40 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                  : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
+                  ? "bg-[#111115] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
               )}
             />
           </div>
@@ -458,10 +457,10 @@ export default function CustomerCdnReviewsPage() {
           /* COMMENTS TAB */
           filteredComments.length === 0 ? (
             <div className={cn(
-              "rounded-2xl border p-12 text-center",
-              isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm"
+              "rounded-2xl border p-8 sm:p-12 text-center",
+              isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200/90 bg-white shadow-2xs"
             )}>
-              <MessageSquare className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
+              <MessageSquare className={cn("w-10 h-10 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No comments found</p>
               <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                 {searchQuery ? "No comments matching your search criteria." : "None of your CDN files have received comments yet."}
@@ -477,13 +476,13 @@ export default function CustomerCdnReviewsPage() {
                   className={cn(
                     "rounded-2xl border p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
-                      ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md"
-                      : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
+                      ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14]"
+                      : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
                   )}
                 >
                   <div className="flex items-start gap-3.5 min-w-0 flex-1">
                     {/* Profile Avatar */}
-                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                       <img
                         referrerPolicy="no-referrer"
                         src={comment.avatar ? `${comment.avatar}${comment.avatar.includes('?') ? '&' : '?'}v=4` : `/api/avatar?email=${encodeURIComponent(comment.email)}&name=${encodeURIComponent(comment.name)}&v=4`}
@@ -534,7 +533,7 @@ export default function CustomerCdnReviewsPage() {
                       {/* Comment text */}
                       <p className={cn(
                         "text-sm leading-relaxed whitespace-pre-wrap p-3 rounded-xl border",
-                        isDark ? "text-zinc-300 bg-black/30 border-white/5" : "text-slate-700 bg-slate-50 border-slate-100"
+                        isDark ? "text-zinc-300 bg-[#111115] border-white/[0.08]" : "text-slate-700 bg-slate-50/80 border-slate-200/90"
                       )}>
                         {comment.content}
                       </p>
@@ -543,7 +542,7 @@ export default function CustomerCdnReviewsPage() {
                       <div className={cn("flex flex-wrap items-center gap-2.5 text-xs pt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                         <div className={cn(
                           "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs max-w-full font-medium truncate",
-                          isDark ? "bg-white/5 border-white/5 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700"
+                          isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-700"
                         )}>
                           <FileVideo className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                           <span className="truncate max-w-[200px] sm:max-w-xs md:max-w-md">{comment.media?.originalName || "Deleted Media"}</span>
@@ -557,7 +556,7 @@ export default function CustomerCdnReviewsPage() {
                   </div>
 
                   {/* Right Actions */}
-                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto justify-end">
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-white/[0.06] w-full sm:w-auto justify-end">
                     {comment.media?.token && (
                       <Link
                         href={`/media/${comment.media.token}`}
@@ -565,8 +564,8 @@ export default function CustomerCdnReviewsPage() {
                         className={cn(
                           "p-2 rounded-xl border transition-colors inline-flex items-center justify-center",
                           isDark
-                            ? "border-white/10 bg-white/5 hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
-                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
+                            ? "border-white/[0.08] bg-white/[0.02] hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
+                            : "border-slate-200/90 bg-slate-50/80 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
                         )}
                         title="Open Public Media Page"
                       >
@@ -585,8 +584,8 @@ export default function CustomerCdnReviewsPage() {
                       className={cn(
                         "p-2 rounded-xl border transition-colors cursor-pointer inline-flex items-center justify-center",
                         isDark
-                          ? "border-white/10 bg-white/5 hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
-                          : "border-slate-200 bg-slate-50 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
+                          ? "border-white/[0.08] bg-white/[0.02] hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
+                          : "border-slate-200/90 bg-slate-50/80 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
                       )}
                       title="Moderate / Delete Comment"
                     >
@@ -601,10 +600,10 @@ export default function CustomerCdnReviewsPage() {
           /* RATINGS TAB */
           filteredRatings.length === 0 ? (
             <div className={cn(
-              "rounded-2xl border p-12 text-center",
-              isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm"
+              "rounded-2xl border p-8 sm:p-12 text-center",
+              isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200/90 bg-white shadow-2xs"
             )}>
-              <Star className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
+              <Star className={cn("w-10 h-10 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
               <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No ratings found</p>
               <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                 {searchQuery ? "No star ratings matching your search criteria." : "None of your CDN files have received direct star ratings yet."}
@@ -620,13 +619,13 @@ export default function CustomerCdnReviewsPage() {
                   className={cn(
                     "rounded-2xl border p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full",
                     isDark
-                      ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md"
-                      : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
+                      ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14]"
+                      : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
                   )}
                 >
                   <div className="flex items-start gap-3.5 min-w-0 flex-1">
                     {/* Rating Profile Avatar */}
-                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0 mt-0.5", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                       <img
                         referrerPolicy="no-referrer"
                         src={
@@ -695,7 +694,7 @@ export default function CustomerCdnReviewsPage() {
                         {rating.ipAddress && (
                           <span className={cn(
                             "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-mono text-[11px] border shrink-0",
-                            isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+                            isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-700"
                           )}>
                             <span className="text-[10px] text-zinc-500 font-sans font-medium">IP:</span>
                             {rating.ipAddress}
@@ -707,7 +706,7 @@ export default function CustomerCdnReviewsPage() {
                       <div className={cn("flex flex-wrap items-center gap-2.5 text-xs pt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                         <div className={cn(
                           "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs max-w-full font-medium truncate",
-                          isDark ? "bg-white/5 border-white/5 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700"
+                          isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-700"
                         )}>
                           <FileVideo className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                           <span className="truncate max-w-[200px] sm:max-w-xs md:max-w-md">{rating.media?.originalName || "Deleted Media"}</span>
@@ -721,7 +720,7 @@ export default function CustomerCdnReviewsPage() {
                   </div>
 
                   {/* Right Actions */}
-                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto justify-end">
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-white/[0.06] w-full sm:w-auto justify-end">
                     {rating.media?.token && (
                       <Link
                         href={`/media/${rating.media.token}`}
@@ -729,8 +728,8 @@ export default function CustomerCdnReviewsPage() {
                         className={cn(
                           "p-2 rounded-xl border transition-colors inline-flex items-center justify-center",
                           isDark
-                            ? "border-white/10 bg-white/5 hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
-                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
+                            ? "border-white/[0.08] bg-white/[0.02] hover:bg-cyan-500/15 hover:border-cyan-500/30 text-zinc-400 hover:text-cyan-400"
+                            : "border-slate-200/90 bg-slate-50/80 hover:bg-cyan-50 hover:border-cyan-200 text-slate-600 hover:text-cyan-700"
                         )}
                         title="Open Public Media Page"
                       >
@@ -749,8 +748,8 @@ export default function CustomerCdnReviewsPage() {
                       className={cn(
                         "p-2 rounded-xl border transition-colors cursor-pointer inline-flex items-center justify-center",
                         isDark
-                          ? "border-white/10 bg-white/5 hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
-                          : "border-slate-200 bg-slate-50 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
+                          ? "border-white/[0.08] bg-white/[0.02] hover:bg-red-500/15 hover:border-red-500/30 text-zinc-400 hover:text-red-400"
+                          : "border-slate-200/90 bg-slate-50/80 hover:bg-red-50 hover:border-red-200 text-slate-600 hover:text-red-600"
                       )}
                       title="Moderate / Delete Rating"
                     >

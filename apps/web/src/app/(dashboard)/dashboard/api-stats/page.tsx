@@ -56,10 +56,10 @@ export default function ApiStatsPage() {
 
   if (!stats) {
     return (
-      <div className={cn("flex flex-col items-center justify-center min-h-[60vh] border rounded-3xl  m-4", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-        <Activity className="w-16 h-16 text-cyan-500/50 mb-6 animate-pulse" />
-        <h2 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Data Available</h2>
-        <p className={cn("text-center max-w-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Create an API Key and start making requests to see your API statistics here.</p>
+      <div className={cn("flex flex-col items-center justify-center min-h-[60vh] border rounded-2xl p-8 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <Activity className="w-14 h-14 text-cyan-500/50 mb-5 animate-pulse" />
+        <h2 className={cn("text-xl sm:text-2xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Data Available</h2>
+        <p className={cn("text-xs sm:text-sm text-center max-w-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Create an API Key and start making requests to see your API statistics here.</p>
       </div>
     );
   }
@@ -71,32 +71,41 @@ export default function ApiStatsPage() {
       initial="hidden"
       animate="visible"
     >
-      {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-        
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
-              <BarChart2 className="w-3 h-3" /> Analytics Engine
-            </div>
-            <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              API <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Statistics</span>
+      {/* Compact Unboxed Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              API Statistics
             </h1>
-            <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor your API usage, performance, and key metrics across all projects in real-time.</p>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
+              Analytics Engine
+            </span>
           </div>
-          <div className="flex items-center gap-2 px-5 py-2.5 bg-[#011627]/80  text-cyan-400 rounded-2xl border border-cyan-500/20 text-sm font-bold shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse " />
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Monitor your API usage, performance, and key metrics across all projects in real-time.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <div className={cn("w-full sm:w-auto flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-medium", isDark ? "bg-white/[0.02] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-700")}>
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             Live Metrics Active
           </div>
+          <button
+            onClick={() => { setLoading(true); fetchStats(); }}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shrink-0"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
         </div>
       </motion.div>
 
       {/* Stats Grid - Bento Style */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div variants={itemVariants} className={cn(" border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-cyan-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50")}>
-                    <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-sm transition-all">
+        <motion.div variants={itemVariants} className={cn("border p-6 rounded-2xl relative overflow-hidden group transition-all duration-300", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300")}>
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center transition-all">
               <Activity className="w-6 h-6 text-cyan-400" />
             </div>
             <span className="flex items-center gap-1 text-[10px] font-black text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2.5 py-1 rounded-full uppercase tracking-wider">
@@ -104,39 +113,39 @@ export default function ApiStatsPage() {
             </span>
           </div>
           <h3 className={cn("text-xs font-bold uppercase tracking-widest mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Requests</h3>
-          <p className={cn("text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.totalRequests.toLocaleString()}</p>
+          <p className={cn("text-3xl sm:text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.totalRequests.toLocaleString()}</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn(" border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-cyan-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50")}>
-                    <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-sm transition-all">
+        <motion.div variants={itemVariants} className={cn("border p-6 rounded-2xl relative overflow-hidden group transition-all duration-300", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300")}>
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center transition-all">
               <Key className="w-6 h-6 text-cyan-400" />
             </div>
           </div>
           <h3 className={cn("text-xs font-bold uppercase tracking-widest mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Active API Keys</h3>
           <div className="flex items-baseline gap-2">
-            <p className={cn("text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.activeKeys}</p>
+            <p className={cn("text-3xl sm:text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.activeKeys}</p>
             <p className={cn("text-sm font-semibold", isDark ? "text-zinc-500" : "text-slate-500")}>/ {stats.totalKeys}</p>
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn(" border p-6 rounded-3xl shadow-sm relative overflow-hidden group hover:border-blue-500/30 hover:-translate-y-1 transition-all duration-300", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50")}>
-                    <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-sm transition-all">
+        <motion.div variants={itemVariants} className={cn("border p-6 rounded-2xl relative overflow-hidden group transition-all duration-300", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300")}>
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center transition-all">
               <FolderDot className="w-6 h-6 text-blue-400" />
             </div>
           </div>
           <h3 className={cn("text-xs font-bold uppercase tracking-widest mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Projects Used</h3>
-          <p className={cn("text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.projectUsage.length}</p>
+          <p className={cn("text-3xl sm:text-4xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{stats.projectUsage.length}</p>
         </motion.div>
       </div>
 
       {/* Main Chart */}
-      <motion.div variants={itemVariants} className={cn(" border rounded-3xl p-6 md:p-8 shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-                <div className="relative z-10 mb-8">
-          <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+      <motion.div variants={itemVariants} className={cn("border rounded-2xl p-6 md:p-8 relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <div className="relative z-10 mb-8">
+          <h3 className={cn("text-lg sm:text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             Traffic Overview
-            <span className={cn("text-xs font-semibold px-2 py-1 rounded-lg", isDark ? "bg-white/10 text-zinc-300" : "bg-slate-100 text-slate-500")}>Last 7 Days</span>
+            <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-500")}>Last 7 Days</span>
           </h3>
         </div>
         <div className="h-[350px] w-full relative z-10">
@@ -156,7 +165,7 @@ export default function ApiStatsPage() {
               <XAxis dataKey="day" stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} dy={15} />
               <YAxis stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} dx={-15} />
               <Tooltip 
-                contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+                contentStyle={{ backgroundColor: 'rgba(10, 10, 12, 0.95)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
                 itemStyle={{ color: '#06b6d4', fontWeight: 'bold' }}
                 cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2, strokeDasharray: '5 5' }}
               />
@@ -168,7 +177,7 @@ export default function ApiStatsPage() {
 
       {/* Grid for Pie and Bar charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={itemVariants} className={cn(" border rounded-3xl p-6 md:p-8 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-6 md:p-8", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>Usage by Project</h3>
           {stats.projectUsage.length > 0 ? (
             <div className="h-[300px] w-full flex items-center justify-center">
@@ -195,7 +204,7 @@ export default function ApiStatsPage() {
                     Total Items
                   </text>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
+                    contentStyle={{ backgroundColor: 'rgba(10, 10, 12, 0.95)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}
                     itemStyle={{ color: '#fff', fontWeight: 'bold' }}
                   />
                 </PieChart>
@@ -207,17 +216,17 @@ export default function ApiStatsPage() {
             </div>
           )}
           {/* Custom Legend */}
-          <div className="flex flex-wrap gap-4 justify-center mt-6 max-h-[120px] overflow-y-auto custom-scrollbar pr-2">
+          <div className="flex flex-wrap gap-3 justify-center mt-6 max-h-[120px] overflow-y-auto custom-scrollbar pr-2">
             {stats.projectUsage.map((entry: any, index: number) => (
-              <div key={entry.name} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border shrink-0", isDark ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-200")}>
-                <span className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+              <div key={entry.name} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border shrink-0", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                 <span className={cn("text-xs font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>{entry.name} <span className="opacity-50 font-normal">({entry.usage})</span></span>
               </div>
             ))}
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className={cn(" border rounded-3xl p-6 md:p-8 shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-6 md:p-8", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <h3 className={cn("text-lg font-bold mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>Top API Keys</h3>
           {stats.topKeys.length > 0 ? (
             <div className="h-[300px] w-full overflow-y-auto custom-scrollbar pr-2">
@@ -235,7 +244,7 @@ export default function ApiStatsPage() {
                     <YAxis type="category" dataKey="name" stroke="#ffffff40" tick={{ fill: '#ffffff80', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} dx={-15} />
                     <Tooltip 
                       cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                      contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
+                      contentStyle={{ backgroundColor: 'rgba(10, 10, 12, 0.95)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}
                     />
                     <Bar dataKey="usage" fill="url(#themeBar)" radius={[0, 8, 8, 0]} barSize={24} animationDuration={1500} />
                   </BarChart>

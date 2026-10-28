@@ -69,41 +69,56 @@ export default function BeritaListPage() {
       initial="hidden"
       animate="visible"
     >
-      <motion.div variants={itemVariants} className="flex items-center">
-        <Link 
-          href="/dashboard" 
-          className={cn("inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm", isDark ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200")}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Kembali ke Dashboard
-        </Link>
+      {/* Compact Unboxed Page Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Latest Announcements
+            </h1>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-700")}>
+              <Newspaper className="w-3 h-3" /> News & Maintenance
+            </span>
+          </div>
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Official platform announcements, scheduled maintenance notices, and service updates.</p>
+        </div>
+
+        <div className="w-full sm:w-auto shrink-0">
+          <Link 
+            href="/dashboard" 
+            className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl transition-all border", isDark ? "text-zinc-300 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08]" : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs")}
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Kembali ke Dashboard
+          </Link>
+        </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("border rounded-3xl shadow-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("p-6 border-b", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-100 bg-slate-50")}>
-          <h1 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-            <Newspaper className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            Latest Announcements
-          </h1>
+      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <div className={cn("p-4 sm:p-5 border-b", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
+          <h2 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <Newspaper className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+            Published Feed
+          </h2>
         </div>
 
         <div className="flex flex-col">
           {beritaList.length === 0 ? (
             <div className={cn("p-12 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
-              <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No announcements have been published yet.</p>
+              <FileText className="w-10 h-10 mx-auto mb-3 opacity-50" />
+              <p className="text-xs sm:text-sm">No announcements have been published yet.</p>
             </div>
           ) : (
             currentItems.map((berita) => (
               <Link 
                 href={`/dashboard/berita/${berita.id}`} 
                 key={berita.id}
-                className={cn("p-6 border-b transition-colors block group", isDark ? "border-slate-800/60 hover:bg-slate-800/40" : "border-slate-100 hover:bg-slate-50")}
+                className={cn("p-5 sm:p-6 border-b last:border-b-0 transition-colors block group", isDark ? "border-white/[0.06] hover:bg-white/[0.02]" : "border-slate-200/90 hover:bg-slate-50/80")}
               >
-                <h2 className={cn("text-lg font-bold transition-colors mb-2", isDark ? "text-cyan-400 group-hover:text-cyan-300" : "text-cyan-600 group-hover:text-cyan-700")}>
+                <h2 className={cn("text-base sm:text-lg font-bold transition-colors mb-2", isDark ? "text-cyan-400 group-hover:text-cyan-300" : "text-cyan-600 group-hover:text-cyan-700")}>
                   {berita.title}
                 </h2>
-                <p className={cn("text-sm line-clamp-3 mb-4 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <p className={cn("text-xs sm:text-sm line-clamp-3 mb-3.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
                   {getBeritaExcerpt(berita.content)}
                 </p>
                 <div className={cn("flex items-center text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
@@ -116,8 +131,8 @@ export default function BeritaListPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="p-6 flex items-center justify-between bg-black/20">
-            <Link href="/dashboard" className="text-sm text-fuchsia-400 hover:text-fuchsia-300 transition-colors font-medium">
+          <div className={cn("p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
+            <Link href="/dashboard" className="text-xs sm:text-sm text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
               Back to Dashboard
             </Link>
             

@@ -408,87 +408,82 @@ export default function IncidentsClient() {
         }
       `}</style>
 
-      {/* Hero Header Card - Exactly matching Metric & Alert (/dashboard/alerts) */}
-      <div
-        className={cn(
-          "relative overflow-hidden rounded-3xl border p-5 sm:p-6 md:p-8 shadow-md group no-print",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
-        )}
-      >
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div
+      {/* Page Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 no-print">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Incident & Reports
+            </h1>
+            <span
               className={cn(
-                "inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-3 sm:mb-4 tracking-wide",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800"
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-medium",
+                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
               )}
             >
-              <ShieldAlert className="w-3.5 h-3.5" /> Incident & Telemetry Audit
-            </div>
-            <h1 className={cn("text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Incident & <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Reports</span>
-            </h1>
-            <p className={cn("text-xs sm:text-sm max-w-md leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Centralized resource abuse telemetry, bandwidth throttling safeguards, and official incident reports.
-            </p>
+              <ShieldAlert className="w-3 h-3" /> Incident & Telemetry Audit
+            </span>
+          </div>
+          <p className={cn("text-xs sm:text-sm max-w-xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Centralized resource abuse telemetry, bandwidth throttling safeguards, and official incident reports.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
+          <div className="relative flex-1 sm:w-60 lg:w-64">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500/50" />
+            <input
+              type="text"
+              placeholder="Search instances..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn(
+                "w-full border rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm focus:outline-none transition-colors",
+                isDark
+                  ? "bg-[#111115] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+              )}
+            />
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-60 lg:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500/50" />
-              <input
-                type="text"
-                placeholder="Search instances..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={cn(
-                  "w-full border rounded-2xl pl-9 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none transition-colors",
-                  isDark
-                    ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                    : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                )}
-              />
-            </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => fetchIncidents(true)}
+              disabled={refreshing}
+              className={cn(
+                "p-2 sm:p-2.5 rounded-xl border text-sm transition-all",
+                isDark ? "bg-[#111115] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 shadow-2xs"
+              )}
+              title="Refresh live data"
+            >
+              <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin text-cyan-500")} />
+            </button>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => fetchIncidents(true)}
-                disabled={refreshing}
-                className={cn(
-                  "p-2 sm:p-2.5 rounded-xl border text-sm transition-all shadow-sm",
-                  isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-200 text-slate-600 hover:text-slate-900"
-                )}
-                title="Refresh live data"
-              >
-                <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin text-cyan-500")} />
-              </button>
+            <button
+              onClick={handleExportCsv}
+              disabled={loading || !data?.incidents?.length}
+              className={cn(
+                "flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 whitespace-nowrap",
+                isDark
+                  ? "bg-[#111115] border-white/[0.08] text-cyan-400 hover:bg-white/[0.04] hover:border-cyan-500/40"
+                  : "bg-white border-slate-200/90 text-cyan-700 hover:bg-slate-50 shadow-2xs"
+              )}
+            >
+              <Download className="w-4 h-4" />
+              <span>Export CSV</span>
+            </button>
 
-              <button
-                onClick={handleExportCsv}
-                disabled={loading || !data?.incidents?.length}
-                className={cn(
-                  "flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap",
-                  isDark
-                    ? "bg-[#060b14] border-slate-800 text-cyan-400 hover:bg-slate-800/60 hover:border-cyan-500/40"
-                    : "bg-white border-slate-200 text-cyan-700 hover:bg-slate-50"
-                )}
-              >
-                <Download className="w-4 h-4" />
-                <span>Export CSV</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsFleetReport(true);
-                  setReportModalItem(null);
-                }}
-                disabled={loading || !data?.incidents?.length}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Official Report</span>
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setIsFleetReport(true);
+                setReportModalItem(null);
+              }}
+              disabled={loading || !data?.incidents?.length}
+              className="flex-1 sm:flex-initial px-4 py-2 sm:py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Official Report</span>
+            </button>
           </div>
         </div>
       </div>
@@ -496,7 +491,7 @@ export default function IncidentsClient() {
       {/* Bandwidth Policy & Node Protection Notice Banner */}
       <div
         className={cn(
-          "rounded-xl sm:rounded-2xl p-4 sm:p-5 border transition-all shadow-sm no-print flex items-start gap-3 sm:gap-3.5",
+          "rounded-xl sm:rounded-2xl p-4 sm:p-5 border transition-all no-print flex items-start gap-3 sm:gap-3.5",
           isDark
             ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200"
             : "bg-cyan-50 border-cyan-200 text-cyan-800"
@@ -528,12 +523,12 @@ export default function IncidentsClient() {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 no-print">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 no-print">
         {/* Total VPS */}
         <div
           className={cn(
-            "rounded-2xl p-3.5 sm:p-5 border transition-all",
-            isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+            "rounded-2xl p-4 sm:p-5 border transition-all",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between mb-2">
@@ -560,8 +555,8 @@ export default function IncidentsClient() {
         {/* Healthy Instances */}
         <div
           className={cn(
-            "rounded-2xl p-3.5 sm:p-5 border transition-all",
-            isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+            "rounded-2xl p-4 sm:p-5 border transition-all",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between mb-2">
@@ -588,8 +583,8 @@ export default function IncidentsClient() {
         {/* Throttled Safeguard Active */}
         <div
           className={cn(
-            "rounded-2xl p-3.5 sm:p-5 border transition-all",
-            isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+            "rounded-2xl p-4 sm:p-5 border transition-all",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between mb-2">
@@ -616,8 +611,8 @@ export default function IncidentsClient() {
         {/* Suspended / Critical */}
         <div
           className={cn(
-            "rounded-2xl p-3.5 sm:p-5 border transition-all",
-            isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+            "rounded-2xl p-4 sm:p-5 border transition-all",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between mb-2">
@@ -660,10 +655,10 @@ export default function IncidentsClient() {
               className={cn(
                 "px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border",
                 isActive
-                  ? "bg-cyan-600 text-white border-cyan-600 shadow-sm"
+                  ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
                   : isDark
-                  ? "bg-[#0b1322] border-slate-800 text-zinc-400 hover:text-white hover:border-slate-700"
-                  : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                  ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/[0.15]"
+                  : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-slate-300 shadow-2xs"
               )}
             >
               {tab.label}
@@ -676,8 +671,8 @@ export default function IncidentsClient() {
       {loading ? (
         <div
           className={cn(
-            "rounded-3xl p-8 sm:p-12 border text-center flex flex-col items-center justify-center space-y-4 shadow-md",
-            isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm"
+            "rounded-2xl p-8 sm:p-12 border text-center flex flex-col items-center justify-center space-y-4",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
@@ -693,8 +688,8 @@ export default function IncidentsClient() {
       ) : filteredIncidents.length === 0 ? (
         <div
           className={cn(
-            "rounded-3xl p-8 sm:p-12 border text-center flex flex-col items-center justify-center space-y-4 shadow-md",
-            isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm"
+            "rounded-2xl p-8 sm:p-12 border text-center flex flex-col items-center justify-center space-y-4",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div
@@ -727,14 +722,14 @@ export default function IncidentsClient() {
               <div
                 key={vps.id}
                 className={cn(
-                  "rounded-2xl p-4 sm:p-6 border transition-all duration-200 relative overflow-hidden",
+                  "rounded-2xl p-4 sm:p-5 border transition-all duration-200 relative overflow-hidden",
                   isCritical
                     ? isDark
-                      ? "bg-[#0b1322] border-rose-500/40"
-                      : "bg-white border-rose-300 shadow-md"
+                      ? "bg-[#0a0a0c] border-rose-500/40"
+                      : "bg-white border-rose-300 shadow-2xs"
                     : isDark
-                    ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700"
-                    : "bg-white border-slate-200 shadow-sm hover:border-slate-300"
+                    ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.15]"
+                    : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300"
                 )}
               >
                 {/* Active Incident Warning / Notice Bar */}
@@ -758,7 +753,7 @@ export default function IncidentsClient() {
                       href={`/dashboard/tickets/new?service=VPS&subject=${encodeURIComponent(
                         `Request Unthrottle for VMID ${vps.vmid} (${vps.hostname})`
                       )}`}
-                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-semibold shrink-0 text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all w-full sm:w-auto"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-bold shrink-0 text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all w-full sm:w-auto"
                     >
                       <span>Request Unthrottle</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -786,7 +781,7 @@ export default function IncidentsClient() {
                       href={`/dashboard/tickets/new?service=VPS&subject=${encodeURIComponent(
                         `Request Network Reconnect for VMID ${vps.vmid} (${vps.hostname})`
                       )}`}
-                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-bold shrink-0 text-xs bg-rose-600 hover:bg-rose-700 text-white transition-all w-full sm:w-auto shadow-sm"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-bold shrink-0 text-xs bg-rose-600 hover:bg-rose-700 text-white transition-all w-full sm:w-auto shadow-sm"
                     >
                       <span>Request Network Reconnect</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -814,7 +809,7 @@ export default function IncidentsClient() {
                       href={`/dashboard/tickets/new?service=VPS&subject=${encodeURIComponent(
                         `Suspension Dispute for VMID ${vps.vmid} (${vps.hostname})`
                       )}`}
-                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-bold shrink-0 text-xs bg-rose-600 hover:bg-rose-700 text-white transition-all w-full sm:w-auto shadow-sm"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-bold shrink-0 text-xs bg-rose-600 hover:bg-rose-700 text-white transition-all w-full sm:w-auto shadow-sm"
                     >
                       <span>Dispute via Support Ticket</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -823,7 +818,7 @@ export default function IncidentsClient() {
                 )}
 
                 {/* Instance Top Row Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 sm:pb-4 border-b border-slate-800/40 mb-3.5 sm:mb-4">
+                <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 sm:pb-4 border-b mb-3.5 sm:mb-4", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={cn(
@@ -836,13 +831,13 @@ export default function IncidentsClient() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={cn("font-bold text-sm sm:base truncate", isDark ? "text-white" : "text-slate-900")}>
+                        <span className={cn("font-bold text-sm sm:text-base truncate", isDark ? "text-white" : "text-slate-900")}>
                           {vps.hostname}
                         </span>
                         <span
                           className={cn(
                             "px-2 py-0.5 rounded-md font-mono text-[10px] sm:text-[11px] border font-semibold shrink-0",
-                            isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+                            isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-700"
                           )}
                         >
                           ID: {vps.vmid}
@@ -928,7 +923,7 @@ export default function IncidentsClient() {
                     <span
                       className={cn(
                         "hidden sm:inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border",
-                        isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                        isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-400" : "bg-slate-50/80 border-slate-200/90 text-slate-600"
                       )}
                     >
                       <Clock className="w-3 h-3" />
@@ -958,7 +953,7 @@ export default function IncidentsClient() {
                         {vps.metrics.cpuPercent}%
                       </span>
                     </div>
-                    <div className={cn("h-1.5 sm:h-2 rounded-full overflow-hidden", isDark ? "bg-white/5" : "bg-slate-100")}>
+                    <div className={cn("h-1.5 sm:h-2 rounded-full overflow-hidden", isDark ? "bg-white/[0.06]" : "bg-slate-100")}>
                       <div
                         className={cn(
                           "h-full rounded-full transition-all duration-500",
@@ -984,7 +979,7 @@ export default function IncidentsClient() {
                         {vps.metrics.memPercent}%
                       </span>
                     </div>
-                    <div className={cn("h-1.5 sm:h-2 rounded-full overflow-hidden", isDark ? "bg-white/5" : "bg-slate-100")}>
+                    <div className={cn("h-1.5 sm:h-2 rounded-full overflow-hidden", isDark ? "bg-white/[0.06]" : "bg-slate-100")}>
                       <div
                         className="h-full rounded-full bg-cyan-600 transition-all duration-500"
                         style={{ width: `${Math.min(100, Math.max(0, vps.metrics.memPercent))}%` }}
@@ -1005,7 +1000,7 @@ export default function IncidentsClient() {
                         {vps.metrics.diskPercent}%
                       </span>
                     </div>
-                    <div className={cn("h-1.5 sm:h-2 rounded-full overflow-hidden", isDark ? "bg-white/5" : "bg-slate-100")}>
+                    <div className={cn("h-1.5 sm:h-2 rounded-full overflow-hidden", isDark ? "bg-white/[0.06]" : "bg-slate-100")}>
                       <div
                         className="h-full rounded-full bg-cyan-600 transition-all duration-500"
                         style={{ width: `${Math.min(100, Math.max(0, vps.metrics.diskPercent))}%` }}
@@ -1044,7 +1039,7 @@ export default function IncidentsClient() {
                         "p-1.5 sm:p-2 rounded-lg text-xs font-mono flex items-center justify-between border",
                         vps.isNetDisabled
                           ? (isDark ? "bg-rose-950/20 border-rose-500/20" : "bg-rose-50 border-rose-200")
-                          : (isDark ? "bg-[#060b14] border-white/5" : "bg-slate-50 border-slate-200")
+                          : (isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")
                       )}
                     >
                       {vps.isNetDisabled ? (
@@ -1069,15 +1064,15 @@ export default function IncidentsClient() {
                 </div>
 
                 {/* Bottom Card Action Footer */}
-                <div className="pt-3.5 sm:pt-4 mt-3.5 sm:mt-4 border-t border-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className={cn("pt-3.5 sm:pt-4 mt-3.5 sm:mt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                   <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
                     <button
                       onClick={() => setTelemetryModalItem(vps)}
                       className={cn(
-                        "flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all shadow-sm w-full sm:w-auto",
+                        "flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all w-full sm:w-auto",
                         isDark
-                          ? "bg-white/5 border-white/10 text-cyan-400 hover:bg-cyan-950/40 hover:border-cyan-500/40"
-                          : "bg-white border-slate-200 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-300"
+                          ? "bg-white/[0.02] border-white/[0.08] text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-500/30"
+                          : "bg-white border-slate-200/90 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-300 shadow-2xs"
                       )}
                     >
                       <Activity className="w-3.5 h-3.5" />
@@ -1090,10 +1085,10 @@ export default function IncidentsClient() {
                         setReportModalItem(vps);
                       }}
                       className={cn(
-                        "flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all shadow-sm w-full sm:w-auto",
+                        "flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all w-full sm:w-auto",
                         isDark
-                          ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:border-white/20"
-                          : "bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50"
+                          ? "bg-white/[0.02] border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.06]"
+                          : "bg-white border-slate-200/90 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs"
                       )}
                     >
                       <Printer className="w-3.5 h-3.5" />
@@ -1131,15 +1126,15 @@ export default function IncidentsClient() {
           <div
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "w-full max-w-4xl rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 shadow-2xl relative my-3 sm:my-6 md:my-8",
-              isDark ? "bg-[#0b1322] border-cyan-500/30 text-white" : "bg-white border-slate-200 text-slate-900"
+              "w-full max-w-4xl rounded-2xl border p-4 sm:p-6 space-y-5 shadow-2xl relative my-3 sm:my-6 md:my-8",
+              isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-white border-slate-200/90 text-slate-900"
             )}
           >
             {/* Modal Header */}
             <div
               className={cn(
-                "sticky top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 px-4 sm:px-6 md:px-8 py-3.5 sm:py-4 rounded-t-2xl sm:rounded-t-3xl border-b flex items-start justify-between gap-4 backdrop-blur-xl shadow-sm",
-                isDark ? "bg-[#0b1322]/95 border-slate-800 text-white" : "bg-white/95 border-slate-200 text-slate-900"
+                "sticky top-0 z-20 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 px-4 sm:px-6 py-3.5 sm:py-4 rounded-t-2xl border-b flex items-start justify-between gap-4 backdrop-blur-xl",
+                isDark ? "bg-[#0a0a0c]/95 border-white/[0.08] text-white" : "bg-white/95 border-slate-200/90 text-slate-900"
               )}
             >
               <div className="min-w-0 flex-1">
@@ -1156,7 +1151,7 @@ export default function IncidentsClient() {
                     VMID: {telemetryModalItem.vmid}
                   </span>
                 </div>
-                <h3 className="text-base sm:text-xl md:text-2xl font-extrabold truncate">{telemetryModalItem.hostname}</h3>
+                <h3 className="text-base sm:text-xl font-bold truncate">{telemetryModalItem.hostname}</h3>
                 <p className={cn("text-xs mt-0.5 font-mono truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
                   IP: {telemetryModalItem.primaryIp} • Node: {telemetryModalItem.node} • Cores:{" "}
                   {telemetryModalItem.cpuCores} • RAM: {telemetryModalItem.ramGb} GB
@@ -1165,10 +1160,10 @@ export default function IncidentsClient() {
 
               <button
                 onClick={() => setTelemetryModalItem(null)}
-                className="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                className={cn("p-1.5 sm:p-2 rounded-xl border transition-colors shrink-0", isDark ? "text-zinc-400 hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08]" : "text-slate-500 hover:text-slate-900 bg-slate-50/80 hover:bg-slate-100 border-slate-200/90")}
                 title="Close (Esc)"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
@@ -1180,7 +1175,7 @@ export default function IncidentsClient() {
               <div
                 className={cn(
                   "p-1 rounded-xl border flex items-center gap-1",
-                  isDark ? "bg-[#060b14] border-white/10" : "bg-slate-100 border-slate-200"
+                  isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90"
                 )}
               >
                 {[
@@ -1194,7 +1189,7 @@ export default function IncidentsClient() {
                     className={cn(
                       "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all",
                       rrdTimeframe === tf.id
-                        ? "bg-cyan-600 text-white shadow-sm"
+                        ? "bg-cyan-400 text-slate-950 shadow-sm"
                         : isDark
                         ? "text-zinc-400 hover:text-white"
                         : "text-slate-600 hover:text-slate-900"
@@ -1209,8 +1204,8 @@ export default function IncidentsClient() {
             {/* RRD Chart 1: CPU Utilization */}
             <div
               className={cn(
-                "p-3.5 sm:p-5 rounded-2xl border space-y-2 sm:space-y-3",
-                isDark ? "bg-[#060b14] border-white/5" : "bg-slate-50 border-slate-200"
+                "p-4 sm:p-5 rounded-xl border space-y-2 sm:space-y-3",
+                isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90"
               )}
             >
               <div className="flex items-center justify-between">
@@ -1237,23 +1232,23 @@ export default function IncidentsClient() {
                           <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#27272a" : "#e2e8f0"} />
                       <XAxis
                         dataKey="time"
                         tickFormatter={(t) => (t ? new Date(t * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "")}
-                        stroke={isDark ? "#64748b" : "#94a3b8"}
+                        stroke={isDark ? "#71717a" : "#94a3b8"}
                         fontSize={10}
                       />
                       <YAxis
                         tickFormatter={(v) => `${Math.round(v * 100)}%`}
-                        stroke={isDark ? "#64748b" : "#94a3b8"}
+                        stroke={isDark ? "#71717a" : "#94a3b8"}
                         fontSize={10}
                         domain={[0, 1]}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: isDark ? "#0b1322" : "#ffffff",
-                          borderColor: isDark ? "#1e293b" : "#cbd5e1",
+                          backgroundColor: isDark ? "#0a0a0c" : "#ffffff",
+                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#cbd5e1",
                           borderRadius: "12px",
                           fontSize: "12px",
                         }}
@@ -1274,8 +1269,8 @@ export default function IncidentsClient() {
             {/* RRD Chart 2: Network Traffic Speed */}
             <div
               className={cn(
-                "p-3.5 sm:p-5 rounded-2xl border space-y-2 sm:space-y-3",
-                isDark ? "bg-[#060b14] border-white/5" : "bg-slate-50 border-slate-200"
+                "p-4 sm:p-5 rounded-xl border space-y-2 sm:space-y-3",
+                isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90"
               )}
             >
               <div className="flex items-center justify-between">
@@ -1311,22 +1306,22 @@ export default function IncidentsClient() {
                           <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#27272a" : "#e2e8f0"} />
                       <XAxis
                         dataKey="time"
                         tickFormatter={(t) => (t ? new Date(t * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "")}
-                        stroke={isDark ? "#64748b" : "#94a3b8"}
+                        stroke={isDark ? "#71717a" : "#94a3b8"}
                         fontSize={10}
                       />
                       <YAxis
                         tickFormatter={(v) => formatSpeed(Number(v))}
-                        stroke={isDark ? "#64748b" : "#94a3b8"}
+                        stroke={isDark ? "#71717a" : "#94a3b8"}
                         fontSize={10}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: isDark ? "#0b1322" : "#ffffff",
-                          borderColor: isDark ? "#1e293b" : "#cbd5e1",
+                          backgroundColor: isDark ? "#0a0a0c" : "#ffffff",
+                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#cbd5e1",
                           borderRadius: "12px",
                           fontSize: "12px",
                         }}
@@ -1349,10 +1344,10 @@ export default function IncidentsClient() {
             </div>
 
             {/* Modal Footer Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3.5 sm:pt-4 border-t border-slate-800/40">
+            <div className={cn("flex items-center justify-end gap-3 pt-3.5 sm:pt-4 border-t", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
               <button
                 onClick={() => setTelemetryModalItem(null)}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold border border-white/10 hover:bg-white/5 transition-colors"
+                className={cn("w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-medium border transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300 hover:bg-white/[0.06]" : "bg-slate-50/80 border-slate-200/90 text-slate-700 hover:bg-slate-100")}
               >
                 Close
               </button>
@@ -1373,17 +1368,17 @@ export default function IncidentsClient() {
           <div
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "w-full max-w-4xl rounded-2xl sm:rounded-3xl border shadow-2xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 relative my-3 sm:my-6 md:my-8 printable-report",
-              isDark ? "bg-[#0b1322] border-slate-800/80 text-white" : "bg-white border-slate-200 text-slate-900"
+              "w-full max-w-4xl rounded-2xl border shadow-2xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 relative my-3 sm:my-6 md:my-8 printable-report",
+              isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-white border-slate-200/90 text-slate-900"
             )}
           >
             {/* Top Modal Chrome (Sticky, Hidden on Print) */}
             <div
               className={cn(
-                "sticky top-0 z-30 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 px-4 sm:px-6 md:px-8 py-3 sm:py-3.5 rounded-t-2xl sm:rounded-t-3xl border-b flex items-center justify-between gap-3 no-print backdrop-blur-xl transition-all shadow-sm",
+                "sticky top-0 z-30 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 px-4 sm:px-6 md:px-8 py-3 sm:py-3.5 rounded-t-2xl border-b flex items-center justify-between gap-3 no-print backdrop-blur-xl transition-all",
                 isDark
-                  ? "bg-[#0b1322]/95 border-slate-800 text-white"
-                  : "bg-white/95 border-slate-200 text-slate-900"
+                  ? "bg-[#0a0a0c]/95 border-white/[0.08] text-white"
+                  : "bg-white/95 border-slate-200/90 text-slate-900"
               )}
             >
               <div className="flex items-center gap-2 min-w-0">
@@ -1397,7 +1392,7 @@ export default function IncidentsClient() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all print-include"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all print-include"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print / PDF</span>
@@ -1408,8 +1403,8 @@ export default function IncidentsClient() {
                     setIsFleetReport(false);
                   }}
                   className={cn(
-                    "p-1.5 sm:p-2 rounded-xl transition-colors",
-                    isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    "p-1.5 sm:p-2 rounded-xl border transition-colors",
+                    isDark ? "text-zinc-400 hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08]" : "text-slate-500 hover:text-slate-900 bg-slate-50/80 hover:bg-slate-100 border-slate-200/90"
                   )}
                   title="Close (Esc)"
                 >
@@ -1419,7 +1414,7 @@ export default function IncidentsClient() {
             </div>
 
             {/* Official Report Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 sm:pb-6 border-b-2 border-dashed border-slate-300 dark:border-slate-800">
+            <div className={cn("flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 sm:pb-6 border-b-2 border-dashed", isDark ? "border-white/[0.12]" : "border-slate-300")}>
               <div className="space-y-1 sm:space-y-1.5 min-w-0">
                 <h3 className="font-extrabold text-base sm:text-xl tracking-tight truncate">
                   MASDIKA CLOUD INFRASTRUCTURE
@@ -1466,25 +1461,25 @@ export default function IncidentsClient() {
                 </h4>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs">
-                  <div className="p-2.5 sm:p-3 rounded-xl border bg-slate-50/50 dark:bg-white/5 min-w-0">
+                  <div className={cn("p-2.5 sm:p-3 rounded-xl border min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block">Hostname</span>
                     <span className="font-bold text-xs sm:text-sm truncate block" title={reportModalItem.hostname}>
                       {reportModalItem.hostname}
                     </span>
                   </div>
-                  <div className="p-2.5 sm:p-3 rounded-xl border bg-slate-50/50 dark:bg-white/5 min-w-0">
+                  <div className={cn("p-2.5 sm:p-3 rounded-xl border min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block">VMID / Hypervisor</span>
                     <span className="font-bold text-xs sm:text-sm truncate block">
                       {reportModalItem.vmid} ({reportModalItem.node})
                     </span>
                   </div>
-                  <div className="p-2.5 sm:p-3 rounded-xl border bg-slate-50/50 dark:bg-white/5 min-w-0">
+                  <div className={cn("p-2.5 sm:p-3 rounded-xl border min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block">Primary IP</span>
                     <span className="font-mono font-bold text-xs sm:text-sm truncate block" title={reportModalItem.primaryIp}>
                       {reportModalItem.primaryIp}
                     </span>
                   </div>
-                  <div className="p-2.5 sm:p-3 rounded-xl border bg-slate-50/50 dark:bg-white/5 min-w-0">
+                  <div className={cn("p-2.5 sm:p-3 rounded-xl border min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase block">Provisioned Specs</span>
                     <span className="font-bold text-xs sm:text-sm truncate block">
                       {reportModalItem.cpuCores} vCPU / {reportModalItem.ramGb} GB RAM
@@ -1559,7 +1554,7 @@ export default function IncidentsClient() {
                       statusColor: "bg-cyan-100 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-300 border-cyan-300",
                     },
                   ].map((row, idx) => (
-                    <div key={idx} className="p-3 rounded-xl border bg-slate-50/60 dark:bg-white/5 space-y-1.5">
+                    <div key={idx} className={cn("p-3 rounded-xl border space-y-1.5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <span className="font-bold">{row.metric}</span>
                         <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold border", row.statusColor)}>
@@ -1579,9 +1574,9 @@ export default function IncidentsClient() {
                 </div>
 
                 {/* Desktop & Printable Table (>= md screens) */}
-                <div className="hidden md:block print:block overflow-x-auto border rounded-2xl">
+                <div className={cn("hidden md:block print:block overflow-x-auto border rounded-xl", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-100 dark:bg-white/5 border-b font-bold uppercase text-[10px]">
+                    <thead className={cn("border-b font-bold uppercase text-[10px]", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <tr>
                         <th className="p-3">Resource Metric</th>
                         <th className="p-3">Live Utilization</th>
@@ -1589,7 +1584,7 @@ export default function IncidentsClient() {
                         <th className="p-3">Status Indicator</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-white/5">
+                    <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200")}>
                       <tr>
                         <td className="p-3 font-semibold">Processor Load (CPU)</td>
                         <td className="p-3 font-mono font-bold">{reportModalItem.metrics.cpuPercent}%</td>
@@ -1692,7 +1687,7 @@ export default function IncidentsClient() {
 
                 <div
                   className={cn(
-                    "p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-xs sm:text-sm leading-relaxed space-y-2",
+                    "p-3.5 sm:p-4 rounded-xl border text-xs sm:text-sm leading-relaxed space-y-2",
                     reportModalItem.isSuspended
                       ? isDark
                         ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
@@ -1745,7 +1740,7 @@ export default function IncidentsClient() {
                 {/* Mobile Fleet Cards (< md screens) */}
                 <div className="block md:hidden print:hidden space-y-2.5">
                   {data?.incidents.map((vps) => (
-                    <div key={vps.id} className="p-3 rounded-xl border bg-slate-50/60 dark:bg-white/5 space-y-2 text-xs">
+                    <div key={vps.id} className={cn("p-3 rounded-xl border space-y-2 text-xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-bold truncate">{vps.hostname}</span>
                         <span
@@ -1782,9 +1777,9 @@ export default function IncidentsClient() {
                 </div>
 
                 {/* Desktop Fleet Table (>= md screens) */}
-                <div className="hidden md:block print:block overflow-x-auto border rounded-2xl">
+                <div className={cn("hidden md:block print:block overflow-x-auto border rounded-xl", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-100 dark:bg-white/5 border-b font-bold uppercase text-[10px]">
+                    <thead className={cn("border-b font-bold uppercase text-[10px]", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <tr>
                         <th className="p-3">VMID</th>
                         <th className="p-3">Hostname</th>
@@ -1796,7 +1791,7 @@ export default function IncidentsClient() {
                         <th className="p-3">Audit Severity</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-white/5">
+                    <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200")}>
                       {data?.incidents.map((vps) => (
                         <tr key={vps.id}>
                           <td className="p-3 font-mono font-bold">{vps.vmid}</td>
@@ -1854,7 +1849,7 @@ export default function IncidentsClient() {
             )}
 
             {/* Policy & Terms Clause */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-300 dark:border-slate-800">
+            <div className={cn("space-y-1.5 pt-2 border-t", isDark ? "border-white/[0.08]" : "border-slate-300")}>
               <h4 className="text-[11px] sm:text-xs font-black uppercase tracking-widest text-cyan-600">
                 5. Bandwidth Policy & Node Safeguard Notice
               </h4>
@@ -1867,7 +1862,7 @@ export default function IncidentsClient() {
             </div>
 
             {/* Formal Verification Stamp */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3.5 sm:pt-4 border-t-2 border-dashed border-slate-300 dark:border-slate-800">
+            <div className={cn("flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3.5 sm:pt-4 border-t-2 border-dashed", isDark ? "border-white/[0.12]" : "border-slate-300")}>
               <div className="space-y-0.5 min-w-0">
                 <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Cryptographic Verification Seal
@@ -1884,22 +1879,22 @@ export default function IncidentsClient() {
             </div>
 
             {/* Print action footer */}
-            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-800/40 no-print">
+            <div className={cn("flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t no-print", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
               <button
                 onClick={() => {
                   setReportModalItem(null);
                   setIsFleetReport(false);
                 }}
                 className={cn(
-                  "w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-medium border transition-colors text-center",
-                  isDark ? "border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                  "w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-medium border transition-colors text-center",
+                  isDark ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-zinc-300 hover:text-white" : "bg-slate-50/80 border-slate-200/90 hover:bg-slate-100 text-slate-700"
                 )}
               >
                 Close
               </button>
               <button
                 onClick={handlePrint}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all print-include"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all print-include"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Document</span>

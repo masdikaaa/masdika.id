@@ -94,15 +94,15 @@ export default function ReserveNewIpPage() {
   const ipPrice = isIPv6 ? (pricing?.ipv6 || 0) : (pricing?.ipv4 || 0);
 
   return (
-    <div className="w-full space-y-6 md:space-y-8 pb-10">
+    <div className="w-full space-y-6 pb-10">
       <div className="flex items-center">
         <Link 
           href="/dashboard/reserved-ips" 
           className={cn(
-            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border shadow-2xs",
             isDark 
-              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
-              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+              ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90"
           )}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -110,28 +110,29 @@ export default function ReserveNewIpPage() {
         </Link>
       </div>
 
-      {/* Hero Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-        
-        
-        <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
-            <Plus className="w-3 h-3" /> New Reservation
+      {/* Compact Unboxed Page Header */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Reserve Global IP
+            </h1>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
+              <Plus className="w-3 h-3" /> New Reservation
+            </span>
           </div>
-          <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            Reserve <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Global IP</span>
-          </h1>
-          <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Select an available IP address from the pool. This IP will be reserved for your account and can be attached to any future deployment.</p>
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Select an available IP address from the pool. This IP will be reserved for your account and can be attached to any future deployment.
+          </p>
         </div>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn("border rounded-3xl p-6 md:p-8 shadow-md relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-                
-        <div className="relative z-10 space-y-8">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <div className="relative z-10 space-y-6">
           {/* IP Selection */}
           <div>
             <label className={cn("text-sm font-semibold mb-3 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-              <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold", isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-white text-cyan-800 border border-slate-200 shadow-sm")}>1</span>
+              <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold border", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-slate-50 text-cyan-800 border-slate-200/90 shadow-2xs")}>1</span>
               Select Available IP Address
             </label>
             <div className="ml-0 sm:ml-8 mt-2 sm:mt-0">
@@ -153,7 +154,7 @@ export default function ReserveNewIpPage() {
                       className="font-mono text-sm py-3.5"
                     />
                     
-                    <div className={cn("p-4 rounded-xl flex items-start gap-3 border transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                    <div className={cn("p-4 rounded-xl flex items-start gap-3 border transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800 shadow-2xs")}>
                       <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                       <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
                         <strong className={cn("font-medium mr-1.5", isDark ? "text-cyan-400" : "text-cyan-900")}>Note:</strong> After reserving a Local IP, please open a support ticket to request a Public IP allocation.
@@ -164,19 +165,17 @@ export default function ReserveNewIpPage() {
             </div>
           </div>
 
-
-
           {/* Cost Calculator */}
           {selectedIp && (
-            <div className={cn("ml-0 sm:ml-8 rounded-2xl p-5 space-y-4 relative overflow-hidden border shadow-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90")}>
+            <div className={cn("ml-0 sm:ml-8 rounded-2xl p-4 sm:p-5 space-y-4 relative overflow-hidden border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90 shadow-2xs")}>
               <div className="flex items-center gap-3 relative z-10">
-                <div className={cn("p-2.5 rounded-xl shrink-0 border", isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-slate-100 border-slate-200")}>
+                <div className={cn("p-2.5 rounded-xl shrink-0 border", isDark ? "bg-cyan-500/15 border-cyan-500/25" : "bg-white border-slate-200/90")}>
                   <Calculator className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 </div>
                 <h5 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Estimated Cost</h5>
               </div>
               
-              <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
+              <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
                  <div className="min-w-0">
                      <div className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-500")}>
                       Hourly Accumulation
@@ -197,24 +196,23 @@ export default function ReserveNewIpPage() {
             </div>
           )}
 
-          <div className="pt-6 flex flex-col sm:flex-row justify-end">
+          <div className="pt-2 flex flex-col sm:flex-row justify-end">
             <button
               onClick={handleReserve}
               disabled={isReserving || availableIps.length === 0}
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
             >
               {isReserving ? (
                 <>
-                  <RefreshCw className="w-5 h-5 animate-spin" /> Reserving...
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Reserving...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5" /> Reserve IP Now
+                  <CheckCircle className="w-4 h-4" /> Reserve IP Now
                 </>
               )}
             </button>
           </div>
-
         </div>
       </motion.div>
     </div>

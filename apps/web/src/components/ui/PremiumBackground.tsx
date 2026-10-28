@@ -33,20 +33,25 @@ function DotGridPattern({ className }: { className?: string }) {
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 select-none opacity-35 dark:opacity-20",
+        "pointer-events-none absolute inset-0 select-none opacity-25 dark:opacity-15",
         className
       )}
       style={{
         backgroundImage:
-          "radial-gradient(rgba(100, 116, 139, 0.4) 1.2px, transparent 1.2px)",
+          "radial-gradient(rgba(100, 116, 139, 0.35) 1.2px, transparent 1.2px)",
         backgroundSize: "28px 28px",
       }}
     />
   );
 }
 
+/**
+ * Subtle accent diamond outline.
+ * Hidden on mobile/tablet so it NEVER overlaps or blocks any page content, text, or buttons.
+ * Translucent and non-intrusive on desktop.
+ */
 function DiamondOrnament({
-  size = 20,
+  size = 18,
   className,
 }: {
   size?: number;
@@ -56,16 +61,20 @@ function DiamondOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none flex items-center justify-center",
+        "pointer-events-none absolute select-none hidden xl:flex items-center justify-center opacity-30 dark:opacity-20",
         className
       )}
       style={{ width: `${size}px`, height: `${size}px` }}
     >
-      <div className="w-full h-full bg-cyan-500 dark:bg-cyan-400 rounded-[5px] rotate-45 shadow-md shadow-cyan-500/35 dark:shadow-cyan-400/30" />
+      <div className="w-full h-full border border-cyan-500/60 dark:border-cyan-400/50 bg-cyan-500/10 dark:bg-cyan-400/10 rounded-[4px] rotate-45" />
     </div>
   );
 }
 
+/**
+ * Subtle architectural dot matrix cluster.
+ * Hidden on mobile/tablet to protect readability.
+ */
 function DotMatrixOrnament({
   tone = "slate",
   className,
@@ -74,12 +83,15 @@ function DotMatrixOrnament({
   className?: string;
 }) {
   const fill = tone === "accent" ? "#06B6D4" : "#64748B";
-  const fillOpacity = tone === "accent" ? 0.75 : 0.45;
+  const fillOpacity = tone === "accent" ? 0.35 : 0.2;
 
   return (
     <div
       aria-hidden="true"
-      className={cn("pointer-events-none absolute select-none", className)}
+      className={cn(
+        "pointer-events-none absolute select-none hidden xl:block opacity-35 dark:opacity-20",
+        className
+      )}
       style={{ width: "40px", height: "28px" }}
     >
       <svg width="40" height="28" viewBox="0 0 40 28" fill="none">
@@ -98,6 +110,10 @@ function DotMatrixOrnament({
   );
 }
 
+/**
+ * Subtle architectural plus marker.
+ * Hidden on mobile/tablet to avoid overlapping text.
+ */
 function PlusOrnament({
   tone = "accent",
   className,
@@ -111,7 +127,7 @@ function PlusOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none flex items-center justify-center",
+        "pointer-events-none absolute select-none hidden xl:flex items-center justify-center opacity-35 dark:opacity-20",
         className
       )}
       style={{ width: "16px", height: "16px" }}
@@ -122,7 +138,7 @@ function PlusOrnament({
           stroke={stroke}
           strokeWidth="2"
           strokeLinecap="round"
-          strokeOpacity="0.65"
+          strokeOpacity="0.5"
         />
       </svg>
     </div>
@@ -130,21 +146,20 @@ function PlusOrnament({
 }
 
 const RING_NEUTRAL_DASHED =
-  "rounded-full border border-dashed border-neutral-300/80 dark:border-zinc-700/60";
+  "hidden sm:block rounded-full border border-dashed border-neutral-300/35 dark:border-zinc-800/40";
 const RING_NEUTRAL_SOLID =
-  "rounded-full border border-neutral-200/90 dark:border-zinc-800/80";
+  "hidden sm:block rounded-full border border-neutral-200/40 dark:border-zinc-800/35";
 const RING_ACCENT_SOLID =
-  "rounded-full border border-cyan-500/30 dark:border-cyan-400/25";
+  "hidden sm:block rounded-full border border-cyan-500/15 dark:border-cyan-400/12";
 const RING_ACCENT_DASHED =
-  "rounded-full border border-dashed border-cyan-500/30 dark:border-cyan-400/25";
+  "hidden sm:block rounded-full border border-dashed border-cyan-500/15 dark:border-cyan-400/12";
 
 /**
- * Architectural section background ornaments inspired by SMK Telkom Malang:
+ * Architectural section background ornaments:
  * - Subtle 28x28 radial dot-grid
- * - Concentric dashed neutral & solid accent circular lines
- * - Rotated rounded-square diamond badges
- * - 4x3 dot matrix clusters (slate & accent)
- * - Crosshair plus (+) markers
+ * - Concentric dashed neutral & solid accent circular lines (sm+ only, soft opacity)
+ * - Translucent diamond outlines & dot matrices strictly on outer margins (xl only)
+ * - Safe `-z-10` layer so it NEVER blocks or covers page content
  */
 export function SectionOrnaments({
   variant = "sides",
@@ -159,7 +174,7 @@ export function SectionOrnaments({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 select-none z-0 overflow-hidden",
+        "pointer-events-none absolute inset-0 select-none -z-10 overflow-hidden",
         className
       )}
     >
@@ -185,27 +200,12 @@ export function SectionOrnaments({
               RING_NEUTRAL_SOLID
             )}
           />
-          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
-          <DiamondOrnament
-            size={14}
-            className="top-24 left-1/4 hidden md:flex"
-          />
-          <DiamondOrnament size={18} className="top-12 right-10 sm:right-24" />
-          <DiamondOrnament size={16} className="bottom-24 left-10 sm:left-24" />
-          <DiamondOrnament
-            size={20}
-            className="bottom-14 right-12 sm:right-28"
-          />
-          <DotMatrixOrnament
-            tone="slate"
-            className="bottom-28 left-14 sm:left-32"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-20 right-14 sm:right-36"
-          />
-          <PlusOrnament tone="accent" className="top-6 left-1/3" />
-          <PlusOrnament tone="slate" className="bottom-8 right-1/3" />
+          <DiamondOrnament size={18} className="top-12 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-16 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-20 left-8 xl:left-16" />
+          <DiamondOrnament size={18} className="bottom-14 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="bottom-24 left-10 xl:left-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 xl:right-20" />
         </>
       )}
 
@@ -235,24 +235,12 @@ export function SectionOrnaments({
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={20} className="top-10 left-6 sm:left-16" />
-          <DiamondOrnament
-            size={14}
-            className="top-12 left-1/3 hidden lg:flex"
-          />
-          <DiamondOrnament size={20} className="top-10 right-6 sm:right-16" />
-          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-20" />
-          <DiamondOrnament size={18} className="bottom-10 right-8 sm:right-20" />
-          <DotMatrixOrnament
-            tone="slate"
-            className="bottom-16 left-12 sm:left-28"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-16 right-12 sm:right-28"
-          />
-          <PlusOrnament tone="accent" className="top-20 left-1/4" />
-          <PlusOrnament tone="slate" className="top-20 right-1/4" />
+          <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 xl:left-16" />
+          <DiamondOrnament size={16} className="bottom-10 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="bottom-16 left-10 xl:left-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 xl:right-20" />
         </>
       )}
 
@@ -282,25 +270,12 @@ export function SectionOrnaments({
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={22} className="top-12 right-8 sm:right-20" />
-          <DiamondOrnament size={16} className="top-[18%] left-6 sm:left-16" />
-          <DiamondOrnament size={18} className="top-[45%] right-8 sm:right-20" />
-          <DiamondOrnament size={16} className="top-[54%] left-6 sm:left-16" />
-          <DiamondOrnament
-            size={20}
-            className="bottom-20 right-8 sm:right-20"
-          />
-          <DiamondOrnament size={14} className="bottom-28 left-8 sm:left-20" />
-          <DotMatrixOrnament
-            tone="slate"
-            className="top-[24%] left-8 sm:left-24"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="top-[58%] left-8 sm:left-24"
-          />
-          <PlusOrnament tone="accent" className="top-[35%] right-1/4" />
-          <PlusOrnament tone="slate" className="top-[70%] left-1/4" />
+          <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="top-[20%] left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-[45%] right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-20 right-6 xl:right-12" />
+          <DotMatrixOrnament tone="slate" className="top-[24%] left-8 xl:left-16" />
+          <DotMatrixOrnament tone="accent" className="bottom-24 left-8 xl:left-16" />
         </>
       )}
 
@@ -318,18 +293,12 @@ export function SectionOrnaments({
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
-          <DiamondOrnament size={18} className="top-8 right-8 sm:right-20" />
-          <DiamondOrnament size={16} className="bottom-8 left-10 sm:left-24" />
-          <DiamondOrnament size={18} className="bottom-8 right-10 sm:right-24" />
-          <DotMatrixOrnament
-            tone="slate"
-            className="bottom-12 right-14 sm:right-32"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-12 left-14 sm:left-32"
-          />
+          <DiamondOrnament size={18} className="top-8 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-8 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-8 left-8 xl:left-16" />
+          <DiamondOrnament size={16} className="bottom-8 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="bottom-12 right-10 xl:right-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-12 left-10 xl:left-20" />
         </>
       )}
 
@@ -347,27 +316,12 @@ export function SectionOrnaments({
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={22} className="top-12 left-8 sm:left-20" />
-          <DiamondOrnament size={20} className="top-12 right-8 sm:right-20" />
-          <DiamondOrnament
-            size={14}
-            className="top-6 left-1/3 hidden lg:flex"
-          />
-          <DiamondOrnament size={16} className="bottom-12 left-10 sm:left-24" />
-          <DiamondOrnament
-            size={18}
-            className="bottom-12 right-10 sm:right-24"
-          />
-          <DotMatrixOrnament
-            tone="slate"
-            className="bottom-16 left-14 sm:left-32"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-16 right-14 sm:right-32"
-          />
-          <PlusOrnament tone="accent" className="top-8 left-1/4" />
-          <PlusOrnament tone="slate" className="top-8 right-1/4" />
+          <DiamondOrnament size={18} className="top-12 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-12 left-8 xl:left-16" />
+          <DiamondOrnament size={16} className="bottom-12 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="bottom-16 left-10 xl:left-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 xl:right-20" />
         </>
       )}
 
@@ -391,19 +345,12 @@ export function SectionOrnaments({
               RING_NEUTRAL_DASHED
             )}
           />
-          <DiamondOrnament size={22} className="top-10 left-6 sm:left-14" />
-          <DiamondOrnament size={18} className="top-10 right-8 sm:right-20" />
-          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-16" />
-          <DiamondOrnament size={20} className="bottom-10 right-8 sm:right-20" />
-          <DotMatrixOrnament
-            tone="slate"
-            className="bottom-14 left-10 sm:left-20"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-14 right-12 sm:right-24"
-          />
-          <PlusOrnament tone="accent" className="top-6 right-1/3" />
+          <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 xl:left-16" />
+          <DiamondOrnament size={16} className="bottom-10 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="bottom-14 left-10 xl:left-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-14 right-10 xl:right-20" />
         </>
       )}
 
@@ -427,19 +374,12 @@ export function SectionOrnaments({
               RING_NEUTRAL_DASHED
             )}
           />
-          <DiamondOrnament size={20} className="top-10 left-8 sm:left-18" />
-          <DiamondOrnament size={20} className="top-10 right-8 sm:right-20" />
-          <DiamondOrnament size={16} className="bottom-12 left-8 sm:left-18" />
-          <DiamondOrnament size={18} className="bottom-12 right-8 sm:right-20" />
-          <DotMatrixOrnament
-            tone="slate"
-            className="top-18 left-10 sm:left-22"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-16 right-10 sm:right-24"
-          />
-          <PlusOrnament tone="accent" className="top-8 left-1/3" />
+          <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-12 left-8 xl:left-16" />
+          <DiamondOrnament size={16} className="bottom-12 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="top-18 left-8 xl:left-16" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-8 xl:right-16" />
         </>
       )}
 
@@ -457,34 +397,12 @@ export function SectionOrnaments({
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={22} className="top-12 left-10 sm:left-20" />
-          <DiamondOrnament size={22} className="top-12 right-10 sm:right-20" />
-          <DiamondOrnament
-            size={16}
-            className="top-24 left-1/3 hidden lg:flex"
-          />
-          <DiamondOrnament
-            size={16}
-            className="top-24 right-1/3 hidden lg:flex"
-          />
-          <DiamondOrnament
-            size={18}
-            className="bottom-16 left-10 sm:left-20"
-          />
-          <DiamondOrnament
-            size={18}
-            className="bottom-16 right-10 sm:right-20"
-          />
-          <DotMatrixOrnament
-            tone="slate"
-            className="bottom-24 left-12 sm:left-24"
-          />
-          <DotMatrixOrnament
-            tone="accent"
-            className="bottom-24 right-12 sm:right-24"
-          />
-          <PlusOrnament tone="accent" className="top-6 left-1/3" />
-          <PlusOrnament tone="slate" className="top-6 right-1/3" />
+          <DiamondOrnament size={18} className="top-12 left-6 xl:left-12" />
+          <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
+          <DiamondOrnament size={16} className="bottom-16 left-8 xl:left-16" />
+          <DiamondOrnament size={16} className="bottom-16 right-8 xl:right-16" />
+          <DotMatrixOrnament tone="slate" className="bottom-24 left-10 xl:left-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-24 right-10 xl:right-20" />
         </>
       )}
 
@@ -502,14 +420,12 @@ export function SectionOrnaments({
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={16} className="top-10 left-7" />
-          <DiamondOrnament size={16} className="top-12 right-7" />
-          <DiamondOrnament size={14} className="bottom-20 left-8" />
-          <DiamondOrnament size={15} className="bottom-20 right-8" />
+          <DiamondOrnament size={16} className="top-10 left-6" />
+          <DiamondOrnament size={16} className="top-12 right-6" />
+          <DiamondOrnament size={14} className="bottom-20 left-6" />
+          <DiamondOrnament size={14} className="bottom-20 right-6" />
           <DotMatrixOrnament tone="slate" className="top-28 left-6" />
           <DotMatrixOrnament tone="accent" className="bottom-28 right-6" />
-          <PlusOrnament tone="accent" className="top-24 right-12" />
-          <PlusOrnament tone="slate" className="bottom-32 left-12" />
         </>
       )}
     </div>
@@ -528,15 +444,13 @@ const PAGE_ORNAMENT_BANDS: OrnamentVariant[] = [
 
 /**
  * Scrolling page-level architectural ornaments for subpages.
- * Rendered as an `absolute inset-0` layer inside the scrolling page container
- * so the dot-grid, circular lines, diamonds, and dot matrices scroll naturally
- * with the page (just like the Home page) rather than staying fixed on screen.
+ * Rendered strictly behind content (`-z-10`) so no elements are obscured.
  */
 export function PageOrnaments() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-24 md:top-32 bottom-0 overflow-hidden select-none z-0"
+      className="pointer-events-none absolute inset-x-0 top-24 md:top-32 bottom-0 overflow-hidden select-none -z-10"
     >
       <DotGridPattern />
       <div className="flex flex-col w-full">
@@ -558,7 +472,7 @@ export function PremiumBackground() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700"
+      className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700"
     />
   );
 }

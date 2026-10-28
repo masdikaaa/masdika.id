@@ -212,25 +212,25 @@ export default function DashboardOverview() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+        <div className="grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto">
           <Link
             href="/dashboard/topup"
             className={cn(
-              "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all",
+              "inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl text-xs font-semibold border transition-all",
               isDark
                 ? "bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] text-zinc-200"
                 : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-700 shadow-2xs"
             )}
           >
-            <Wallet className="w-3.5 h-3.5 text-cyan-500" />
-            Top Up Credit
+            <Wallet className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+            <span>Top Up Credit</span>
           </Link>
           <Link
             href="/dashboard/checkout"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-2xs"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shadow-2xs"
           >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            Deploy Resource
+            <Plus className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
+            <span>Deploy Resource</span>
           </Link>
         </div>
       </motion.div>
@@ -1090,133 +1090,157 @@ export default function DashboardOverview() {
                 <div
                   key={vps.id}
                   className={cn(
-                    "px-5 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors",
+                    "p-4 sm:px-5 sm:py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 lg:gap-4 transition-colors",
                     isDark ? "hover:bg-white/[0.015]" : "hover:bg-slate-50/70"
                   )}
                 >
-                  {/* Hostname, OS Icon & IP */}
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div
-                      className={cn(
-                        "w-10 h-10 rounded-xl border flex items-center justify-center p-2 shrink-0",
-                        isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50 border-slate-200/80"
-                      )}
-                    >
-                      {osIcon ? (
-                        <img
-                          referrerPolicy="no-referrer"
-                          src={osIcon}
-                          alt={vps.osTemplate || "OS"}
-                          className="w-full h-full object-contain"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <Terminal className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/dashboard/vps/${vps.id}`}
-                          className={cn(
-                            "text-sm font-bold truncate hover:underline",
-                            isDark ? "text-white hover:text-cyan-400" : "text-slate-900 hover:text-cyan-700"
-                          )}
-                        >
-                          {vps.hostname}
-                        </Link>
-                        <span
-                          className={cn(
-                            "text-[10px] font-mono px-1.5 py-0.5 rounded border",
-                            isDark
-                              ? "bg-white/[0.03] border-white/[0.07] text-zinc-500"
-                              : "bg-slate-100 border-slate-200 text-slate-500"
-                          )}
-                        >
-                          #{vps.id}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (ipAddr && ipAddr !== "No IP" && ipAddr !== "Provisioning IP") {
-                              navigator.clipboard.writeText(ipAddr);
-                              toast.success("IP address copied");
-                            }
-                          }}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 text-xs font-mono transition-colors group/ip",
-                            isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700"
-                          )}
-                          title="Copy IP Address"
-                        >
-                          {ipAddr}
-                          <Copy className="w-3 h-3 opacity-0 group-hover/ip:opacity-100 transition-opacity" />
-                        </button>
-                        {vps.node && (
-                          <>
-                            <span className={cn("text-xs", isDark ? "text-zinc-700" : "text-slate-300")}>•</span>
-                            <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                              Node: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{vps.node}</strong>
-                            </span>
-                          </>
+                  {/* Top Row on Mobile / Left Side on Desktop: Hostname, OS Icon, IP & Mobile Status Pill */}
+                  <div className="flex items-start sm:items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-xl border flex items-center justify-center p-2 shrink-0",
+                          isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50 border-slate-200/80"
+                        )}
+                      >
+                        {osIcon ? (
+                          <img
+                            referrerPolicy="no-referrer"
+                            src={osIcon}
+                            alt={vps.osTemplate || "OS"}
+                            className="w-full h-full object-contain"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <Terminal className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                         )}
                       </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/dashboard/vps/${vps.id}`}
+                            className={cn(
+                              "text-sm font-bold truncate hover:underline",
+                              isDark ? "text-white hover:text-cyan-400" : "text-slate-900 hover:text-cyan-700"
+                            )}
+                          >
+                            {vps.hostname}
+                          </Link>
+                          <span
+                            className={cn(
+                              "text-[10px] font-mono px-1.5 py-0.5 rounded border shrink-0",
+                              isDark
+                                ? "bg-white/[0.03] border-white/[0.07] text-zinc-500"
+                                : "bg-slate-100 border-slate-200 text-slate-500"
+                            )}
+                          >
+                            #{vps.id}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (ipAddr && ipAddr !== "No IP" && ipAddr !== "Provisioning IP") {
+                                navigator.clipboard.writeText(ipAddr);
+                                toast.success("IP address copied");
+                              }
+                            }}
+                            className={cn(
+                              "inline-flex items-center gap-1 text-xs font-mono transition-colors group/ip",
+                              isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700"
+                            )}
+                            title="Copy IP Address"
+                          >
+                            {ipAddr}
+                            <Copy className="w-3 h-3 opacity-0 group-hover/ip:opacity-100 transition-opacity" />
+                          </button>
+                          {vps.node && (
+                            <>
+                              <span className={cn("text-xs", isDark ? "text-zinc-700" : "text-slate-300")}>•</span>
+                              <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                Node: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{vps.node}</strong>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Status Badge on Mobile (Top-Right aligned) */}
+                    <span
+                      className={cn(
+                        "lg:hidden inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shrink-0",
+                        isRunning
+                          ? isDark
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : isDark
+                          ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]"
+                          : "bg-slate-100 text-slate-600 border-slate-200"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          isRunning ? "bg-emerald-400 animate-pulse" : "bg-zinc-500"
+                        )}
+                      />
+                      {vps.liveStatus?.status || "STOPPED"}
+                    </span>
                   </div>
 
-                  {/* Hardware Specs Strip + Status & Actions */}
-                  <div className="flex flex-wrap items-center justify-between lg:justify-end gap-3 sm:gap-4">
-                    {/* Hardware Spec Pills */}
-                    <div className="flex flex-wrap items-center gap-1.5">
+                  {/* Hardware Specs Strip + Desktop Status & Manage CTA */}
+                  <div className="flex flex-col sm:flex-row lg:items-center justify-between lg:justify-end gap-2.5 sm:gap-3">
+                    {/* Hardware Spec Pills (Equal 3-column grid on mobile, inline flex on sm+) */}
+                    <div className="grid grid-cols-3 sm:flex items-center gap-1.5 w-full sm:w-auto">
                       {vps.cpuCores && (
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border",
+                            "inline-flex items-center justify-center sm:justify-start gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] font-mono font-medium border truncate",
                             isDark
                               ? "bg-white/[0.02] border-white/[0.06] text-zinc-300"
                               : "bg-slate-50 border-slate-200/80 text-slate-700"
                           )}
                         >
-                          <Cpu className="w-3 h-3 text-cyan-500" />
-                          {vps.cpuCores} vCPU
+                          <Cpu className="w-3 h-3 text-cyan-500 shrink-0" />
+                          <span className="truncate">{vps.cpuCores} vCPU</span>
                         </span>
                       )}
                       {vps.ramGb && (
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border",
+                            "inline-flex items-center justify-center sm:justify-start gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] font-mono font-medium border truncate",
                             isDark
                               ? "bg-white/[0.02] border-white/[0.06] text-zinc-300"
                               : "bg-slate-50 border-slate-200/80 text-slate-700"
                           )}
                         >
-                          <Activity className="w-3 h-3 text-cyan-500" />
-                          {vps.ramGb >= 1 ? `${vps.ramGb} GB` : `${vps.ramGb * 1024} MB`} RAM
+                          <Activity className="w-3 h-3 text-cyan-500 shrink-0" />
+                          <span className="truncate">{vps.ramGb >= 1 ? `${vps.ramGb} GB` : `${vps.ramGb * 1024} MB`} RAM</span>
                         </span>
                       )}
                       {vps.diskGb && (
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border",
+                            "inline-flex items-center justify-center sm:justify-start gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] font-mono font-medium border truncate",
                             isDark
                               ? "bg-white/[0.02] border-white/[0.06] text-zinc-300"
                               : "bg-slate-50 border-slate-200/80 text-slate-700"
                           )}
                         >
-                          <HardDrive className="w-3 h-3 text-cyan-500" />
-                          {vps.diskGb} GB NVMe
+                          <HardDrive className="w-3 h-3 text-cyan-500 shrink-0" />
+                          <span className="truncate">{vps.diskGb} GB NVMe</span>
                         </span>
                       )}
                     </div>
 
-                    {/* Status + Manage CTA */}
-                    <div className="flex items-center gap-2.5">
+                    {/* Desktop Status + Manage CTA */}
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto">
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border",
+                          "hidden lg:inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shrink-0",
                           isRunning
                             ? isDark
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -1238,13 +1262,13 @@ export default function DashboardOverview() {
                       <Link
                         href={`/dashboard/vps/${vps.id}`}
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all",
+                          "w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl sm:rounded-lg border text-xs font-semibold transition-all shrink-0",
                           isDark
                             ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-200 hover:text-white"
                             : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800 shadow-2xs"
                         )}
                       >
-                        Manage
+                        <span>Manage</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
@@ -1315,35 +1339,58 @@ export default function DashboardOverview() {
                 <div
                   key={cluster.id}
                   className={cn(
-                    "px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors",
+                    "p-4 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 transition-colors",
                     isDark ? "hover:bg-white/[0.015]" : "hover:bg-slate-50/70"
                   )}
                 >
-                  <div className="flex items-center gap-3.5">
-                    <div
-                      className={cn(
-                        "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0",
-                        isDark
-                          ? "bg-white/[0.03] border-white/[0.08] text-cyan-400"
-                          : "bg-slate-50 border-slate-200 text-cyan-700"
-                      )}
-                    >
-                      <SiKubernetes className="w-5 h-5" />
+                  <div className="flex items-start sm:items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0",
+                          isDark
+                            ? "bg-white/[0.03] border-white/[0.08] text-cyan-400"
+                            : "bg-slate-50 border-slate-200 text-cyan-700"
+                        )}
+                      >
+                        <SiKubernetes className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                          {cluster.name}
+                        </h3>
+                        <p className={cn("text-xs font-mono mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          {cluster.version} • {cluster.nodeCount} nodes
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
-                        {cluster.name}
-                      </h3>
-                      <p className={cn("text-xs font-mono mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        {cluster.version} • {cluster.nodeCount} nodes
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3">
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border",
+                        "sm:hidden inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shrink-0",
+                        isClusterActive
+                          ? isDark
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : isDark
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          : "bg-amber-50 text-amber-700 border-amber-200"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          isClusterActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                        )}
+                      />
+                      {cluster.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 w-full sm:w-auto">
+                    <span
+                      className={cn(
+                        "hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shrink-0",
                         isClusterActive
                           ? isDark
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -1365,13 +1412,13 @@ export default function DashboardOverview() {
                     <Link
                       href={`/dashboard/k3s/${cluster.id}`}
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all",
+                        "w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl sm:rounded-lg border text-xs font-semibold transition-all shrink-0",
                         isDark
                           ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-200 hover:text-white"
                           : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800 shadow-2xs"
                       )}
                     >
-                      Manage
+                      <span>Manage</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>

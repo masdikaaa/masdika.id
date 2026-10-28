@@ -80,7 +80,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className={cn("border p-3 rounded-lg shadow-md", isDark ? "bg-[#0A0B1A] border-white/10" : "bg-white border-slate-200")}>
+        <div className={cn("border p-3 rounded-xl shadow-md", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
           <p className={cn("text-xs mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
@@ -94,10 +94,10 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
   };
 
   const renderChart = (title: string, icon: any, dataKey1: string, dataKey2: string | null, color1: string, color2: string | null, unit: string) => (
-    <div className={cn("border rounded-2xl p-6 shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-      <div className="flex justify-between items-center mb-6">
+    <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+      <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-3">
-          <h3 className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{title}</h3>
+          <h3 className={cn("font-semibold text-sm sm:text-base", isDark ? "text-white" : "text-slate-900")}>{title}</h3>
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
@@ -137,11 +137,11 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
                   </linearGradient>
                 )}
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#334155" : "#e2e8f0"} vertical={false} />
-              <XAxis dataKey="time" stroke={isDark ? "#334155" : "#cbd5e1"} tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 11 }} minTickGap={30} />
-              <YAxis stroke={isDark ? "#334155" : "#cbd5e1"} tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 11 }} width={90} tickFormatter={(val) => `${val} ${unit}`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#27272a" : "#e2e8f0"} vertical={false} />
+              <XAxis dataKey="time" stroke={isDark ? "#27272a" : "#cbd5e1"} tick={{ fill: isDark ? '#71717a' : '#94a3b8', fontSize: 11 }} minTickGap={30} />
+              <YAxis stroke={isDark ? "#27272a" : "#cbd5e1"} tick={{ fill: isDark ? '#71717a' : '#94a3b8', fontSize: 11 }} width={90} tickFormatter={(val) => `${val} ${unit}`} />
               <Tooltip 
-                contentStyle={{ backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#e2e8f0', borderRadius: '8px', color: isDark ? '#fff' : '#0f172a', fontSize: '12px' }} 
+                contentStyle={{ backgroundColor: isDark ? '#0a0a0c' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', borderRadius: '12px', color: isDark ? '#fff' : '#0f172a', fontSize: '12px' }} 
               />
               <Area type="monotone" dataKey={dataKey1} stroke={color1} strokeWidth={2} fillOpacity={1} fill={`url(#color${dataKey1})`} unit={unit} name={dataKey1 === 'cpu' ? 'CPU' : dataKey1 === 'memory' ? 'Memory' : dataKey1 === 'netin' ? 'Download' : 'Read'} />
               {dataKey2 && color2 && (
@@ -160,10 +160,10 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
         <Link 
           href="/dashboard/alerts" 
           className={cn(
-            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
+            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border",
             isDark 
-              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
-              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
+              ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
           )}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -171,22 +171,24 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
         </Link>
       </div>
 
-      {/* Hero Header */}
-      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
-              <Activity className="w-3 h-3" /> Resource Telemetry
-            </div>
-            <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              CloudWatch <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Metrics</span>
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              CloudWatch Metrics
             </h1>
-            <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Real-time and historical resource telemetry for your instances.</p>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Activity className="w-3 h-3" /> Resource Telemetry
+            </span>
           </div>
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Real-time and historical resource telemetry for your instances.
+          </p>
+        </div>
 
-          <div className={cn("flex items-center gap-2 p-1 rounded-xl border", isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200")}>
+        <div className={cn("flex items-center justify-between sm:justify-start gap-1.5 p-1 rounded-xl border w-full sm:w-auto", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+          <div className="flex items-center gap-1 flex-1 sm:flex-initial">
             {[
               { id: "hour", label: "1H" },
               { id: "day", label: "1D" },
@@ -196,29 +198,30 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
               <button
                 key={tf.id}
                 onClick={() => setTimeframe(tf.id)}
-                className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                className={cn("flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all",
                   timeframe === tf.id
-                    ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-white text-cyan-700 border border-slate-200 shadow-sm font-bold")
-                    : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200 border border-transparent")
+                    ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-bold" : "bg-white text-cyan-700 border border-slate-200/90 shadow-2xs font-bold")
+                    : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04] border border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 border border-transparent")
                 )}
               >
                 {tf.label}
               </button>
             ))}
-
-            <button
-              onClick={fetchMetrics}
-              disabled={loading}
-              className={cn("px-3 py-2 transition-colors ml-2", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
-            </button>
           </div>
+
+          <button
+            onClick={fetchMetrics}
+            disabled={loading}
+            className={cn("px-2.5 py-1.5 rounded-lg transition-colors ml-1", isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60")}
+            title="Refresh metrics"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
+          </button>
         </div>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {renderChart("CPU Usage (%)", Activity, "cpu", null, "#22d3ee", null, "%")}
         {renderChart("Memory Used (%)", MemoryStick, "memory", null, "#8b5cf6", null, "%")}
         {renderChart("Network Speed", Network, "netin", "netout", "#34d399", "#818cf8", "MB/s")}

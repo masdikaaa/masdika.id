@@ -30,9 +30,9 @@ const COUNTRY_OPTIONS = [
   { value: "OTHER", label: "🌐 Other" },
 ];
 
-const inputClassDark = 'w-full max-w-full min-w-0 box-border bg-[#060b14] border border-slate-800 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-sm';
-const inputClassLight = 'w-full max-w-full min-w-0 box-border bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-sm';
-const labelClassDark = 'block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2';
+const inputClassDark = 'w-full max-w-full min-w-0 box-border bg-[#111115] border border-white/[0.08] rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all';
+const inputClassLight = 'w-full max-w-full min-w-0 box-border bg-slate-50/80 border border-slate-200/90 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all';
+const labelClassDark = 'block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-2';
 const labelClassLight = 'block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2';
 
 
@@ -56,7 +56,7 @@ const OtpInput = ({ value, onChange, isDanger = false }: { value: string; onChan
                 ? activeColor 
                 : value.length === i
                 ? focusColor
-                : (isDark ? 'border border-slate-800 text-slate-600 bg-[#060b14]' : 'border border-slate-200 text-slate-300 bg-slate-50')
+                : (isDark ? 'border border-white/[0.08] text-zinc-600 bg-[#111115]' : 'border border-slate-200/90 text-slate-300 bg-slate-50/80')
             }`}
           >
             {value[i] || '0'}
@@ -580,45 +580,46 @@ export default function SettingsPage() {
   };
 
   return (
-    <motion.div className="space-y-6 md:space-y-8 pb-24 sm:pb-16 w-full max-w-full min-w-0 box-border" variants={containerVariants} initial="hidden" animate="visible">
-      {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("w-full max-w-full min-w-0 relative overflow-hidden rounded-2xl sm:rounded-3xl border p-4 sm:p-7 md:p-8 group shadow-sm box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 w-full min-w-0">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 sm:mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
-            <Settings className="w-3.5 h-3.5" /> Account Management
+    <motion.div className="space-y-6 pb-24 sm:pb-16 w-full max-w-full min-w-0 box-border" variants={containerVariants} initial="hidden" animate="visible">
+      {/* Compact Unboxed Page Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full min-w-0">
+        <div className="space-y-1 min-w-0">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Account Settings
+            </h1>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-700")}>
+              <Settings className="w-3 h-3" /> Account Management
+            </span>
           </div>
-          <h1 className={cn("text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1.5 sm:mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            Account <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Settings</span>
-          </h1>
-          <p className={cn("text-xs sm:text-sm max-w-xl", isDark ? "text-slate-400" : "text-slate-500")}>
+          <p className={cn("text-xs sm:text-sm max-w-xl", isDark ? "text-zinc-400" : "text-slate-500")}>
             Manage your profile information, email address, password, and account security.
           </p>
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-8 items-stretch md:items-start w-full max-w-full min-w-0">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-6 items-stretch md:items-start w-full max-w-full min-w-0">
         {/* Navigation Sidebar (Sticky on mobile & desktop) */}
-        <div className="w-full max-w-full md:w-60 shrink-0 sticky top-0 md:top-4 z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
-          <div className={cn("w-full max-w-full rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-md grid grid-cols-2 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="w-full max-w-full md:w-60 shrink-0 sticky top-0 md:top-6 md:self-start lg:sticky lg:top-6 lg:self-start z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
+          <div className={cn("w-full max-w-full rounded-2xl p-1.5 sm:p-2 grid grid-cols-2 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as 'profile' | 'security')}
-                  className={`relative flex items-center justify-center md:justify-start gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl transition-all text-left shrink-0 w-full min-w-0 border cursor-pointer ${
+                  className={`relative flex items-center justify-center md:justify-start gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl transition-all text-left shrink-0 w-full min-w-0 border cursor-pointer ${
                     isActive
-                      ? (isDark ? 'bg-slate-800/90 text-white border-slate-700 shadow-sm' : 'bg-slate-100 text-slate-900 border-slate-300 shadow-sm')
-                      : (isDark ? 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50')
+                      ? (isDark ? 'bg-[#111115] text-white border-white/[0.12]' : 'bg-slate-100 text-slate-900 border-slate-200/90')
+                      : (isDark ? 'border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03]' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50')
                   }`}
                 >
-                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-white border-slate-300 text-cyan-700 shadow-sm') : (isDark ? 'bg-slate-800/60 border-slate-700/60 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500')}`}>
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 border ${isActive ? (isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-white border-slate-200/90 text-cyan-700') : (isDark ? 'bg-white/[0.03] border-white/[0.08] text-zinc-400' : 'bg-slate-50/80 border-slate-200/90 text-slate-500')}`}>
                     <tab.icon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <div className={`text-xs sm:text-sm font-bold leading-none ${isActive ? (isDark ? 'text-white' : 'text-slate-900') : (isDark ? 'text-slate-300' : 'text-slate-600')}`}>{tab.label}</div>
-                    <div className={cn("hidden md:block text-[10px] mt-1.5 truncate", isDark ? "text-slate-400" : "text-slate-400")}>{tab.desc}</div>
+                    <div className={`text-xs sm:text-sm font-bold leading-none ${isActive ? (isDark ? 'text-white' : 'text-slate-900') : (isDark ? 'text-zinc-300' : 'text-slate-600')}`}>{tab.label}</div>
+                    <div className={cn("hidden md:block text-[10px] mt-1.5 truncate", isDark ? "text-zinc-400" : "text-slate-400")}>{tab.desc}</div>
                   </div>
                 </button>
               );
@@ -639,20 +640,20 @@ export default function SettingsPage() {
                 className="space-y-6 w-full max-w-full min-w-0"
               >
                 {/* Profile Picture Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
-                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <Camera className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Profile Picture</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Update your avatar and display photo.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Update your avatar and display photo.</p>
                     </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 relative z-10">
                     <div className="relative group shrink-0">
-                      <div className={cn("w-28 h-28 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl overflow-hidden border-2 relative", isDark ? "border-slate-800 bg-[#060b14] shadow-sm" : "border-slate-200 bg-slate-100 shadow-sm")}>
+                      <div className={cn("w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 relative", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-100")}>
                         {imagePreview ? (
                           <img referrerPolicy="no-referrer" src={imagePreview} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         ) : (
@@ -671,7 +672,7 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       <div 
-                        className={cn("absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm cursor-pointer transition-colors border-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950", isDark ? "border-[#0b1322]" : "border-white")} 
+                        className={cn("absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center cursor-pointer transition-colors border-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950", isDark ? "border-[#0a0a0c]" : "border-white")} 
                         onClick={() => fileInputRef.current?.click()}
                       >
                         <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -681,18 +682,18 @@ export default function SettingsPage() {
                     
                     <div className="flex-1 text-center sm:text-left min-w-0">
                       <h4 className={cn("font-bold text-base sm:text-lg mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{name || 'Your Name'}</h4>
-                      <p className={cn("text-xs sm:text-sm mb-2.5 truncate", isDark ? "text-slate-400" : "text-slate-500")}>{email}</p>
+                      <p className={cn("text-xs sm:text-sm mb-2.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{email}</p>
                       <div className="mb-3.5">
-                        <span className={cn("text-[11px] rounded-lg px-2.5 py-1 border inline-block", isDark ? "text-slate-400 bg-[#060b14] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>
+                        <span className={cn("text-[11px] rounded-lg px-2.5 py-1 border inline-block", isDark ? "text-zinc-400 bg-[#111115] border-white/[0.08]" : "text-slate-500 bg-slate-50/80 border-slate-200/90")}>
                           PNG or JPG · Max size 2MB
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-2.5 justify-center sm:justify-start">
-                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-2 border shadow-sm cursor-pointer", isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}>
+                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer", isDark ? "bg-[#111115] hover:bg-white/[0.06] text-zinc-200 border-white/[0.08]" : "bg-slate-50/80 hover:bg-slate-100 text-slate-700 border-slate-200/90")}>
                           <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Upload Photo
                         </button>
                         {imagePreview && (
-                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border shadow-sm cursor-pointer", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
+                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border cursor-pointer", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
                             Remove
                           </button>
                         )}
@@ -702,14 +703,14 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Personal Info Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
-                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <User className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Personal Information</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Manage your display name and registered email address.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your display name and registered email address.</p>
                     </div>
                   </div>
 
@@ -731,7 +732,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => setShowEmailModal(true)}
-                          className={cn("text-xs font-semibold transition-colors px-2.5 py-1 rounded-lg border cursor-pointer", isDark ? "text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border-slate-700" : "text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-200")}
+                          className={cn("text-xs font-semibold transition-colors px-2.5 py-1 rounded-lg border cursor-pointer", isDark ? "text-zinc-300 hover:text-white bg-[#111115] hover:bg-white/[0.06] border-white/[0.08]" : "text-slate-700 hover:text-slate-900 bg-slate-50/80 hover:bg-slate-100 border-slate-200/90")}
                         >
                           Change Email
                         </button>
@@ -742,29 +743,29 @@ export default function SettingsPage() {
                         disabled
                         className={cn(inputClass, "opacity-75 cursor-not-allowed")}
                       />
-                      <p className={cn("text-[11px] mt-1.5 ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Email can only be changed via OTP verification.</p>
+                      <p className={cn("text-[11px] mt-1.5 ml-1", isDark ? "text-zinc-500" : "text-slate-400")}>Email can only be changed via OTP verification.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Billing Info Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
-                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <Building2 className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Billing Information</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Address and company details used for invoices and billing.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Address and company details used for invoices and billing.</p>
                     </div>
                   </div>
 
                   <div className="space-y-4 sm:space-y-5 relative z-20">
                     {/* Company Name */}
                     <div>
-                      <label className={labelClass}>Company Name <span className={cn("normal-case font-normal", isDark ? "text-slate-500" : "text-slate-400")}>(optional)</span></label>
+                      <label className={labelClass}>Company Name <span className={cn("normal-case font-normal", isDark ? "text-zinc-500" : "text-slate-400")}>(optional)</span></label>
                       <div className="relative">
-                        <Briefcase className={cn("absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none", isDark ? "text-slate-500" : "text-slate-400")} />
+                        <Briefcase className={cn("absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none", isDark ? "text-zinc-500" : "text-slate-400")} />
                         <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Your company or organization" className={cn(inputClass, "!pl-11 sm:!pl-11")} />
                       </div>
                     </div>
@@ -773,7 +774,7 @@ export default function SettingsPage() {
                     <div>
                       <label className={labelClass}>Phone Number</label>
                       <div className="relative">
-                        <Phone className={cn("absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none", isDark ? "text-slate-500" : "text-slate-400")} />
+                        <Phone className={cn("absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none", isDark ? "text-zinc-500" : "text-slate-400")} />
                         <input type="tel" value={phone} onChange={handlePhoneChange} placeholder="+1 234 567 8900" className={cn(inputClass, "!pl-11 sm:!pl-11")} minLength={8} />
                       </div>
                     </div>
@@ -782,7 +783,7 @@ export default function SettingsPage() {
                     <div>
                       <label className={labelClass}>Address</label>
                       <div className="relative mb-2.5">
-                        <MapPin className={cn("absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none", isDark ? "text-slate-500" : "text-slate-400")} />
+                        <MapPin className={cn("absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none", isDark ? "text-zinc-500" : "text-slate-400")} />
                         <input type="text" value={address1} onChange={(e) => setAddress1(e.target.value)} placeholder="Street address" className={cn(inputClass, "!pl-11 sm:!pl-11")} />
                       </div>
                       <input type="text" value={address2} onChange={(e) => setAddress2(e.target.value)} placeholder="Apt, suite, floor (optional)" className={inputClass} />
@@ -825,11 +826,11 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className={cn("pt-5 mt-6 border-t flex flex-col sm:flex-row justify-end items-stretch sm:items-center relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("pt-5 mt-6 border-t flex flex-col sm:flex-row justify-end items-stretch sm:items-center relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                     <button
                       onClick={saveProfile}
                       disabled={isSavingProfile}
-                      className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-2xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
                     >
                       {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       Save Changes
@@ -850,15 +851,15 @@ export default function SettingsPage() {
                 className="space-y-6 w-full max-w-full min-w-0"
               >
                 {/* Change Password Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
-                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                    <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <Lock className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Change Password</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
+                      <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Use a strong, unique password to keep your account safe.</p>
                     </div>
                   </div>
 
@@ -874,7 +875,7 @@ export default function SettingsPage() {
                           className={inputClass + ' pr-12'}
                           required
                         />
-                        <button type="button" onClick={() => setShowOldPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                        <button type="button" onClick={() => setShowOldPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                           {showOldPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
@@ -891,7 +892,7 @@ export default function SettingsPage() {
                             className={inputClass + ' pr-12'}
                             required
                           />
-                          <button type="button" onClick={() => setShowNewPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                          <button type="button" onClick={() => setShowNewPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                             {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
@@ -907,7 +908,7 @@ export default function SettingsPage() {
                             className={`${inputClass} pr-12 ${confirmPassword && newPassword && confirmPassword !== newPassword ? 'border-rose-500/50 focus:ring-rose-500/20' : confirmPassword && confirmPassword === newPassword ? 'border-emerald-500/50 focus:ring-emerald-500/20' : ''}`}
                             required
                           />
-                          <button type="button" onClick={() => setShowConfirmPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
+                          <button type="button" onClick={() => setShowConfirmPw(v => !v)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}>
                             {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
@@ -920,11 +921,11 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className={cn("pt-5 mt-5 border-t flex flex-col sm:flex-row justify-end items-stretch sm:items-center relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("pt-5 mt-5 border-t flex flex-col sm:flex-row justify-end items-stretch sm:items-center relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                       <button
                         type="submit"
                         disabled={isPasswordLoading}
-                        className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
+                        className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-2xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
                       >
                         {isPasswordLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                         Update Password
@@ -934,21 +935,18 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  {/* Subtle Accent Glow */}
-                  <div className={cn("absolute -top-24 -right-24 w-60 h-60 rounded-full blur-3xl pointer-events-none", twoFactorEnabled ? "bg-emerald-500/10" : "bg-cyan-500/10")} />
-
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   {/* Header */}
-                  <div className={cn("flex flex-col sm:flex-row sm:items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 relative z-10 pb-4 border-b transition-colors w-full min-w-0", isDark ? "border-slate-800/80" : "border-slate-100")}>
+                  <div className={cn("flex flex-col sm:flex-row sm:items-start sm:items-center justify-between gap-3 sm:gap-4 mb-5 relative z-10 pb-4 border-b transition-colors w-full min-w-0", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                     <div className="flex items-center gap-3.5 min-w-0 flex-1 w-full">
-                      <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0 transition-colors", twoFactorEnabled ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700") : (isDark ? "bg-slate-800/90 border-slate-700/80 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600"))}>
+                      <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0 transition-colors", twoFactorEnabled ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700") : (isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600"))}>
                         {twoFactorEnabled ? <ShieldCheck className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className={cn("text-base md:text-lg font-bold leading-tight break-words", isDark ? "text-white" : "text-slate-900")}>Two-Factor Authentication (2FA)</h3>
                         </div>
-                        <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>
+                        <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Add an extra layer of security with Time-based One-Time Passwords (TOTP).
                         </p>
                       </div>
@@ -960,8 +958,8 @@ export default function SettingsPage() {
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Active &amp; Protected
                         </span>
                       ) : (
-                        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border", isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-200 text-slate-700")}>
-                          <span className="w-2 h-2 rounded-full bg-slate-400" /> Not Configured
+                        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border", isDark ? "bg-[#111115] border-white/[0.08] text-zinc-300" : "bg-slate-50/80 border-slate-200/90 text-slate-700")}>
+                          <span className="w-2 h-2 rounded-full bg-zinc-400" /> Not Configured
                         </span>
                       )}
                     </div>
@@ -969,17 +967,17 @@ export default function SettingsPage() {
 
                   {/* Main Authenticator Row (Locked Horizontal Alignment on ALL screens) */}
                   <div className={cn(
-                    "relative z-10 rounded-2xl border p-3.5 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 mb-5 transition-all shadow-xs w-full max-w-full min-w-0 box-border",
+                    "relative z-10 rounded-xl border p-3.5 sm:p-4 flex items-center justify-between gap-3 sm:gap-4 mb-5 transition-all w-full max-w-full min-w-0 box-border",
                     twoFactorEnabled
-                      ? (isDark ? "bg-[#060b14] border-emerald-500/30" : "bg-white border-emerald-200 shadow-sm")
-                      : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
+                      ? (isDark ? "bg-[#111115] border-emerald-500/30" : "bg-slate-50/80 border-emerald-200")
+                      : (isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")
                   )}>
                     <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
                       <div className={cn(
-                        "w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border shrink-0 transition-colors shadow-2xs",
+                        "w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border shrink-0 transition-colors",
                         twoFactorEnabled
                           ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-100 text-emerald-700 border-emerald-200")
-                          : (isDark ? "bg-slate-800/80 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")
+                          : (isDark ? "bg-white/[0.03] border-white/[0.08] text-cyan-400" : "bg-white border-slate-200/90 text-cyan-600")
                       )}>
                         <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
@@ -992,12 +990,12 @@ export default function SettingsPage() {
                             "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border",
                             twoFactorEnabled
                               ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")
-                              : (isDark ? "bg-slate-800/90 border-slate-700 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600")
+                              : (isDark ? "bg-white/[0.04] border-white/[0.08] text-zinc-400" : "bg-white border-slate-200/90 text-slate-600")
                           )}>
                             {twoFactorEnabled ? "Active" : "Disabled"}
                           </span>
                         </div>
-                        <p className={cn("text-xs mt-0.5 truncate sm:whitespace-normal", isDark ? "text-slate-400" : "text-slate-500")}>
+                        <p className={cn("text-xs mt-0.5 truncate sm:whitespace-normal", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Google Authenticator, Microsoft Authenticator, Authy, or 1Password.
                         </p>
                       </div>
@@ -1015,7 +1013,7 @@ export default function SettingsPage() {
                           "relative inline-flex h-7 w-13 items-center rounded-full transition-all cursor-pointer border disabled:opacity-50 shadow-inner focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
                           twoFactorEnabled
                             ? "bg-cyan-500 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.35)]"
-                            : (isDark ? "bg-slate-800 border-slate-700 hover:border-slate-600" : "bg-slate-200 border-slate-300 hover:border-slate-400")
+                            : (isDark ? "bg-zinc-800 border-zinc-700 hover:border-zinc-600" : "bg-slate-200 border-slate-300 hover:border-slate-400")
                         )}
                       >
                         {is2FALoading ? (
@@ -1032,33 +1030,33 @@ export default function SettingsPage() {
 
                   {/* 3 Security Pillars / Specs */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-5 relative z-10">
-                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-[#060b14]/60 border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
                         <KeyRound className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
                         <div className={cn("text-xs font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>6-Digit TOTP</div>
-                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Refreshed every 30s</div>
+                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Refreshed every 30s</div>
                       </div>
                     </div>
 
-                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-[#060b14]/60 border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
                         <Lock className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
                         <div className={cn("text-xs font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Brute-Force Guard</div>
-                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>Protects password leaks</div>
+                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Protects password leaks</div>
                       </div>
                     </div>
 
-                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-[#060b14]/60 border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("p-3 rounded-xl border flex items-center gap-3", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
                         <Globe className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
                         <div className={cn("text-xs font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Universal Support</div>
-                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>iOS, Android, macOS, Win</div>
+                        <div className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>iOS, Android, macOS, Win</div>
                       </div>
                     </div>
                   </div>
@@ -1068,7 +1066,7 @@ export default function SettingsPage() {
                     "p-3.5 sm:p-4 rounded-xl border text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10",
                     twoFactorEnabled
                       ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-200/90" : "bg-emerald-50 border-emerald-200 text-emerald-900")
-                      : (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200/90" : "bg-slate-50 border-slate-200 text-slate-700")
+                      : (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200/90" : "bg-slate-50/80 border-slate-200/90 text-slate-700")
                   )}>
                     <div className="flex items-start gap-2.5 min-w-0 flex-1">
                       {twoFactorEnabled ? (
@@ -1088,7 +1086,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={handle2FAToggle}
                         disabled={is2FALoading}
-                        className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shrink-0 cursor-pointer shadow-xs self-start sm:self-auto"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all shrink-0 cursor-pointer shadow-2xs self-start sm:self-auto"
                       >
                         Setup 2FA
                       </button>
@@ -1097,15 +1095,15 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security & Login History Card */}
-                <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10 w-full min-w-0">
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 relative z-10 w-full min-w-0">
                     <div className="flex items-center gap-3.5 min-w-0 flex-1 w-full">
-                      <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-sm border shrink-0", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                      <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                         <History className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <h3 className={cn("text-base md:text-lg font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Sessions & Login History</h3>
-                        <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-slate-400" : "text-slate-500")}>Monitor active devices and account login activity.</p>
+                        <p className={cn("text-xs md:text-sm mt-0.5 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor active devices and account login activity.</p>
                       </div>
                     </div>
 
@@ -1118,8 +1116,8 @@ export default function SettingsPage() {
                           className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer disabled:opacity-50",
                             isDark
-                              ? "border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400"
-                              : "border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-500 hover:text-rose-600"
+                              ? "border-white/[0.08] hover:border-rose-500/40 hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400"
+                              : "border-slate-200/90 hover:border-rose-300 hover:bg-rose-50 text-slate-500 hover:text-rose-600"
                           )}
                         >
                           {isClearingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -1151,8 +1149,8 @@ export default function SettingsPage() {
                         className={cn(
                           "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer",
                           isDark
-                            ? "border-slate-800 hover:border-slate-700 bg-[#060b14] text-zinc-300 hover:text-white"
-                            : "border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            ? "border-white/[0.08] hover:border-white/[0.16] bg-[#111115] text-zinc-300 hover:text-white"
+                            : "border-slate-200/90 hover:border-slate-300 bg-slate-50/80 text-slate-700 hover:bg-slate-100"
                         )}
                       >
                         <RefreshCw className={cn("w-3.5 h-3.5", loadingLoginLogs && "animate-spin text-cyan-400")} />
@@ -1162,7 +1160,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Logs Table / List Container */}
-                  <div className={cn("relative z-10 rounded-2xl border overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")}>
+                  <div className={cn("relative z-10 rounded-xl border overflow-hidden", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-white border-slate-200/90")}>
                     {loadingLoginLogs ? (
                       <div className="py-12 flex flex-col items-center justify-center gap-2">
                         <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" />
@@ -1178,7 +1176,7 @@ export default function SettingsPage() {
                         <div className="hidden md:block overflow-x-auto">
                           <table className="w-full text-left text-xs border-collapse">
                             <thead>
-                              <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#0b1322] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                              <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#111115] text-zinc-400 border-white/[0.08]" : "bg-slate-50/80 text-slate-500 border-slate-200/90")}>
                                 <th className="py-3 px-4 whitespace-nowrap">Device & Browser</th>
                                 <th className="py-3 px-4 w-36 whitespace-nowrap">IP Address</th>
                                 <th className="py-3 px-4 w-32 whitespace-nowrap">Login Time</th>
@@ -1186,14 +1184,14 @@ export default function SettingsPage() {
                                 <th className="py-3 px-4 text-right whitespace-nowrap">Status & Actions</th>
                               </tr>
                             </thead>
-                            <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
+                            <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
                               {loginLogs.map((log) => {
                                 const dt = formatDateTime(log.createdAt);
                                 return (
-                                  <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
+                                  <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
                                     <td className="py-3 px-4 align-middle">
                                       <div className="flex items-center gap-2.5">
-                                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-slate-800/90 border-slate-700/80" : "bg-slate-100 border-slate-200")}>
+                                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                                           <BrowserIcon browser={log.browser || log.deviceLabel} device={log.device} className="w-4 h-4 shrink-0" />
                                         </div>
                                         <div className="flex flex-col min-w-0">
@@ -1231,7 +1229,7 @@ export default function SettingsPage() {
                                             <CheckCircle2 className="w-3 h-3" /> Active
                                           </span>
                                         ) : log.status === 'REVOKED' ? (
-                                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-slate-800 border-slate-700 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-[#111115] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200/90 text-slate-500")}>
                                             Signed Out
                                           </span>
                                         ) : (
@@ -1248,7 +1246,7 @@ export default function SettingsPage() {
                                             className={cn(
                                               "inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all cursor-pointer disabled:opacity-50",
                                               log.isCurrentDevice
-                                                ? (isDark ? "border-slate-800 hover:border-slate-700 bg-slate-900 text-zinc-300 hover:text-white" : "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200")
+                                                ? (isDark ? "border-white/[0.08] hover:border-white/[0.16] bg-[#111115] text-zinc-300 hover:text-white" : "border-slate-200/90 bg-slate-100 text-slate-700 hover:bg-slate-200")
                                                 : (isDark ? "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" : "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100")
                                             )}
                                           >
@@ -1269,8 +1267,8 @@ export default function SettingsPage() {
                                           className={cn(
                                             "inline-flex items-center justify-center p-1.5 rounded-lg text-[10px] border transition-all cursor-pointer disabled:opacity-50",
                                             isDark
-                                              ? "border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400"
-                                              : "border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600"
+                                              ? "border-white/[0.08] hover:border-rose-500/40 hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400"
+                                              : "border-slate-200/90 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600"
                                           )}
                                         >
                                           {deletingLogId === (log.id || log.rawId) ? (
@@ -1289,14 +1287,14 @@ export default function SettingsPage() {
                         </div>
 
                         {/* ── Mobile View (<md) ── */}
-                        <div className="block md:hidden divide-y divide-slate-800/80">
+                        <div className={cn("block md:hidden divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
                           {loginLogs.map((log) => {
                             const dt = formatDateTime(log.createdAt);
                             return (
                               <div key={log.id} className="p-3.5 space-y-2.5 transition-colors">
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-slate-800 border-slate-700" : "bg-slate-100 border-slate-200")}>
+                                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                                       <BrowserIcon browser={log.browser || log.deviceLabel} device={log.device} className="w-4 h-4 shrink-0" />
                                     </div>
                                     <div className="min-w-0">
@@ -1322,7 +1320,7 @@ export default function SettingsPage() {
                                         <CheckCircle2 className="w-3 h-3" /> Active
                                       </span>
                                     ) : log.status === 'REVOKED' ? (
-                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-slate-800 border-slate-700 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-[#111115] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200/90 text-slate-500")}>
                                         Signed Out
                                       </span>
                                     ) : (
@@ -1334,7 +1332,7 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* Compact Mobile Details */}
-                                <div className={cn("rounded-xl p-2.5 text-[11px] space-y-1.5 border", isDark ? "bg-[#0b1322]/80 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                                <div className={cn("rounded-xl p-2.5 text-[11px] space-y-1.5 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                                   <div className="flex items-center justify-between gap-2">
                                     <span className={cn("text-[10px]", isDark ? "text-zinc-400" : "text-slate-500")}>IP Address</span>
                                     <span className={cn("font-mono font-medium break-all text-right text-[11px]", isDark ? "text-zinc-200" : "text-slate-800")}>{log.ipAddress}</span>
@@ -1359,7 +1357,7 @@ export default function SettingsPage() {
                                       className={cn(
                                         "flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
                                         log.isCurrentDevice
-                                          ? (isDark ? "border-slate-700 bg-slate-800/80 text-zinc-200 hover:text-white" : "border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200")
+                                          ? (isDark ? "border-white/[0.08] bg-[#111115] text-zinc-200 hover:text-white" : "border-slate-200/90 bg-slate-100 text-slate-800 hover:bg-slate-200")
                                           : (isDark ? "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" : "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100")
                                       )}
                                     >
@@ -1380,8 +1378,8 @@ export default function SettingsPage() {
                                       "py-1.5 px-3 rounded-xl text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
                                       log.isSession && log.status === 'SUCCESS' ? "w-auto" : "w-full",
                                       isDark
-                                        ? "border-slate-800 hover:border-rose-500/40 bg-slate-800/40 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400"
-                                        : "border-slate-200 hover:border-rose-300 bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-600"
+                                        ? "border-white/[0.08] hover:border-rose-500/40 bg-[#111115] hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400"
+                                        : "border-slate-200/90 hover:border-rose-300 bg-slate-50/80 hover:bg-rose-50 text-slate-500 hover:text-rose-600"
                                     )}
                                   >
                                     {deletingLogId === (log.id || log.rawId) ? (
@@ -1398,7 +1396,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* ── Pagination Bar ── */}
-                        <div className={cn("p-3 sm:p-3.5 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs", isDark ? "border-slate-800/80 bg-[#060b14]" : "border-slate-200 bg-slate-50/50")}>
+                        <div className={cn("p-3 sm:p-3.5 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
                           <span className={cn("text-[11px]", isDark ? "text-zinc-400" : "text-slate-500")}>
                             Showing <strong className={isDark ? "text-white" : "text-slate-900"}>{loginLogs.length}</strong> of <strong className={isDark ? "text-white" : "text-slate-900"}>{loginLogsTotal}</strong> login records
                           </span>
@@ -1410,7 +1408,7 @@ export default function SettingsPage() {
                               disabled={loginLogsPage <= 1 || loadingLoginLogs}
                               className={cn(
                                 "px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
-                                isDark ? "border-slate-800 bg-slate-900/60 text-zinc-300 hover:text-white hover:border-slate-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                                isDark ? "border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:text-white hover:border-white/[0.16]" : "border-slate-200/90 bg-white text-slate-700 hover:bg-slate-100"
                               )}
                             >
                               <ChevronLeft className="w-3.5 h-3.5" />
@@ -1427,7 +1425,7 @@ export default function SettingsPage() {
                               disabled={loginLogsPage >= loginLogsTotalPages || loadingLoginLogs}
                               className={cn(
                                 "px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
-                                isDark ? "border-slate-800 bg-slate-900/60 text-zinc-300 hover:text-white hover:border-slate-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                                isDark ? "border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:text-white hover:border-white/[0.16]" : "border-slate-200/90 bg-white text-slate-700 hover:bg-slate-100"
                               )}
                             >
                               <span className="hidden sm:inline">Next</span>
@@ -1439,7 +1437,7 @@ export default function SettingsPage() {
                     )}
                   </div>
 
-                  <div className={cn("mt-4 p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
+                  <div className={cn("mt-4 p-3.5 rounded-xl border flex items-start gap-2.5 text-xs", isDark ? "bg-[#111115] border-white/[0.08] text-zinc-400" : "bg-slate-50/80 border-slate-200/90 text-slate-600")}>
                     <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                     <p className="leading-relaxed">
                       <strong>Account Security Tip:</strong> If you notice an unrecognized device or login time, immediately click <em>Sign Out</em> on that session and update your password.
@@ -1458,20 +1456,20 @@ export default function SettingsPage() {
       <AnimatePresence>
         {showOtpModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-              <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+              <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                   <KeyRound className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>Verify Password Change</h3>
-                <p className={cn("text-xs sm:text-sm", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a 6-digit code to your email. Enter it below to confirm the change.</p>
+                <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>We've sent a 6-digit code to your email. Enter it below to confirm the change.</p>
               </div>
               <div className="space-y-4 relative z-10">
                 <OtpInput value={otpCode} onChange={setOtpCode} />
                 <div className="flex gap-2.5 sm:gap-3 pt-2">
-                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 cursor-pointer">
+                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs transition-all disabled:opacity-50 cursor-pointer">
                     {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                   </button>
                 </div>
@@ -1485,11 +1483,11 @@ export default function SettingsPage() {
       <AnimatePresence>
         {showEmailModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-              <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+              <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                   <Mail className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>Change Email Address</h3>
@@ -1497,25 +1495,25 @@ export default function SettingsPage() {
 
               {!emailOtpStep ? (
                 <form onSubmit={handleEmailRequest} className="space-y-4 relative z-10">
-                  <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>Enter your new email. We'll send a verification code to your <strong className={isDark ? "text-white" : "text-slate-900"}>current</strong> email.</p>
+                  <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Enter your new email. We'll send a verification code to your <strong className={isDark ? "text-white" : "text-slate-900"}>current</strong> email.</p>
                   <div>
                     <label className={labelClass}>New Email Address</label>
                     <input type="email" required value={newEmailInput} onChange={(e) => setNewEmailInput(e.target.value)} className={inputClass} placeholder="new@example.com" />
                   </div>
                   <div className="flex gap-2.5 sm:gap-3 pt-2">
-                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer">
+                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Continue'}
                     </button>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-4 relative z-10">
-                  <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-slate-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
+                  <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
                   <OtpInput value={emailOtpCode} onChange={setEmailOtpCode} />
                   <div className="flex gap-2.5 sm:gap-3">
-                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Back</button>
-                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer">
+                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Back</button>
+                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify & Save'}
                     </button>
                   </div>
@@ -1530,19 +1528,19 @@ export default function SettingsPage() {
       <AnimatePresence>
         {showTwoFactorModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl sm:rounded-3xl border p-5 sm:p-7 md:p-8 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
-                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-slate-800 border-slate-700 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-600")}>
+                <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                   <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>Setup 2FA</h3>
-                <p className={cn("text-xs sm:text-sm", isDark ? "text-slate-400" : "text-slate-500")}>Scan this QR code with Google Authenticator or Authy.</p>
+                <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Scan this QR code with Google Authenticator or Authy.</p>
               </div>
 
               <div className="flex justify-center mb-6 relative z-10">
-                <div className="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div className="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
                   {qrCodeUrl && <img referrerPolicy="no-referrer" src={qrCodeUrl} alt="QR Code" className="w-40 h-40 sm:w-48 sm:h-48" loading="lazy" decoding="async" />}
                 </div>
               </div>
@@ -1553,8 +1551,8 @@ export default function SettingsPage() {
                   <OtpInput value={twoFactorCode} onChange={setTwoFactorCode} />
                 </div>
                 <div className="flex gap-2.5 sm:gap-3 pt-2">
-                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer">
+                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
                     {is2FALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enable 2FA'}
                   </button>
                 </div>

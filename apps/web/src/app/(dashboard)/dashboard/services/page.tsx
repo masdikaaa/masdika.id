@@ -197,24 +197,26 @@ export default function MyServicesPage() {
   }
 
   return (
-    <motion.div className="space-y-8 pb-10" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div className="space-y-6 pb-10" variants={containerVariants} initial="hidden" animate="visible">
 
-      {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("border rounded-3xl p-8 md:p-12 transition-all flex flex-col md:flex-row md:items-center justify-between gap-8", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className="relative z-10 shrink-0">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
-            <PackageOpen className="w-3 h-3" /> Portfolio & Usage
+      {/* Compact Unboxed Page Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              My Services
+            </h1>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-700")}>
+              <PackageOpen className="w-3 h-3" /> Portfolio & Usage
+            </span>
           </div>
-          <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            My <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Services</span>
-          </h1>
-          <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>View and manage all your active and past subscriptions.</p>
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>View and manage all your active and past subscriptions.</p>
         </div>
 
-        <div className="relative z-10 shrink-0">
+        <div className="w-full sm:w-auto shrink-0">
           <Link
             href="/dashboard/checkout"
-            className="w-full md:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-2 text-slate-950"
+            className="w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-2xs flex items-center justify-center gap-2 text-slate-950"
           >
             <Box className="w-4 h-4" />
             Order New Service
@@ -223,23 +225,23 @@ export default function MyServicesPage() {
       </motion.div>
 
       {subscriptions.length === 0 && vpsServices.length === 0 && k3sServices.length === 0 ? (
-        <motion.div variants={itemVariants} className={cn("border rounded-3xl p-12 text-center", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10">
-            <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-slate-800/50" : "bg-slate-100")}>
-              <Layers className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
+            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+              <Layers className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
             </div>
-            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Services Found</h3>
-            <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You haven't subscribed to any Masdika services yet. Explore our high-performance infrastructure.</p>
+            <h3 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Services Found</h3>
+            <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You haven't subscribed to any Masdika services yet. Explore our high-performance infrastructure.</p>
             <Link
               href="/dashboard/checkout"
-              className="font-semibold text-slate-950 px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-sm inline-flex items-center justify-center gap-2 text-sm"
+              className="font-bold text-slate-950 px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-2xs inline-flex items-center justify-center gap-2 text-xs sm:text-sm"
             >
               Browse Services
             </Link>
           </div>
         </motion.div>
       ) : (
-        <motion.div variants={itemVariants} className="space-y-8">
+        <motion.div variants={itemVariants} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedServices.map((item, idx) => {
               const isVps = item.hostname !== undefined;
@@ -253,18 +255,18 @@ export default function MyServicesPage() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     key={`vps-${vps.id}`}
-                    className={cn("group border rounded-[2rem] p-6 md:p-8 transition-all flex flex-col h-full relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300", vps.status === 'TERMINATED' && "opacity-75 grayscale-[30%]")}
+                    className={cn("group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300", vps.status === 'TERMINATED' && "opacity-75 grayscale-[30%]")}
                   >
-                    <div className="flex justify-between items-start mb-8 relative z-10">
-                      <div className="flex gap-4 items-center">
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div className="flex gap-3.5 items-center min-w-0">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-sm",
+                          "w-12 h-12 rounded-xl bg-gradient-to-br border flex items-center justify-center shrink-0",
                           colorClass
                         )}>
                           {getServiceIcon(vps.kubernetesClusterId ? 'K3S' : 'VPS')}
                         </div>
-                        <div>
-                          <h3 className={cn("text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1", isDark ? "text-white" : "text-slate-900")}>{vps.hostname}</h3>
+                        <div className="min-w-0">
+                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{vps.hostname}</h3>
                           <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>
                             {vps.kubernetesClusterId ? "KUBERNETES NODE" : "CLOUD VPS"}
                           </p>
@@ -273,24 +275,24 @@ export default function MyServicesPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 flex-1 relative z-10">
-                      <div className={cn("col-span-2 border p-4 rounded-2xl flex justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
                         {getStatusBadge(vps.status)}
                       </div>
 
-                      <div className={cn("border p-4 rounded-2xl flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Cycle</span>
                         <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Pay-As-You-Go</span>
                       </div>
 
-                      <div className={cn("border p-4 rounded-2xl flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Expires</span>
                         <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>
                           {vps.expiresAt ? new Date(vps.expiresAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                         </span>
                       </div>
 
-                      <div className={cn("col-span-2 border p-4 rounded-2xl flex justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <div className="flex flex-col">
                           <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Usage Cost</span>
                           <span className="text-xs text-cyan-400 font-bold mt-1">{formatRupiah(vps.hourlyRate || (vps.monthlyPrice ? vps.monthlyPrice / 720 : 0))}/hr (PAYG)</span>
@@ -302,7 +304,7 @@ export default function MyServicesPage() {
                       </div>
 
                       {vps.status === 'SUSPENDED' && (
-                        <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-sm">
+                        <div className="col-span-2 mt-1 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                           <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
                             <div className="flex-1">
@@ -324,13 +326,13 @@ export default function MyServicesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-6 pt-4 flex gap-3 relative z-10">
+                    <div className="mt-5 pt-4 flex gap-3 relative z-10">
                       {vps.status === 'SUSPENDED' && (
                         !vps.autoRenew ? (
                           <button
                             onClick={() => handleToggleAutoRenew(vps.id, 'VPS', false)}
                             disabled={togglingId === `VPS-${vps.id}`}
-                            className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                            className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
                           >
                             <RefreshCw className={cn("w-3.5 h-3.5", togglingId === `VPS-${vps.id}` && "animate-spin")} />
                             Enable Auto-Renew
@@ -338,7 +340,7 @@ export default function MyServicesPage() {
                         ) : (
                           <Link
                             href="/dashboard/billing/topup"
-                            className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                            className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
                           >
                             <CreditCard className="w-3.5 h-3.5" />
                             Top Up Saldo
@@ -348,12 +350,12 @@ export default function MyServicesPage() {
                       {vps.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/vps/${vps.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center transition-all shadow-sm text-slate-950"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Instance
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center shadow-sm cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -370,21 +372,21 @@ export default function MyServicesPage() {
                     transition={{ delay: idx * 0.05 }}
                     key={`k3s-${k3s.id}`}
                     className={cn(
-                      "group border rounded-[2rem] p-6 md:p-8 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300",
+                      "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       k3s.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
-                    <div className="flex justify-between items-start mb-8 relative z-10">
-                      <div className="flex gap-4 items-center">
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div className="flex gap-3.5 items-center min-w-0">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-sm",
+                          "w-12 h-12 rounded-xl bg-gradient-to-br border flex items-center justify-center shrink-0",
                           colorClass
                         )}>
                           {getServiceIcon('K3S')}
                         </div>
-                        <div>
-                          <h3 className={cn("text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1", isDark ? "text-white" : "text-slate-900")}>{k3s.name}</h3>
+                        <div className="min-w-0">
+                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{k3s.name}</h3>
                           <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>
                             MANAGED K3S CLUSTER
                           </p>
@@ -393,22 +395,22 @@ export default function MyServicesPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 flex-1 relative z-10">
-                      <div className={cn("col-span-2 border p-4 rounded-2xl flex justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
                         {getStatusBadge(k3s.status)}
                       </div>
 
-                      <div className={cn("border p-4 rounded-2xl flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Nodes</span>
                         <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{k3s.nodeCount}</span>
                       </div>
 
-                      <div className={cn("border p-4 rounded-2xl flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Cycle</span>
                         <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Pay-As-You-Go</span>
                       </div>
 
-                      <div className={cn("col-span-2 border p-4 rounded-2xl flex justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <div className="flex flex-col">
                           <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Usage Cost</span>
                           <span className="text-xs text-cyan-400 font-bold mt-1">{formatRupiah(k3s.hourlyRate || (k3s.monthlyPrice ? k3s.monthlyPrice / 720 : 0))}/hr (PAYG)</span>
@@ -421,16 +423,16 @@ export default function MyServicesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-6 pt-4 flex gap-3 relative z-10">
+                    <div className="mt-5 pt-4 flex gap-3 relative z-10">
                       {k3s.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/k3s/${k3s.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center transition-all shadow-sm text-slate-950"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Cluster
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center shadow-sm cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -447,43 +449,43 @@ export default function MyServicesPage() {
                     transition={{ delay: idx * 0.05 }}
                     key={sub.id}
                     className={cn(
-                      "group border rounded-[2rem] p-6 md:p-8 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-slate-700" : "bg-white border-slate-200 shadow-sm hover:border-slate-300",
+                      "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       sub.status === 'CANCELLED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
-                    <div className="flex justify-between items-start mb-8 relative z-10">
-                      <div className="flex gap-4 items-center">
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div className="flex gap-3.5 items-center min-w-0">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-sm",
+                          "w-12 h-12 rounded-xl bg-gradient-to-br border flex items-center justify-center shrink-0",
                           colorClass
                         )}>
                           {getServiceIcon(sub.plan.service)}
                         </div>
-                        <div>
-                          <h3 className={cn("text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1", isDark ? "text-white" : "text-slate-900")}>{sub.plan.name}</h3>
+                        <div className="min-w-0">
+                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{sub.plan.name}</h3>
                           <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>{sub.plan.service.replace('_', ' ')}</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 flex-1 relative z-10">
-                      <div className={cn("col-span-2 border p-4 rounded-2xl flex justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
                         {getStatusBadge(sub.status)}
                       </div>
 
-                      <div className={cn("border p-4 rounded-2xl flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Cycle</span>
                         <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{getCycleText(sub.cycle)}</span>
                       </div>
 
-                      <div className={cn("border p-4 rounded-2xl flex flex-col justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Expires</span>
                         <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{new Date(sub.expiresAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                       </div>
 
-                      <div className={cn("col-span-2 border p-4 rounded-2xl flex justify-between items-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/50 border-slate-200")}>
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <div className="flex flex-col">
                           <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Usage Cost</span>
                           <span className="text-xs text-cyan-400 font-bold mt-1">{formatRupiah(sub.plan.hourlyPrice || (sub.plan.price / 720))}/hr (PAYG)</span>
@@ -495,7 +497,7 @@ export default function MyServicesPage() {
                       </div>
 
                       {sub.status === 'SUSPENDED' && (
-                        <div className="col-span-2 mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl shadow-sm">
+                        <div className="col-span-2 mt-1 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                           <div className="flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
                             <div className="flex-1">
@@ -517,7 +519,7 @@ export default function MyServicesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-6 pt-4 flex gap-3 relative z-10">
+                    <div className="mt-5 pt-4 flex gap-3 relative z-10">
                       {sub.status !== 'TERMINATED' && sub.status !== 'CANCELLED' ? (
                         <>
                           {sub.status === 'SUSPENDED' && (
@@ -525,7 +527,7 @@ export default function MyServicesPage() {
                               <button
                                 onClick={() => handleToggleAutoRenew(sub.id, 'SUBSCRIPTION', false)}
                                 disabled={togglingId === `SUBSCRIPTION-${sub.id}`}
-                                className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                                className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
                               >
                                 <RefreshCw className={cn("w-3.5 h-3.5", togglingId === `SUBSCRIPTION-${sub.id}` && "animate-spin")} />
                                 Enable Auto-Renew
@@ -533,7 +535,7 @@ export default function MyServicesPage() {
                             ) : (
                               <Link
                                 href="/dashboard/billing/topup"
-                                className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                                className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
                               >
                                 <CreditCard className="w-3.5 h-3.5" />
                                 Top Up Saldo
@@ -542,7 +544,7 @@ export default function MyServicesPage() {
                           )}
                           <button
                             onClick={() => setTerminateModal({ id: sub.id, name: sub.plan.name, service: sub.plan.service })}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-2.5 rounded-lg flex items-center justify-center transition-all shadow-sm shrink-0"
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-2.5 rounded-xl flex items-center justify-center transition-all shrink-0"
                             title="Terminate Service"
                           >
                             <XCircle className="w-4 h-4" />
@@ -551,7 +553,7 @@ export default function MyServicesPage() {
                           {sub.status === 'ACTIVE' && hasHigherPlan(sub) && (
                             <Link
                               href={`/dashboard/checkout?upgradeId=${sub.id}`}
-                              className={cn("flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm", isDark ? "text-white" : "text-slate-900")}
+                              className={cn("flex-1 border py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all", isDark ? "bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.08] text-white" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-slate-900")}
                             >
                               <ArrowUpCircle className="w-4 h-4" /> Upgrade
                             </Link>
@@ -562,13 +564,13 @@ export default function MyServicesPage() {
                               sub.plan.service === 'SHORTENER' ? '/dashboard/shortener' :
                                   '/dashboard'
                             }
-                            className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-lg text-xs font-semibold flex items-center justify-center transition-all shadow-sm text-slate-950"
+                            className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                           >
                             Manage
                           </Link>
                         </>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center shadow-sm cursor-not-allowed">
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -580,7 +582,7 @@ export default function MyServicesPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className={cn("pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("pt-6 border-t", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
@@ -593,8 +595,8 @@ export default function MyServicesPage() {
 
       {/* Terminate Confirmation Modal */}
       {terminateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className={cn("border w-full max-w-sm rounded-3xl p-6 shadow-xl relative", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className={cn("border w-full max-w-sm rounded-2xl p-6 shadow-xl relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
             <button onClick={() => setTerminateModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
               <XCircle className="w-6 h-6" />
             </button>
@@ -615,7 +617,7 @@ export default function MyServicesPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setTerminateModal(null)}
-                className={cn("px-4 py-2.5 rounded-lg border transition-colors text-sm font-medium", isDark ? "text-zinc-400 border-slate-700 hover:bg-slate-800" : "text-slate-600 border-slate-200 hover:bg-slate-100")}
+                className={cn("px-4 py-2.5 rounded-xl border transition-colors text-xs sm:text-sm font-medium", isDark ? "text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]" : "text-slate-600 border-slate-200/90 hover:bg-slate-100")}
                 disabled={terminateLoading}
               >
                 Cancel
@@ -623,7 +625,7 @@ export default function MyServicesPage() {
               <button
                 onClick={handleTerminate}
                 disabled={terminateLoading}
-                className="px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 flex items-center gap-2 text-sm"
+                className="px-5 py-2.5 rounded-xl font-bold transition-all bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 flex items-center gap-2 text-xs sm:text-sm"
               >
                 {terminateLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                 Yes, Terminate

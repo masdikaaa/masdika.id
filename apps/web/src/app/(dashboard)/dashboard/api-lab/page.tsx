@@ -230,39 +230,49 @@ export default function ApiLabPage() {
 
   return (
     <div className="space-y-6 w-full pb-10">
-      <div className="flex items-center">
-        <Link 
-          href="/dashboard" 
-          className={cn(
-            "inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition-all border shadow-sm",
-            isDark 
-              ? "text-zinc-400 hover:text-white bg-[#0b1322] hover:bg-[#111c33] border-slate-800 hover:border-cyan-500/40" 
-              : "text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border-slate-200"
-          )}
-        >
-          <ChevronLeft className="w-4 h-4" /> Back to Dashboard
-        </Link>
-      </div>
-      
-      <div className={cn("relative overflow-hidden rounded-3xl  border p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-black/5 shadow-sm")}>
-        
-        <div className="relative z-10">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 tracking-wide", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-slate-100 border-slate-200 text-cyan-700")}>
-            <Activity className="w-3 h-3" /> API Testing Facility
+      {/* Compact Unboxed Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              API Lab
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
+              API Testing Facility
+            </span>
           </div>
-          <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            API <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Lab</span>
-          </h1>
-          <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-600")}>Test and interact with your ordered API services directly from this dashboard.</p>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Test and interact with your ordered API services directly from this dashboard.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <Link 
+            href="/dashboard" 
+            className={cn(
+              "w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-medium px-4 py-2 rounded-xl transition-all border shrink-0",
+              isDark 
+                ? "text-zinc-300 hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08]" 
+                : "text-slate-700 hover:text-slate-900 bg-slate-50/80 hover:bg-slate-100 border-slate-200/90"
+            )}
+          >
+            <ChevronLeft className="w-4 h-4" /> Back to Dashboard
+          </Link>
+          <Link
+            href="/dashboard/api-keys"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shrink-0"
+          >
+            <Key className="w-4 h-4" /> Manage Keys
+          </Link>
         </div>
       </div>
 
       {uniqueServices.length === 0 ? (
-        <div className={cn("border rounded-3xl p-12 text-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-black/5")}>
+        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <AlertCircle className="w-12 h-12 text-yellow-500/50 mx-auto mb-4" />
-          <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No APIs Found</h3>
-          <p className={cn("mb-6", isDark ? "text-zinc-400" : "text-slate-600")}>You haven't generated any API keys for your ordered services yet.</p>
-          <Link href="/dashboard/api-keys" className="bg-cyan-500 text-[#011627] px-6 py-3 rounded-xl font-bold hover:bg-cyan-400 transition-colors inline-block">
+          <h3 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No APIs Found</h3>
+          <p className={cn("text-xs sm:text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-600")}>You haven't generated any API keys for your ordered services yet.</p>
+          <Link href="/dashboard/api-keys" className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-colors inline-block">
             Generate API Key
           </Link>
         </div>
@@ -278,10 +288,10 @@ export default function ApiLabPage() {
                   key={serviceStr}
                   onClick={() => handleSelectService(serviceStr, keys.find(k => k.service === serviceStr)?.key)}
                   className={cn(
-                    "text-left p-5 rounded-2xl border transition-all shadow-sm relative cursor-pointer",
+                    "text-left p-5 rounded-2xl border transition-all relative cursor-pointer",
                     isActive
-                      ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20")
-                      : (isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 hover:bg-[#0a1222]" : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md")
+                      ? (isDark ? "bg-[#111115] border-cyan-500/50 ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-2xs ring-2 ring-cyan-600/20")
+                      : (isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.14] hover:bg-[#111115]" : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs")
                   )}
                 >
                   <div className="flex justify-between items-start mb-2 pr-6">
@@ -296,8 +306,8 @@ export default function ApiLabPage() {
                   <div className={cn(
                     "absolute top-4 right-4 w-5 h-5 rounded-full border flex items-center justify-center transition-all",
                     isActive
-                      ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
-                      : isDark ? "border-slate-700 bg-slate-800/40" : "border-slate-300 bg-slate-50"
+                      ? "bg-cyan-600 border-cyan-600 text-white"
+                      : isDark ? "border-white/[0.12] bg-white/[0.02]" : "border-slate-300 bg-slate-50/80"
                   )}>
                     {isActive && <Check className="w-3 h-3 stroke-[3]" />}
                   </div>
@@ -320,17 +330,17 @@ export default function ApiLabPage() {
           )}
 
           {currentConfig && (
-            <div className="flex flex-col lg:flex-row gap-8 mt-8">
+            <div className="flex flex-col lg:flex-row gap-6 mt-6">
               {/* Sidebar Params */}
               <div className="w-full lg:w-64 shrink-0 space-y-2">
                 {currentConfig.methods.includes("POST") && (
                   <div
                     onClick={() => setMethod("POST")}
                     className={cn(
-                      "p-4 rounded-xl cursor-pointer transition-all border font-medium text-sm shadow-sm",
+                      "p-4 rounded-xl cursor-pointer transition-all border font-medium text-sm",
                       method === "POST"
-                        ? (isDark ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30 font-bold" : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20 font-bold")
-                        : (isDark ? "bg-[#060b14] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white" : "bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:text-slate-900")
+                        ? (isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 ring-1 ring-cyan-500/30 font-bold" : "bg-white border-cyan-600 text-cyan-900 shadow-2xs ring-2 ring-cyan-600/20 font-bold")
+                        : (isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:border-white/[0.14] hover:text-white" : "bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:text-slate-900 shadow-2xs")
                     )}
                   >
                     <span className="font-bold">POST</span> Using POST Method
@@ -340,10 +350,10 @@ export default function ApiLabPage() {
                   <div
                     onClick={() => setMethod("GET")}
                     className={cn(
-                      "p-4 rounded-xl cursor-pointer transition-all border font-medium text-sm shadow-sm",
+                      "p-4 rounded-xl cursor-pointer transition-all border font-medium text-sm",
                       method === "GET"
-                        ? (isDark ? "bg-[#0b162c] border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30 font-bold" : "bg-white border-cyan-600 text-cyan-900 shadow-md ring-2 ring-cyan-600/20 font-bold")
-                        : (isDark ? "bg-[#060b14] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white" : "bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:text-slate-900")
+                        ? (isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 ring-1 ring-cyan-500/30 font-bold" : "bg-white border-cyan-600 text-cyan-900 shadow-2xs ring-2 ring-cyan-600/20 font-bold")
+                        : (isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:border-white/[0.14] hover:text-white" : "bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:text-slate-900 shadow-2xs")
                     )}
                   >
                     <span className="font-bold">GET</span> Using Query Parameter
@@ -355,21 +365,21 @@ export default function ApiLabPage() {
               <div className="flex-1 space-y-6 min-w-0 w-full">
                 
                 {/* API Key Banner */}
-                <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 shadow-sm">
+                <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 text-cyan-300">
+                    <div className="flex items-center gap-3 text-cyan-400">
                       <Key className="w-5 h-5 shrink-0" />
                       <span className="text-sm font-medium">API Key loaded successfully.</span>
                     </div>
-                    <div className={cn("bg-[#011627] border px-4 py-2 rounded-lg text-xs font-mono text-cyan-400 truncate max-w-xs shadow-inner", isDark ? "border-white/10" : "border-slate-200")}>
+                    <div className={cn("border px-4 py-2 rounded-xl text-xs font-mono text-cyan-400 truncate max-w-xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 text-cyan-700")}>
                       {apiKey}
                     </div>
                   </div>
                 </div>
 
                 {/* Endpoint Area */}
-                <div className={cn("rounded-2xl overflow-hidden shadow-2xl border", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
-                  <div className={cn("px-5 py-3 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[#161b22] border-white/5" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("rounded-2xl overflow-hidden border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className={cn("px-5 py-3 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <div className="flex items-center gap-3">
                       <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -380,7 +390,7 @@ export default function ApiLabPage() {
                     </div>
                     <button
                       onClick={() => setUseWww(!useWww)}
-                      className={cn("text-xs px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-2", isDark ? "bg-white/5 hover:bg-white/10 text-zinc-300 border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200")}
+                      className={cn("text-xs px-3 py-1.5 rounded-xl border transition-colors flex items-center gap-2", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] text-zinc-300 border-white/[0.08]" : "bg-white hover:bg-slate-100 text-slate-600 border-slate-200/90")}
                     >
                       <div className={`w-2 h-2 rounded-full ${useWww ? 'bg-cyan-400' : 'bg-zinc-500'}`} />
                       Use 'www' prefix
@@ -388,8 +398,8 @@ export default function ApiLabPage() {
                   </div>
                   
                   <div className="p-5 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
-                    <div className={cn("flex-1 rounded-xl p-3 flex items-center gap-3 overflow-x-auto font-mono text-sm shadow-inner border", isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200")}>
-                      <span className={cn("font-bold px-2.5 py-1 rounded-md", isDark ? "bg-white/5 text-cyan-400" : "bg-white text-cyan-600 shadow-sm")}>
+                    <div className={cn("flex-1 rounded-xl p-3 flex items-center gap-3 overflow-x-auto font-mono text-sm border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                      <span className={cn("font-bold px-2.5 py-1 rounded-lg", isDark ? "bg-white/[0.04] text-cyan-400" : "bg-white text-cyan-600 border border-slate-200/90")}>
                         {method}
                       </span>
                       <span className={cn("whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-700")}>
@@ -400,16 +410,16 @@ export default function ApiLabPage() {
                     <button
                       onClick={handleSend}
                       disabled={loading || !apiKey}
-                      className="shrink-0 px-6 py-2.5 lg:py-0 h-full min-h-[48px] rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                      className="shrink-0 px-6 py-2.5 lg:py-0 h-full min-h-[48px] rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 text-slate-950"
                     >
                       {loading ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" />
                           Sending...
                         </>
                       ) : (
                         <>
-                          <Play className="w-5 h-5" />
+                          <Play className="w-4 h-4" />
                           Send Request
                         </>
                       )}
@@ -429,7 +439,7 @@ export default function ApiLabPage() {
                             onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                             className="hidden"
                           />
-                            <div className={cn("relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center gap-4 text-center", uploadFile ? (isDark ? "border-cyan-500/50 bg-[#0b162c] ring-1 ring-cyan-500/30" : "border-cyan-600 bg-white shadow-sm ring-2 ring-cyan-600/20") : (isDark ? "border-slate-800 bg-[#060b14] group-hover:border-slate-700" : "border-slate-300 bg-white group-hover:border-slate-400 group-hover:shadow-sm"))}>
+                            <div className={cn("relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center gap-4 text-center", uploadFile ? (isDark ? "border-cyan-500/50 bg-[#111115] ring-1 ring-cyan-500/30" : "border-cyan-600 bg-white shadow-2xs ring-2 ring-cyan-600/20") : (isDark ? "border-white/[0.08] bg-[#0a0a0c] group-hover:border-white/[0.14]" : "border-slate-300 bg-white group-hover:border-slate-400 shadow-2xs"))}>
                             {uploadFile ? (
                               <>
                                 <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
@@ -445,18 +455,18 @@ export default function ApiLabPage() {
                               </>
                             ) : (
                               <>
-                                <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-300", isDark ? "bg-white/5 border-white/10 group-hover:border-cyan-500/20 group-hover:bg-cyan-500/5" : "bg-white border-slate-200 group-hover:border-slate-300 group-hover:bg-slate-50")}>
+                                <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-300", isDark ? "bg-white/[0.02] border-white/[0.08] group-hover:border-cyan-500/20 group-hover:bg-cyan-500/5" : "bg-slate-50/80 border-slate-200/90 group-hover:border-slate-300")}>
                                   <Upload className={cn("w-7 h-7 transition-colors duration-300", isDark ? "text-zinc-500 group-hover:text-cyan-400/70" : "text-slate-400 group-hover:text-slate-600")} />
                                 </div>
                                 <div>
                                   <p className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-900")}>Drop your file here</p>
                                   <p className={cn("text-xs mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>or <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>click to browse</span> from your device</p>
                                 </div>
-                                <div className={cn("flex items-center gap-2 text-[11px]", isDark ? "text-zinc-600" : "text-slate-500")}>
-                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/5 border-white/5" : "bg-slate-100 border-slate-200")}>Images</span>
-                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/5 border-white/5" : "bg-slate-100 border-slate-200")}>Videos</span>
-                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/5 border-white/5" : "bg-slate-100 border-slate-200")}>Documents</span>
-                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/5 border-white/5" : "bg-slate-100 border-slate-200")}>Any file</span>
+                                <div className={cn("flex flex-wrap items-center justify-center gap-2 text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>Images</span>
+                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>Videos</span>
+                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>Documents</span>
+                                  <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>Any file</span>
                                 </div>
                               </>
                             )}
@@ -464,8 +474,8 @@ export default function ApiLabPage() {
                         </label>
                       </div>
                     ) : (
-                      <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
-                        <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#161b22] border-white/5" : "bg-slate-50 border-slate-200")}>
+                      <div className={cn("rounded-2xl overflow-hidden border mt-6", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                        <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                           <div className="flex gap-2 w-16">
                             <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                             <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
@@ -479,7 +489,7 @@ export default function ApiLabPage() {
                         <textarea
                           value={requestBody}
                           onChange={(e) => setRequestBody(e.target.value)}
-                          className={cn("w-full p-5 font-mono text-sm outline-none resize-none min-h-[150px] leading-relaxed", isDark ? "bg-black/20 text-cyan-300" : "bg-slate-50 text-cyan-700")}
+                          className={cn("w-full p-5 font-mono text-sm outline-none resize-none min-h-[150px] leading-relaxed", isDark ? "bg-[#0a0a0c] text-cyan-300" : "bg-slate-50/80 text-cyan-700")}
                           spellCheck={false}
                         />
                       </div>
@@ -488,8 +498,8 @@ export default function ApiLabPage() {
                 )}
 
                 {method === "GET" && activeService === "CDN" && (
-                  <div className={cn("rounded-xl overflow-hidden shadow-2xl border mt-4", isDark ? "bg-[#0d1117] border-white/5" : "bg-white border-black/5")}>
-                    <div className={cn("px-4 py-3 flex items-center justify-between", isDark ? "bg-[#161b22]" : "bg-slate-50 border-b border-slate-200")}>
+                  <div className={cn("rounded-2xl overflow-hidden border mt-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <span className={cn("text-xs font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>Query Parameter</span>
                     </div>
                     <div className="p-5 flex flex-col gap-2">
@@ -500,7 +510,7 @@ export default function ApiLabPage() {
                           value={cdnToken}
                           onChange={(e) => setCdnToken(e.target.value)}
                           placeholder="e.g. 123e4567-e89b-12d3..."
-                          className={cn("flex-1 border rounded-lg px-4 py-2 text-sm font-mono focus:outline-none", isDark ? "bg-black/40 border-white/10 text-cyan-300 focus:border-cyan-500/50" : "bg-slate-50 border-slate-200 text-cyan-700 focus:border-cyan-400")}
+                          className={cn("flex-1 border rounded-xl px-4 py-2 text-sm font-mono focus:outline-none", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-300 focus:border-cyan-500/50" : "bg-slate-50/80 border-slate-200/90 text-cyan-700 focus:border-cyan-400")}
                         />
                       </div>
                       <p className={cn("text-xs ml-16 mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>
@@ -511,8 +521,8 @@ export default function ApiLabPage() {
                 )}
 
                 {/* Response Area */}
-                <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6 relative", isDark ? "bg-[#0d1117] border-white/10" : "bg-white border-black/5")}>
-                  <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#161b22] border-white/5" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("rounded-2xl overflow-hidden border mt-6 relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <div className="flex items-center gap-3">
                       <Terminal className="w-4 h-4 text-cyan-500" />
                       <span className={cn("text-xs font-mono tracking-wider", isDark ? "text-zinc-300" : "text-slate-600")}>Response</span>
@@ -532,9 +542,9 @@ export default function ApiLabPage() {
                     </div>
                   </div>
 
-                  <div className={cn("relative min-h-[250px] max-h-[500px] flex flex-col w-full", isDark ? "bg-black/20" : "bg-slate-50")}>
+                  <div className={cn("relative min-h-[250px] max-h-[500px] flex flex-col w-full", isDark ? "bg-[#0a0a0c]" : "bg-slate-50/80")}>
                     {loading ? (
-                      <div className={cn("absolute inset-0 flex flex-col items-center justify-center  z-10", isDark ? "bg-[#0d1117]/80" : "bg-white/80")}>
+                      <div className={cn("absolute inset-0 flex flex-col items-center justify-center z-10", isDark ? "bg-[#0a0a0c]/80" : "bg-white/80")}>
                         <div className="relative">
                           <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -547,7 +557,7 @@ export default function ApiLabPage() {
                       <div className="flex-1 overflow-auto hide-scrollbar w-full relative group">
                         <button 
                           onClick={copyToClipboard}
-                          className={cn("absolute top-4 right-4 p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 border", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-400 hover:text-white" : "bg-white hover:bg-slate-100 border-slate-200 text-slate-400 hover:text-slate-600")}
+                          className={cn("absolute top-4 right-4 p-2 rounded-xl transition-colors opacity-0 group-hover:opacity-100 border", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white hover:bg-slate-100 border-slate-200/90 text-slate-400 hover:text-slate-600")}
                           title="Copy Response"
                         >
                           <Copy className="w-4 h-4" />
@@ -569,9 +579,9 @@ export default function ApiLabPage() {
                         </SyntaxHighlighter>
                       </div>
                     ) : (
-                      <div className={cn("h-full absolute inset-0 flex flex-col items-center justify-center font-mono text-sm py-20", isDark ? "text-zinc-500 bg-gradient-to-b from-transparent to-black/20" : "text-slate-400 bg-gradient-to-b from-transparent to-slate-100/50")}>
-                        <div className={cn("w-16 h-16 rounded-2xl border flex items-center justify-center mb-4", isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm")}>
-                          <Terminal className={cn("w-8 h-8", isDark ? "text-zinc-600" : "text-slate-300")} />
+                      <div className={cn("h-full absolute inset-0 flex flex-col items-center justify-center font-mono text-sm py-20", isDark ? "text-zinc-500" : "text-slate-400")}>
+                        <div className={cn("w-14 h-14 rounded-2xl border flex items-center justify-center mb-4", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+                          <Terminal className={cn("w-7 h-7", isDark ? "text-zinc-600" : "text-slate-300")} />
                         </div>
                         <span className="text-center px-4 leading-relaxed">Hit "Send Request" to view the response here</span>
                       </div>

@@ -171,70 +171,69 @@ export default function ReservedIpsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className={cn("relative overflow-hidden rounded-3xl border p-6 md:p-8 group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
+    <div className="space-y-6 pb-10">
+      {/* Compact Unboxed Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Reserved IPs
+            </h1>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
               <Network className="w-3 h-3" />
               Network Infrastructure
-            </div>
-            <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Reserved <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>IPs</span>
-            </h1>
-            <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Reserve static IPv4 and IPv6 addresses to use with your Cloud VPS or Managed K3s deployments.
-            </p>
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            {ips.length > 0 && (
-              <button
-                onClick={toggleSelectAll}
-                className={cn("bg-white/5 hover:bg-white/10 border font-medium text-sm px-4 py-3 rounded-2xl flex items-center gap-2 transition-all hover:border-white/20", isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-500")}
-              >
-                <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center transition-all ${selectedIps.length === ips.length && ips.length > 0
-                  ? 'bg-cyan-500 text-[#0f172a]'
-                  : 'bg-[#060b14] border border-slate-800 text-transparent'
-                  }`}>
-                  <CheckCircle className="w-3 h-3 stroke-[2.5]" />
-                </div>
-                <span className="hidden sm:inline">Select All</span>
-              </button>
-            )}
-            {selectedIps.length > 0 && (
-              <button
-                onClick={() => setShowBulkReleaseModal(true)}
-                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium text-sm px-4 py-3 rounded-2xl flex items-center gap-2 transition-all hover:border-red-500/40"
-              >
-                <Trash2 className="w-4 h-4" />
-                Release ({selectedIps.length})
-              </button>
-            )}
-            <Link
-              href="/dashboard/reserved-ips/new"
-              className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center justify-center gap-2"
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Reserve static IPv4 and IPv6 addresses to use with your Cloud VPS or Managed K3s deployments.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          {ips.length > 0 && (
+            <button
+              onClick={toggleSelectAll}
+              className={cn("border font-medium text-xs sm:text-sm px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-all", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-600 shadow-2xs")}
             >
-              <Plus className="w-4 h-4" />
-              Reserve New IP
-            </Link>
-          </div>
+              <div className={cn("w-4 h-4 rounded-[4px] flex items-center justify-center transition-all", selectedIps.length === ips.length && ips.length > 0
+                ? "bg-cyan-400 text-slate-950"
+                : isDark ? "bg-white/[0.02] border border-white/[0.08] text-transparent" : "bg-slate-100 border border-slate-300 text-transparent"
+              )}>
+                <CheckCircle className="w-3 h-3 stroke-[2.5]" />
+              </div>
+              <span className="hidden sm:inline">Select All</span>
+            </button>
+          )}
+          {selectedIps.length > 0 && (
+            <button
+              onClick={() => setShowBulkReleaseModal(true)}
+              className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium text-xs sm:text-sm px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-all hover:border-red-500/40"
+            >
+              <Trash2 className="w-4 h-4" />
+              Release ({selectedIps.length})
+            </button>
+          )}
+          <Link
+            href="/dashboard/reserved-ips/new"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-2xs inline-flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Reserve New IP
+          </Link>
         </div>
       </div>
 
       {ips.length === 0 ? (
-        <div className={cn("border rounded-3xl p-12 text-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm")}>
-          <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-50")}>
-            <Network className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
+        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <div className={cn("w-16 h-16 rounded-2xl border flex items-center justify-center mx-auto mb-5", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+            <Network className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
-          <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Reserved IPs</h4>
-          <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <h4 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Reserved IPs</h4>
+          <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
             You don't have any reserved IP addresses yet. Reserve an IP to ensure it's always yours and ready to be attached to your services.
           </p>
           <Link
             href="/dashboard/reserved-ips/new"
-            className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center justify-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-2xs inline-flex items-center justify-center gap-2"
           >
             Reserve Your First IP
           </Link>
@@ -242,27 +241,27 @@ export default function ReservedIpsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {ips.map(ip => (
-            <div key={ip.id} className={cn("border rounded-xl p-5 transition-all relative", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
+            <div key={ip.id} className={cn("border rounded-2xl p-4 sm:p-5 transition-all relative", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.15]" : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs")}>
               <div className="absolute top-4 right-4 z-10">
                 <button
                   onClick={() => toggleSelectIp(ip.id)}
-                  className={`w-5 h-5 rounded flex items-center justify-center transition-all ${selectedIps.includes(ip.id)
-                    ? 'bg-cyan-500 text-[#0f172a]'
-                    : 'bg-[#060b14] border border-slate-800 text-transparent'
-                    }`}
+                  className={cn("w-5 h-5 rounded flex items-center justify-center transition-all", selectedIps.includes(ip.id)
+                    ? "bg-cyan-400 text-slate-950"
+                    : isDark ? "bg-white/[0.02] border border-white/[0.08] text-transparent" : "bg-slate-100 border border-slate-300 text-transparent"
+                  )}
                 >
                   <CheckCircle className="w-3.5 h-3.5 stroke-[2.5]" />
                 </button>
               </div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${ip.isAttached ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                  <div className="p-2 rounded-xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/20">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col gap-1.5 pt-0.5 w-full">
                     <div className="flex flex-wrap items-center gap-4">
                       <div className="flex items-center gap-1.5">
-                        <span className={cn("inline-flex items-center justify-center p-1 rounded bg-zinc-800 border border-zinc-700", isDark ? "text-zinc-400" : "text-slate-500")} title="Local IP">
+                        <span className={cn("inline-flex items-center justify-center p-1 rounded border", isDark ? "bg-white/[0.04] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200/90 text-slate-500")} title="Local IP">
                           <Network className="w-3.5 h-3.5" />
                         </span>
                         <h3 className={cn("text-[15px] font-mono font-bold leading-none", isDark ? "text-white" : "text-slate-900")}>{ip.ipAddress}</h3>
@@ -273,9 +272,9 @@ export default function ReservedIpsPage() {
                       
                       {ip.publicIp && (
                         <>
-                          <div className="w-px h-4 bg-white/10 hidden sm:block"></div>
+                          <div className="w-px h-4 bg-white/[0.08] hidden sm:block"></div>
                           <div className="flex items-center gap-1.5">
-                            <span className="inline-flex items-center justify-center p-1 rounded bg-cyan-900/30 text-cyan-500 border border-cyan-800/50" title="Public IP">
+                            <span className="inline-flex items-center justify-center p-1 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/25" title="Public IP">
                               <Globe className="w-3.5 h-3.5" />
                             </span>
                             <h3 className="text-[15px] font-mono font-bold text-cyan-400 leading-none">{ip.publicIp}</h3>
@@ -300,7 +299,7 @@ export default function ReservedIpsPage() {
                       {ip.isAttached && (
                         <div className="flex items-center gap-2 text-xs">
                           <span className={cn("font-medium w-16", isDark ? "text-zinc-500" : "text-slate-500")}>Service:</span>
-                          <span className={cn("font-medium truncate max-w-[200px] px-2 py-0.5 bg-white/5 rounded border", isDark ? "text-white border-white/10" : "text-slate-900 border-slate-200")}>
+                          <span className={cn("font-medium truncate max-w-[200px] px-2 py-0.5 rounded border", isDark ? "bg-white/[0.02] text-white border-white/[0.08]" : "bg-slate-50 text-slate-900 border-slate-200/90")}>
                             {ip.vps?.hostname || ip.vps?.name || 'Service'}
                           </span>
                         </div>
@@ -310,14 +309,14 @@ export default function ReservedIpsPage() {
                 </div>
               </div>
 
-              <div className={cn("space-y-2 mb-4 rounded-lg p-3 border", isDark ? "bg-black/20 border-white/5" : "bg-slate-50/50 border-slate-200")}>
+              <div className={cn("space-y-2 mb-4 rounded-xl p-3.5 border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                 <div className="flex justify-between text-sm">
                   <span className={cn("", isDark ? "text-zinc-400" : "text-slate-500")}>Accumulated Cost</span>
                   <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>
                     {formatRupiah(ip.accumulatedCost)}
                   </span>
                 </div>
-                <div className={cn("pt-2 mt-2 border-t", isDark ? "border-white/5" : "border-slate-200")}>
+                <div className={cn("pt-2 mt-2 border-t", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                   <p className={cn("text-[11px] leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>
                     {ip.isAttached ? (
                       <>This IP is currently attached. Its billing is now <strong className={cn("", isDark ? "text-zinc-400" : "text-slate-500")}>merged into the VPS invoice</strong>. The standalone invoice is paused.</>
@@ -333,13 +332,13 @@ export default function ReservedIpsPage() {
                   <>
                     <button
                       onClick={() => handleOpenAttachModal(ip)}
-                      className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg text-sm font-medium transition-colors"
+                      className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl text-xs sm:text-sm font-medium transition-colors"
                     >
                       Attach VPS
                     </button>
                     <button
                       onClick={() => router.push('/dashboard/checkout')}
-                      className="flex-1 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg text-sm font-medium transition-colors"
+                      className="flex-1 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl text-xs sm:text-sm font-medium transition-colors"
                     >
                       Deploy New
                     </button>
@@ -347,7 +346,7 @@ export default function ReservedIpsPage() {
                 )}
                 <button
                   onClick={() => handleOpenReleaseModal(ip)}
-                  className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm font-medium transition-colors"
+                  className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs sm:text-sm font-medium transition-colors"
                 >
                   Release IP
                 </button>
@@ -383,7 +382,7 @@ export default function ReservedIpsPage() {
 
       {showAttachModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className={cn("border rounded-2xl p-6 max-w-md w-full shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+          <div className={cn("border rounded-2xl p-6 max-w-md w-full shadow-xl relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
             <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Attach Reserved IP</h3>
             <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
               Attach <strong className={cn("", isDark ? "text-white" : "text-slate-900")}>{ipToAttach?.ipAddress}</strong> to an existing VPS. This will replace the current primary public IP of the VPS.
@@ -416,7 +415,7 @@ export default function ReservedIpsPage() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowAttachModal(false)}
-                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
                 disabled={isAttaching}
               >
                 Cancel
@@ -424,7 +423,7 @@ export default function ReservedIpsPage() {
               <button
                 onClick={handleAttach}
                 disabled={!selectedVpsId || isAttaching}
-                className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isAttaching ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />}
                 Attach IP

@@ -100,29 +100,29 @@ export default function NotificationsPage() {
 
   return (
     <motion.div
-      className="space-y-6 md:space-y-8 pb-10"
+      className="space-y-6 pb-10"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Hero Header */}
-      <motion.div variants={itemVariants} className={cn("relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-sm group flex flex-col md:flex-row md:items-center justify-between gap-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        
-        
-        <div className="relative z-10 shrink-0">
-          <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700")}>
-            <Bell className="w-3 h-3" /> Updates & Alerts
+      {/* Compact Unboxed Page Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              All Notifications
+            </h1>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-700")}>
+              <Bell className="w-3 h-3" /> Updates & Alerts
+            </span>
           </div>
-          <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            All <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>Notifications</span>
-          </h1>
-          <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>View your recent updates, billing alerts, and support responses.</p>
+          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>View your recent updates, billing alerts, and support responses.</p>
         </div>
         
-        <div className="relative z-10 shrink-0 flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
           <Link 
             href="/dashboard"
-            className={cn("w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 border transition-all", isDark ? "bg-slate-800/60 hover:bg-slate-800 text-white border-slate-700/80" : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200 shadow-sm")}
+            className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border transition-all", isDark ? "bg-[#0a0a0c] hover:bg-white/[0.04] text-zinc-300 hover:text-white border-white/[0.08]" : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 shadow-2xs")}
           >
             <ChevronLeft className="w-4 h-4" />
             Back to Dashboard
@@ -130,7 +130,7 @@ export default function NotificationsPage() {
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
             >
               <CheckCircle2 className="w-4 h-4" />
               Mark all as read
@@ -140,56 +140,56 @@ export default function NotificationsPage() {
       </motion.div>
 
       {notifications.length === 0 ? (
-        <motion.div variants={itemVariants} className={cn("border rounded-3xl p-12 text-center shadow-sm relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10">
-            <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-slate-100")}>
-              <BellRing className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-500")} />
+            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+              <BellRing className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
             </div>
-            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Notifications</h3>
-            <p className={cn("max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any recent notifications at the moment.</p>
+            <h3 className={cn("text-lg sm:text-xl font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>No Notifications</h3>
+            <p className={cn("text-xs sm:text-sm max-w-md mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>You don't have any recent notifications at the moment.</p>
           </div>
         </motion.div>
       ) : (
-        <motion.div variants={itemVariants} className={cn("border rounded-3xl overflow-hidden shadow-md relative", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           
-          <div className={cn("divide-y relative z-10", isDark ? "divide-slate-800/60" : "divide-slate-100")}>
+          <div className={cn("divide-y relative z-10", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
             {paginatedNotifications.map((notif) => (
               <div key={notif.id}>
                 <Link
                   href={notif.link || "#"}
-                  className={cn("block p-5 sm:p-6 transition-all group", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50/80")}
+                  className={cn("block p-4 sm:p-5 transition-all group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}
                 >
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="shrink-0 mt-1">
+                  <div className="flex gap-3.5 sm:gap-4">
+                    <div className="shrink-0 mt-0.5">
                       {notif.type === 'TICKET' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-slate-800 border-transparent text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : (isDark ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-slate-100 text-cyan-700 border-slate-200 shadow-sm')}`}>
-                          <MessageSquare className="w-5 h-5" />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-400' : 'bg-slate-50/80 border-slate-200/90 text-slate-500') : (isDark ? 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30' : 'bg-cyan-500/10 text-cyan-700 border-cyan-500/20')}`}>
+                          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                       ) : notif.type === 'INVOICE' ? (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-slate-800 border-transparent text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : (isDark ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-slate-100 text-cyan-700 border-slate-200 shadow-sm')}`}>
-                          <Receipt className="w-5 h-5" />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-400' : 'bg-slate-50/80 border-slate-200/90 text-slate-500') : (isDark ? 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30' : 'bg-cyan-500/10 text-cyan-700 border-cyan-500/20')}`}>
+                          <Receipt className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                       ) : (
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-slate-800 border-transparent text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : (isDark ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-slate-100 text-cyan-700 border-slate-200 shadow-sm')}`}>
-                          <AlertCircle className="w-5 h-5" />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-400' : 'bg-slate-50/80 border-slate-200/90 text-slate-500') : (isDark ? 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30' : 'bg-cyan-500/10 text-cyan-700 border-cyan-500/20')}`}>
+                          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 mb-1">
-                        <h4 className={`font-semibold text-base truncate ${notif.isRead ? (isDark ? 'text-zinc-300' : 'text-slate-700') : (isDark ? 'text-white' : 'text-slate-900')}`}>
+                        <h4 className={`font-bold text-sm sm:text-base truncate ${notif.isRead ? (isDark ? 'text-zinc-300' : 'text-slate-700') : (isDark ? 'text-white' : 'text-slate-900')}`}>
                           {notif.subject}
                         </h4>
                         <span className={cn("text-xs font-medium shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>
                           {formatRelativeTime(notif.createdAt)}
                         </span>
                       </div>
-                      <p className={`text-sm line-clamp-2 ${notif.isRead ? (isDark ? 'text-zinc-500' : 'text-slate-500') : (isDark ? 'text-zinc-400' : 'text-slate-600')}`}>
+                      <p className={`text-xs sm:text-sm line-clamp-2 ${notif.isRead ? (isDark ? 'text-zinc-500' : 'text-slate-500') : (isDark ? 'text-zinc-400' : 'text-slate-600')}`}>
                         {notif.content}
                       </p>
                       
                       {!notif.isRead && (
-                        <div className={cn("mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-800 border-slate-200")}>
+                        <div className={cn("mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-500/10 text-cyan-800 border-cyan-500/20")}>
                           <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
                           Unread
                         </div>
@@ -202,7 +202,7 @@ export default function NotificationsPage() {
           </div>
           
           {totalPages > 1 && (
-            <div className={cn("p-6 border-t relative z-10", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50/50")}>
+            <div className={cn("p-5 sm:p-6 border-t relative z-10", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
