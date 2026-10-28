@@ -17,15 +17,15 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, string> = {
   neutral:
-    "border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]",
+    "border border-[var(--border-primary)] bg-white dark:bg-[#0c121e] text-[var(--text-secondary)] shadow-xs",
   success:
-    "border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    "border border-emerald-500/30 bg-white dark:bg-[#0c121e] text-emerald-700 dark:text-emerald-400 shadow-xs",
   warning:
-    "border border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    "border border-amber-500/30 bg-white dark:bg-[#0c121e] text-amber-700 dark:text-amber-400 shadow-xs",
   danger:
-    "border border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-400",
+    "border border-red-500/30 bg-white dark:bg-[#0c121e] text-red-700 dark:text-red-400 shadow-xs",
   brand:
-    "border border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400",
+    "border border-cyan-500/40 bg-white dark:bg-[#0a101d] text-cyan-700 dark:text-cyan-400 shadow-xs",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {

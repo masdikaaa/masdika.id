@@ -94,7 +94,7 @@ export function HeroAvatarFrame({
               "flex absolute z-30 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
               pos,
               anim,
-              "bg-white/90 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-slate-200/80 dark:border-white/10",
+              "bg-white dark:bg-[#0a0a0c] border border-slate-200/90 dark:border-white/15",
               "shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)]",
               "hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 cursor-default"
             )}
