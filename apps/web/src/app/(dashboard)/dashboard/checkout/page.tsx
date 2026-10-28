@@ -466,10 +466,10 @@ function CheckoutContent() {
           </div>
         </div>
 
-        {/* Quick Wallet Balance Pill */}
+        {/* Quick Wallet Balance Pill (Mobile only since Desktop Topbar displays the Wallet Capsule) */}
         <div
           className={cn(
-            "flex items-center justify-between sm:justify-start gap-3 px-3.5 py-2 rounded-xl border self-stretch sm:self-auto shrink-0",
+            "flex sm:hidden items-center justify-between gap-3 px-3.5 py-2 rounded-xl border self-stretch shrink-0",
             isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Link2, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2 } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Link2, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -143,7 +143,14 @@ export default function DashboardLayoutClient({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const searchResults = searchQuery.trim() === ""
+    ? []
+    : SIDEBAR_LINKS.filter(link => link.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   useEffect(() => {
     const fetchNotifications = () => {
@@ -348,34 +355,192 @@ export default function DashboardLayoutClient({
         )}
 
         {/* Topbar */}
-        <header className={cn("h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b sticky top-0 z-30", isDark ? "bg-[#0c0c0e]/90 backdrop-blur-md border-white/10" : "bg-white/90 backdrop-blur-md border-slate-200/80 shadow-sm")}>
-          <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open navigation menu"
-            className={cn("lg:hidden p-2 transition-colors group flex flex-col items-center justify-center w-10 h-10 gap-1.5 relative focus:outline-none", isDark ? "text-slate-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}
-          >
-            <span className="w-6 h-[2px] bg-current rounded-full transform transition-all duration-300 ease-out origin-center" />
-            <span className="w-6 h-[2px] bg-current rounded-full transform transition-all duration-300 ease-out origin-center" />
-            <span className="w-6 h-[2px] bg-current rounded-full transform transition-all duration-300 ease-out origin-center" />
-          </button>
+        <header
+          className={cn(
+            "h-16 flex items-center justify-between px-3.5 sm:px-6 lg:px-8 border-b sticky top-0 z-30 transition-colors",
+            isDark
+              ? "bg-[#0a0a0c]/90 backdrop-blur-xl border-white/[0.08]"
+              : "bg-white/90 backdrop-blur-xl border-slate-200/80 shadow-2xs"
+          )}
+        >
+          {/* Left: Mobile Menu Trigger + Desktop Quick Search */}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open navigation menu"
+              className={cn(
+                "lg:hidden w-9 h-9 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all shrink-0 focus:outline-none",
+                isDark
+                  ? "bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:text-cyan-400 hover:border-white/[0.15]"
+                  : "bg-slate-50 border-slate-200/90 text-slate-600 hover:text-cyan-600"
+              )}
+            >
+              <span className="w-4 h-[1.5px] bg-current rounded-full" />
+              <span className="w-4 h-[1.5px] bg-current rounded-full" />
+              <span className="w-4 h-[1.5px] bg-current rounded-full" />
+            </button>
 
-          <div className="ml-auto flex items-center gap-2 sm:gap-6">
-            <div className="flex items-center gap-2 sm:gap-4 relative">
+            <div className="hidden md:flex items-center max-w-xs lg:max-w-sm w-full relative z-50">
+              <Search className={cn("w-4 h-4 absolute left-3.5 z-10 pointer-events-none", isDark ? "text-zinc-500" : "text-slate-400")} />
+              <input
+                type="text"
+                placeholder="Quick jump to service or menu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                className={cn(
+                  "w-full border text-xs sm:text-sm rounded-xl pl-10 pr-9 py-2 focus:outline-none transition-all",
+                  isDark
+                    ? "bg-white/[0.02] border-white/[0.08] text-white placeholder:text-zinc-500 focus:bg-[#111115] focus:border-cyan-500/40"
+                    : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-cyan-500"
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute right-2.5 px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border pointer-events-none",
+                  isDark ? "bg-white/[0.04] border-white/[0.08] text-zinc-500" : "bg-white border-slate-200 text-slate-400"
+                )}
+              >
+                /
+              </span>
 
-              {/* Balance Display (Top-up button) */}
-              <Link href="/dashboard/billing" className={cn("flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl transition-colors mr-1 sm:mr-2 border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20" : "bg-white text-slate-800 border-slate-200 hover:border-cyan-500/50 hover:bg-slate-50 shadow-sm")}>
-                <Wallet className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
-                <span className="text-xs sm:text-sm font-bold whitespace-nowrap">{formatRupiah(userBalance || 0)}</span>
-              </Link>
+              {isSearchFocused && searchQuery.trim() !== "" && (
+                <div
+                  className={cn(
+                    "absolute top-full mt-2 w-full border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 z-50",
+                    isDark ? "bg-[#0c0c0e] border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.85)]" : "bg-white border-slate-200 shadow-xl"
+                  )}
+                >
+                  <div className="max-h-64 overflow-y-auto p-1.5">
+                    {searchResults.length > 0 ? (
+                      searchResults.map(link => (
+                        <Link
+                          key={link.name}
+                          href={link.href}
+                          className={cn(
+                            "flex items-center justify-between gap-3 px-3 py-2 rounded-xl transition-colors group",
+                            isDark ? "hover:bg-white/[0.05]" : "hover:bg-slate-100"
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <link.icon className={cn("w-4 h-4 shrink-0", link.color)} />
+                            <span className={cn("text-xs sm:text-sm font-medium truncate", isDark ? "text-zinc-200 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900")}>
+                              {link.name}
+                            </span>
+                          </div>
+                          <span className={cn("text-[10px] font-medium shrink-0", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {link.group}
+                          </span>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className={cn("p-4 text-center text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        No results found for &quot;{searchQuery}&quot;
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-              <button onClick={() => setTheme(isDark ? 'light' : 'dark')} aria-label="Toggle Theme" className={cn("transition-colors relative group outline-none mr-1 sm:mr-2", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
-                {isDark ? <Sun className="w-5 h-5 transition-transform group-hover:rotate-12" /> : <Moon className="w-5 h-5 transition-transform group-hover:-rotate-12" />}
+          {/* Right: Wallet Capsule + Action Dock + Profile Pill */}
+          <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
+            {/* 1. Wallet & Top-Up Capsule */}
+            <Link
+              href="/dashboard/billing"
+              className={cn(
+                "group flex items-center gap-2 p-1 pl-2 sm:pl-2.5 rounded-xl border transition-all duration-200",
+                isDark
+                  ? "bg-gradient-to-r from-cyan-500/[0.08] via-cyan-500/[0.03] to-white/[0.01] border-cyan-500/25 hover:border-cyan-400/50 hover:from-cyan-500/[0.14]"
+                  : "bg-slate-50/90 hover:bg-white border-slate-200/90 hover:border-cyan-500/40 shadow-2xs"
+              )}
+              title="Manage Billing & Top Up Credit"
+            >
+              <div
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                  isDark
+                    ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400"
+                    : "bg-cyan-50 border-cyan-200 text-cyan-700"
+                )}
+              >
+                <Wallet className="w-3.5 h-3.5" />
+              </div>
+
+              <div className="flex flex-col leading-none pr-0.5">
+                <span className={cn("text-[9px] font-bold uppercase tracking-wider hidden sm:inline", isDark ? "text-cyan-400/75" : "text-slate-400")}>
+                  Credit
+                </span>
+                <span className={cn("text-xs sm:text-[13px] font-bold font-mono tracking-tight whitespace-nowrap sm:mt-0.5", isDark ? "text-white" : "text-slate-900")}>
+                  {formatRupiah(userBalance || 0)}
+                </span>
+              </div>
+
+              <span
+                className={cn(
+                  "h-7 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all shrink-0",
+                  isDark
+                    ? "bg-cyan-400 group-hover:bg-cyan-300 text-slate-950 shadow-2xs"
+                    : "bg-cyan-500 group-hover:bg-cyan-600 text-white"
+                )}
+              >
+                <Plus className="w-3 h-3 stroke-[2.75]" />
+                <span className="hidden xl:inline">Top Up</span>
+              </span>
+            </Link>
+
+            {/* 2. Utility Action Dock (Theme + Notifications) */}
+            <div
+              className={cn(
+                "flex items-center gap-1 p-1 rounded-xl border relative",
+                isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-100/80 border-slate-200/80"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                aria-label="Toggle Theme"
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all group outline-none cursor-pointer",
+                  isDark
+                    ? "text-zinc-400 hover:text-white hover:bg-white/[0.07]"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-white shadow-2xs"
+                )}
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12 text-amber-300/90" />
+                ) : (
+                  <Moon className="w-4 h-4 transition-transform duration-200 group-hover:-rotate-12" />
+                )}
               </button>
 
-              <button onClick={() => setShowNotifications(!showNotifications)} aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`} className={cn("transition-colors relative group outline-none mr-1 sm:mr-2", isDark ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
-                <Bell className={cn("w-5 h-5 transition-transform", showNotifications ? "animate-ring" : "group-hover:rotate-12")} aria-hidden="true" />
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  setShowProfileMenu(false);
+                }}
+                aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+                title="Notifications"
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all relative group outline-none cursor-pointer",
+                  showNotifications
+                    ? isDark ? "bg-white/[0.1] text-cyan-400" : "bg-white text-cyan-700 shadow-2xs"
+                    : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.07]" : "text-slate-500 hover:text-slate-900 hover:bg-white"
+                )}
+              >
+                <Bell className={cn("w-4 h-4 transition-transform", showNotifications ? "animate-ring" : "group-hover:rotate-12")} aria-hidden="true" />
                 {unreadCount > 0 && (
-                  <span aria-live="polite" className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center border-2 border-background">
+                  <span
+                    aria-live="polite"
+                    className={cn(
+                      "absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-[9px] font-bold text-white flex items-center justify-center ring-2",
+                      isDark ? "ring-[#0a0a0c]" : "ring-white"
+                    )}
+                  >
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -385,26 +550,26 @@ export default function DashboardLayoutClient({
               {showNotifications && (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setShowNotifications(false)} />
-                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:-right-2 sm:left-auto sm:w-80 border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" : "bg-white border-slate-200 shadow-xl")}>
+                  <div className={cn("fixed top-[72px] left-4 right-4 sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 border rounded-2xl shadow-2xl z-50 overflow-hidden transform origin-top sm:origin-top-right transition-all", isDark ? "bg-[#0c0c0e] border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.85)]" : "bg-white border-slate-200 shadow-xl")}>
                     <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-white/10" : "border-slate-100")}>
-                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
+                      <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>Notifications</h3>
                       <div className="flex items-center gap-3">
                         {notifications.length > 0 && (
                           <button
                             onClick={handleMarkAllAsRead}
-                            className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                            className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
                           >
-                            Mark all as read
+                            Mark all read
                           </button>
                         )}
-                        <Link href="/dashboard/notifications" onClick={() => setShowNotifications(false)} className={cn("text-xs", isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
+                        <Link href="/dashboard/notifications" onClick={() => setShowNotifications(false)} className={cn("text-xs font-medium", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                           View All
                         </Link>
                       </div>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <div className={cn("p-6 text-center text-sm", isDark ? "text-slate-400" : "text-slate-500")}>
+                        <div className={cn("p-6 text-center text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                           No new notifications
                         </div>
                       ) : (
@@ -413,10 +578,10 @@ export default function DashboardLayoutClient({
                             key={notif.id}
                             href={notif.link || `/dashboard`}
                             onClick={() => setShowNotifications(false)}
-                            className={cn("block p-4 border-b transition-colors", isDark ? "border-white/5 hover:bg-white/5" : "border-slate-100 hover:bg-slate-50")}
+                            className={cn("block p-3.5 border-b transition-colors", isDark ? "border-white/5 hover:bg-white/[0.04]" : "border-slate-100 hover:bg-slate-50")}
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <div className={cn("font-semibold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{notif.subject || 'No Subject'}</div>
+                              <div className={cn("font-semibold text-xs sm:text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{notif.subject || 'No Subject'}</div>
                               {notif.type === 'TICKET' && notif.id.startsWith('ticket-') ? (
                                 <button
                                   onClick={async (e) => {
@@ -444,11 +609,11 @@ export default function DashboardLayoutClient({
                                 <span className="w-2 h-2 rounded-full bg-cyan-500 mt-1 shrink-0" />
                               )}
                             </div>
-                            <div className={cn("text-xs mt-1 truncate", isDark ? "text-slate-400" : "text-slate-500")}>
+                            <div className={cn("text-xs mt-1 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
                               <span className="font-medium text-cyan-500 mr-1">{notif.type}</span>
                               {notif.name} - {notif.content}
                             </div>
-                            <div className={cn("text-[10px] mt-2", isDark ? "text-slate-500" : "text-slate-400")}>{new Date(notif.createdAt).toLocaleString()}</div>
+                            <div className={cn("text-[10px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>{new Date(notif.createdAt).toLocaleString()}</div>
                           </Link>
                         ))
                       )}
@@ -458,22 +623,148 @@ export default function DashboardLayoutClient({
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex flex-col items-end">
-                <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{userName}</span>
-                <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>{userEmail}</span>
-              </div>
-              <Link href="/dashboard/settings" className="w-10 h-10 rounded-full shrink-0 hover:scale-105 transition-transform cursor-pointer">
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center overflow-hidden border border-white/20">
-                  {userImage ? (
-                    <img referrerPolicy="no-referrer" src={userImage} alt={userName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                  ) : (
-                    <span className="text-lg font-bold text-white">
-                      {userName.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+            {/* Vertical Divider */}
+            <div className={cn("h-7 w-[1px] hidden sm:block", isDark ? "bg-white/[0.08]" : "bg-slate-200")} />
+
+            {/* 3. Interactive User Profile Pill & Quick Menu */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfileMenu(!showProfileMenu);
+                  setShowNotifications(false);
+                }}
+                className={cn(
+                  "group flex items-center gap-2.5 p-1 sm:pl-3 sm:pr-2 rounded-xl border transition-all duration-200 cursor-pointer text-left",
+                  showProfileMenu
+                    ? isDark ? "bg-white/[0.06] border-cyan-500/40" : "bg-slate-100 border-cyan-500/40"
+                    : isDark
+                      ? "bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08] hover:border-white/[0.15]"
+                      : "bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}
+              >
+                <div className="hidden sm:flex flex-col items-end leading-tight">
+                  <span className={cn("text-xs sm:text-[13px] font-bold tracking-tight truncate max-w-[150px]", isDark ? "text-white" : "text-slate-900")}>
+                    {userName}
+                  </span>
+                  <span className={cn("text-[11px] truncate max-w-[150px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    {userEmail}
+                  </span>
                 </div>
-              </Link>
+
+                <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl p-[1.5px] bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600 shrink-0 shadow-xs">
+                  <div className={cn("w-full h-full rounded-[7px] sm:rounded-[10px] flex items-center justify-center overflow-hidden", isDark ? "bg-[#0a0a0c]" : "bg-slate-900")}>
+                    {userImage ? (
+                      <img referrerPolicy="no-referrer" src={userImage} alt={userName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    ) : (
+                      <span className="text-sm font-bold text-white">
+                        {userName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={cn(
+                      "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2",
+                      isDark ? "ring-[#0a0a0c]" : "ring-white"
+                    )}
+                    title="Online"
+                  />
+                </div>
+
+                <ChevronDown
+                  className={cn(
+                    "w-3.5 h-3.5 hidden sm:block transition-transform duration-200",
+                    isDark ? "text-zinc-500 group-hover:text-zinc-300" : "text-slate-400 group-hover:text-slate-700",
+                    showProfileMenu && "rotate-180 text-cyan-400"
+                  )}
+                />
+              </button>
+
+              {showProfileMenu && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Close profile menu"
+                    className="fixed inset-0 z-40 cursor-default"
+                    onClick={() => setShowProfileMenu(false)}
+                  />
+                  <div
+                    className={cn(
+                      "absolute right-0 top-12 w-60 rounded-2xl border p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150",
+                      isDark
+                        ? "bg-[#0c0c0e] border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
+                        : "bg-white border-slate-200 shadow-xl"
+                    )}
+                  >
+                    <div className={cn("px-3 py-2.5 mb-1 border-b", isDark ? "border-white/[0.07]" : "border-slate-100")}>
+                      <div className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                        {userName}
+                      </div>
+                      <div className={cn("text-[11px] truncate mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        {userEmail}
+                      </div>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <Link
+                        href="/dashboard/settings"
+                        onClick={() => setShowProfileMenu(false)}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors",
+                          isDark ? "text-zinc-300 hover:text-white hover:bg-white/[0.05]" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                        )}
+                      >
+                        <Settings className="w-4 h-4 text-cyan-400" />
+                        Account Settings
+                      </Link>
+                      <Link
+                        href="/dashboard/billing"
+                        onClick={() => setShowProfileMenu(false)}
+                        className={cn(
+                          "flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors",
+                          isDark ? "text-zinc-300 hover:text-white hover:bg-white/[0.05]" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                        )}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Wallet className="w-4 h-4 text-cyan-400" />
+                          Billing & Wallet
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-cyan-400">
+                          {formatRupiah(userBalance || 0)}
+                        </span>
+                      </Link>
+                      <Link
+                        href="/dashboard/api-keys"
+                        onClick={() => setShowProfileMenu(false)}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors",
+                          isDark ? "text-zinc-300 hover:text-white hover:bg-white/[0.05]" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                        )}
+                      >
+                        <Key className="w-4 h-4 text-amber-400" />
+                        API Keys
+                      </Link>
+                    </div>
+
+                    <div className={cn("mt-1 pt-1 border-t", isDark ? "border-white/[0.07]" : "border-slate-100")}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          handleLogout();
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer",
+                          isDark ? "text-rose-400 hover:bg-rose-500/10" : "text-rose-600 hover:bg-rose-50"
+                        )}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
