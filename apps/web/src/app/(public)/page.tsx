@@ -32,6 +32,7 @@ import { TechStackMarquee } from "@/components/ui/TechStackMarquee";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { SectionOrnaments } from "@/components/ui/PremiumBackground";
 
 const TypeAnimation = dynamic(
   () => import("react-type-animation").then((mod) => mod.TypeAnimation),
@@ -268,7 +269,8 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 overflow-x-hidden">
 
       {/* ── 1. HERO ──────────────────────────────────────────────── */}
-      <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+      <section className="relative overflow-hidden pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        <SectionOrnaments variant="hero" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
@@ -422,8 +424,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 2. ABOUT ──────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="sides" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
             {/* Stats column */}
@@ -492,8 +495,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 3. WORKING PROCESS ──────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="diagonal" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -533,8 +537,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 3.5 PRODUCTS ────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="center" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -606,8 +611,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 4. TOOLS & TECHNOLOGIES ─────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="center-wide" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -642,8 +648,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 5. SERVICES ─────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="bottom-left" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -690,8 +697,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 6. PORTFOLIO HIGHLIGHTS ─────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 bg-slate-100/70 dark:bg-white/[0.02] border-y border-slate-200/80 dark:border-white/[0.06]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden bg-slate-100/70 dark:bg-white/[0.02] border-y border-slate-200/80 dark:border-white/[0.06]">
+        <SectionOrnaments variant="right-focus" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -785,6 +793,7 @@ export default function HomePage() {
 
       {/* ── 7. TESTIMONIALS ─────────────────────────────────────────── */}
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
@@ -867,8 +876,9 @@ export default function HomePage() {
       </section>
 
       {/* ── 8. LATEST BLOG POSTS ────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="right-focus" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -961,18 +971,17 @@ export default function HomePage() {
       </section>
 
       {/* ── 9. CTA ──────────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 lg:py-28 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="cta" />
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="relative rounded-2xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)]"
+            className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm"
           >
-            {/* Subtle top brand accent line */}
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
-
             <div className="mb-8 inline-block">
               <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
                 LET&apos;S BUILD TOGETHER

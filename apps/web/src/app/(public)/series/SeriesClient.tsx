@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
@@ -548,7 +548,8 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
 
         {/* ── 3. COMMUNITY & WORKSHOP CTA (Identik dengan Section 3 Vacancies) ── */}
         <section className="pt-8 pb-12">
-          <div className="rounded-3xl bg-gradient-to-b from-cyan-500/5 to-transparent dark:from-cyan-500/10 dark:to-transparent border border-cyan-500/20 p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden">
+          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
               CUSTOM WORKSHOPS &amp; TRAINING
             </Badge>

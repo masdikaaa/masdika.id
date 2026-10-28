@@ -163,10 +163,10 @@ export default function PaygMonitorPage() {
           </div>
         </div>
 
-        {/* Card 2: Running Burn Rate (Biaya Berjalan) */}
+        {/* Card 2: Running Burn Rate */}
         <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Biaya Berjalan</span>
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Hourly Burn Rate</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
@@ -179,10 +179,10 @@ export default function PaygMonitorPage() {
           </div>
         </div>
 
-        {/* Card 3: Biaya Total Akumulasi (Unbilled Cycle) */}
+        {/* Card 3: Total Accumulated Cost (Unbilled Cycle) */}
         <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Akumulasi</span>
+            <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Accumulated</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600")}>
               <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
@@ -390,27 +390,27 @@ export default function PaygMonitorPage() {
                 <tr>
                   <th className="py-3 px-3 sm:px-4 rounded-l-lg font-semibold w-[26%]">
                     <div>Customer</div>
-                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">klik baris untuk rincian</div>
+                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">click row for details</div>
                   </th>
                   <th className="py-3 px-3 sm:px-4 font-semibold text-right w-[15%]">
                     <div>Customer Balance</div>
-                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">sisa deposit</div>
+                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">remaining balance</div>
                   </th>
                   <th className="py-3 px-3 sm:px-4 font-semibold text-right w-[14%]">
                     <div>Hourly Rate</div>
-                    <div className="text-[9px] font-normal text-cyan-400 normal-case tracking-normal">biaya berjalan</div>
+                    <div className="text-[9px] font-normal text-cyan-400 normal-case tracking-normal">burn rate</div>
                   </th>
                   <th className="py-3 px-3 sm:px-4 font-semibold text-center w-[18%]">
                     <div>Balance Status</div>
-                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">ketahanan saldo</div>
+                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">balance runtime</div>
                   </th>
                   <th className="py-3 px-2 sm:px-3 font-semibold text-center w-[10%]">
                     <div>Services</div>
-                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">unit aktif</div>
+                    <div className="text-[9px] font-normal text-zinc-500 normal-case tracking-normal">active units</div>
                   </th>
                   <th className="py-3 px-3 sm:px-4 rounded-r-lg font-semibold text-right w-[17%]">
                     <div>Unbilled Cycle</div>
-                    <div className="text-[9px] font-normal text-emerald-400 normal-case tracking-normal">biaya akumulasi</div>
+                    <div className="text-[9px] font-normal text-emerald-400 normal-case tracking-normal">accumulated cost</div>
                   </th>
                 </tr>
               </thead>

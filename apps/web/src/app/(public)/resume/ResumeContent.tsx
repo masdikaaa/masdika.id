@@ -409,7 +409,8 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
 
         {/* ── 4. CALL TO ACTION (Identik Patokan Events) ──────────────────────── */}
         <section className="pt-16 pb-12">
-          <div className="rounded-3xl bg-gradient-to-b from-cyan-500/5 to-transparent dark:from-cyan-500/10 dark:to-transparent border border-cyan-500/20 p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden">
+          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
               CAREER &amp; COLLABORATION
             </Badge>

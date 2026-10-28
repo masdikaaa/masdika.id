@@ -28,6 +28,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { SectionOrnaments } from "@/components/ui/PremiumBackground";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -304,19 +305,12 @@ export default function RegisterPage() {
         isDark ? "text-white" : "text-slate-900"
       )}
     >
-      {/* Clean atmospheric cyan background matching frontend */}
-      <div 
+      {/* Architectural background with concentric lines, dot-grid, diamonds & crosshairs */}
+      <div
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
         style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
       >
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: isDark
-              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
-              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
-          }}
-        />
+        <SectionOrnaments variant="cta" />
       </div>
 
       {/* Main Unified Dual-Panel Card */}
@@ -514,8 +508,8 @@ export default function RegisterPage() {
                             passwordStrength.score < 2
                               ? "text-red-500"
                               : passwordStrength.score < 4
-                              ? isDark ? "text-amber-400" : "text-amber-600"
-                              : isDark ? "text-cyan-400" : "text-cyan-700"
+                                ? isDark ? "text-amber-400" : "text-amber-600"
+                                : isDark ? "text-cyan-400" : "text-cyan-700"
                           }
                         >
                           {passwordStrength.text}
@@ -531,11 +525,11 @@ export default function RegisterPage() {
                                 ? passwordStrength.score < 2
                                   ? "bg-red-500"
                                   : passwordStrength.score < 4
-                                  ? "bg-amber-500"
-                                  : "bg-cyan-500"
+                                    ? "bg-amber-500"
+                                    : "bg-cyan-500"
                                 : isDark
-                                ? "bg-white/10"
-                                : "bg-slate-200"
+                                  ? "bg-white/10"
+                                  : "bg-slate-200"
                             )}
                           />
                         ))}
@@ -842,12 +836,12 @@ export default function RegisterPage() {
                           ? "bg-cyan-500/5 border-cyan-500/20 text-cyan-400"
                           : "bg-cyan-50 border-cyan-200 text-cyan-700"
                         : otpCountdown > 0
-                        ? isDark
-                          ? "bg-amber-500/5 border-amber-500/20 text-amber-400"
-                          : "bg-amber-50 border-amber-200 text-amber-600"
-                        : isDark
-                        ? "bg-red-500/5 border-red-500/20 text-red-400"
-                        : "bg-red-50 border-red-200 text-red-600"
+                          ? isDark
+                            ? "bg-amber-500/5 border-amber-500/20 text-amber-400"
+                            : "bg-amber-50 border-amber-200 text-amber-600"
+                          : isDark
+                            ? "bg-red-500/5 border-red-500/20 text-red-400"
+                            : "bg-red-50 border-red-200 text-red-600"
                     )}
                   >
                     <Timer className="w-4 h-4" />
@@ -899,8 +893,8 @@ export default function RegisterPage() {
                     {isResendingOtp
                       ? "Sending..."
                       : resendCountdown > 0
-                      ? `Resend Code in ${resendCountdown}s`
-                      : "Resend Verification Code"}
+                        ? `Resend Code in ${resendCountdown}s`
+                        : "Resend Verification Code"}
                   </button>
                 </motion.form>
               )}
@@ -922,35 +916,8 @@ export default function RegisterPage() {
               : "bg-gradient-to-br from-cyan-50/70 via-sky-50/40 to-slate-50/80 border-l border-slate-200/80"
           )}
         >
-          {/* Ambient Glows */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/15 rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
-
-          {/* Floating Decorative Circles */}
-          <motion.div
-            animate={{ y: [0, -12, 0], x: [0, 4, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className={cn(
-              "absolute top-10 left-8 w-9 h-9 rounded-full pointer-events-none",
-              isDark ? "bg-cyan-500/10 border border-cyan-400/20" : "bg-cyan-200/50"
-            )}
-          />
-          <motion.div
-            animate={{ y: [0, 10, 0], x: [0, -6, 0] }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className={cn(
-              "absolute top-1/3 right-8 w-14 h-14 rounded-full pointer-events-none",
-              isDark ? "bg-cyan-500/10 border border-cyan-400/20" : "bg-cyan-200/40"
-            )}
-          />
-          <motion.div
-            animate={{ y: [0, -8, 0], x: [0, 5, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className={cn(
-              "absolute bottom-20 left-10 w-6 h-6 rounded-full pointer-events-none",
-              isDark ? "bg-cyan-400/15" : "bg-cyan-300/45"
-            )}
-          />
+          {/* Architectural Panel Ornaments (Concentric Lines, Diamonds, Dot Matrices, Crosshairs) */}
+          <SectionOrnaments variant="panel" />
 
           {/* Top Showcase Header */}
           <div className="relative z-10 text-center pt-2">

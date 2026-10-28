@@ -1,105 +1,564 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
+export type OrnamentVariant =
+  | "hero"
+  | "sides"
+  | "diagonal"
+  | "center"
+  | "center-wide"
+  | "bottom-left"
+  | "right-focus"
+  | "cta"
+  | "panel";
+
+const DOT_COORDS = [
+  [2, 2],
+  [14, 2],
+  [26, 2],
+  [38, 2],
+  [2, 14],
+  [14, 14],
+  [26, 14],
+  [38, 14],
+  [2, 26],
+  [14, 26],
+  [26, 26],
+  [38, 26],
+] as const;
+
+function DotGridPattern({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 select-none opacity-35 dark:opacity-20",
+        className
+      )}
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(100, 116, 139, 0.4) 1.2px, transparent 1.2px)",
+        backgroundSize: "28px 28px",
+      }}
+    />
+  );
+}
+
+function DiamondOrnament({
+  size = 20,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute select-none flex items-center justify-center",
+        className
+      )}
+      style={{ width: `${size}px`, height: `${size}px` }}
+    >
+      <div className="w-full h-full bg-cyan-500 dark:bg-cyan-400 rounded-[5px] rotate-45 shadow-md shadow-cyan-500/35 dark:shadow-cyan-400/30" />
+    </div>
+  );
+}
+
+function DotMatrixOrnament({
+  tone = "slate",
+  className,
+}: {
+  tone?: "slate" | "accent";
+  className?: string;
+}) {
+  const fill = tone === "accent" ? "#06B6D4" : "#64748B";
+  const fillOpacity = tone === "accent" ? 0.75 : 0.45;
+
+  return (
+    <div
+      aria-hidden="true"
+      className={cn("pointer-events-none absolute select-none", className)}
+      style={{ width: "40px", height: "28px" }}
+    >
+      <svg width="40" height="28" viewBox="0 0 40 28" fill="none">
+        {DOT_COORDS.map(([cx, cy], idx) => (
+          <circle
+            key={idx}
+            cx={cx}
+            cy={cy}
+            r="2"
+            fill={fill}
+            fillOpacity={fillOpacity}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function PlusOrnament({
+  tone = "accent",
+  className,
+}: {
+  tone?: "slate" | "accent";
+  className?: string;
+}) {
+  const stroke = tone === "accent" ? "#06B6D4" : "#64748B";
+
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute select-none flex items-center justify-center",
+        className
+      )}
+      style={{ width: "16px", height: "16px" }}
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M8 2V14M2 8H14"
+          stroke={stroke}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeOpacity="0.65"
+        />
+      </svg>
+    </div>
+  );
+}
+
+const RING_NEUTRAL_DASHED =
+  "rounded-full border border-dashed border-neutral-300/80 dark:border-zinc-700/60";
+const RING_NEUTRAL_SOLID =
+  "rounded-full border border-neutral-200/90 dark:border-zinc-800/80";
+const RING_ACCENT_SOLID =
+  "rounded-full border border-cyan-500/30 dark:border-cyan-400/25";
+const RING_ACCENT_DASHED =
+  "rounded-full border border-dashed border-cyan-500/30 dark:border-cyan-400/25";
+
 /**
- * Atmospheric background using pure radial-gradient overlays and
- * subtle architectural grid lines matching the VELIXS dark mode aesthetic.
- * Clean, high-contrast, zero-cyan atmospheric depth with near-zero GPU overhead.
+ * Architectural section background ornaments inspired by SMK Telkom Malang:
+ * - Subtle 28x28 radial dot-grid
+ * - Concentric dashed neutral & solid accent circular lines
+ * - Rotated rounded-square diamond badges
+ * - 4x3 dot matrix clusters (slate & accent)
+ * - Crosshair plus (+) markers
+ */
+export function SectionOrnaments({
+  variant = "sides",
+  withDotGrid = true,
+  className,
+}: {
+  variant?: OrnamentVariant;
+  withDotGrid?: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 select-none z-0 overflow-hidden",
+        className
+      )}
+    >
+      {withDotGrid && <DotGridPattern />}
+
+      {variant === "hero" && (
+        <>
+          <div
+            className={cn(
+              "absolute -top-[12%] left-[10%] w-[960px] h-[960px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[16%] -right-[8%] w-[720px] h-[720px]",
+              RING_ACCENT_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[28%] -right-[4%] w-[520px] h-[520px]",
+              RING_NEUTRAL_SOLID
+            )}
+          />
+          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
+          <DiamondOrnament
+            size={14}
+            className="top-24 left-1/4 hidden md:flex"
+          />
+          <DiamondOrnament size={18} className="top-12 right-10 sm:right-24" />
+          <DiamondOrnament size={16} className="bottom-24 left-10 sm:left-24" />
+          <DiamondOrnament
+            size={20}
+            className="bottom-14 right-12 sm:right-28"
+          />
+          <DotMatrixOrnament
+            tone="slate"
+            className="bottom-28 left-14 sm:left-32"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-20 right-14 sm:right-36"
+          />
+          <PlusOrnament tone="accent" className="top-6 left-1/3" />
+          <PlusOrnament tone="slate" className="bottom-8 right-1/3" />
+        </>
+      )}
+
+      {variant === "sides" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-1/2 -left-[260px] -translate-y-1/2 w-[760px] h-[760px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -left-[180px] -translate-y-1/2 w-[580px] h-[580px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[260px] -translate-y-1/2 w-[760px] h-[760px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[180px] -translate-y-1/2 w-[580px] h-[580px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <DiamondOrnament size={20} className="top-10 left-6 sm:left-16" />
+          <DiamondOrnament
+            size={14}
+            className="top-12 left-1/3 hidden lg:flex"
+          />
+          <DiamondOrnament size={20} className="top-10 right-6 sm:right-16" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-20" />
+          <DiamondOrnament size={18} className="bottom-10 right-8 sm:right-20" />
+          <DotMatrixOrnament
+            tone="slate"
+            className="bottom-16 left-12 sm:left-28"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-16 right-12 sm:right-28"
+          />
+          <PlusOrnament tone="accent" className="top-20 left-1/4" />
+          <PlusOrnament tone="slate" className="top-20 right-1/4" />
+        </>
+      )}
+
+      {variant === "diagonal" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-[4%] right-[-160px] w-[820px] h-[820px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[8%] right-[-80px] w-[620px] h-[620px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[40%] left-[-180px] w-[860px] h-[860px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[44%] left-[-100px] w-[660px] h-[660px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <DiamondOrnament size={22} className="top-12 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="top-[18%] left-6 sm:left-16" />
+          <DiamondOrnament size={18} className="top-[45%] right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="top-[54%] left-6 sm:left-16" />
+          <DiamondOrnament
+            size={20}
+            className="bottom-20 right-8 sm:right-20"
+          />
+          <DiamondOrnament size={14} className="bottom-28 left-8 sm:left-20" />
+          <DotMatrixOrnament
+            tone="slate"
+            className="top-[24%] left-8 sm:left-24"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="top-[58%] left-8 sm:left-24"
+          />
+          <PlusOrnament tone="accent" className="top-[35%] right-1/4" />
+          <PlusOrnament tone="slate" className="top-[70%] left-1/4" />
+        </>
+      )}
+
+      {variant === "center" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] sm:w-[1300px] h-[900px] sm:h-[1300px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1050px] h-[700px] sm:h-[1050px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
+          <DiamondOrnament size={18} className="top-8 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-8 left-10 sm:left-24" />
+          <DiamondOrnament size={18} className="bottom-8 right-10 sm:right-24" />
+          <DotMatrixOrnament
+            tone="slate"
+            className="bottom-12 right-14 sm:right-32"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-12 left-14 sm:left-32"
+          />
+        </>
+      )}
+
+      {variant === "center-wide" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1050px] sm:w-[1450px] h-[1050px] sm:h-[1450px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[1100px] h-[750px] sm:h-[1100px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <DiamondOrnament size={22} className="top-12 left-8 sm:left-20" />
+          <DiamondOrnament size={20} className="top-12 right-8 sm:right-20" />
+          <DiamondOrnament
+            size={14}
+            className="top-6 left-1/3 hidden lg:flex"
+          />
+          <DiamondOrnament size={16} className="bottom-12 left-10 sm:left-24" />
+          <DiamondOrnament
+            size={18}
+            className="bottom-12 right-10 sm:right-24"
+          />
+          <DotMatrixOrnament
+            tone="slate"
+            className="bottom-16 left-14 sm:left-32"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-16 right-14 sm:right-32"
+          />
+          <PlusOrnament tone="accent" className="top-8 left-1/4" />
+          <PlusOrnament tone="slate" className="top-8 right-1/4" />
+        </>
+      )}
+
+      {variant === "bottom-left" && (
+        <>
+          <div
+            className={cn(
+              "absolute -bottom-[80px] left-[6%] w-[800px] h-[800px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute -bottom-[20px] left-[10%] w-[620px] h-[620px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[6%] right-[-8%] w-[620px] h-[620px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <DiamondOrnament size={22} className="top-10 left-6 sm:left-14" />
+          <DiamondOrnament size={18} className="top-10 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-16" />
+          <DiamondOrnament size={20} className="bottom-10 right-8 sm:right-20" />
+          <DotMatrixOrnament
+            tone="slate"
+            className="bottom-14 left-10 sm:left-20"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-14 right-12 sm:right-24"
+          />
+          <PlusOrnament tone="accent" className="top-6 right-1/3" />
+        </>
+      )}
+
+      {variant === "right-focus" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[220px] -translate-y-1/2 w-[800px] h-[800px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[140px] -translate-y-1/2 w-[620px] h-[620px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/4 -left-[200px] w-[680px] h-[680px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <DiamondOrnament size={20} className="top-10 left-8 sm:left-18" />
+          <DiamondOrnament size={20} className="top-10 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-12 left-8 sm:left-18" />
+          <DiamondOrnament size={18} className="bottom-12 right-8 sm:right-20" />
+          <DotMatrixOrnament
+            tone="slate"
+            className="top-18 left-10 sm:left-22"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-16 right-10 sm:right-24"
+          />
+          <PlusOrnament tone="accent" className="top-8 left-1/3" />
+        </>
+      )}
+
+      {variant === "cta" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] sm:w-[1500px] h-[1100px] sm:h-[1500px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] sm:w-[1150px] h-[800px] sm:h-[1150px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <DiamondOrnament size={22} className="top-12 left-10 sm:left-20" />
+          <DiamondOrnament size={22} className="top-12 right-10 sm:right-20" />
+          <DiamondOrnament
+            size={16}
+            className="top-24 left-1/3 hidden lg:flex"
+          />
+          <DiamondOrnament
+            size={16}
+            className="top-24 right-1/3 hidden lg:flex"
+          />
+          <DiamondOrnament
+            size={18}
+            className="bottom-16 left-10 sm:left-20"
+          />
+          <DiamondOrnament
+            size={18}
+            className="bottom-16 right-10 sm:right-20"
+          />
+          <DotMatrixOrnament
+            tone="slate"
+            className="bottom-24 left-12 sm:left-24"
+          />
+          <DotMatrixOrnament
+            tone="accent"
+            className="bottom-24 right-12 sm:right-24"
+          />
+          <PlusOrnament tone="accent" className="top-6 left-1/3" />
+          <PlusOrnament tone="slate" className="top-6 right-1/3" />
+        </>
+      )}
+
+      {variant === "panel" && (
+        <>
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[460px] h-[460px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[330px] h-[330px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <DiamondOrnament size={16} className="top-10 left-7" />
+          <DiamondOrnament size={16} className="top-12 right-7" />
+          <DiamondOrnament size={14} className="bottom-20 left-8" />
+          <DiamondOrnament size={15} className="bottom-20 right-8" />
+          <DotMatrixOrnament tone="slate" className="top-28 left-6" />
+          <DotMatrixOrnament tone="accent" className="bottom-28 right-6" />
+          <PlusOrnament tone="accent" className="top-24 right-12" />
+          <PlusOrnament tone="slate" className="bottom-32 left-12" />
+        </>
+      )}
+    </div>
+  );
+}
+
+const PAGE_ORNAMENT_BANDS: OrnamentVariant[] = [
+  "hero",
+  "sides",
+  "diagonal",
+  "center-wide",
+  "right-focus",
+  "bottom-left",
+  "cta",
+];
+
+/**
+ * Scrolling page-level architectural ornaments for subpages.
+ * Rendered as an `absolute inset-0` layer inside the scrolling page container
+ * so the dot-grid, circular lines, diamonds, and dot matrices scroll naturally
+ * with the page (just like the Home page) rather than staying fixed on screen.
+ */
+export function PageOrnaments() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 top-24 md:top-32 bottom-0 overflow-hidden select-none z-0"
+    >
+      <DotGridPattern />
+      <div className="flex flex-col w-full">
+        {PAGE_ORNAMENT_BANDS.map((variant, idx) => (
+          <div key={idx} className="relative w-full h-[850px] shrink-0">
+            <SectionOrnaments variant={variant} withDotGrid={false} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Base canvas background.
+ * Kept purely solid so no rings or dots stay frozen (`fixed`) in the viewport when scrolling.
  */
 export function PremiumBackground() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#f8fafd] dark:bg-[#000000] transition-colors duration-700"
-    >
-
-
-      {/* ── LIGHT MODE GRADIENT SYSTEM (Pure Unified Brand Cyan & Sky) ─── */}
-      <div className="absolute inset-0 pointer-events-none transition-opacity duration-700 opacity-100 dark:opacity-0">
-        {/* Soft, clean Cyan aura on hero / top-right */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 65% 55% at 80% 12%, rgba(6,182,212,0.14) 0%, rgba(6,182,212,0.04) 45%, transparent 70%)",
-          }}
-        />
-
-        {/* Hero Center-Right Aura: Cyan blur behind avatar */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 50% at 72% 38%, rgba(6,182,212,0.12) 0%, transparent 68%)",
-          }}
-        />
-
-        {/* Secondary Ambient Aura: Middle-Left depth behind headline */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 45% at 15% 35%, rgba(6,182,212,0.10) 0%, transparent 65%)",
-          }}
-        />
-
-        {/* Tertiary Soft Horizon Glow: Lower Page Bloom */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 65% 50% at 80% 75%, rgba(6,182,212,0.06) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Top Organic Light Wash Overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(6,182,212,0.06),transparent)]"
-        />
-      </div>
-
-      {/* ── DARK MODE GRADIENT SYSTEM (Identik Konsisten dengan Light Mode) ─── */}
-      <div className="absolute inset-0 pointer-events-none transition-opacity duration-700 opacity-0 dark:opacity-100">
-        {/* Primary Ambient Aura: Top-Right Cyan Glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.06) 45%, transparent 75%)",
-          }}
-        />
-
-        {/* Hero Center-Right Aura: Cyan blur behind avatar */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 50% at 72% 38%, rgba(6,182,212,0.16) 0%, transparent 68%)",
-          }}
-        />
-
-        {/* Secondary Ambient Aura: Middle-Left depth behind headline */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 45% at 15% 35%, rgba(6,182,212,0.12) 0%, transparent 65%)",
-          }}
-        />
-
-        {/* Tertiary Soft Horizon Glow: Lower Page Bloom */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 65% 50% at 80% 75%, rgba(6,182,212,0.08) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Top Organic Light Wash Overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,rgba(6,182,212,0.09),transparent)]"
-        />
-      </div>
-    </div>
+      className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700"
+    />
   );
 }

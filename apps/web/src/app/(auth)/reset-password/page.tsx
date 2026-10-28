@@ -10,13 +10,14 @@ import { Suspense } from "react";
 
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { SectionOrnaments } from "@/components/ui/PremiumBackground";
 
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -75,22 +76,15 @@ function ResetPasswordForm() {
 
   return (
     <div className={cn("min-h-screen w-full flex overflow-hidden items-center justify-center p-4 relative font-sans selection:bg-cyan-500/30", isDark ? "text-white" : "text-slate-900")}>
-      {/* Clean atmospheric cyan background matching frontend */}
-      <div 
+      {/* Architectural background with concentric lines, dot-grid, diamonds & crosshairs */}
+      <div
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
         style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
       >
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: isDark
-              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
-              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
-          }}
-        />
+        <SectionOrnaments variant="cta" />
       </div>
       <div className="w-full max-w-md relative z-10">
-        
+
         {/* Logo */}
         <Link href="/" className="flex items-center group w-fit mb-6">
           <img

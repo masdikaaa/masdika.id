@@ -700,95 +700,101 @@ export default function VpcDashboardPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mb-6">
-              <AnimatePresence>
-                {selectedVpcs.length > 0 && (
-                  <>
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      onClick={handleBulkDetachAllFromVpcs}
-                      disabled={deleting}
-                      className={cn("border px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50", isDark ? "bg-zinc-500/10 border-zinc-500/20 hover:bg-zinc-500/20 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700 hover:text-slate-900")}
-                    >
-                      {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unplug className="w-4 h-4" />}
-                      Detach All VMs
-                    </motion.button>
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      onClick={() => setShowDeleteVpcModal('bulk')}
-                      disabled={deleting}
-                      className={cn("border hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50", isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-700 border-red-200")}
-                    >
-                      {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                      Delete Selected ({selectedVpcs.length})
-                    </motion.button>
-                  </>
-                )}
-              </AnimatePresence>
-              <button
-                onClick={() => setShowAddVpcModal(true)}
-                className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Create VPC
-              </button>
-            </div>
+            {loadingVpcs ? (
+              <div className={cn("py-16 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
+                <p className="text-sm">Loading VPCs...</p>
+              </div>
+            ) : vpcs.length === 0 ? (
+              <div className="py-8 sm:py-12 text-center">
+                <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-cyan-500/20 transform -rotate-6">
+                  <VpcIcon className="w-12 h-12 text-cyan-400 transform rotate-6" />
+                </div>
+                <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPCs Provisioned</h4>
+                <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Create your first Virtual Private Cloud to isolate your instances securely.
+                </p>
+                <button
+                  onClick={() => setShowAddVpcModal(true)}
+                  className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Your First VPC
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-end gap-2 mb-6">
+                  <AnimatePresence>
+                    {selectedVpcs.length > 0 && (
+                      <>
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          onClick={handleBulkDetachAllFromVpcs}
+                          disabled={deleting}
+                          className={cn("border px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50", isDark ? "bg-zinc-500/10 border-zinc-500/20 hover:bg-zinc-500/20 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700 hover:text-slate-900")}
+                        >
+                          {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unplug className="w-4 h-4" />}
+                          Detach All VMs
+                        </motion.button>
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          onClick={() => setShowDeleteVpcModal('bulk')}
+                          disabled={deleting}
+                          className={cn("border hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50", isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-700 border-red-200")}
+                        >
+                          {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                          Delete Selected ({selectedVpcs.length})
+                        </motion.button>
+                      </>
+                    )}
+                  </AnimatePresence>
+                  <button
+                    onClick={() => setShowAddVpcModal(true)}
+                    className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create VPC
+                  </button>
+                </div>
 
-            <div className="overflow-x-auto pb-4">
-              <table className="w-full text-left whitespace-nowrap">
-                <thead className={cn("text-sm", isDark ? "bg-[#1f3e5a]/50 text-zinc-300" : "bg-slate-50 text-slate-900 font-bold")}>
-                  <tr>
-                    <th className="px-6 py-4 font-bold w-12">
-                      <button
-                        onClick={handleSelectAllVisibleVpcs}
-                        className={cn(
-                          "w-5 h-5 rounded-md flex items-center justify-center transition-all",
-                          isAllVisibleVpcsSelected
-                            ? "bg-cyan-400"
-                            : isDark ? "bg-black/40 border border-white/10 hover:border-cyan-400/50" : "bg-white border border-slate-300 hover:border-cyan-400"
-                        )}
-                      >
-                        <CheckCircle className={cn("w-3.5 h-3.5", isAllVisibleVpcsSelected ? "text-[#0f172a]" : "text-transparent")} />
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 font-bold">Name</th>
-                    <th className="px-6 py-4 font-bold">NAT Gateway</th>
-                    <th className="px-6 py-4 font-bold">CIDR</th>
-                    <th className="px-6 py-4 font-bold">Gateway</th>
-                    <th className="px-6 py-4 font-bold">Resources</th>
-                    <th className="px-6 py-4 font-bold">Status</th>
-                    <th className="px-6 py-4 font-bold">Description</th>
-                    <th className="px-6 py-4 font-bold">
-                      <div className="flex justify-end">
-                        <span className="w-28 text-left pl-2">Actions</span>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1f3e5a]/50 text-sm">
-                  {loadingVpcs ? (
-                    <tr>
-                      <td colSpan={9} className={cn("px-6 py-12 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                        Loading VPCs...
-                      </td>
-                    </tr>
-                  ) : visibleVpcs.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="px-6 py-12 text-center">
-                        <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20 transform -rotate-6">
-                          <VpcIcon className="w-12 h-12 text-cyan-400 transform rotate-6" />
-                        </div>
-                        <h4 className={cn("text-lg font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPCs Provisioned</h4>
-                        <p className={cn("text-sm max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>Create your first Virtual Private Cloud to isolate your instances securely.</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    visibleVpcs.map(vpc => (
+                <div className="overflow-x-auto pb-4">
+                  <table className="w-full text-left whitespace-nowrap">
+                    <thead className={cn("text-sm", isDark ? "bg-[#1f3e5a]/50 text-zinc-300" : "bg-slate-50 text-slate-900 font-bold")}>
+                      <tr>
+                        <th className="px-6 py-4 font-bold w-12">
+                          <button
+                            onClick={handleSelectAllVisibleVpcs}
+                            className={cn(
+                              "w-5 h-5 rounded-md flex items-center justify-center transition-all",
+                              isAllVisibleVpcsSelected
+                                ? "bg-cyan-400"
+                                : isDark ? "bg-black/40 border border-white/10 hover:border-cyan-400/50" : "bg-white border border-slate-300 hover:border-cyan-400"
+                            )}
+                          >
+                            <CheckCircle className={cn("w-3.5 h-3.5", isAllVisibleVpcsSelected ? "text-[#0f172a]" : "text-transparent")} />
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 font-bold">Name</th>
+                        <th className="px-6 py-4 font-bold">NAT Gateway</th>
+                        <th className="px-6 py-4 font-bold">CIDR</th>
+                        <th className="px-6 py-4 font-bold">Gateway</th>
+                        <th className="px-6 py-4 font-bold">Resources</th>
+                        <th className="px-6 py-4 font-bold">Status</th>
+                        <th className="px-6 py-4 font-bold">Description</th>
+                        <th className="px-6 py-4 font-bold">
+                          <div className="flex justify-end">
+                            <span className="w-28 text-left pl-2">Actions</span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1f3e5a]/50 text-sm">
+                      {visibleVpcs.map(vpc => (
                       <tr key={vpc.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
                         <td className="px-6 py-4">
                           <button
@@ -914,104 +920,111 @@ export default function VpcDashboardPage() {
                           </div>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-              {totalVpcsPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  <button onClick={() => setVpcsPage(p => Math.max(1, p - 1))} disabled={vpcsPage === 1} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Prev</button>
-                  <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Page {vpcsPage} / {totalVpcsPages}</span>
-                  <button onClick={() => setVpcsPage(p => Math.min(totalVpcsPages, p + 1))} disabled={vpcsPage === totalVpcsPages} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Next</button>
-                </div>
-              )}
+                    ))}
+                  </tbody>
+                </table>
+                {totalVpcsPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <button onClick={() => setVpcsPage(p => Math.max(1, p - 1))} disabled={vpcsPage === 1} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Prev</button>
+                    <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Page {vpcsPage} / {totalVpcsPages}</span>
+                    <button onClick={() => setVpcsPage(p => Math.min(totalVpcsPages, p + 1))} disabled={vpcsPage === totalVpcsPages} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Next</button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === "peering" && (
+        <div className="p-6">
+          <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+            <div className="space-y-1 flex-1 min-w-0">
+              <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>About VPC Peering:</p>
+              <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
             </div>
           </div>
-        )}
 
-        {activeTab === "peering" && (
-          <div className="p-6">
-            <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-              <div className="space-y-1 flex-1 min-w-0">
-                <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>About VPC Peering:</p>
-                <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
-              </div>
+          {loadingPeerings ? (
+            <div className={cn("py-16 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
+              <p className="text-sm">Loading Peerings...</p>
             </div>
-
-            <div className="flex justify-end gap-2 mb-6">
-              <AnimatePresence>
-                {selectedPeerings.length > 0 && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    onClick={() => setShowDeletePeeringModal('bulk')}
-                    disabled={deleting}
-                    className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-                  >
-                    {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    Delete Selected ({selectedPeerings.length})
-                  </motion.button>
-                )}
-              </AnimatePresence>
+          ) : peerings.length === 0 ? (
+            <div className="py-8 sm:py-12 text-center">
+              <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-cyan-500/20 transform -rotate-6">
+                <Link2 className="w-10 h-10 text-cyan-400 transform rotate-6" />
+              </div>
+              <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPC Peerings</h4>
+              <p className={cn("text-sm max-w-md mx-auto mb-8 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Connect two VPCs to route traffic between them using private IP addresses.
+              </p>
               <button
                 onClick={() => setShowAddPeeringModal(true)}
-                className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
+                className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm transition-all shadow-sm inline-flex items-center justify-center gap-2"
               >
                 <Link2 className="w-4 h-4" />
-                Create Peering
+                Create Your First Peering
               </button>
             </div>
+          ) : (
+            <>
+              <div className="flex justify-end gap-2 mb-6">
+                <AnimatePresence>
+                  {selectedPeerings.length > 0 && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      onClick={() => setShowDeletePeeringModal('bulk')}
+                      disabled={deleting}
+                      className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                    >
+                      {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      Delete Selected ({selectedPeerings.length})
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={() => setShowAddPeeringModal(true)}
+                  className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
+                >
+                  <Link2 className="w-4 h-4" />
+                  Create Peering
+                </button>
+              </div>
 
-            <div className="overflow-x-auto pb-4">
-              <table className="w-full text-left whitespace-nowrap">
-                <thead className={cn("text-sm", isDark ? "bg-[#1f3e5a]/50 text-zinc-300" : "bg-slate-50 text-slate-900 font-bold")}>
-                  <tr>
-                    <th className="px-6 py-4 font-bold w-12">
-                      <button
-                        onClick={handleSelectAllVisiblePeerings}
-                        className={cn(
-                          "w-5 h-5 rounded-md flex items-center justify-center transition-all",
-                          isAllVisiblePeeringsSelected
-                            ? "bg-cyan-400"
-                            : isDark ? "bg-black/40 border border-white/10 hover:border-cyan-400/50" : "bg-white border border-slate-300 hover:border-cyan-400"
-                        )}
-                      >
-                        <CheckCircle className={cn("w-3.5 h-3.5", isAllVisiblePeeringsSelected ? "text-[#0f172a]" : "text-transparent")} />
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 font-bold">VPC A</th>
-                    <th className="px-6 py-4 font-bold">VPC B</th>
-                    <th className="px-6 py-4 font-bold">Status</th>
-                    <th className="px-6 py-4 font-bold hidden md:table-cell">Description</th>
-                    <th className="px-6 py-4 font-bold">
-                      <div className="flex justify-end">
-                        <span className="w-28 text-left pl-2">Actions</span>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1f3e5a]/50 text-sm">
-                  {loadingPeerings ? (
+              <div className="overflow-x-auto pb-4">
+                <table className="w-full text-left whitespace-nowrap">
+                  <thead className={cn("text-sm", isDark ? "bg-[#1f3e5a]/50 text-zinc-300" : "bg-slate-50 text-slate-900 font-bold")}>
                     <tr>
-                      <td colSpan={6} className={cn("px-6 py-12 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                        Loading Peerings...
-                      </td>
-                    </tr>
-                  ) : visiblePeerings.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center">
-                        <div className="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-cyan-500/20 transform -rotate-6">
-                          <Link2 className="w-10 h-10 text-cyan-400 transform rotate-6" />
+                      <th className="px-6 py-4 font-bold w-12">
+                        <button
+                          onClick={handleSelectAllVisiblePeerings}
+                          className={cn(
+                            "w-5 h-5 rounded-md flex items-center justify-center transition-all",
+                            isAllVisiblePeeringsSelected
+                              ? "bg-cyan-400"
+                              : isDark ? "bg-black/40 border border-white/10 hover:border-cyan-400/50" : "bg-white border border-slate-300 hover:border-cyan-400"
+                          )}
+                        >
+                          <CheckCircle className={cn("w-3.5 h-3.5", isAllVisiblePeeringsSelected ? "text-[#0f172a]" : "text-transparent")} />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 font-bold">VPC A</th>
+                      <th className="px-6 py-4 font-bold">VPC B</th>
+                      <th className="px-6 py-4 font-bold">Status</th>
+                      <th className="px-6 py-4 font-bold hidden md:table-cell">Description</th>
+                      <th className="px-6 py-4 font-bold">
+                        <div className="flex justify-end">
+                          <span className="w-28 text-left pl-2">Actions</span>
                         </div>
-                        <h4 className={cn("text-lg font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPC Peerings</h4>
-                        <p className={cn("text-sm max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>Connect two VPCs to route traffic between them using private IP addresses.</p>
-                      </td>
+                      </th>
                     </tr>
-                  ) : (
-                    visiblePeerings.map(peering => (
+                  </thead>
+                  <tbody className="divide-y divide-[#1f3e5a]/50 text-sm">
+                    {visiblePeerings.map(peering => (
                       <tr key={peering.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
                         <td className="px-6 py-4">
                           <button
@@ -1065,20 +1078,21 @@ export default function VpcDashboardPage() {
                           </div>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-              {totalPeeringsPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6 mb-2">
-                  <button onClick={() => setPeeringsPage(p => Math.max(1, p - 1))} disabled={peeringsPage === 1} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Prev</button>
-                  <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Page {peeringsPage} / {totalPeeringsPages}</span>
-                  <button onClick={() => setPeeringsPage(p => Math.min(totalPeeringsPages, p + 1))} disabled={peeringsPage === totalPeeringsPages} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Next</button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                    ))}
+                  </tbody>
+                </table>
+                {totalPeeringsPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6 mb-2">
+                    <button onClick={() => setPeeringsPage(p => Math.max(1, p - 1))} disabled={peeringsPage === 1} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Prev</button>
+                    <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Page {peeringsPage} / {totalPeeringsPages}</span>
+                    <button onClick={() => setPeeringsPage(p => Math.min(totalPeeringsPages, p + 1))} disabled={peeringsPage === totalPeeringsPages} className={cn("px-3 py-1 bg-white/5 border rounded-md disabled:opacity-50", isDark ? "border-white/10" : "border-slate-200")}>Next</button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
       </motion.div>
 
       {/* Create VPC Modal */}

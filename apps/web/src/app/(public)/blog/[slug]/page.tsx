@@ -470,7 +470,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recentPosts.length === 0 ? (
-              <div className={cn("col-span-1 md:col-span-2 flex flex-col items-center justify-center py-16 px-4 text-center border rounded-3xl relative overflow-hidden group", isDark ? "bg-gradient-to-b from-[#0a1f33]/30 to-transparent border-white/5" : "bg-white border-black/5 shadow-sm")}>
+              <div className={cn("col-span-1 md:col-span-2 flex flex-col items-center justify-center py-16 px-4 text-center border rounded-3xl relative overflow-hidden group", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5 shadow-sm")}>
                 <div className={cn("w-16 h-16 mb-4 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-500", isDark ? "bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20" : "bg-cyan-50 text-cyan-600 group-hover:bg-cyan-100")}>
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />

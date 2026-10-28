@@ -11,6 +11,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { SectionOrnaments } from "@/components/ui/PremiumBackground";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function LoginPage() {
         setPassword(data.password);
         setRememberMe(data.rememberMe);
         setShow2FA(true);
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -111,19 +112,12 @@ export default function LoginPage() {
         isDark ? "text-white" : "text-slate-900"
       )}
     >
-      {/* Clean atmospheric cyan background matching frontend */}
-      <div 
+      {/* Architectural background with concentric lines, dot-grid, diamonds & crosshairs */}
+      <div
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 transition-colors duration-500"
         style={{ backgroundColor: isDark ? "#000000" : "#f8fafb" }}
       >
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: isDark
-              ? "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
-              : "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.06) 0%, transparent 65%)",
-          }}
-        />
+        <SectionOrnaments variant="cta" />
       </div>
 
       {/* Main Unified Dual-Panel Card */}
@@ -433,35 +427,8 @@ export default function LoginPage() {
               : "bg-gradient-to-br from-slate-50 via-cyan-50/25 to-slate-100/60 border-l border-slate-200/80"
           )}
         >
-          {/* Ambient Glows */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/15 rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
-
-          {/* Floating Decorative Circles (As seen in Reference Image 1) */}
-          <motion.div
-            animate={{ y: [0, -12, 0], x: [0, 4, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className={cn(
-              "absolute top-12 left-10 w-9 h-9 rounded-full pointer-events-none",
-              isDark ? "bg-cyan-500/10 border border-cyan-400/20" : "bg-cyan-200/50"
-            )}
-          />
-          <motion.div
-            animate={{ y: [0, 10, 0], x: [0, -6, 0] }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className={cn(
-              "absolute top-1/3 right-10 w-14 h-14 rounded-full pointer-events-none",
-              isDark ? "bg-blue-500/10 border border-blue-400/20" : "bg-blue-200/40"
-            )}
-          />
-          <motion.div
-            animate={{ y: [0, -8, 0], x: [0, 5, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className={cn(
-              "absolute bottom-24 left-12 w-6 h-6 rounded-full pointer-events-none",
-              isDark ? "bg-cyan-400/15" : "bg-cyan-300/45"
-            )}
-          />
+          {/* Architectural Panel Ornaments (Concentric Lines, Diamonds, Dot Matrices, Crosshairs) */}
+          <SectionOrnaments variant="panel" />
 
           {/* Top Showcase Header */}
           <div className="relative z-10 text-center pt-2">

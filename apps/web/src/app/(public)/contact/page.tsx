@@ -425,8 +425,8 @@ export default function ContactPage() {
                 <div className={cn(
                   "rounded-3xl p-6 sm:p-8 relative overflow-hidden border transition-all duration-300",
                   isDark
-                    ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] shadow-xl"
-                    : "bg-slate-50/80 border-slate-200"
+                    ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-xl"
+                    : "bg-[var(--surface)] border-slate-200 shadow-sm"
                 )}>
                   <div className="mb-6">
                     <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1.5 flex items-center gap-2">
