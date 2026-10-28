@@ -21,6 +21,7 @@ import {
   Calendar,
   Clock,
   Link2,
+  Building2,
 } from "lucide-react";
 import {
   SiKubernetes,
@@ -39,6 +40,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { TechStackMarquee } from "@/components/ui/TechStackMarquee";
+import { TechIcon } from "@/components/ui/TechIcon";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -706,34 +708,29 @@ export default function HomePage() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
           >
             {INFRASTRUCTURE_STACK.map((infra, idx) => (
               <motion.div variants={item} key={infra.name + idx} className="h-full">
-                <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-4 sm:p-6 flex flex-col">
+                <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 flex flex-col">
                   {/* Top row: Icon box + Category badge */}
-                  <div className="flex items-start justify-between gap-2 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
-                      <infra.icon className={cn("w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} />
+                  <div className="flex items-start justify-between gap-3 mb-5">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
+                      <infra.icon className={cn("w-6 h-6 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} />
                     </div>
-                    <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                       {infra.category}
                     </span>
                   </div>
 
-                  {/* Mobile category label */}
-                  <span className="sm:hidden text-[10px] font-mono font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-1">
-                    {infra.category}
-                  </span>
-
                   {/* Brand Name */}
-                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1.5">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-2">
                     {infra.name}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed flex-grow">
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed flex-grow">
                     {infra.description}
                   </p>
                 </div>
@@ -830,17 +827,17 @@ export default function HomePage() {
       </section>
 
       {/* ── 6. PORTFOLIO HIGHLIGHTS ─────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden bg-slate-100/70 dark:bg-white/[0.02] border-y border-slate-200/80 dark:border-white/[0.06]">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16"
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16"
           >
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 mb-4">
+              <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 Projects
               </span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
@@ -852,14 +849,14 @@ export default function HomePage() {
               size="md"
               href="/portfolio"
               rightIcon={<ArrowRight className="w-4 h-4" />}
-              className="shrink-0"
+              className="shrink-0 w-fit"
             >
-              View All
+              View All Projects
             </Button>
           </motion.div>
 
           {portfolioProjects.length === 0 ? (
-            <div className="text-center py-20 px-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
+            <div className="text-center py-20 px-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]">
               <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 border border-[var(--border-primary)] bg-[var(--surface-secondary)]">
                 <FolderOpen className={cn("w-6 h-6", iconAccent)} />
               </div>
@@ -867,58 +864,99 @@ export default function HomePage() {
               <p className="text-sm text-[var(--text-muted)] max-w-xs mx-auto">Projects will appear here once they are added to the database.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {portfolioProjects.map((project, index) => (
-                <FadeIn key={project.id} delay={index * 0.1} direction="up" className="h-full">
-                  <div className="group flex flex-col rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 hover:shadow-xl transition-all duration-300 h-full">
-                    {/* Crisp Screenshot Preview — No blur or obscuring gradient */}
-                    <Link
-                      href={project.slug ? `/portfolio/${project.slug}` : "#"}
-                      className="block relative aspect-[16/10] overflow-hidden bg-[var(--surface-secondary)] group/img border-b border-[var(--border-primary)]"
-                    >
-                      <Image
-                        referrerPolicy="no-referrer"
-                        src={project.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
-                        alt={project.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        unoptimized={true}
-                        className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-105"
-                      />
-                      {/* Category Badge */}
-                      <div className="absolute top-3.5 left-3.5 z-10">
-                        <span className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white/95 dark:bg-[#121212]/95 border border-[var(--border-primary)] text-[var(--text-secondary)] shadow-sm">
-                          {project.category?.name || project.category || "Uncategorized"}
-                        </span>
-                      </div>
-                    </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+              {portfolioProjects.map((project, index) => {
+                const techList = project.techStack
+                  ? project.techStack.split(",").map((t: string) => t.trim()).filter(Boolean)
+                  : [];
 
-                    {/* Clean Card Body */}
-                    <div className="p-5 sm:p-6 flex flex-col flex-1">
-                      <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="group/title focus:outline-none mb-2">
-                        <h3 className="text-lg sm:text-xl font-bold transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400">
-                          {project.title}
-                        </h3>
+                return (
+                  <FadeIn key={project.id} delay={index * 0.1} direction="up" className="h-full">
+                    <div className="group flex flex-col rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-2xl dark:hover:shadow-[0_12px_40px_-10px_rgba(6,182,212,0.12)] transition-all duration-300 hover:-translate-y-1 h-full">
+                      {/* Screenshot Preview with Clean Browser Header Bar */}
+                      <Link
+                        href={project.slug ? `/portfolio/${project.slug}` : "#"}
+                        className="block relative overflow-hidden bg-[var(--surface-secondary)] group/img border-b border-[var(--border-primary)]"
+                      >
+                        {/* Sleek Window Top Bar */}
+                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--border-primary)] bg-[var(--surface)]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                          </div>
+                          <span className="text-[11px] font-mono font-medium text-[var(--text-muted)] truncate max-w-[180px] sm:max-w-[260px]">
+                            {project.slug ? `${project.slug}.masdika.id` : project.title}
+                          </span>
+                          <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400">
+                            {project.category?.name || project.category || "Case Study"}
+                          </span>
+                        </div>
+
+                        {/* Unobstructed 16:10 Image */}
+                        <div className="relative aspect-[16/10] w-full overflow-hidden">
+                          <Image
+                            referrerPolicy="no-referrer"
+                            src={project.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
+                            alt={project.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            unoptimized={true}
+                            className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-[1.03]"
+                          />
+                        </div>
                       </Link>
-                      <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-4 flex-1">
-                        {project.description || "Explore full technical architecture, features, and deployment details."}
-                      </p>
-                      <div className="mt-auto pt-3 border-t border-[var(--border-primary)] flex items-center justify-between">
-                        <span className="text-xs font-medium text-[var(--text-muted)]">
-                          {project.client || "Personal Project"}
-                        </span>
-                        <Link
-                          href={project.slug ? `/portfolio/${project.slug}` : "#"}
-                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-cyan-600 dark:text-cyan-400 group-hover:text-cyan-500 transition-colors"
-                        >
-                          <span>View Case Study</span>
-                          <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+
+                      {/* Card Body */}
+                      <div className="p-5 sm:p-6 lg:p-7 flex flex-col flex-1">
+                        {/* Tech Stack Chips */}
+                        {techList.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3.5">
+                            {techList.slice(0, 4).map((tech: string, i: number) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 transition-colors"
+                              >
+                                <TechIcon tech={tech} size={13} />
+                                <span>{tech}</span>
+                              </span>
+                            ))}
+                            {techList.length > 4 && (
+                              <span className="inline-flex items-center px-2 py-1 text-[10px] font-bold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-muted)]">
+                                +{techList.length - 4}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="group/title focus:outline-none mb-2">
+                          <h3 className="text-lg sm:text-xl font-bold transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400 leading-snug">
+                            {project.title}
+                          </h3>
                         </Link>
+
+                        <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-5 flex-1">
+                          {project.description || "Explore full technical architecture, features, and deployment details."}
+                        </p>
+
+                        <div className="mt-auto pt-4 border-t border-[var(--border-primary)] flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] min-w-0">
+                            <Building2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                            <span className="truncate">{project.client || "Personal Project"}</span>
+                          </div>
+                          <Link
+                            href={project.slug ? `/portfolio/${project.slug}` : "#"}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-400 group-hover:text-slate-950 group-hover:border-cyan-400 transition-all shrink-0"
+                          >
+                            <span>View Case Study</span>
+                            <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </FadeIn>
-              ))}
+                  </FadeIn>
+                );
+              })}
             </div>
           )}
         </div>
