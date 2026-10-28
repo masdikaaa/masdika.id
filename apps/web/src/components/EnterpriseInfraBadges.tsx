@@ -179,13 +179,13 @@ export function EnterpriseInfraSidebarCard({ className }: { className?: string }
         {brands.map((b) => (
           <div
             key={b.name}
-            className="py-2 px-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 flex flex-col items-center justify-center text-center gap-1 transition-all group cursor-default"
+            className="py-2 px-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 flex flex-col items-center justify-center text-center gap-1 transition-all group/brand cursor-default"
             title={b.title}
           >
-            <div className={cn("h-4 flex items-center justify-center transition-transform group-hover:scale-110", b.color)}>
+            <div className={cn("h-4 flex items-center justify-center transition-transform group-hover/brand:scale-110", b.color)}>
               {b.icon}
             </div>
-            <span className="text-[10px] font-bold leading-none text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+            <span className="text-[10px] font-bold leading-none text-[var(--text-primary)] group-hover/brand:text-cyan-600 dark:group-hover/brand:text-cyan-400 transition-colors">
               {b.name}
             </span>
             <span className="text-[8px] leading-none text-[var(--text-muted)]">

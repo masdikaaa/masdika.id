@@ -1981,7 +1981,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 })())) ||
                 (serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0)
               }
-              className={cn("group w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm py-3 px-5 rounded-xl flex items-center justify-center gap-2.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed relative z-10 shadow-xs cursor-pointer")}
+              className={cn("w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm py-3 px-5 rounded-xl flex items-center justify-center gap-2.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed relative z-10 shadow-xs cursor-pointer")}
             >
               {isDisabled ? "Coming Soon" : isSubmitting ? (
                 <>

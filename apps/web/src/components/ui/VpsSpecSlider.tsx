@@ -325,7 +325,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
         </div>
 
         {/* Pricing Summary */}
-        <div className="lg:col-span-5 xl:col-span-4 border border-[var(--border-primary)] rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group shadow-xl h-fit lg:sticky lg:top-24 bg-[var(--surface-secondary)]">
+        <div className="lg:col-span-5 xl:col-span-4 border border-[var(--border-primary)] rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden shadow-xl h-fit lg:sticky lg:top-24 bg-[var(--surface-secondary)]">
           <div className="relative z-10">
             <h3 className="text-lg md:text-xl font-black mb-4 sm:mb-5 tracking-tight text-[var(--text-primary)]">
               Estimated Cost
@@ -415,7 +415,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
             onClick={handleDeploy}
             disabled={loading || isDisabled}
             className={cn(
-              "w-full px-7 py-3.5 mt-5 sm:mt-6 rounded-xl font-semibold flex items-center justify-center gap-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer",
+              "w-full px-7 py-3.5 mt-5 sm:mt-6 rounded-xl font-semibold flex items-center justify-center gap-2.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer",
               isDisabled
                 ? (isDark ? "bg-white/5 text-zinc-500 border border-white/10 cursor-not-allowed" : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed")
                 : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm",
