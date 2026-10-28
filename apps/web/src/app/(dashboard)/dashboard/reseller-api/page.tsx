@@ -213,31 +213,29 @@ export default function ResellerApiPage() {
             </div>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left min-w-[800px]">
-              <thead className={cn("text-[10px] uppercase tracking-wider font-bold border-b", isDark ? "text-zinc-500 border-white/5 bg-black/20" : "text-slate-500 border-slate-200 bg-slate-50")}>
-                <tr>
-                  <th className="px-6 py-4 whitespace-nowrap">ID</th>
-                  <th className="px-6 py-4 whitespace-nowrap">Hostname</th>
-                  <th className="px-6 py-4 whitespace-nowrap">Type</th>
-                  <th className="px-6 py-4 whitespace-nowrap">Information</th>
-                  <th className="px-6 py-4 whitespace-nowrap">Status</th>
-                  <th className="px-6 py-4 whitespace-nowrap text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {instances.length === 0 ? (
+          {instances.length === 0 ? (
+            <div className="p-8 sm:p-12 text-center">
+              <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
+                <Server className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
+              </div>
+              <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Instances Deployed</h4>
+              <p className={cn("text-sm max-w-md mx-auto leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>No instances deployed via API yet.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left min-w-[800px]">
+                <thead className={cn("text-[10px] uppercase tracking-wider font-bold border-b", isDark ? "text-zinc-500 border-white/5 bg-black/20" : "text-slate-500 border-slate-200 bg-slate-50")}>
                   <tr>
-                    <td colSpan={6} className="px-6 py-16 text-center">
-                      <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-white/5" : "bg-white shadow-sm border border-slate-200")}>
-                        <Server className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-400")} />
-                      </div>
-                      <h4 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Instances Deployed</h4>
-                      <p className={cn("text-sm max-w-md mx-auto leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>No instances deployed via API yet.</p>
-                    </td>
+                    <th className="px-6 py-4 whitespace-nowrap">ID</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Hostname</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Type</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Information</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                    <th className="px-6 py-4 whitespace-nowrap text-right">Action</th>
                   </tr>
-                ) : (
-                  paginatedInstances.map((vps) => {
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {paginatedInstances.map((vps) => {
                     const isRunning = vps.liveStatus?.status === 'running';
                     
                     return (
@@ -288,13 +286,13 @@ export default function ResellerApiPage() {
                         </td>
                       </tr>
                     );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
           
-          {totalPages > 1 && (
+          {instances.length > 0 && totalPages > 1 && (
             <div className="p-4 sm:p-6 border-t border-white/5 flex justify-center">
               <Pagination
                 currentPage={page}
