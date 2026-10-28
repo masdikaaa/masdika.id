@@ -27,7 +27,7 @@ const COUNTRY_OPTIONS = [
   { value: "IN", label: "🇮🇳 India" },
   { value: "DE", label: "🇩🇪 Germany" },
   { value: "NL", label: "🇳🇱 Netherlands" },
-  { value: "OTHER", label: "🌐 Other" },
+  { value: "OTHER", label: "Other" },
 ];
 
 const inputClassDark = 'w-full max-w-full min-w-0 box-border bg-[#111115] border border-white/[0.08] rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all';

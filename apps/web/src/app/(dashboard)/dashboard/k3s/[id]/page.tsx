@@ -607,7 +607,7 @@ export default function K3sDetailPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className={cn("border rounded-2xl p-6 max-w-md w-full shadow-xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+              className={cn("border rounded-2xl p-6 max-w-md w-full shadow-xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
             >
               <h3 className={cn(
                 "text-xl font-bold mb-3 flex items-center gap-2",
@@ -651,7 +651,7 @@ export default function K3sDetailPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className={cn("border rounded-2xl p-6 max-w-2xl w-full shadow-xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+              className={cn("border rounded-2xl p-6 max-w-2xl w-full shadow-xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
@@ -666,7 +666,7 @@ export default function K3sDetailPage() {
                 </button>
               </div>
 
-              <div className={cn("flex gap-1.5 p-1.5 rounded-xl border mb-6", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+              <div className={cn("flex gap-1.5 p-1.5 rounded-xl border mb-6", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                 {(["windows", "linux", "mac"] as const).map((os) => (
                   <button
                     key={os}
@@ -688,7 +688,7 @@ export default function K3sDetailPage() {
                 <p>2. If you don&apos;t have <code>kubectl</code> installed yet, you can <a href="https://kubernetes.io/docs/tasks/tools/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline font-bold">download it here</a>.</p>
                 <p>3. Follow the OS specific instructions below to use it with <code>kubectl</code>:</p>
 
-                <div className={cn("p-4 rounded-xl font-mono text-xs overflow-x-auto shadow-inner border", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
+                <div className={cn("p-4 rounded-xl font-mono text-xs overflow-x-auto shadow-inner border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
                   {guideOs === "windows" && (
                     <div className="space-y-3">
                       <p className="text-slate-400"># 1. Place the downloaded file in your user directory</p>
@@ -1061,7 +1061,7 @@ export default function K3sDetailPage() {
               </div>
 
               {/* Navigation Tabs */}
-              <div className={cn("border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs", "flex gap-1.5 p-1.5 rounded-2xl overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full")}>
+              <div className={cn("border transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs", "flex gap-1.5 p-1.5 rounded-2xl overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full")}>
                 {[
                   { id: "overview", label: "Overview", icon: Box },
                   { id: "monitoring", label: "Monitoring", icon: Activity },
@@ -1089,7 +1089,7 @@ export default function K3sDetailPage() {
               {activeTab === "overview" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden group", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden group", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <h2 className={cn("text-base md:text-lg font-bold mb-4 md:mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                           <Activity className="w-4 h-4 text-cyan-400" />
@@ -1164,7 +1164,7 @@ export default function K3sDetailPage() {
                       </div>
                     </div>
 
-                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden group", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden group", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <h2 className={cn("text-base sm:text-lg font-bold mb-5 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                           <ShieldCheck className="w-4 h-4 text-cyan-400" />
@@ -1213,7 +1213,7 @@ export default function K3sDetailPage() {
                   </div>
 
                   <div className="space-y-6">
-                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden group h-full", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden group h-full", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <h2 className={cn("text-base sm:text-lg font-bold mb-5 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                           <Server className="w-4 h-4 text-cyan-400" />
@@ -1250,7 +1250,7 @@ export default function K3sDetailPage() {
 
               {activeTab === "monitoring" && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                     <div className="flex justify-between items-center mb-6">
                       <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                         <Cpu className="w-5 h-5 text-blue-500" />
@@ -1303,7 +1303,7 @@ export default function K3sDetailPage() {
                     </div>
                   </div>
 
-                  <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                     <div className="flex justify-between items-center mb-6">
                       <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                         <HardDrive className="w-5 h-5 text-cyan-500" />
@@ -1360,7 +1360,7 @@ export default function K3sDetailPage() {
 
               {activeTab === "nodes" && (
                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                  <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className={cn("p-4 sm:p-5 border-b flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sm:gap-0", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                     <h2 className={cn("text-base sm:text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Cluster Nodes (VMs)</h2>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1634,7 +1634,7 @@ export default function K3sDetailPage() {
                 </div>
 
                 {/* Default Ingress & ServiceLB Notice Card */}
-                <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
@@ -1710,7 +1710,7 @@ export default function K3sDetailPage() {
                         <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>
                           <strong>Ingress-NGINX</strong> is the industry-standard controller. It is highly lightweight (~80–120 MB RAM), reliable, and ready to bind node ports 80 and 443 out-of-the-box:
                         </p>
-                        <div className={cn("relative border rounded-xl p-4 font-mono text-xs overflow-x-auto shadow-inner", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
+                        <div className={cn("relative border rounded-xl p-4 font-mono text-xs overflow-x-auto shadow-inner", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
                           <button
                             type="button"
                             onClick={() => handleCopyCommand("kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/baremetal/deploy.yaml", "nginx-deploy")}
@@ -1738,7 +1738,7 @@ export default function K3sDetailPage() {
                         <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>
                           If you prefer using K3s bundled Traefik and ServiceLB (Klipper-LB), connect to your <strong>Master VM</strong> (via SSH or the Web Console button above) and remove the disable flags:
                         </p>
-                        <div className={cn("relative border rounded-xl p-4 font-mono text-xs overflow-x-auto shadow-inner", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
+                        <div className={cn("relative border rounded-xl p-4 font-mono text-xs overflow-x-auto shadow-inner", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
                           <button
                             type="button"
                             onClick={() => handleCopyCommand("sudo sed -i 's/--disable traefik --disable servicelb//g' /etc/systemd/system/k3s.service && sudo systemctl daemon-reload && sudo systemctl restart k3s", "builtin-deploy")}
@@ -1766,7 +1766,7 @@ export default function K3sDetailPage() {
                         <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>
                           To deploy the latest official Traefik release with full custom values via Helm:
                         </p>
-                        <div className={cn("relative border rounded-xl p-4 font-mono text-xs overflow-x-auto shadow-inner", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
+                        <div className={cn("relative border rounded-xl p-4 font-mono text-xs overflow-x-auto shadow-inner", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-300" : "bg-slate-900 border-slate-800 text-cyan-300")}>
                           <button
                             type="button"
                             onClick={() => handleCopyCommand("helm repo add traefik https://traefik.github.io/charts && helm repo update && helm install traefik traefik/traefik -n kube-system --set ports.web.nodePort=30080 --set ports.websecure.nodePort=30443", "helm-deploy")}
@@ -1796,7 +1796,7 @@ export default function K3sDetailPage() {
               {activeTab === "settings" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in zoom-in-95 duration-500">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <h2 className={cn("text-lg font-bold mb-6 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <Settings className="w-5 h-5 text-cyan-400" />
                         General Settings
@@ -1809,7 +1809,7 @@ export default function K3sDetailPage() {
                               type="text" 
                               value={editClusterName} 
                               onChange={(e) => setEditClusterName(e.target.value)} 
-                              className={cn("flex-1 w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all min-w-0 text-sm", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")} 
+                              className={cn("flex-1 w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all min-w-0 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")} 
                             />
                             <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className="px-5 py-2.5 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 font-bold rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 shrink-0 text-xs sm:text-sm">
                               {isSavingName && <RefreshCw className="w-4 h-4 animate-spin shrink-0" />}
@@ -1819,13 +1819,13 @@ export default function K3sDetailPage() {
                         </div>
                         <div>
                           <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Kubernetes Version</label>
-                          <input type="text" value={cluster.version} disabled className={cn("w-full border rounded-xl px-4 py-2.5 cursor-not-allowed font-mono text-sm", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-500" : "bg-slate-100 border-slate-200/90 text-slate-500")} />
+                          <input type="text" value={cluster.version} disabled className={cn("w-full border rounded-xl px-4 py-2.5 cursor-not-allowed font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-500" : "bg-slate-100 border-slate-200/90 text-slate-500")} />
                           <p className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>Upgrading the Kubernetes version is managed by the system administrator.</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("border rounded-2xl p-4 sm:p-5 relative overflow-visible", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <h2 className={cn("text-lg font-bold mb-2 flex items-center gap-2 relative z-10", isDark ? "text-white" : "text-slate-900")}>
                         <AlertTriangle className="w-5 h-5 text-red-500" />
                         Delete Cluster
@@ -1833,7 +1833,7 @@ export default function K3sDetailPage() {
                       <p className={cn("text-sm mb-6 relative z-10", isDark ? "text-zinc-400" : "text-slate-500")}>These actions are permanent and cannot be undone. Proceed with extreme caution.</p>
 
                       <div className="space-y-4 relative z-10">
-                        <div className={cn("flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border transition-colors rounded-2xl gap-4", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <div className={cn("flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border transition-colors rounded-2xl gap-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                           <div>
                             <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Reinstall Kubernetes Cluster</h3>
                             <p className={cn("text-xs mt-1.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>Wipe the current K3s installation and reinstall with a fresh state. All cluster data will be lost.</p>
@@ -1868,10 +1868,10 @@ export default function K3sDetailPage() {
                   </div>
 
                   <div className="space-y-6">
-                    <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <h2 className={cn("text-lg font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Security Options</h2>
                       <div className="space-y-4">
-                        <div className={cn("p-4 sm:p-5 border rounded-2xl hover:border-cyan-500/30 transition-colors group", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <div className={cn("p-4 sm:p-5 border rounded-2xl hover:border-cyan-500/30 transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                           <h3 className={cn("font-bold text-sm group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>Rotate Certificates</h3>
                           <p className={cn("text-xs mt-1.5 mb-5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>Rotate all K3s control plane certificates. You will need to download a new kubeconfig file.</p>
                           <button onClick={handleRotateCertificates} disabled={isRotating || isSuspended} className={cn("w-full px-4 py-2.5 border disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-cyan-500/10 border-white/[0.08] text-white" : "bg-white hover:bg-cyan-50 text-slate-900 border-slate-300")}>
@@ -2014,7 +2014,7 @@ export default function K3sDetailPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={cn("relative w-full max-w-md border rounded-2xl p-6 overflow-hidden shadow-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}
+              className={cn("relative w-full max-w-md border rounded-2xl p-6 overflow-hidden shadow-xl", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}
             >
               <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Edit Node Role</h3>
               <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -2029,7 +2029,7 @@ export default function K3sDetailPage() {
                     value={editRoleModal.currentRole}
                     onChange={(e) => setEditRoleModal(prev => ({ ...prev, currentRole: e.target.value }))}
                     placeholder="e.g. worker, database, ingress"
-                    className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
                   />
                   <p className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
                     Tip: Leave empty to clear the node role.

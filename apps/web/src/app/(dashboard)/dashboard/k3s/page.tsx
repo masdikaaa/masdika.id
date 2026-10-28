@@ -74,7 +74,7 @@ export default function K3sListPage() {
       </div>
 
       {clusters.length === 0 ? (
-        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className={cn("w-16 h-16 rounded-2xl border flex items-center justify-center mx-auto mb-5", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
             <SiKubernetes className="w-8 h-8 text-zinc-500" />
           </div>
@@ -89,7 +89,7 @@ export default function K3sListPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {clusters.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((cluster) => (
             <Link key={cluster.id} href={`/dashboard/k3s/${cluster.id}`}>
-              <div className={cn("border relative rounded-2xl p-4 sm:p-5 transition-all duration-200 group overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300")}>
+              <div className={cn("border relative rounded-2xl p-4 sm:p-5 transition-all duration-200 group overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300")}>
                 
                 <div className="relative z-10 flex justify-between items-start mb-5">
                   <div className="flex items-center gap-3.5 min-w-0">

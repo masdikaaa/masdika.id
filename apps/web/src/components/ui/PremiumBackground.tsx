@@ -33,12 +33,12 @@ function DotGridPattern({ className }: { className?: string }) {
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 select-none opacity-25 dark:opacity-15",
+        "pointer-events-none absolute inset-0 select-none opacity-35 dark:opacity-20",
         className
       )}
       style={{
         backgroundImage:
-          "radial-gradient(rgba(100, 116, 139, 0.35) 1.2px, transparent 1.2px)",
+          "radial-gradient(rgba(100, 116, 139, 0.4) 1.2px, transparent 1.2px)",
         backgroundSize: "28px 28px",
       }}
     />
@@ -46,12 +46,12 @@ function DotGridPattern({ className }: { className?: string }) {
 }
 
 /**
- * Subtle accent diamond outline.
- * Hidden on mobile/tablet so it NEVER overlaps or blocks any page content, text, or buttons.
- * Translucent and non-intrusive on desktop.
+ * Architectural solid cyan diamond badges.
+ * Hidden on extra small mobile to ensure zero overlap with mobile headers,
+ * vibrant and glowing on desktop and tablet as designed.
  */
 function DiamondOrnament({
-  size = 18,
+  size = 20,
   className,
 }: {
   size?: number;
@@ -61,19 +61,18 @@ function DiamondOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none hidden xl:flex items-center justify-center opacity-30 dark:opacity-20",
+        "pointer-events-none absolute select-none hidden sm:flex items-center justify-center",
         className
       )}
       style={{ width: `${size}px`, height: `${size}px` }}
     >
-      <div className="w-full h-full border border-cyan-500/60 dark:border-cyan-400/50 bg-cyan-500/10 dark:bg-cyan-400/10 rounded-[4px] rotate-45" />
+      <div className="w-full h-full bg-cyan-500 dark:bg-cyan-400 rounded-[5px] rotate-45 shadow-md shadow-cyan-500/35 dark:shadow-cyan-400/30" />
     </div>
   );
 }
 
 /**
- * Subtle architectural dot matrix cluster.
- * Hidden on mobile/tablet to protect readability.
+ * Architectural dot matrix clusters (slate & accent).
  */
 function DotMatrixOrnament({
   tone = "slate",
@@ -83,13 +82,13 @@ function DotMatrixOrnament({
   className?: string;
 }) {
   const fill = tone === "accent" ? "#06B6D4" : "#64748B";
-  const fillOpacity = tone === "accent" ? 0.35 : 0.2;
+  const fillOpacity = tone === "accent" ? 0.75 : 0.45;
 
   return (
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none hidden xl:block opacity-35 dark:opacity-20",
+        "pointer-events-none absolute select-none hidden sm:block",
         className
       )}
       style={{ width: "40px", height: "28px" }}
@@ -111,8 +110,7 @@ function DotMatrixOrnament({
 }
 
 /**
- * Subtle architectural plus marker.
- * Hidden on mobile/tablet to avoid overlapping text.
+ * Crosshair plus (+) markers.
  */
 function PlusOrnament({
   tone = "accent",
@@ -127,7 +125,7 @@ function PlusOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none hidden xl:flex items-center justify-center opacity-35 dark:opacity-20",
+        "pointer-events-none absolute select-none hidden sm:flex items-center justify-center",
         className
       )}
       style={{ width: "16px", height: "16px" }}
@@ -138,7 +136,7 @@ function PlusOrnament({
           stroke={stroke}
           strokeWidth="2"
           strokeLinecap="round"
-          strokeOpacity="0.5"
+          strokeOpacity="0.65"
         />
       </svg>
     </div>
@@ -146,13 +144,13 @@ function PlusOrnament({
 }
 
 const RING_NEUTRAL_DASHED =
-  "hidden sm:block rounded-full border border-dashed border-neutral-300/35 dark:border-zinc-800/40";
+  "rounded-full border border-dashed border-neutral-300/80 dark:border-zinc-700/60";
 const RING_NEUTRAL_SOLID =
-  "hidden sm:block rounded-full border border-neutral-200/40 dark:border-zinc-800/35";
+  "rounded-full border border-neutral-200/90 dark:border-zinc-800/80";
 const RING_ACCENT_SOLID =
-  "hidden sm:block rounded-full border border-cyan-500/15 dark:border-cyan-400/12";
+  "rounded-full border border-cyan-500/30 dark:border-cyan-400/25";
 const RING_ACCENT_DASHED =
-  "hidden sm:block rounded-full border border-dashed border-cyan-500/15 dark:border-cyan-400/12";
+  "rounded-full border border-dashed border-cyan-500/30 dark:border-cyan-400/25";
 
 /**
  * Architectural section background ornaments:
@@ -200,12 +198,14 @@ export function SectionOrnaments({
               RING_NEUTRAL_SOLID
             )}
           />
-          <DiamondOrnament size={18} className="top-12 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-16 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-20 left-8 xl:left-16" />
-          <DiamondOrnament size={18} className="bottom-14 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="bottom-24 left-10 xl:left-20" />
-          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 xl:right-20" />
+          <DiamondOrnament size={20} className="top-12 left-10 sm:left-20" />
+          <DiamondOrnament size={20} className="top-16 right-10 sm:right-24" />
+          <DiamondOrnament size={16} className="bottom-20 left-12 sm:left-24" />
+          <DiamondOrnament size={18} className="bottom-14 right-12 sm:right-28" />
+          <DotMatrixOrnament tone="slate" className="top-24 left-16 sm:left-32" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-16 sm:right-32" />
+          <PlusOrnament tone="accent" className="top-10 right-1/4" />
+          <PlusOrnament tone="slate" className="bottom-28 left-1/4" />
         </>
       )}
 

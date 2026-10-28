@@ -64,7 +64,7 @@ export default function BlockedScreen({
         className="w-full max-w-xl relative z-10"
       >
         <motion.div 
-          className={`relative bg-[#0b1322] border ${colors.border} shadow-2xl rounded-3xl p-8 sm:p-12 text-center overflow-hidden`}
+          className={`relative bg-[#111115] border ${colors.border} shadow-2xl rounded-3xl p-8 sm:p-12 text-center overflow-hidden`}
         >
           {/* Top animated gradient line */}
           <motion.div 

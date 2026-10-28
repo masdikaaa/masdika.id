@@ -465,45 +465,6 @@ function CheckoutContent() {
             </p>
           </div>
         </div>
-
-        {/* Quick Wallet Balance Pill (Mobile only since Desktop Topbar displays the Wallet Capsule) */}
-        <div
-          className={cn(
-            "flex sm:hidden items-center justify-between gap-3 px-3.5 py-2 rounded-xl border self-stretch shrink-0",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
-          )}
-        >
-          <div className="flex items-center gap-2.5">
-            <div
-              className={cn(
-                "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-50 text-cyan-700"
-              )}
-            >
-              <Wallet className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <div className={cn("text-[10px] font-medium leading-none", isDark ? "text-zinc-500" : "text-slate-400")}>
-                Available Credit
-              </div>
-              <div className={cn("text-xs sm:text-sm font-bold font-mono leading-tight mt-0.5", isDark ? "text-white" : "text-slate-900")}>
-                {formatRupiah(balance)}
-              </div>
-            </div>
-          </div>
-          <Link
-            href="/dashboard/topup"
-            className={cn(
-              "inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
-              isDark
-                ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-cyan-400"
-                : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-cyan-700"
-            )}
-          >
-            <Plus className="w-3 h-3" />
-            Top Up
-          </Link>
-        </div>
       </motion.div>
 
       {/* Compact Architectural Hardware Specification Strip */}
