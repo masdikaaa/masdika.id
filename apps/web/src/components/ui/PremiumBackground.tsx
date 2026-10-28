@@ -46,9 +46,8 @@ function DotGridPattern({ className }: { className?: string }) {
 }
 
 /**
- * Architectural solid cyan diamond badges.
- * Hidden on extra small mobile to ensure zero overlap with mobile headers,
- * vibrant and glowing on desktop and tablet as designed.
+ * Architectural solid cyan diamond badges (matching SMK Telkom Malang layout).
+ * Uses exact responsive coordinates and sizes matching the reference.
  */
 function DiamondOrnament({
   size = 20,
@@ -61,7 +60,7 @@ function DiamondOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none hidden sm:flex items-center justify-center",
+        "pointer-events-none absolute select-none flex items-center justify-center",
         className
       )}
       style={{ width: `${size}px`, height: `${size}px` }}
@@ -88,7 +87,7 @@ function DotMatrixOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none hidden sm:block",
+        "pointer-events-none absolute select-none",
         className
       )}
       style={{ width: "40px", height: "28px" }}
@@ -125,7 +124,7 @@ function PlusOrnament({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute select-none hidden sm:flex items-center justify-center",
+        "pointer-events-none absolute select-none flex items-center justify-center",
         className
       )}
       style={{ width: "16px", height: "16px" }}
@@ -148,16 +147,13 @@ const RING_NEUTRAL_DASHED =
 const RING_NEUTRAL_SOLID =
   "rounded-full border border-neutral-200/90 dark:border-zinc-800/80";
 const RING_ACCENT_SOLID =
-  "rounded-full border border-cyan-500/30 dark:border-cyan-400/25";
+  "rounded-full border border-cyan-500/25 dark:border-cyan-400/20";
 const RING_ACCENT_DASHED =
-  "rounded-full border border-dashed border-cyan-500/30 dark:border-cyan-400/25";
+  "rounded-full border border-dashed border-cyan-500/25 dark:border-cyan-400/20";
 
 /**
- * Architectural section background ornaments:
- * - Subtle 28x28 radial dot-grid
- * - Concentric dashed neutral & solid accent circular lines (sm+ only, soft opacity)
- * - Translucent diamond outlines & dot matrices strictly on outer margins (xl only)
- * - Safe `-z-10` layer so it NEVER blocks or covers page content
+ * Architectural section background ornaments.
+ * 100% faithful to the SMK Telkom Malang design system from top to bottom.
  */
 export function SectionOrnaments({
   variant = "sides",
@@ -172,297 +168,300 @@ export function SectionOrnaments({
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 select-none -z-10 overflow-hidden",
+        "pointer-events-none absolute inset-0 select-none z-0 overflow-hidden",
         className
       )}
     >
       {withDotGrid && <DotGridPattern />}
 
+      {/* ── 1. HERO VARIANT (Matching SMK Telkom Malang Sec 2) ── */}
       {variant === "hero" && (
         <>
-          {/* Desktop Hero Rings (Framing the mascot & wide margins on desktop) */}
-          <div className="hidden lg:block pointer-events-none">
-            <div
-              className={cn(
-                "absolute -top-[12%] left-[10%] w-[960px] h-[960px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-[16%] -right-[8%] w-[720px] h-[720px]",
-                RING_ACCENT_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-[28%] -right-[4%] w-[520px] h-[520px]",
-                RING_NEUTRAL_SOLID
-              )}
-            />
-          </div>
+          <div
+            className={cn(
+              "absolute -top-[12%] left-[10%] w-[960px] h-[960px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[16%] -right-[8%] w-[720px] h-[720px]",
+              RING_ACCENT_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[28%] -right-[4%] w-[520px] h-[520px]",
+              RING_NEUTRAL_SOLID
+            )}
+          />
 
-          {/* Mobile & Tablet Hero Rings: Positioned at bottom behind mascot, 100% clear of text & buttons */}
-          <div className="lg:hidden pointer-events-none">
-            <div
-              className={cn(
-                "absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 w-[320px] sm:w-[460px] h-[320px] sm:h-[460px]",
-                RING_ACCENT_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute bottom-0 sm:bottom-4 left-1/2 -translate-x-1/2 w-[420px] sm:w-[580px] h-[420px] sm:h-[580px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-          </div>
+          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
+          <DiamondOrnament size={14} className="top-24 left-1/4 hidden md:flex" />
+          <DiamondOrnament size={18} className="top-12 right-10 sm:right-24" />
+          <DiamondOrnament size={16} className="bottom-24 left-10 sm:left-24" />
+          <DiamondOrnament size={20} className="bottom-14 right-12 sm:right-28" />
 
-          <DiamondOrnament size={20} className="top-12 left-10 sm:left-20" />
-          <DiamondOrnament size={20} className="top-16 right-10 sm:right-24" />
-          <DiamondOrnament size={16} className="bottom-20 left-12 sm:left-24" />
-          <DiamondOrnament size={18} className="bottom-14 right-12 sm:right-28" />
-          <DotMatrixOrnament tone="slate" className="top-24 left-16 sm:left-32" />
-          <DotMatrixOrnament tone="accent" className="bottom-16 right-16 sm:right-32" />
-          <PlusOrnament tone="accent" className="top-10 right-1/4" />
-          <PlusOrnament tone="slate" className="bottom-28 left-1/4" />
+          <DotMatrixOrnament tone="slate" className="bottom-28 left-14 sm:left-32" />
+          <DotMatrixOrnament tone="accent" className="bottom-20 right-14 sm:right-36" />
+
+          <PlusOrnament tone="accent" className="top-6 left-1/3" />
+          <PlusOrnament tone="slate" className="bottom-8 right-1/3" />
         </>
       )}
 
+      {/* ── 2. SIDES VARIANT (Matching SMK Telkom Malang Sec 4 & 10) ── */}
       {variant === "sides" && (
         <>
-          {/* Desktop side rings */}
-          <div className="hidden md:block pointer-events-none">
-            <div
-              className={cn(
-                "absolute top-1/2 -left-[260px] -translate-y-1/2 w-[760px] h-[760px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-1/2 -left-[180px] -translate-y-1/2 w-[580px] h-[580px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-1/2 -right-[260px] -translate-y-1/2 w-[760px] h-[760px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-1/2 -right-[180px] -translate-y-1/2 w-[580px] h-[580px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-          </div>
+          <div
+            className={cn(
+              "absolute top-1/2 -left-[260px] -translate-y-1/2 w-[760px] h-[760px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -left-[180px] -translate-y-1/2 w-[580px] h-[580px]",
+              RING_ACCENT_SOLID
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[260px] -translate-y-1/2 w-[760px] h-[760px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[180px] -translate-y-1/2 w-[580px] h-[580px]",
+              RING_ACCENT_SOLID
+            )}
+          />
 
-          {/* Mobile side rings: gently graze outer edge without cutting across cards */}
-          <div className="md:hidden pointer-events-none">
-            <div
-              className={cn(
-                "absolute top-1/2 -left-[160px] -translate-y-1/2 w-[220px] h-[220px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-1/2 -right-[160px] -translate-y-1/2 w-[220px] h-[220px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-          </div>
+          <DiamondOrnament size={20} className="top-10 left-6 sm:left-16" />
+          <DiamondOrnament size={14} className="top-12 left-1/3 hidden lg:flex" />
+          <DiamondOrnament size={20} className="top-10 right-6 sm:right-16" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-20" />
+          <DiamondOrnament size={18} className="bottom-10 right-8 sm:right-20" />
 
-          <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-10 left-8 xl:left-16" />
-          <DiamondOrnament size={16} className="bottom-10 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="bottom-16 left-10 xl:left-20" />
-          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 xl:right-20" />
+          <DotMatrixOrnament tone="slate" className="bottom-16 left-12 sm:left-28" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-12 sm:right-28" />
+
+          <PlusOrnament tone="accent" className="top-20 left-1/4" />
+          <PlusOrnament tone="slate" className="top-20 right-1/4" />
         </>
       )}
 
+      {/* ── 3. DIAGONAL VARIANT (Matching SMK Telkom Malang Sec 5) ── */}
       {variant === "diagonal" && (
         <>
-          <div className="hidden md:block pointer-events-none">
-            <div
-              className={cn(
-                "absolute top-[4%] right-[-160px] w-[820px] h-[820px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-[8%] right-[-80px] w-[620px] h-[620px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-[40%] left-[-180px] w-[860px] h-[860px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-[44%] left-[-100px] w-[660px] h-[660px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-          </div>
-          <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="top-[20%] left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-[45%] right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-20 right-6 xl:right-12" />
-          <DotMatrixOrnament tone="slate" className="top-[24%] left-8 xl:left-16" />
-          <DotMatrixOrnament tone="accent" className="bottom-24 left-8 xl:left-16" />
+          <div
+            className={cn(
+              "absolute top-[4%] right-[-160px] w-[820px] h-[820px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[8%] right-[-80px] w-[620px] h-[620px]",
+              RING_ACCENT_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[40%] left-[-180px] w-[860px] h-[860px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[44%] left-[-100px] w-[660px] h-[660px]",
+              RING_ACCENT_DASHED
+            )}
+          />
+
+          <DiamondOrnament size={22} className="top-12 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="top-[18%] left-6 sm:left-16" />
+          <DiamondOrnament size={18} className="top-[45%] right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="top-[54%] left-6 sm:left-16" />
+          <DiamondOrnament size={20} className="bottom-20 right-8 sm:right-20" />
+          <DiamondOrnament size={14} className="bottom-28 left-8 sm:left-20" />
+
+          <DotMatrixOrnament tone="slate" className="top-[24%] left-8 sm:left-24" />
+          <DotMatrixOrnament tone="accent" className="top-[58%] left-8 sm:left-24" />
+
+          <PlusOrnament tone="accent" className="top-[35%] right-1/4" />
+          <PlusOrnament tone="slate" className="top-[70%] left-1/4" />
         </>
       )}
 
+      {/* ── 4. CENTER VARIANT (Matching SMK Telkom Malang Sec 6) ── */}
       {variant === "center" && (
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[700px] md:w-[1000px] lg:w-[1300px] h-[340px] sm:h-[700px] md:h-[1000px] lg:h-[1300px]",
-              RING_NEUTRAL_DASHED
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] sm:w-[1300px] h-[900px] sm:h-[1300px]",
+              "rounded-full border border-dashed border-neutral-300/75 dark:border-zinc-700/60"
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] sm:w-[520px] md:w-[750px] lg:w-[1050px] h-[240px] sm:h-[520px] md:h-[750px] lg:h-[1050px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1050px] h-[700px] sm:h-[1050px]",
               RING_ACCENT_SOLID
             )}
           />
-          <DiamondOrnament size={18} className="top-8 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-8 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-8 left-8 xl:left-16" />
-          <DiamondOrnament size={16} className="bottom-8 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="bottom-12 right-10 xl:right-20" />
-          <DotMatrixOrnament tone="accent" className="bottom-12 left-10 xl:left-20" />
+
+          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
+          <DiamondOrnament size={18} className="top-8 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-8 left-10 sm:left-24" />
+          <DiamondOrnament size={18} className="bottom-8 right-10 sm:right-24" />
+
+          <DotMatrixOrnament tone="slate" className="bottom-12 right-14 sm:right-32" />
+          <DotMatrixOrnament tone="accent" className="bottom-12 left-14 sm:left-32" />
         </>
       )}
 
+      {/* ── 5. CENTER-WIDE VARIANT (Matching SMK Telkom Malang Sec 7) ── */}
       {variant === "center-wide" && (
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] sm:w-[800px] md:w-[1100px] lg:w-[1450px] h-[360px] sm:h-[800px] md:h-[1100px] lg:h-[1450px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1050px] sm:w-[1450px] h-[1050px] sm:h-[1450px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] sm:w-[600px] md:w-[850px] lg:w-[1100px] h-[260px] sm:h-[600px] md:h-[850px] lg:h-[1100px]",
-              RING_ACCENT_SOLID
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[1100px] h-[750px] sm:h-[1100px]",
+              RING_ACCENT_DASHED
             )}
           />
-          <DiamondOrnament size={18} className="top-12 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-12 left-8 xl:left-16" />
-          <DiamondOrnament size={16} className="bottom-12 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="bottom-16 left-10 xl:left-20" />
-          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 xl:right-20" />
+
+          <DiamondOrnament size={22} className="top-12 left-8 sm:left-20" />
+          <DiamondOrnament size={20} className="top-12 right-8 sm:right-20" />
+          <DiamondOrnament size={14} className="top-6 left-1/3 hidden lg:flex" />
+          <DiamondOrnament size={16} className="bottom-12 left-10 sm:left-24" />
+          <DiamondOrnament size={18} className="bottom-12 right-10 sm:right-24" />
+
+          <DotMatrixOrnament tone="slate" className="bottom-16 left-14 sm:left-32" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-14 sm:right-32" />
+
+          <PlusOrnament tone="accent" className="top-8 left-1/4" />
+          <PlusOrnament tone="slate" className="top-8 right-1/4" />
         </>
       )}
 
+      {/* ── 6. BOTTOM-LEFT VARIANT (Matching SMK Telkom Malang Sec 8) ── */}
       {variant === "bottom-left" && (
         <>
-          <div className="hidden md:block pointer-events-none">
-            <div
-              className={cn(
-                "absolute -bottom-[80px] left-[6%] w-[800px] h-[800px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute -bottom-[20px] left-[10%] w-[620px] h-[620px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-[6%] right-[-8%] w-[620px] h-[620px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-          </div>
-          <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-10 left-8 xl:left-16" />
-          <DiamondOrnament size={16} className="bottom-10 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="bottom-14 left-10 xl:left-20" />
-          <DotMatrixOrnament tone="accent" className="bottom-14 right-10 xl:right-20" />
+          <div
+            className={cn(
+              "absolute -bottom-[80px] left-[6%] w-[800px] h-[800px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute -bottom-[20px] left-[10%] w-[620px] h-[620px]",
+              RING_ACCENT_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-[6%] right-[-8%] w-[620px] h-[620px]",
+              "rounded-full border border-dashed border-neutral-300/70 dark:border-zinc-700/60"
+            )}
+          />
+
+          <DiamondOrnament size={22} className="top-10 left-6 sm:left-14" />
+          <DiamondOrnament size={18} className="top-10 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-16" />
+          <DiamondOrnament size={20} className="bottom-10 right-8 sm:right-20" />
+
+          <DotMatrixOrnament tone="slate" className="bottom-14 left-10 sm:left-20" />
+          <DotMatrixOrnament tone="accent" className="bottom-14 right-12 sm:right-24" />
+
+          <PlusOrnament tone="accent" className="top-6 right-1/3" />
         </>
       )}
 
+      {/* ── 7. RIGHT-FOCUS VARIANT (Matching SMK Telkom Malang Sec 9) ── */}
       {variant === "right-focus" && (
         <>
-          <div className="hidden md:block pointer-events-none">
-            <div
-              className={cn(
-                "absolute top-1/2 -right-[220px] -translate-y-1/2 w-[800px] h-[800px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-1/2 -right-[140px] -translate-y-1/2 w-[620px] h-[620px]",
-                RING_ACCENT_SOLID
-              )}
-            />
-            <div
-              className={cn(
-                "absolute top-1/4 -left-[200px] w-[680px] h-[680px]",
-                RING_NEUTRAL_DASHED
-              )}
-            />
-          </div>
-          <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-12 left-8 xl:left-16" />
-          <DiamondOrnament size={16} className="bottom-12 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="top-18 left-8 xl:left-16" />
-          <DotMatrixOrnament tone="accent" className="bottom-16 right-8 xl:right-16" />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[220px] -translate-y-1/2 w-[800px] h-[800px]",
+              RING_NEUTRAL_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/2 -right-[140px] -translate-y-1/2 w-[620px] h-[620px]",
+              RING_ACCENT_DASHED
+            )}
+          />
+          <div
+            className={cn(
+              "absolute top-1/4 -left-[200px] w-[680px] h-[680px]",
+              "rounded-full border border-dashed border-neutral-300/70 dark:border-zinc-700/60"
+            )}
+          />
+
+          <DiamondOrnament size={20} className="top-10 left-8 sm:left-18" />
+          <DiamondOrnament size={20} className="top-10 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-12 left-8 sm:left-18" />
+          <DiamondOrnament size={18} className="bottom-12 right-8 sm:right-20" />
+
+          <DotMatrixOrnament tone="slate" className="top-18 left-10 sm:left-22" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 sm:right-24" />
+
+          <PlusOrnament tone="accent" className="top-8 left-1/3" />
         </>
       )}
 
+      {/* ── 8. CTA VARIANT (Matching SMK Telkom Malang Sec 11) ── */}
       {variant === "cta" && (
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[700px] md:w-[1100px] lg:w-[1500px] h-[340px] sm:h-[700px] md:h-[1100px] lg:h-[1500px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] sm:w-[1500px] h-[1100px] sm:h-[1500px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] sm:w-[500px] md:w-[800px] lg:w-[1150px] h-[250px] sm:h-[500px] md:h-[800px] lg:h-[1150px]",
-              RING_ACCENT_SOLID
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] sm:w-[1150px] h-[800px] sm:h-[1150px]",
+              RING_ACCENT_DASHED
             )}
           />
-          <DiamondOrnament size={18} className="top-12 left-6 xl:left-12" />
-          <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
-          <DiamondOrnament size={16} className="bottom-16 left-8 xl:left-16" />
-          <DiamondOrnament size={16} className="bottom-16 right-8 xl:right-16" />
-          <DotMatrixOrnament tone="slate" className="bottom-24 left-10 xl:left-20" />
-          <DotMatrixOrnament tone="accent" className="bottom-24 right-10 xl:right-20" />
+
+          <DiamondOrnament size={22} className="top-12 left-10 sm:left-20" />
+          <DiamondOrnament size={22} className="top-12 right-10 sm:right-20" />
+          <DiamondOrnament size={16} className="top-24 left-1/3 hidden lg:flex" />
+          <DiamondOrnament size={16} className="top-24 right-1/3 hidden lg:flex" />
+          <DiamondOrnament size={18} className="bottom-16 left-10 sm:left-20" />
+          <DiamondOrnament size={18} className="bottom-16 right-10 sm:right-20" />
+
+          <DotMatrixOrnament tone="slate" className="bottom-24 left-12 sm:left-24" />
+          <DotMatrixOrnament tone="accent" className="bottom-24 right-12 sm:right-24" />
+
+          <PlusOrnament tone="accent" className="top-6 left-1/3" />
+          <PlusOrnament tone="slate" className="top-6 right-1/3" />
         </>
       )}
 
+      {/* ── 9. PANEL VARIANT ── */}
       {variant === "panel" && (
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[460px] h-[280px] sm:h-[460px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[460px] h-[460px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] sm:w-[330px] h-[200px] sm:h-[330px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[330px] h-[330px]",
               RING_ACCENT_SOLID
             )}
           />
@@ -474,6 +473,65 @@ export function SectionOrnaments({
           <DotMatrixOrnament tone="accent" className="bottom-28 right-6" />
         </>
       )}
+    </div>
+  );
+}
+
+/**
+ * Architectural Hero Ornaments precisely aligned with the Hero subject (mascot/avatar),
+ * matching the SMK Telkom Malang hero image container layout:
+ * - Concentric circles centered behind the subject
+ * - Circular node anchor dots
+ */
+export function HeroOrnaments({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 select-none flex items-center justify-center -z-10 overflow-visible",
+        className
+      )}
+    >
+      {/* 1. Large Neutral Ring behind subject (85% of hero height) */}
+      <div
+        className={cn(
+          "pointer-events-none absolute rounded-full -z-20 border border-neutral-200/80 dark:border-zinc-800/80 bg-transparent",
+          "w-[340px] sm:w-[440px] md:w-[500px] lg:w-[540px] xl:w-[600px] h-[340px] sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[600px]",
+          "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        )}
+      />
+
+      {/* 2. Middle Accent Ring behind subject (52.5% of hero height) */}
+      <div
+        className={cn(
+          "pointer-events-none absolute rounded-full -z-10 border border-cyan-500/25 dark:border-cyan-400/20 bg-transparent",
+          "w-[260px] sm:w-[330px] md:w-[380px] lg:w-[420px] xl:w-[460px] h-[260px] sm:h-[330px] md:h-[380px] lg:h-[420px] xl:h-[460px]",
+          "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        )}
+      />
+
+      {/* 3. Small Dashed Ring behind subject (32.5% of hero height) */}
+      <div
+        className={cn(
+          "pointer-events-none absolute rounded-full -z-10 border border-dashed border-neutral-300/85 dark:border-zinc-700/60 bg-transparent",
+          "w-[180px] sm:w-[220px] md:w-[250px] lg:w-[280px] xl:w-[300px] h-[180px] sm:h-[220px] md:h-[250px] lg:h-[280px] xl:h-[300px]",
+          "left-[38%] top-[42%] -translate-x-1/2 -translate-y-1/2"
+        )}
+      />
+
+      {/* 4. Small Anchor Node Dots (matching SMK Telkom Malang hero image) */}
+      <div
+        className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full h-2 w-2 border border-neutral-400/50 dark:border-zinc-600 bg-neutral-400/40 dark:bg-zinc-700"
+        style={{ left: "32%", top: "18%" }}
+      />
+      <div
+        className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full h-2 w-2 border border-cyan-500/50 dark:border-cyan-400/50 bg-cyan-400/40"
+        style={{ left: "74%", top: "48%" }}
+      />
+      <div
+        className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full h-2 w-2 bg-neutral-400/40 dark:bg-zinc-600"
+        style={{ left: "26%", top: "62%" }}
+      />
     </div>
   );
 }
@@ -490,7 +548,7 @@ const PAGE_ORNAMENT_BANDS: OrnamentVariant[] = [
 
 /**
  * Scrolling page-level architectural ornaments for subpages.
- * Rendered strictly behind content (`-z-10`) so no elements are obscured.
+ * Rendered strictly behind content (`z-0`) so no elements are obscured.
  */
 export function PageOrnaments() {
   return (

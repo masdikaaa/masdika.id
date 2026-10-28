@@ -44,7 +44,7 @@ import { TechIcon } from "@/components/ui/TechIcon";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { SectionOrnaments } from "@/components/ui/PremiumBackground";
+import { SectionOrnaments, HeroOrnaments } from "@/components/ui/PremiumBackground";
 
 const TypeAnimation = dynamic(
   () => import("react-type-animation").then((mod) => mod.TypeAnimation),
@@ -350,7 +350,7 @@ export default function HomePage() {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="max-w-2xl relative z-30"
+              className="max-w-2xl relative z-30 order-2 lg:order-1"
             >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -412,9 +412,12 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, delay: 0.2 }}
-              className="relative flex items-center justify-center mt-10 lg:mt-0"
+              className="relative flex items-center justify-center mt-6 lg:mt-0 order-1 lg:order-2"
             >
               <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] h-[440px] sm:h-[500px] lg:h-[600px] mx-auto flex items-end justify-center">
+                {/* Architectural Hero Background Ornaments precisely framed around the hero avatar (SMK Telkom Malang aesthetic) */}
+                <HeroOrnaments />
+
                 {/* Subtle ambient depth bloom behind avatar — pure Cyan */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
