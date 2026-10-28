@@ -423,7 +423,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
             )}
           >
             <span className="relative z-10 flex items-center gap-2 tracking-wide font-semibold">
-              {!isDisabled && <Rocket className="w-5 h-5 group-hover:-translate-y-1.5 group-hover:translate-x-1.5 transition-transform duration-300" />}
+              {!isDisabled && <Rocket className="w-5 h-5 shrink-0" />}
               {isDisabled ? "Coming Soon" : loading ? "Loading..." : "Deploy Now"}
             </span>
           </button>
