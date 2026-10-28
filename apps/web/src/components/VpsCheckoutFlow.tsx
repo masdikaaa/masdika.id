@@ -661,23 +661,23 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
   return (
     <>
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full max-w-full min-w-0">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 w-full max-w-full min-w-0">
         {/* Configuration Pane */}
-        <div className="xl:col-span-2 space-y-6 md:space-y-8 w-full max-w-full min-w-0">
+        <div className="xl:col-span-2 space-y-6 w-full max-w-full min-w-0">
 
           {/* OS Templates - Only for regular VPS (Kubernetes is locked to Debian 13) */}
           {serviceType !== "KUBERNETES" && (
-            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[60] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-              <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <HardDrive className="w-5 h-5 text-cyan-400" />
-                1. Choose Operating System
+            <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[60] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <h2 className={cn("text-base sm:text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <HardDrive className="w-4 h-4 text-cyan-400" />
+                1. Operating System Image
               </h2>
               {templates.length === 0 ? (
-                <div className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No templates available. Please contact support.</div>
+                <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>No templates available. Please contact support.</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Image / App</label>
+                    <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Distribution / OS Family</label>
                     <Select
                       value={selectedOsFamily || ""}
                       onChange={(val) => {
@@ -701,11 +701,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         ) 
                       }))}
                       placeholder="Select Image / App..."
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                      className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Image / App Version</label>
+                    <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Release Version</label>
                     <Select
                       value={selectedTemplate || ""}
                       onChange={(val) => setSelectedTemplate(Number(val))}
@@ -721,7 +721,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         })
                       }
                       placeholder="Select Version..."
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                      className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                     />
                   </div>
                 </div>
@@ -730,10 +730,10 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           )}
 
           {serviceType === "KUBERNETES" && !isAddWorkerNode && (
-            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[50] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-              <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Server className="w-5 h-5 text-cyan-400" />
-                1. Choose Kubernetes Version
+            <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[50] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <h2 className={cn("text-base sm:text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <Server className="w-4 h-4 text-cyan-400" />
+                1. Kubernetes Control Plane Version
               </h2>
               <div className="relative z-[50]">
                 <Select
@@ -748,17 +748,17 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </div>
                     ) 
                   }))}
-                  className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                 />
               </div>
             </motion.div>
           )}
 
           {nodes.length > 0 && (
-            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[40] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-              <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <MapPin className="w-5 h-5 text-cyan-400" />
-                2. Region
+            <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[40] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <h2 className={cn("text-base sm:text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <MapPin className="w-4 h-4 text-cyan-400" />
+                2. Datacenter Region
               </h2>
               <div className="relative z-[40]">
                 <Select
@@ -771,784 +771,794 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       : `${node.regionName || node.node} (${node.status})`
                   }))}
                   placeholder="Select Region..."
-                  className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold transition-colors", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700 text-white" : "bg-white border-slate-200 hover:border-cyan-400 text-slate-900 shadow-sm")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold transition-colors", isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.15] text-white" : "bg-white border-slate-200 hover:border-cyan-400 text-slate-900")}
                 />
               </div>
             </motion.div>
           )}
 
           {/* Compute Resources & Billing Mode */}
-          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative mb-6 md:mb-8 z-[30] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3 relative z-10">
-              <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Sliders className="w-5 h-5 text-cyan-400" />
-                3. Compute Resources
-              </h2>
-              <IntelCpuBadge />
-            </div>
-            
-            <div className="flex justify-start sm:justify-end mb-6">
-              <div className={cn("flex rounded-lg p-1 border w-full sm:w-max", isDark ? "bg-black/50 border-white/10" : "bg-slate-200 border-slate-300")}>
-                <button
-                  onClick={() => setDiskType("HDD")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition-all flex items-center justify-center gap-2", diskType === "HDD" ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
-                >
-                  <HardDrive className="w-4 h-4" /> HDD
-                </button>
-                <button
-                  onClick={() => setDiskType("SSD")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition-all flex items-center justify-center gap-2", diskType === "SSD" ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
-                >
-                  <Disc className="w-4 h-4" /> SSD
-                </button>
+          <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[30] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b gap-3 relative z-10"
+              style={{ borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(226,232,240,0.8)" }}
+            >
+              <div>
+                <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                  <Sliders className="w-4 h-4 text-cyan-400" />
+                  3. Compute Resources
+                </h2>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Scale dedicated CPU cores, memory, and block storage.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <IntelCpuBadge />
+                <div className={cn("flex rounded-lg p-0.5 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+                  <button
+                    type="button"
+                    onClick={() => setDiskType("HDD")}
+                    className={cn("px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer", diskType === "HDD" ? "bg-cyan-400 text-slate-950 shadow-2xs" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
+                  >
+                    <HardDrive className="w-3.5 h-3.5" /> HDD
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDiskType("SSD")}
+                    className={cn("px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer", diskType === "SSD" ? "bg-cyan-400 text-slate-950 shadow-2xs" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
+                  >
+                    <Disc className="w-3.5 h-3.5" /> SSD
+                  </button>
+                </div>
               </div>
             </div>
 
-              <div className="space-y-8 relative z-10">
-                {/* vCPU Slider */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className={cn("text-sm font-medium flex items-center gap-2", isDark ? "text-zinc-300" : "text-slate-700")}>
-                      <Cpu className="w-4 h-4" /> vCPU Cores
-                    </label>
-                    <span className="text-cyan-400 font-bold">{cpuCores} Core{cpuCores > 1 ? 's' : ''}</span>
-                  </div>
-                  <input
-                    type="range" min="1" max={maxSpecs.cpu} step="1"
-                    value={cpuCores} onChange={e => setCpuCores(Number(e.target.value))}
-                    className={cn("w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                    style={{ background: `linear-gradient(to right, #22d3ee ${((cpuCores - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${((cpuCores - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100}%)` }}
-                  />
-                  <div className="flex justify-between text-xs text-zinc-500 mt-1">
-                    <span>1 Core</span><span>{maxSpecs.cpu} Cores</span>
-                  </div>
+            <div className="space-y-6 relative z-10">
+              {/* vCPU Slider */}
+              <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
+                <div className="flex justify-between items-center mb-2.5">
+                  <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
+                    <Cpu className="w-4 h-4 text-cyan-400" /> vCPU Cores
+                  </label>
+                  <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                    {cpuCores} Core{cpuCores > 1 ? 's' : ''}
+                  </span>
                 </div>
-
-                {/* RAM Slider */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className={cn("text-sm font-medium flex items-center gap-2", isDark ? "text-zinc-300" : "text-slate-700")}>
-                      <MemoryStick className="w-4 h-4" /> Memory (RAM)
-                    </label>
-                    <span className="text-cyan-400 font-bold">{ramGb} GB</span>
-                  </div>
-                  <input
-                    type="range" min="1" max={maxSpecs.ram} step="1"
-                    value={ramGb} onChange={e => setRamGb(Number(e.target.value))}
-                    className={cn("w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                    style={{ background: `linear-gradient(to right, #22d3ee ${((ramGb - 1) / Math.max(1, maxSpecs.ram - 1)) * 100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${((ramGb - 1) / Math.max(1, maxSpecs.ram - 1)) * 100}%)` }}
-                  />
-                  <div className="flex justify-between text-xs text-zinc-500 mt-1">
-                    <span>1 GB</span><span>{maxSpecs.ram} GB</span>
-                  </div>
-                </div>
-
-                {/* Disk Slider */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className={cn("text-sm font-medium flex items-center gap-2", isDark ? "text-zinc-300" : "text-slate-700")}>
-                      <HardDrive className="w-4 h-4" /> Disk Storage ({diskType})
-                    </label>
-                    <span className="text-cyan-400 font-bold">{diskGb} GB</span>
-                  </div>
-                  <input
-                    type="range" min="20" max={diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd} step="10"
-                    value={diskGb} onChange={e => setDiskGb(Number(e.target.value))}
-                    className={cn("w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                    style={{ background: `linear-gradient(to right, #22d3ee ${((diskGb - 20) / Math.max(1, (diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd) - 20)) * 100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${((diskGb - 20) / Math.max(1, (diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd) - 20)) * 100}%)` }}
-                  />
-                  <div className="flex justify-between text-xs text-zinc-500 mt-1">
-                    <span>20 GB</span><span>{diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd} GB</span>
-                  </div>
+                <input
+                  type="range" min="1" max={maxSpecs.cpu} step="1"
+                  value={cpuCores} onChange={e => setCpuCores(Number(e.target.value))}
+                  className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
+                  style={{ background: `linear-gradient(to right, #22d3ee ${((cpuCores - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((cpuCores - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100}%)` }}
+                />
+                <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
+                  <span>1 Core</span><span>{maxSpecs.cpu} Cores</span>
                 </div>
               </div>
 
+              {/* RAM Slider */}
+              <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
+                <div className="flex justify-between items-center mb-2.5">
+                  <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
+                    <MemoryStick className="w-4 h-4 text-cyan-400" /> Memory (RAM)
+                  </label>
+                  <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                    {ramGb} GB
+                  </span>
+                </div>
+                <input
+                  type="range" min="1" max={maxSpecs.ram} step="1"
+                  value={ramGb} onChange={e => setRamGb(Number(e.target.value))}
+                  className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
+                  style={{ background: `linear-gradient(to right, #22d3ee ${((ramGb - 1) / Math.max(1, maxSpecs.ram - 1)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((ramGb - 1) / Math.max(1, maxSpecs.ram - 1)) * 100}%)` }}
+                />
+                <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
+                  <span>1 GB</span><span>{maxSpecs.ram} GB</span>
+                </div>
+              </div>
+
+              {/* Disk Slider */}
+              <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
+                <div className="flex justify-between items-center mb-2.5">
+                  <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
+                    <HardDrive className="w-4 h-4 text-cyan-400" /> Block Storage ({diskType})
+                  </label>
+                  <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                    {diskGb} GB {diskType}
+                  </span>
+                </div>
+                <input
+                  type="range" min="20" max={diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd} step="10"
+                  value={diskGb} onChange={e => setDiskGb(Number(e.target.value))}
+                  className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
+                  style={{ background: `linear-gradient(to right, #22d3ee ${((diskGb - 20) / Math.max(1, (diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd) - 20)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((diskGb - 20) / Math.max(1, (diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd) - 20)) * 100}%)` }}
+                />
+                <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
+                  <span>20 GB</span><span>{diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd} GB</span>
+                </div>
+              </div>
+            </div>
           </motion.div>
+
           {/* Network & Extra (Only for PAYG) */}
+          <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[20] grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <div className="flex flex-col h-full w-full max-w-full min-w-0">
+              <div className="flex flex-wrap items-center justify-between mb-3.5 gap-2 shrink-0">
+                <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                  <Network className="w-4 h-4 text-cyan-400 shrink-0" />
+                  4. Public Networking
+                </h2>
+                <NetworkInfraBadge />
+              </div>
+              <div className="flex-1 flex flex-col gap-3 w-full max-w-full min-w-0">
 
-            <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[20] grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-              <div className="flex flex-col h-full w-full max-w-full min-w-0">
-                <div className="flex flex-wrap items-center justify-between mb-3 sm:mb-4 gap-2 shrink-0">
-                  <h2 className={cn("text-lg sm:text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                    <Network className="w-5 h-5 text-cyan-400 shrink-0" />
-                    4. Networking
-                  </h2>
-                  <NetworkInfraBadge />
-                </div>
-                <div className="flex-1 flex flex-col gap-3 w-full max-w-full min-w-0">
+                {reservedIps.length > 0 && (
+                  <div className={cn(
+                    "p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-xl border transition-all space-y-3",
+                    useReservedIp ? (isDark ? "bg-cyan-500/[0.05] border-cyan-500/50 ring-1 ring-cyan-500/20" : "bg-cyan-50/40 border-cyan-600 ring-1 ring-cyan-600/20") : (isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")
+                  )}>
+                    <div className="flex items-center justify-between gap-2.5 sm:gap-3 w-full">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                        <div className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center font-bold border transition-colors shrink-0",
+                          useReservedIp ? (isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border-cyan-500/20") : (isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-white border-slate-200 text-slate-600")
+                        )}>
+                          <Network className="w-4 h-4 shrink-0" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className={cn("font-bold text-xs sm:text-sm leading-tight", useReservedIp ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Use Reserved IP</div>
+                          <div className={cn("text-[11px] font-medium truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Attach an IP you already own</div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setUseReservedIp(!useReservedIp)}
+                        className={cn(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none transition-colors",
+                          useReservedIp ? "bg-cyan-400" : (isDark ? "bg-white/10" : "bg-slate-300")
+                        )}
+                      >
+                        <span className="sr-only">Use Reserved IP</span>
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            useReservedIp ? "translate-x-4" : "translate-x-0"
+                          )}
+                        />
+                      </button>
+                    </div>
 
-                  {reservedIps.length > 0 && (
-                    <div className={cn(
-                      "p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-2xl border transition-all space-y-3",
-                      useReservedIp ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
-                    )}>
-                      <div className="flex items-center justify-between gap-2.5 sm:gap-3 w-full">
-                        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-                          <div className={cn(
-                            "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold border transition-colors shrink-0",
-                            useReservedIp ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border border-cyan-500/20") : (isDark ? "bg-slate-800 text-slate-400 border border-slate-700" : "bg-slate-100 border border-slate-200 text-slate-600")
-                          )}>
-                            <Network className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className={cn("font-bold text-xs sm:text-sm leading-tight", useReservedIp ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Use Reserved IP</div>
-                            <div className={cn("text-[11px] sm:text-xs font-medium truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Attach an IP you already own</div>
+                    {useReservedIp && (
+                      <div className={cn("pt-2 border-t", isDark ? "border-white/[0.07]" : "border-slate-200/70")}>
+                        <Select
+                          value={selectedReservedIpId || ""}
+                          onChange={(val) => setSelectedReservedIpId(parseInt(val))}
+                          options={reservedIps.map(ip => ({ 
+                            value: ip.id, 
+                            label: ip.publicIp ? `${ip.ipAddress} (Public: ${ip.publicIp})` : ip.ipAddress 
+                          }))}
+                          placeholder="Select Reserved IP"
+                          className={cn("w-full rounded-lg px-3 py-2 text-sm", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                        <p className={cn("text-[11px] mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          When using a reserved IP, you will not be billed hourly for the IP on this service.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!useReservedIp && hasIpv4Pool && (
+                  <div className={cn(
+                    "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-xl border transition-all gap-3 flex-1 justify-center",
+                    ipv4Count > 0 ? (isDark ? "bg-cyan-500/[0.05] border-cyan-500/50 ring-1 ring-cyan-500/20" : "bg-cyan-50/40 border-cyan-600 ring-1 ring-cyan-600/20") : (isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")
+                  )}>
+                    <div className="flex items-center justify-between w-full gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                        <div className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center font-bold border text-[10px] sm:text-xs transition-colors shrink-0",
+                          ipv4Count > 0 ? (isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border-cyan-500/20") : (isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-white border-slate-200 text-slate-600")
+                        )}>
+                          IPv4
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className={cn("font-bold text-xs sm:text-sm leading-tight mb-0.5", ipv4Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Public IPv4</div>
+                          <div className={cn("text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            +{formatRupiah(pricing.ipv4 || 0)}/hr <span className="hidden sm:inline">per IP</span>
                           </div>
                         </div>
+                      </div>
+
+                      <div className={cn(
+                        "flex items-center gap-1.5 rounded-lg p-1 border shrink-0",
+                        isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
+                      )}>
                         <button
                           type="button"
-                          onClick={() => setUseReservedIp(!useReservedIp)}
+                          onClick={() => setIpv4Count(Math.max(0, ipv4Count - 1))}
+                          disabled={ipv4Count <= 0}
                           className={cn(
-                            "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-[#0f172a] transition-colors",
-                            useReservedIp ? "bg-cyan-500" : (isDark ? "bg-white/10" : "bg-slate-300")
+                            "w-6 h-6 flex items-center justify-center rounded text-xs font-bold transition-all disabled:opacity-30 cursor-pointer",
+                            isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white" : "bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200"
                           )}
                         >
-                          <span className="sr-only">Use Reserved IP</span>
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              useReservedIp ? "translate-x-4" : "translate-x-0"
-                            )}
-                          />
+                          -
+                        </button>
+                        <span className={cn("w-5 text-center font-bold font-mono text-xs sm:text-sm", ipv4Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>{ipv4Count}</span>
+                        <button
+                          type="button"
+                          onClick={() => setIpv4Count(Math.min(10, ipv4Count + 1))}
+                          className={cn(
+                            "w-6 h-6 flex items-center justify-center rounded text-xs font-bold transition-all cursor-pointer",
+                            isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white" : "bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200"
+                          )}
+                        >
+                          +
                         </button>
                       </div>
-
-                      {useReservedIp && (
-                        <div className={cn("pt-2 border-t", isDark ? "border-white/5" : "border-slate-100")}>
-                          <Select
-                            value={selectedReservedIpId || ""}
-                            onChange={(val) => setSelectedReservedIpId(parseInt(val))}
-                            options={reservedIps.map(ip => ({ 
-                              value: ip.id, 
-                              label: ip.publicIp ? `${ip.ipAddress} (Public: ${ip.publicIp})` : ip.ipAddress 
-                            }))}
-                            placeholder="Select Reserved IP"
-                            className={cn("w-full rounded-lg px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-black/40 border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
-                          />
-                          <p className={cn("text-[11px] mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            When using a reserved IP, you will not be billed hourly for the IP on this service.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {!useReservedIp && hasIpv4Pool && (
-                    <div className={cn(
-                      "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-3 flex-1 justify-center",
-                      ipv4Count > 0 ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
-                    )}>
-                      <div className="flex items-center justify-between w-full gap-2 min-w-0">
-                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                          <div className={cn(
-                            "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold border text-[10px] sm:text-xs transition-colors shrink-0",
-                            ipv4Count > 0 ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border border-cyan-500/20") : (isDark ? "bg-slate-800 text-slate-400 border border-slate-700" : "bg-slate-100 border border-slate-200 text-slate-600")
-                          )}>
-                            IPv4
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className={cn("font-bold text-xs sm:text-sm leading-tight mb-0.5", ipv4Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Public IPv4</div>
-                            <div className={cn("text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
-                              +{formatRupiah(pricing.ipv4 || 0)}/hr <span className="hidden sm:inline">per IP</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className={cn(
-                          "flex items-center gap-1.5 sm:gap-2 rounded-lg p-1 border shrink-0",
-                          isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200"
-                        )}>
-                          <button
-                            type="button"
-                            onClick={() => setIpv4Count(Math.max(0, ipv4Count - 1))}
-                            disabled={ipv4Count <= 0}
-                            className={cn(
-                              "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs sm:text-sm font-bold transition-all disabled:opacity-30",
-                              isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs"
-                            )}
-                          >
-                            -
-                          </button>
-                          <span className={cn("w-5 sm:w-6 text-center font-bold text-xs sm:text-sm", ipv4Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>{ipv4Count}</span>
-                          <button
-                            type="button"
-                            onClick={() => setIpv4Count(Math.min(10, ipv4Count + 1))}
-                            className={cn(
-                              "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs sm:text-sm font-bold transition-all",
-                              isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs"
-                            )}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className={cn(
-                        "pt-2 border-t flex flex-wrap items-center justify-between text-[11px] sm:text-xs font-mono gap-1.5 sm:gap-2",
-                        isDark ? "border-cyan-500/20" : "border-slate-200"
-                      )}>
-                        <span className={cn("font-sans", isDark ? "text-zinc-400" : "text-slate-500")}>Est. Cost ({ipv4Count} IP):</span>
-                        <div className={cn("font-bold text-right", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          +{formatRupiah(ipv4Count * (pricing.ipv4 || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-400" : "text-slate-500")}>(~{formatRupiah(ipv4Count * (pricing.ipv4 || 0) * 720)}/mo)</span>
-                        </div>
-                      </div>
-                      <p className={cn("text-[10px] italic leading-tight break-words", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        *Public IP is an addon. If you add this option, please open a support ticket after checkout to claim your IP.
-                      </p>
-                    </div>
-                  )}
-
-                  {hasIpv6Pool && (
-                    <div className={cn(
-                      "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-3",
-                      ipv6Count > 0 ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
-                    )}>
-                      <div className="flex items-center justify-between w-full gap-2 min-w-0">
-                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                          <div className={cn(
-                            "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold border text-xs transition-colors shrink-0",
-                            ipv6Count > 0 ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border border-cyan-500/20") : (isDark ? "bg-slate-800 text-slate-400 border border-slate-700" : "bg-slate-100 border border-slate-200 text-slate-600")
-                          )}>
-                            IPv6
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className={cn("font-bold text-xs sm:text-sm leading-tight mb-0.5", ipv6Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Public IPv6</div>
-                            <div className={cn("text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
-                              +{formatRupiah(pricing.ipv6 || 0)}/hr <span className="hidden sm:inline">per IP</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className={cn(
-                          "flex items-center gap-1.5 sm:gap-2 rounded-lg p-1 border shrink-0",
-                          isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200"
-                        )}>
-                          <button
-                            type="button"
-                            onClick={() => setIpv6Count(Math.max(0, ipv6Count - 1))}
-                            disabled={ipv6Count <= 0}
-                            className={cn(
-                              "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs sm:text-sm font-bold transition-all disabled:opacity-30",
-                              isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs"
-                            )}
-                          >
-                            -
-                          </button>
-                          <span className={cn("w-5 sm:w-6 text-center font-bold text-xs sm:text-sm", ipv6Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>{ipv6Count}</span>
-                          <button
-                            type="button"
-                            onClick={() => setIpv6Count(Math.min(10, ipv6Count + 1))}
-                            className={cn(
-                              "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs sm:text-sm font-bold transition-all",
-                              isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs"
-                            )}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className={cn(
-                        "pt-2 border-t flex flex-wrap items-center justify-between text-[11px] sm:text-xs font-mono gap-1.5 sm:gap-2",
-                        isDark ? "border-cyan-500/20" : "border-slate-200"
-                      )}>
-                        <span className={cn("font-sans", isDark ? "text-zinc-400" : "text-slate-500")}>Est. Cost ({ipv6Count} IP):</span>
-                        <div className={cn("font-bold text-right", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          +{formatRupiah(ipv6Count * (pricing.ipv6 || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-400" : "text-slate-500")}>(~{formatRupiah(ipv6Count * (pricing.ipv6 || 0) * 720)}/mo)</span>
-                        </div>
-                      </div>
-                      <p className={cn("text-[10px] italic leading-tight break-words", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        *Public IP is an addon. If you add this option, please open a support ticket after checkout to claim your IP.
-                      </p>
-                    </div>
-                  )}
-                  {!useReservedIp && !hasIpv4Pool && !hasIpv6Pool && (
-                    <div className="p-3 rounded-lg border border-white/10 bg-white/5 text-sm text-zinc-400 text-center">
-                      No Public IP addresses available at the moment.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col h-full w-full max-w-full min-w-0">
-                <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                  <DatabaseBackup className="w-5 h-5 text-cyan-400 shrink-0" />
-                  5. Backup Addon
-                </h2>
-                <div className={cn(
-                  "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-3 flex-1 justify-center",
-                  backupGb > 0
-                    ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20")
-                    : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
-                )}>
-                  <div className="flex items-center justify-between w-full gap-2 min-w-0">
-                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                      <div className={cn(
-                        "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold border text-xs transition-colors shrink-0",
-                        backupGb > 0 ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border border-cyan-500/20") : (isDark ? "bg-slate-800 text-slate-400 border border-slate-700" : "bg-slate-100 border border-slate-200 text-slate-600")
-                      )}>
-                        <HardDrive className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className={cn("font-bold text-xs sm:text-sm leading-tight mb-0.5", backupGb > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Offsite Backup</div>
-                        <div className={cn("text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
-                          +{formatRupiah(pricing.backup || 0)}/hr <span className="hidden sm:inline">per GB</span>
-                        </div>
-                      </div>
                     </div>
 
                     <div className={cn(
-                      "flex items-center gap-1 rounded-lg px-2 sm:px-2.5 py-1 border shrink-0",
-                      isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200"
+                      "pt-2 border-t flex flex-wrap items-center justify-between text-[11px] font-mono gap-1.5",
+                      isDark ? "border-white/[0.07]" : "border-slate-200/70"
                     )}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="1000"
-                        value={backupGb.toString()}
-                        onChange={(e) => {
-                          if (e.target.value === "") {
-                            setBackupGb(0);
-                          } else {
-                            const val = parseInt(e.target.value);
-                            if (!isNaN(val) && val >= 0) {
-                              setBackupGb(Math.min(val, maxBackupAllowed));
-                            }
-                          }
-                        }}
-                        className={cn(
-                          "bg-transparent text-center font-bold text-xs sm:text-sm font-mono focus:outline-none p-0 border-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-                          backupGb > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900")
-                        )}
-                        style={{ width: `${Math.max(1, backupGb.toString().length)}ch` }}
-                      />
-                      <span className={cn("font-bold text-xs sm:text-sm font-mono pr-0.5", backupGb > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>GB</span>
-                    </div>
-                  </div>
-
-                  <input
-                    type="range" min="0" max={maxBackupAllowed} step="5"
-                    value={backupGb} onChange={e => setBackupGb(Math.min(Number(e.target.value), maxBackupAllowed))}
-                    className={cn("w-full max-w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none my-1", isDark ? "bg-white/10" : "bg-slate-200")}
-                    style={{ background: `linear-gradient(to right, #22d3ee ${((backupGb - 0) / Math.max(1, maxBackupAllowed - 0)) * 100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${((backupGb - 0) / Math.max(1, maxBackupAllowed - 0)) * 100}%)` }}
-                  />
-
-                  {backupGb > 0 ? (
-                    <div className={cn(
-                      "pt-2 border-t flex flex-wrap items-center justify-between text-[11px] sm:text-xs font-mono gap-1.5 sm:gap-2",
-                      isDark ? "border-cyan-500/20" : "border-slate-200"
-                    )}>
-                      <span className={cn("font-sans", isDark ? "text-zinc-400" : "text-slate-500")}>Est. Cost ({backupGb} GB):</span>
+                      <span className={cn("font-sans", isDark ? "text-zinc-400" : "text-slate-500")}>Est. Cost ({ipv4Count} IP):</span>
                       <div className={cn("font-bold text-right", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                        +{formatRupiah(backupGb * (pricing.backup || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-400" : "text-slate-500")}>(~{formatRupiah(backupGb * (pricing.backup || 0) * 720)}/mo)</span>
+                        +{formatRupiah(ipv4Count * (pricing.ipv4 || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-500" : "text-slate-500")}>(~{formatRupiah(ipv4Count * (pricing.ipv4 || 0) * 720)}/mo)</span>
                       </div>
                     </div>
-                  ) : (
-                    <div className={cn("pt-2 border-t flex flex-col sm:flex-row sm:items-start justify-between text-[11px] sm:text-xs gap-1 sm:gap-2", isDark ? "border-slate-800" : "border-slate-200")}>
-                      <span className={cn("font-sans leading-snug", isDark ? "text-zinc-500" : "text-slate-500")}>Enable automatic backups by allocating storage.</span>
-                      <div className={cn("font-mono italic text-left sm:text-right shrink-0", isDark ? "text-zinc-500" : "text-slate-400")}>0 GB (No extra cost)</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Bandwidth Speed Limit Section */}
-              <div className="flex flex-col h-full w-full max-w-full min-w-0 md:col-span-2">
-                <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                  <Activity className="w-5 h-5 text-cyan-400 shrink-0" />
-                  6. Network Bandwidth (Speed Limit)
-                </h2>
-                <div className={cn(
-                  "flex flex-col p-4 sm:p-5 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-4",
-                  isDark ? "bg-[#0b162c] border-cyan-500/40 shadow-sm" : "bg-white border-cyan-600/30 shadow-sm"
-                )}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <span className={cn("font-bold text-sm sm:text-base", isDark ? "text-white" : "text-slate-900")}>Port Speed Rate Limit</span>
-                      <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Dedicated network port traffic rate shaper. 100 Mbps base speed is included for free.</p>
-                    </div>
-                    <div className="flex items-center gap-2 self-start sm:self-auto">
-                      <span className={cn(
-                        "px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border transition-colors",
-                        bandwidthMbps === 100
-                          ? (isDark ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border-cyan-200")
-                          : (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")
-                      )}>
-                        {bandwidthMbps} Mbps {bandwidthMbps === 100 ? "(Free)" : `(+${formatRupiah(Math.floor((bandwidthMbps - 100) / 50) * 50000)}/mo)`}
-                      </span>
-                    </div>
                   </div>
+                )}
 
-                  {/* Range Slider */}
-                  {bandwidthOptions.length > 1 && (
-                    <div className="pt-1">
-                      <input
-                        type="range"
-                        min={bandwidthOptions[0]}
-                        max={bandwidthOptions[bandwidthOptions.length - 1]}
-                        step={50}
-                        value={bandwidthMbps}
-                        onChange={(e) => {
-                          const val = Number(e.target.value);
-                          const closest = bandwidthOptions.reduce((prev, curr) =>
-                            Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev, bandwidthOptions[0]
-                          );
-                          setBandwidthMbps(closest);
-                        }}
-                        className={cn(
-                          "w-full max-w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none my-1",
-                          isDark ? "bg-white/10" : "bg-slate-200"
-                        )}
-                        style={{
-                          background: `linear-gradient(to right, #22d3ee ${((bandwidthMbps - bandwidthOptions[0]) / Math.max(1, bandwidthOptions[bandwidthOptions.length - 1] - bandwidthOptions[0])) * 100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${((bandwidthMbps - bandwidthOptions[0]) / Math.max(1, bandwidthOptions[bandwidthOptions.length - 1] - bandwidthOptions[0])) * 100}%)`
-                        }}
-                      />
-                    </div>
-                  )}
+                {hasIpv6Pool && (
+                  <div className={cn(
+                    "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-xl border transition-all gap-3",
+                    ipv6Count > 0 ? (isDark ? "bg-cyan-500/[0.05] border-cyan-500/50 ring-1 ring-cyan-500/20" : "bg-cyan-50/40 border-cyan-600 ring-1 ring-cyan-600/20") : (isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")
+                  )}>
+                    <div className="flex items-center justify-between w-full gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                        <div className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center font-bold border text-xs transition-colors shrink-0",
+                          ipv6Count > 0 ? (isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border-cyan-500/20") : (isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-white border-slate-200 text-slate-600")
+                        )}>
+                          IPv6
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className={cn("font-bold text-xs sm:text-sm leading-tight mb-0.5", ipv6Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Public IPv6</div>
+                          <div className={cn("text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            +{formatRupiah(pricing.ipv6 || 0)}/hr <span className="hidden sm:inline">per IP</span>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 pt-1">
-                    {bandwidthOptions.map((speed, index) => {
-                      const isSelected = bandwidthMbps === speed;
-                      const extraSteps = Math.floor(Math.max(0, speed - 100) / 50);
-                      const monthlyPrice = extraSteps * 50000;
-                      const isLastOdd = index === bandwidthOptions.length - 1 && bandwidthOptions.length % 2 === 1;
-                      return (
+                      <div className={cn(
+                        "flex items-center gap-1.5 rounded-lg p-1 border shrink-0",
+                        isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
+                      )}>
                         <button
-                          key={speed}
                           type="button"
-                          onClick={() => setBandwidthMbps(speed)}
+                          onClick={() => setIpv6Count(Math.max(0, ipv6Count - 1))}
+                          disabled={ipv6Count <= 0}
                           className={cn(
-                            "flex items-center justify-center py-2.5 px-2.5 sm:py-2.5 sm:px-2 rounded-xl border text-center transition-all cursor-pointer relative min-w-0",
-                            isLastOdd ? "col-span-2 sm:col-span-1 flex-row gap-2 sm:flex-col sm:gap-0" : "col-span-1 flex-col",
-                            isSelected
-                              ? (isDark ? "bg-cyan-500/20 border-cyan-400 text-white shadow-sm ring-1 ring-cyan-400" : "bg-cyan-50 border-cyan-600 text-cyan-900 shadow-sm ring-2 ring-cyan-600/30")
-                              : (isDark ? "bg-[#060b14] border-slate-800 text-zinc-300 hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300")
+                            "w-6 h-6 flex items-center justify-center rounded text-xs font-bold transition-all disabled:opacity-30 cursor-pointer",
+                            isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white" : "bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200"
                           )}
                         >
-                          <span className="font-bold text-xs sm:text-sm font-mono tracking-tight shrink-0">{speed} Mbps</span>
-                          <span className={cn(
-                            "text-[10px] sm:text-[11px] font-semibold tracking-tight whitespace-nowrap",
-                            isLastOdd ? "mt-0 sm:mt-0.5" : "mt-0.5",
-                            speed === 100
-                              ? (isSelected ? "text-cyan-300 font-bold" : (isDark ? "text-cyan-400" : "text-cyan-600"))
-                              : (isSelected ? (isDark ? "text-cyan-200" : "text-cyan-800") : (isDark ? "text-zinc-400" : "text-slate-500"))
-                          )}>
-                            {speed === 100 ? "FREE" : `+${formatRupiah(monthlyPrice)}/mo`}
-                          </span>
+                          -
                         </button>
-                      );
-                    })}
+                        <span className={cn("w-5 text-center font-bold font-mono text-xs sm:text-sm", ipv6Count > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>{ipv6Count}</span>
+                        <button
+                          type="button"
+                          onClick={() => setIpv6Count(Math.min(10, ipv6Count + 1))}
+                          className={cn(
+                            "w-6 h-6 flex items-center justify-center rounded text-xs font-bold transition-all cursor-pointer",
+                            isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white" : "bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200"
+                          )}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className={cn(
+                      "pt-2 border-t flex flex-wrap items-center justify-between text-[11px] font-mono gap-1.5",
+                      isDark ? "border-white/[0.07]" : "border-slate-200/70"
+                    )}>
+                      <span className={cn("font-sans", isDark ? "text-zinc-400" : "text-slate-500")}>Est. Cost ({ipv6Count} IP):</span>
+                      <div className={cn("font-bold text-right", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        +{formatRupiah(ipv6Count * (pricing.ipv6 || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-500" : "text-slate-500")}>(~{formatRupiah(ipv6Count * (pricing.ipv6 || 0) * 720)}/mo)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {!useReservedIp && !hasIpv4Pool && !hasIpv6Pool && (
+                  <div className="p-3 rounded-lg border border-white/[0.07] bg-white/[0.02] text-sm text-zinc-400 text-center">
+                    No Public IP addresses available at the moment.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col h-full w-full max-w-full min-w-0">
+              <h2 className={cn("text-base sm:text-lg font-bold mb-3.5 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                <DatabaseBackup className="w-4 h-4 text-cyan-400 shrink-0" />
+                5. Automated Backups
+              </h2>
+              <div className={cn(
+                "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-xl border transition-all gap-3 flex-1 justify-center",
+                backupGb > 0
+                  ? (isDark ? "bg-cyan-500/[0.05] border-cyan-500/50 ring-1 ring-cyan-500/20" : "bg-cyan-50/40 border-cyan-600 ring-1 ring-cyan-600/20")
+                  : (isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")
+              )}>
+                <div className="flex items-center justify-between w-full gap-2 min-w-0">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center font-bold border text-xs transition-colors shrink-0",
+                      backupGb > 0 ? (isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border-cyan-500/20") : (isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-white border-slate-200 text-slate-600")
+                    )}>
+                      <HardDrive className="w-4 h-4 shrink-0" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className={cn("font-bold text-xs sm:text-sm leading-tight mb-0.5", backupGb > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Offsite Snapshot Quota</div>
+                      <div className={cn("text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        +{formatRupiah(pricing.backup || 0)}/hr <span className="hidden sm:inline">per GB</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "flex items-center gap-1 rounded-lg px-2.5 py-1 border shrink-0",
+                    isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
+                  )}>
+                    <input
+                      type="number"
+                      min="0"
+                      max="1000"
+                      value={backupGb.toString()}
+                      onChange={(e) => {
+                        if (e.target.value === "") {
+                          setBackupGb(0);
+                        } else {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val) && val >= 0) {
+                            setBackupGb(Math.min(val, maxBackupAllowed));
+                          }
+                        }
+                      }}
+                      className={cn(
+                        "bg-transparent text-center font-bold text-xs sm:text-sm font-mono focus:outline-none p-0 border-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                        backupGb > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900")
+                      )}
+                      style={{ width: `${Math.max(1, backupGb.toString().length)}ch` }}
+                    />
+                    <span className={cn("font-bold text-xs sm:text-sm font-mono pr-0.5", backupGb > 0 ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>GB</span>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col h-full w-full max-w-full min-w-0 md:col-span-2">
-                <h2 className={cn("text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                  <VpcIcon className="w-5 h-5 text-cyan-400 shrink-0" />
-                  7. Virtual Private Cloud
-                </h2>
-                <div className={cn(
-                  "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-2xl border transition-all gap-3 flex-1",
-                  useVpc ? (isDark ? "bg-[#0b162c] border-cyan-500 shadow-md ring-1 ring-cyan-500/30" : "bg-white border-cyan-600 shadow-md ring-2 ring-cyan-600/20") : (isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200/90 shadow-sm")
-                )}>
-                  <div className="flex items-center justify-between w-full gap-2 sm:gap-3 min-w-0">
-                    <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-                      <div className={cn(
-                        "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold border transition-colors shrink-0",
-                        useVpc ? (isDark ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border border-cyan-500/20") : (isDark ? "bg-slate-800 text-slate-400 border border-slate-700" : "bg-slate-100 border border-slate-200 text-slate-600")
-                      )}>
-                        <Plug className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className={cn("font-bold text-xs sm:text-sm leading-tight", useVpc ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-white" : "text-slate-900"))}>Attach to VPC</div>
-                        <div className={cn("text-[11px] sm:text-xs font-medium truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Isolate your instance securely</div>
-                      </div>
+                <input
+                  type="range" min="0" max={maxBackupAllowed} step="5"
+                  value={backupGb} onChange={e => setBackupGb(Math.min(Number(e.target.value), maxBackupAllowed))}
+                  className={cn("w-full max-w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none my-1", isDark ? "bg-white/10" : "bg-slate-200")}
+                  style={{ background: `linear-gradient(to right, #22d3ee ${((backupGb - 0) / Math.max(1, maxBackupAllowed - 0)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((backupGb - 0) / Math.max(1, maxBackupAllowed - 0)) * 100}%)` }}
+                />
+
+                {backupGb > 0 ? (
+                  <div className={cn(
+                    "pt-2 border-t flex flex-wrap items-center justify-between text-[11px] font-mono gap-1.5",
+                    isDark ? "border-white/[0.07]" : "border-slate-200/70"
+                  )}>
+                    <span className={cn("font-sans", isDark ? "text-zinc-400" : "text-slate-500")}>Est. Cost ({backupGb} GB):</span>
+                    <div className={cn("font-bold text-right", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      +{formatRupiah(backupGb * (pricing.backup || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-500" : "text-slate-500")}>(~{formatRupiah(backupGb * (pricing.backup || 0) * 720)}/mo)</span>
                     </div>
+                  </div>
+                ) : (
+                  <div className={cn("pt-2 border-t flex flex-col sm:flex-row sm:items-start justify-between text-[11px] gap-1 sm:gap-2", isDark ? "border-white/[0.07]" : "border-slate-200/70")}>
+                    <span className={cn("font-sans leading-snug", isDark ? "text-zinc-500" : "text-slate-500")}>Enable automatic backups by allocating storage.</span>
+                    <div className={cn("font-mono italic text-left sm:text-right shrink-0", isDark ? "text-zinc-500" : "text-slate-400")}>0 GB (Free)</div>
+                  </div>
+                )}
+              </div>
+            </div>
 
-                    <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 rounded-full shrink-0">
-                      Required
+            {/* Bandwidth Speed Limit Section */}
+            <div className="flex flex-col h-full w-full max-w-full min-w-0 md:col-span-2">
+              <h2 className={cn("text-base sm:text-lg font-bold mb-3.5 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+                6. Network Port Speed
+              </h2>
+              <div className={cn(
+                "flex flex-col p-4 w-full max-w-full min-w-0 rounded-xl border transition-all gap-4",
+                isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80"
+              )}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className={cn("font-bold text-xs sm:text-sm", isDark ? "text-white" : "text-slate-900")}>Port Speed Rate Limit</span>
+                    <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Dedicated network port traffic shaper. 100 Mbps base speed is included free.</p>
+                  </div>
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <span className={cn(
+                      "px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border transition-colors",
+                      isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                    )}>
+                      {bandwidthMbps} Mbps {bandwidthMbps === 100 ? "(Free)" : `(+${formatRupiah(Math.floor((bandwidthMbps - 100) / 50) * 50000)}/mo)`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Range Slider */}
+                {bandwidthOptions.length > 1 && (
+                  <div className="pt-1">
+                    <input
+                      type="range"
+                      min={bandwidthOptions[0]}
+                      max={bandwidthOptions[bandwidthOptions.length - 1]}
+                      step={50}
+                      value={bandwidthMbps}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const closest = bandwidthOptions.reduce((prev, curr) =>
+                          Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev, bandwidthOptions[0]
+                        );
+                        setBandwidthMbps(closest);
+                      }}
+                      className={cn(
+                        "w-full max-w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none my-1",
+                        isDark ? "bg-white/10" : "bg-slate-200"
+                      )}
+                      style={{
+                        background: `linear-gradient(to right, #22d3ee ${((bandwidthMbps - bandwidthOptions[0]) / Math.max(1, bandwidthOptions[bandwidthOptions.length - 1] - bandwidthOptions[0])) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((bandwidthMbps - bandwidthOptions[0]) / Math.max(1, bandwidthOptions[bandwidthOptions.length - 1] - bandwidthOptions[0])) * 100}%)`
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+                  {bandwidthOptions.map((speed, index) => {
+                    const isSelected = bandwidthMbps === speed;
+                    const extraSteps = Math.floor(Math.max(0, speed - 100) / 50);
+                    const monthlyPrice = extraSteps * 50000;
+                    const isLastOdd = index === bandwidthOptions.length - 1 && bandwidthOptions.length % 2 === 1;
+                    return (
+                      <button
+                        key={speed}
+                        type="button"
+                        onClick={() => setBandwidthMbps(speed)}
+                        className={cn(
+                          "flex items-center justify-center py-2 px-2 rounded-lg border text-center transition-all cursor-pointer relative min-w-0",
+                          isLastOdd ? "col-span-2 sm:col-span-1 flex-row gap-2 sm:flex-col sm:gap-0" : "col-span-1 flex-col",
+                          isSelected
+                            ? (isDark ? "bg-cyan-500/15 border-cyan-500/50 text-white" : "bg-cyan-50 border-cyan-600 text-cyan-900")
+                            : (isDark ? "bg-[#111115] border-white/[0.07] text-zinc-300 hover:border-white/[0.15]" : "bg-white border-slate-200 text-slate-700 hover:border-slate-300")
+                        )}
+                      >
+                        <span className="font-bold text-xs sm:text-sm font-mono tracking-tight shrink-0">{speed} Mbps</span>
+                        <span className={cn(
+                          "text-[10px] font-semibold tracking-tight whitespace-nowrap",
+                          isLastOdd ? "mt-0 sm:mt-0.5" : "mt-0.5",
+                          speed === 100
+                            ? (isSelected ? "text-cyan-400 font-bold" : (isDark ? "text-cyan-400" : "text-cyan-600"))
+                            : (isSelected ? (isDark ? "text-cyan-300" : "text-cyan-800") : (isDark ? "text-zinc-500" : "text-slate-500"))
+                        )}>
+                          {speed === 100 ? "FREE" : `+${formatRupiah(monthlyPrice)}/mo`}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col h-full w-full max-w-full min-w-0 md:col-span-2">
+              <h2 className={cn("text-base sm:text-lg font-bold mb-3.5 flex items-center gap-2 shrink-0", isDark ? "text-white" : "text-slate-900")}>
+                <VpcIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+                7. Virtual Private Cloud (VPC)
+              </h2>
+              <div className={cn(
+                "flex flex-col p-3.5 sm:p-4 w-full max-w-full min-w-0 rounded-xl border transition-all gap-3 flex-1",
+                isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80"
+              )}>
+                <div className="flex items-center justify-between w-full gap-2 sm:gap-3 min-w-0">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center font-bold border transition-colors shrink-0",
+                      isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-700 border-cyan-500/20"
+                    )}>
+                      <Plug className="w-4 h-4 shrink-0" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className={cn("font-bold text-xs sm:text-sm leading-tight", isDark ? "text-white" : "text-slate-900")}>Attach to Private VPC</div>
+                      <div className={cn("text-[11px] font-medium truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Isolate instance traffic on a dedicated RFC 1918 subnet</div>
                     </div>
                   </div>
 
-                  {useVpc && (
-                    <div className="pt-3 border-t border-cyan-500/20 space-y-4">
-                      {isCreatingVpc ? (
-                        <div className={cn("p-4 rounded-xl border space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                          <h4 className={cn("text-sm font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Create New VPC</h4>
-                          <div>
-                            <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>VPC Name <span className="text-red-500">*</span></label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Production Network"
-                              value={newVpcName}
-                              onChange={(e) => setNewVpcName(e.target.value)}
-                              className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900")}
-                            />
-                          </div>
-                          <div>
-                            <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Description (Optional)</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. For web servers and databases"
-                              value={newVpcDescription}
-                              onChange={(e) => setNewVpcDescription(e.target.value)}
-                              className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900")}
-                            />
-                          </div>
-                          <div>
-                            <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>IPv4 CIDR Block <span className="text-red-500">*</span></label>
-                            <input
-                              type="text"
-                              placeholder="e.g. 10.10.100.0/24"
-                              value={newVpcCidr}
-                              onChange={(e) => setNewVpcCidr(e.target.value)}
-                              className={cn(
-                                "w-full bg-black/60 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 font-mono",
-                                (newVpcCidr && validateCidr(newVpcCidr).error) ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-slate-800 focus:border-cyan-500 focus:ring-cyan-500"
-                              )}
-                            />
-                            {(newVpcCidr && validateCidr(newVpcCidr).error) ? (
-                              <p className="text-[11px] text-red-400 mt-1.5">
-                                {validateCidr(newVpcCidr).error}
-                                {validateCidr(newVpcCidr).suggestion && (
-                                  <> - <button type="button" onClick={() => setNewVpcCidr(validateCidr(newVpcCidr).suggestion!)} className="text-cyan-400 hover:underline">Did you mean {validateCidr(newVpcCidr).suggestion}?</button></>
-                                )}
-                              </p>
-                            ) : (
-                              <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>
-                                Must be a private IP range (RFC 1918). e.g., 10.x.x.x, 172.16.x.x, 192.168.x.x.
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between mt-2.5 gap-3 w-full">
-                            <div className="min-w-0 flex-1">
-                              <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                                <span>Enable NAT Gateway</span>
-                                <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 font-bold", isDark ? "bg-white/10 text-zinc-400 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
-                              </div>
-                              <div className={cn("text-[11px] sm:text-xs mt-0.5 leading-snug", isDark ? "text-zinc-500" : "text-slate-500")}>Allow instances to access the internet</div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setNewVpcNatEnabled(!newVpcNatEnabled)}
-                              className={cn(
-                                "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-[#0f172a] transition-colors",
-                                newVpcNatEnabled ? "bg-cyan-500" : (isDark ? "bg-white/10" : "bg-slate-300")
-                              )}
-                            >
-                              <span className="sr-only">Toggle NAT Gateway</span>
-                              <span
-                                aria-hidden="true"
-                                className={cn(
-                                  "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                                  newVpcNatEnabled ? "translate-x-4" : "translate-x-0"
-                                )}
-                              />
-                            </button>
-                          </div>
-                          <div className="flex items-center justify-end gap-2 pt-2">
-                            <button
-                              type="button"
-                              onClick={() => setIsCreatingVpc(false)}
-                              className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors flex items-center gap-1"
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                              Back
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCreateVpcInline}
-                              disabled={isSubmittingVpc}
-                              className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2"
-                            >
-                              {isSubmittingVpc ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-                              Create VPC
-                            </button>
-                          </div>
+                  <div className="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 rounded-md shrink-0">
+                    Required
+                  </div>
+                </div>
+
+                {useVpc && (
+                  <div className={cn("pt-3 border-t space-y-4", isDark ? "border-white/[0.07]" : "border-slate-200/70")}>
+                    {isCreatingVpc ? (
+                      <div className={cn("p-4 rounded-xl border space-y-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
+                        <h4 className={cn("text-sm font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Create New VPC</h4>
+                        <div>
+                          <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>VPC Name <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Production Network"
+                            value={newVpcName}
+                            onChange={(e) => setNewVpcName(e.target.value)}
+                            className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-300 text-slate-900")}
+                          />
                         </div>
-                      ) : vpcs.length === 0 ? (
-                        <div className="text-sm text-zinc-400 bg-[#060b14] p-4 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-center gap-3">
-                          <p>You don't have any Virtual Private Cloud networks.</p>
-                          <button 
+                        <div>
+                          <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Description (Optional)</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. For web servers and databases"
+                            value={newVpcDescription}
+                            onChange={(e) => setNewVpcDescription(e.target.value)}
+                            className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-300 text-slate-900")}
+                          />
+                        </div>
+                        <div>
+                          <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>IPv4 CIDR Block <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 10.10.100.0/24"
+                            value={newVpcCidr}
+                            onChange={(e) => setNewVpcCidr(e.target.value)}
+                            className={cn(
+                              "w-full border rounded-lg px-3 py-2 text-sm focus:outline-none font-mono",
+                              isDark ? "bg-[#111115] text-white" : "bg-white text-slate-900",
+                              (newVpcCidr && validateCidr(newVpcCidr).error) ? "border-red-500 focus:border-red-500" : (isDark ? "border-white/[0.08] focus:border-cyan-500" : "border-slate-300 focus:border-cyan-500")
+                            )}
+                          />
+                          {(newVpcCidr && validateCidr(newVpcCidr).error) ? (
+                            <p className="text-[11px] text-red-400 mt-1.5">
+                              {validateCidr(newVpcCidr).error}
+                              {validateCidr(newVpcCidr).suggestion && (
+                                <> - <button type="button" onClick={() => setNewVpcCidr(validateCidr(newVpcCidr).suggestion!)} className="text-cyan-400 hover:underline">Did you mean {validateCidr(newVpcCidr).suggestion}?</button></>
+                              )}
+                            </p>
+                          ) : (
+                            <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                              Must be a private IP range (RFC 1918). e.g., 10.x.x.x, 172.16.x.x, 192.168.x.x.
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between mt-2.5 gap-3 w-full">
+                          <div className="min-w-0 flex-1">
+                            <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap leading-tight", isDark ? "text-white" : "text-slate-900")}>
+                              <span>Enable NAT Gateway</span>
+                              <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 font-bold", isDark ? "bg-white/[0.06] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
+                            </div>
+                            <div className={cn("text-[11px] sm:text-xs mt-0.5 leading-snug", isDark ? "text-zinc-500" : "text-slate-500")}>Allow instances to access the internet</div>
+                          </div>
+                          <button
                             type="button"
-                            onClick={() => setIsCreatingVpc(true)} 
-                            className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-semibold transition-colors text-xs"
+                            onClick={() => setNewVpcNatEnabled(!newVpcNatEnabled)}
+                            className={cn(
+                              "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none transition-colors",
+                              newVpcNatEnabled ? "bg-cyan-400" : (isDark ? "bg-white/10" : "bg-slate-300")
+                            )}
                           >
-                            Create VPC Network
+                            <span className="sr-only">Toggle NAT Gateway</span>
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                newVpcNatEnabled ? "translate-x-4" : "translate-x-0"
+                              )}
+                            />
                           </button>
                         </div>
-                      ) : (
-                        <>
-                          <div>
-                            <div>
-                              <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Select VPC Network</label>
-                              <div className="flex flex-col gap-2 w-full">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                                  <div className="flex-1 min-w-0 w-full">
-                                    <Select
-                                      value={selectedVpcId?.toString() || ""}
-                                      onChange={(val) => setSelectedVpcId(Number(val))}
-                                      options={vpcs.map(vpc => ({ value: vpc.id.toString(), label: `${vpc.name} (${vpc.cidr})` }))}
-                                      placeholder="Select VPC Network"
-                                      className="py-2 px-3 min-h-[38px] rounded-lg w-full"
-                                    />
+                        <div className="flex items-center justify-end gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setIsCreatingVpc(false)}
+                            className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors flex items-center gap-1"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Back
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCreateVpcInline}
+                            disabled={isSubmittingVpc}
+                            className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2"
+                          >
+                            {isSubmittingVpc ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                            Create VPC
+                          </button>
+                        </div>
+                      </div>
+                    ) : vpcs.length === 0 ? (
+                      <div className={cn("text-sm p-4 rounded-xl border flex flex-col items-center justify-center text-center gap-3", isDark ? "text-zinc-400 bg-[#0a0a0c] border-white/[0.08]" : "text-slate-500 bg-white border-slate-200")}>
+                        <p>You don't have any Virtual Private Cloud networks.</p>
+                        <button 
+                          type="button"
+                          onClick={() => setIsCreatingVpc(true)} 
+                          className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-semibold transition-colors text-xs"
+                        >
+                          Create VPC Network
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Select VPC Network</label>
+                          <div className="flex flex-col gap-2 w-full">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+                              <div className="flex-1 min-w-0 w-full">
+                                <Select
+                                  value={selectedVpcId?.toString() || ""}
+                                  onChange={(val) => setSelectedVpcId(Number(val))}
+                                  options={vpcs.map(vpc => ({ value: vpc.id.toString(), label: `${vpc.name} (${vpc.cidr})` }))}
+                                  placeholder="Select VPC Network"
+                                  className={cn("py-2 px-3 min-h-[38px] rounded-lg w-full", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                                />
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={() => setIsCreatingVpc(true)} 
+                                className={cn("w-full sm:w-auto shrink-0 border px-3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1 min-h-[38px] cursor-pointer", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-cyan-400" : "bg-white hover:bg-slate-50 border-slate-200 text-cyan-700")}
+                              >
+                                <Plus className="w-3.5 h-3.5" /> New VPC
+                              </button>
+                            </div>
+                            {selectedVpcId && (() => {
+                              const selectedVpcObj = vpcs.find(v => v.id === selectedVpcId);
+                              if (!selectedVpcObj) return null;
+                              return (
+                                <div className="flex items-center justify-between mt-2.5 gap-3 w-full">
+                                  <div className="min-w-0 flex-1">
+                                    <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap leading-tight", isDark ? "text-white" : "text-slate-900")}>
+                                      <span>NAT Gateway</span>
+                                      <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 font-bold", isDark ? "bg-white/[0.06] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
+                                    </div>
+                                    <div className={cn("text-[11px] sm:text-xs mt-0.5 leading-snug truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Enable internet access for all VMs in this VPC</div>
                                   </div>
-                                  <button 
+                                  <button
                                     type="button"
-                                    onClick={() => setIsCreatingVpc(true)} 
-                                    className={cn("w-full sm:w-auto shrink-0 border px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1 min-h-[38px]", isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-cyan-400" : "bg-white hover:bg-slate-50 border-slate-200 text-cyan-600")}
+                                    disabled={loading}
+                                    onClick={async () => {
+                                      const newState = !selectedVpcObj.isNatEnabled;
+                                      setVpcs(vpcs.map(v => v.id === selectedVpcId ? { ...v, isNatEnabled: newState } : v));
+                                      
+                                      try {
+                                        const res = await fetch(`/api/dashboard/vpc/${selectedVpcId}/nat`, {
+                                          method: "PATCH",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({ isNatEnabled: newState })
+                                        });
+                                        if (!res.ok) throw new Error("Failed to update NAT Gateway");
+                                        toast.success(`NAT Gateway ${newState ? 'enabled' : 'disabled'} for ${selectedVpcObj.name}`);
+                                      } catch (err: any) {
+                                        toast.error(err.message || "Failed to update NAT Gateway");
+                                        setVpcs(vpcs.map(v => v.id === selectedVpcId ? { ...v, isNatEnabled: !newState } : v));
+                                      }
+                                    }}
+                                    className={cn(
+                                      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none transition-colors disabled:opacity-50",
+                                      selectedVpcObj.isNatEnabled ? "bg-cyan-400" : (isDark ? "bg-white/10" : "bg-slate-300")
+                                    )}
                                   >
-                                    <Plus className="w-4 h-4" /> New VPC
+                                    <span className="sr-only">Toggle NAT Gateway</span>
+                                    <span
+                                      aria-hidden="true"
+                                      className={cn(
+                                        "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                        selectedVpcObj.isNatEnabled ? "translate-x-4" : "translate-x-0"
+                                      )}
+                                    />
                                   </button>
                                 </div>
-                                {selectedVpcId && (() => {
-                                  const selectedVpcObj = vpcs.find(v => v.id === selectedVpcId);
-                                  if (!selectedVpcObj) return null;
-                                  return (
-                                    <div className="flex items-center justify-between mt-3 gap-3 w-full">
-                                      <div className="min-w-0 flex-1">
-                                        <div className={cn("text-xs sm:text-sm font-medium flex items-center gap-2 flex-wrap leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                                          <span>NAT Gateway</span>
-                                          <span className={cn("text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 font-bold", isDark ? "bg-white/10 text-zinc-400 border-white/5" : "bg-slate-100 text-slate-500 border-slate-200")}>VPC Level</span>
-                                        </div>
-                                        <div className={cn("text-[11px] sm:text-xs mt-0.5 leading-snug truncate sm:whitespace-normal", isDark ? "text-zinc-500" : "text-slate-500")}>Enable internet access for all VMs in this VPC</div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        disabled={loading}
-                                        onClick={async () => {
-                                          const newState = !selectedVpcObj.isNatEnabled;
-                                          // Optimistically update the UI by mapping over vpcs state
-                                          setVpcs(vpcs.map(v => v.id === selectedVpcId ? { ...v, isNatEnabled: newState } : v));
-                                          
-                                          try {
-                                            const res = await fetch(`/api/dashboard/vpc/${selectedVpcId}/nat`, {
-                                              method: "PATCH",
-                                              headers: { "Content-Type": "application/json" },
-                                              body: JSON.stringify({ isNatEnabled: newState })
-                                            });
-                                            if (!res.ok) throw new Error("Failed to update NAT Gateway");
-                                            toast.success(`NAT Gateway ${newState ? 'enabled' : 'disabled'} for ${selectedVpcObj.name}`);
-                                          } catch (err: any) {
-                                            toast.error(err.message || "Failed to update NAT Gateway");
-                                            // Revert optimistic update on failure
-                                            setVpcs(vpcs.map(v => v.id === selectedVpcId ? { ...v, isNatEnabled: !newState } : v));
-                                          }
-                                        }}
-                                        className={cn(
-                                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-[#0f172a] transition-colors disabled:opacity-50",
-                                          selectedVpcObj.isNatEnabled ? "bg-cyan-500" : "bg-white/10"
-                                        )}
-                                      >
-                                        <span className="sr-only">Toggle NAT Gateway</span>
-                                        <span
-                                          aria-hidden="true"
-                                          className={cn(
-                                            "pointer-events-none absolute left-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                                            selectedVpcObj.isNatEnabled ? "translate-x-4" : "translate-x-0"
-                                          )}
-                                        />
-                                      </button>
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Private IP Address <span className="text-red-500">*</span></label>
-                            {(() => {
-                              const currentVpc = vpcs.find(v => v.id === selectedVpcId);
-                              const ipRange = currentVpc ? getUsableIpRange(currentVpc.cidr, currentVpc.gateway || '') : null;
-                              const placeholderText = ipRange ? `e.g. ${ipRange.first}` : 'e.g. 10.10.100.5';
-                              const isGatewayEntered = currentVpc?.gateway && privateIpAddress.trim() === currentVpc.gateway;
-                              const isIpUsed = currentVpc?.vpsServices?.some((v: any) => v.vpcIp === privateIpAddress.trim());
-                              const isIpOutOfRange = (() => {
-                                if (!ipRange || !privateIpAddress.trim() || isGatewayEntered || isIpUsed) return false;
-                                const ipNum = ipToNum(privateIpAddress.trim());
-                                const firstNum = ipToNum(ipRange.first);
-                                const lastNum = ipToNum(ipRange.last);
-                                return ipNum < firstNum || ipNum > lastNum;
-                              })();
-                              const hasError = isGatewayEntered || isIpOutOfRange || isIpUsed;
-
-                              return (
-                                <>
-                                  <input
-                                    type="text"
-                                    placeholder={placeholderText}
-                                    value={privateIpAddress}
-                                    onChange={(e) => setPrivateIpAddress(e.target.value)}
-                                    className={cn("w-full bg-black/40 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 font-mono transition-colors", 
-                                      hasError ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" : "border-slate-800 focus:border-cyan-500 focus:ring-cyan-500")}
-                                  />
-                                  {isGatewayEntered ? (
-                                    <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
-                                      <XCircle className="w-3.5 h-3.5 shrink-0" />
-                                      <span><strong>{privateIpAddress}</strong> is reserved for the VPC Gateway. Please use a usable IP.</span>
-                                    </div>
-                                  ) : isIpUsed ? (
-                                    <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
-                                      <XCircle className="w-3.5 h-3.5 shrink-0" />
-                                      <span><strong>{privateIpAddress}</strong> is already in use by another VM in this VPC.</span>
-                                    </div>
-                                  ) : isIpOutOfRange ? (
-                                    <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
-                                      <XCircle className="w-3.5 h-3.5 shrink-0" />
-                                      <span><strong>{privateIpAddress}</strong> is outside the valid range. Please use {ipRange?.first} - {ipRange?.last}.</span>
-                                    </div>
-                                  ) : ipRange && (
-                                    <div className={cn("text-[11px] mt-1.5 font-mono flex flex-wrap items-center gap-x-1.5 gap-y-0.5", isDark ? "text-cyan-400/70" : "text-cyan-700")}>
-                                      <span>Valid range:</span>
-                                      <span className={cn("font-bold", isDark ? "text-cyan-300" : "text-cyan-600")}>{ipRange.first} - {ipRange.last}</span>
-                                      <span className={isDark ? "text-cyan-400/50" : "text-cyan-600/70"}>({ipRange.count} usable IPs)</span>
-                                    </div>
-                                  )}
-                                </>
                               );
                             })()}
                           </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          {/* Firewall Settings */}
-          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[10] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-            <h2 className={cn("text-xl font-bold mb-2 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-              <ShieldCheck className="w-5 h-5 text-cyan-400" />
-              7. Firewall
-            </h2>
-            <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>A security group is a set of firewall rules that control the traffic for your instance. Add rules to allow specific traffic to reach your instance.</p>
+                        </div>
+                        <div>
+                          <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Private IP Address <span className="text-red-500">*</span></label>
+                          {(() => {
+                            const currentVpc = vpcs.find(v => v.id === selectedVpcId);
+                            const ipRange = currentVpc ? getUsableIpRange(currentVpc.cidr, currentVpc.gateway || '') : null;
+                            const placeholderText = ipRange ? `e.g. ${ipRange.first}` : 'e.g. 10.10.100.5';
+                            const isGatewayEntered = currentVpc?.gateway && privateIpAddress.trim() === currentVpc.gateway;
+                            const isIpUsed = currentVpc?.vpsServices?.some((v: any) => v.vpcIp === privateIpAddress.trim());
+                            const isIpOutOfRange = (() => {
+                              if (!ipRange || !privateIpAddress.trim() || isGatewayEntered || isIpUsed) return false;
+                              const ipNum = ipToNum(privateIpAddress.trim());
+                              const firstNum = ipToNum(ipRange.first);
+                              const lastNum = ipToNum(ipRange.last);
+                              return ipNum < firstNum || ipNum > lastNum;
+                            })();
+                            const hasError = isGatewayEntered || isIpOutOfRange || isIpUsed;
 
-            <div className="space-y-4">
+                            return (
+                              <>
+                                <input
+                                  type="text"
+                                  placeholder={placeholderText}
+                                  value={privateIpAddress}
+                                  onChange={(e) => setPrivateIpAddress(e.target.value)}
+                                  className={cn(
+                                    "w-full border rounded-lg px-3 py-2 text-sm focus:outline-none font-mono transition-colors",
+                                    isDark ? "bg-[#111115] text-white" : "bg-white text-slate-900",
+                                    hasError ? "border-red-500/60 focus:border-red-500" : (isDark ? "border-white/[0.08] focus:border-cyan-500" : "border-slate-200 focus:border-cyan-500")
+                                  )}
+                                />
+                                {isGatewayEntered ? (
+                                  <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
+                                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span><strong>{privateIpAddress}</strong> is reserved for the VPC Gateway. Please use a usable IP.</span>
+                                  </div>
+                                ) : isIpUsed ? (
+                                  <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
+                                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span><strong>{privateIpAddress}</strong> is already in use by another VM in this VPC.</span>
+                                  </div>
+                                ) : isIpOutOfRange ? (
+                                  <div className="text-[11px] text-red-400 mt-1.5 font-medium flex items-center gap-1.5">
+                                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span><strong>{privateIpAddress}</strong> is outside the valid range. Please use {ipRange?.first} - {ipRange?.last}.</span>
+                                  </div>
+                                ) : ipRange && (
+                                  <div className={cn("text-[11px] mt-1.5 font-mono flex flex-wrap items-center gap-x-1.5 gap-y-0.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                                    <span>Valid range:</span>
+                                    <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{ipRange.first} – {ipRange.last}</span>
+                                    <span className={isDark ? "text-zinc-500" : "text-slate-400"}>({ipRange.count} usable IPs)</span>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Firewall Settings */}
+          <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[10] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <div className="mb-4">
+              <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                8. Security Group & Firewall
+              </h2>
+              <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Define inbound traffic rules for your instance.
+              </p>
+            </div>
+
+            <div className="space-y-3">
               {/* SSH Rule */}
-              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("border p-3.5 sm:p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3", isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
                     onClick={() => setFirewallRules(r => ({ ...r, ssh: { ...r.ssh, enabled: !r.ssh.enabled } }))}
                     className={cn(
-                      "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200",
+                      "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all cursor-pointer",
                       firewallRules.ssh.enabled
-                        ? "bg-cyan-400"
-                        : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
+                        ? "bg-cyan-400 border-cyan-400"
+                        : isDark ? "bg-transparent border-white/[0.2] hover:border-cyan-400/50" : "bg-white border-slate-300 hover:border-cyan-500"
                     )}
                   >
-                    <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.ssh.enabled ? "text-[#0f172a]" : "text-transparent")} />
+                    <CheckCircle className={cn("w-3 h-3", firewallRules.ssh.enabled ? "text-slate-950" : "text-transparent")} />
                   </button>
                   <div>
-                    <div className={cn("text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Allow SSH traffic from</div>
-                    <div className={cn("text-xs mt-0.5 leading-snug", isDark ? "text-zinc-400" : "text-slate-500")}>Helps you connect to your instance</div>
+                    <div className={cn("text-xs sm:text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Allow SSH (Port 22)</div>
+                    <div className={cn("text-[11px] mt-0.5 leading-snug", isDark ? "text-zinc-400" : "text-slate-500")}>Remote terminal access to your instance</div>
                   </div>
                 </div>
                 {firewallRules.ssh.enabled && (
                   <div className="flex flex-col gap-2 w-full md:w-64 shrink-0">
                     <Select
-                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-lg px-3 py-2 text-xs sm:text-sm", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                       value={firewallRules.ssh.source}
                       onChange={(val) => setFirewallRules(r => ({ ...r, ssh: { ...r.ssh, source: val } }))}
                       options={[
@@ -1560,7 +1570,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     {firewallRules.ssh.source === "custom" && (
                       <input
                         type="text" placeholder="e.g. 192.168.1.1/32"
-                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("border rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 w-full font-mono", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                         value={firewallRules.ssh.customIp}
                         onChange={(e) => setFirewallRules(r => ({ ...r, ssh: { ...r.ssh, customIp: e.target.value } }))}
                       />
@@ -1570,29 +1580,29 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
 
               {/* HTTPS Rule */}
-              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("border p-3.5 sm:p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3", isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
                     onClick={() => setFirewallRules(r => ({ ...r, https: { ...r.https, enabled: !r.https.enabled } }))}
                     className={cn(
-                      "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200",
+                      "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all cursor-pointer",
                       firewallRules.https.enabled
-                        ? "bg-cyan-400"
-                        : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
+                        ? "bg-cyan-400 border-cyan-400"
+                        : isDark ? "bg-transparent border-white/[0.2] hover:border-cyan-400/50" : "bg-white border-slate-300 hover:border-cyan-500"
                     )}
                   >
-                    <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.https.enabled ? "text-[#0f172a]" : "text-transparent")} />
+                    <CheckCircle className={cn("w-3 h-3", firewallRules.https.enabled ? "text-slate-950" : "text-transparent")} />
                   </button>
                   <div>
-                    <div className={cn("text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Allow HTTPS traffic from the Internet</div>
-                    <div className={cn("text-xs mt-0.5 leading-snug", isDark ? "text-zinc-400" : "text-slate-500")}>To set up an endpoint, for example when creating a web server</div>
+                    <div className={cn("text-xs sm:text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Allow HTTPS (Port 443)</div>
+                    <div className={cn("text-[11px] mt-0.5 leading-snug", isDark ? "text-zinc-400" : "text-slate-500")}>Encrypted web traffic from the internet</div>
                   </div>
                 </div>
                 {firewallRules.https.enabled && (
                   <div className="flex flex-col gap-2 w-full md:w-64 shrink-0">
                     <Select
-                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-lg px-3 py-2 text-xs sm:text-sm", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                       value={firewallRules.https.source}
                       onChange={(val) => setFirewallRules(r => ({ ...r, https: { ...r.https, source: val } }))}
                       options={[
@@ -1604,7 +1614,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     {firewallRules.https.source === "custom" && (
                       <input
                         type="text" placeholder="e.g. 192.168.1.1/32"
-                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("border rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 w-full font-mono", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                         value={firewallRules.https.customIp}
                         onChange={(e) => setFirewallRules(r => ({ ...r, https: { ...r.https, customIp: e.target.value } }))}
                       />
@@ -1614,29 +1624,29 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
 
               {/* HTTP Rule */}
-              <div className={cn("border p-4 rounded-xl flex flex-col md:flex-row md:items-start justify-between gap-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("border p-3.5 sm:p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3", isDark ? "bg-white/[0.015] border-white/[0.07]" : "bg-slate-50/50 border-slate-200/80")}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
                     onClick={() => setFirewallRules(r => ({ ...r, http: { ...r.http, enabled: !r.http.enabled } }))}
                     className={cn(
-                      "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200",
+                      "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all cursor-pointer",
                       firewallRules.http.enabled
-                        ? "bg-cyan-400"
-                        : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-400/50" : "bg-white border-slate-200 hover:border-cyan-400"
+                        ? "bg-cyan-400 border-cyan-400"
+                        : isDark ? "bg-transparent border-white/[0.2] hover:border-cyan-400/50" : "bg-white border-slate-300 hover:border-cyan-500"
                     )}
                   >
-                    <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.http.enabled ? "text-[#0f172a]" : "text-transparent")} />
+                    <CheckCircle className={cn("w-3 h-3", firewallRules.http.enabled ? "text-slate-950" : "text-transparent")} />
                   </button>
                   <div>
-                    <div className={cn("text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Allow HTTP traffic from the Internet</div>
-                    <div className={cn("text-xs mt-0.5 leading-snug", isDark ? "text-zinc-400" : "text-slate-500")}>To set up an endpoint, for example when creating a web server</div>
+                    <div className={cn("text-xs sm:text-sm font-bold leading-tight", isDark ? "text-white" : "text-slate-900")}>Allow HTTP (Port 80)</div>
+                    <div className={cn("text-[11px] mt-0.5 leading-snug", isDark ? "text-zinc-400" : "text-slate-500")}>Unencrypted web traffic and ACME challenges</div>
                   </div>
                 </div>
                 {firewallRules.http.enabled && (
                   <div className="flex flex-col gap-2 w-full md:w-64 shrink-0">
                     <Select
-                      className={cn("w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-lg px-3 py-2 text-xs sm:text-sm", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                       value={firewallRules.http.source}
                       onChange={(val) => setFirewallRules(r => ({ ...r, http: { ...r.http, source: val } }))}
                       options={[
@@ -1648,7 +1658,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     {firewallRules.http.source === "custom" && (
                       <input
                         type="text" placeholder="e.g. 192.168.1.1/32"
-                        className={cn("border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("border rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 w-full font-mono", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                         value={firewallRules.http.customIp}
                         onChange={(e) => setFirewallRules(r => ({ ...r, http: { ...r.http, customIp: e.target.value } }))}
                       />
@@ -1659,31 +1669,35 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
             </div>
           </motion.div>
 
-
           {/* Authentication & Settings */}
-          <motion.div variants={itemVariants} className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md relative z-[5] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                        <h2 className={cn("text-xl font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-              <Settings2 className="w-5 h-5 text-cyan-400" />
-              9. Server Details
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
+          <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[5] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <div className="mb-4">
+              <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <Settings2 className="w-4 h-4 text-cyan-400" />
+                9. Instance Identity & Authentication
+              </h2>
+              <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Configure the FQDN hostname, system user, and SSH key credentials.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-5">
               <div className="space-y-4">
                 <div>
-                  <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Hostname</label>
+                  <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Hostname (FQDN)</label>
                   <input
                     type="text"
                     required
                     value={hostname}
                     onChange={(e) => setHostname(e.target.value)}
                     placeholder="server.example.com"
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-4 py-3 text-sm font-medium focus:outline-none transition-colors", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500/60 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 placeholder:text-slate-400")}
                   />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className={cn("block text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Username</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={cn("block text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>System Username</label>
                     {isWindows && (
-                      <span className="text-[11px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
                         Default Administrator
                       </span>
                     )}
@@ -1699,25 +1713,25 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''));
                       }
                     }}
-                    placeholder={isWindows ? "Administrator" : "User"}
+                    placeholder={isWindows ? "Administrator" : "ubuntu"}
                     className={cn(
-                      "w-full border rounded-2xl px-5 py-3.5 text-sm font-bold focus:outline-none transition-colors",
+                      "w-full border rounded-xl px-4 py-3 text-sm font-medium focus:outline-none transition-colors",
                       isWindows
-                        ? (isDark ? "bg-[#060b14]/70 border-slate-800 text-zinc-400 cursor-not-allowed select-none" : "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed select-none")
-                        : (isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")
+                        ? (isDark ? "bg-[#111115]/60 border-white/[0.06] text-zinc-500 cursor-not-allowed select-none" : "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed select-none")
+                        : (isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500/60 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 placeholder:text-slate-400")
                     )}
                   />
                   {isWindows && (
                     <p className={cn("text-[11px] mt-1.5 flex items-center gap-1.5 font-medium", isDark ? "text-cyan-400/90" : "text-cyan-700")}>
                       <Info className="w-3.5 h-3.5 shrink-0" />
-                      <span>Windows requires the default user <strong>Administrator</strong> (cannot be changed).</span>
+                      <span>Windows requires the default user <strong>Administrator</strong>.</span>
                     </p>
                   )}
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Password</label>
+                  <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Root / Admin Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -1726,23 +1740,24 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Min 8 chars, 1 symbol..."
                       className={cn(
-                        isDark ? "w-full bg-black/40 border rounded-2xl pl-5 pr-12 py-3.5 text-sm text-white font-bold focus:outline-none transition-colors shadow-inner placeholder:text-zinc-600" : "w-full border border-slate-200 bg-white rounded-2xl pl-5 pr-12 py-3.5 text-sm text-slate-900 font-bold focus:outline-none transition-colors placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500",
+                        "w-full border rounded-xl pl-4 pr-11 py-3 text-sm font-medium focus:outline-none transition-colors",
+                        isDark ? "bg-[#111115] text-white placeholder:text-zinc-600" : "bg-white text-slate-900 placeholder:text-slate-400",
                         passwordError && password.length > 0
-                          ? "border-red-500/50 focus:border-red-500 hover:border-red-500/30"
-                          : isDark ? "border-slate-800 focus:border-cyan-500/50 hover:border-cyan-500/30" : "hover:border-cyan-400"
+                          ? "border-red-500/60 focus:border-red-500"
+                          : isDark ? "border-white/[0.08] focus:border-cyan-500/60" : "border-slate-200 focus:border-cyan-500"
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-colors p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-colors p-1"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Retype Password</label>
+                  <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Confirm Password</label>
                   <div className="relative">
                     <input
                       type={showPasswordConfirm ? "text" : "password"}
@@ -1751,41 +1766,40 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       onChange={(e) => setPasswordConfirm(e.target.value)}
                       placeholder="Retype password..."
                       className={cn(
-                        isDark ? "w-full bg-black/40 border rounded-2xl pl-5 pr-12 py-3.5 text-sm text-white font-bold focus:outline-none transition-colors shadow-inner placeholder:text-zinc-600" : "w-full border border-slate-200 bg-white rounded-2xl pl-5 pr-12 py-3.5 text-sm text-slate-900 font-bold focus:outline-none transition-colors placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-500",
+                        "w-full border rounded-xl pl-4 pr-11 py-3 text-sm font-medium focus:outline-none transition-colors",
+                        isDark ? "bg-[#111115] text-white placeholder:text-zinc-600" : "bg-white text-slate-900 placeholder:text-slate-400",
                         password !== passwordConfirm && passwordConfirm.length > 0
-                          ? "border-red-500/50 focus:border-red-500 hover:border-red-500/30"
-                          : isDark ? "border-slate-800 focus:border-cyan-500/50 hover:border-cyan-500/30" : "hover:border-cyan-400"
+                          ? "border-red-500/60 focus:border-red-500"
+                          : isDark ? "border-white/[0.08] focus:border-cyan-500/60" : "border-slate-200 focus:border-cyan-500"
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-colors p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-colors p-1"
                     >
                       {showPasswordConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
                 {passwordError && (
-                  <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
-                    <XCircle className="w-3 h-3" /> {passwordError}
+                  <p className="text-xs text-red-400 mt-1.5 flex items-center gap-1">
+                    <XCircle className="w-3.5 h-3.5" /> {passwordError}
                   </p>
                 )}
               </div>
             </div>
 
-
-
-            <div className="mt-6">
+            <div className="mt-5 pt-5 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(226,232,240,0.8)" }}>
               <div className="flex items-center justify-between mb-2">
-                <label className={cn("block text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>SSH Public Key (Optional)</label>
+                <label className={cn("block text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>SSH Public Key (Optional)</label>
                 <button
                   type="button"
                   onClick={handleGenerateSSHKey}
                   disabled={isGeneratingKey}
                   className={cn(
-                    "text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors font-medium",
-                    isDark ? "text-cyan-400 hover:text-cyan-300 bg-cyan-500/10" : "text-slate-900 hover:text-black bg-slate-100 hover:bg-slate-200"
+                    "text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors font-semibold cursor-pointer",
+                    isDark ? "text-cyan-400 hover:bg-white/[0.06] bg-white/[0.03] border-white/[0.08]" : "text-cyan-700 hover:bg-slate-100 bg-slate-50 border-slate-200"
                   )}
                 >
                   {isGeneratingKey ? (
@@ -1793,99 +1807,100 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   ) : (
                     <Plus className="w-3.5 h-3.5" />
                   )}
-                  Auto Generate & Download .pem
+                  Generate & Download .pem
                 </button>
               </div>
               <textarea
                 value={sshKey}
                 onChange={(e) => setSshKey(e.target.value)}
                 placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
-                className={cn("w-full h-28 border rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 shadow-inner hover:border-cyan-500/30 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-400")}
+                className={cn("w-full h-24 border rounded-xl px-4 py-3 text-xs sm:text-sm focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500/60 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 placeholder:text-slate-400")}
               />
-              <p className="text-xs text-zinc-500 mt-2">Add your public key to login securely without a password.</p>
+              <p className="text-[11px] text-zinc-500 mt-1.5">Add your SSH public key for passwordless authentication.</p>
             </div>
           </motion.div>
         </div>
 
         {/* Order Summary Sidebar */}
         <motion.div variants={itemVariants} className="xl:col-span-1 w-full max-w-full min-w-0">
-          <div className={cn("rounded-3xl p-4 sm:p-6 md:p-8 shadow-md sticky top-6 relative overflow-hidden w-full max-w-full min-w-0", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-                        <h2 className={cn("text-xl font-bold tracking-wide mb-6 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>
-              <ListChecks className="w-5 h-5 text-cyan-400" />
-              {serviceType === "KUBERNETES" ? (isAddWorkerNode ? "Worker Configuration" : "Cluster Configuration") : "Server Configuration"}
+          <div className={cn("rounded-2xl p-5 sm:p-6 border sticky top-6 relative overflow-hidden w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <h2 className={cn("text-base sm:text-lg font-bold mb-5 pb-3.5 border-b flex items-center gap-2 relative z-10", isDark ? "text-white border-white/[0.07]" : "text-slate-900 border-slate-100")}>
+              <ListChecks className="w-4 h-4 text-cyan-400" />
+              {serviceType === "KUBERNETES" ? (isAddWorkerNode ? "Worker Summary" : "Cluster Summary") : "Instance Summary"}
             </h2>
 
-            <div className="space-y-4 mb-6 relative z-10">
+            <div className={cn("rounded-xl border divide-y mb-5 relative z-10", isDark ? "bg-white/[0.015] border-white/[0.07] divide-white/[0.06]" : "bg-slate-50/60 border-slate-200/80 divide-slate-200/70")}>
               {serviceType === "KUBERNETES" && !isAddWorkerNode && (
-                <div className="flex justify-between items-center text-sm px-2">
-                  <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Server className="w-3.5 h-3.5 text-cyan-400" /> K3s Version</span>
-                  <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-cyan-400 bg-slate-800/60 border-slate-700" : "text-cyan-700 bg-slate-100 border-slate-200")}>
+                <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Server className="w-3.5 h-3.5 text-cyan-400" /> K3s Engine</span>
+                  <span className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     {kubernetesVersion}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Disc className="w-3.5 h-3.5" /> OS Template</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border truncate max-w-[150px]", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
+              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Disc className="w-3.5 h-3.5" /> Image</span>
+                <span className={cn("font-semibold truncate max-w-[160px]", isDark ? "text-zinc-200" : "text-slate-900")}>
                   {templates.find(t => t.id === selectedTemplate)?.name || (serviceType === "KUBERNETES" ? "Debian-13" : "-")}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Wallet className="w-3.5 h-3.5" /> Billing Mode</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>Pay As You Go</span>
-              </div>
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Cpu className="w-3.5 h-3.5 text-cyan-400" /> Processor</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border text-xs flex items-center gap-1.5", isDark ? "text-cyan-400 bg-slate-800/60 border-slate-700" : "text-cyan-700 bg-slate-100 border-slate-200")}>
-                  <IntelLogo className="w-3.5 h-3.5 shrink-0" /> Intel® Xeon® ({cpuCores}C)
+              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Cpu className="w-3.5 h-3.5 text-cyan-400" /> Processor</span>
+                <span className={cn("font-semibold flex items-center gap-1.5", isDark ? "text-zinc-200" : "text-slate-900")}>
+                  <IntelLogo className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> {cpuCores} vCPU
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><MemoryStick className="w-3.5 h-3.5" /> RAM</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{ramGb} GB</span>
+              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><MemoryStick className="w-3.5 h-3.5" /> Memory</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>{ramGb} GB RAM</span>
               </div>
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><HardDrive className="w-3.5 h-3.5" /> Disk Storage</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{diskGb} GB</span>
+              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><HardDrive className="w-3.5 h-3.5" /> Storage</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>{diskGb} GB {diskType}</span>
               </div>
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Network className="w-3.5 h-3.5" /> Network IPs</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
-                  {ipv4Count > 0 && ipv6Count > 0 ? `${ipv4Count} IPv4 + ${ipv6Count} IPv6` : ipv4Count > 0 ? `${ipv4Count} IPv4` : ipv6Count > 0 ? `${ipv6Count} IPv6` : "None"}
+              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Network className="w-3.5 h-3.5" /> Public IP</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>
+                  {ipv4Count > 0 && ipv6Count > 0 ? `${ipv4Count} IPv4 + ${ipv6Count} IPv6` : ipv4Count > 0 ? `${ipv4Count} IPv4` : ipv6Count > 0 ? `${ipv6Count} IPv6` : "VPC Only"}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm px-2">
-                <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><Activity className="w-3.5 h-3.5" /> Bandwidth</span>
-                <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>
-                  {bandwidthMbps} Mbps {bandwidthMbps > 100 ? `(+${formatRupiah(Math.floor((bandwidthMbps - 100) / 50) * 50000)}/mo)` : "(Free)"}
+              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Activity className="w-3.5 h-3.5" /> Port Speed</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>
+                  {bandwidthMbps} Mbps
                 </span>
               </div>
               {backupGb > 0 && (
-                <div className="flex justify-between items-center text-sm px-2">
-                  <span className={cn("font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]", isDark ? "text-zinc-400" : "text-slate-600")}><DatabaseBackup className="w-3.5 h-3.5" /> Backup Storage</span>
-                  <span className={cn("font-bold px-2 py-1 rounded-lg border", isDark ? "text-white bg-slate-800/60 border-slate-700" : "text-slate-900 bg-slate-100 border-slate-200")}>{backupGb} GB</span>
+                <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><DatabaseBackup className="w-3.5 h-3.5" /> Backups</span>
+                  <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>{backupGb} GB</span>
                 </div>
               )}
             </div>
 
-            <div className={cn("border-t pt-6 mb-6", isDark ? "border-slate-800" : "border-slate-200")}>
-              <div className="flex justify-between items-center text-sm mb-4">
-                <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Total Price</span>
-                <div className="text-right">
-                  <div className="text-cyan-400 font-bold text-lg">Rp {calculateHourlyPrice().toLocaleString('id-ID')} / hr</div>
-                  <div className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>~ Rp {calculateMonthlyPrice().toLocaleString('id-ID')} / mo</div>
+            <div className={cn("rounded-xl p-4 mb-5 border flex items-center justify-between", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
+              <div>
+                <div className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-600")}>Estimated Rate</div>
+                <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Billed hourly (PAYG)</div>
+              </div>
+              <div className="text-right">
+                <div className="text-cyan-400 font-bold font-mono text-lg sm:text-xl leading-tight">
+                  Rp {calculateHourlyPrice().toLocaleString('id-ID')}<span className="text-xs font-normal opacity-80">/hr</span>
+                </div>
+                <div className={cn("text-[11px] font-mono mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  ≈ Rp {calculateMonthlyPrice().toLocaleString('id-ID')}/mo
                 </div>
               </div>
             </div>
 
-            <div className={cn("mb-6 border-t pt-6", isDark ? "border-slate-800" : "border-slate-200")}>
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="relative flex items-center justify-center mt-1 shrink-0">
-                  <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className={cn("w-5 h-5 rounded border cursor-pointer appearance-none transition-all", isDark ? "border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-500/20 checked:bg-cyan-500 checked:border-cyan-500" : "border-slate-300 bg-white text-cyan-600 focus:ring-cyan-200 checked:bg-cyan-600 checked:border-cyan-600")} />
-                  <ShieldCheck className={cn("absolute w-3.5 h-3.5 text-white pointer-events-none transition-opacity", termsAccepted ? "opacity-100" : "opacity-0")} />
+            <div className="mb-5">
+              <label className="flex items-start gap-2.5 cursor-pointer group select-none">
+                <div className="relative flex items-center justify-center mt-0.5 shrink-0">
+                  <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className={cn("w-4 h-4 rounded border cursor-pointer appearance-none transition-all", isDark ? "border-white/[0.2] bg-white/[0.02] checked:bg-cyan-400 checked:border-cyan-400" : "border-slate-300 bg-white checked:bg-cyan-600 checked:border-cyan-600")} />
+                  <ShieldCheck className={cn("absolute w-3 h-3 text-slate-950 pointer-events-none transition-opacity", termsAccepted ? "opacity-100" : "opacity-0")} />
                 </div>
                 <span className={cn("text-xs leading-relaxed transition-colors", isDark ? "text-zinc-400 group-hover:text-zinc-300" : "text-slate-500 group-hover:text-slate-700")}>
-                  I agree to the <a href="/terms" target="_blank" className={cn("hover:underline", isDark ? "text-cyan-400" : "text-cyan-600")}>Terms of Service</a> and <a href="/privacy" target="_blank" className={cn("hover:underline", isDark ? "text-cyan-400" : "text-cyan-600")}>Privacy Policy</a>, and understand that resources will be provisioned immediately.
+                  I agree to the <a href="/terms" target="_blank" className={cn("hover:underline font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Terms of Service</a> and <a href="/privacy" target="_blank" className={cn("hover:underline font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Privacy Policy</a>.
                 </span>
               </label>
             </div>
@@ -1894,7 +1909,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               <div className="mb-4 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-xs flex items-start gap-2">
                 <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
-                  A minimum balance of <strong>Rp 50.000</strong> is required to enable Pay-As-You-Go mode. Please <Link href="/dashboard/billing" className="underline font-bold hover:text-red-300 transition-colors">Top Up</Link> first.
+                  A minimum balance of <strong>Rp 50.000</strong> is required to deploy Pay-As-You-Go instances. Please <Link href="/dashboard/billing" className="underline font-bold hover:text-red-300 transition-colors">Top Up</Link> first.
                 </span>
               </div>
             )}
@@ -1927,16 +1942,16 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
               if (missingFields.length > 0 || isK3sMissingIp) {
                 return (
-                  <div className={cn("mb-4 rounded-xl p-4 flex items-start gap-3 text-sm animate-in slide-in-from-bottom-2 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                    <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                  <div className={cn("mb-4 rounded-xl p-3.5 flex items-start gap-2.5 text-xs border", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                    <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     <div className="flex flex-col gap-1">
-                      <p className={cn("font-medium mb-1", isDark ? "text-cyan-400" : "text-cyan-800")}>Cannot Deploy {serviceType === "KUBERNETES" ? "Cluster" : "Server"}:</p>
-                      <ul className="list-disc list-inside space-y-1">
+                      <p className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>Required before deployment:</p>
+                      <ul className="list-disc list-inside space-y-0.5 text-zinc-400">
                         {missingFields.length > 0 && (
-                          <li>Please complete all required fields: {missingFields.join(", ")}.</li>
+                          <li>Complete: {missingFields.join(", ")}.</li>
                         )}
                         {isK3sMissingIp && (
-                          <li>K3s requires at least 1 Public IPv4 or a Reserved IP.</li>
+                          <li>K3s requires at least 1 Public IPv4 or Reserved IP.</li>
                         )}
                       </ul>
                     </div>
@@ -1966,33 +1981,30 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 })())) ||
                 (serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0)
               }
-              className={cn("group w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-3.5 px-6 rounded-lg flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative z-10 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500")}
+              className={cn("group w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm py-3 px-5 rounded-xl flex items-center justify-center gap-2.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed relative z-10 shadow-xs cursor-pointer")}
             >
               {isDisabled ? "Coming Soon" : isSubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Processing...
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Provisioning...
                 </>
               ) : (
                 <>
-                  <Rocket className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
-                  {isAddWorkerNode ? "Deploy Worker Node" : "Deploy Server"}
+                  <Rocket className="w-4 h-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  {isAddWorkerNode ? "Deploy Worker Node" : "Deploy Instance"}
                 </>
               )}
             </button>
 
-            <div className="mt-5 relative z-10">
+            <div className="mt-4 relative z-10">
               <EnterpriseInfraSidebarCard />
             </div>
 
-            <div className="mt-4 flex flex-col items-center justify-center gap-1.5 relative z-10">
-              <div className={cn("flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-500")}>
-                <ShieldCheck className="w-4 h-4 text-cyan-500" />
-                256-bit Encrypted Checkout
+            <div className="mt-3.5 flex flex-col items-center justify-center gap-1 relative z-10">
+              <div className={cn("flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                256-bit Encrypted Provisioning
               </div>
-              <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-600" : "text-slate-400")}>
-                Provisioning typically takes up to 5 minutes.
-              </p>
             </div>
           </div>
         </motion.div>

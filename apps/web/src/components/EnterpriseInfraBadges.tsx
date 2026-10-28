@@ -4,7 +4,7 @@ import React from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { SiIntel, SiMikrotik } from "react-icons/si";
-import { ShieldCheck, Cpu, Network } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 /**
  * Official Juniper Networks Vector Logo
@@ -42,184 +42,105 @@ export function MikrotikLogo({ className, ...props }: React.SVGProps<SVGSVGEleme
 }
 
 /**
- * Full Enterprise Infrastructure Trust Showcase (Top Banner variant)
+ * Compact Architectural Hardware Specification Bar (Top Strip variant)
  */
 export function EnterpriseInfraBanner() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const specs = [
+    {
+      name: "Intel® Xeon®",
+      role: "AVX-512 Compute Nodes",
+      logo: <IntelLogo className="w-5 h-5" />,
+    },
+    {
+      name: "Juniper Networks®",
+      role: "Core Switching Fabric",
+      logo: <JuniperLogo className="w-6 h-auto" />,
+    },
+    {
+      name: "MikroTik® RouterOS",
+      role: "Multi-Homed BGP Edge",
+      logo: <MikrotikLogo className="w-4 h-4" />,
+    },
+  ];
+
   return (
     <div
       className={cn(
-        "rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-8 shadow-md relative overflow-hidden transition-all",
+        "rounded-2xl border px-4 py-3.5 sm:px-5 sm:py-4 transition-all",
         isDark
-          ? "bg-[#0b1322] border-slate-800/80 shadow-md"
-          : "bg-white border-slate-200 shadow-sm"
+          ? "bg-[#0a0a0c] border-white/[0.08]"
+          : "bg-white border-slate-200/90 shadow-xs"
       )}
     >
-      <div className="relative z-10">
-        {/* Header */}
-        <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b transition-colors", isDark ? "border-slate-800/80" : "border-slate-100")}>
-          <div className="flex items-center gap-2.5">
-            <div
-              className={cn(
-                "w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 transition-colors",
-                isDark
-                  ? "bg-slate-800/80 border-slate-700 text-cyan-400"
-                  : "bg-slate-100 border-slate-200 text-cyan-700"
-              )}
-            >
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                  Enterprise Infrastructure & Hardware
-                </h3>
-                <span className={cn("inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Sidoarjo DC
-                </span>
-              </div>
-              <p className={cn("text-xs mt-0.5", isDark ? "text-slate-400" : "text-slate-500")}>
-                Engineered with genuine enterprise processors & carrier-grade routing for 98.99% uptime.
-              </p>
-            </div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Left: Datacenter Status & SLA */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center border shrink-0",
+              isDark
+                ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
+                : "bg-cyan-50 border-cyan-200 text-cyan-700"
+            )}
+          >
+            <ShieldCheck className="w-4 h-4" />
           </div>
-
-          <div className="flex items-center gap-2 text-[11px] font-mono shrink-0 self-start sm:self-auto">
-            <span className={cn("px-2.5 py-1 rounded-lg border font-semibold", isDark ? "bg-[#060b14] border-slate-800 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
-              1 Gbps Uplink
-            </span>
-            <span className={cn("px-2.5 py-1 rounded-lg border font-semibold", isDark ? "bg-[#060b14] border-slate-800 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
-              Anti-DDoS BGP
-            </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={cn("text-xs sm:text-sm font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                Enterprise Bare-Metal Infrastructure
+              </span>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                  isDark
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                )}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Sidoarjo DC
+              </span>
+            </div>
+            <p className={cn("text-[11px] mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+              1 Gbps redundant uplink · Anti-DDoS BGP · 98.99% uptime SLA
+            </p>
           </div>
         </div>
 
-        {/* 3 Pillars: Intel Compute, Juniper Core, MikroTik Edge */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-          {/* 1. Intel Compute */}
-          <div
-            className={cn(
-              "p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between",
-              isDark
-                ? "bg-[#060b14] border-slate-800 hover:border-slate-700"
-                : "bg-slate-50/80 border-slate-200 hover:border-slate-300 shadow-xs"
-            )}
-          >
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 transition-colors",
-                      isDark
-                        ? "bg-slate-800/80 border-slate-700 text-cyan-400"
-                        : "bg-slate-100 border-slate-200 text-cyan-700"
-                    )}
-                  >
-                    <IntelLogo className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className={cn("font-bold text-sm leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                      Intel® Xeon®
-                    </div>
-                    <div className={cn("text-[10px] font-semibold uppercase tracking-wider mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                      Compute Architecture
-                    </div>
-                  </div>
-                </div>
-                <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border shrink-0", isDark ? "bg-slate-800/80 text-slate-400 border-slate-700/80" : "bg-slate-100 text-slate-600 border-slate-200")}>
-                  COMPUTE
-                </span>
+        {/* Right: 3 Hardware Pillars Inline */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 lg:w-auto shrink-0">
+          {specs.map((item) => (
+            <div
+              key={item.name}
+              className={cn(
+                "flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-colors",
+                isDark
+                  ? "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.12]"
+                  : "bg-slate-50/80 border-slate-200/80 hover:border-slate-300"
+              )}
+            >
+              <div
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                  isDark ? "bg-white/[0.04] text-cyan-400" : "bg-white text-cyan-700 border border-slate-200/60"
+                )}
+              >
+                {item.logo}
               </div>
-              <p className={cn("text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
-                High-performance Intel Xeon processor nodes with AVX-512 acceleration and dedicated hardware virtualization.
-              </p>
-            </div>
-          </div>
-
-          {/* 2. Juniper Networks Core */}
-          <div
-            className={cn(
-              "p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between",
-              isDark
-                ? "bg-[#060b14] border-slate-800 hover:border-slate-700"
-                : "bg-slate-50/80 border-slate-200 hover:border-slate-300 shadow-xs"
-            )}
-          >
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 transition-colors",
-                      isDark
-                        ? "bg-slate-800/80 border-slate-700 text-cyan-400"
-                        : "bg-slate-100 border-slate-200 text-cyan-700"
-                    )}
-                  >
-                    <JuniperLogo className="w-6 h-auto" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className={cn("font-bold text-sm leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                      Juniper Networks®
-                    </div>
-                    <div className={cn("text-[10px] font-semibold uppercase tracking-wider mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                      Core Routing Backbone
-                    </div>
-                  </div>
+              <div className="min-w-0">
+                <div className={cn("text-xs font-bold leading-tight truncate", isDark ? "text-zinc-100" : "text-slate-900")}>
+                  {item.name}
                 </div>
-                <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border shrink-0", isDark ? "bg-slate-800/80 text-slate-400 border-slate-700/80" : "bg-slate-100 text-slate-600 border-slate-200")}>
-                  CORE NET
-                </span>
-              </div>
-              <p className={cn("text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
-                Carrier-grade Juniper MX & QFX core switching fabric ensuring zero-packet-drop routing and redundant 1 Gbps uplinks.
-              </p>
-            </div>
-          </div>
-
-          {/* 3. MikroTik Edge & BGP */}
-          <div
-            className={cn(
-              "p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between",
-              isDark
-                ? "bg-[#060b14] border-slate-800 hover:border-slate-700"
-                : "bg-slate-50/80 border-slate-200 hover:border-slate-300 shadow-xs"
-            )}
-          >
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 transition-colors",
-                      isDark
-                        ? "bg-slate-800/80 border-slate-700 text-cyan-400"
-                        : "bg-slate-100 border-slate-200 text-cyan-700"
-                    )}
-                  >
-                    <MikrotikLogo className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className={cn("font-bold text-sm leading-tight", isDark ? "text-white" : "text-slate-900")}>
-                      MikroTik® RouterOS
-                    </div>
-                    <div className={cn("text-[10px] font-semibold uppercase tracking-wider mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                      Edge & BGP Gateway
-                    </div>
-                  </div>
+                <div className={cn("text-[10px] leading-tight truncate mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  {item.role}
                 </div>
-                <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border shrink-0", isDark ? "bg-slate-800/80 text-slate-400 border-slate-700/80" : "bg-slate-100 text-slate-600 border-slate-200")}>
-                  EDGE BGP
-                </span>
               </div>
-              <p className={cn("text-xs leading-relaxed", isDark ? "text-slate-400" : "text-slate-600")}>
-                Hardware-accelerated edge routing with dynamic multi-homed BGP peering, NAT gateway isolation, and traffic shaping.
-              </p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
@@ -236,73 +157,67 @@ export function EnterpriseInfraSidebarCard() {
   return (
     <div
       className={cn(
-        "rounded-2xl border p-4 transition-all relative overflow-hidden",
-        isDark ? "bg-[#060b14] border-slate-800 shadow-sm" : "bg-slate-50/80 border-slate-200 shadow-xs"
+        "rounded-xl border p-3.5 transition-all",
+        isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-slate-50/70 border-slate-200/80"
       )}
     >
-      <div className="flex items-center gap-2 mb-3">
-        <ShieldCheck className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
-        <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-slate-300" : "text-slate-700")}>
-          Enterprise Infrastructure
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
+          <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+            Hardware Stack
+          </span>
+        </div>
+        <span className={cn("text-[10px] font-mono font-semibold", isDark ? "text-emerald-400" : "text-emerald-600")}>
+          98.99% SLA
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        {/* Intel */}
+      <div className="grid grid-cols-3 gap-1.5">
         <div
           className={cn(
-            "p-2.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 transition-colors",
-            isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+            "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1",
+            isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-white border-slate-200/80"
           )}
           title="Server powered by Intel® Xeon® processors"
         >
-          <div className={cn("w-6 h-6 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            <IntelLogo className="w-5 h-5" />
+          <div className={cn("h-4 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            <IntelLogo className="w-4 h-4" />
           </div>
-          <span className={cn("text-[10px] font-bold leading-tight", isDark ? "text-slate-200" : "text-slate-800")}>
-            Intel® Xeon®
+          <span className={cn("text-[10px] font-semibold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
+            Intel® Xeon
           </span>
-          <span className="text-[8px] text-zinc-500 uppercase tracking-wider">Compute</span>
         </div>
 
-        {/* Juniper */}
         <div
           className={cn(
-            "p-2.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 transition-colors",
-            isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+            "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1",
+            isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-white border-slate-200/80"
           )}
           title="Core network powered by Juniper Networks®"
         >
-          <div className={cn("w-6 h-6 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
+          <div className={cn("h-4 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
             <JuniperLogo className="w-5 h-auto" />
           </div>
-          <span className={cn("text-[10px] font-bold leading-tight", isDark ? "text-slate-200" : "text-slate-800")}>
+          <span className={cn("text-[10px] font-semibold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
             Juniper®
           </span>
-          <span className="text-[8px] text-zinc-500 uppercase tracking-wider">Core Net</span>
         </div>
 
-        {/* MikroTik */}
         <div
           className={cn(
-            "p-2.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 transition-colors",
-            isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+            "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1",
+            isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-white border-slate-200/80"
           )}
           title="Edge routing powered by MikroTik® RouterOS"
         >
-          <div className={cn("w-6 h-6 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            <MikrotikLogo className="w-4 h-4" />
+          <div className={cn("h-4 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            <MikrotikLogo className="w-3.5 h-3.5" />
           </div>
-          <span className={cn("text-[10px] font-bold leading-tight", isDark ? "text-slate-200" : "text-slate-800")}>
+          <span className={cn("text-[10px] font-semibold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
             MikroTik®
           </span>
-          <span className="text-[8px] text-zinc-500 uppercase tracking-wider">Edge BGP</span>
         </div>
-      </div>
-
-      <div className={cn("pt-2.5 border-t flex items-center justify-between text-[10px] font-medium", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-500")}>
-        <span>Sidoarjo DC • 1 Gbps</span>
-        <span className="text-emerald-400 font-bold">98.99% SLA</span>
       </div>
     </div>
   );
@@ -318,17 +233,17 @@ export function IntelCpuBadge({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all shadow-xs",
+        "inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all",
         isDark
-          ? "bg-[#060b14] border-slate-800 text-slate-300 hover:border-slate-700"
-          : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300",
+          ? "bg-white/[0.03] border-white/[0.08] text-zinc-300"
+          : "bg-slate-50 border-slate-200 text-slate-700",
         className
       )}
     >
       <IntelLogo className="w-4 h-4 text-cyan-400 shrink-0" />
-      <span className="font-bold">Intel® Xeon® Processor</span>
-      <span className={cn("text-[10px] opacity-75 hidden sm:inline", isDark ? "text-cyan-400/80" : "text-cyan-700")}>
-        · Enterprise Cores
+      <span className="font-semibold text-[11px]">Intel® Xeon®</span>
+      <span className={cn("text-[10px] hidden sm:inline", isDark ? "text-zinc-500" : "text-slate-400")}>
+        · Dedicated Cores
       </span>
     </div>
   );
@@ -344,24 +259,22 @@ export function NetworkInfraBadge({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex flex-wrap items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all shadow-xs",
+        "inline-flex flex-wrap items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all",
         isDark
-          ? "bg-[#060b14] border-slate-800 text-slate-300 hover:border-slate-700"
-          : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300",
+          ? "bg-white/[0.03] border-white/[0.08] text-zinc-300"
+          : "bg-slate-50 border-slate-200 text-slate-700",
         className
       )}
     >
       <div className="flex items-center gap-1.5 text-cyan-400">
         <JuniperLogo className="w-4 h-auto" />
-        <span className="font-bold text-[11px] text-slate-300 dark:text-slate-200">Juniper Core</span>
+        <span className={cn("font-semibold text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>Juniper</span>
       </div>
-      <span className="text-slate-600 dark:text-slate-500">•</span>
+      <span className={isDark ? "text-zinc-600" : "text-slate-300"}>·</span>
       <div className="flex items-center gap-1.5 text-cyan-400">
         <MikrotikLogo className="w-3.5 h-3.5" />
-        <span className="font-bold text-[11px] text-slate-300 dark:text-slate-200">MikroTik BGP</span>
+        <span className={cn("font-semibold text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>MikroTik BGP</span>
       </div>
-      <span className="text-slate-600 dark:text-slate-500">•</span>
-      <span className="text-[10px] font-mono text-cyan-400 font-semibold">1 Gbps</span>
     </div>
   );
 }
