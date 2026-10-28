@@ -105,7 +105,7 @@ export function EnterpriseInfraBanner() {
                 Sidoarjo DC
               </span>
             </div>
-            <p className={cn("text-[11px] mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <p className={cn("text-[11px] mt-0.5 leading-normal", isDark ? "text-zinc-400" : "text-slate-500")}>
               1 Gbps redundant uplink · Anti-DDoS BGP · 98.99% uptime SLA
             </p>
           </div>

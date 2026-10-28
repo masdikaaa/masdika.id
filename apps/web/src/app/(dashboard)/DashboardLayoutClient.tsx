@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
-import { formatRupiah } from "@/lib/billing";
+import { formatRupiah, formatCompactRupiah } from "@/lib/billing";
 
 const VpcIcon = ({ className }: { className?: string }) => (
   <svg
@@ -357,20 +357,20 @@ export default function DashboardLayoutClient({
         {/* Topbar */}
         <header
           className={cn(
-            "h-16 flex items-center justify-between px-3.5 sm:px-6 lg:px-8 border-b sticky top-0 z-30 transition-colors",
+            "h-16 flex items-center justify-between px-2.5 sm:px-6 lg:px-8 border-b sticky top-0 z-30 transition-colors",
             isDark
               ? "bg-[#0a0a0c]/90 backdrop-blur-xl border-white/[0.08]"
               : "bg-white/90 backdrop-blur-xl border-slate-200/80 shadow-2xs"
           )}
         >
           {/* Left: Mobile Menu Trigger + Desktop Quick Search */}
-          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open navigation menu"
               className={cn(
-                "lg:hidden h-10 p-1 rounded-xl border flex items-center justify-center transition-all shrink-0 focus:outline-none group cursor-pointer",
+                "lg:hidden h-9 w-9 sm:h-10 sm:w-auto p-1 rounded-xl border flex items-center justify-center transition-all shrink-0 focus:outline-none group cursor-pointer",
                 isDark
                   ? "bg-white/[0.02] border-white/[0.08] hover:border-white/[0.15]"
                   : "bg-slate-100/80 border-slate-200/80 hover:border-slate-300"
@@ -378,7 +378,7 @@ export default function DashboardLayoutClient({
             >
               <span
                 className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all",
                   isDark
                     ? "text-zinc-300 group-hover:text-cyan-400 group-hover:bg-white/[0.07]"
                     : "text-slate-600 group-hover:text-cyan-700 group-hover:bg-white shadow-2xs"
@@ -466,27 +466,27 @@ export default function DashboardLayoutClient({
           </div>
 
           {/* Right: Wallet Capsule + Action Dock + Profile Pill */}
-          <div className="flex items-center gap-2 sm:gap-2.5 ml-auto shrink-0">
-            {/* 1. Wallet & Top-Up Capsule (Strictly h-10 p-1 with h-8 inner boxes for 100% left/right symmetry) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 ml-auto shrink-0">
+            {/* 1. Wallet & Top-Up Capsule */}
             <Link
               href="/dashboard/billing"
               className={cn(
-                "group h-10 p-1 flex items-center gap-2 rounded-xl border transition-all duration-200 shrink-0",
+                "group h-9 sm:h-10 p-1 flex items-center gap-1.5 sm:gap-2 rounded-xl border transition-all duration-200 shrink-0",
                 isDark
                   ? "bg-gradient-to-r from-cyan-500/[0.08] via-cyan-500/[0.03] to-white/[0.01] border-cyan-500/25 hover:border-cyan-400/50 hover:from-cyan-500/[0.14]"
                   : "bg-slate-50/90 hover:bg-white border-slate-200/90 hover:border-cyan-500/40 shadow-2xs"
               )}
-              title="Manage Billing & Top Up Credit"
+              title={`Credit: ${formatRupiah(userBalance || 0)} (Click to Top Up)`}
             >
               <div
                 className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
                   isDark
                     ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400"
                     : "bg-cyan-50 border-cyan-200 text-cyan-700"
                 )}
               >
-                <Wallet className="w-4 h-4" />
+                <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
 
               <div className="flex flex-col justify-center leading-none px-0.5">
@@ -494,13 +494,20 @@ export default function DashboardLayoutClient({
                   Credit
                 </span>
                 <span className={cn("text-xs sm:text-[13px] font-bold font-mono tracking-tight whitespace-nowrap sm:mt-0.5", isDark ? "text-white" : "text-slate-900")}>
-                  {formatRupiah(userBalance || 0)}
+                  {/* Desktop / Tablet: Full Rupiah */}
+                  <span className="hidden sm:inline">
+                    {formatRupiah(userBalance || 0)}
+                  </span>
+                  {/* Mobile: Compact when in millions (e.g. Rp 1,5 jt) to prevent header overflow */}
+                  <span className="inline sm:hidden">
+                    {formatCompactRupiah(userBalance || 0)}
+                  </span>
                 </span>
               </div>
 
               <span
                 className={cn(
-                  "h-8 w-8 sm:w-auto sm:px-2.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all shrink-0",
+                  "h-7 w-7 sm:h-8 sm:w-auto sm:px-2.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all shrink-0",
                   isDark
                     ? "bg-cyan-400 group-hover:bg-cyan-300 text-slate-950 shadow-2xs"
                     : "bg-cyan-500 group-hover:bg-cyan-600 text-white"
@@ -514,7 +521,7 @@ export default function DashboardLayoutClient({
             {/* 2. Utility Action Dock (Theme + Notifications) */}
             <div
               className={cn(
-                "h-10 p-1 flex items-center gap-1 rounded-xl border relative shrink-0",
+                "h-9 sm:h-10 p-0.5 sm:p-1 flex items-center gap-0.5 sm:gap-1 rounded-xl border relative shrink-0",
                 isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-100/80 border-slate-200/80"
               )}
             >
@@ -524,16 +531,16 @@ export default function DashboardLayoutClient({
                 aria-label="Toggle Theme"
                 title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
                 className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all group outline-none cursor-pointer",
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all group outline-none cursor-pointer",
                   isDark
                     ? "text-zinc-400 hover:text-white hover:bg-white/[0.07]"
                     : "text-slate-500 hover:text-slate-900 hover:bg-white shadow-2xs"
                 )}
               >
                 {isDark ? (
-                  <Sun className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12 text-amber-300/90" />
+                  <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:rotate-12 text-amber-300/90" />
                 ) : (
-                  <Moon className="w-4 h-4 transition-transform duration-200 group-hover:-rotate-12" />
+                  <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:-rotate-12" />
                 )}
               </button>
 
@@ -546,13 +553,13 @@ export default function DashboardLayoutClient({
                 aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
                 title="Notifications"
                 className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all relative group outline-none cursor-pointer",
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all relative group outline-none cursor-pointer",
                   showNotifications
                     ? isDark ? "bg-white/[0.1] text-cyan-400" : "bg-white text-cyan-700 shadow-2xs"
                     : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.07]" : "text-slate-500 hover:text-slate-900 hover:bg-white"
                 )}
               >
-                <Bell className={cn("w-4 h-4 transition-transform", showNotifications ? "animate-ring" : "group-hover:rotate-12")} aria-hidden="true" />
+                <Bell className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform", showNotifications ? "animate-ring" : "group-hover:rotate-12")} aria-hidden="true" />
                 {unreadCount > 0 && (
                   <span
                     aria-live="polite"
@@ -655,7 +662,7 @@ export default function DashboardLayoutClient({
                   setShowNotifications(false);
                 }}
                 className={cn(
-                  "group h-10 flex items-center gap-2.5 p-1 sm:pl-3 sm:pr-2 rounded-xl border transition-all duration-200 cursor-pointer text-left",
+                  "group h-9 sm:h-10 flex items-center gap-2.5 p-0.5 sm:p-1 sm:pl-3 sm:pr-2 rounded-xl border transition-all duration-200 cursor-pointer text-left",
                   showProfileMenu
                     ? isDark ? "bg-white/[0.06] border-cyan-500/40" : "bg-slate-100 border-cyan-500/40"
                     : isDark
@@ -672,7 +679,7 @@ export default function DashboardLayoutClient({
                   </span>
                 </div>
 
-                <div className="relative w-8 h-8 rounded-lg p-[1.5px] bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600 shrink-0 shadow-xs">
+                <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-lg p-[1.5px] bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600 shrink-0 shadow-xs">
                   <div className={cn("w-full h-full rounded-[6.5px] flex items-center justify-center overflow-hidden", isDark ? "bg-[#0a0a0c]" : "bg-slate-900")}>
                     {userImage ? (
                       <img referrerPolicy="no-referrer" src={userImage} alt={userName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
