@@ -107,7 +107,7 @@ const SERVICES: ServiceDef[] = [
     name: "Cloud VPS",
     category: "COMPUTE",
     icon: Terminal,
-    desc: "Dedicated-core virtual machines with NVMe/SSD storage & 1 Gbps uplink.",
+    desc: "Dedicated-core virtual machines with SSD/HDD storage & 1 Gbps uplink.",
     badge: "Popular",
     tags: ["1 Gbps Uplink", "Anti-DDoS BGP", "Root Access"]
   },

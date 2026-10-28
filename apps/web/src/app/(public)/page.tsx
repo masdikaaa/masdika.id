@@ -133,7 +133,7 @@ const INFRASTRUCTURE_STACK = [
   {
     name: "Dell",
     category: "Bare-Metal",
-    description: "Redundant PowerEdge rackmount server hardware with enterprise NVMe RAID.",
+    description: "Redundant PowerEdge rackmount server hardware with enterprise SSD/HDD RAID.",
     icon: SiDell,
     iconColor: "text-[#007DB8] dark:text-[#38bdf8]",
   },

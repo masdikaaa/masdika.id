@@ -771,7 +771,7 @@ export default function MyVpsPage() {
                         )}
                       >
                         <HardDrive className="w-3 h-3 text-cyan-500 shrink-0" />
-                        {vps.diskGb} GB NVMe
+                        {vps.diskGb} GB SSD
                       </span>
                       <span
                         className={cn(

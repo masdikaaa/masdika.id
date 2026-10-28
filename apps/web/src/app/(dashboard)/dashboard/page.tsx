@@ -1231,7 +1231,7 @@ export default function DashboardOverview() {
                           )}
                         >
                           <HardDrive className="w-3 h-3 text-cyan-500 shrink-0" />
-                          <span className="truncate">{vps.diskGb} GB NVMe</span>
+                          <span className="truncate">{vps.diskGb} GB SSD</span>
                         </span>
                       )}
                     </div>
