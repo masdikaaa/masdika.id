@@ -180,24 +180,44 @@ export function SectionOrnaments({
 
       {variant === "hero" && (
         <>
-          <div
-            className={cn(
-              "absolute -top-[12%] left-[10%] w-[960px] h-[960px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[16%] -right-[8%] w-[720px] h-[720px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[28%] -right-[4%] w-[520px] h-[520px]",
-              RING_NEUTRAL_SOLID
-            )}
-          />
+          {/* Desktop Hero Rings (Framing the mascot & wide margins on desktop) */}
+          <div className="hidden lg:block pointer-events-none">
+            <div
+              className={cn(
+                "absolute -top-[12%] left-[10%] w-[960px] h-[960px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-[16%] -right-[8%] w-[720px] h-[720px]",
+                RING_ACCENT_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-[28%] -right-[4%] w-[520px] h-[520px]",
+                RING_NEUTRAL_SOLID
+              )}
+            />
+          </div>
+
+          {/* Mobile & Tablet Hero Rings: Positioned at bottom behind mascot, 100% clear of text & buttons */}
+          <div className="lg:hidden pointer-events-none">
+            <div
+              className={cn(
+                "absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 w-[320px] sm:w-[460px] h-[320px] sm:h-[460px]",
+                RING_ACCENT_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute bottom-0 sm:bottom-4 left-1/2 -translate-x-1/2 w-[420px] sm:w-[580px] h-[420px] sm:h-[580px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+          </div>
+
           <DiamondOrnament size={20} className="top-12 left-10 sm:left-20" />
           <DiamondOrnament size={20} className="top-16 right-10 sm:right-24" />
           <DiamondOrnament size={16} className="bottom-20 left-12 sm:left-24" />
@@ -211,30 +231,50 @@ export function SectionOrnaments({
 
       {variant === "sides" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 -left-[260px] -translate-y-1/2 w-[760px] h-[760px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -left-[180px] -translate-y-1/2 w-[580px] h-[580px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[260px] -translate-y-1/2 w-[760px] h-[760px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[180px] -translate-y-1/2 w-[580px] h-[580px]",
-              RING_ACCENT_SOLID
-            )}
-          />
+          {/* Desktop side rings */}
+          <div className="hidden md:block pointer-events-none">
+            <div
+              className={cn(
+                "absolute top-1/2 -left-[260px] -translate-y-1/2 w-[760px] h-[760px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/2 -left-[180px] -translate-y-1/2 w-[580px] h-[580px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/2 -right-[260px] -translate-y-1/2 w-[760px] h-[760px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/2 -right-[180px] -translate-y-1/2 w-[580px] h-[580px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+          </div>
+
+          {/* Mobile side rings: gently graze outer edge without cutting across cards */}
+          <div className="md:hidden pointer-events-none">
+            <div
+              className={cn(
+                "absolute top-1/2 -left-[160px] -translate-y-1/2 w-[220px] h-[220px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/2 -right-[160px] -translate-y-1/2 w-[220px] h-[220px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+          </div>
+
           <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
           <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
           <DiamondOrnament size={16} className="bottom-10 left-8 xl:left-16" />
@@ -246,30 +286,32 @@ export function SectionOrnaments({
 
       {variant === "diagonal" && (
         <>
-          <div
-            className={cn(
-              "absolute top-[4%] right-[-160px] w-[820px] h-[820px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[8%] right-[-80px] w-[620px] h-[620px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[40%] left-[-180px] w-[860px] h-[860px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[44%] left-[-100px] w-[660px] h-[660px]",
-              RING_ACCENT_SOLID
-            )}
-          />
+          <div className="hidden md:block pointer-events-none">
+            <div
+              className={cn(
+                "absolute top-[4%] right-[-160px] w-[820px] h-[820px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-[8%] right-[-80px] w-[620px] h-[620px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-[40%] left-[-180px] w-[860px] h-[860px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-[44%] left-[-100px] w-[660px] h-[660px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+          </div>
           <DiamondOrnament size={18} className="top-12 right-6 xl:right-12" />
           <DiamondOrnament size={16} className="top-[20%] left-6 xl:left-12" />
           <DiamondOrnament size={18} className="top-[45%] right-6 xl:right-12" />
@@ -283,13 +325,13 @@ export function SectionOrnaments({
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] sm:w-[1300px] h-[900px] sm:h-[1300px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[700px] md:w-[1000px] lg:w-[1300px] h-[340px] sm:h-[700px] md:h-[1000px] lg:h-[1300px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1050px] h-[700px] sm:h-[1050px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] sm:w-[520px] md:w-[750px] lg:w-[1050px] h-[240px] sm:h-[520px] md:h-[750px] lg:h-[1050px]",
               RING_ACCENT_SOLID
             )}
           />
@@ -306,13 +348,13 @@ export function SectionOrnaments({
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1050px] sm:w-[1450px] h-[1050px] sm:h-[1450px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] sm:w-[800px] md:w-[1100px] lg:w-[1450px] h-[360px] sm:h-[800px] md:h-[1100px] lg:h-[1450px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[1100px] h-[750px] sm:h-[1100px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] sm:w-[600px] md:w-[850px] lg:w-[1100px] h-[260px] sm:h-[600px] md:h-[850px] lg:h-[1100px]",
               RING_ACCENT_SOLID
             )}
           />
@@ -327,24 +369,26 @@ export function SectionOrnaments({
 
       {variant === "bottom-left" && (
         <>
-          <div
-            className={cn(
-              "absolute -bottom-[80px] left-[6%] w-[800px] h-[800px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute -bottom-[20px] left-[10%] w-[620px] h-[620px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[6%] right-[-8%] w-[620px] h-[620px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
+          <div className="hidden md:block pointer-events-none">
+            <div
+              className={cn(
+                "absolute -bottom-[80px] left-[6%] w-[800px] h-[800px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute -bottom-[20px] left-[10%] w-[620px] h-[620px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-[6%] right-[-8%] w-[620px] h-[620px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+          </div>
           <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
           <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
           <DiamondOrnament size={16} className="bottom-10 left-8 xl:left-16" />
@@ -356,24 +400,26 @@ export function SectionOrnaments({
 
       {variant === "right-focus" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[220px] -translate-y-1/2 w-[800px] h-[800px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[140px] -translate-y-1/2 w-[620px] h-[620px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/4 -left-[200px] w-[680px] h-[680px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
+          <div className="hidden md:block pointer-events-none">
+            <div
+              className={cn(
+                "absolute top-1/2 -right-[220px] -translate-y-1/2 w-[800px] h-[800px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/2 -right-[140px] -translate-y-1/2 w-[620px] h-[620px]",
+                RING_ACCENT_SOLID
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/4 -left-[200px] w-[680px] h-[680px]",
+                RING_NEUTRAL_DASHED
+              )}
+            />
+          </div>
           <DiamondOrnament size={18} className="top-10 left-6 xl:left-12" />
           <DiamondOrnament size={18} className="top-10 right-6 xl:right-12" />
           <DiamondOrnament size={16} className="bottom-12 left-8 xl:left-16" />
@@ -387,13 +433,13 @@ export function SectionOrnaments({
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] sm:w-[1500px] h-[1100px] sm:h-[1500px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[700px] md:w-[1100px] lg:w-[1500px] h-[340px] sm:h-[700px] md:h-[1100px] lg:h-[1500px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] sm:w-[1150px] h-[800px] sm:h-[1150px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] sm:w-[500px] md:w-[800px] lg:w-[1150px] h-[250px] sm:h-[500px] md:h-[800px] lg:h-[1150px]",
               RING_ACCENT_SOLID
             )}
           />
@@ -410,13 +456,13 @@ export function SectionOrnaments({
         <>
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[460px] h-[460px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[460px] h-[280px] sm:h-[460px]",
               RING_NEUTRAL_DASHED
             )}
           />
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[330px] h-[330px]",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] sm:w-[330px] h-[200px] sm:h-[330px]",
               RING_ACCENT_SOLID
             )}
           />
