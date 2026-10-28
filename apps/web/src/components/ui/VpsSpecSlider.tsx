@@ -6,6 +6,7 @@ import { formatRupiah } from "@/lib/billing";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
+import { EnterpriseInfraSidebarCard } from "@/components/EnterpriseInfraBadges";
 
 interface Pricing {
   vcpu: number;
@@ -426,6 +427,9 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
               {isDisabled ? "Coming Soon" : loading ? "Loading..." : "Deploy Now"}
             </span>
           </button>
+
+          {/* Infrastructure Brands: MikroTik, Juniper, Dell */}
+          <EnterpriseInfraSidebarCard className="mt-4" />
         </div>
       </div>
     </div>

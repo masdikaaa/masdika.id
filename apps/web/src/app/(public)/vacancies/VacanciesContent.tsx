@@ -17,6 +17,7 @@ import {
 import { OpportunityGrid } from "@/components/ui/OpportunityGrid";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { Opportunity } from "@prisma/client";
 
 const item = {
@@ -81,105 +82,25 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
               </div>
             </motion.div>
 
-            {/* Right – Hero Avatar (job-vacancies.png) with Floating Badges */}
+            {/* Right – Hero Avatar (job-vacancies.webp) with 4 Floating Badges */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-10 lg:mt-0"
+              className="relative flex items-center justify-center mt-6 lg:mt-0"
             >
-              <div className="relative w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px] mx-auto flex items-end justify-center">
-                {/* Subtle ambient depth bloom behind avatar */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-
-                {/* Floating Card 1: Top-Left (Verified Roles) */}
-                <div
-                  className="absolute top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-1 bg-white/95 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
-                >
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-                    <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
-                      Verified Roles
-                    </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      Direct Tech Leads
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating Card 2: Top-Right (Remote & Hybrid) */}
-                <div
-                  className="absolute top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-2 bg-white/95 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
-                >
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-                    <Globe className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
-                      Work Flexibility
-                    </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      Remote &amp; Hybrid
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating Card 3: Bottom-Left (DevOps & Cloud) */}
-                <div
-                  className="absolute bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-3 bg-white/95 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
-                >
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-                    <Server className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
-                      Target Tracks
-                    </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      DevOps &amp; Cloud
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating Card 4: Bottom-Right (Direct Apply) */}
-                <div
-                  className="absolute bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10 z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 animate-float-4 bg-white/95 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)] hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default max-w-[170px] sm:max-w-none"
-                >
-                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-                    <Zap className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">
-                      Direct Apply
-                    </div>
-                    <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 whitespace-nowrap truncate max-w-[115px] sm:max-w-none">
-                      1-Click LinkedIn
-                    </div>
-                  </div>
-                </div>
-
-                {/* Karakter job-vacancies.png utuh, proporsional & konsisten dengan halaman lain */}
-                <div
-                  className="w-full h-full relative z-10 flex items-end justify-center"
-                  style={{
-                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)",
-                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0) 98%)"
-                  }}
-                >
-                  <Image
-                    src="/job-vacancies.webp"
-                    alt="Masdika – Job Vacancies"
-                    width={1536}
-                    height={1024}
-                    priority={true}
-                    unoptimized={true}
-                    className="w-full h-full object-contain object-bottom"
-                  />
-                  <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/40 to-transparent pointer-events-none" />
-                </div>
-              </div>
+              <HeroAvatarFrame
+                imageSrc="/job-vacancies.webp"
+                imageAlt="Masdika – Job Vacancies"
+                imageWidth={1536}
+                imageHeight={1024}
+                badges={[
+                  { icon: ShieldCheck, label: "Verified Roles", value: "Direct Tech Leads" },
+                  { icon: Globe, label: "Work Flexibility", value: "Remote & Hybrid" },
+                  { icon: Server, label: "Target Tracks", value: "DevOps & Cloud" },
+                  { icon: Zap, label: "Direct Apply", value: "1-Click LinkedIn" },
+                ]}
+              />
             </motion.div>
           </div>
         </section>

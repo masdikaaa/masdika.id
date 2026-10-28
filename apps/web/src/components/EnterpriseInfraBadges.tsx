@@ -3,8 +3,15 @@
 import React from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { SiIntel, SiMikrotik } from "react-icons/si";
+import { SiIntel, SiMikrotik, SiDell, SiJunipernetworks } from "react-icons/si";
 import { ShieldCheck } from "lucide-react";
+
+/**
+ * Official Dell Vector Logo
+ */
+export function DellLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
+  return <SiDell className={className} {...(props as any)} />;
+}
 
 /**
  * Official Juniper Networks Vector Logo
@@ -148,24 +155,49 @@ export function EnterpriseInfraBanner() {
 }
 
 /**
- * Compact Infrastructure Trust Card for Order Summary Sidebars
+ * Compact Infrastructure Trust Card for Order Summary Sidebars (MikroTik, Juniper, Dell)
  */
-export function EnterpriseInfraSidebarCard() {
+export function EnterpriseInfraSidebarCard({ className }: { className?: string }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const brands = [
+    {
+      name: "MikroTik",
+      role: "Edge BGP",
+      icon: <SiMikrotik className="w-3.5 h-3.5" />,
+      color: "text-slate-800 dark:text-zinc-100",
+      title: "Edge routing & VPC powered by MikroTik® RouterOS",
+    },
+    {
+      name: "Juniper",
+      role: "Core Fabric",
+      icon: <SiJunipernetworks className="w-3.5 h-3.5" />,
+      color: "text-[#00A98F] dark:text-[#2dd4bf]",
+      title: "Core switching & backbone powered by Juniper Networks®",
+    },
+    {
+      name: "Dell",
+      role: "PowerEdge",
+      icon: <SiDell className="w-3.5 h-3.5" />,
+      color: "text-[#007DB8] dark:text-[#38bdf8]",
+      title: "Server hardware powered by Dell PowerEdge",
+    },
+  ];
 
   return (
     <div
       className={cn(
-        "rounded-xl border p-3.5 transition-all",
-        isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-slate-50/70 border-slate-200/80"
+        "rounded-xl border p-3 sm:p-3.5 transition-all",
+        isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-white/80 border-slate-200/80 shadow-xs",
+        className
       )}
     >
-      <div className="flex items-center justify-between gap-2 mb-2.5">
+      <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
+          <ShieldCheck className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
           <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
-            Hardware Stack
+            Enterprise Stack
           </span>
         </div>
         <span className={cn("text-[10px] font-mono font-semibold", isDark ? "text-emerald-400" : "text-emerald-600")}>
@@ -173,51 +205,29 @@ export function EnterpriseInfraSidebarCard() {
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-1.5">
-        <div
-          className={cn(
-            "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1",
-            isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-white border-slate-200/80"
-          )}
-          title="Server powered by Intel® Xeon® processors"
-        >
-          <div className={cn("h-4 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            <IntelLogo className="w-4 h-4" />
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        {brands.map((b) => (
+          <div
+            key={b.name}
+            className={cn(
+              "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1 transition-all group",
+              isDark
+                ? "bg-[#0a0a0c]/80 border-white/[0.06] hover:border-cyan-500/30"
+                : "bg-slate-50 border-slate-200/70 hover:border-cyan-500/30 shadow-2xs"
+            )}
+            title={b.title}
+          >
+            <div className={cn("h-4 flex items-center justify-center transition-transform group-hover:scale-110", b.color)}>
+              {b.icon}
+            </div>
+            <span className={cn("text-[10px] font-bold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
+              {b.name}
+            </span>
+            <span className={cn("text-[8px] leading-none", isDark ? "text-zinc-500" : "text-slate-400")}>
+              {b.role}
+            </span>
           </div>
-          <span className={cn("text-[10px] font-semibold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
-            Intel® Xeon
-          </span>
-        </div>
-
-        <div
-          className={cn(
-            "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1",
-            isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-white border-slate-200/80"
-          )}
-          title="Core network powered by Juniper Networks®"
-        >
-          <div className={cn("h-4 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            <JuniperLogo className="w-5 h-auto" />
-          </div>
-          <span className={cn("text-[10px] font-semibold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
-            Juniper®
-          </span>
-        </div>
-
-        <div
-          className={cn(
-            "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1",
-            isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-white border-slate-200/80"
-          )}
-          title="Edge routing powered by MikroTik® RouterOS"
-        >
-          <div className={cn("h-4 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            <MikrotikLogo className="w-3.5 h-3.5" />
-          </div>
-          <span className={cn("text-[10px] font-semibold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
-            MikroTik®
-          </span>
-        </div>
+        ))}
       </div>
     </div>
   );

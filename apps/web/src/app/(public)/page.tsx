@@ -44,7 +44,8 @@ import { TechIcon } from "@/components/ui/TechIcon";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { SectionOrnaments, HeroOrnaments } from "@/components/ui/PremiumBackground";
+import { SectionOrnaments } from "@/components/ui/PremiumBackground";
+import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 
 const TypeAnimation = dynamic(
   () => import("react-type-animation").then((mod) => mod.TypeAnimation),
@@ -407,71 +408,27 @@ export default function HomePage() {
               </div>
             </motion.div>
 
-            {/* Right – hero image with smooth blur-fade bottom */}
+            {/* Right – hero image with smooth grounded bottom fade */}
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, delay: 0.2 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0 order-1 lg:order-2"
+              className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2"
             >
-              <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] h-[440px] sm:h-[500px] lg:h-[600px] mx-auto flex items-end justify-center">
-                {/* Architectural Hero Background Ornaments precisely framed around the hero avatar (SMK Telkom Malang aesthetic) */}
-                <HeroOrnaments className="z-0" />
-
-                {/* Subtle ambient depth bloom behind avatar — pure Cyan */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none z-0" />
-
-                {/* Hero Character with progressive seamless bottom fade into background */}
-                <div
-                  className="w-full h-full relative z-10 flex items-end justify-center overflow-hidden"
-                  style={{
-                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0.85) 75%, rgba(0,0,0,0) 98%)",
-                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0.85) 75%, rgba(0,0,0,0) 98%)"
-                  }}
-                >
-                  <Image
-                    referrerPolicy="no-referrer"
-                    src="/masdika.webp"
-                    alt="Masdika – Cloud Engineer"
-                    width={583}
-                    height={875}
-                    priority={true}
-                    fetchPriority="high"
-                    unoptimized={true}
-                    className="w-full h-full object-contain object-bottom relative z-10"
-                  />
-                  {/* Soft bottom vignette fade into background */}
-                  <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/60 to-transparent pointer-events-none z-10" />
-                </div>
-
-                {/* Floating animated hero badges */}
-                {[
-                  { icon: Cloud, label: "AWS Certified", value: "Cloud Expert", pos: "top-1 -left-1 sm:top-4 sm:-left-6 lg:-left-10", anim: "animate-float-1" },
-                  { icon: Database, label: "High Availability", value: "DB Architect", pos: "top-14 -right-1 sm:top-4 sm:-right-6 lg:-right-10", anim: "animate-float-2" },
-                  { icon: Activity, label: "CI/CD Pipeline", value: "Automation", pos: "bottom-20 -left-1 sm:bottom-12 sm:-left-6 lg:-left-10", anim: "animate-float-3" },
-                  { icon: SiKubernetes, label: "Kubernetes", value: "Mastery", pos: "bottom-2 -right-1 sm:bottom-12 sm:-right-6 lg:-right-10", anim: "animate-float-4" },
-                ].map(({ icon: Icon, label, value, pos, anim }, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex absolute z-30 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
-                      pos,
-                      anim,
-                      "bg-white/45 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-white/60 dark:border-white/10",
-                      "shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)]",
-                      "hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 select-none cursor-default"
-                    )}
-                  >
-                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-                      <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-400 leading-none truncate">{label}</div>
-                      <div className="text-[10px] sm:text-sm font-bold text-slate-800 dark:text-white leading-tight mt-0.5 sm:mt-1 truncate max-w-[115px] sm:max-w-none">{value}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <HeroAvatarFrame
+                imageSrc="/masdika.webp"
+                imageAlt="Masdika – Cloud Engineer"
+                imageWidth={583}
+                imageHeight={875}
+                isPortrait={true}
+                priority={true}
+                badges={[
+                  { icon: Cloud, label: "AWS Certified", value: "Cloud Expert" },
+                  { icon: Database, label: "High Availability", value: "DB Architect" },
+                  { icon: Activity, label: "CI/CD Pipeline", value: "Automation" },
+                  { icon: SiKubernetes, label: "Kubernetes", value: "Mastery" },
+                ]}
+              />
             </motion.div>
           </div>
         </div>
