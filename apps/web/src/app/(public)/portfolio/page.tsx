@@ -249,21 +249,21 @@ export default function PortfolioPage() {
                         </Link>
 
                         {/* Content Section */}
-                        <div className="flex-1 p-6 flex flex-col">
+                        <div className="flex-1 p-4 sm:p-6 flex flex-col">
                           {/* Tech Stack Chips */}
                           {techList.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mb-3.5">
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-3 sm:mb-3.5">
                               {techList.slice(0, 4).map((tech: string, i: number) => (
                                 <span
                                   key={i}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 transition-colors"
+                                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 transition-colors"
                                 >
-                                  <TechIcon tech={tech} size={13} />
+                                  <TechIcon tech={tech} size={12} />
                                   <span>{tech}</span>
                                 </span>
                               ))}
                               {techList.length > 4 && (
-                                <span className="inline-flex items-center px-2 py-1 text-[10px] font-bold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-muted)]">
+                                <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-muted)]">
                                   +{techList.length - 4}
                                 </span>
                               )}

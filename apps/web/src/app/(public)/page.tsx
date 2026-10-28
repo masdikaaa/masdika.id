@@ -839,16 +839,25 @@ export default function HomePage() {
                         className="block relative overflow-hidden bg-[var(--surface-secondary)] group/img border-b border-[var(--border-primary)]"
                       >
                         {/* Sleek Window Top Bar */}
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--border-primary)] bg-[var(--surface)]">
-                          <div className="flex items-center gap-1.5">
+                        <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 border-b border-[var(--border-primary)] bg-[var(--surface)]">
+                          {/* Window Control Dots */}
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
                             <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                           </div>
-                          <span className="text-[11px] font-mono font-medium text-[var(--text-muted)] truncate max-w-[180px] sm:max-w-[260px]">
-                            {project.slug ? `${project.slug}.masdika.id` : project.title}
-                          </span>
-                          <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400">
+
+                          {/* Address Bar Pill (Safari / Chrome Style) */}
+                          <div className="min-w-0 flex-1 px-1 flex items-center justify-center">
+                            <div className="w-full max-w-[280px] px-2.5 py-0.5 rounded-md bg-[var(--surface-secondary)] border border-[var(--border-primary)]/70 text-center">
+                              <span className="text-[10px] sm:text-[11px] font-mono font-medium text-[var(--text-muted)] truncate block">
+                                {project.slug ? `${project.slug}.masdika.id` : project.title}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Category Badge */}
+                          <span className="shrink-0 px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
                             {project.category?.name || project.category || "Case Study"}
                           </span>
                         </div>
@@ -868,45 +877,45 @@ export default function HomePage() {
                       </Link>
 
                       {/* Card Body */}
-                      <div className="p-5 sm:p-6 lg:p-7 flex flex-col flex-1">
+                      <div className="p-4 sm:p-6 lg:p-7 flex flex-col flex-1">
                         {/* Tech Stack Chips */}
                         {techList.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-3.5">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-3 sm:mb-3.5">
                             {techList.slice(0, 4).map((tech: string, i: number) => (
                               <span
                                 key={i}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 transition-colors"
+                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 transition-colors"
                               >
-                                <TechIcon tech={tech} size={13} />
+                                <TechIcon tech={tech} size={12} />
                                 <span>{tech}</span>
                               </span>
                             ))}
                             {techList.length > 4 && (
-                              <span className="inline-flex items-center px-2 py-1 text-[10px] font-bold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-muted)]">
+                              <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-muted)]">
                                 +{techList.length - 4}
                               </span>
                             )}
                           </div>
                         )}
 
-                        <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="group/title focus:outline-none mb-2">
-                          <h3 className="text-lg sm:text-xl font-bold transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400 leading-snug">
+                        <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="group/title focus:outline-none mb-1.5 sm:mb-2">
+                          <h3 className="text-base sm:text-lg lg:text-xl font-bold transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400 leading-snug">
                             {project.title}
                           </h3>
                         </Link>
 
-                        <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-5 flex-1">
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-4 sm:mb-5 flex-1">
                           {project.description || "Explore full technical architecture, features, and deployment details."}
                         </p>
 
-                        <div className="mt-auto pt-4 border-t border-[var(--border-primary)] flex items-center justify-between gap-3">
+                        <div className="mt-auto pt-3.5 sm:pt-4 border-t border-[var(--border-primary)] flex items-center justify-between gap-2 sm:gap-3">
                           <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] min-w-0">
                             <Building2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
                             <span className="truncate">{project.client || "Personal Project"}</span>
                           </div>
                           <Link
                             href={project.slug ? `/portfolio/${project.slug}` : "#"}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-400 group-hover:text-slate-950 group-hover:border-cyan-400 transition-all shrink-0"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-400 group-hover:text-slate-950 group-hover:border-cyan-400 transition-all shrink-0"
                           >
                             <span>View Case Study</span>
                             <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
