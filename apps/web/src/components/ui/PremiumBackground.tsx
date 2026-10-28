@@ -30,18 +30,34 @@ const DOT_COORDS = [
 
 function DotGridPattern({ className }: { className?: string }) {
   return (
-    <div
-      aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute inset-0 select-none opacity-35 dark:opacity-20",
-        className
-      )}
-      style={{
-        backgroundImage:
-          "radial-gradient(rgba(100, 116, 139, 0.4) 1.2px, transparent 1.2px)",
-        backgroundSize: "28px 28px",
-      }}
-    />
+    <>
+      {/* Light mode dot grid (slate dots on light canvas) */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 select-none opacity-40 dark:hidden",
+          className
+        )}
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(100, 116, 139, 0.45) 1.2px, transparent 1.2px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+      {/* Dark mode dot grid (crisp white/zinc dots on dark canvas) */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 select-none hidden dark:block opacity-40",
+          className
+        )}
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(255, 255, 255, 0.35) 1.2px, transparent 1.2px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+    </>
   );
 }
 
@@ -184,17 +200,17 @@ export function SectionOrnaments({
             )}
           />
 
-          <DiamondOrnament size={20} className="top-8 left-8 sm:left-20 hidden md:flex" />
-          <DiamondOrnament size={14} className="top-24 left-1/4 hidden md:flex" />
-          <DiamondOrnament size={18} className="top-12 right-10 sm:right-24" />
-          <DiamondOrnament size={16} className="bottom-24 left-10 sm:left-24 hidden md:flex" />
-          <DiamondOrnament size={20} className="bottom-14 right-12 sm:right-28" />
+          {/* Perimeter Framing Ornaments — Kept strictly to outer margins so they never collide with text, badges, or hero avatars */}
+          <DiamondOrnament size={20} className="top-8 left-6 sm:left-14 hidden md:flex" />
+          <DiamondOrnament size={18} className="top-12 right-8 sm:right-20" />
+          <DiamondOrnament size={16} className="bottom-24 left-8 sm:left-20 hidden md:flex" />
+          <DiamondOrnament size={20} className="bottom-14 right-10 sm:right-24" />
 
-          <DotMatrixOrnament tone="slate" className="bottom-28 left-14 sm:left-32 hidden md:flex" />
-          <DotMatrixOrnament tone="accent" className="bottom-20 right-14 sm:right-36" />
+          <DotMatrixOrnament tone="slate" className="bottom-28 left-12 sm:left-28 hidden md:flex" />
+          <DotMatrixOrnament tone="accent" className="bottom-20 right-12 sm:right-32" />
 
-          <PlusOrnament tone="accent" className="top-6 left-1/3 hidden md:flex" />
-          <PlusOrnament tone="slate" className="bottom-8 right-1/3" />
+          <PlusOrnament tone="accent" className="top-8 right-1/4 hidden xl:flex" />
+          <PlusOrnament tone="slate" className="bottom-8 right-1/3 hidden md:flex" />
         </>
       )}
 
@@ -226,17 +242,16 @@ export function SectionOrnaments({
             )}
           />
 
-          <DiamondOrnament size={20} className="top-10 left-6 sm:left-16 hidden md:flex" />
-          <DiamondOrnament size={14} className="top-12 left-1/3 hidden lg:flex" />
-          <DiamondOrnament size={20} className="top-10 right-6 sm:right-16" />
-          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-20 hidden md:flex" />
-          <DiamondOrnament size={18} className="bottom-10 right-8 sm:right-20" />
+          <DiamondOrnament size={20} className="top-10 left-6 sm:left-14 hidden md:flex" />
+          <DiamondOrnament size={20} className="top-10 right-6 sm:right-14" />
+          <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-16 hidden md:flex" />
+          <DiamondOrnament size={18} className="bottom-10 right-8 sm:right-16" />
 
-          <DotMatrixOrnament tone="slate" className="bottom-16 left-12 sm:left-28 hidden md:flex" />
-          <DotMatrixOrnament tone="accent" className="bottom-16 right-12 sm:right-28" />
+          <DotMatrixOrnament tone="slate" className="bottom-16 left-10 sm:left-24 hidden md:flex" />
+          <DotMatrixOrnament tone="accent" className="bottom-16 right-10 sm:right-24" />
 
-          <PlusOrnament tone="accent" className="top-20 left-1/4 hidden md:flex" />
-          <PlusOrnament tone="slate" className="top-20 right-1/4" />
+          <PlusOrnament tone="accent" className="top-16 left-8 sm:left-20 hidden xl:flex" />
+          <PlusOrnament tone="slate" className="top-16 right-8 sm:right-20 hidden md:flex" />
         </>
       )}
 
@@ -278,8 +293,8 @@ export function SectionOrnaments({
           <DotMatrixOrnament tone="slate" className="top-[24%] left-8 sm:left-24 hidden md:flex" />
           <DotMatrixOrnament tone="accent" className="top-[58%] left-8 sm:left-24 hidden md:flex" />
 
-          <PlusOrnament tone="accent" className="top-[35%] right-1/4" />
-          <PlusOrnament tone="slate" className="top-[70%] left-1/4 hidden md:flex" />
+          <PlusOrnament tone="accent" className="top-[35%] right-10 sm:right-20 hidden md:flex" />
+          <PlusOrnament tone="slate" className="top-[70%] left-10 sm:left-20 hidden md:flex" />
         </>
       )}
 
@@ -327,15 +342,14 @@ export function SectionOrnaments({
 
           <DiamondOrnament size={22} className="top-12 left-8 sm:left-20 hidden md:flex" />
           <DiamondOrnament size={20} className="top-12 right-8 sm:right-20" />
-          <DiamondOrnament size={14} className="top-6 left-1/3 hidden lg:flex" />
           <DiamondOrnament size={16} className="bottom-12 left-10 sm:left-24 hidden md:flex" />
           <DiamondOrnament size={18} className="bottom-12 right-10 sm:right-24" />
 
           <DotMatrixOrnament tone="slate" className="bottom-16 left-14 sm:left-32 hidden md:flex" />
           <DotMatrixOrnament tone="accent" className="bottom-16 right-14 sm:right-32" />
 
-          <PlusOrnament tone="accent" className="top-8 left-1/4 hidden md:flex" />
-          <PlusOrnament tone="slate" className="top-8 right-1/4" />
+          <PlusOrnament tone="accent" className="top-12 left-10 sm:left-24 hidden xl:flex" />
+          <PlusOrnament tone="slate" className="top-12 right-10 sm:right-24 hidden md:flex" />
         </>
       )}
 
@@ -403,7 +417,7 @@ export function SectionOrnaments({
           <DotMatrixOrnament tone="slate" className="top-18 left-10 sm:left-22" />
           <DotMatrixOrnament tone="accent" className="bottom-16 right-10 sm:right-24" />
 
-          <PlusOrnament tone="accent" className="top-8 left-1/3" />
+          <PlusOrnament tone="accent" className="top-8 left-8 sm:left-16 hidden md:flex" />
         </>
       )}
 
@@ -425,16 +439,14 @@ export function SectionOrnaments({
 
           <DiamondOrnament size={22} className="top-12 left-10 sm:left-20" />
           <DiamondOrnament size={22} className="top-12 right-10 sm:right-20" />
-          <DiamondOrnament size={16} className="top-24 left-1/3 hidden lg:flex" />
-          <DiamondOrnament size={16} className="top-24 right-1/3 hidden lg:flex" />
           <DiamondOrnament size={18} className="bottom-16 left-10 sm:left-20" />
           <DiamondOrnament size={18} className="bottom-16 right-10 sm:right-20" />
 
           <DotMatrixOrnament tone="slate" className="bottom-24 left-12 sm:left-24" />
           <DotMatrixOrnament tone="accent" className="bottom-24 right-12 sm:right-24" />
 
-          <PlusOrnament tone="accent" className="top-6 left-1/3" />
-          <PlusOrnament tone="slate" className="top-6 right-1/3" />
+          <PlusOrnament tone="accent" className="top-6 left-10 sm:left-20 hidden md:flex" />
+          <PlusOrnament tone="slate" className="top-6 right-10 sm:right-20 hidden md:flex" />
         </>
       )}
 

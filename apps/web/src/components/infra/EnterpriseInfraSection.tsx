@@ -42,7 +42,7 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
               <span className="px-3 py-1.5 rounded-xl border font-bold bg-[var(--surface-secondary)] border-[var(--border-primary)] text-cyan-600 dark:text-cyan-400">
                 1 Gbps Uplink
               </span>
-              <span className="px-3 py-1.5 rounded-xl border font-bold bg-[var(--surface-secondary)] border-[var(--border-primary)] text-emerald-600 dark:text-emerald-400">
+              <span className="px-3 py-1.5 rounded-xl border font-bold bg-[var(--surface-secondary)] border-[var(--border-primary)] text-[var(--text-primary)]">
                 Sidoarjo DC
               </span>
               <span className="px-3 py-1.5 rounded-xl border font-bold bg-[var(--surface-secondary)] border-[var(--border-primary)] text-[var(--text-secondary)]">
@@ -55,10 +55,10 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* 1. Intel Compute */}
             <FadeIn delay={0.1} direction="up" className="h-full">
-              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 transition-all duration-300 shadow-sm group">
+              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-xs group">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-colors bg-cyan-50 dark:bg-slate-800/80 border-cyan-200/80 dark:border-slate-700 text-cyan-700 dark:text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-all bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-105 shrink-0">
                       <IntelLogo className="w-6 h-6 sm:w-7 sm:h-7" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-primary)]">
@@ -93,10 +93,10 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
 
             {/* 2. Juniper Networks Core Fabric */}
             <FadeIn delay={0.2} direction="up" className="h-full">
-              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 transition-all duration-300 shadow-sm group">
+              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-xs group">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-colors bg-cyan-50 dark:bg-slate-800/80 border-cyan-200/80 dark:border-slate-700 text-cyan-700 dark:text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-all bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-105 shrink-0">
                       <JuniperLogo className="w-7 h-auto sm:w-8 sm:h-auto" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-primary)]">
@@ -131,10 +131,10 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
 
             {/* 3. MikroTik Edge Peering */}
             <FadeIn delay={0.3} direction="up" className="h-full">
-              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 transition-all duration-300 shadow-sm group">
+              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-xs group">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-colors bg-cyan-50 dark:bg-slate-800/80 border-cyan-200/80 dark:border-slate-700 text-cyan-700 dark:text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-all bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-105 shrink-0">
                       <MikrotikLogo className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-primary)]">
