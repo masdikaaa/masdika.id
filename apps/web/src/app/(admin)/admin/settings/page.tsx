@@ -468,7 +468,7 @@ export default function SettingsPage() {
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Navigation Sidebar */}
-        <div className="w-full md:w-60 shrink-0">
+        <div className="w-full md:w-60 shrink-0 sticky top-0 md:top-4 z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
           <div className={cn("border rounded-2xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;

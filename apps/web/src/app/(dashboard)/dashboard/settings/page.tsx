@@ -580,7 +580,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <motion.div className="space-y-6 md:space-y-8 pb-24 sm:pb-16 w-full max-w-full min-w-0 overflow-x-hidden box-border" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div className="space-y-6 md:space-y-8 pb-24 sm:pb-16 w-full max-w-full min-w-0 box-border" variants={containerVariants} initial="hidden" animate="visible">
       {/* Hero Header */}
       <motion.div variants={itemVariants} className={cn("w-full max-w-full min-w-0 relative overflow-hidden rounded-2xl sm:rounded-3xl border p-4 sm:p-7 md:p-8 group shadow-sm box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -598,8 +598,8 @@ export default function SettingsPage() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-8 items-stretch md:items-start w-full max-w-full min-w-0">
-        {/* Navigation Sidebar (Sticky on desktop) */}
-        <div className="w-full max-w-full md:w-60 shrink-0 md:sticky md:top-24 z-10 min-w-0">
+        {/* Navigation Sidebar (Sticky on mobile & desktop) */}
+        <div className="w-full max-w-full md:w-60 shrink-0 sticky top-0 md:top-4 z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
           <div className={cn("w-full max-w-full rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-md grid grid-cols-2 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
