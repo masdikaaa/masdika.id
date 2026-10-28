@@ -287,20 +287,40 @@ export default function AdminLayout({
               : "bg-white/90 backdrop-blur-xl border-slate-200/80 shadow-2xs"
           )}
         >
-          <div className="flex items-center flex-1 gap-3 min-w-0">
+          <div className="flex items-center flex-1 gap-2.5 min-w-0">
             <button
+              type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open navigation menu"
               className={cn(
-                "lg:hidden w-9 h-9 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all shrink-0 focus:outline-none",
+                "lg:hidden h-10 p-1 rounded-xl border flex items-center justify-center transition-all shrink-0 focus:outline-none group cursor-pointer",
                 isDark
-                  ? "bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:text-cyan-400 hover:border-white/[0.15]"
-                  : "bg-slate-50 border-slate-200/90 text-slate-600 hover:text-cyan-600"
+                  ? "bg-white/[0.02] border-white/[0.08] hover:border-white/[0.15]"
+                  : "bg-slate-100/80 border-slate-200/80 hover:border-slate-300"
               )}
             >
-              <span className="w-4 h-[1.5px] bg-current rounded-full" />
-              <span className="w-4 h-[1.5px] bg-current rounded-full" />
-              <span className="w-4 h-[1.5px] bg-current rounded-full" />
+              <span
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
+                  isDark
+                    ? "text-zinc-300 group-hover:text-cyan-400 group-hover:bg-white/[0.07]"
+                    : "text-slate-600 group-hover:text-cyan-700 group-hover:bg-white shadow-2xs"
+                )}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.85"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="3" />
+                  <path d="M9 3v18" />
+                  <path d="m14 9 3 3-3 3" />
+                </svg>
+              </span>
             </button>
 
             <div className="hidden md:flex items-center max-w-xs lg:max-w-sm w-full relative z-50">
@@ -313,7 +333,7 @@ export default function AdminLayout({
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 className={cn(
-                  "w-full border text-xs sm:text-sm rounded-xl pl-10 pr-9 py-2 focus:outline-none transition-all",
+                  "w-full h-10 border text-xs sm:text-sm rounded-xl pl-10 pr-9 focus:outline-none transition-all",
                   isDark
                     ? "bg-white/[0.02] border-white/[0.08] text-white placeholder:text-zinc-500 focus:bg-[#111115] focus:border-cyan-500/40"
                     : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-cyan-500"
@@ -357,11 +377,11 @@ export default function AdminLayout({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 ml-auto shrink-0">
             {/* Utility Action Dock */}
             <div
               className={cn(
-                "flex items-center gap-1 p-1 rounded-xl border relative",
+                "h-10 p-1 flex items-center gap-1 rounded-xl border relative shrink-0",
                 isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-100/80 border-slate-200/80"
               )}
             >
@@ -491,7 +511,7 @@ export default function AdminLayout({
             <div className={cn("h-7 w-[1px] hidden sm:block", isDark ? "bg-white/[0.08]" : "bg-slate-200")} />
 
             {/* Interactive Admin Profile Pill & Quick Menu */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -500,7 +520,7 @@ export default function AdminLayout({
                 }}
                 aria-label={`Profile menu for ${profileData.name}`}
                 className={cn(
-                  "group flex items-center gap-2.5 p-1 sm:pl-3 sm:pr-2 rounded-xl border transition-all duration-200 cursor-pointer text-left",
+                  "group h-10 flex items-center gap-2.5 p-1 sm:pl-3 sm:pr-2 rounded-xl border transition-all duration-200 cursor-pointer text-left",
                   showProfileMenu
                     ? isDark ? "bg-white/[0.06] border-cyan-500/40" : "bg-slate-100 border-cyan-500/40"
                     : isDark
@@ -508,17 +528,17 @@ export default function AdminLayout({
                       : "bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
                 )}
               >
-                <div className="hidden sm:flex flex-col items-end leading-tight">
+                <div className="hidden sm:flex flex-col items-end justify-center leading-none">
                   <span className={cn("text-xs sm:text-[13px] font-bold tracking-tight truncate max-w-[140px]", isDark ? "text-white" : "text-slate-900")}>
                     {profileData.name}
                   </span>
-                  <span className={cn("text-[10px] font-semibold uppercase tracking-wider mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <span className={cn("text-[10px] font-semibold uppercase tracking-wider mt-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     Super Admin
                   </span>
                 </div>
 
-                <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl p-[1.5px] bg-gradient-to-br from-cyan-400 via-cyan-500 to-purple-600 shrink-0 shadow-xs">
-                  <div className={cn("w-full h-full rounded-[7px] sm:rounded-[10px] flex items-center justify-center overflow-hidden font-bold text-white text-sm", isDark ? "bg-[#0a0a0c]" : "bg-slate-900")}>
+                <div className="relative w-8 h-8 rounded-lg p-[1.5px] bg-gradient-to-br from-cyan-400 via-cyan-500 to-purple-600 shrink-0 shadow-xs">
+                  <div className={cn("w-full h-full rounded-[6.5px] flex items-center justify-center overflow-hidden font-bold text-white text-xs", isDark ? "bg-[#0a0a0c]" : "bg-slate-900")}>
                     {profileData.image ? (
                       <img referrerPolicy="no-referrer" src={profileData.image} alt={`${profileData.name} profile picture`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     ) : (

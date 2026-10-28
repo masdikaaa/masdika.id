@@ -1075,19 +1075,6 @@ export default function DashboardOverview() {
                 </p>
               </div>
             </div>
-
-            <Link
-              href="/dashboard/vps"
-              className={cn(
-                "group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all self-start sm:self-auto",
-                isDark
-                  ? "bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08] text-zinc-200 hover:text-white"
-                  : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 shadow-2xs"
-              )}
-            >
-              Manage All Instances
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
           </div>
 
           <div className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
@@ -1319,19 +1306,6 @@ export default function DashboardOverview() {
                 </p>
               </div>
             </div>
-
-            <Link
-              href="/dashboard/k3s"
-              className={cn(
-                "group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all self-start sm:self-auto",
-                isDark
-                  ? "bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08] text-zinc-200 hover:text-white"
-                  : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 shadow-2xs"
-              )}
-            >
-              Manage Clusters
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
           </div>
 
           <div className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
