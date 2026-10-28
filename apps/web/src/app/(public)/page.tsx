@@ -22,7 +22,17 @@ import {
   Clock,
   Link2,
 } from "lucide-react";
-import { SiKubernetes } from "react-icons/si";
+import {
+  SiKubernetes,
+  SiMikrotik,
+  SiJunipernetworks,
+  SiIntel,
+  SiDell,
+  SiCloudflare,
+  SiGoogle,
+  SiNextdotjs,
+  SiPostgresql,
+} from "react-icons/si";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -93,6 +103,65 @@ const PRODUCTS = [
       "Global edge network to securely host, manage, and deliver your files and media globally with low latency.",
     href: "/file-cdn",
     type: "PaaS",
+  },
+];
+
+const INFRASTRUCTURE_STACK = [
+  {
+    name: "MikroTik",
+    category: "Core Routing",
+    description: "Enterprise BGP routing, firewalling & high-throughput network tunneling.",
+    icon: SiMikrotik,
+    iconColor: "text-slate-800 dark:text-white group-hover:text-cyan-500 dark:group-hover:text-cyan-400",
+  },
+  {
+    name: "Juniper Networks",
+    category: "Backbone Switch",
+    description: "Carrier-grade datacenter switching and ultra-low-latency packet forwarding.",
+    icon: SiJunipernetworks,
+    iconColor: "text-[#00A98F] dark:text-[#2dd4bf]",
+  },
+  {
+    name: "Intel Xeon",
+    category: "Compute Engine",
+    description: "High-frequency enterprise server processors for intensive cloud workloads.",
+    icon: SiIntel,
+    iconColor: "text-[#0071C5] dark:text-[#38bdf8]",
+  },
+  {
+    name: "Dell PowerEdge",
+    category: "Bare-Metal",
+    description: "Redundant rackmount server hardware with enterprise NVMe RAID storage.",
+    icon: SiDell,
+    iconColor: "text-[#007DB8] dark:text-[#38bdf8]",
+  },
+  {
+    name: "Cloudflare",
+    category: "Edge & Security",
+    description: "Global Anycast CDN, Zero Trust tunnels, WAF & L3/L7 DDoS mitigation.",
+    icon: SiCloudflare,
+    iconColor: "text-[#F38020]",
+  },
+  {
+    name: "Google Cloud",
+    category: "Cloud Ecosystem",
+    description: "Global cloud infrastructure peering, upstream DNS & hybrid cloud services.",
+    icon: SiGoogle,
+    iconColor: "text-[#4285F4] dark:text-[#60a5fa]",
+  },
+  {
+    name: "Next.js",
+    category: "Web Framework",
+    description: "React server-rendered architecture powering blazing-fast control panels.",
+    icon: SiNextdotjs,
+    iconColor: "text-slate-900 dark:text-white",
+  },
+  {
+    name: "PostgreSQL",
+    category: "Core Database",
+    description: "ACID-compliant relational database engine for high-concurrency state.",
+    icon: SiPostgresql,
+    iconColor: "text-[#336791] dark:text-[#60a5fa]",
   },
 ];
 
@@ -604,6 +673,70 @@ export default function HomePage() {
                     </div>
                   </div>
                 </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── 3.8 SUPPORT & INFRASTRUCTURE ────────────────────────────── */}
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+        <SectionOrnaments variant="sides" />
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
+          >
+            <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
+              Support &amp; Infrastructure
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-5 leading-[1.15]">
+              Powered by Enterprise<br className="hidden sm:inline" /> Hardware &amp; Stack
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Built on carrier-grade routing, bare-metal server hardware, global edge protection, and battle-tested software architecture.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5"
+          >
+            {INFRASTRUCTURE_STACK.map((infra, idx) => (
+              <motion.div variants={item} key={infra.name + idx} className="h-full">
+                <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-4 sm:p-6 flex flex-col">
+                  {/* Top row: Icon box + Category badge */}
+                  <div className="flex items-start justify-between gap-2 mb-4 sm:mb-5">
+                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
+                      <infra.icon className={cn("w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} />
+                    </div>
+                    <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+                      {infra.category}
+                    </span>
+                  </div>
+
+                  {/* Mobile category label */}
+                  <span className="sm:hidden text-[10px] font-mono font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-1">
+                    {infra.category}
+                  </span>
+
+                  {/* Brand Name */}
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1.5">
+                    {infra.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed flex-grow">
+                    {infra.description}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
