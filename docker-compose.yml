@@ -161,8 +161,11 @@ services:
 
   nginx:
     image: nginx:alpine
+    pull_policy: always
     container_name: masdika_nginx
     restart: always
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - app
       - vnc-proxy

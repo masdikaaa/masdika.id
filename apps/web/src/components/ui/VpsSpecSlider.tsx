@@ -112,25 +112,15 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
   };
 
   // Slider track color - uses theme-aware background for unfilled portion
-  const sliderTrackBg = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+  const sliderTrackBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
 
   // Toggle button styles
-  const toggleContainerClass = cn(
-    "flex rounded-lg p-0.5 border",
-    isDark ? "bg-cyan-950/40 border-cyan-500/20" : "bg-slate-100 border-slate-200"
-  );
-  const toggleActiveClass = isDark
-    ? "bg-cyan-400 text-slate-950 font-semibold shadow-sm"
-    : "bg-white text-slate-900 shadow-sm border border-slate-200";
-  const toggleInactiveClass = isDark
-    ? "text-zinc-400 hover:text-white"
-    : "text-slate-500 hover:text-slate-700";
+  const toggleContainerClass = "flex rounded-lg p-0.5 border border-[var(--border-primary)] bg-[var(--surface-secondary)]";
+  const toggleActiveClass = "bg-cyan-500 dark:bg-cyan-400 text-slate-950 font-bold shadow-xs";
+  const toggleInactiveClass = "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold";
 
   return (
-    <div className={cn(
-      "border rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0 transition-all",
-      isDark ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-2xl shadow-black/50" : "bg-white border-cyan-200 shadow-xl"
-    )}>
+    <div className="border border-[var(--border-primary)] bg-[var(--surface)] rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden mx-2 sm:mx-0 transition-all">
       <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 relative z-10 items-start">
 
         {/* Sliders */}
@@ -138,13 +128,10 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
           {/* CPU */}
           <div>
             <div className="flex justify-between items-center mb-3 md:mb-4">
-              <label className={cn("text-base md:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Cpu className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> CPU Cores
+              <label className="text-base md:text-lg font-bold flex items-center gap-2 text-[var(--text-primary)]">
+                <Cpu className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> CPU Cores
               </label>
-              <span className={cn(
-                "px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-              )}>
+              <span className="px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
                 {cpu} vCPU
               </span>
             </div>
@@ -163,13 +150,10 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
           {/* RAM */}
           <div>
             <div className="flex justify-between items-center mb-3 md:mb-4">
-              <label className={cn("text-base md:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <MemoryStick className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Memory (RAM)
+              <label className="text-base md:text-lg font-bold flex items-center gap-2 text-[var(--text-primary)]">
+                <MemoryStick className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Memory (RAM)
               </label>
-              <span className={cn(
-                "px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-              )}>
+              <span className="px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
                 {ram} GB
               </span>
             </div>
@@ -189,28 +173,25 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
           <div>
             <div className="flex justify-between items-center mb-3 md:mb-4 gap-2">
               <div className="flex items-center gap-2 md:gap-4">
-                <label className={cn("text-base md:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                  <HardDrive className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Storage
+                <label className="text-base md:text-lg font-bold flex items-center gap-2 text-[var(--text-primary)]">
+                  <HardDrive className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Storage
                 </label>
                 <div className={toggleContainerClass}>
                   <button
                     onClick={() => setDiskType("HDD")}
-                    className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs font-bold rounded-md transition-all", diskType === "HDD" ? toggleActiveClass : toggleInactiveClass)}
+                    className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs rounded-md transition-all", diskType === "HDD" ? toggleActiveClass : toggleInactiveClass)}
                   >
                     HDD
                   </button>
                   <button
                     onClick={() => setDiskType("SSD")}
-                    className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs font-bold rounded-md transition-all", diskType === "SSD" ? toggleActiveClass : toggleInactiveClass)}
+                    className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs rounded-md transition-all", diskType === "SSD" ? toggleActiveClass : toggleInactiveClass)}
                   >
                     SSD
                   </button>
                 </div>
               </div>
-              <span className={cn(
-                "px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border shrink-0",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-              )}>
+              <span className="px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 shrink-0">
                 {disk} GB
               </span>
             </div>
@@ -229,13 +210,10 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
           {/* Backup */}
           <div>
             <div className="flex justify-between items-center mb-3 md:mb-4 gap-2">
-              <label className={cn("text-base md:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Database className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Backup Storage
+              <label className="text-base md:text-lg font-bold flex items-center gap-2 text-[var(--text-primary)]">
+                <Database className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Backup Storage
               </label>
-              <div className={cn(
-                "flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-xl shrink-0 border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200"
-              )}>
+              <div className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-xl shrink-0 border border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
                 <input
                   type="number"
                   min="0"
@@ -251,13 +229,10 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
                       }
                     }
                   }}
-                  className={cn(
-                    "bg-transparent text-center font-bold text-sm md:text-base font-mono focus:outline-none p-0 border-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-                    isDark ? "text-cyan-400" : "text-cyan-700"
-                  )}
+                  className="bg-transparent text-center font-bold text-sm md:text-base font-mono focus:outline-none p-0 border-none text-cyan-700 dark:text-cyan-400 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   style={{ width: `${Math.max(1, backup.toString().length)}ch` }}
                 />
-                <span className={cn("font-bold text-sm md:text-base font-mono pr-0.5", isDark ? "text-cyan-400" : "text-cyan-700")}>GB</span>
+                <span className="font-bold text-sm md:text-base font-mono pr-0.5 text-cyan-700 dark:text-cyan-400">GB</span>
               </div>
             </div>
             <input
@@ -277,19 +252,19 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
             <div>
               <div className="flex justify-between items-center mb-3 md:mb-4 gap-2">
                 <div className="flex items-center gap-2 md:gap-4">
-                  <label className={cn("text-base md:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                    <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Public IPv4
+                  <label className="text-base md:text-lg font-bold flex items-center gap-2 text-[var(--text-primary)]">
+                    <Network className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Public IPv4
                   </label>
                   <div className={toggleContainerClass}>
                     <button
                       onClick={() => setIncludeIpv4(false)}
-                      className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs font-bold rounded-md transition-all", !includeIpv4 ? toggleActiveClass : toggleInactiveClass)}
+                      className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs rounded-md transition-all", !includeIpv4 ? toggleActiveClass : toggleInactiveClass)}
                     >
                       NAT (None)
                     </button>
                     <button
                       onClick={() => setIncludeIpv4(true)}
-                      className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs font-bold rounded-md transition-all", includeIpv4 ? toggleActiveClass : toggleInactiveClass)}
+                      className={cn("px-2 md:px-3 py-1 text-[10px] md:text-xs rounded-md transition-all", includeIpv4 ? toggleActiveClass : toggleInactiveClass)}
                     >
                       Included
                     </button>
@@ -302,13 +277,10 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
           {/* Bandwidth Speed Slider */}
           <div>
             <div className="flex justify-between items-center mb-3 md:mb-4 gap-2">
-              <label className={cn("text-base md:text-lg font-bold flex items-center gap-2 whitespace-nowrap shrink-0", isDark ? "text-white" : "text-slate-900")}>
-                <Wifi className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} /> Bandwidth Speed
+              <label className="text-base md:text-lg font-bold flex items-center gap-2 whitespace-nowrap shrink-0 text-[var(--text-primary)]">
+                <Wifi className="w-5 h-5 shrink-0 text-cyan-600 dark:text-cyan-400" /> Bandwidth Speed
               </label>
-              <span className={cn(
-                "px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border shrink-0",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-              )}>
+              <span className="px-3 py-1 md:px-4 md:py-1.5 rounded-xl font-bold font-mono text-sm md:text-base border border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 shrink-0">
                 {bandwidth} Mbps
               </span>
             </div>
@@ -336,77 +308,105 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
 
           {/* Bandwidth Banner */}
           <div className="pt-2 lg:pt-4">
-            <div className={cn(
-              "p-4 rounded-2xl flex items-start sm:items-center gap-4 border transition-colors",
-              isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200"
-            )}>
-              <div className={cn(
-                "w-12 h-12 rounded-xl border text-cyan-500 flex items-center justify-center shrink-0",
-                isDark ? "bg-cyan-500/20 border-cyan-500/20" : "bg-cyan-50 border-cyan-200"
-              )}>
+            <div className="p-4 rounded-2xl flex items-start sm:items-center gap-4 border border-[var(--border-primary)] bg-[var(--surface-secondary)] transition-colors">
+              <div className="w-12 h-12 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 shadow-xs">
                 <Wifi className="w-6 h-6" />
               </div>
               <div>
-                <h4 className={cn("font-bold text-sm md:text-base mb-1", isDark ? "text-white" : "text-slate-900")}>Unlimited Traffic Quota Included</h4>
-                <p className={cn("text-xs md:text-sm leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>All port speeds include unmetered traffic data transfer for your {serviceType === "K3S" ? "K3s" : "VPS"} workloads with zero bandwidth overage charges.</p>
+                <h4 className="font-bold text-sm md:text-base text-[var(--text-primary)] mb-1">
+                  Unlimited Traffic Quota Included
+                </h4>
+                <p className="text-xs md:text-sm leading-relaxed text-[var(--text-secondary)]">
+                  All port speeds include unmetered traffic data transfer for your {serviceType === "K3S" ? "K3s" : "VPS"} workloads with zero bandwidth overage charges.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Pricing Summary */}
-        <div className={cn(
-          "lg:col-span-5 xl:col-span-4 border rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group shadow-xl h-fit lg:sticky lg:top-24",
-          isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200"
-        )}>
+        <div className="lg:col-span-5 xl:col-span-4 border border-[var(--border-primary)] rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group shadow-xl h-fit lg:sticky lg:top-24 bg-[var(--surface-secondary)]">
           <div className="relative z-10">
-            <h3 className={cn("text-lg md:text-xl font-black mb-4 sm:mb-5 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Estimated Cost</h3>
+            <h3 className="text-lg md:text-xl font-black mb-4 sm:mb-5 tracking-tight text-[var(--text-primary)]">
+              Estimated Cost
+            </h3>
 
             <div className="space-y-3.5 mb-5 sm:mb-6 text-sm md:text-base font-medium">
-              <div className={cn("flex justify-between gap-2 items-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className="whitespace-nowrap flex items-center"><Cpu className="w-4 h-4 mr-2 text-cyan-500" /> {cpu} vCPU</span>
-                <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(cpu * pricing.vcpu * 730)}/mo</span>
+              <div className="flex justify-between gap-2 items-center text-[var(--text-secondary)]">
+                <span className="whitespace-nowrap flex items-center">
+                  <Cpu className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-400" /> {cpu} vCPU
+                </span>
+                <span className="text-right shrink-0 font-bold text-[var(--text-primary)]">
+                  {formatRupiah(cpu * pricing.vcpu * 730)}/mo
+                </span>
               </div>
-              <div className={cn("flex justify-between gap-2 items-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className="whitespace-nowrap flex items-center"><MemoryStick className="w-4 h-4 mr-2 text-cyan-500" /> {ram} GB RAM</span>
-                <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(ram * pricing.ram * 730)}/mo</span>
+              <div className="flex justify-between gap-2 items-center text-[var(--text-secondary)]">
+                <span className="whitespace-nowrap flex items-center">
+                  <MemoryStick className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-400" /> {ram} GB RAM
+                </span>
+                <span className="text-right shrink-0 font-bold text-[var(--text-primary)]">
+                  {formatRupiah(ram * pricing.ram * 730)}/mo
+                </span>
               </div>
-              <div className={cn("flex justify-between gap-2 items-center w-full", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className="flex items-center min-w-0 truncate flex-1"><HardDrive className="w-4 h-4 mr-2 text-cyan-500 shrink-0" /> <span className="truncate">{disk} GB {diskType}</span></span>
-                <span className={cn("text-right shrink-0 font-bold pl-1", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(disk * (diskType === "SSD" ? (pricing.diskSsd || pricing.disk) : pricing.disk) * 730)}/mo</span>
+              <div className="flex justify-between gap-2 items-center w-full text-[var(--text-secondary)]">
+                <span className="flex items-center min-w-0 truncate flex-1">
+                  <HardDrive className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-400 shrink-0" />{" "}
+                  <span className="truncate">{disk} GB {diskType}</span>
+                </span>
+                <span className="text-right shrink-0 font-bold pl-1 text-[var(--text-primary)]">
+                  {formatRupiah(disk * (diskType === "SSD" ? (pricing.diskSsd || pricing.disk) : pricing.disk) * 730)}/mo
+                </span>
               </div>
               {backup > 0 && (
-                <div className={cn("flex justify-between gap-2 items-center w-full", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  <span className="flex items-center min-w-0 truncate flex-1"><Database className="w-4 h-4 mr-2 text-cyan-500 shrink-0" /> <span className="truncate">{backup} GB Backup</span></span>
-                  <span className={cn("text-right shrink-0 font-bold pl-1", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(backup * (pricing.backup || 0) * 730)}/mo</span>
+                <div className="flex justify-between gap-2 items-center w-full text-[var(--text-secondary)]">
+                  <span className="flex items-center min-w-0 truncate flex-1">
+                    <Database className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-400 shrink-0" />{" "}
+                    <span className="truncate">{backup} GB Backup</span>
+                  </span>
+                  <span className="text-right shrink-0 font-bold pl-1 text-[var(--text-primary)]">
+                    {formatRupiah(backup * (pricing.backup || 0) * 730)}/mo
+                  </span>
                 </div>
               )}
-              <div className={cn("flex justify-between gap-2 items-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className="whitespace-nowrap flex items-center"><ShieldCheck className="w-4 h-4 mr-2 text-cyan-500" /> {includeIpv4 ? "1x IPv4" : "NAT (No IPv4)"}</span>
-                <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah((includeIpv4 ? pricing.ipv4 : 0) * 730)}/mo</span>
+              <div className="flex justify-between gap-2 items-center text-[var(--text-secondary)]">
+                <span className="whitespace-nowrap flex items-center">
+                  <ShieldCheck className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-400" />{" "}
+                  {includeIpv4 ? "1x IPv4" : "NAT (No IPv4)"}
+                </span>
+                <span className="text-right shrink-0 font-bold text-[var(--text-primary)]">
+                  {formatRupiah((includeIpv4 ? pricing.ipv4 : 0) * 730)}/mo
+                </span>
               </div>
-              <div className={cn("flex justify-between gap-2 items-center", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className="whitespace-nowrap flex items-center"><Wifi className="w-4 h-4 mr-2 text-cyan-500" /> {bandwidth} Mbps Port</span>
-                <span className={cn("text-right shrink-0 font-bold", isDark ? "text-white" : "text-slate-900")}>
+              <div className="flex justify-between gap-2 items-center text-[var(--text-secondary)]">
+                <span className="whitespace-nowrap flex items-center">
+                  <Wifi className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-400" /> {bandwidth} Mbps Port
+                </span>
+                <span className="text-right shrink-0 font-bold text-[var(--text-primary)]">
                   {bandwidthHourlyCost > 0 ? `${formatRupiah(bandwidthHourlyCost * 730)}/mo` : "Included (Free)"}
                 </span>
               </div>
             </div>
 
-            <div className={cn("pt-5 border-t", isDark ? "border-white/10" : "border-slate-200")}>
+            <div className="pt-5 border-t border-[var(--border-primary)]">
               <div className="flex items-baseline flex-wrap gap-1 sm:gap-2 mb-1.5">
-                <span className={cn("text-3xl sm:text-4xl font-black break-all sm:break-normal max-w-full tracking-tight", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                <span className="text-3xl sm:text-4xl font-black break-all sm:break-normal max-w-full tracking-tight text-cyan-600 dark:text-cyan-400">
                   {formatRupiah(calculateMonthlyPrice())}
                 </span>
-                <span className={cn("text-sm font-bold tracking-widest uppercase", isDark ? "text-zinc-500" : "text-slate-400")}>/MO</span>
+                <span className="text-sm font-bold tracking-widest uppercase text-[var(--text-muted)]">
+                  /MO
+                </span>
               </div>
-              <p className={cn("text-xs font-medium mb-3.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <p className="text-xs font-medium mb-3.5 text-[var(--text-secondary)]">
                 Or {formatRupiah(calculateHourlyPrice())}/hour (Pay-As-You-Go)
               </p>
 
-              <div className={cn("rounded-xl p-3 sm:p-3.5 text-[10px] sm:text-xs leading-relaxed shadow-sm border", isDark ? "bg-cyan-950/30 border-cyan-500/20 text-zinc-300" : "bg-cyan-50 border-cyan-200 text-slate-600")}>
-                <p className="mb-1.5"><span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Free VPC:</span> Virtual Private Cloud (VPC) feature is available for free with no additional charges.</p>
-                <p><span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Billing Policy:</span> Similar to global cloud providers, Storage, Backup Storage, and Reserved IPs are billed per hour even when your instance is Shutdown/Stopped or the IP is unused, as the resources are still allocated to your account.</p>
+              <div className="rounded-xl p-3 sm:p-3.5 text-[10px] sm:text-xs leading-relaxed border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] shadow-xs">
+                <p className="mb-1.5">
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400">Free VPC:</span> Virtual Private Cloud (VPC) feature is available for free with no additional charges.
+                </p>
+                <p>
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400">Billing Policy:</span> Similar to global cloud providers, Storage, Backup Storage, and Reserved IPs are billed per hour even when your instance is Shutdown/Stopped or the IP is unused, as the resources are still allocated to your account.
+                </p>
               </div>
             </div>
           </div>

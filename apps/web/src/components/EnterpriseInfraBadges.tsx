@@ -51,7 +51,7 @@ export function MikrotikLogo({ className, ...props }: React.SVGProps<SVGSVGEleme
 /**
  * Compact Architectural Hardware Specification Bar (Top Strip variant)
  */
-export function EnterpriseInfraBanner() {
+export function EnterpriseInfraBanner({ className }: { className?: string } = {}) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -76,43 +76,27 @@ export function EnterpriseInfraBanner() {
   return (
     <div
       className={cn(
-        "rounded-2xl border px-4 py-3.5 sm:px-5 sm:py-4 transition-all",
-        isDark
-          ? "bg-[#0a0a0c] border-white/[0.08]"
-          : "bg-white border-slate-200/90 shadow-xs"
+        "rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] px-4 py-3.5 sm:px-5 sm:py-4 transition-all shadow-xs",
+        className
       )}
     >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Left: Datacenter Status & SLA */}
         <div className="flex items-center gap-3 min-w-0">
-          <div
-            className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center border shrink-0",
-              isDark
-                ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
-                : "bg-cyan-50 border-cyan-200 text-cyan-700"
-            )}
-          >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-cyan-600 dark:text-cyan-400 shrink-0">
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={cn("text-xs sm:text-sm font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)]">
                 Enterprise Bare-Metal Infrastructure
               </span>
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full border",
-                  isDark
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                    : "bg-emerald-50 border-emerald-200 text-emerald-700"
-                )}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Sidoarjo DC
               </span>
             </div>
-            <p className={cn("text-[11px] mt-0.5 leading-normal", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <p className="text-[11px] mt-0.5 leading-normal text-[var(--text-secondary)]">
               1 Gbps redundant uplink · Anti-DDoS BGP · 98.99% uptime SLA
             </p>
           </div>
@@ -123,26 +107,16 @@ export function EnterpriseInfraBanner() {
           {specs.map((item) => (
             <div
               key={item.name}
-              className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-colors",
-                isDark
-                  ? "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.12]"
-                  : "bg-slate-50/80 border-slate-200/80 hover:border-slate-300"
-              )}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 transition-colors"
             >
-              <div
-                className={cn(
-                  "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isDark ? "bg-white/[0.04] text-cyan-400" : "bg-white text-cyan-700 border border-slate-200/60"
-                )}
-              >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-[var(--border-primary)] bg-[var(--surface)] text-cyan-600 dark:text-cyan-400">
                 {item.logo}
               </div>
               <div className="min-w-0">
-                <div className={cn("text-xs font-bold leading-tight truncate", isDark ? "text-zinc-100" : "text-slate-900")}>
+                <div className="text-xs font-bold leading-tight truncate text-[var(--text-primary)]">
                   {item.name}
                 </div>
-                <div className={cn("text-[10px] leading-tight truncate mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                <div className="text-[10px] leading-tight truncate mt-0.5 text-[var(--text-secondary)]">
                   {item.role}
                 </div>
               </div>
@@ -158,21 +132,18 @@ export function EnterpriseInfraBanner() {
  * Compact Infrastructure Trust Card for Order Summary Sidebars (MikroTik, Juniper, Dell)
  */
 export function EnterpriseInfraSidebarCard({ className }: { className?: string }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const brands = [
     {
       name: "MikroTik",
       role: "Edge BGP",
       icon: <SiMikrotik className="w-3.5 h-3.5" />,
-      color: "text-slate-800 dark:text-zinc-100",
+      color: "text-slate-800 dark:text-white",
       title: "Edge routing & VPC powered by MikroTik® RouterOS",
     },
     {
       name: "Juniper",
       role: "Core Fabric",
-      icon: <SiJunipernetworks className="w-3.5 h-3.5" />,
+      icon: <JuniperLogo className="h-2.5 sm:h-3 w-auto" />,
       color: "text-[#00A98F] dark:text-[#2dd4bf]",
       title: "Core switching & backbone powered by Juniper Networks®",
     },
@@ -188,19 +159,18 @@ export function EnterpriseInfraSidebarCard({ className }: { className?: string }
   return (
     <div
       className={cn(
-        "rounded-xl border p-3 sm:p-3.5 transition-all",
-        isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-white/80 border-slate-200/80 shadow-xs",
+        "rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] p-3 sm:p-3.5 transition-all shadow-xs",
         className
       )}
     >
       <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
-          <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+          <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
             Enterprise Stack
           </span>
         </div>
-        <span className={cn("text-[10px] font-mono font-semibold", isDark ? "text-emerald-400" : "text-emerald-600")}>
+        <span className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
           98.99% SLA
         </span>
       </div>
@@ -209,21 +179,16 @@ export function EnterpriseInfraSidebarCard({ className }: { className?: string }
         {brands.map((b) => (
           <div
             key={b.name}
-            className={cn(
-              "py-2 px-1.5 rounded-lg border flex flex-col items-center justify-center text-center gap-1 transition-all group",
-              isDark
-                ? "bg-[#0a0a0c]/80 border-white/[0.06] hover:border-cyan-500/30"
-                : "bg-slate-50 border-slate-200/70 hover:border-cyan-500/30 shadow-2xs"
-            )}
+            className="py-2 px-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 flex flex-col items-center justify-center text-center gap-1 transition-all group cursor-default"
             title={b.title}
           >
             <div className={cn("h-4 flex items-center justify-center transition-transform group-hover:scale-110", b.color)}>
               {b.icon}
             </div>
-            <span className={cn("text-[10px] font-bold leading-none", isDark ? "text-zinc-200" : "text-slate-800")}>
+            <span className="text-[10px] font-bold leading-none text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
               {b.name}
             </span>
-            <span className={cn("text-[8px] leading-none", isDark ? "text-zinc-500" : "text-slate-400")}>
+            <span className="text-[8px] leading-none text-[var(--text-muted)]">
               {b.role}
             </span>
           </div>
@@ -237,22 +202,16 @@ export function EnterpriseInfraSidebarCard({ className }: { className?: string }
  * CPU Specification Pill for vCPU selection in VpsCheckoutFlow
  */
 export function IntelCpuBadge({ className }: { className?: string }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all",
-        isDark
-          ? "bg-white/[0.03] border-white/[0.08] text-zinc-300"
-          : "bg-slate-50 border-slate-200 text-slate-700",
+        "inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] text-xs font-medium transition-all",
         className
       )}
     >
-      <IntelLogo className="w-4 h-4 text-cyan-400 shrink-0" />
-      <span className="font-semibold text-[11px]">Intel® Xeon®</span>
-      <span className={cn("text-[10px] hidden sm:inline", isDark ? "text-zinc-500" : "text-slate-400")}>
+      <IntelLogo className="w-4 h-4 text-[#0071C5] dark:text-[#38bdf8] shrink-0" />
+      <span className="font-semibold text-[11px] text-[var(--text-primary)]">Intel® Xeon®</span>
+      <span className="text-[10px] hidden sm:inline text-[var(--text-muted)]">
         · Dedicated Cores
       </span>
     </div>
@@ -263,27 +222,21 @@ export function IntelCpuBadge({ className }: { className?: string }) {
  * Network Infrastructure Badge for Networking selection in VpsCheckoutFlow
  */
 export function NetworkInfraBadge({ className }: { className?: string }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   return (
     <div
       className={cn(
-        "inline-flex flex-wrap items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all",
-        isDark
-          ? "bg-white/[0.03] border-white/[0.08] text-zinc-300"
-          : "bg-slate-50 border-slate-200 text-slate-700",
+        "inline-flex flex-wrap items-center gap-2 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] text-xs font-medium transition-all",
         className
       )}
     >
-      <div className="flex items-center gap-1.5 text-cyan-400">
-        <JuniperLogo className="w-4 h-auto" />
-        <span className={cn("font-semibold text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>Juniper</span>
+      <div className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
+        <JuniperLogo className="w-4 h-auto text-[#00A98F] dark:text-[#2dd4bf]" />
+        <span className="font-semibold text-[11px] text-[var(--text-primary)]">Juniper</span>
       </div>
-      <span className={isDark ? "text-zinc-600" : "text-slate-300"}>·</span>
-      <div className="flex items-center gap-1.5 text-cyan-400">
-        <MikrotikLogo className="w-3.5 h-3.5" />
-        <span className={cn("font-semibold text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>MikroTik BGP</span>
+      <span className="text-[var(--text-muted)]">·</span>
+      <div className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
+        <MikrotikLogo className="w-3.5 h-3.5 text-slate-800 dark:text-white" />
+        <span className="font-semibold text-[11px] text-[var(--text-primary)]">MikroTik BGP</span>
       </div>
     </div>
   );
