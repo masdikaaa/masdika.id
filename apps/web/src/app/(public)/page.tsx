@@ -29,10 +29,10 @@ import {
   SiIntel,
   SiDell,
   SiCloudflare,
-  SiGoogle,
   SiNextdotjs,
   SiPostgresql,
 } from "react-icons/si";
+import { FcGoogle } from "react-icons/fc";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -122,16 +122,16 @@ const INFRASTRUCTURE_STACK = [
     iconColor: "text-[#00A98F] dark:text-[#2dd4bf]",
   },
   {
-    name: "Intel Xeon",
+    name: "Intel",
     category: "Compute Engine",
-    description: "High-frequency enterprise server processors for intensive cloud workloads.",
+    description: "High-frequency enterprise Xeon processors for intensive cloud workloads.",
     icon: SiIntel,
     iconColor: "text-[#0071C5] dark:text-[#38bdf8]",
   },
   {
-    name: "Dell PowerEdge",
+    name: "Dell",
     category: "Bare-Metal",
-    description: "Redundant rackmount server hardware with enterprise NVMe RAID storage.",
+    description: "Redundant PowerEdge rackmount server hardware with enterprise NVMe RAID.",
     icon: SiDell,
     iconColor: "text-[#007DB8] dark:text-[#38bdf8]",
   },
@@ -143,11 +143,11 @@ const INFRASTRUCTURE_STACK = [
     iconColor: "text-[#F38020]",
   },
   {
-    name: "Google Cloud",
-    category: "Cloud Ecosystem",
-    description: "Global cloud infrastructure peering, upstream DNS & hybrid cloud services.",
-    icon: SiGoogle,
-    iconColor: "text-[#4285F4] dark:text-[#60a5fa]",
+    name: "Google",
+    category: "Global Ecosystem",
+    description: "Global network peering, OAuth 2.0 identity, upstream DNS & cloud ecosystem.",
+    icon: FcGoogle,
+    iconColor: "",
   },
   {
     name: "Next.js",
