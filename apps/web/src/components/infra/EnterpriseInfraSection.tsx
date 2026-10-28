@@ -55,18 +55,19 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* 1. Intel Compute */}
             <FadeIn delay={0.1} direction="up" className="h-full">
-              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-xs group">
+              <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-7 flex flex-col justify-between shadow-xs">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-all bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-105 shrink-0">
-                      <IntelLogo className="w-6 h-6 sm:w-7 sm:h-7" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
+                      <IntelLogo className="w-6 h-6 sm:w-7 sm:h-7 text-[#0071C5] dark:text-[#38bdf8] transition-transform duration-300 group-hover:scale-110" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-primary)]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                       Compute Architecture
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-1">
+                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
                     Intel® Xeon® Processors
                   </h3>
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-2.5 sm:mb-3">
@@ -93,18 +94,19 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
 
             {/* 2. Juniper Networks Core Fabric */}
             <FadeIn delay={0.2} direction="up" className="h-full">
-              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-xs group">
+              <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-7 flex flex-col justify-between shadow-xs">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-all bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-105 shrink-0">
-                      <JuniperLogo className="w-7 h-auto sm:w-8 sm:h-auto" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
+                      <JuniperLogo className="w-7 h-auto sm:w-8 sm:h-auto text-[#00A98F] dark:text-[#2dd4bf] transition-transform duration-300 group-hover:scale-110" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-primary)]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                       Core Backbone
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-1">
+                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
                     Juniper Networks®
                   </h3>
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-2.5 sm:mb-3">
@@ -131,18 +133,19 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
 
             {/* 3. MikroTik Edge Peering */}
             <FadeIn delay={0.3} direction="up" className="h-full">
-              <div className="p-5 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col justify-between h-full hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-xs group">
+              <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-7 flex flex-col justify-between shadow-xs">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border transition-all bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-105 shrink-0">
-                      <MikrotikLogo className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
+                      <MikrotikLogo className="w-5 h-5 sm:w-6 sm:h-6 text-slate-800 dark:text-white group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-transform duration-300 group-hover:scale-110" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border-primary)]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                       Edge Gateway
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-1">
+                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
                     MikroTik® RouterOS
                   </h3>
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-2.5 sm:mb-3">
