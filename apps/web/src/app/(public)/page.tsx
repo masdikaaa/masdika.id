@@ -416,17 +416,17 @@ export default function HomePage() {
             >
               <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] h-[440px] sm:h-[500px] lg:h-[600px] mx-auto flex items-end justify-center">
                 {/* Architectural Hero Background Ornaments precisely framed around the hero avatar (SMK Telkom Malang aesthetic) */}
-                <HeroOrnaments />
+                <HeroOrnaments className="z-0" />
 
                 {/* Subtle ambient depth bloom behind avatar — pure Cyan */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none z-0" />
 
-                {/* Hero Character with progressive blur and gradient mask fade */}
+                {/* Hero Character with progressive seamless bottom fade into background */}
                 <div
                   className="w-full h-full relative z-10 flex items-end justify-center overflow-hidden"
                   style={{
-                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0.7) 75%, rgba(0,0,0,0) 98%)",
-                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0.7) 75%, rgba(0,0,0,0) 98%)"
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0.85) 75%, rgba(0,0,0,0) 98%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0.85) 75%, rgba(0,0,0,0) 98%)"
                   }}
                 >
                   <Image
@@ -438,10 +438,10 @@ export default function HomePage() {
                     priority={true}
                     fetchPriority="high"
                     unoptimized={true}
-                    className="w-full h-full object-contain object-bottom"
+                    className="w-full h-full object-contain object-bottom relative z-10"
                   />
-                  {/* Additional soft ambient fade layer at the bottom */}
-                  <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/50 to-transparent pointer-events-none" />
+                  {/* Soft bottom vignette fade into background */}
+                  <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/60 to-transparent pointer-events-none z-10" />
                 </div>
 
                 {/* Floating animated hero badges */}
@@ -454,7 +454,7 @@ export default function HomePage() {
                   <div
                     key={i}
                     className={cn(
-                      "flex absolute z-20 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
+                      "flex absolute z-30 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
                       pos,
                       anim,
                       "bg-white/45 dark:bg-[#0a0a0a]/85 backdrop-blur-xl border border-white/60 dark:border-white/10",

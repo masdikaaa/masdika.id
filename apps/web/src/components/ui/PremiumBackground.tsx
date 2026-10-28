@@ -183,18 +183,6 @@ export function SectionOrnaments({
               RING_NEUTRAL_DASHED
             )}
           />
-          <div
-            className={cn(
-              "absolute top-[16%] -right-[8%] w-[720px] h-[720px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[28%] -right-[4%] w-[520px] h-[520px]",
-              RING_NEUTRAL_SOLID
-            )}
-          />
 
           <DiamondOrnament size={20} className="top-8 left-8 sm:left-20" />
           <DiamondOrnament size={14} className="top-24 left-1/4 hidden md:flex" />
@@ -488,49 +476,39 @@ export function HeroOrnaments({ className }: { className?: string }) {
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 select-none flex items-center justify-center -z-10 overflow-visible",
+        "pointer-events-none absolute inset-0 select-none flex items-center justify-center z-0 overflow-visible",
         className
       )}
+      style={{
+        maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0) 72%)",
+        WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0) 72%)"
+      }}
     >
       {/* 1. Large Neutral Ring behind subject (85% of hero height) */}
       <div
         className={cn(
-          "pointer-events-none absolute rounded-full -z-20 border border-neutral-200/80 dark:border-zinc-800/80 bg-transparent",
+          "pointer-events-none absolute rounded-full border border-neutral-200/80 dark:border-zinc-800/80 bg-transparent z-0",
           "w-[340px] sm:w-[440px] md:w-[500px] lg:w-[540px] xl:w-[600px] h-[340px] sm:h-[440px] md:h-[500px] lg:h-[540px] xl:h-[600px]",
-          "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          "left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2"
         )}
       />
 
       {/* 2. Middle Accent Ring behind subject (52.5% of hero height) */}
       <div
         className={cn(
-          "pointer-events-none absolute rounded-full -z-10 border border-cyan-500/25 dark:border-cyan-400/20 bg-transparent",
+          "pointer-events-none absolute rounded-full border border-cyan-500/25 dark:border-cyan-400/20 bg-transparent z-0",
           "w-[260px] sm:w-[330px] md:w-[380px] lg:w-[420px] xl:w-[460px] h-[260px] sm:h-[330px] md:h-[380px] lg:h-[420px] xl:h-[460px]",
-          "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          "left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2"
         )}
       />
 
       {/* 3. Small Dashed Ring behind subject (32.5% of hero height) */}
       <div
         className={cn(
-          "pointer-events-none absolute rounded-full -z-10 border border-dashed border-neutral-300/85 dark:border-zinc-700/60 bg-transparent",
+          "pointer-events-none absolute rounded-full border border-dashed border-neutral-300/85 dark:border-zinc-700/60 bg-transparent z-0",
           "w-[180px] sm:w-[220px] md:w-[250px] lg:w-[280px] xl:w-[300px] h-[180px] sm:h-[220px] md:h-[250px] lg:h-[280px] xl:h-[300px]",
-          "left-[38%] top-[42%] -translate-x-1/2 -translate-y-1/2"
+          "left-[38%] top-[35%] -translate-x-1/2 -translate-y-1/2"
         )}
-      />
-
-      {/* 4. Small Anchor Node Dots (matching SMK Telkom Malang hero image) */}
-      <div
-        className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full h-2 w-2 border border-neutral-400/50 dark:border-zinc-600 bg-neutral-400/40 dark:bg-zinc-700"
-        style={{ left: "32%", top: "18%" }}
-      />
-      <div
-        className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full h-2 w-2 border border-cyan-500/50 dark:border-cyan-400/50 bg-cyan-400/40"
-        style={{ left: "74%", top: "48%" }}
-      />
-      <div
-        className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full h-2 w-2 bg-neutral-400/40 dark:bg-zinc-600"
-        style={{ left: "26%", top: "62%" }}
       />
     </div>
   );
