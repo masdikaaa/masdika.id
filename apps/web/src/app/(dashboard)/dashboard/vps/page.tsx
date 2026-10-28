@@ -2,23 +2,44 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Server, Play, Square, Power, RotateCcw, Activity, RefreshCw, Terminal, AlertTriangle, XCircle, Settings, Search, ChevronLeft, ChevronRight, HardDrive, Cpu, Network, CheckCircle, Copy, Plus } from "lucide-react";
+import {
+  Server,
+  Play,
+  Square,
+  Power,
+  RotateCcw,
+  Activity,
+  RefreshCw,
+  Terminal,
+  AlertTriangle,
+  X,
+  Settings,
+  Search,
+  HardDrive,
+  Cpu,
+  Network,
+  Check,
+  Copy,
+  Plus,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { Pagination } from "@/components/ui/Pagination";
 import Link from "next/link";
 
-const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
+const getOsIcon = (osTemplate: string) => {
   const os = osTemplate?.toLowerCase() || "";
   if (os.includes("ubuntu")) return "https://cdn.simpleicons.org/ubuntu/E95420";
   if (os.includes("debian")) return "https://cdn.simpleicons.org/debian/A81D33";
   if (os.includes("centos")) return "https://cdn.simpleicons.org/centos/262577";
-  if (os.includes("almalinux") || os.includes("alma")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
+  if (os.includes("almalinux") || os.includes("alma"))
+    return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
   if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
   if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
   if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
-  if (os.includes("windows")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
+  if (os.includes("windows"))
+    return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
   if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
   if (os.includes("mikrotik") || os.includes("chr")) {
     return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";
@@ -28,24 +49,27 @@ const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
 
 export default function MyVpsPage() {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
   const [vpsList, setVpsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<Record<number, boolean>>({});
-  const [confirmModal, setConfirmModal] = useState<{ vpsId: number, action: string, hostname: string } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ vpsId: number; action: string; hostname: string } | null>(null);
   const [consoleLoading, setConsoleLoading] = useState<number | null>(null);
   const [selectedVps, setSelectedVps] = useState<number[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [actionConfirm, setActionConfirm] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "RUNNING" | "STOPPED">("ALL");
 
   // Pagination & Filter
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const [searchFilter, setSearchFilter] = useUrlString<string>("searchFilter", "");
   const itemsPerPage = 10;
 
-  const fetchVps = async () => {
+  const fetchVps = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
     try {
-      const res = await fetch("/api/user/vps", { cache: 'no-store' });
+      const res = await fetch("/api/user/vps", { cache: "no-store" });
       const data = await res.json();
       if (Array.isArray(data)) {
         setVpsList(data);
@@ -54,22 +78,20 @@ export default function MyVpsPage() {
       console.error(error);
     } finally {
       setLoading(false);
+      if (isManual) setRefreshing(false);
     }
   };
 
   useEffect(() => {
     fetchVps();
-    // Poll every 5s to update live status
-    const interval = setInterval(fetchVps, 5000);
+    const interval = setInterval(() => fetchVps(false), 5000);
     return () => clearInterval(interval);
   }, []);
-
-
 
   const handleAction = async (vpsId: number, action: string) => {
     setConfirmModal(null);
 
-    setActionLoading(prev => ({ ...prev, [vpsId]: true }));
+    setActionLoading((prev) => ({ ...prev, [vpsId]: true }));
     try {
       const res = await fetch("/api/user/vps/action", {
         method: "POST",
@@ -80,14 +102,14 @@ export default function MyVpsPage() {
 
       if (res.ok) {
         toast.success(`Action '${action}' executed successfully.`);
-        fetchVps(); // Refresh status
+        fetchVps();
       } else {
         toast.error(data.error || "Failed to execute action");
       }
     } catch (error) {
       toast.error("An error occurred");
     } finally {
-      setActionLoading(prev => ({ ...prev, [vpsId]: false }));
+      setActionLoading((prev) => ({ ...prev, [vpsId]: false }));
     }
   };
 
@@ -182,38 +204,38 @@ export default function MyVpsPage() {
 
   const getActionConfig = (act: string) => {
     switch (act) {
-      case 'start':
+      case "start":
         return {
-          icon: <Play className="w-6 h-6 text-green-500" />,
-          bg: "bg-green-500/10",
-          buttonClass: "bg-green-500 hover:bg-green-600 shadow-green-500/20 text-white",
+          icon: <Play className="w-5 h-5 text-emerald-400" />,
+          bg: "bg-emerald-500/10 border border-emerald-500/20",
+          buttonClass: "bg-emerald-500 hover:bg-emerald-400 text-slate-950",
           title: "Start",
-          desc: "Are you sure you want to start the selected VPS instances?"
+          desc: "Are you sure you want to start the selected VPS instances?",
         };
-      case 'shutdown':
+      case "shutdown":
         return {
-          icon: <Power className="w-6 h-6 text-orange-500" />,
-          bg: "bg-orange-500/10",
-          buttonClass: "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20 text-white",
+          icon: <Power className="w-5 h-5 text-amber-400" />,
+          bg: "bg-amber-500/10 border border-amber-500/20",
+          buttonClass: "bg-amber-500 hover:bg-amber-400 text-slate-950",
           title: "Shutdown",
-          desc: "Are you sure you want to gracefully shutdown the selected VPS instances?"
+          desc: "Are you sure you want to gracefully shutdown the selected VPS instances?",
         };
-      case 'reboot':
+      case "reboot":
         return {
-          icon: <RotateCcw className="w-6 h-6 text-cyan-500" />,
-          bg: "bg-cyan-500/10",
+          icon: <RotateCcw className="w-5 h-5 text-cyan-400" />,
+          bg: "bg-cyan-500/10 border border-cyan-500/20",
           buttonClass: "bg-cyan-400 hover:bg-cyan-300 text-slate-950",
           title: "Reboot",
-          desc: "Are you sure you want to reboot the selected VPS instances?"
+          desc: "Are you sure you want to reboot the selected VPS instances?",
         };
-      case 'delete':
+      case "delete":
       default:
         return {
-          icon: <AlertTriangle className="w-6 h-6 text-red-500" />,
-          bg: "bg-red-500/10",
-          buttonClass: "bg-red-500 hover:bg-red-600 shadow-red-500/20 text-white",
+          icon: <AlertTriangle className="w-5 h-5 text-rose-400" />,
+          bg: "bg-rose-500/10 border border-rose-500/20",
+          buttonClass: "bg-rose-500 hover:bg-rose-400 text-white",
           title: "Delete",
-          desc: "This action is permanent and cannot be undone."
+          desc: "This action is permanent and cannot be undone.",
         };
     }
   };
@@ -221,161 +243,384 @@ export default function MyVpsPage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] w-full flex items-center justify-center">
-        <RefreshCw className="w-10 h-10 text-cyan-500 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
       </div>
     );
   }
 
-  const filteredList = vpsList.filter(v =>
-    !searchFilter ||
-    v.hostname.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    v.assignedIps.some((ip: any) => ip.ipAddress.includes(searchFilter)) ||
-    v.id.toString().includes(searchFilter)
-  );
+  const runningCount = vpsList.filter((v) => v.liveStatus?.status === "running").length;
+  const stoppedCount = vpsList.length - runningCount;
+
+  const filteredList = vpsList.filter((v) => {
+    const matchesSearch =
+      !searchFilter ||
+      v.hostname.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      v.assignedIps.some((ip: any) => ip.ipAddress.includes(searchFilter) || ip.publicIp?.includes(searchFilter)) ||
+      v.id.toString().includes(searchFilter);
+
+    const vRunning = v.liveStatus?.status === "running";
+    const matchesStatus =
+      statusFilter === "ALL" ||
+      (statusFilter === "RUNNING" && vRunning) ||
+      (statusFilter === "STOPPED" && !vRunning);
+
+    return matchesSearch && matchesStatus;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filteredList.length / itemsPerPage));
   const paginatedList = filteredList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-
-
   return (
-    <div className="w-full space-y-6">
-      {/* Hero Header */}
-      <div className={cn("border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm", "relative overflow-hidden rounded-3xl p-6 md:p-8 group")}>
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 tracking-wide border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-300 text-cyan-950")}>
-              <Server className="w-3.5 h-3.5" /> Cloud Infrastructure
-            </div>
-            <h1 className={cn("text-3xl md:text-4xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-950")}>
-              My <span className={cn(isDark ? "text-cyan-400" : "text-cyan-600")}>VPS Instances</span>
+    <div className="w-full space-y-5 pb-10">
+      {/* Compact Architectural Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-1">
+        <div>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              Virtual Private Servers
             </h1>
-            <p className={cn("text-sm max-w-md font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>Manage your virtual private servers, power states, and view resource usage.</p>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border",
+                  isDark
+                    ? "bg-white/[0.03] border-white/[0.08] text-zinc-300"
+                    : "bg-white border-slate-200 text-slate-700"
+                )}
+              >
+                {vpsList.length} Total
+              </span>
+              {runningCount > 0 && (
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
+                    isDark
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  )}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {runningCount} Running
+                </span>
+              )}
+            </div>
+          </div>
+          <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage your cloud compute instances, power lifecycle, and web VNC console access.
+          </p>
+        </div>
+
+        {/* Search, Refresh & Deploy Controls */}
+        <div className="flex items-center gap-2.5 w-full lg:w-auto">
+          <div className="relative flex-1 lg:w-64">
+            <Search
+              className={cn(
+                "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none",
+                isDark ? "text-zinc-500" : "text-slate-400"
+              )}
+            />
+            <input
+              type="text"
+              placeholder="Filter by ID, hostname, or IP..."
+              value={searchFilter}
+              onChange={(e) => {
+                setSearchFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "w-full border rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm focus:outline-none transition-all",
+                isDark
+                  ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500/40"
+                  : "bg-white border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 shadow-2xs"
+              )}
+            />
+            {searchFilter && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchFilter("");
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-white/10",
+                  isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-400 hover:text-slate-600"
+                )}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500/50" />
-              <input
-                type="text"
-                placeholder="Search ID, Hostname, IP..."
-                value={searchFilter}
-                onChange={(e) => { setSearchFilter(e.target.value); setCurrentPage(1); }}
-                className={cn("w-full border rounded-2xl pl-9 pr-4 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" : "bg-white border-slate-300 text-slate-950 font-medium focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm placeholder:text-slate-400")}
-              />
-            </div>
-            <button
-              onClick={fetchVps}
-              className={cn("p-2.5 rounded-lg border transition-colors shrink-0", isDark ? "bg-[#060b14] text-cyan-400 border-slate-800 hover:bg-[#09111e]" : "bg-white text-cyan-700 border-slate-300 hover:bg-slate-50 shadow-sm")}
-              title="Refresh Status"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <Link
-              href="/dashboard/checkout?service=vps"
-              className="flex items-center gap-2 px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-sm font-bold rounded-lg transition-all shadow-sm shrink-0 text-slate-950"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Create Instance</span>
-            </Link>
-          </div>
+          <button
+            onClick={() => fetchVps(true)}
+            className={cn(
+              "w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0",
+              isDark
+                ? "bg-[#0a0a0c] text-zinc-300 hover:text-white border-white/[0.08] hover:bg-white/[0.04]"
+                : "bg-white text-slate-700 hover:text-slate-900 border-slate-200/90 hover:bg-slate-50 shadow-2xs"
+            )}
+            title="Refresh Status"
+          >
+            <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin text-cyan-400")} />
+          </button>
+
+          <Link
+            href="/dashboard/checkout?service=vps"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-xs sm:text-sm font-bold rounded-xl transition-all shadow-2xs shrink-0 text-slate-950"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span className="hidden sm:inline">Deploy Instance</span>
+            <span className="sm:hidden">Deploy</span>
+          </Link>
         </div>
       </div>
 
       {vpsList.length === 0 ? (
-        <div className={cn("border transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-300 shadow-sm", "rounded-3xl p-12 text-center")}>
-          <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 transform -rotate-6", isDark ? "bg-[#060b14] border border-slate-800" : "bg-slate-100 border border-slate-300")}>
-            <Server className={cn("w-10 h-10 transform rotate-6", isDark ? "text-zinc-500" : "text-slate-600")} />
+        <div
+          className={cn(
+            "border rounded-2xl p-12 text-center",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          )}
+        >
+          <div
+            className={cn(
+              "w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 border",
+              isDark ? "bg-white/[0.03] border-white/[0.08] text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+            )}
+          >
+            <Server className="w-6 h-6" />
           </div>
-          <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-950")}>No VPS Found</h3>
-          <p className={cn("max-w-md mx-auto mb-6 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>You don't have any active VPS instances yet. Deploy your first virtual private server to get started.</p>
-          <Link href="/dashboard/checkout?service=vps" className="font-bold text-slate-950 px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-sm inline-flex items-center justify-center gap-2 text-sm">
+          <h3 className={cn("text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>
+            No Virtual Private Servers Found
+          </h3>
+          <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
+            You don&apos;t have any active VPS instances yet. Deploy your first high-performance cloud server in seconds.
+          </p>
+          <Link
+            href="/dashboard/checkout?service=vps"
+            className="font-bold text-slate-950 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-2xs inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
             Deploy New VPS
           </Link>
         </div>
       ) : (
-        <div className={cn("border rounded-2xl shadow-md overflow-hidden flex flex-col", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-300")}>
-          <div className={cn("border-b", isDark ? "border-slate-800/80 bg-[#060b14]" : "border-slate-300 bg-slate-50", "px-6 py-2 flex flex-wrap items-center justify-between min-h-[56px] gap-4")}>
-            {totalPages > 1 && (
-              <div className="py-2">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
+        <div
+          className={cn(
+            "border rounded-2xl overflow-hidden flex flex-col",
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          )}
+        >
+          {/* Unified Table Filter & Bulk Actions Bar */}
+          <div
+            className={cn(
+              "border-b px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3",
+              isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/60"
+            )}
+          >
+            {/* Status Filter Segmented Pills */}
+            <div
+              className={cn(
+                "inline-flex items-center p-0.5 rounded-xl border",
+                isDark ? "bg-black/40 border-white/[0.06]" : "bg-slate-100/80 border-slate-200/80"
+              )}
+            >
+              {(
+                [
+                  { id: "ALL", label: "All", count: vpsList.length },
+                  { id: "RUNNING", label: "Running", count: runningCount },
+                  { id: "STOPPED", label: "Stopped", count: stoppedCount },
+                ] as const
+              ).map((tab) => {
+                const active = statusFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(tab.id);
+                      setCurrentPage(1);
+                    }}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5",
+                      active
+                        ? isDark
+                          ? "bg-white/[0.08] text-white shadow-2xs"
+                          : "bg-white text-slate-900 shadow-2xs"
+                        : isDark
+                        ? "text-zinc-400 hover:text-zinc-200"
+                        : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    {tab.label}
+                    <span
+                      className={cn(
+                        "text-[10px] font-mono px-1.5 py-0.2 rounded",
+                        active
+                          ? isDark
+                            ? "bg-cyan-500/15 text-cyan-300"
+                            : "bg-cyan-50 text-cyan-700"
+                          : isDark
+                          ? "text-zinc-500"
+                          : "text-slate-400"
+                      )}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Side: Bulk Actions OR Instance Counter */}
+            {selectedVps.length > 0 ? (
+              (() => {
+                const selectedVpsData = vpsList.filter((v) => selectedVps.includes(v.id));
+                const canStart = selectedVpsData.some((v) => v.liveStatus?.status !== "running");
+                const canShutdownOrReboot = selectedVpsData.some((v) => v.liveStatus?.status === "running");
+
+                return (
+                  <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
+                    <span
+                      className={cn(
+                        "text-xs font-mono font-semibold px-2.5 py-1 rounded-lg border",
+                        isDark
+                          ? "text-cyan-300 bg-cyan-500/10 border-cyan-500/20"
+                          : "text-cyan-800 bg-cyan-50 border-cyan-200"
+                      )}
+                    >
+                      {selectedVps.length} selected
+                    </span>
+                    {canStart && (
+                      <button
+                        onClick={() => handleBulkAction("start")}
+                        disabled={bulkLoading}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50",
+                          isDark
+                            ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
+                            : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200"
+                        )}
+                      >
+                        <Play className="w-3 h-3" /> Start
+                      </button>
+                    )}
+                    {canShutdownOrReboot && (
+                      <button
+                        onClick={() => handleBulkAction("shutdown")}
+                        disabled={bulkLoading}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50",
+                          isDark
+                            ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20"
+                            : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200"
+                        )}
+                      >
+                        <Power className="w-3 h-3" /> Shutdown
+                      </button>
+                    )}
+                    {canShutdownOrReboot && (
+                      <button
+                        onClick={() => handleBulkAction("reboot")}
+                        disabled={bulkLoading}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50",
+                          isDark
+                            ? "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border-white/[0.08]"
+                            : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
+                        )}
+                      >
+                        <RotateCcw className="w-3 h-3" /> Reboot
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleBulkAction("delete")}
+                      disabled={bulkLoading}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg border transition-colors text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50",
+                        isDark
+                          ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20"
+                          : "bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-200"
+                      )}
+                    >
+                      <AlertTriangle className="w-3 h-3" /> Delete
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVps([])}
+                      className={cn(
+                        "p-1 rounded-lg transition-colors",
+                        isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-400 hover:text-slate-700"
+                      )}
+                      title="Clear selection"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+                Showing <span className="font-mono font-semibold">{paginatedList.length}</span> of{" "}
+                <span className="font-mono font-semibold">{filteredList.length}</span> instances
               </div>
             )}
-            {selectedVps.length > 0 && (() => {
-              const selectedVpsData = vpsList.filter(v => selectedVps.includes(v.id));
-              const canStart = selectedVpsData.some(v => v.liveStatus?.status !== "running");
-              const canShutdownOrReboot = selectedVpsData.some(v => v.liveStatus?.status === "running");
-
-              return (
-                <div className="flex items-center gap-1.5 md:gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-md mr-2 border", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-950 bg-cyan-100 border-cyan-300")}>{selectedVps.length} selected</span>
-                  {canStart && (
-                    <button onClick={() => handleBulkAction('start')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-bold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border-cyan-300")}>
-                      <Play className="w-3.5 h-3.5" /> <span className="hidden md:inline">Start</span>
-                    </button>
-                  )}
-                  {canShutdownOrReboot && (
-                    <button onClick={() => handleBulkAction('shutdown')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-bold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" : "bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300")}>
-                      <Power className="w-3.5 h-3.5" /> <span className="hidden md:inline">Shutdown</span>
-                    </button>
-                  )}
-                  {canShutdownOrReboot && (
-                    <button onClick={() => handleBulkAction('reboot')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-bold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" : "bg-blue-100 hover:bg-blue-200 text-blue-950 border-blue-300")}>
-                      <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden md:inline">Reboot</span>
-                    </button>
-                  )}
-                  <div className={cn("w-px h-4 mx-1", isDark ? "bg-white/10" : "bg-slate-300")} />
-                  <button onClick={() => handleBulkAction('delete')} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg border transition-colors text-xs font-bold flex items-center gap-1.5 disabled:opacity-50", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-100 hover:bg-red-200 text-red-950 border-red-300")}>
-                    <AlertTriangle className="w-3.5 h-3.5" /> <span className="hidden md:inline">{selectedVps.length === paginatedList.length && paginatedList.length > 1 ? 'Delete All' : 'Delete'}</span>
-                  </button>
-                </div>
-              );
-            })()}
           </div>
 
+          {/* Data Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-max">
+            <table className="w-full text-left border-collapse min-w-[860px]">
               <thead>
-                <tr className={cn("border-b text-xs font-bold uppercase tracking-wider", isDark ? "border-white/5 bg-black/10 text-zinc-400" : "border-slate-300 bg-slate-100 text-slate-900")}>
-                  <th className="py-4 pl-6 pr-2 w-14 font-bold">
+                <tr
+                  className={cn(
+                    "border-b text-[11px] font-semibold uppercase tracking-wider",
+                    isDark
+                      ? "border-white/[0.06] bg-white/[0.01] text-zinc-400"
+                      : "border-slate-200/80 bg-slate-50/80 text-slate-500"
+                  )}
+                >
+                  <th className="py-3 pl-5 pr-2 w-11">
                     <button
                       type="button"
                       onClick={() => {
-                        const isAllSelected = paginatedList.length > 0 && selectedVps.length === paginatedList.length;
+                        const isAllSelected =
+                          paginatedList.length > 0 && selectedVps.length === paginatedList.length;
                         if (!isAllSelected) {
-                          setSelectedVps(paginatedList.map(v => v.id));
+                          setSelectedVps(paginatedList.map((v) => v.id));
                         } else {
                           setSelectedVps([]);
                         }
                       }}
                       className={cn(
-                        "w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all duration-200",
+                        "w-4 h-4 rounded flex items-center justify-center shrink-0 transition-all border",
                         paginatedList.length > 0 && selectedVps.length === paginatedList.length
-                          ? "bg-cyan-400"
-                          : (isDark ? "bg-black/40 border border-white/10 hover:border-cyan-400/50" : "bg-white border border-slate-400 hover:border-cyan-500")
+                          ? "bg-cyan-400 border-cyan-400 text-slate-950"
+                          : isDark
+                          ? "bg-white/[0.02] border-white/[0.15] hover:border-cyan-400/60"
+                          : "bg-white border-slate-300 hover:border-cyan-500"
                       )}
                     >
-                      <CheckCircle className={cn("w-3.5 h-3.5", paginatedList.length > 0 && selectedVps.length === paginatedList.length ? "text-[#0f172a]" : "text-transparent")} />
+                      {paginatedList.length > 0 && selectedVps.length === paginatedList.length && (
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      )}
                     </button>
                   </th>
-                  <th className="py-4 px-4 font-bold w-16">ID</th>
-                  <th className="py-4 px-4 font-bold w-64">Hostname</th>
-                  <th className="py-4 px-4 font-bold w-40">Type</th>
-                  <th className="py-4 px-4 font-bold">Information</th>
-                  <th className="py-4 px-4 font-bold">Status</th>
-                  <th className="py-4 px-4 font-bold">Server</th>
-                  <th className="py-4 pl-4 pr-6 font-bold text-right">Action</th>
+                  <th className="py-3 px-3">Instance & Network</th>
+                  <th className="py-3 px-3">Hardware Allocation</th>
+                  <th className="py-3 px-3">Node & Role</th>
+                  <th className="py-3 px-3">Status</th>
+                  <th className="py-3 pl-3 pr-5 text-right">Controls & Console</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 dark:divide-white/5">
+              <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
                 {paginatedList.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className={cn("p-8 text-center font-medium", isDark ? "text-zinc-500" : "text-slate-700")}>No instances match your search.</td>
+                    <td
+                      colSpan={6}
+                      className={cn("p-10 text-center text-sm", isDark ? "text-zinc-500" : "text-slate-500")}
+                    >
+                      No instances match your current filter.
+                    </td>
                   </tr>
                 ) : (
                   paginatedList.map((vps) => {
@@ -383,206 +628,380 @@ export default function MyVpsPage() {
                     const isRunning = liveStatus === "running";
                     const isProvisioning = vps.status === "PROVISIONING" || vps.status === "PENDING";
                     const isSuspended = vps.status === "SUSPENDED";
-                    const displayStatus = isProvisioning ? "Deploying" : (isSuspended ? "SUSPENDED" : (liveStatus || vps.status));
+                    const isTerminated = vps.status === "TERMINATED";
+                    const displayStatus = isProvisioning
+                      ? "Deploying"
+                      : isSuspended
+                      ? "Suspended"
+                      : liveStatus || vps.status;
+                    const isSelected = selectedVps.includes(vps.id);
+                    const ipAddr =
+                      vps.assignedIps?.[0]?.publicIp ||
+                      vps.assignedIps?.[0]?.ipAddress ||
+                      (vps.status === "PENDING" ? "Provisioning IP" : "No IP");
 
                     return (
-                      <tr key={vps.id} className={cn("transition-colors group", isDark ? "hover:bg-slate-800/40" : "hover:bg-slate-50")}>
-                        <td className="py-4 pl-6 pr-2 align-middle">
+                      <tr
+                        key={vps.id}
+                        className={cn(
+                          "transition-colors group",
+                          isSelected
+                            ? isDark
+                              ? "bg-cyan-500/[0.04]"
+                              : "bg-cyan-50/40"
+                            : isDark
+                            ? "hover:bg-white/[0.015]"
+                            : "hover:bg-slate-50/70"
+                        )}
+                      >
+                        {/* Checkbox */}
+                        <td className="py-3.5 pl-5 pr-2 align-middle">
                           <button
                             type="button"
                             onClick={() => {
-                              if (!selectedVps.includes(vps.id)) {
-                                setSelectedVps(prev => [...prev, vps.id]);
+                              if (!isSelected) {
+                                setSelectedVps((prev) => [...prev, vps.id]);
                               } else {
-                                setSelectedVps(prev => prev.filter(id => id !== vps.id));
+                                setSelectedVps((prev) => prev.filter((id) => id !== vps.id));
                               }
                             }}
                             className={cn(
-                              "w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all duration-200",
-                              selectedVps.includes(vps.id)
-                                ? "bg-cyan-400"
-                                : (isDark ? "bg-black/40 border border-white/10 hover:border-cyan-400/50" : "bg-white border border-slate-400 hover:border-cyan-500")
+                              "w-4 h-4 rounded flex items-center justify-center shrink-0 transition-all border",
+                              isSelected
+                                ? "bg-cyan-400 border-cyan-400 text-slate-950"
+                                : isDark
+                                ? "bg-white/[0.02] border-white/[0.15] hover:border-cyan-400/60"
+                                : "bg-white border-slate-300 hover:border-cyan-500"
                             )}
                           >
-                            <CheckCircle className={cn("w-3.5 h-3.5", selectedVps.includes(vps.id) ? "text-[#0f172a]" : "text-transparent")} />
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                           </button>
                         </td>
-                        <td className="py-4 px-4 align-middle">
-                          <span className={cn("text-sm font-mono font-bold", isDark ? "text-zinc-400" : "text-slate-900")}>{vps.id}</span>
-                        </td>
-                        <td className="py-4 px-4 align-middle">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 shrink-0 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl flex items-center justify-center p-2">
-                              {getOsIcon(vps.osTemplate, isDark) ? (
-                                 
-                                <img referrerPolicy="no-referrer" src={getOsIcon(vps.osTemplate, isDark)!} alt="OS" className="w-full h-full object-contain drop-shadow-md" loading="lazy" decoding="async" />
+
+                        {/* Instance (OS Icon, Hostname, #ID, IP) */}
+                        <td className="py-3.5 px-3 align-middle">
+                          <div className="flex items-center gap-3.5">
+                            <div
+                              className={cn(
+                                "w-10 h-10 shrink-0 rounded-xl border flex items-center justify-center p-2",
+                                isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50 border-slate-200/80"
+                              )}
+                            >
+                              {getOsIcon(vps.osTemplate) ? (
+                                <img
+                                  referrerPolicy="no-referrer"
+                                  src={getOsIcon(vps.osTemplate)!}
+                                  alt="OS"
+                                  className="w-full h-full object-contain"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
                               ) : (
-                                <Server className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                                <Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                               )}
                             </div>
-                            <div>
-                              <div className={cn("font-bold text-base", isDark ? "text-white" : "text-slate-950")}>{vps.hostname}</div>
-                              <div className="flex flex-wrap items-center gap-2">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Link
+                                  href={`/dashboard/vps/${vps.id}`}
+                                  className={cn(
+                                    "font-bold text-sm truncate hover:underline",
+                                    isDark ? "text-white hover:text-cyan-400" : "text-slate-900 hover:text-cyan-700"
+                                  )}
+                                >
+                                  {vps.hostname}
+                                </Link>
+                                <span
+                                  className={cn(
+                                    "text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                                    isDark
+                                      ? "bg-white/[0.03] border-white/[0.07] text-zinc-500"
+                                      : "bg-slate-100 border-slate-200 text-slate-500"
+                                  )}
+                                >
+                                  #{vps.id}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5">
                                 {vps.assignedIps.length > 0 ? (
-                                  <div
+                                  <button
+                                    type="button"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      navigator.clipboard.writeText(vps.assignedIps[0].publicIp || vps.assignedIps[0].ipAddress);
+                                      navigator.clipboard.writeText(ipAddr);
                                       toast.success("IP copied to clipboard");
                                     }}
-                                    className={cn("text-sm font-mono whitespace-nowrap shrink-0 cursor-pointer transition-colors flex items-center gap-1.5 group/ip font-semibold", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-700 hover:text-cyan-700")}
+                                    className={cn(
+                                      "text-xs font-mono whitespace-nowrap cursor-pointer transition-colors inline-flex items-center gap-1.5 group/ip",
+                                      isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700"
+                                    )}
                                     title="Copy IP Address"
                                   >
-                                    {vps.assignedIps[0].publicIp || vps.assignedIps[0].ipAddress}
-                                    <Copy className="w-3.5 h-3.5 opacity-0 group-hover/ip:opacity-100 transition-opacity" />
-                                  </div>
+                                    {ipAddr}
+                                    <Copy className="w-3 h-3 opacity-0 group-hover/ip:opacity-100 transition-opacity" />
+                                  </button>
                                 ) : (
-                                  <div className={cn("text-sm font-mono whitespace-nowrap shrink-0 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
-                                    {vps.status === 'PENDING' ? "Provisioning IP" : "No IP"}
-                                  </div>
+                                  <span
+                                    className={cn(
+                                      "text-xs font-mono whitespace-nowrap",
+                                      isDark ? "text-zinc-500" : "text-slate-400"
+                                    )}
+                                  >
+                                    {ipAddr}
+                                  </span>
                                 )}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-4 align-middle">
-                          <div className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full border inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 uppercase tracking-wider", isDark ? "bg-black/20 border-white/5" : "bg-slate-100 border-slate-300")}>
-                            {vps.kubernetesRole ? (
-                              <>
-                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span>
-                                <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>K3s Node</span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span>
-                                <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-950")}>Cloud VPS</span>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 align-middle">
-                          <div className={cn("flex items-center gap-6 text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>
-                            <div className="space-y-1.5">
-                              <div className="flex items-center gap-2"><Cpu className={cn("w-3.5 h-3.5", isDark ? "text-zinc-500" : "text-slate-600")} /> {vps.ramGb >= 1 ? `${vps.ramGb} GB` : `${vps.ramGb * 1024} MB`} RAM</div>
-                              <div className="flex items-center gap-2"><Activity className={cn("w-3.5 h-3.5", isDark ? "text-zinc-500" : "text-slate-600")} /> {vps.cpuCores} Core</div>
-                            </div>
-                            <div className="space-y-1.5">
-                              <div className="flex items-center gap-2"><HardDrive className={cn("w-3.5 h-3.5", isDark ? "text-zinc-500" : "text-slate-600")} /> {vps.diskGb} GB</div>
-                              <div className="flex items-center gap-2" title="Network Bandwidth Limit"><Network className={cn("w-3.5 h-3.5", isDark ? "text-zinc-500" : "text-slate-600")} /> {vps.bandwidthMbps ? `${vps.bandwidthMbps} Mbps` : '100 Mbps'}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 align-middle">
-                          <div className="flex items-center gap-2">
-                            <span className={cn(
-                              "px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide",
-                              isRunning && !isSuspended && vps.status !== 'TERMINATED' ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-100 text-cyan-950 border border-cyan-300") :
-                                isSuspended ? (isDark ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" : "bg-orange-100 text-orange-950 border border-orange-300") :
-                                  vps.status === 'TERMINATED' ? (isDark ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-red-100 text-red-950 border border-red-300") :
-                                    isProvisioning ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 animate-pulse" : "bg-cyan-100 text-cyan-950 border border-cyan-300 animate-pulse") :
-                                      (isDark ? "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20" : "bg-slate-100 text-slate-800 border border-slate-300")
-                            )}>
-                              {displayStatus}
+
+                        {/* Hardware Allocation */}
+                        <td className="py-3.5 px-3 align-middle">
+                          <div className="flex flex-wrap items-center gap-1.5 max-w-[290px]">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium border",
+                                isDark
+                                  ? "bg-white/[0.02] border-white/[0.06] text-zinc-300"
+                                  : "bg-slate-50 border-slate-200/80 text-slate-700"
+                              )}
+                            >
+                              <Cpu className="w-3 h-3 text-cyan-500" />
+                              {vps.cpuCores} vCPU
                             </span>
-                            {isProvisioning && <RefreshCw className="w-3 h-3 text-cyan-400 animate-spin" />}
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium border",
+                                isDark
+                                  ? "bg-white/[0.02] border-white/[0.06] text-zinc-300"
+                                  : "bg-slate-50 border-slate-200/80 text-slate-700"
+                              )}
+                            >
+                              <Activity className="w-3 h-3 text-cyan-500" />
+                              {vps.ramGb >= 1 ? `${vps.ramGb} GB` : `${vps.ramGb * 1024} MB`} RAM
+                            </span>
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium border",
+                                isDark
+                                  ? "bg-white/[0.02] border-white/[0.06] text-zinc-300"
+                                  : "bg-slate-50 border-slate-200/80 text-slate-700"
+                              )}
+                            >
+                              <HardDrive className="w-3 h-3 text-cyan-500" />
+                              {vps.diskGb} GB
+                            </span>
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium border",
+                                isDark
+                                  ? "bg-white/[0.02] border-white/[0.06] text-zinc-400"
+                                  : "bg-slate-50 border-slate-200/80 text-slate-600"
+                              )}
+                              title="Network Bandwidth"
+                            >
+                              <Network className="w-3 h-3 text-cyan-500" />
+                              {vps.bandwidthMbps ? `${vps.bandwidthMbps} Mbps` : "100 Mbps"}
+                            </span>
                           </div>
                         </td>
-                        <td className="py-4 px-4 align-middle text-sm">
-                          <div className={cn("font-bold", isDark ? "text-zinc-300" : "text-slate-800")}>{vps.node}</div>
+
+                        {/* Node & Role */}
+                        <td className="py-3.5 px-3 align-middle">
+                          <div className="flex flex-col items-start gap-1">
+                            <span
+                              className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-md border inline-flex items-center gap-1.5 uppercase tracking-wider",
+                                isDark
+                                  ? "bg-white/[0.02] border-white/[0.07] text-zinc-300"
+                                  : "bg-slate-100 border-slate-200 text-slate-700"
+                              )}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                              {vps.kubernetesRole ? "K3s Node" : "Cloud VPS"}
+                            </span>
+                            <span
+                              className={cn(
+                                "text-[11px] font-mono",
+                                isDark ? "text-zinc-500" : "text-slate-500"
+                              )}
+                            >
+                              Node: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{vps.node}</strong>
+                            </span>
+                          </div>
                         </td>
-                        <td className="py-4 pl-4 pr-6 align-middle text-right">
+
+                        {/* Status */}
+                        <td className="py-3.5 px-3 align-middle">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                              isRunning && !isSuspended && !isTerminated
+                                ? isDark
+                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : isSuspended
+                                ? isDark
+                                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
+                                : isTerminated
+                                ? isDark
+                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                  : "bg-rose-50 text-rose-700 border-rose-200"
+                                : isProvisioning
+                                ? isDark
+                                  ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 animate-pulse"
+                                  : "bg-cyan-50 text-cyan-700 border-cyan-200 animate-pulse"
+                                : isDark
+                                ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                isRunning && !isSuspended && !isTerminated
+                                  ? "bg-emerald-400 animate-pulse"
+                                  : isSuspended
+                                  ? "bg-amber-400"
+                                  : isTerminated
+                                  ? "bg-rose-400"
+                                  : isProvisioning
+                                  ? "bg-cyan-400"
+                                  : "bg-zinc-500"
+                              )}
+                            />
+                            {displayStatus}
+                          </span>
+                        </td>
+
+                        {/* Disciplined Actions & Console */}
+                        <td className="py-3.5 pl-3 pr-5 align-middle text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {vps.status !== 'TERMINATED' ? (
-                              <Link
-                                href={`/dashboard/vps/${vps.id}`}
+                            {/* Contextual Power Control Group */}
+                            {!isRunning ? (
+                              <button
+                                onClick={() =>
+                                  setConfirmModal({ vpsId: vps.id, action: "start", hostname: vps.hostname })
+                                }
+                                disabled={actionLoading[vps.id] || isSuspended || isTerminated}
                                 className={cn(
-                                  "p-2 rounded-lg transition-colors border shadow-sm font-bold",
-                                  isDark 
-                                    ? "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border-white/10 hover:border-white/20" 
-                                    : "bg-white hover:bg-slate-100 text-slate-800 hover:text-slate-950 border-slate-300"
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all border text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed",
+                                  isDark
+                                    ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
+                                    : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
                                 )}
-                                title="Manage Settings"
+                                title="Start Instance"
                               >
-                                <Settings className="w-4 h-4" />
-                              </Link>
+                                <Play className="w-3.5 h-3.5" />
+                                Start
+                              </button>
                             ) : (
-                              <div 
+                              <div
                                 className={cn(
-                                  "p-2 rounded-lg border cursor-not-allowed opacity-40 font-bold",
-                                  isDark ? "bg-white/5 text-zinc-500 border-white/5" : "bg-slate-100 text-slate-500 border-slate-300"
+                                  "inline-flex items-center rounded-lg border divide-x overflow-hidden",
+                                  isDark
+                                    ? "bg-white/[0.02] border-white/[0.08] divide-white/[0.06]"
+                                    : "bg-white border-slate-200 divide-slate-200 shadow-2xs"
                                 )}
-                                title="Terminated"
                               >
-                                <Settings className="w-4 h-4" />
+                                <button
+                                  onClick={() =>
+                                    setConfirmModal({ vpsId: vps.id, action: "reboot", hostname: vps.hostname })
+                                  }
+                                  disabled={actionLoading[vps.id] || isTerminated}
+                                  className={cn(
+                                    "p-1.5 transition-colors disabled:opacity-40",
+                                    isDark
+                                      ? "text-zinc-400 hover:text-cyan-400 hover:bg-white/[0.05]"
+                                      : "text-slate-600 hover:text-cyan-700 hover:bg-slate-50"
+                                  )}
+                                  title="Reboot Instance"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    setConfirmModal({ vpsId: vps.id, action: "shutdown", hostname: vps.hostname })
+                                  }
+                                  disabled={actionLoading[vps.id] || isTerminated}
+                                  className={cn(
+                                    "p-1.5 transition-colors disabled:opacity-40",
+                                    isDark
+                                      ? "text-zinc-400 hover:text-amber-400 hover:bg-white/[0.05]"
+                                      : "text-slate-600 hover:text-amber-600 hover:bg-slate-50"
+                                  )}
+                                  title="Graceful Shutdown"
+                                >
+                                  <Power className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    setConfirmModal({ vpsId: vps.id, action: "stop", hostname: vps.hostname })
+                                  }
+                                  disabled={actionLoading[vps.id] || isTerminated}
+                                  className={cn(
+                                    "p-1.5 transition-colors disabled:opacity-40",
+                                    isDark
+                                      ? "text-zinc-400 hover:text-rose-400 hover:bg-white/[0.05]"
+                                      : "text-slate-600 hover:text-rose-600 hover:bg-slate-50"
+                                  )}
+                                  title="Force Stop (Power Off)"
+                                >
+                                  <Square className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             )}
-                            <button
-                              onClick={() => setConfirmModal({ vpsId: vps.id, action: "start", hostname: vps.hostname })}
-                              disabled={actionLoading[vps.id] || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
-                              className={cn(
-                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
-                                isDark 
-                                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" 
-                                  : "bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border-emerald-300"
-                              )}
-                              title="Start"
-                            >
-                              <Play className="w-4 h-4" /> <span className="hidden xl:inline">Start</span>
-                            </button>
-                            <button
-                              onClick={() => setConfirmModal({ vpsId: vps.id, action: "shutdown", hostname: vps.hostname })}
-                              disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn(
-                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
-                                isDark 
-                                  ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20" 
-                                  : "bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300"
-                              )}
-                              title="Shutdown"
-                            >
-                              <Power className="w-4 h-4" /> <span className="hidden xl:inline">Shutdown</span>
-                            </button>
-                            <button
-                              onClick={() => setConfirmModal({ vpsId: vps.id, action: "stop", hostname: vps.hostname })}
-                              disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn(
-                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
-                                isDark 
-                                  ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" 
-                                  : "bg-red-100 hover:bg-red-200 text-red-950 border-red-300"
-                              )}
-                              title="Stop"
-                            >
-                              <Square className="w-4 h-4" /> <span className="hidden xl:inline">Stop</span>
-                            </button>
-                            <button
-                              onClick={() => setConfirmModal({ vpsId: vps.id, action: "reboot", hostname: vps.hostname })}
-                              disabled={actionLoading[vps.id] || !isRunning || vps.status === 'TERMINATED'}
-                              className={cn(
-                                "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
-                                isDark 
-                                  ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20" 
-                                  : "bg-blue-100 hover:bg-blue-200 text-blue-950 border-blue-300"
-                              )}
-                              title="Restart"
-                            >
-                              <RotateCcw className="w-4 h-4" /> <span className="hidden xl:inline">Restart</span>
-                            </button>
+
+                            {/* Console Button */}
                             {!vps.kubernetesRole && (
                               <button
                                 onClick={() => openConsole(vps.id)}
-                                disabled={consoleLoading === vps.id || vps.status === 'TERMINATED'}
+                                disabled={consoleLoading === vps.id || isTerminated}
                                 className={cn(
-                                  "flex items-center gap-1.5 p-2 rounded-lg transition-all border shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs",
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all border text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed",
                                   isDark
                                     ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
-                                    : "bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border-cyan-300"
+                                    : "bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border-cyan-200"
                                 )}
-                                title="Console"
+                                title="Launch Web VNC Console"
                               >
-                                {consoleLoading === vps.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Terminal className="w-4 h-4" />}
+                                {consoleLoading === vps.id ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Terminal className="w-3.5 h-3.5" />
+                                )}
                                 <span className="hidden xl:inline">Console</span>
                               </button>
+                            )}
+
+                            {/* Manage Button */}
+                            {!isTerminated ? (
+                              <Link
+                                href={`/dashboard/vps/${vps.id}`}
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors border text-xs font-semibold",
+                                  isDark
+                                    ? "bg-white/[0.03] hover:bg-white/[0.07] text-zinc-200 hover:text-white border-white/[0.08]"
+                                    : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200 shadow-2xs"
+                                )}
+                                title="Instance Settings & Details"
+                              >
+                                <Settings className="w-3.5 h-3.5" />
+                                <span className="hidden xl:inline">Manage</span>
+                              </Link>
+                            ) : (
+                              <div
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border cursor-not-allowed opacity-40 text-xs font-semibold",
+                                  isDark
+                                    ? "bg-white/[0.02] text-zinc-500 border-white/[0.05]"
+                                    : "bg-slate-100 text-slate-400 border-slate-200"
+                                )}
+                                title="Terminated"
+                              >
+                                <Settings className="w-3.5 h-3.5" />
+                              </div>
                             )}
                           </div>
                         </td>
@@ -594,95 +1013,159 @@ export default function MyVpsPage() {
             </table>
           </div>
 
-          <div className={cn("px-6 py-2 border-t", isDark ? "border-white/5 bg-black/20" : "border-slate-300 bg-slate-50")}>
-            {totalPages > 1 && (
-              <div className="py-2">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )}
-          </div>
+          {/* Pagination Footer */}
+          {totalPages > 1 && (
+            <div
+              className={cn(
+                "px-5 py-3 border-t",
+                isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
+              )}
+            >
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            </div>
+          )}
         </div>
       )}
 
-      {/* Confirmation Modal */}
+      {/* Single Instance Action Confirmation Modal */}
       {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200">
-          <div className={cn("border w-full max-w-sm rounded-3xl p-6 shadow-2xl relative", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300")}>
-            <button onClick={() => setConfirmModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
-              <XCircle className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "border w-full max-w-sm rounded-2xl p-5 shadow-2xl relative",
+              isDark ? "bg-[#0a0a0c] border-white/[0.1]" : "bg-white border-slate-200"
+            )}
+          >
+            <button
+              onClick={() => setConfirmModal(null)}
+              className={cn(
+                "absolute top-4 right-4 p-1 rounded-lg transition-colors",
+                isDark ? "text-zinc-500 hover:text-white hover:bg-white/[0.06]" : "text-slate-400 hover:text-slate-900"
+              )}
+            >
+              <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
-                confirmModal.action === "start" ? (isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-100 text-cyan-700") :
-                  confirmModal.action === "stop" ? (isDark ? "bg-red-500/10 text-red-400" : "bg-red-100 text-red-700") :
-                    confirmModal.action === "shutdown" ? (isDark ? "bg-amber-500/10 text-amber-400" : "bg-amber-100 text-amber-700") :
-                      (isDark ? "bg-blue-500/10 text-blue-400" : "bg-blue-100 text-blue-700")
-              )}>
-                <AlertTriangle className="w-5 h-5" />
+            <div className="flex items-center gap-3 mb-3.5">
+              <div
+                className={cn(
+                  "w-9 h-9 rounded-xl flex items-center justify-center border",
+                  confirmModal.action === "start"
+                    ? isDark
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                    : confirmModal.action === "stop"
+                    ? isDark
+                      ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                      : "bg-rose-50 border-rose-200 text-rose-700"
+                    : confirmModal.action === "shutdown"
+                    ? isDark
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                      : "bg-amber-50 border-amber-200 text-amber-700"
+                    : isDark
+                    ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
+                    : "bg-cyan-50 border-cyan-200 text-cyan-700"
+                )}
+              >
+                <AlertTriangle className="w-4 h-4" />
               </div>
-              <h2 className={cn("text-xl font-bold capitalize", isDark ? "text-white" : "text-slate-950")}>{confirmModal.action} Server</h2>
+              <h2 className={cn("text-base font-bold capitalize", isDark ? "text-white" : "text-slate-900")}>
+                {confirmModal.action} Instance
+              </h2>
             </div>
 
-            <p className={cn("text-sm mb-6 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
-              Are you sure you want to <strong>{confirmModal.action}</strong> the server <strong className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>{confirmModal.hostname}</strong>?
+            <p className={cn("text-xs sm:text-sm mb-5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+              Are you sure you want to <strong>{confirmModal.action}</strong> the server{" "}
+              <strong className={cn("font-mono", isDark ? "text-white" : "text-slate-900")}>
+                {confirmModal.hostname}
+              </strong>
+              ?
               {confirmModal.action === "stop" && (
-                <span className="block mt-2 text-red-500 font-bold">Warning: This is a forced stop. Unsaved data may be lost. Use Shutdown instead for a graceful exit.</span>
+                <span className="block mt-2 text-rose-400 font-medium text-xs">
+                  Warning: Forced power off may cause unsaved data loss. Use Shutdown for a graceful ACPI exit.
+                </span>
               )}
             </p>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2.5">
               <button
                 onClick={() => setConfirmModal(null)}
-                className={cn("px-4 py-2.5 rounded-lg border transition-colors text-sm font-bold", isDark ? "text-zinc-400 border-slate-700 hover:bg-slate-800" : "text-slate-800 border-slate-300 hover:bg-slate-100")}
+                className={cn(
+                  "px-3.5 py-2 rounded-xl border transition-colors text-xs font-semibold",
+                  isDark
+                    ? "text-zinc-300 border-white/[0.08] hover:bg-white/[0.04]"
+                    : "text-slate-700 border-slate-200 hover:bg-slate-50"
+                )}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleAction(confirmModal.vpsId, confirmModal.action)}
                 className={cn(
-                  "px-5 py-2.5 rounded-lg font-bold transition-colors shadow-sm text-sm",
-                  confirmModal.action === "start" ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950" :
-                    confirmModal.action === "stop" ? "bg-red-600 hover:bg-red-500 text-white" :
-                      confirmModal.action === "shutdown" ? "bg-amber-600 hover:bg-amber-500 text-white" :
-                        "bg-blue-600 hover:bg-blue-500 text-white"
+                  "px-4 py-2 rounded-xl font-bold transition-colors text-xs",
+                  confirmModal.action === "start"
+                    ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
+                    : confirmModal.action === "stop"
+                    ? "bg-rose-500 hover:bg-rose-400 text-white"
+                    : confirmModal.action === "shutdown"
+                    ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                    : "bg-cyan-400 hover:bg-cyan-300 text-slate-950"
                 )}
               >
-                Yes, {confirmModal.action}
+                Confirm {confirmModal.action}
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* Action Confirmation Modal */}
+
+      {/* Bulk Action Confirmation Modal */}
       {actionConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-300")}>
-            <div className="flex items-center gap-4 mb-4">
-              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shrink-0", getActionConfig(actionConfirm).bg)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div
+            className={cn(
+              "border rounded-2xl p-5 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200",
+              isDark ? "bg-[#0a0a0c] border-white/[0.1]" : "bg-white border-slate-200"
+            )}
+          >
+            <div className="flex items-start gap-3.5 mb-4">
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                  getActionConfig(actionConfirm).bg
+                )}
+              >
                 {getActionConfig(actionConfirm).icon}
               </div>
               <div>
-                <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-950")}>{getActionConfig(actionConfirm).title} {selectedVps.length} VPS {selectedVps.length > 1 ? 'Instances' : 'Instance'}</h3>
-                <p className={cn("text-sm mt-1 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>{getActionConfig(actionConfirm).desc}</p>
+                <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  {getActionConfig(actionConfirm).title} {selectedVps.length} VPS{" "}
+                  {selectedVps.length > 1 ? "Instances" : "Instance"}
+                </h3>
+                <p className={cn("text-xs sm:text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  {getActionConfig(actionConfirm).desc}
+                </p>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 mt-6">
+            <div className="flex items-center justify-end gap-2.5 mt-5">
               <button
                 onClick={() => setActionConfirm(null)}
-                className={cn("px-4 py-2 rounded-lg text-sm font-bold border transition-colors", isDark ? "text-zinc-300 border-slate-700 hover:bg-slate-800" : "text-slate-800 border-slate-300 hover:bg-slate-100")}
+                className={cn(
+                  "px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors",
+                  isDark
+                    ? "text-zinc-300 border-white/[0.08] hover:bg-white/[0.04]"
+                    : "text-slate-700 border-slate-200 hover:bg-slate-50"
+                )}
               >
                 Cancel
               </button>
               <button
                 onClick={executeAction}
-                className={cn("px-5 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm", getActionConfig(actionConfirm).buttonClass)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-colors",
+                  getActionConfig(actionConfirm).buttonClass
+                )}
               >
-                Yes, {getActionConfig(actionConfirm).title}
+                Confirm {getActionConfig(actionConfirm).title}
               </button>
             </div>
           </div>
