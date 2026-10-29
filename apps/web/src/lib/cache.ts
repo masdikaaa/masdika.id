@@ -58,8 +58,8 @@ export async function getCachedData<T>(
       const cached = await redis.get(key);
       if (cached) {
         const parsed = JSON.parse(cached) as T;
-        // Populate L1 cache (15s micro-cache or 20% of TTL)
-        const l1Ttl = Math.min(15000, ttlSeconds * 200);
+        // Populate L1 cache (up to 60s in RAM micro-cache)
+        const l1Ttl = Math.min(60000, ttlSeconds * 500);
         l1Cache.set(key, { data: parsed, expiresAt: now + l1Ttl });
         return parsed;
       }
@@ -76,8 +76,8 @@ export async function getCachedData<T>(
         const freshData = await fetcher();
 
         if (freshData !== undefined && freshData !== null) {
-          // Store in L1 Memory Cache
-          const l1Ttl = Math.min(15000, ttlSeconds * 200);
+          // Store in L1 Memory Cache (up to 60s in RAM)
+          const l1Ttl = Math.min(60000, ttlSeconds * 500);
           l1Cache.set(key, { data: freshData, expiresAt: Date.now() + l1Ttl });
 
           // Store in L2 Redis Cache

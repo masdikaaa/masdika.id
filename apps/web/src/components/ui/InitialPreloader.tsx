@@ -19,40 +19,17 @@ export function InitialPreloader() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    const startTime = Date.now();
-    const minDisplayTime = 550; // Smooth elegant presence on initial cold load
+    // React has hydrated and DOM is rendered. Keep spinner visible for a brief,
+    // crisp moment (350ms) so the animation is clearly enjoyed, then fade out snappy.
+    const displayTimer = setTimeout(() => {
+      setFading(true);
+      const unmountTimer = setTimeout(() => {
+        setHidden(true);
+      }, 200); // 200ms snappy fade-out transition
+      return () => clearTimeout(unmountTimer);
+    }, 350);
 
-    const finishLoading = () => {
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, minDisplayTime - elapsed);
-
-      const dismissTimer = setTimeout(() => {
-        setFading(true);
-        const unmountTimer = setTimeout(() => {
-          setHidden(true);
-        }, 350); // Matches transition duration
-        return () => clearTimeout(unmountTimer);
-      }, remaining);
-
-      return () => clearTimeout(dismissTimer);
-    };
-
-    if (document.readyState === "complete") {
-      const cleanup = finishLoading();
-      return cleanup;
-    } else {
-      const handleLoad = () => {
-        finishLoading();
-      };
-      window.addEventListener("load", handleLoad);
-      // Safety fallback in case external trackers or heavy resources delay window 'load'
-      const safetyTimer = setTimeout(finishLoading, 2500);
-
-      return () => {
-        window.removeEventListener("load", handleLoad);
-        clearTimeout(safetyTimer);
-      };
-    }
+    return () => clearTimeout(displayTimer);
   }, []);
 
   if (hidden) {
@@ -63,7 +40,7 @@ export function InitialPreloader() {
     <div
       aria-hidden="true"
       className={cn(
-        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-300 ease-out",
+        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-200 ease-out",
         "bg-[#f8fafb] dark:bg-[#000000]",
         fading ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
       )}
