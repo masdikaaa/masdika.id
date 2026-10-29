@@ -50,7 +50,7 @@ export function HeroAvatarFrame({
       className={cn(
         "relative w-full mx-auto flex items-end justify-center select-none",
         isPortrait
-          ? "max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] h-[420px] sm:h-[500px] lg:h-[600px]"
+          ? "max-w-[320px] sm:max-w-[420px] lg:max-w-[500px] h-[350px] sm:h-[480px] lg:h-[600px]"
           : "max-w-[360px] sm:max-w-[460px] lg:max-w-[520px] xl:max-w-[560px] h-[380px] sm:h-[440px] lg:h-[480px]",
         className
       )}

@@ -8,7 +8,8 @@ export const getPublicSettings = async () => {
   const safeKeys = [
     'social_github', 'social_linkedin', 'social_twitter', 'social_instagram', 
     'social_youtube', 'site_name', 'site_title', 'site_description', 
-    'contact_email', 'contact_location', 'contact_phone'
+    'contact_email', 'contact_location', 'contact_phone',
+    'hero_title', 'hero_description', 'hero_typing_text', 'cv_url'
   ];
   
   try {
