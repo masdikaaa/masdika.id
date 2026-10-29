@@ -190,13 +190,7 @@ export default function ServicesPage() {
 
         {/* ── 1. PRODUCTS SECTION (Sama persis patokan Home) ────────────────── */}
         <section id="products-section" className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Our Products
             </span>
@@ -206,18 +200,12 @@ export default function ServicesPage() {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               High-performance, fully managed digital products engineered to help your applications scale seamlessly with uncompromising reliability.
             </p>
-          </motion.div>
+          </div>
 
           {/* Products Grid */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {PRODUCTS.map((prod, i) => (
-              <motion.div variants={item} key={i} className="h-full">
+              <div key={i} className="h-full">
                 <Link
                   href={prod.href}
                   className="block group h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.1)] transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
@@ -256,20 +244,14 @@ export default function ServicesPage() {
                     </div>
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </section>
 
         {/* ── 2. TECHNICAL EXPERTISE SECTION (Sama persis patokan Home) ────── */}
         <section className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               What I Do
             </span>
@@ -279,18 +261,12 @@ export default function ServicesPage() {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Deep engineering expertise across multi-cloud infrastructure, container automation, and database tuning to ensure high availability.
             </p>
-          </motion.div>
+          </div>
 
           {/* Expertise Grid */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {EXPERTISE.map((exp, i) => (
-              <motion.div variants={item} key={i} className="h-full">
+              <div key={i} className="h-full">
                 <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.1)] transition-all duration-300 hover:-translate-y-1 p-6 flex flex-col justify-between h-full group">
                   <div>
                     <div className="flex items-center justify-between mb-5">
@@ -302,7 +278,7 @@ export default function ServicesPage() {
                       <div className="relative w-11 h-11 flex items-center justify-center">
                         <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 36 36">
                           <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" className="text-slate-100 dark:text-white/5" strokeWidth="3" />
-                          <motion.circle
+                          <circle
                             cx="18"
                             cy="18"
                             r="15"
@@ -310,10 +286,7 @@ export default function ServicesPage() {
                             stroke="currentColor"
                             strokeWidth="3"
                             strokeDasharray="94.2"
-                            initial={{ strokeDashoffset: 94.2 }}
-                            whileInView={{ strokeDashoffset: 94.2 - (94.2 * exp.percentage) / 100 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            strokeDashoffset={94.2 - (94.2 * exp.percentage) / 100}
                             className="text-cyan-500 dark:text-cyan-400"
                             strokeLinecap="round"
                           />
@@ -333,19 +306,14 @@ export default function ServicesPage() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </section>
 
         {/* ── 3. WORKING PROCESS SECTION (Sama persis patokan Home) ─────────── */}
         <section className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Workflow
             </span>
@@ -355,7 +323,7 @@ export default function ServicesPage() {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               A disciplined, three-stage engineering methodology designed to de-risk projects, automate operations, and scale with confidence.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-[var(--border-primary)] z-0" />

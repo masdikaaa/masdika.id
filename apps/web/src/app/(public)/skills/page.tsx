@@ -173,13 +173,7 @@ export default function SkillsPage() {
 
         {/* ── 1. TECHNICAL PROFICIENCIES SECTION ──────────────────────── */}
         <section id="skills-grid" className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Core Competencies
             </span>
@@ -189,18 +183,12 @@ export default function SkillsPage() {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Hands-on experience and verified proficiency across enterprise cloud providers, container orchestration, and continuous delivery systems.
             </p>
-          </motion.div>
+          </div>
 
           {/* Categories Grid */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8"
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             {categories.map((category, i) => (
-              <motion.div variants={item} key={i}>
+              <div key={i}>
                 <div className="h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col justify-between">
                   <div className="mb-6 pb-4 border-b border-[var(--border-primary)] flex items-center justify-between">
                     <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
@@ -240,11 +228,8 @@ export default function SkillsPage() {
 
                         {/* Progress Bar with Cyan Tone */}
                         <div className="h-2 rounded-full overflow-hidden bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            whileInView={{ width: `${skill.level}%` }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1.2, ease: "easeOut", delay: 0.05 * j }}
+                          <div
+                            style={{ width: `${skill.level}%` }}
                             className="h-full rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400"
                           />
                         </div>
@@ -252,20 +237,14 @@ export default function SkillsPage() {
                     ))}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </section>
 
         {/* ── 2. PROFESSIONAL TRAITS SECTION ─────────────────────────── */}
         <section className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Engineering Mindset
             </span>
@@ -275,7 +254,7 @@ export default function SkillsPage() {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Core operating principles that guide high-impact engineering collaboration, continuous growth, and mission-critical execution.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -284,13 +263,8 @@ export default function SkillsPage() {
               { label: "Adaptability", desc: "Rapid adoption of emerging tools, cloud patterns, and evolving architectures.", icon: Lightbulb },
               { label: "Goal-Oriented", desc: "Laser focus on delivering measurable uptime, cost efficiency, and business velocity.", icon: Target }
             ].map((trait, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                variants={item}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
                 className="h-full"
               >
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
@@ -304,7 +278,7 @@ export default function SkillsPage() {
                     {trait.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>
@@ -314,13 +288,7 @@ export default function SkillsPage() {
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
             
             {/* Left Header Column */}
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="w-full lg:w-1/3"
-            >
+            <div className="w-full lg:w-1/3">
               <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
                 Milestones &amp; Accreditations
               </span>
@@ -338,7 +306,7 @@ export default function SkillsPage() {
               >
                 Hire Cloud Expertise
               </Button>
-            </motion.div>
+            </div>
             
             {/* Right Certifications Grid */}
             <div className="w-full lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -346,12 +314,8 @@ export default function SkillsPage() {
                 const IconComponent = (LucideIcons as any)[cert.icon] || Award;
                 
                 return (
-                  <motion.div 
+                  <div 
                     key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
                     className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors p-6 flex flex-col justify-between group"
                   >
                     <div>
@@ -370,7 +334,7 @@ export default function SkillsPage() {
                         {cert.org}
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               }) : (
                 <div className="col-span-2 text-center py-16 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">

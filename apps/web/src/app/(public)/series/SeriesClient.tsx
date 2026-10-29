@@ -179,13 +179,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
 
         {/* ── 1. SERIES CATALOG SECTION ──────────────────────────────── */}
         <section id="series-catalog" className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, margin: "100px" }}
-            className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Curated Courses
             </span>
@@ -195,7 +189,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Step-by-step video &amp; article series structured to accelerate your mastery in cloud architecture, container management, and DevOps pipelines.
             </p>
-          </motion.div>
+          </div>
 
           {/* Controls: Search Bar & Level Filters */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-10 pb-6 border-b border-[var(--border-primary)]">
@@ -246,12 +240,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
 
           {/* Series Grid or Premium Empty State */}
           {filteredSeries.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 sm:p-14 text-center max-w-xl mx-auto shadow-sm"
-            >
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 sm:p-14 text-center max-w-xl mx-auto shadow-sm">
               <div className="w-16 h-16 rounded-2xl mx-auto mb-6 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
                 <GraduationCap className="w-8 h-8" strokeWidth={1.75} />
               </div>
@@ -295,17 +284,12 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                   </Button>
                 )}
               </div>
-            </motion.div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {filteredSeries.map((s, idx) => (
-                <motion.div
+              {filteredSeries.map((s) => (
+                <div
                   key={s.id}
-                  variants={item}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, margin: "100px" }}
-                  transition={{ duration: 0.5, delay: idx * 0.08, ease: "easeOut" }}
                   className="h-full"
                 >
                   <article className="rounded-xl lg:rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-300 overflow-hidden group flex flex-col h-full hover:shadow-xl hover:-translate-y-1">
@@ -387,7 +371,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                     </div>
 
                   </article>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -395,13 +379,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
 
         {/* ── 2. CURRICULUM TRACKS (Identik dengan Section 2 Vacancies) ── */}
         <section id="curriculum" className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, margin: "100px" }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Structured Pathways
             </span>
@@ -411,7 +389,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Explore sequential learning journeys designed to take you from foundational syntax to multi-region cloud architecture and bare-metal orchestration.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -436,12 +414,8 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                 desc: "Debian/Ubuntu production hardening, WireGuard tunnels, database replication, and zero-trust perimeter access."
               }
             ].map((track, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "100px" }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
                 className="h-full"
               >
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
@@ -455,7 +429,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                     {track.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>

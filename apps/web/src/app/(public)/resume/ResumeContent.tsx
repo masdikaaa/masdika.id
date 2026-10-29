@@ -94,11 +94,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
 
             {/* Main Content Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+            <div
               className="md:col-span-2 lg:col-span-3 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-7 sm:p-10 lg:p-12 hover:border-cyan-500/40 transition-colors shadow-sm flex flex-col justify-between"
             >
               <div className="relative z-10">
@@ -127,14 +123,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   </Button>
                 </div>
               )}
-            </motion.div>
+            </div>
 
             {/* Years of Experience Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+            <div
               className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col items-center justify-center text-center hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div className="text-6xl sm:text-7xl font-black text-[var(--text-primary)] mb-2 tracking-tight">
@@ -143,14 +135,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--text-muted)] leading-relaxed">
                 Years Of<br />Experience
               </p>
-            </motion.div>
+            </div>
 
             {/* Business Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+            <div
               className="md:col-span-1 lg:col-span-2 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div className="flex items-center gap-4 mb-5">
@@ -162,14 +150,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               <p className="text-sm sm:text-base leading-relaxed text-[var(--text-secondary)]">
                 Each one showcases my approach to solving complex architectural challenges effectively and efficiently, delivering solid business value.
               </p>
-            </motion.div>
+            </div>
 
             {/* Partners Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+            <div
               className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div className="flex items-center gap-4 mb-5">
@@ -181,14 +165,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               <p className="text-sm sm:text-base leading-relaxed text-[var(--text-secondary)]">
                 Cloud consulting consultants provide expert advice and strategic guidance.
               </p>
-            </motion.div>
+            </div>
 
             {/* Cloud Deployments Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+            <div
               className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex items-center justify-between gap-4 hover:border-cyan-500/40 transition-colors shadow-sm"
             >
               <div>
@@ -202,7 +182,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               <div className="w-14 h-14 rounded-full border border-dashed border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
                 <Lock className="w-6 h-6" />
               </div>
-            </motion.div>
+            </div>
 
           </div>
         </section>
@@ -220,13 +200,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
 
           <TechStackMarquee />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            viewport={{ once: true, margin: "-50px" }}
-            className="flex justify-center mt-12"
-          >
+          <div className="flex justify-center mt-12">
             <Button
               variant="primary"
               size="md"
@@ -235,7 +209,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
             >
               View All Skills
             </Button>
-          </motion.div>
+          </div>
         </section>
 
         {/* ── 3. EXPERIENCE & EDUCATION SECTION ───────────────────────── */}

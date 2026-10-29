@@ -104,13 +104,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
 
         {/* ── 1. EVENTS GRID SECTION ─────────────────────────────────── */}
         <section id="events-grid" className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Scheduled Sessions
             </span>
@@ -120,20 +114,14 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Filter and search across technical webinars, architecture masterclasses, and open conference sessions.
             </p>
-          </motion.div>
+          </div>
 
           <OpportunityGrid opportunities={opportunities} emptyType="EVENT" />
         </section>
 
         {/* ── 2. SESSION FORMATS SECTION ─────────────────────────────── */}
         <section className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Session Formats
             </span>
@@ -143,7 +131,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Tailored event formats designed for high audience engagement, actionable takeaways, and practical engineering skills.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -168,13 +156,8 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
                 desc: "Open floor sessions answering community questions on career growth, cloud certifications, and tooling."
               }
             ].map((format, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                variants={item}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
                 className="h-full"
               >
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
@@ -188,7 +171,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
                     {format.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>

@@ -97,13 +97,7 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
 
         {/* ── 1. VACANCIES GRID SECTION ──────────────────────────────── */}
         <section id="vacancies-grid" className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Active Listings
             </span>
@@ -113,20 +107,14 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Browse and apply for high-impact engineering opportunities across cloud infrastructure, site reliability, and DevOps automation.
             </p>
-          </motion.div>
+          </div>
 
           <OpportunityGrid opportunities={opportunities} emptyType="JOBS" />
         </section>
 
         {/* ── 2. FOCUS ENGINEERING DOMAINS ────────────────────────────── */}
         <section className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Target Specialties
             </span>
@@ -136,7 +124,7 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               We focus on roles that demand real-world infrastructure mastery, container orchestration, and automated deployment pipelines.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -161,13 +149,8 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
                 desc: "Hardened Debian, Ubuntu, and RedHat servers, WireGuard VPNs, and production database clustering."
               }
             ].map((domain, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                variants={item}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
                 className="h-full"
               >
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
@@ -181,7 +164,7 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
                     {domain.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>

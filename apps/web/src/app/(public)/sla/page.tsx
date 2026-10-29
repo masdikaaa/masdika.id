@@ -97,12 +97,7 @@ export default function SLAPage() {
             </span>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6 sm:space-y-8 relative z-10"
-          >
+          <div className="space-y-6 sm:space-y-8 relative z-10">
             {/* Section 1 */}
             <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 sm:p-8 shadow-sm hover:border-cyan-500/30 transition-all">
               <div className="flex items-center gap-3.5 mb-4">
@@ -216,7 +211,7 @@ export default function SLAPage() {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
       </div>
