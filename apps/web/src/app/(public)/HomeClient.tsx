@@ -490,7 +490,13 @@ export function HomeClient({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
             {/* Stats column */}
-            <div className="lg:col-span-4 flex flex-col gap-4">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "50px" }}
+              transition={{ duration: 0.7 }}
+              className="lg:col-span-4 flex flex-col gap-4"
+            >
               <div className="rounded-2xl p-10 flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)]">
                 <p className="text-7xl font-black text-[var(--text-primary)] mb-1">4+</p>
                 <p className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
@@ -507,10 +513,16 @@ export function HomeClient({
                   <p className="text-sm text-[var(--text-muted)]">50+ Deployments</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Text column */}
-            <div className="lg:col-span-8 flex flex-col justify-center">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "50px" }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="lg:col-span-8 flex flex-col justify-center"
+            >
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 About Me
               </span>
@@ -537,7 +549,7 @@ export function HomeClient({
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -546,14 +558,19 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="diagonal" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Workflow
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
               My Working Process
             </h2>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
             <div className="hidden md:block absolute top-12 left-[12.5%] right-[12.5%] h-px bg-[var(--border-primary)] z-0" />
@@ -583,7 +600,13 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="center" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Our Products
             </span>
@@ -593,11 +616,17 @@ export function HomeClient({
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Deploy, scale, and manage your applications with our high-performance cloud infrastructure and fully managed services.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "50px" }}
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+          >
             {PRODUCTS.map((prod, i) => (
-              <div key={i} className="h-full">
+              <motion.div variants={item} key={i} className="h-full">
                 <Link
                   href={prod.href}
                   className="block group h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors duration-200"
@@ -635,9 +664,9 @@ export function HomeClient({
                     </div>
                   </div>
                 </Link>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -645,7 +674,13 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
+          >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Support &amp; Infrastructure
             </span>
@@ -655,11 +690,17 @@ export function HomeClient({
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Built on carrier-grade routing, bare-metal server hardware, global edge protection, and battle-tested software architecture.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "50px" }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
+          >
             {INFRASTRUCTURE_STACK.map((infra, idx) => (
-              <div key={infra.name + idx} className="h-full">
+              <motion.div variants={item} key={infra.name + idx} className="h-full">
                 <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 flex flex-col">
                   {/* Top row: Icon box + Category badge */}
                   <div className="flex items-start justify-between gap-3 mb-5">
@@ -682,9 +723,9 @@ export function HomeClient({
                     {infra.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -692,7 +733,13 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="center-wide" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            transition={{ duration: 0.7 }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Expertise
             </span>
@@ -702,7 +749,7 @@ export function HomeClient({
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Leveraging industry-standard tools to build, deploy, and scale robust applications in high-performance cloud environments.
             </p>
-          </div>
+          </motion.div>
 
           <TechStackMarquee />
 
@@ -723,14 +770,19 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="bottom-left" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Solutions
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
               Premium IT Services
             </h2>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
@@ -767,7 +819,12 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16"
+          >
             <div>
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 Projects
@@ -785,7 +842,7 @@ export function HomeClient({
             >
               View All Projects
             </Button>
-          </div>
+          </motion.div>
 
           {portfolioProjects.length === 0 ? (
             <div className="text-center py-20 px-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]">
@@ -906,14 +963,19 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16 px-4">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="text-center max-w-2xl mx-auto mb-16 px-4"
+          >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Feedback
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
               What Clients Say
             </h2>
-          </div>
+          </motion.div>
 
           <div className="relative w-full overflow-hidden flex">
             <div className="absolute top-0 left-0 w-16 h-full z-10 pointer-events-none bg-gradient-to-r from-[var(--background)] to-transparent" />
@@ -985,7 +1047,12 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16"
+          >
             <div>
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 Blog
@@ -1003,7 +1070,7 @@ export function HomeClient({
             >
               Read All
             </Button>
-          </div>
+          </motion.div>
 
           {latestPosts.length === 0 ? (
             <div className="text-center py-20 px-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
@@ -1013,7 +1080,7 @@ export function HomeClient({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {latestPosts.map((post, index) => (
-                <div key={post.id || index} className="h-full">
+                <FadeIn key={post.id || index} delay={index * 0.1} direction="up" className="h-full">
                   <div className="group relative rounded-xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 focus-within:ring-2 focus-within:ring-cyan-500 transition-colors flex flex-col h-full">
                     <Link href={`/blog/${post.slug || "#"}`} className="flex flex-col h-full focus:outline-none">
                       <div className="relative h-48 w-full overflow-hidden shrink-0">
@@ -1063,7 +1130,7 @@ export function HomeClient({
                       </div>
                     </Link>
                   </div>
-                </div>
+                </FadeIn>
               ))}
             </div>
           )}
@@ -1074,7 +1141,13 @@ export function HomeClient({
       <section className="py-20 lg:py-28 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            transition={{ duration: 0.7 }}
+            className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm"
+          >
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <div className="mb-8 inline-block">
               <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -1111,7 +1184,7 @@ export function HomeClient({
                 View Pricing
               </Button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

@@ -4,7 +4,15 @@ import redis from './redis';
 // In-memory lock to prevent Cache Breakdown (Hot Key) on the same Node instance
 let pendingFetch: Promise<any> | null = null;
 
+// L1 In-Memory RAM micro-cache (~0.001ms response time)
+let l1SettingsCache: { data: any; expiresAt: number } | null = null;
+
 export const getPublicSettings = async () => {
+  const now = Date.now();
+  if (l1SettingsCache && l1SettingsCache.expiresAt > now) {
+    return l1SettingsCache.data;
+  }
+
   const safeKeys = [
     'social_github', 'social_linkedin', 'social_twitter', 'social_instagram', 
     'social_youtube', 'site_name', 'site_title', 'site_description', 
@@ -17,7 +25,11 @@ export const getPublicSettings = async () => {
     if (redis) {
       try {
         const cached = await redis.get('public_settings');
-        if (cached) return JSON.parse(cached);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          l1SettingsCache = { data: parsed, expiresAt: now + 60000 };
+          return parsed;
+        }
       } catch (redisError) {
         console.warn("[Cache Error] Redis read failed, falling back to DB:", (redisError as Error).message);
       }
@@ -48,6 +60,7 @@ export const getPublicSettings = async () => {
             }
           }
 
+          l1SettingsCache = { data: settings, expiresAt: Date.now() + 60000 };
           return settings;
         } finally {
           // Always clear the lock when done so future requests can fetch fresh data

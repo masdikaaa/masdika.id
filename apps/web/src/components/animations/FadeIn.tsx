@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface FadeInProps {
@@ -11,13 +12,46 @@ interface FadeInProps {
 }
 
 /**
- * Lightweight FadeIn wrapper.
- * Renders content immediately without hiding it behind opacity:0,
- * guaranteeing instant visibility on mobile and desktop scroll.
+ * High-performance, lightweight FadeIn animation.
+ * Uses positive viewport margin (40px) to trigger smoothly BEFORE
+ * entering the screen, guaranteeing zero lag or blank cut-offs on mobile and desktop.
  */
 export function FadeIn({
   children,
+  direction = "up",
+  delay = 0,
+  duration = 0.45,
   className = "",
 }: FadeInProps) {
-  return <div className={className}>{children}</div>;
+  const directions = {
+    up: { y: 20, x: 0 },
+    down: { y: -20, x: 0 },
+    left: { x: 20, y: 0 },
+    right: { x: -20, y: 0 },
+    none: { x: 0, y: 0 },
+  };
+
+  return (
+    <motion.div
+      initial={{
+        opacity: 0,
+        ...directions[direction],
+      }}
+      whileInView={{
+        opacity: 1,
+        x: 0,
+        y: 0,
+      }}
+      viewport={{ once: true, margin: "40px" }}
+      transition={{
+        duration,
+        delay,
+        ease: [0.22, 1, 0.36, 1], // Smooth cubic-bezier
+      }}
+      className={className}
+      style={{ willChange: "transform, opacity" }}
+    >
+      {children}
+    </motion.div>
+  );
 }
