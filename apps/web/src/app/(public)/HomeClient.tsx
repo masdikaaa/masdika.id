@@ -34,6 +34,7 @@ import {
   SiPostgresql,
 } from "react-icons/si";
 import { FcGoogle } from "react-icons/fc";
+import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -361,7 +362,12 @@ export function HomeClient({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
             {/* Left – text */}
-            <div className="max-w-2xl relative z-30 order-2 lg:order-1">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30 order-2 lg:order-1"
+            >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -426,10 +432,14 @@ export function HomeClient({
                   View Resume
                 </Button>
               </div>
-            </div>
-
+            </motion.div>
             {/* Right – hero image with smooth grounded bottom fade */}
-            <div className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+              className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2"
+            >
               <HeroAvatarFrame
                 imageSrc="/masdika.webp"
                 imageAlt="Masdika – Cloud Engineer"
@@ -444,7 +454,7 @@ export function HomeClient({
                   { icon: SiKubernetes, label: "Kubernetes", value: "Mastery" },
                 ]}
               />
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
