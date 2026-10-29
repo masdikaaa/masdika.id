@@ -5,31 +5,51 @@ import { cn } from "@/lib/utils";
 
 /**
  * Initial Preloader Component
- * Ensures the signature PremiumLoader is displayed instantly on initial page load / hard reload
- * across both mobile (iPhone/Android) and desktop devices.
+ * Ensures the signature PremiumLoader is displayed until the page and DOM content
+ * are genuinely loaded and ready across mobile (iPhone/Android) and desktop devices.
  * 
- * Safety & Performance Highlights:
- * - Managed purely via CSS opacity and display to NEVER conflict with React reconciliation.
+ * Safety & Reliability Highlights:
+ * - Dismisses ONLY after `document.readyState === 'complete'` / `window.load` and React mount.
+ * - Non-destructive CSS opacity/display toggles (never breaks React 19 reconciliation).
  * - Uses dynamic viewport height (100dvh) for dead-center alignment on iPhone Safari.
- * - Perfectly balanced tracking (pl-[0.4em]) eliminates horizontal offsets.
- * - Inline fallback script toggles styles only (never removes DOM nodes).
+ * - Perfect balanced tracking (pl-[0.4em]) eliminates horizontal offsets.
  */
 export function InitialPreloader() {
   const [fading, setFading] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    // Dismiss gracefully once React is hydrated, keeping the branded spinner visible
-    // for a crisp, snappy duration (600ms) before fading out.
-    const displayTimer = setTimeout(() => {
-      setFading(true);
-      const hideTimer = setTimeout(() => {
-        setHidden(true);
-      }, 300);
-      return () => clearTimeout(hideTimer);
-    }, 600);
+    let fadeTimer: NodeJS.Timeout;
+    let hideTimer: NodeJS.Timeout;
 
-    return () => clearTimeout(displayTimer);
+    const dismiss = () => {
+      // Allow brief moment for branded spinner to finish gracefully
+      fadeTimer = setTimeout(() => {
+        setFading(true);
+        hideTimer = setTimeout(() => {
+          setHidden(true);
+        }, 350);
+      }, 400);
+    };
+
+    if (document.readyState === "complete") {
+      dismiss();
+    } else {
+      window.addEventListener("load", dismiss, { once: true });
+      // Safety ceiling: never keep user stuck longer than 4s even on broken networks
+      const maxWaitTimer = setTimeout(dismiss, 4000);
+      return () => {
+        window.removeEventListener("load", dismiss);
+        clearTimeout(maxWaitTimer);
+        clearTimeout(fadeTimer);
+        clearTimeout(hideTimer);
+      };
+    }
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
   return (
@@ -37,7 +57,7 @@ export function InitialPreloader() {
       id="initial-preloader"
       aria-hidden="true"
       className={cn(
-        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-300 ease-out",
+        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-350 ease-out",
         "bg-[#f8fafb] dark:bg-[#000000]",
         fading ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
       )}
@@ -100,22 +120,28 @@ export function InitialPreloader() {
         </div>
       </div>
 
-      {/* Lightweight self-dismiss script ensures fast 1-2s transition without mutating DOM tree */}
+      {/* Lightweight self-dismiss script ensures fast transition ONLY when content is ready */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              var p = document.getElementById('initial-preloader');
-              if (!p) return;
-              setTimeout(function() {
-                if (p) {
-                  p.style.opacity = '0';
-                  p.style.pointerEvents = 'none';
-                  setTimeout(function() {
-                    if (p) p.style.display = 'none';
-                  }, 300);
-                }
-              }, 650);
+              function dismissLoader() {
+                var p = document.getElementById('initial-preloader');
+                if (!p) return;
+                p.style.opacity = '0';
+                p.style.pointerEvents = 'none';
+                setTimeout(function() {
+                  if (p) p.style.display = 'none';
+                }, 350);
+              }
+              if (document.readyState === 'complete') {
+                setTimeout(dismissLoader, 450);
+              } else {
+                window.addEventListener('load', function() {
+                  setTimeout(dismissLoader, 400);
+                });
+                setTimeout(dismissLoader, 4000);
+              }
             })();
           `,
         }}

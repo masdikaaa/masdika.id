@@ -97,7 +97,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${initialTheme} overflow-x-clip`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased ${initialTheme}`}
       suppressHydrationWarning
     >
       <head>
@@ -121,11 +121,11 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground overflow-x-clip">
+      <body suppressHydrationWarning className="min-h-screen flex flex-col bg-background text-foreground">
         <ThemeProvider initialTheme={initialTheme}>
           <InitialPreloader />
           <Tracker />
-          <main className="flex-1 flex flex-col">
+          <main className="flex-1 flex flex-col overflow-x-hidden">
             {children}
           </main>
           <AIChatWrapper />

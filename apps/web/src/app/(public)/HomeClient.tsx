@@ -493,7 +493,7 @@ export function HomeClient({
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "50px" }}
+              viewport={{ once: true, amount: "some" }}
               transition={{ duration: 0.7 }}
               className="lg:col-span-4 flex flex-col gap-4"
             >
@@ -519,7 +519,7 @@ export function HomeClient({
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "50px" }}
+              viewport={{ once: true, amount: "some" }}
               transition={{ duration: 0.7, delay: 0.15 }}
               className="lg:col-span-8 flex flex-col justify-center"
             >
@@ -561,7 +561,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
@@ -604,7 +604,7 @@ export function HomeClient({
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
@@ -622,7 +622,7 @@ export function HomeClient({
             variants={container}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
           >
             {PRODUCTS.map((prod, i) => (
@@ -678,7 +678,7 @@ export function HomeClient({
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
           >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
@@ -696,7 +696,7 @@ export function HomeClient({
             variants={container}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
           >
             {INFRASTRUCTURE_STACK.map((infra, idx) => (
@@ -736,7 +736,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             transition={{ duration: 0.7 }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
@@ -773,7 +773,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
@@ -822,7 +822,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16"
           >
             <div>
@@ -966,7 +966,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="text-center max-w-2xl mx-auto mb-16 px-4"
           >
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
@@ -1050,7 +1050,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16"
           >
             <div>
@@ -1144,7 +1144,7 @@ export function HomeClient({
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "50px" }}
+            viewport={{ once: true, amount: "some" }}
             transition={{ duration: 0.7 }}
             className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm"
           >

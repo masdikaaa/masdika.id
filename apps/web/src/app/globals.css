@@ -213,7 +213,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
-  overflow-x: clip;
   transition: background-color 0.3s ease, color 0.3s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
