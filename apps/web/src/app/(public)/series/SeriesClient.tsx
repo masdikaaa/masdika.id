@@ -50,6 +50,23 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
 };
 
+function SeriesThumbnail({ src, alt }: { src?: string | null; alt: string }) {
+  const [imgError, setImgError] = useState(false);
+  const finalSrc = !imgError && src ? src : "/list-episodes.webp";
+
+  return (
+    <Image
+      src={finalSrc}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      unoptimized={true}
+      onError={() => setImgError(true)}
+      className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
+    />
+  );
+}
+
 export default function SeriesClient({ initialSeries = [] }: { initialSeries?: SeriesItem[] }) {
   const [seriesList] = useState<SeriesItem[]>(initialSeries);
   const [searchQuery, setSearchQuery] = useState("");
@@ -309,20 +326,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                       href={`/series/${s.slug}`}
                       className="aspect-[16/10] relative overflow-hidden bg-[var(--surface-secondary)] block cursor-pointer"
                     >
-                      {s.image ? (
-                        <Image
-                          src={s.image}
-                          alt={s.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          unoptimized={true}
-                          className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[var(--surface-secondary)] text-[var(--text-muted)]">
-                          <BookOpen className="w-10 h-10 opacity-30" />
-                        </div>
-                      )}
+                      <SeriesThumbnail src={s.image} alt={s.title} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70" />
 
                       {/* Level Badge Floating Top Left */}
@@ -331,8 +335,8 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                       </div>
 
                       {/* Episodes Count Floating Bottom Right */}
-                      <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 text-white border border-white/10 backdrop-blur-md text-xs font-semibold shadow-md">
-                        <Play className="w-3 h-3 text-cyan-400 fill-cyan-400" />
+                      <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 text-slate-800 border border-slate-200/80 dark:bg-slate-950/80 dark:text-white dark:border-white/10 backdrop-blur-md text-xs font-semibold shadow-md">
+                        <Play className="w-3 h-3 text-cyan-600 dark:text-cyan-400 fill-cyan-600 dark:fill-cyan-400" />
                         <span>{s.episodes?.length ?? 0} Episodes</span>
                       </div>
                     </Link>

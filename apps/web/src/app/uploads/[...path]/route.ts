@@ -27,7 +27,13 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    const baseUploadsDir = path.normalize(path.join(process.cwd(), 'public', 'uploads'));
+    let baseUploadsDir = path.normalize(path.join(process.cwd(), 'public', 'uploads'));
+    if (!fs.existsSync(baseUploadsDir)) {
+      const monorepoWebDir = path.normalize(path.join(process.cwd(), 'apps', 'web', 'public', 'uploads'));
+      if (fs.existsSync(monorepoWebDir)) {
+        baseUploadsDir = monorepoWebDir;
+      }
+    }
     const filePath = path.normalize(path.join(baseUploadsDir, ...resolvedParams.path));
 
     // Prevent directory traversal (Strict Check)

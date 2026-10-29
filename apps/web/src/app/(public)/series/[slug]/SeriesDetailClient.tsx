@@ -22,6 +22,144 @@ import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 
+interface EpisodeCardProps {
+  ep: any;
+  index: number;
+  totalEpisodes: number;
+  seriesSlug: string;
+  seriesImage?: string | null;
+}
+
+function EpisodeCard({ ep, index, totalEpisodes, seriesSlug, seriesImage }: EpisodeCardProps) {
+  const [useFallbackImg, setUseFallbackImg] = useState(false);
+  const [noImg, setNoImg] = useState(false);
+
+  // Preferred image: episode image -> series image -> list-episodes illustration
+  const imageSrc = !noImg
+    ? useFallbackImg
+      ? (seriesImage || "/list-episodes.webp")
+      : (ep.image || seriesImage || "/list-episodes.webp")
+    : null;
+
+  const handleImageError = () => {
+    if (!useFallbackImg) {
+      setUseFallbackImg(true);
+    } else {
+      setNoImg(true);
+    }
+  };
+
+  const showImage = !noImg && !!imageSrc;
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay: index * 0.08, ease: "easeOut" }}
+      className="rounded-xl lg:rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-300 overflow-hidden group flex flex-col h-full hover:shadow-xl hover:-translate-y-1"
+    >
+      {/* Thumbnail */}
+      <Link
+        href={`/series/${seriesSlug}/${ep.slug}`}
+        className="aspect-[16/10] relative overflow-hidden bg-[var(--surface-secondary)] block"
+      >
+        {showImage ? (
+          <>
+            <Image
+              src={imageSrc}
+              alt={ep.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized
+              onError={handleImageError}
+            />
+            {/* Gradient overlay for contrast */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 opacity-70 group-hover:opacity-60 transition-opacity" />
+          </>
+        ) : (
+          /* Solid, opaque placeholder matching site card style */
+          <div className="w-full h-full relative flex flex-col items-center justify-center bg-[var(--surface-secondary)] select-none">
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/[0.04] to-transparent pointer-events-none" />
+
+            <div className="relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-white dark:bg-white/[0.06] border border-black/5 dark:border-white/10 text-cyan-500 dark:text-cyan-400 shadow-sm group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-400">
+              <Play className="w-5 h-5 fill-current ml-0.5" />
+            </div>
+
+            <span className="relative z-10 text-[10px] font-mono font-bold tracking-widest uppercase mt-2.5 text-[var(--text-muted)]">
+              Episode {index + 1}
+            </span>
+          </div>
+        )}
+
+        {/* Floating Episode Badge — Top Left */}
+        <div className="absolute top-3.5 left-3.5 z-10">
+          <Badge variant="brand" size="sm" className="font-mono uppercase shadow-md">
+            EP {String(index + 1).padStart(2, "0")}
+          </Badge>
+        </div>
+
+        {/* Floating Lesson Label — Bottom Right (only displayed over real images, never on placeholder) */}
+        {showImage && (
+          <div className="absolute bottom-3 right-3 z-10">
+            <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-white/95 text-slate-800 border border-slate-200/80 dark:bg-slate-950/80 dark:text-white dark:border-white/10 backdrop-blur-md shadow-xs">
+              Episode {index + 1}
+            </span>
+          </div>
+        )}
+
+        {/* Hover Play Button (when image is present) */}
+        {showImage && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <div className="w-14 h-14 rounded-full bg-cyan-500 text-black flex items-center justify-center shadow-2xl shadow-cyan-500/50 scale-90 group-hover:scale-100 transition-transform duration-300">
+              <Play className="w-6 h-6 fill-current ml-0.5" />
+            </div>
+          </div>
+        )}
+      </Link>
+
+      {/* Card body */}
+      <div className="p-5 sm:p-6 flex flex-col flex-1">
+        {/* Meta row */}
+        <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium mb-3">
+          <Calendar className="w-3.5 h-3.5 shrink-0" />
+          <span>
+            {new Date(ep.createdAt).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 line-clamp-2 leading-snug mb-3 transition-colors">
+          {ep.title}
+        </h3>
+
+        {/* Excerpt */}
+        {ep.excerpt && (
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3 mb-6 flex-1">
+            {ep.excerpt}
+          </p>
+        )}
+        {!ep.excerpt && <div className="flex-1" />}
+
+        {/* Footer */}
+        <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between mt-auto">
+          <span className="text-xs text-[var(--text-muted)] font-medium">
+            Module {index + 1} of {totalEpisodes}
+          </span>
+          <span className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+            Watch
+            <ChevronRight className="w-4 h-4" />
+          </span>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
 export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any; slug: string }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -205,78 +343,20 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
               </p>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {series.episodes && series.episodes.length > 0 ? (
                 series.episodes.map((ep: any, index: number) => (
-                  <Link
+                  <EpisodeCard
                     key={ep.id}
-                    href={`/series/${slug}/${ep.slug}`}
-                    className={cn(
-                      "group p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4",
-                      isDark
-                        ? "bg-[var(--surface)] hover:bg-[#121212] border-[var(--border-primary)] hover:border-cyan-500/50 shadow-md shadow-black/20"
-                        : "bg-white hover:bg-slate-50 border-black/10 hover:border-cyan-500/40 shadow-xs hover:shadow-sm"
-                    )}
-                  >
-                    <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0">
-                      <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border transition-all duration-200",
-                        isDark
-                          ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-black group-hover:scale-105"
-                          : "bg-cyan-50 border-cyan-200 text-cyan-700 group-hover:bg-cyan-600 group-hover:text-white group-hover:scale-105"
-                      )}>
-                        {index + 1}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className={cn(
-                            "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
-                            isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500"
-                          )}>
-                            Episode {index + 1}
-                          </span>
-                          <span className={cn("text-xs flex items-center gap-1", isDark ? "text-zinc-500" : "text-slate-400")}>
-                            <Calendar className="w-3 h-3" />
-                            {new Date(ep.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </span>
-                        </div>
-                        <h3 className={cn(
-                          "text-base sm:text-lg font-bold transition-colors line-clamp-1",
-                          isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600"
-                        )}>
-                          {ep.title}
-                        </h3>
-                        {ep.excerpt && (
-                          <p className={cn("text-xs sm:text-sm mt-0.5 line-clamp-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                            {ep.excerpt}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
-                      <span className={cn(
-                        "text-xs font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-colors",
-                        isDark 
-                          ? "bg-white/5 border-white/10 text-cyan-400 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/40"
-                          : "bg-slate-100 border-slate-200 text-cyan-700 group-hover:bg-cyan-50 group-hover:border-cyan-300"
-                      )}>
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                        Watch Episode
-                      </span>
-                      <ChevronRight className={cn(
-                        "w-5 h-5 transition-transform group-hover:translate-x-1",
-                        isDark ? "text-zinc-600 group-hover:text-cyan-400" : "text-slate-300 group-hover:text-cyan-600"
-                      )} />
-                    </div>
-                  </Link>
+                    ep={ep}
+                    index={index}
+                    totalEpisodes={series.episodes.length}
+                    seriesSlug={slug}
+                    seriesImage={series.image}
+                  />
                 ))
               ) : (
-                <div className={cn(
-                  "p-12 text-center rounded-2xl border",
-                  isDark ? "bg-[var(--surface)] border-[var(--border-primary)] text-zinc-500" : "bg-white border-black/5 text-slate-400"
-                )}>
+                <div className="col-span-full p-12 text-center rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)]">
                   <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
                   <p className="text-base font-semibold">No episodes published yet for this series.</p>
                   <p className="text-xs mt-1">Check back soon for new content!</p>
