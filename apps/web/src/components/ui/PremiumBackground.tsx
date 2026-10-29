@@ -28,6 +28,10 @@ const DOT_COORDS = [
   [38, 26],
 ] as const;
 
+/**
+ * High-precision dot matrix background.
+ * Spacing tuned to 24px x 24px for a denser, tighter, ultra-crisp aesthetic.
+ */
 function DotGridPattern({ className }: { className?: string }) {
   return (
     <>
@@ -41,10 +45,10 @@ function DotGridPattern({ className }: { className?: string }) {
         style={{
           backgroundImage:
             "radial-gradient(rgba(100, 116, 139, 0.45) 1.2px, transparent 1.2px)",
-          backgroundSize: "28px 28px",
+          backgroundSize: "24px 24px",
         }}
       />
-      {/* Dark mode dot grid (crisp white/zinc dots on dark canvas) */}
+      {/* Dark mode dot grid (crisp starlight dots on dark canvas) */}
       <div
         aria-hidden="true"
         className={cn(
@@ -54,7 +58,7 @@ function DotGridPattern({ className }: { className?: string }) {
         style={{
           backgroundImage:
             "radial-gradient(rgba(255, 255, 255, 0.35) 1.2px, transparent 1.2px)",
-          backgroundSize: "28px 28px",
+          backgroundSize: "24px 24px",
         }}
       />
     </>
@@ -62,8 +66,7 @@ function DotGridPattern({ className }: { className?: string }) {
 }
 
 /**
- * Architectural solid cyan diamond badges (matching SMK Telkom Malang layout).
- * Uses exact responsive coordinates and sizes matching the reference.
+ * Architectural solid cyan diamond badges.
  */
 function DiamondOrnament({
   size = 20,
@@ -160,8 +163,6 @@ function PlusOrnament({
 
 const RING_NEUTRAL_DASHED =
   "rounded-full border border-dashed border-neutral-300/80 dark:border-zinc-700/60";
-const RING_NEUTRAL_SOLID =
-  "rounded-full border border-neutral-200/90 dark:border-zinc-800/80";
 const RING_ACCENT_SOLID =
   "rounded-full border border-cyan-500/25 dark:border-cyan-400/20";
 const RING_ACCENT_DASHED =
@@ -169,7 +170,7 @@ const RING_ACCENT_DASHED =
 
 /**
  * Architectural section background ornaments.
- * 100% faithful to the SMK Telkom Malang design system from top to bottom.
+ * Pure vector lines, rings, and clean dot grid.
  */
 export function SectionOrnaments({
   variant = "sides",
@@ -190,7 +191,7 @@ export function SectionOrnaments({
     >
       {withDotGrid && <DotGridPattern />}
 
-      {/* ── 1. HERO VARIANT (Matching SMK Telkom Malang Sec 2) ── */}
+      {/* ── 1. HERO VARIANT ── */}
       {variant === "hero" && (
         <>
           <div
@@ -200,21 +201,20 @@ export function SectionOrnaments({
             )}
           />
 
-          {/* Perimeter Framing Ornaments — Kept strictly to outer margins so they never collide with text, badges, or hero avatars */}
-          <DiamondOrnament size={20} className="top-8 left-6 sm:left-14 hidden md:flex" />
-          <DiamondOrnament size={18} className="top-12 right-8 sm:right-20" />
+          <DiamondOrnament size={20} className="top-36 sm:top-40 left-6 sm:left-14 hidden md:flex" />
+          <DiamondOrnament size={18} className="top-36 sm:top-40 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="bottom-24 left-8 sm:left-20 hidden md:flex" />
           <DiamondOrnament size={20} className="bottom-14 right-10 sm:right-24" />
 
           <DotMatrixOrnament tone="slate" className="bottom-28 left-12 sm:left-28 hidden md:flex" />
           <DotMatrixOrnament tone="accent" className="bottom-20 right-12 sm:right-32" />
 
-          <PlusOrnament tone="accent" className="top-8 right-1/4 hidden xl:flex" />
+          <PlusOrnament tone="accent" className="top-32 sm:top-36 right-1/4 hidden xl:flex" />
           <PlusOrnament tone="slate" className="bottom-8 right-1/3 hidden md:flex" />
         </>
       )}
 
-      {/* ── 2. SIDES VARIANT (Matching SMK Telkom Malang Sec 4 & 10) ── */}
+      {/* ── 2. SIDES VARIANT ── */}
       {variant === "sides" && (
         <>
           <div
@@ -255,7 +255,7 @@ export function SectionOrnaments({
         </>
       )}
 
-      {/* ── 3. DIAGONAL VARIANT (Matching SMK Telkom Malang Sec 5) ── */}
+      {/* ── 3. DIAGONAL VARIANT ── */}
       {variant === "diagonal" && (
         <>
           <div
@@ -298,7 +298,7 @@ export function SectionOrnaments({
         </>
       )}
 
-      {/* ── 4. CENTER VARIANT (Matching SMK Telkom Malang Sec 6) ── */}
+      {/* ── 4. CENTER VARIANT ── */}
       {variant === "center" && (
         <>
           <div
@@ -324,7 +324,7 @@ export function SectionOrnaments({
         </>
       )}
 
-      {/* ── 5. CENTER-WIDE VARIANT (Matching SMK Telkom Malang Sec 7) ── */}
+      {/* ── 5. CENTER-WIDE VARIANT ── */}
       {variant === "center-wide" && (
         <>
           <div
@@ -353,7 +353,7 @@ export function SectionOrnaments({
         </>
       )}
 
-      {/* ── 6. BOTTOM-LEFT VARIANT (Matching SMK Telkom Malang Sec 8) ── */}
+      {/* ── 6. BOTTOM-LEFT VARIANT ── */}
       {variant === "bottom-left" && (
         <>
           <div
@@ -387,7 +387,7 @@ export function SectionOrnaments({
         </>
       )}
 
-      {/* ── 7. RIGHT-FOCUS VARIANT (Matching SMK Telkom Malang Sec 9) ── */}
+      {/* ── 7. RIGHT-FOCUS VARIANT ── */}
       {variant === "right-focus" && (
         <>
           <div
@@ -421,7 +421,7 @@ export function SectionOrnaments({
         </>
       )}
 
-      {/* ── 8. CTA VARIANT (Matching SMK Telkom Malang Sec 11) ── */}
+      {/* ── 8. CTA VARIANT ── */}
       {variant === "cta" && (
         <>
           <div
@@ -478,10 +478,8 @@ export function SectionOrnaments({
 }
 
 /**
- * Architectural Hero Ornaments precisely aligned with the Hero subject (mascot/avatar),
- * matching the SMK Telkom Malang hero image container layout:
- * - Concentric circles centered behind the subject
- * - Circular node anchor dots
+ * Architectural Hero Ornaments precisely aligned with the Hero subject (mascot/avatar).
+ * Clean vector concentric rings.
  */
 export function HeroOrnaments({ className }: { className?: string }) {
   return (
@@ -538,13 +536,13 @@ const PAGE_ORNAMENT_BANDS: OrnamentVariant[] = [
 
 /**
  * Scrolling page-level architectural ornaments for subpages.
- * Rendered strictly behind content (`z-0`) so no elements are obscured.
+ * Starts from top: 0 so dot grid seamlessly spans behind navbar with no empty gaps.
  */
 export function PageOrnaments() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-24 md:top-32 bottom-0 overflow-hidden select-none -z-10"
+      className="pointer-events-none absolute inset-0 overflow-hidden select-none -z-10"
     >
       <DotGridPattern />
       <div className="flex flex-col w-full">
@@ -559,14 +557,37 @@ export function PageOrnaments() {
 }
 
 /**
- * Base canvas background.
- * Kept purely solid so no rings or dots stay frozen (`fixed`) in the viewport when scrolling.
+ * Base canvas background with ethereal, organic gradient blur mesh.
+ * Inspired by high-end Dribbble / Linear UI:
+ * - Fluid, pastel lavender & sky blue gradient blur across light mode
+ * - Deep luminous cyan & violet gradient blur across dark mode
+ * - Completely smooth & seamless across the full viewport, with zero harsh borders or spotlight stickers.
  */
 export function PremiumBackground() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700"
-    />
+      className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700 select-none"
+    >
+      {/* ── Light Mode Ethereal Gradient Blur Mesh ── */}
+      {/* Top Left Sky / Cyan Ambient Wash (behind headline) */}
+      <div className="dark:hidden absolute -top-[160px] -left-[140px] w-[680px] h-[680px] rounded-full bg-gradient-to-br from-cyan-400/20 via-sky-300/15 to-transparent blur-[140px]" />
+
+      {/* Center Left Subtle Indigo Tint */}
+      <div className="dark:hidden absolute top-[40%] -left-[180px] w-[540px] h-[540px] rounded-full bg-gradient-to-tr from-indigo-300/14 via-blue-200/10 to-transparent blur-[140px]" />
+
+      {/* Bottom Right Soft Cyan Aura */}
+      <div className="dark:hidden absolute bottom-[5%] -right-[120px] w-[620px] h-[620px] rounded-full bg-gradient-to-tl from-cyan-300/16 via-sky-200/10 to-transparent blur-[160px]" />
+
+      {/* ── Dark Mode Luminous Gradient Blur Mesh ── */}
+      {/* Top Left Neon Cyan Atmospheric Glow (behind headline) */}
+      <div className="hidden dark:block absolute -top-[180px] -left-[160px] w-[740px] h-[700px] rounded-full bg-gradient-to-br from-cyan-500/16 via-cyan-400/6 to-transparent blur-[150px]" />
+
+      {/* Center Left Deep Sapphire Blue Aura */}
+      <div className="hidden dark:block absolute top-[38%] -left-[200px] w-[580px] h-[560px] rounded-full bg-gradient-to-tr from-blue-600/10 via-indigo-600/5 to-transparent blur-[150px]" />
+
+      {/* Bottom Right Deep Cyan / Teal Ambient Glow */}
+      <div className="hidden dark:block absolute bottom-[5%] -right-[140px] w-[640px] h-[620px] rounded-full bg-gradient-to-tl from-cyan-500/12 via-teal-500/6 to-transparent blur-[160px]" />
+    </div>
   );
 }

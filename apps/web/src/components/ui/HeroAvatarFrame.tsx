@@ -58,9 +58,6 @@ export function HeroAvatarFrame({
       {/* Architectural Hero Background Ornaments precisely framed around the hero avatar */}
       <HeroOrnaments className="z-0" />
 
-      {/* Subtle ambient depth bloom behind avatar — pure Cyan */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none z-0" />
-
       {/* Hero Character with progressive grounded bottom fade */}
       <div
         className="w-full h-full relative z-10 flex items-end justify-center overflow-hidden"
