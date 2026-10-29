@@ -14,6 +14,7 @@ config({ path: envPath });
 const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp"],
   output: "standalone",
+  compress: true,
   experimental: {
     // Raise body size limit for server actions (admin needs up to 5GB)
     serverActions: {
@@ -36,8 +37,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
       { protocol: "http", hostname: "**" },
     ],
-    // Minimize image format negotiation
-    formats: ["image/webp", "image/avif"],
+    // Prioritize AVIF (20-40% smaller) with WebP fallback
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
   },
   async rewrites() {
     return [

@@ -54,6 +54,9 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
+                width={130}
+                height={32}
+                loading="lazy"
                 className="h-8 w-auto"
               />
             </Link>

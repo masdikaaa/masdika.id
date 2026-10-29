@@ -90,12 +90,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
             </motion.div>
 
             {/* Right – Hero Avatar (event-webinar.webp) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/event-webinar.webp"
                 imageAlt="Masdika – Events & Webinars"
@@ -108,7 +103,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
                   { icon: Sparkles, label: "Interactive", value: "Live Q&A" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </section>
 

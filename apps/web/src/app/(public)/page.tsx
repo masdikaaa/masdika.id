@@ -304,8 +304,6 @@ export default function HomePage() {
     };
   }, [isPaused]);
 
-  ReactDOM.preload("/masdika.webp", { as: "image", fetchPriority: "high" });
-
   const typingSequence = useMemo(() => {
     const rawText =
       settings?.hero_typing_text ||
@@ -409,12 +407,7 @@ export default function HomePage() {
             </motion.div>
 
             {/* Right – hero image with smooth grounded bottom fade */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.9, delay: 0.2 }}
-              className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2"
-            >
+            <div className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2">
               <HeroAvatarFrame
                 imageSrc="/masdika.webp"
                 imageAlt="Masdika – Cloud Engineer"
@@ -429,7 +422,7 @@ export default function HomePage() {
                   { icon: SiKubernetes, label: "Kubernetes", value: "Mastery" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -870,7 +863,6 @@ export default function HomePage() {
                             alt={project.title}
                             fill
                             sizes="(max-width: 768px) 100vw, 50vw"
-                            unoptimized={true}
                             className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-[1.03]"
                           />
                         </div>
@@ -1062,7 +1054,6 @@ export default function HomePage() {
                           alt={post.title}
                           fill
                           sizes="(max-width: 768px) 100vw, 33vw"
-                          unoptimized={true}
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         {post.category && (

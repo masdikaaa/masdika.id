@@ -266,12 +266,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
             </motion.div>
 
             {/* Right – Hero Avatar (blog.webp) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/blog.webp"
                 imageAlt="Masdika – Tech Blog & Articles"
@@ -284,7 +279,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                   { icon: Zap, label: "Weekly Posts", value: "Fresh Deep-Dives" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </section>
 
@@ -501,8 +496,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                             alt={heroPost.title}
                             fill
                             sizes="(max-width: 1024px) 100vw, 42vw"
-                            unoptimized={true}
-                            priority={true}
+                            preload={true}
                             className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
                           />
                         ) : (
@@ -544,7 +538,6 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                               alt={post.title}
                               fill
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              unoptimized={true}
                               className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
                             />
                           ) : (

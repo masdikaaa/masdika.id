@@ -230,12 +230,7 @@ export default function ShortenerPage() {
             </motion.div>
 
             {/* Right – Hero Avatar (url-shortener.webp) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/url-shortener.webp"
                 imageAlt="Masdika URL Shortener Mascot"
@@ -248,7 +243,7 @@ export default function ShortenerPage() {
                   { icon: ShieldCheck, label: "Link Security", value: "Anti-Phishing & SSL" },
                 ]}
               />
-            </motion.div>
+            </div>
 
           </div>
         </section>

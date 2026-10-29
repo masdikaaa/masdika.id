@@ -131,12 +131,7 @@ export default function PortfolioPage() {
             </motion.div>
 
             {/* Right – Hero Avatar (portofolio.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/portofolio.webp"
                 imageAlt="Masdika – Portfolio Works"
@@ -149,7 +144,7 @@ export default function PortfolioPage() {
                   { icon: SiKubernetes, label: "Kubernetes", value: "Orchestration" },
                 ]}
               />
-            </motion.div>
+            </div>
 
           </div>
         </section>
@@ -229,7 +224,6 @@ export default function PortfolioPage() {
                               alt={project.title}
                               fill
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              unoptimized={true}
                               className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-105"
                             />
                           ) : (

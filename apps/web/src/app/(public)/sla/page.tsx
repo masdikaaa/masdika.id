@@ -71,12 +71,7 @@ export default function SLAPage() {
             </motion.div>
 
             {/* Right – Hero Avatar (sla.webp) with Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/sla.webp"
                 imageAlt="Masdika – Service Level Agreement"
@@ -90,7 +85,7 @@ export default function SLAPage() {
                   { icon: Clock, label: "Global Operations", value: "24/7 Monitoring" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </section>
 

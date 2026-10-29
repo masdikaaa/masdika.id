@@ -614,12 +614,7 @@ export default function ResellerApiClient() {
             </motion.div>
 
             {/* Right – Hero Avatar (reseller-api.webp) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/reseller-api.webp"
                 imageAlt="Masdika – White-Label Reseller API"
@@ -632,7 +627,7 @@ export default function ResellerApiClient() {
                   { icon: Activity, label: "Control & Metrics", value: "Power & VNC Console" },
                 ]}
               />
-            </motion.div>
+            </div>
 
           </div>
         </section>

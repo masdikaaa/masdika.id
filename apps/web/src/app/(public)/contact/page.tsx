@@ -195,12 +195,7 @@ export default function ContactPage() {
             </motion.div>
 
             {/* Right Column: Hero Avatar (contact.webp / contact.png) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/contact.webp"
                 imageAlt="Masdika Contact Mascot"
@@ -213,7 +208,7 @@ export default function ContactPage() {
                   { icon: Clock, label: "Response Time", value: "Sub-1h Guarantee" },
                 ]}
               />
-            </motion.div>
+            </div>
 
           </div>
         </div>

@@ -60,7 +60,6 @@ function SeriesThumbnail({ src, alt }: { src?: string | null; alt: string }) {
       alt={alt}
       fill
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      unoptimized={true}
       onError={() => setImgError(true)}
       className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
     />
@@ -166,12 +165,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
             </motion.div>
 
             {/* Right – Hero Avatar (series.webp) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/series.webp"
                 imageAlt="Masdika – Learning Series"
@@ -184,7 +178,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                   { icon: Zap, label: "Production Stacks", value: "Enterprise Grade" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </section>
 

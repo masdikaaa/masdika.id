@@ -142,12 +142,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
             </motion.div>
 
             {/* Right – Hero Avatar (kube.webp) with 4 Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/kube.webp"
                 imageAlt="Masdika – Managed Kubernetes Clusters"
@@ -160,7 +155,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
                   { icon: ShieldCheck, label: "Availability", value: "Multi-Master Control" },
                 ]}
               />
-            </motion.div>
+            </div>
 
           </div>
         </section>

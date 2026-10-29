@@ -71,12 +71,7 @@ export default function PrivacyPolicyPage() {
             </motion.div>
 
             {/* Right – Hero Avatar (privacy-policy.webp) with Floating Badges */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/privacy-policy.webp"
                 imageAlt="Masdika – Privacy Policy"
@@ -89,7 +84,7 @@ export default function PrivacyPolicyPage() {
                   { icon: Eye, label: "Transparency", value: "User Controlled" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </section>
 

@@ -76,12 +76,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
             </motion.div>
 
             {/* Right – Hero Avatar (about.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/about.webp"
                 imageAlt="Masdika – About Me"
@@ -94,7 +89,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   { icon: SiKubernetes, label: "Kubernetes", value: "Mastery" },
                 ]}
               />
-            </motion.div>
+            </div>
 
           </div>
         </section>

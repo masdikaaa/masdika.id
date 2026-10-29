@@ -12,11 +12,13 @@ import { AIChatWrapper } from "@/components/AIChatWrapper";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 import { getCachedData } from '@/lib/cache';
@@ -103,7 +105,6 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.simpleicons.org" />
         <link rel="preconnect" href="https://cdn.simpleicons.org" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.transparenttextures.com" />
         {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{

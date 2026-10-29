@@ -150,7 +150,6 @@ export default function ForgotPasswordPage() {
                   alt="Masdika Assistant"
                   width={48}
                   height={48}
-                  unoptimized
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -414,8 +413,7 @@ export default function ForgotPasswordPage() {
                 alt="Masdika Assistant"
                 width={380}
                 height={470}
-                priority
-                unoptimized
+                preload={true}
                 className="max-h-[250px] sm:max-h-[270px] xl:max-h-[300px] w-auto object-contain drop-shadow-2xl select-none pointer-events-none"
               />
 

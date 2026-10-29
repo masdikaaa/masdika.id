@@ -176,12 +176,7 @@ export default function ServicesPage() {
             </motion.div>
 
             {/* Right – Hero Avatar (services.webp) with 4 Floating Badges (All 4 Visible on Mobile) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.9, delay: 0.2 }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
-            >
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/services.webp"
                 imageAlt="Masdika – Services & Solutions"
@@ -194,7 +189,7 @@ export default function ServicesPage() {
                   { icon: SiKubernetes, label: "Kubernetes", value: "Managed K8s" },
                 ]}
               />
-            </motion.div>
+            </div>
           </div>
         </section>
 

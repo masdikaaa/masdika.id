@@ -72,8 +72,12 @@ export function HeroAvatarFrame({
           alt={imageAlt}
           width={imageWidth}
           height={imageHeight}
-          priority={priority}
-          unoptimized={true}
+          preload={priority}
+          sizes={
+            isPortrait
+              ? "(max-width: 640px) 340px, (max-width: 1024px) 420px, 500px"
+              : "(max-width: 640px) 360px, (max-width: 1024px) 460px, 560px"
+          }
           className="w-full h-full object-contain object-bottom relative z-10"
         />
         {/* Soft grounded bottom vignette fade into background */}

@@ -372,7 +372,6 @@ export default function RegisterPage() {
                   alt="Masdika Registration Assistant"
                   width={48}
                   height={48}
-                  unoptimized
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -1023,8 +1022,7 @@ export default function RegisterPage() {
                 alt="Masdika Assistant"
                 width={380}
                 height={500}
-                priority
-                unoptimized
+                preload={true}
                 className="max-h-[320px] xl:max-h-[380px] w-auto object-contain drop-shadow-2xl select-none pointer-events-none"
               />
 

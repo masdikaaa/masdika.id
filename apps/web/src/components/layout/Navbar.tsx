@@ -321,6 +321,9 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
+                width={130}
+                height={32}
+                fetchPriority="high"
                 className="h-8 w-auto"
               />
             </Link>
