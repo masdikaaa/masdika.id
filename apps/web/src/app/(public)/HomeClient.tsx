@@ -34,7 +34,6 @@ import {
   SiPostgresql,
 } from "react-icons/si";
 import { FcGoogle } from "react-icons/fc";
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -52,19 +51,6 @@ const TypeAnimation = dynamic(
   { ssr: false }
 );
 
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-} as const;
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const },
-  },
-};
 
 const PRODUCTS = [
   {
@@ -490,13 +476,7 @@ export function HomeClient({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
             {/* Stats column */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: "some" }}
-              transition={{ duration: 0.7 }}
-              className="lg:col-span-4 flex flex-col gap-4"
-            >
+            <FadeIn direction="right" duration={0.7} className="lg:col-span-4 flex flex-col gap-4">
               <div className="rounded-2xl p-10 flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)]">
                 <p className="text-7xl font-black text-[var(--text-primary)] mb-1">4+</p>
                 <p className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
@@ -513,16 +493,10 @@ export function HomeClient({
                   <p className="text-sm text-[var(--text-muted)]">50+ Deployments</p>
                 </div>
               </div>
-            </motion.div>
+            </FadeIn>
 
             {/* Text column */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: "some" }}
-              transition={{ duration: 0.7, delay: 0.15 }}
-              className="lg:col-span-8 flex flex-col justify-center"
-            >
+            <FadeIn direction="left" delay={0.15} duration={0.7} className="lg:col-span-8 flex flex-col justify-center">
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 About Me
               </span>
@@ -549,7 +523,7 @@ export function HomeClient({
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </FadeIn>
           </div>
         </div>
       </section>
@@ -558,19 +532,14 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="diagonal" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Workflow
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
               My Working Process
             </h2>
-          </motion.div>
+          </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
             <div className="hidden md:block absolute top-12 left-[12.5%] right-[12.5%] h-px bg-[var(--border-primary)] z-0" />
@@ -600,13 +569,7 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="center" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, amount: "some" }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <FadeIn direction="down" duration={0.5} className="text-center max-w-2xl mx-auto mb-16">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Our Products
             </span>
@@ -616,17 +579,11 @@ export function HomeClient({
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Deploy, scale, and manage your applications with our high-performance cloud infrastructure and fully managed services.
             </p>
-          </motion.div>
+          </FadeIn>
 
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: "some" }}
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {PRODUCTS.map((prod, i) => (
-              <motion.div variants={item} key={i} className="h-full">
+              <FadeIn key={i} delay={i * 0.08} direction="up" className="h-full">
                 <Link
                   href={prod.href}
                   className="block group h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors duration-200"
@@ -664,9 +621,9 @@ export function HomeClient({
                     </div>
                   </div>
                 </Link>
-              </motion.div>
+              </FadeIn>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -674,13 +631,7 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, amount: "some" }}
-            className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
-          >
+          <FadeIn direction="down" duration={0.5} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Support &amp; Infrastructure
             </span>
@@ -690,17 +641,11 @@ export function HomeClient({
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Built on carrier-grade routing, bare-metal server hardware, global edge protection, and battle-tested software architecture.
             </p>
-          </motion.div>
+          </FadeIn>
 
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: "some" }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {INFRASTRUCTURE_STACK.map((infra, idx) => (
-              <motion.div variants={item} key={infra.name + idx} className="h-full">
+              <FadeIn key={infra.name + idx} delay={idx * 0.06} direction="up" className="h-full">
                 <div className="group relative h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 flex flex-col">
                   {/* Top row: Icon box + Category badge */}
                   <div className="flex items-start justify-between gap-3 mb-5">
@@ -723,9 +668,9 @@ export function HomeClient({
                     {infra.description}
                   </p>
                 </div>
-              </motion.div>
+              </FadeIn>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -733,13 +678,7 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="center-wide" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            transition={{ duration: 0.7 }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <FadeIn direction="up" duration={0.7} className="text-center max-w-2xl mx-auto mb-16">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Expertise
             </span>
@@ -749,7 +688,7 @@ export function HomeClient({
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Leveraging industry-standard tools to build, deploy, and scale robust applications in high-performance cloud environments.
             </p>
-          </motion.div>
+          </FadeIn>
 
           <TechStackMarquee />
 
@@ -770,19 +709,14 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="bottom-left" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Solutions
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
               Premium IT Services
             </h2>
-          </motion.div>
+          </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
@@ -819,12 +753,7 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16"
-          >
+          <FadeIn direction="down" className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
             <div>
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 Projects
@@ -842,7 +771,7 @@ export function HomeClient({
             >
               View All Projects
             </Button>
-          </motion.div>
+          </FadeIn>
 
           {portfolioProjects.length === 0 ? (
             <div className="text-center py-20 px-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]">
@@ -963,19 +892,14 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            className="text-center max-w-2xl mx-auto mb-16 px-4"
-          >
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16 px-4">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
               Feedback
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
               What Clients Say
             </h2>
-          </motion.div>
+          </FadeIn>
 
           <div className="relative w-full overflow-hidden flex">
             <div className="absolute top-0 left-0 w-16 h-full z-10 pointer-events-none bg-gradient-to-r from-[var(--background)] to-transparent" />
@@ -1047,12 +971,7 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16"
-          >
+          <FadeIn direction="down" className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
             <div>
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
                 Blog
@@ -1070,7 +989,7 @@ export function HomeClient({
             >
               Read All
             </Button>
-          </motion.div>
+          </FadeIn>
 
           {latestPosts.length === 0 ? (
             <div className="text-center py-20 px-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
@@ -1141,13 +1060,7 @@ export function HomeClient({
       <section className="py-20 lg:py-28 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: "some" }}
-            transition={{ duration: 0.7 }}
-            className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm"
-          >
+          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <div className="mb-8 inline-block">
               <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -1184,7 +1097,7 @@ export function HomeClient({
                 View Pricing
               </Button>
             </div>
-          </motion.div>
+          </FadeIn>
         </div>
       </section>
     </div>
