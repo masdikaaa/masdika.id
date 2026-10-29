@@ -5,29 +5,30 @@ import { cn } from "@/lib/utils";
 
 /**
  * Initial Preloader Component
- * Ensures the signature PremiumLoader is always displayed on initial page load / hard reload
- * across both mobile and desktop devices.
+ * Ensures the signature PremiumLoader is displayed instantly on initial page load / hard reload
+ * across both mobile (iPhone/Android) and desktop devices.
  * 
- * Features:
- * - Pure CSS GPU-accelerated spin and pulse animations (zero CPU load).
- * - Styled with Tailwind dark: variants matching the active theme immediately.
- * - Smooth minimum duration (500ms) to ensure elegant perception without flickering.
- * - Graceful fade-out transition, completely unmounted after load to free memory.
+ * Performance & Centering Highlights:
+ * - Uses dynamic viewport height (100dvh) to guarantee dead-center alignment on iPhone Safari.
+ * - Perfectly balanced tracking (pl-[0.4em]) eliminates horizontal offsets.
+ * - Self-timed inline dismissal (650ms) ensures it is genuinely fast ("sat set", 1-2s total)
+ *   even if mobile networks are still downloading secondary JS chunks.
+ * - Smooth 250ms fade-out transition, completely unmounting after display.
  */
 export function InitialPreloader() {
   const [fading, setFading] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    // React has hydrated and DOM is rendered. Keep spinner visible for a brief,
-    // crisp moment (350ms) so the animation is clearly enjoyed, then fade out snappy.
+    // Dismiss gracefully once React is hydrated, keeping the branded spinner visible
+    // for a crisp, snappy duration (600ms) before fading out.
     const displayTimer = setTimeout(() => {
       setFading(true);
       const unmountTimer = setTimeout(() => {
         setHidden(true);
-      }, 200); // 200ms snappy fade-out transition
+      }, 250);
       return () => clearTimeout(unmountTimer);
-    }, 350);
+    }, 600);
 
     return () => clearTimeout(displayTimer);
   }, []);
@@ -38,9 +39,10 @@ export function InitialPreloader() {
 
   return (
     <div
+      id="initial-preloader"
       aria-hidden="true"
       className={cn(
-        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-200 ease-out",
+        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-250 ease-out",
         "bg-[#f8fafb] dark:bg-[#000000]",
         fading ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
       )}
@@ -50,8 +52,9 @@ export function InitialPreloader() {
         left: 0,
         right: 0,
         bottom: 0,
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100dvh",
+        minHeight: "100dvh",
       }}
     >
       {/* Background Radial Glow */}
@@ -68,8 +71,8 @@ export function InitialPreloader() {
         }}
       />
 
-      {/* Main Loader Container */}
-      <div className="relative z-10 flex flex-col items-center">
+      {/* Main Loader Container — perfectly centered in visible 100dvh viewport */}
+      <div className="relative z-10 flex flex-col items-center justify-center">
         <div className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
           {/* Outer glowing ring — CSS spin */}
           <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-500 border-r-cyan-500 dark:border-t-cyan-400 dark:border-r-cyan-400 dark:shadow-[0_0_30px_rgba(34,211,238,0.4)] premium-spin" />
@@ -84,9 +87,9 @@ export function InitialPreloader() {
           <div className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-cyan-500 shadow-sm dark:bg-white dark:shadow-[0_0_20px_rgba(255,255,255,1)] premium-pulse" />
         </div>
 
-        {/* Text */}
+        {/* Text — perfectly centered horizontally with pl-[0.4em] */}
         <div className="mt-8 md:mt-10 flex flex-col items-center">
-          <h3 className="font-black tracking-[0.4em] md:tracking-[0.5em] text-sm mb-3 ml-2 text-cyan-700 dark:text-cyan-400 premium-text-pulse">
+          <h3 className="font-black tracking-[0.4em] md:tracking-[0.5em] pl-[0.4em] text-sm mb-3 text-cyan-700 dark:text-cyan-400 premium-text-pulse">
             LOADING
           </h3>
           <div className="flex gap-1.5 md:gap-2">
@@ -100,7 +103,27 @@ export function InitialPreloader() {
           </div>
         </div>
       </div>
+
+      {/* Lightweight self-dismiss script ensures fast 1-2s transition even if mobile JS downloads are queued */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              var p = document.getElementById('initial-preloader');
+              if (!p) return;
+              setTimeout(function() {
+                if (p) {
+                  p.style.opacity = '0';
+                  p.style.pointerEvents = 'none';
+                  setTimeout(function() {
+                    if (p && p.parentNode) p.parentNode.removeChild(p);
+                  }, 250);
+                }
+              }, 700);
+            })();
+          `,
+        }}
+      />
     </div>
   );
 }
-

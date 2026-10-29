@@ -41,8 +41,9 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
               left: 0,
               right: 0,
               bottom: 0,
-              width: "100vw",
-              height: "100vh",
+              width: "100%",
+              height: "100dvh",
+              minHeight: "100dvh",
             }
           : undefined
       }
@@ -105,7 +106,7 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
         <div className="mt-8 md:mt-10 flex flex-col items-center">
           <h3
             className={cn(
-              "font-black tracking-[0.4em] md:tracking-[0.5em] text-sm mb-3 ml-2 premium-text-pulse",
+              "font-black tracking-[0.4em] md:tracking-[0.5em] pl-[0.4em] text-sm mb-3 premium-text-pulse",
               isDark ? "text-cyan-400" : "text-cyan-700"
             )}
           >
