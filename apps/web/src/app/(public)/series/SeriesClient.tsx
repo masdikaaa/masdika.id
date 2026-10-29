@@ -117,12 +117,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
             {/* Left – Text & Actions */}
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="max-w-2xl relative z-30"
-            >
+            <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -162,7 +157,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                   View Curriculum
                 </Button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Right – Hero Avatar (series.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">

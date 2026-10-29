@@ -134,12 +134,7 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
             {/* Left Column: Headline & Action */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl"
-            >
+            <div className="max-w-2xl">
               <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="mb-6 sm:mb-8 font-mono uppercase">
                 AVAILABLE FOR INQUIRIES &amp; PROJECTS
               </Badge>
@@ -192,7 +187,7 @@ export default function ContactPage() {
                   Sidoarjo Datacenter Hub
                 </span>
               </div>
-            </motion.div>
+            </div>
 
             {/* Right Column: Hero Avatar (contact.webp / contact.png) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">

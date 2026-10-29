@@ -345,12 +345,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
             {/* Left – text */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="max-w-2xl relative z-30 order-2 lg:order-1"
-            >
+            <div className="max-w-2xl relative z-30 order-2 lg:order-1">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -404,7 +399,7 @@ export default function HomePage() {
                   View Resume
                 </Button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Right – hero image with smooth grounded bottom fade */}
             <div className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2">

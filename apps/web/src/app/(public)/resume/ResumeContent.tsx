@@ -28,12 +28,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
             {/* Left – Text & Actions */}
-            <motion.div
-              initial={{ opacity: 0, x: -24 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="max-w-2xl relative z-20"
-            >
+            <div className="max-w-2xl relative z-20">
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
                   MY JOURNEY &amp; CAREER
@@ -73,7 +68,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   Get in Touch
                 </Button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Right – Hero Avatar (about.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">

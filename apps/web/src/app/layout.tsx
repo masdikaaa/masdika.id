@@ -101,11 +101,6 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Preconnect to external CDNs for faster tech-stack icon loading */}
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://cdn.simpleicons.org" />
-        <link rel="preconnect" href="https://cdn.simpleicons.org" crossOrigin="anonymous" />
         {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
