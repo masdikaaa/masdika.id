@@ -165,13 +165,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
           </div>
 
           {/* Filter Pills Segment Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="flex justify-center mb-12"
-          >
+          <div className="flex justify-center mb-12">
             <div className="inline-flex flex-wrap items-center justify-center p-1.5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm gap-1.5 max-w-full">
               {FILTERS.map((filter) => {
                 const isActive = activeFilter === filter.name;
@@ -192,7 +186,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
                 );
               })}
             </div>
-          </motion.div>
+          </div>
 
           {/* Projects Grid */}
           <div>
@@ -303,12 +297,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
 
             {/* Pagination Controls */}
             {!loading && totalPages > 1 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="flex justify-center items-center gap-2 mt-16"
-              >
+              <div className="flex justify-center items-center gap-2 mt-16">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
@@ -343,20 +332,14 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-              </motion.div>
+              </div>
             )}
           </div>
         </section>
 
         {/* ── 2. ENGINEERING HIGHLIGHTS SECTION (Format identik Session Formats di Events) ────────── */}
         <section className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Architectural Domains
             </span>
@@ -366,7 +349,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Every production system is engineered following modern cloud-native standards, high availability, and operational resilience.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -391,15 +374,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
                 desc: "Distributed database replication, automated failover routing, and disaster recovery."
               }
             ].map((format, idx) => (
-              <motion.div
-                key={idx}
-                variants={item}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
-                className="h-full"
-              >
+              <div key={idx} className="h-full">
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 group-hover:scale-110 transition-transform duration-300">
                     {format.icon === SiKubernetes ? (
@@ -415,7 +390,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
                     {format.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>

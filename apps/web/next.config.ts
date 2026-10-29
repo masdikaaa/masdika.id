@@ -43,17 +43,6 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     minimumCacheTTL: 31536000,
   },
-  async rewrites() {
-    return [
-      {
-        source: "/storage-api/:path*",
-        // In local mode it tries localhost, in docker it tries minio
-        destination: process.env.MINIO_EXEC_MODE === "docker"
-          ? `http://minio:${process.env.MINIO_PORT || 9000}/:path*`
-          : `http://${process.env.MINIO_ENDPOINT || '127.0.0.1'}:${process.env.MINIO_PORT || 9000}/:path*`,
-      },
-    ];
-  },
   async headers() {
     return [
       // ── Aggressive static-asset caching (images, fonts, icons) ──

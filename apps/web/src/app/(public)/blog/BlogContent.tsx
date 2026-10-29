@@ -280,13 +280,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
 
         {/* ── 1. ARTICLES FEED SECTION ───────────────────────────────── */}
         <section id="articles-feed" className="py-16 lg:py-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Latest Publications
             </span>
@@ -296,7 +290,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Explore in-depth architectural breakdowns, practical tutorials, and infrastructure notes designed to elevate your engineering craftsmanship.
             </p>
-          </motion.div>
+          </div>
 
           {/* Controls: Search Bar & Filters */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-10 pb-6 border-b border-[var(--border-primary)]">
@@ -409,12 +403,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
             <>
               {/* Featured / Hero Article */}
               {heroPost && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="mb-12"
-                >
+                <div className="mb-12">
                   <div className="rounded-2xl lg:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-300 overflow-hidden group shadow-sm hover:shadow-xl">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
                       
@@ -504,20 +493,15 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
 
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
 
               {/* Standard Articles Grid */}
               {gridPosts.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                  {gridPosts.map((post, idx) => (
-                    <motion.div
+                  {gridPosts.map((post) => (
+                    <div
                       key={post.slug}
-                      variants={item}
-                      initial="hidden"
-                      whileInView="show"
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: idx * 0.08, ease: "easeOut" }}
                       className="h-full"
                     >
                       <article className="rounded-xl lg:rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-300 overflow-hidden group flex flex-col h-full hover:shadow-xl hover:-translate-y-1">
@@ -602,7 +586,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                         </div>
 
                       </article>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -659,13 +643,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
 
         {/* ── 2. CORE TOPIC TRACKS (Identik dengan Section 2 Vacancies) ─ */}
         <section id="topics" className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, margin: "100px" }}
-            className="text-center max-w-2xl mx-auto mb-16"
-          >
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Curated Knowledge Tracks
             </span>
@@ -675,7 +653,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Explore in-depth architectural patterns, production playbooks, and hands-on tutorials across our primary domains.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -704,12 +682,8 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                 categorySlug: "security"
               }
             ].map((track, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "100px" }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
                 className="h-full"
               >
                 <div 
@@ -726,7 +700,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                     {track.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>

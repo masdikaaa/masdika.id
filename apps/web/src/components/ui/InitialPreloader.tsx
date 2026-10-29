@@ -8,12 +8,11 @@ import { cn } from "@/lib/utils";
  * Ensures the signature PremiumLoader is displayed instantly on initial page load / hard reload
  * across both mobile (iPhone/Android) and desktop devices.
  * 
- * Performance & Centering Highlights:
- * - Uses dynamic viewport height (100dvh) to guarantee dead-center alignment on iPhone Safari.
+ * Safety & Performance Highlights:
+ * - Managed purely via CSS opacity and display to NEVER conflict with React reconciliation.
+ * - Uses dynamic viewport height (100dvh) for dead-center alignment on iPhone Safari.
  * - Perfectly balanced tracking (pl-[0.4em]) eliminates horizontal offsets.
- * - Self-timed inline dismissal (650ms) ensures it is genuinely fast ("sat set", 1-2s total)
- *   even if mobile networks are still downloading secondary JS chunks.
- * - Smooth 250ms fade-out transition, completely unmounting after display.
+ * - Inline fallback script toggles styles only (never removes DOM nodes).
  */
 export function InitialPreloader() {
   const [fading, setFading] = useState(false);
@@ -24,25 +23,21 @@ export function InitialPreloader() {
     // for a crisp, snappy duration (600ms) before fading out.
     const displayTimer = setTimeout(() => {
       setFading(true);
-      const unmountTimer = setTimeout(() => {
+      const hideTimer = setTimeout(() => {
         setHidden(true);
-      }, 250);
-      return () => clearTimeout(unmountTimer);
+      }, 300);
+      return () => clearTimeout(hideTimer);
     }, 600);
 
     return () => clearTimeout(displayTimer);
   }, []);
-
-  if (hidden) {
-    return null;
-  }
 
   return (
     <div
       id="initial-preloader"
       aria-hidden="true"
       className={cn(
-        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-250 ease-out",
+        "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-300 ease-out",
         "bg-[#f8fafb] dark:bg-[#000000]",
         fading ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
       )}
@@ -55,6 +50,7 @@ export function InitialPreloader() {
         width: "100%",
         height: "100dvh",
         minHeight: "100dvh",
+        display: hidden ? "none" : undefined,
       }}
     >
       {/* Background Radial Glow */}
@@ -104,7 +100,7 @@ export function InitialPreloader() {
         </div>
       </div>
 
-      {/* Lightweight self-dismiss script ensures fast 1-2s transition even if mobile JS downloads are queued */}
+      {/* Lightweight self-dismiss script ensures fast 1-2s transition without mutating DOM tree */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
@@ -116,10 +112,10 @@ export function InitialPreloader() {
                   p.style.opacity = '0';
                   p.style.pointerEvents = 'none';
                   setTimeout(function() {
-                    if (p && p.parentNode) p.parentNode.removeChild(p);
-                  }, 250);
+                    if (p) p.style.display = 'none';
+                  }, 300);
                 }
-              }, 700);
+              }, 650);
             })();
           `,
         }}
