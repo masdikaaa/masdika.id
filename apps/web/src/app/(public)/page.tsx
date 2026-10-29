@@ -411,8 +411,8 @@ export default function HomePage() {
               <HeroAvatarFrame
                 imageSrc="/masdika.webp"
                 imageAlt="Masdika – Cloud Engineer"
-                imageWidth={583}
-                imageHeight={875}
+                imageWidth={1145}
+                imageHeight={1374}
                 isPortrait={true}
                 priority={true}
                 badges={[
