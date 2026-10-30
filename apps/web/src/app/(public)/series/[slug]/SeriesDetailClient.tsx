@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
+import { FadeIn } from "@/components/animations/FadeIn";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 
@@ -52,10 +53,7 @@ function EpisodeCard({ ep, index, totalEpisodes, seriesSlug, seriesImage }: Epis
   const showImage = !noImg && !!imageSrc;
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: index * 0.08, ease: "easeOut" }}
+    <article
       className="rounded-xl lg:rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-300 overflow-hidden group flex flex-col h-full hover:shadow-xl hover:-translate-y-1"
     >
       {/* Thumbnail */}
@@ -155,7 +153,7 @@ function EpisodeCard({ ep, index, totalEpisodes, seriesSlug, seriesImage }: Epis
           </span>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
 
@@ -204,7 +202,7 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
           {/* Breadcrumb / Back Link */}
-          <div className="mb-6 sm:mb-8">
+          <FadeIn direction="down" className="mb-6 sm:mb-8">
             <Link
               href="/series"
               className={cn(
@@ -222,14 +220,19 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
               </div>
               Back to All Series
             </Link>
-          </div>
+          </FadeIn>
 
           {/* ── 0. HERO SECTION (Konsisten dengan /series, /vacancies, /blog) ── */}
           <section className="relative pt-2 sm:pt-4 pb-12 lg:pb-16 flex items-center">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
               
               {/* Left – Text & Actions */}
-              <div className="max-w-2xl relative z-30">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="max-w-2xl relative z-30"
+              >
                 {/* Status pill using shared Badge */}
                 <div className="flex flex-wrap items-center gap-3 mb-6">
                   <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -293,10 +296,15 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
                     View Episodes ({series.episodes?.length || 0})
                   </Button>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Right – Hero Avatar (list-episodes.webp) with 4 Floating Badges */}
-              <div className="relative flex items-center justify-center mt-6 lg:mt-0">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+                className="relative flex items-center justify-center mt-6 lg:mt-0"
+              >
                 <HeroAvatarFrame
                   imageSrc="/list-episodes.webp"
                   imageAlt={series.title}
@@ -309,13 +317,13 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
                     { icon: ShieldCheck, label: "Instructor", value: series.adminName || "Masdika.ID" },
                   ]}
                 />
-              </div>
+              </motion.div>
             </div>
           </section>
 
           {/* ── 1. EPISODES CATALOG LIST ── */}
           <section id="episodes-catalog" className="pt-6 sm:pt-8 scroll-mt-24">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-[var(--border-primary)]">
+            <FadeIn direction="down" className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-[var(--border-primary)]">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
@@ -330,26 +338,32 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
               <p className="text-sm font-semibold text-[var(--text-secondary)]">
                 {series.episodes?.length || 0} Total Episodes Available
               </p>
-            </div>
+            </FadeIn>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {series.episodes && series.episodes.length > 0 ? (
                 series.episodes.map((ep: any, index: number) => (
-                  <EpisodeCard
+                  <FadeIn
                     key={ep.id}
-                    ep={ep}
-                    index={index}
-                    totalEpisodes={series.episodes.length}
-                    seriesSlug={slug}
-                    seriesImage={series.image}
-                  />
+                    delay={index * 0.08}
+                    direction="up"
+                    className="h-full"
+                  >
+                    <EpisodeCard
+                      ep={ep}
+                      index={index}
+                      totalEpisodes={series.episodes.length}
+                      seriesSlug={slug}
+                      seriesImage={series.image}
+                    />
+                  </FadeIn>
                 ))
               ) : (
-                <div className="col-span-full p-12 text-center rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)]">
+                <FadeIn direction="up" className="col-span-full p-12 text-center rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)]">
                   <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
                   <p className="text-base font-semibold">No episodes published yet for this series.</p>
                   <p className="text-xs mt-1">Check back soon for new content!</p>
-                </div>
+                </FadeIn>
               )}
             </div>
           </section>

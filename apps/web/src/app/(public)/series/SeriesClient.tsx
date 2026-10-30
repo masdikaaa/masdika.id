@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
+import { FadeIn } from "@/components/animations/FadeIn";
 import { cn } from "@/lib/utils";
 
 export interface SeriesEpisode {
@@ -117,7 +118,12 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
             {/* Left – Text & Actions */}
-            <div className="max-w-2xl relative z-30">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="max-w-2xl relative z-30"
+            >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -157,10 +163,15 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                   View Curriculum
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right – Hero Avatar (series.webp) with 4 Floating Badges */}
-            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+              className="relative flex items-center justify-center mt-6 lg:mt-0"
+            >
               <HeroAvatarFrame
                 imageSrc="/series.webp"
                 imageAlt="Masdika – Learning Series"
@@ -173,13 +184,13 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                   { icon: Zap, label: "Production Stacks", value: "Enterprise Grade" },
                 ]}
               />
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* ── 1. SERIES CATALOG SECTION ──────────────────────────────── */}
         <section id="series-catalog" className="py-16 lg:py-24 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Curated Courses
             </span>
@@ -189,10 +200,10 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Step-by-step video &amp; article series structured to accelerate your mastery in cloud architecture, container management, and DevOps pipelines.
             </p>
-          </div>
+          </FadeIn>
 
           {/* Controls: Search Bar & Level Filters */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-10 pb-6 border-b border-[var(--border-primary)]">
+          <FadeIn direction="up" delay={0.1} className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-10 pb-6 border-b border-[var(--border-primary)]">
             {/* Search Input */}
             <div className="relative w-full md:w-80 group">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
@@ -236,11 +247,11 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                 );
               })}
             </div>
-          </div>
+          </FadeIn>
 
           {/* Series Grid or Premium Empty State */}
           {filteredSeries.length === 0 ? (
-            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 sm:p-14 text-center max-w-xl mx-auto shadow-sm">
+            <FadeIn direction="up" className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 sm:p-14 text-center max-w-xl mx-auto shadow-sm">
               <div className="w-16 h-16 rounded-2xl mx-auto mb-6 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
                 <GraduationCap className="w-8 h-8" strokeWidth={1.75} />
               </div>
@@ -284,12 +295,14 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                   </Button>
                 )}
               </div>
-            </div>
+            </FadeIn>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {filteredSeries.map((s) => (
-                <div
+              {filteredSeries.map((s, idx) => (
+                <FadeIn
                   key={s.id}
+                  delay={idx * 0.08}
+                  direction="up"
                   className="h-full"
                 >
                   <article className="rounded-xl lg:rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-300 overflow-hidden group flex flex-col h-full hover:shadow-xl hover:-translate-y-1">
@@ -371,7 +384,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                     </div>
 
                   </article>
-                </div>
+                </FadeIn>
               ))}
             </div>
           )}
@@ -379,7 +392,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
 
         {/* ── 2. CURRICULUM TRACKS (Identik dengan Section 2 Vacancies) ── */}
         <section id="curriculum" className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Structured Pathways
             </span>
@@ -389,7 +402,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Explore sequential learning journeys designed to take you from foundational syntax to multi-region cloud architecture and bare-metal orchestration.
             </p>
-          </div>
+          </FadeIn>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -414,8 +427,10 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                 desc: "Debian/Ubuntu production hardening, WireGuard tunnels, database replication, and zero-trust perimeter access."
               }
             ].map((track, idx) => (
-              <div
+              <FadeIn
                 key={idx}
+                delay={idx * 0.08}
+                direction="up"
                 className="h-full"
               >
                 <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col items-center text-center h-full group">
@@ -429,14 +444,14 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                     {track.desc}
                   </p>
                 </div>
-              </div>
+              </FadeIn>
             ))}
           </div>
         </section>
 
         {/* ── 3. COMMUNITY & WORKSHOP CTA (Identik dengan Section 3 Vacancies) ── */}
         <section className="pt-8 pb-12">
-          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
+          <FadeIn direction="up" duration={0.7} className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
               CUSTOM WORKSHOPS &amp; TRAINING
@@ -464,7 +479,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
                 Explore Services
               </Button>
             </div>
-          </div>
+          </FadeIn>
         </section>
 
       </div>
