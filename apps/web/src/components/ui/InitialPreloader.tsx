@@ -61,20 +61,6 @@ export function InitialPreloader() {
         minHeight: "100dvh",
       }}
     >
-      {/* Background Radial Glow */}
-      <div
-        className="absolute inset-0 pointer-events-none hidden dark:block"
-        style={{
-          background: "radial-gradient(circle 340px at 50% 50%, rgba(34,211,238,0.18) 0%, rgba(34,211,238,0.09) 30%, rgba(34,211,238,0.03) 60%, rgba(34,211,238,0) 100%)",
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none block dark:hidden"
-        style={{
-          background: "radial-gradient(circle 300px at 50% 50%, rgba(6,182,212,0.10) 0%, rgba(6,182,212,0.04) 45%, rgba(6,182,212,0) 100%)",
-        }}
-      />
-
       {/* Main Loader Container — perfectly centered in visible 100dvh viewport */}
       <div className="relative z-10 flex flex-col items-center justify-center">
         <div className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">

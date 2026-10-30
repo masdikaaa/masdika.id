@@ -557,41 +557,15 @@ export function PageOrnaments() {
 }
 
 /**
- * Base canvas background with ethereal, organic gradient blur mesh.
- * Inspired by high-end Dribbble / Linear UI:
- * - Fluid, pastel lavender & sky blue gradient blur across light mode
- * - Deep luminous cyan & violet gradient blur across dark mode
- * - Completely smooth & seamless across the full viewport, with zero harsh borders or spotlight stickers.
+ * Base canvas background: pure, clean, distraction-free solid backdrop
+ * (#000000 deep OLED black in dark mode, #f8fafb in light mode).
+ * Zero blur haze, zero light bleed, zero GPU memory consumption.
  */
 export function PremiumBackground() {
   return (
     <div
       aria-hidden="true"
       className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700 select-none"
-    >
-      {/* ── Light Mode Ethereal Gradient Mesh (Pure CSS vector gradients, zero GPU memory bloat) ── */}
-      <div
-        className="dark:hidden absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle 520px at 15% 10%, rgba(34, 211, 238, 0.16) 0%, rgba(34, 211, 238, 0.05) 40%, transparent 75%),
-            radial-gradient(circle 460px at 10% 45%, rgba(129, 140, 248, 0.12) 0%, rgba(129, 140, 248, 0.04) 40%, transparent 75%),
-            radial-gradient(circle 540px at 90% 90%, rgba(56, 189, 248, 0.14) 0%, rgba(56, 189, 248, 0.04) 40%, transparent 75%)
-          `,
-        }}
-      />
-
-      {/* ── Dark Mode Luminous Gradient Mesh (Pure CSS vector gradients, zero GPU memory bloat) ── */}
-      <div
-        className="hidden dark:block absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle 540px at 15% 10%, rgba(34, 211, 238, 0.15) 0%, rgba(34, 211, 238, 0.04) 40%, transparent 75%),
-            radial-gradient(circle 480px at 10% 45%, rgba(37, 99, 235, 0.10) 0%, rgba(37, 99, 235, 0.03) 40%, transparent 75%),
-            radial-gradient(circle 560px at 90% 90%, rgba(20, 184, 166, 0.11) 0%, rgba(20, 184, 166, 0.03) 40%, transparent 75%)
-          `,
-        }}
-      />
-    </div>
+    />
   );
 }
