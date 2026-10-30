@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
 import { AIChatWrapper } from "@/components/AIChatWrapper";
+import { InitialPreloader } from "@/components/ui/InitialPreloader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -122,6 +123,7 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning className="min-h-screen flex flex-col bg-background text-foreground">
         <ThemeProvider initialTheme={initialTheme}>
+          <InitialPreloader />
           <Tracker />
           <main className="flex-1 flex flex-col overflow-x-hidden">
             {children}

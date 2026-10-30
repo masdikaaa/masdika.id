@@ -4,68 +4,31 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Initial Preloader Component
- * Ensures the signature PremiumLoader is displayed until the page and DOM content
- * are genuinely loaded and ready across mobile (iPhone/Android) and desktop devices.
+ * Premium Initial Preloader Component
+ * Displays the signature branded loader on first open,
+ * then smoothly fades out once React has mounted and the DOM is ready.
  * 
- * Safety & Reliability Highlights:
- * - Dismisses ONLY after `document.readyState === 'complete'` / `window.load` and React mount.
- * - Minimum display duration (650ms) prevents jarring flicker on cached visits.
- * - Smooth fade out (400ms) seamlessly reveals the fully rendered, animated page.
- * - Non-destructive CSS opacity/display toggles (never breaks React 19 reconciliation).
- * - Dead-center alignment using 100dvh for iPhone Safari dynamic viewport changes.
- * - Safety ceiling (2.8s) prevents getting stuck on slow/unstable networks.
+ * Reliability & Experience Highlights:
+ * - Crisp branded display: exactly 600ms on client mount, never hangs on slow assets.
+ * - Smooth fade out (350ms): seamlessly cross-fades into the already-animated page.
+ * - Dead-center 100dvh alignment for mobile (iOS Safari) and desktop.
+ * - Fully unmounts after fadeout to free up memory and GPU layers.
  */
 export function InitialPreloader() {
   const [fading, setFading] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    let fadeTimer: ReturnType<typeof setTimeout>;
     let hideTimer: ReturnType<typeof setTimeout>;
-    let isDismissed = false;
-
-    const startTime = Date.now();
-    const MIN_DISPLAY_TIME = 650; // Ensure brand spinner displays gracefully
-
-    const triggerDismiss = () => {
-      if (isDismissed) return;
-      isDismissed = true;
-
-      const elapsed = Date.now() - startTime;
-      const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsed);
-
-      fadeTimer = setTimeout(() => {
-        setFading(true);
-        if (typeof document !== "undefined") {
-          document.documentElement.classList.add("page-ready");
-        }
-        hideTimer = setTimeout(() => {
-          setHidden(true);
-        }, 400); // 400ms matches transition-opacity duration
-      }, remainingTime);
-    };
-
-    const checkReadiness = () => {
-      if (typeof document !== "undefined" && "fonts" in document && document.fonts?.ready) {
-        document.fonts.ready.then(triggerDismiss).catch(triggerDismiss);
-      } else {
-        triggerDismiss();
-      }
-    };
-
-    if (document.readyState === "complete") {
-      checkReadiness();
-    } else {
-      window.addEventListener("load", checkReadiness, { once: true });
-    }
-
-    // Safety ceiling: never block user for more than 2.8s even on slow 3G / asset stalls
-    const maxSafetyTimer = setTimeout(triggerDismiss, 2800);
+    // Display branded animation smoothly on client mount, then fade out
+    const fadeTimer = setTimeout(() => {
+      setFading(true);
+      hideTimer = setTimeout(() => {
+        setHidden(true);
+      }, 350);
+    }, 600);
 
     return () => {
-      window.removeEventListener("load", checkReadiness);
-      clearTimeout(maxSafetyTimer);
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
     };
@@ -84,7 +47,7 @@ export function InitialPreloader() {
         className={cn(
           "fixed inset-0 z-[999999] flex flex-col items-center justify-center overflow-hidden select-none",
           "bg-[#f8fafb] dark:bg-[#000000]",
-          "transition-opacity duration-400 ease-out",
+          "transition-opacity duration-350 ease-out",
           fading ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
         )}
         style={{
