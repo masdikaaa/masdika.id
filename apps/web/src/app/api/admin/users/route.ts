@@ -18,7 +18,8 @@ export async function GET(req: Request) {
         balance: true,
         isSuspended: true,
         suspendReason: true,
-        createdAt: true
+        createdAt: true,
+        lastActive: true
       },
       orderBy: { createdAt: 'desc' }
     });

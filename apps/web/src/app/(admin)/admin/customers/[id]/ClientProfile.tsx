@@ -14,6 +14,8 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { AdminEditServiceModal } from '@/components/ui/AdminEditServiceModal';
 import { AdminLoader } from '@/components/admin/AdminLoader';
 import { Select } from '@/components/ui/Select';
+import { LastSeenBadge } from '@/components/ui/LastSeenBadge';
+import { isUserOnline } from '@/lib/last-seen';
 
 const formatInvoiceNumber = (num: string) => {
   if (!num) return num;
@@ -614,12 +616,23 @@ export default function ClientProfile({ userId }: { userId: string }) {
             <ArrowLeft className={cn("w-5 h-5", isDark ? "text-zinc-300" : "text-slate-600")} />
           </button>
           
-          <div className={cn("w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
-            <img referrerPolicy="no-referrer" 
-              src={user.image || `/api/avatar?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || 'User')}`} 
-              alt="Profile" 
-              className="w-full h-full object-cover" 
-              loading="lazy" decoding="async" />
+          <div className="relative">
+            <div className={cn("w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
+              <img referrerPolicy="no-referrer" 
+                src={user.image || `/api/avatar?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || 'User')}`} 
+                alt="Profile" 
+                className="w-full h-full object-cover" 
+                loading="lazy" decoding="async" />
+            </div>
+            {isUserOnline(user.lastActive) && (
+              <span
+                className={cn(
+                  "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2",
+                  isDark ? "ring-[#060b14]" : "ring-white"
+                )}
+                title="Online right now"
+              />
+            )}
           </div>
           
           <div className="min-w-0 flex-1">
@@ -627,7 +640,11 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <span className="truncate">{user.name}</span>
               {user.isSuspended && <span className={cn("text-[10px] bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20 font-bold shrink-0", isDark ? "text-red-400" : "text-red-700")}>SUSPENDED</span>}
             </h1>
-            <p className={cn("text-xs sm:text-sm truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-0.5">
+              <p className={cn("text-xs sm:text-sm truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
+              <span className="opacity-30">•</span>
+              <LastSeenBadge date={user.lastActive} isDark={isDark} />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 pl-11 sm:pl-0">
@@ -734,10 +751,16 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 </div>
 
                 <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-slate-800/80" : "border-slate-200")}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-8">
                     <div>
                       <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Registered On</p>
-                      <p className={cn("text-sm font-medium", isDark ? "text-zinc-200" : "text-slate-900")}>{new Date(user.createdAt).toLocaleDateString()}</p>
+                      <p className={cn("text-sm font-medium", isDark ? "text-zinc-200" : "text-slate-900")}>{new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+                    </div>
+                    <div>
+                      <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Last Seen</p>
+                      <div className="mt-1">
+                        <LastSeenBadge date={user.lastActive} isDark={isDark} showSubtext={true} />
+                      </div>
                     </div>
                     <div>
                       <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Account Status</p>

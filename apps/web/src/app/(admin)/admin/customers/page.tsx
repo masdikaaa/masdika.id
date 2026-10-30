@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { LastSeenBadge } from "@/components/ui/LastSeenBadge";
+import { isUserOnline } from "@/lib/last-seen";
 
 export default function AdminCustomersPage() {
   const { theme } = useTheme();
@@ -58,19 +60,39 @@ export default function AdminCustomersPage() {
   const [isResettingReferrals, setIsResettingReferrals] = useState(false);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
 
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "online" | "active" | "suspended">("all");
+  const [sortBy, setSortBy] = useState<"newest" | "last_seen" | "balance">("newest");
 
+  const onlineCount = users.filter(u => isUserOnline(u.lastActive)).length;
   const activeCount = users.filter(u => !u.isSuspended).length;
   const suspendedCount = users.filter(u => u.isSuspended).length;
   const totalBalance = users.reduce((acc, u) => acc + (Number(u.balance) || 0), 0);
 
-  // Filtering
-  const filteredUsers = users.filter((u) => {
-    const matchesStatus = statusFilter === "all" ? true : statusFilter === "suspended" ? u.isSuspended : !u.isSuspended;
-    const matchesSearch = (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesStatus && matchesSearch;
-  });
+  // Filtering & Sorting
+  const filteredUsers = users
+    .filter((u) => {
+      const matchesStatus = statusFilter === "all"
+        ? true
+        : statusFilter === "online"
+        ? isUserOnline(u.lastActive)
+        : statusFilter === "suspended"
+        ? u.isSuspended
+        : !u.isSuspended;
+      const matchesSearch = (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesStatus && matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === "last_seen") {
+        const timeA = a.lastActive ? new Date(a.lastActive).getTime() : 0;
+        const timeB = b.lastActive ? new Date(b.lastActive).getTime() : 0;
+        return timeB - timeA;
+      }
+      if (sortBy === "balance") {
+        return (Number(b.balance) || 0) - (Number(a.balance) || 0);
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   // Pagination
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
@@ -388,6 +410,7 @@ export default function AdminCustomersPage() {
         )}>
           {[
             { id: "all", label: "All Users", count: users.length },
+            { id: "online", label: "Online Now", count: onlineCount },
             { id: "active", label: "Active", count: activeCount },
             { id: "suspended", label: "Suspended", count: suspendedCount },
           ].map((tab) => (
@@ -476,20 +499,30 @@ export default function AdminCustomersPage() {
                 <th className="p-4 whitespace-nowrap">User Details</th>
                 <th className="p-4 whitespace-nowrap">ID</th>
                 <th className="p-4 text-center whitespace-nowrap">Status</th>
+                <th 
+                  onClick={() => setSortBy(sortBy === "last_seen" ? "newest" : "last_seen")}
+                  className="p-4 text-center whitespace-nowrap cursor-pointer hover:text-cyan-400 select-none transition-colors"
+                  title="Click to sort by Last Seen"
+                >
+                  <div className="inline-flex items-center justify-center gap-1.5">
+                    <span>Last Seen</span>
+                    {sortBy === "last_seen" && <span className="text-cyan-400 text-xs">▼</span>}
+                  </div>
+                </th>
                 <th className="p-4 text-center whitespace-nowrap">Balance</th>
                 <th className="p-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {loading ? (
-                <tr><td colSpan={8} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
+                <tr><td colSpan={7} className={cn("p-8 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
                   <div className="flex flex-col items-center justify-center gap-3">
                     <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
                     <p>Loading users...</p>
                   </div>
                 </td></tr>
               ) : filteredUsers.length === 0 ? (
-                <tr><td colSpan={8} className="p-16 text-center">
+                <tr><td colSpan={7} className="p-16 text-center">
                   <div className="flex flex-col items-center justify-center">
                     <Users className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
                     <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No customers found</p>
@@ -515,12 +548,23 @@ export default function AdminCustomersPage() {
                     </td>
                     <td className="p-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
-                          <img referrerPolicy="no-referrer" 
-                            src={u.image || `/api/avatar?email=${encodeURIComponent(u.email || '')}&name=${encodeURIComponent(u.name || 'User')}`} 
-                            alt={u.name || "User"}
-                            className="w-full h-full object-cover"
-                          loading="lazy" decoding="async" />
+                        <div className="relative">
+                          <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+                            <img referrerPolicy="no-referrer" 
+                              src={u.image || `/api/avatar?email=${encodeURIComponent(u.email || '')}&name=${encodeURIComponent(u.name || 'User')}`} 
+                              alt={u.name || "User"}
+                              className="w-full h-full object-cover"
+                            loading="lazy" decoding="async" />
+                          </div>
+                          {isUserOnline(u.lastActive) && (
+                            <span 
+                              className={cn(
+                                "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2",
+                                isDark ? "ring-[#0b1322]" : "ring-white"
+                              )} 
+                              title="Online right now" 
+                            />
+                          )}
                         </div>
                         <div>
                           <Link href={`/admin/customers/${u.id}`} className={cn("font-semibold whitespace-nowrap hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
@@ -541,6 +585,9 @@ export default function AdminCustomersPage() {
                           <CheckCircle className="w-3.5 h-3.5" /> Active
                         </span>
                       )}
+                    </td>
+                    <td className="p-4 text-center whitespace-nowrap">
+                      <LastSeenBadge date={u.lastActive} isDark={isDark} />
                     </td>
                     <td className="p-4 text-center">
                       <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(u.balance || 0)}</div>

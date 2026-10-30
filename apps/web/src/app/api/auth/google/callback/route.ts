@@ -169,6 +169,12 @@ export async function GET(req: Request) {
       console.error('Failed to record Google login log:', logErr);
     }
 
+    // Update lastActive timestamp on successful Google login
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastActive: new Date() },
+    }).catch(err => console.debug("google login lastActive update error:", err));
+
     const redirectUrl = new URL(user.role === 'ADMIN' ? '/admin' : '/dashboard', baseUrl);
     const response = NextResponse.redirect(redirectUrl);
 
