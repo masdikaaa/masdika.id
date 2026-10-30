@@ -569,25 +569,29 @@ export function PremiumBackground() {
       aria-hidden="true"
       className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-[#f8fafb] dark:bg-[#000000] transition-colors duration-700 select-none"
     >
-      {/* ── Light Mode Ethereal Gradient Blur Mesh ── */}
-      {/* Top Left Sky / Cyan Ambient Wash (behind headline) */}
-      <div className="dark:hidden absolute -top-[160px] -left-[140px] w-[680px] h-[680px] rounded-full bg-gradient-to-br from-cyan-400/20 via-sky-300/15 to-transparent blur-[140px]" />
+      {/* ── Light Mode Ethereal Gradient Mesh (Pure CSS vector gradients, zero GPU memory bloat) ── */}
+      <div
+        className="dark:hidden absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle 520px at 15% 10%, rgba(34, 211, 238, 0.16) 0%, rgba(34, 211, 238, 0.05) 40%, transparent 75%),
+            radial-gradient(circle 460px at 10% 45%, rgba(129, 140, 248, 0.12) 0%, rgba(129, 140, 248, 0.04) 40%, transparent 75%),
+            radial-gradient(circle 540px at 90% 90%, rgba(56, 189, 248, 0.14) 0%, rgba(56, 189, 248, 0.04) 40%, transparent 75%)
+          `,
+        }}
+      />
 
-      {/* Center Left Subtle Indigo Tint */}
-      <div className="dark:hidden absolute top-[40%] -left-[180px] w-[540px] h-[540px] rounded-full bg-gradient-to-tr from-indigo-300/14 via-blue-200/10 to-transparent blur-[140px]" />
-
-      {/* Bottom Right Soft Cyan Aura */}
-      <div className="dark:hidden absolute bottom-[5%] -right-[120px] w-[620px] h-[620px] rounded-full bg-gradient-to-tl from-cyan-300/16 via-sky-200/10 to-transparent blur-[160px]" />
-
-      {/* ── Dark Mode Luminous Gradient Blur Mesh ── */}
-      {/* Top Left Neon Cyan Atmospheric Glow (behind headline) */}
-      <div className="hidden dark:block absolute -top-[180px] -left-[160px] w-[740px] h-[700px] rounded-full bg-gradient-to-br from-cyan-500/16 via-cyan-400/6 to-transparent blur-[150px]" />
-
-      {/* Center Left Deep Sapphire Blue Aura */}
-      <div className="hidden dark:block absolute top-[38%] -left-[200px] w-[580px] h-[560px] rounded-full bg-gradient-to-tr from-blue-600/10 via-indigo-600/5 to-transparent blur-[150px]" />
-
-      {/* Bottom Right Deep Cyan / Teal Ambient Glow */}
-      <div className="hidden dark:block absolute bottom-[5%] -right-[140px] w-[640px] h-[620px] rounded-full bg-gradient-to-tl from-cyan-500/12 via-teal-500/6 to-transparent blur-[160px]" />
+      {/* ── Dark Mode Luminous Gradient Mesh (Pure CSS vector gradients, zero GPU memory bloat) ── */}
+      <div
+        className="hidden dark:block absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle 540px at 15% 10%, rgba(34, 211, 238, 0.15) 0%, rgba(34, 211, 238, 0.04) 40%, transparent 75%),
+            radial-gradient(circle 480px at 10% 45%, rgba(37, 99, 235, 0.10) 0%, rgba(37, 99, 235, 0.03) 40%, transparent 75%),
+            radial-gradient(circle 560px at 90% 90%, rgba(20, 184, 166, 0.11) 0%, rgba(20, 184, 166, 0.03) 40%, transparent 75%)
+          `,
+        }}
+      />
     </div>
   );
 }

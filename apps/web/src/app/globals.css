@@ -180,14 +180,13 @@ html.dark {
   animation: float-badge-4 4.6s ease-in-out infinite;
 }
 
-/* Translucent Frosted Glass for all Hero Floating Cards */
+/* High-Performance Cards for Hero Floating Badges */
+/* On mobile, use solid opaque background without expensive real-time blur passes to prevent GPU crashes */
 .animate-float-1,
 .animate-float-2,
 .animate-float-3,
 .animate-float-4 {
-  background-color: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(255, 255, 255, 0.6) !important;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08) !important;
 }
@@ -196,11 +195,30 @@ html.dark .animate-float-1,
 html.dark .animate-float-2,
 html.dark .animate-float-3,
 html.dark .animate-float-4 {
-  background-color: rgba(18, 18, 18, 0.75) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background-color: rgba(18, 18, 18, 0.95) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* On desktop with powerful GPU, apply rich frosted glass blur */
+@media (min-width: 769px) {
+  .animate-float-1,
+  .animate-float-2,
+  .animate-float-3,
+  .animate-float-4 {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  html.dark .animate-float-1,
+  html.dark .animate-float-2,
+  html.dark .animate-float-3,
+  html.dark .animate-float-4 {
+    background-color: rgba(18, 18, 18, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
 }
 
 html {
@@ -2150,18 +2168,18 @@ html.light input[type="range"]::-moz-range-progress {
 }
 
 /* ===== Page Fade-In Animation ===== */
+/* Pure opacity fade-in without transform to prevent iOS Safari from creating a single 
+   giant compositing layer for the entire page height which exhausts mobile GPU memory */
 @keyframes page-fade-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 .page-fade-in {
-  animation: page-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: page-fade-in 0.25s ease-out both;
 }
 
