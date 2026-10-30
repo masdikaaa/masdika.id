@@ -1045,10 +1045,9 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         value={logFilterDate}
                         onChange={(e) => setLogFilterDate(e.target.value)}
                         className={cn(
-                          "block w-full min-w-0 max-w-full h-9 px-8 text-xs text-center rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 box-border leading-normal",
+                          "block w-full min-w-0 max-w-full h-9 pl-3 pr-8 text-xs text-left rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 box-border leading-normal",
                           "[appearance:none] [-webkit-appearance:none]",
-                          "[&::-webkit-date-and-time-value]:h-full [&::-webkit-date-and-time-value]:flex [&::-webkit-date-and-time-value]:items-center [&::-webkit-date-and-time-value]:justify-center [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:m-0 [&::-webkit-date-and-time-value]:p-0",
-                          "[&::-webkit-datetime-edit]:flex [&::-webkit-datetime-edit]:justify-center [&::-webkit-datetime-edit]:text-center [&::-webkit-datetime-edit]:mx-auto",
+                          "[&::-webkit-date-and-time-value]:h-full [&::-webkit-date-and-time-value]:flex [&::-webkit-date-and-time-value]:items-center [&::-webkit-date-and-time-value]:justify-start [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:m-0 [&::-webkit-date-and-time-value]:p-0",
                           "[&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer",
                           isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-300 text-slate-800 [color-scheme:light]"
                         )}
