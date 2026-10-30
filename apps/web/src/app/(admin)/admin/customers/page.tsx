@@ -16,9 +16,11 @@ import { isUserOnline } from "@/lib/last-seen";
 export default function AdminCustomersPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const fetchUsers = async () => {
+  const fetchUsers = async (query?: string | React.MouseEvent) => {
     try {
-      const res = await fetch("/api/admin/users");
+      const q = typeof query === "string" ? query.trim() : searchQuery.trim();
+      const url = q ? `/api/admin/users?q=${encodeURIComponent(q)}` : "/api/admin/users";
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setUsers(data.data || []);
@@ -101,8 +103,11 @@ export default function AdminCustomersPage() {
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchUsers(searchQuery);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
 
   const handleDeleteUserConfirm = async () => {
@@ -285,7 +290,7 @@ export default function AdminCustomersPage() {
             Total Customers: {users.length}
           </div>
           <button
-            onClick={fetchUsers}
+            onClick={() => fetchUsers(searchQuery)}
             disabled={loading}
             className={cn(
               "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",

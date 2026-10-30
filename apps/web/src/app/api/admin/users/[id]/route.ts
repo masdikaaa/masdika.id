@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
 import { decryptDeterministic } from '@/lib/encryption';
+import { syncCustomerToElastic } from '@/lib/sync-elasticsearch';
 import path from 'path';
 import { unlink } from 'fs/promises';
 
@@ -177,6 +178,7 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     await prisma.user.delete({
       where: { id: user.id }
     });
+    syncCustomerToElastic(user.id).catch(err => console.debug('ES syncCustomer error:', err));
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -106,3 +106,139 @@ export async function searchVpsElastic(query: string) {
     return result.hits.hits.map((hit: any) => parseInt(hit._id));
   }, null);
 }
+
+export const CUSTOMER_INDEX = 'masdika-customers';
+
+/**
+ * Initializes the Elasticsearch index for Customers with proper mappings for search
+ */
+export async function initializeCustomerElasticIndex() {
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: CUSTOMER_INDEX });
+    if (!exists) {
+      await client.indices.create({
+        index: CUSTOMER_INDEX,
+        body: {
+          mappings: {
+            properties: {
+              id: { type: 'integer' },
+              email: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              name: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              isSuspended: { type: 'boolean' },
+              balance: { type: 'integer' },
+              lastActive: { type: 'date' },
+              createdAt: { type: 'date' }
+            }
+          }
+        }
+      });
+      console.log(`[Elasticsearch] Index ${CUSTOMER_INDEX} created.`);
+    }
+  });
+}
+
+/**
+ * Syncs a single customer record to Elasticsearch
+ */
+export async function syncCustomerToElastic(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      isSuspended: true,
+      balance: true,
+      lastActive: true,
+      createdAt: true
+    }
+  });
+
+  if (!user || user.role !== 'USER') {
+    // If deleted or not a customer, delete from ES
+    await withElastic(async (client) => {
+      await client.delete({
+        index: CUSTOMER_INDEX,
+        id: userId.toString(),
+      }).catch(e => {
+        if (e.meta?.statusCode !== 404) console.error(e);
+      });
+    });
+    return;
+  }
+
+  const email = decryptDeterministic(user.email) || user.email;
+  const name = user.name ? (decryptDeterministic(user.name) || user.name) : '';
+
+  const doc = {
+    id: user.id,
+    email,
+    name,
+    isSuspended: user.isSuspended,
+    balance: user.balance,
+    lastActive: user.lastActive,
+    createdAt: user.createdAt
+  };
+
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: CUSTOMER_INDEX });
+    if (!exists) {
+      await initializeCustomerElasticIndex();
+    }
+
+    await client.index({
+      index: CUSTOMER_INDEX,
+      id: user.id.toString(),
+      document: doc
+    });
+  });
+}
+
+/**
+ * Searches Customers in Elasticsearch
+ */
+export async function searchCustomersElastic(
+  query: string,
+  options?: { isSuspended?: boolean; limit?: number }
+): Promise<number[] | null> {
+  return await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: CUSTOMER_INDEX });
+    if (!exists) {
+      return null;
+    }
+
+    const must: any[] = [];
+    if (query && query.trim()) {
+      must.push({
+        multi_match: {
+          query: query.trim(),
+          fields: ['name^3', 'email^3', 'id'],
+          fuzziness: 'AUTO',
+          prefix_length: 1
+        }
+      });
+    }
+
+    const filter: any[] = [];
+    if (options?.isSuspended !== undefined) {
+      filter.push({ term: { isSuspended: options.isSuspended } });
+    }
+
+    const result = await client.search({
+      index: CUSTOMER_INDEX,
+      body: {
+        query: must.length || filter.length ? {
+          bool: {
+            ...(must.length ? { must } : {}),
+            ...(filter.length ? { filter } : {})
+          }
+        } : { match_all: {} },
+        sort: [{ createdAt: { order: 'desc' } }],
+        size: options?.limit || 100
+      }
+    });
+
+    return result.hits.hits.map((hit: any) => hit._source ? hit._source.id : parseInt(hit._id, 10));
+  }, null);
+}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
+import { syncCustomerToElastic } from '@/lib/sync-elasticsearch';
 
 export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -30,6 +31,9 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
         suspendReason: true,
       }
     });
+
+    // Sync updated suspend status to Elasticsearch
+    syncCustomerToElastic(userId).catch(err => console.debug("ES syncCustomer error:", err));
 
     return NextResponse.json({ success: true, data: updatedUser });
   } catch (error) {

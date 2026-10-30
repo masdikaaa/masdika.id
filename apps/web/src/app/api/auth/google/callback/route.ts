@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import { getClientIp } from '@/lib/get-ip';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { parseUserAgent } from '@/lib/device';
+import { syncCustomerToElastic } from '@/lib/sync-elasticsearch';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -104,6 +105,9 @@ export async function GET(req: Request) {
           balance: 0,
         },
       });
+
+      // Sync newly created user to Elasticsearch
+      syncCustomerToElastic(user.id).catch(err => console.debug("ES syncCustomer error:", err));
     }
 
     if (user.isSuspended) {

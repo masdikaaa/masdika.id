@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
+import { syncCustomerToElastic } from "@/lib/sync-elasticsearch";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -58,6 +59,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         await attemptAutoUnsuspendAllForUser(userId).catch(console.error);
       }
     }
+
+    // Sync updated user to Elasticsearch (gracefully ignored on local dev if ES is not running)
+    syncCustomerToElastic(userId).catch(err => console.debug("ES syncCustomer error:", err));
 
     return NextResponse.json({ success: true, balance: updatedUser.balance });
   } catch (error) {

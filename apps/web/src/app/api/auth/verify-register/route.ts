@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { encryptDeterministic } from "@/lib/encryption";
 import { getClientIp } from "@/lib/get-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { syncCustomerToElastic } from "@/lib/sync-elasticsearch";
 import crypto from "crypto";
 
 const MAX_OTP_ATTEMPTS = 5; // Max wrong OTP attempts before invalidating registration
@@ -114,6 +115,9 @@ export async function POST(req: NextRequest) {
         country: pendingRegistration.country || null,
       }
     });
+
+    // Sync newly registered user to Elasticsearch if configured
+    syncCustomerToElastic(newUser.id).catch(err => console.debug("ES syncCustomer error:", err));
 
     // Delete pending registration
     await prisma.registrationOtp.delete({
