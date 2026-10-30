@@ -117,9 +117,8 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // 5. Update Proxmox Config
     const cidrSuffix = vpc.cidr.split('/')[1] || '24';
     const speedMbps = vps.bandwidthMbps || 100;
-    const rateMBs = speedMbps / 8;
     const config: any = {};
-    config[`net${netIndex}`] = `model=virtio,bridge=${vpc.router.proxmoxBridge},tag=${vpc.vlanId},firewall=1,rate=${rateMBs}`;
+    config[`net${netIndex}`] = `model=virtio,bridge=${vpc.router.proxmoxBridge},tag=${vpc.vlanId},firewall=1,rate=${speedMbps}`;
 
     // If VM has no public IPs, VPC must be the gateway
     if (vps.assignedIps.length === 0) {

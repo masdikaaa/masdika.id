@@ -76,7 +76,9 @@ export function bandwidthUpgradeHourlyCost(
   return Math.max(0, diff) * bandwidthRatePerHour(pricing);
 }
 
-/** Proxmox `rate` is in MB/s (1 MB/s = 8 Mbps). */
+/**
+ * Proxmox `rate` limit configured directly in Mbps (100 Mbps = 100, 150 Mbps = 150).
+ */
 export function bandwidthToProxmoxRate(mbps: number): number {
-  return mbps / 8;
+  return mbps;
 }

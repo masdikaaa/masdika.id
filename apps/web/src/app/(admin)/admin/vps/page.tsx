@@ -1752,7 +1752,7 @@ export default function VpsManagementPage() {
                     const stepRate = Number(newBandwidthRateInput) || bandwidthRatePerHour;
                     const hourlyPrice = extraSteps * stepRate;
                     const monthlyPrice = hourlyPrice * 730;
-                    const proxmoxRateMBs = speed / 8;
+                    const proxmoxRateMbps = speed;
 
                     return (
                       <div
@@ -1777,7 +1777,7 @@ export default function VpsManagementPage() {
                               )}
                             </div>
                             <span className="text-[11px] font-mono text-zinc-500 block mt-0.5">
-                              Proxmox rate: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{proxmoxRateMBs} MB/s</strong>
+                              Proxmox rate: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{proxmoxRateMbps} Mbps</strong>
                             </span>
                           </div>
 

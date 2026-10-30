@@ -966,7 +966,7 @@ export default function AdminResourceFindingPage() {
                     >
                       <div className="flex items-center gap-1.5 font-medium truncate">
                         <Gauge className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                        <span className="truncate">Throttled: <strong>{vps.rateLimit} MB/s</strong> (~{Math.round(vps.rateLimit * 8)} Mbps)</span>
+                        <span className="truncate">Throttled: <strong>{vps.rateLimit} Mbps</strong></span>
                       </div>
                       <button
                         onClick={() => handleVpsAction(vps.id, "unthrottle")}
@@ -1007,7 +1007,7 @@ export default function AdminResourceFindingPage() {
                     <button
                       onClick={() => {
                         setThrottleModalVps(vps);
-                        setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "1.25");
+                        setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "10");
                       }}
                       className={cn(
                         "h-9 px-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95",
@@ -1023,7 +1023,7 @@ export default function AdminResourceFindingPage() {
                           ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                           : "bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
                       )}
-                      title={vps.isNetDisabled ? "Internet access is disabled" : vps.rateLimit ? `Currently throttled: ${vps.rateLimit} MB/s` : "Set Bandwidth Rate Limit"}
+                      title={vps.isNetDisabled ? "Internet access is disabled" : vps.rateLimit ? `Currently throttled: ${vps.rateLimit} Mbps` : "Set Bandwidth Rate Limit"}
                     >
                       {vps.isNetDisabled ? <WifiOff className="w-3.5 h-3.5 shrink-0" /> : <Gauge className="w-3.5 h-3.5 shrink-0" />}
                       <span>{vps.isNetDisabled ? "Net Off" : vps.rateLimit && vps.rateLimit > 0 ? "Throttled" : "Throttle"}</span>
@@ -1408,10 +1408,7 @@ export default function AdminResourceFindingPage() {
                               >
                                 <div className="flex items-center gap-1.5 font-mono">
                                   <Gauge className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                                  <span>Throttled: <strong className="font-bold">{vps.rateLimit} MB/s</strong></span>
-                                  <span className={cn("text-[10px]", isDark ? "text-cyan-400/70" : "text-cyan-700/70")}>
-                                    (~{Math.round(vps.rateLimit * 8)}M)
-                                  </span>
+                                  <span>Throttled: <strong className="font-bold">{vps.rateLimit} Mbps</strong></span>
                                 </div>
                                 <button
                                   onClick={() => handleVpsAction(vps.id, "unthrottle")}
@@ -1716,7 +1713,7 @@ export default function AdminResourceFindingPage() {
                           <button
                             onClick={() => {
                               setThrottleModalVps(vps);
-                              setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "1.25");
+                              setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "10");
                             }}
                             className={cn(
                               "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
@@ -1736,7 +1733,7 @@ export default function AdminResourceFindingPage() {
                               vps.isNetDisabled
                                 ? "Internet access is disabled (Click to manage)"
                                 : vps.rateLimit && vps.rateLimit > 0
-                                ? `Currently throttled to ${vps.rateLimit} MB/s (~${Math.round(vps.rateLimit * 8)} Mbps). Click to adjust or unthrottle.`
+                                ? `Currently throttled to ${vps.rateLimit} Mbps. Click to adjust or unthrottle.`
                                 : "Throttle Bandwidth (Set Rate Limit)"
                             }
                           >
@@ -1898,7 +1895,7 @@ export default function AdminResourceFindingPage() {
                   <span className="text-zinc-500">Rate Limit:</span>{" "}
                   {inspectVps.rateLimit && inspectVps.rateLimit > 0 ? (
                     <span className={cn("font-bold font-mono", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                      {inspectVps.rateLimit} MB/s (~{Math.round(inspectVps.rateLimit * 8)} Mbps)
+                      {inspectVps.rateLimit} Mbps
                     </span>
                   ) : (
                     <span className="text-emerald-400 font-semibold">Unlimited</span>
@@ -1906,7 +1903,7 @@ export default function AdminResourceFindingPage() {
                   <button
                     onClick={() => {
                       setThrottleModalVps(inspectVps);
-                      setThrottleRate(inspectVps.rateLimit ? inspectVps.rateLimit.toString() : "1.25");
+                      setThrottleRate(inspectVps.rateLimit ? inspectVps.rateLimit.toString() : "10");
                     }}
                     className={cn(
                       "p-1 rounded transition-colors",
@@ -2214,7 +2211,7 @@ export default function AdminResourceFindingPage() {
                   Status: {throttleModalVps.isNetDisabled
                     ? "Internet Disabled (Network Link Down / Isolated)"
                     : throttleModalVps.rateLimit && throttleModalVps.rateLimit > 0
-                    ? `Throttled to ${throttleModalVps.rateLimit} MB/s (~${Math.round(throttleModalVps.rateLimit * 8)} Mbps)`
+                    ? `Throttled to ${throttleModalVps.rateLimit} Mbps`
                     : "Unlimited (Full Host Speed)"}
                 </span>
               </div>

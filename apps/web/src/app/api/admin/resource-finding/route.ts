@@ -570,8 +570,7 @@ export async function POST(req: NextRequest) {
         }
 
         await proxmox.configVm(node, vmid!, updates);
-        const approxMbps = Math.round(rateVal * 8);
-        resultMsg = `Bandwidth throttled to ${rateVal} MB/s (~${approxMbps} Mbps) on VPS #${vmid} (${vps.hostname})`;
+        resultMsg = `Bandwidth rate limit set to ${rateVal} Mbps on VPS #${vmid} (${vps.hostname})`;
         break;
       }
 
