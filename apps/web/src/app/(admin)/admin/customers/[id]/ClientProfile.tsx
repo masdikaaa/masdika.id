@@ -643,7 +643,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             <div className="flex flex-wrap items-center gap-2 mt-0.5">
               <p className={cn("text-xs sm:text-sm truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
               <span className="opacity-30">•</span>
-              <LastSeenBadge date={user.lastActive} isDark={isDark} />
+              <LastSeenBadge date={user.lastActive} isDark={isDark} variant="inline" />
             </div>
           </div>
         </div>
@@ -759,7 +759,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     <div>
                       <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Last Seen</p>
                       <div className="mt-1">
-                        <LastSeenBadge date={user.lastActive} isDark={isDark} showSubtext={true} />
+                        <LastSeenBadge date={user.lastActive} isDark={isDark} showSubtext={true} align="left" />
                       </div>
                     </div>
                     <div>
