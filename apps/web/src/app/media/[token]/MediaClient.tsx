@@ -175,7 +175,6 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
           dragging ? "cursor-grabbing" : scale > 1 ? "cursor-grab" : "cursor-default"
         )}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt={alt}

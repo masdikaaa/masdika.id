@@ -1,19 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/session";
-import MediaClient, { MediaInfo } from "./MediaClient";
+import MediaClient, { MediaInfo, MediaStatus } from "./MediaClient";
 
-export default async function PublicMediaPage({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
-  const { token } = await params;
-
+async function getMediaData(token: string): Promise<{ status: MediaStatus; media: MediaInfo | null }> {
   // UUID validation
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_RE.test(token)) {
-    return <MediaClient token={token} initialStatus="notfound" initialMedia={null} />;
+    return { status: "notfound", media: null };
   }
 
   try {
@@ -32,7 +26,7 @@ export default async function PublicMediaPage({
     });
 
     if (!media) {
-      return <MediaClient token={token} initialStatus="notfound" initialMedia={null} />;
+      return { status: "notfound", media: null };
     }
 
     if (!media.isPublic) {
@@ -53,12 +47,12 @@ export default async function PublicMediaPage({
       }
 
       if (!isAuthorized) {
-        return <MediaClient token={token} initialStatus="private" initialMedia={null} />;
+        return { status: "private", media: null };
       }
     }
 
     if (media.expiresAt && media.expiresAt < new Date()) {
-      return <MediaClient token={token} initialStatus="expired" initialMedia={null} />;
+      return { status: "expired", media: null };
     }
 
     const initialMedia: MediaInfo = {
@@ -71,9 +65,20 @@ export default async function PublicMediaPage({
       isPublic: media.isPublic,
     };
 
-    return <MediaClient token={token} initialStatus="ok" initialMedia={initialMedia} />;
+    return { status: "ok", media: initialMedia };
   } catch (error) {
-    console.error("PublicMediaPage Server Error:", error);
-    return <MediaClient token={token} initialStatus="error" initialMedia={null} />;
+    console.error("PublicMediaPage getMediaData Error:", error);
+    return { status: "error", media: null };
   }
+}
+
+export default async function PublicMediaPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
+  const { token } = await params;
+  const { status, media } = await getMediaData(token);
+
+  return <MediaClient token={token} initialStatus={status} initialMedia={media} />;
 }
