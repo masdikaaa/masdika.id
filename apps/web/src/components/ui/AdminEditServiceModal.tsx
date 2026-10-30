@@ -208,7 +208,7 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
                   name="expiresAt"
                   value={formData.expiresAt || ''}
                   onChange={handleChange}
-                  className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
               <div>
@@ -220,7 +220,7 @@ export function AdminEditServiceModal({ isOpen, onClose, onSuccess, service }: A
                   name="terminationDate"
                   value={formData.terminationDate || ''}
                   onChange={handleChange}
-                  className={cn("w-full border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl p-2.5 text-sm transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
             </div>

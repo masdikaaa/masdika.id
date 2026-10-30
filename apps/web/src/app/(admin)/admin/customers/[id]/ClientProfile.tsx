@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from 'react';
-import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, KeyRound, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History } from 'lucide-react';
+import { User, Activity, FileText, Settings, ShieldAlert, ArrowLeft, Database, Link2, Key, KeyRound, Server, CheckCircle, XCircle, Clock, AlertTriangle, Ban, Box, Globe, Music, Edit3, Terminal, UploadCloud, Mail, Send, Eye, Paperclip, Trash2, RefreshCw, Filter, Search, History, Calendar } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { SiKubernetes } from 'react-icons/si';
 import { toast } from 'sonner';
@@ -1033,28 +1033,30 @@ export default function ClientProfile({ userId }: { userId: string }) {
         {activeTab === 'logs' && (
           <div className="space-y-4">
             {/* WHMCS Search / Filter Card */}
-            <div className={cn("p-5 rounded-2xl border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5">
+            <div className={cn("p-5 rounded-2xl border overflow-hidden w-full max-w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 w-full min-w-0">
                 {/* Left Column */}
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="space-y-3 w-full min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full min-w-0">
                     <label className={cn("w-24 text-xs font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>Date</label>
-                    <div className="relative flex-1">
+                    <div className="relative flex-1 w-full min-w-0">
                       <input
                         type="date"
                         value={logFilterDate}
                         onChange={(e) => setLogFilterDate(e.target.value)}
                         className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          "block w-full min-w-0 max-w-full h-9 pl-3 pr-8 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 box-border [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:min-h-[1.25em]",
+                          "[&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer",
                           isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-300 text-slate-800 [color-scheme:light]"
                         )}
                       />
+                      <Calendar className={cn("w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none z-10", isDark ? "text-zinc-500" : "text-slate-400")} />
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full min-w-0">
                     <label className={cn("w-24 text-xs font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>Username</label>
-                    <div className="flex-1">
+                    <div className="flex-1 w-full min-w-0">
                       <Select
                         value={logFilterUsername}
                         onChange={(val) => setLogFilterUsername(val)}
@@ -1069,33 +1071,33 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 </div>
 
                 {/* Right Column */}
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="space-y-3 w-full min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full min-w-0">
                     <label className={cn("w-24 text-xs font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>Description</label>
-                    <div className="flex-1">
+                    <div className="flex-1 w-full min-w-0">
                       <input
                         type="text"
                         value={logFilterDescription}
                         onChange={(e) => setLogFilterDescription(e.target.value)}
                         placeholder="Search description, order, payment..."
                         className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500",
+                          "w-full min-w-0 max-w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 box-border",
                           isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full min-w-0">
                     <label className={cn("w-24 text-xs font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>IP Address</label>
-                    <div className="flex-1">
+                    <div className="flex-1 w-full min-w-0">
                       <input
                         type="text"
                         value={logFilterIp}
                         onChange={(e) => setLogFilterIp(e.target.value)}
                         placeholder="e.g. 103.147..."
                         className={cn(
-                          "w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono",
+                          "w-full min-w-0 max-w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono box-border",
                           isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />

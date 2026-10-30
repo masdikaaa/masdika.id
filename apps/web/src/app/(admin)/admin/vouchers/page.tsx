@@ -836,7 +836,7 @@ export default function AdminVouchersPage() {
                   type="date"
                   value={newVoucher.validUntil}
                   onChange={e => setNewVoucher({ ...newVoucher, validUntil: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
 
@@ -965,7 +965,7 @@ export default function AdminVouchersPage() {
                       type="date"
                       value={newPromo.validUntil}
                       onChange={e => setNewPromo({ ...newPromo, validUntil: e.target.value })}
-                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                      className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                     />
                   </div>
                 </div>
