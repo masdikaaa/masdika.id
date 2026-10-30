@@ -34,9 +34,6 @@ set_secrets.bat
 apps/web/public/uploads/**
 !apps/web/public/uploads/.gitkeep
 !apps/web/public/uploads/**/.gitkeep
-public/uploads/**
-!public/uploads/.gitkeep
-!public/uploads/**/.gitkeep
 
 apps/web/storage/**
 !apps/web/storage/.gitkeep

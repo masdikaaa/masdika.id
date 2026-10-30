@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
+import { getUploadsDir } from '@/lib/file-utils';
 
 /**
  * Validate image file by checking magic bytes (file signature).
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'File size exceeds the 10MB limit' }, { status: 400 });
     }
 
-    const uploadsDir = safeFolder ? path.join(process.cwd(), 'public', 'uploads', safeFolder) : path.join(process.cwd(), 'public', 'uploads');
+    const uploadsDir = safeFolder ? getUploadsDir(safeFolder) : getUploadsDir();
     const dbPathPrefix = safeFolder ? `/uploads/${safeFolder}` : '/uploads';
     const filePrefix = safeFolder ? safeFolder : 'file';
 
@@ -132,7 +133,7 @@ export async function DELETE(req: Request) {
       const filename = uploadPath.replace(/^\/uploads\//, '');
 
       // Bulletproof path traversal prevention (same pattern as file-utils.ts)
-      const baseDir = path.resolve(process.cwd(), 'public', 'uploads');
+      const baseDir = getUploadsDir();
       const filePath = path.resolve(baseDir, filename);
 
       // Ensure the resolved path is still within the uploads directory

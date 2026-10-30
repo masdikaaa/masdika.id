@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getUploadsDir } from '@/lib/file-utils';
 
 const mimeTypes: Record<string, string> = {
   '.webp': 'image/webp',
@@ -27,13 +28,7 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    let baseUploadsDir = path.normalize(path.join(process.cwd(), 'public', 'uploads'));
-    if (!fs.existsSync(baseUploadsDir)) {
-      const monorepoWebDir = path.normalize(path.join(process.cwd(), 'apps', 'web', 'public', 'uploads'));
-      if (fs.existsSync(monorepoWebDir)) {
-        baseUploadsDir = monorepoWebDir;
-      }
-    }
+    const baseUploadsDir = path.normalize(getUploadsDir());
     const filePath = path.normalize(path.join(baseUploadsDir, ...resolvedParams.path));
 
     // Prevent directory traversal (Strict Check)

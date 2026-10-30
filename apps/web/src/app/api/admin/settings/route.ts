@@ -5,6 +5,7 @@ import { generateSecret, generateURI, verify } from 'otplib';
 import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
+import { getUploadsDir } from '@/lib/file-utils';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -108,7 +109,7 @@ export async function PUT(req: Request) {
         if (matches && matches.length === 3) {
           const buffer = Buffer.from(matches[2], 'base64');
           const fileName = `avatar-${Date.now()}.webp`;
-          const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+          const uploadDir = getUploadsDir('avatars');
           
           if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
@@ -136,7 +137,7 @@ export async function PUT(req: Request) {
           const safeFilename = path.basename(oldImagePath);
           // If the old path starts with /uploads/avatars/, we must handle the path correctly.
           // FIX: Prevent directory traversal by strictly joining with safeFilename
-          const oldFileAbsolutePath = path.join(process.cwd(), 'public', 'uploads', 'avatars', safeFilename);
+          const oldFileAbsolutePath = getUploadsDir('avatars', safeFilename);
           if (fs.existsSync(oldFileAbsolutePath)) {
             fs.unlinkSync(oldFileAbsolutePath);
           }

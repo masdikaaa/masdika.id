@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { decryptDeterministic } from '@/lib/encryption';
+import { getUploadsDir, deleteLocalFile } from '@/lib/file-utils';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
@@ -57,16 +58,13 @@ export async function PUT(req: Request) {
     if (removeImage) {
       const currentUser = await prisma.user.findUnique({ where: { id: auth.userId } });
       if (currentUser?.image) {
-        const filePath = path.join(process.cwd(), 'public', currentUser.image);
-        if (fs.existsSync(filePath)) {
-          try { fs.unlinkSync(filePath); } catch (e) { console.error('Failed to delete image file', e); }
-        }
+        deleteLocalFile(currentUser.image);
       }
       updateData.image = null;
     } else if (file && file.size > 0) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+      const uploadDir = getUploadsDir('avatars');
       if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
       const fileExt = file.name.split('.').pop() || 'png';
       const fileName = `avatar-${Date.now()}.${fileExt}`;

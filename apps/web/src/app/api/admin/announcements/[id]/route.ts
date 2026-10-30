@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { deleteLocalFile } from '@/lib/file-utils';
 import fs from 'fs';
 import path from 'path';
 
@@ -23,13 +24,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
     // Delete old image if it is being replaced
     if (imageUrl !== undefined && oldAnnouncement.imageUrl && oldAnnouncement.imageUrl !== imageUrl) {
-      if (oldAnnouncement.imageUrl.startsWith('/uploads/')) {
-        const filename = oldAnnouncement.imageUrl.replace('/uploads/', '');
-        const filePath = path.resolve(process.cwd(), 'public', 'uploads', filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      }
+      deleteLocalFile(oldAnnouncement.imageUrl);
     }
 
     const announcement = await prisma.announcement.update({
@@ -61,12 +56,8 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
       where: { id: parseInt(params.id) }
     });
 
-    if (oldAnnouncement?.imageUrl && oldAnnouncement.imageUrl.startsWith('/uploads/')) {
-      const filename = oldAnnouncement.imageUrl.replace('/uploads/', '');
-      const filePath = path.resolve(process.cwd(), 'public', 'uploads', filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+    if (oldAnnouncement?.imageUrl) {
+      deleteLocalFile(oldAnnouncement.imageUrl);
     }
 
     await prisma.announcement.delete({

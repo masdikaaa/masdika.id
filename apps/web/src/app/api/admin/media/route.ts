@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
+import { getUploadsDir } from '@/lib/file-utils';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'media');
+    const uploadsDir = getUploadsDir('media');
     
     if (!fs.existsSync(uploadsDir)) {
       return NextResponse.json([]);
@@ -52,7 +53,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
     }
 
-    const filePath = path.join(process.cwd(), 'public', 'uploads', 'media', filename);
+    const filePath = getUploadsDir('media', filename);
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

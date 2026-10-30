@@ -71,15 +71,8 @@ export async function PUT(
     }
 
     // If image changed and old image is a local upload, delete the old image file
-    if (image !== undefined && existingProject.image && existingProject.image !== image && existingProject.image.startsWith('/uploads/')) {
-      const oldFilename = existingProject.image.split('/uploads/')[1];
-      if (oldFilename) {
-        const safeFilename = path.basename(oldFilename);
-        const filePath = path.join(process.cwd(), 'public', 'uploads', safeFilename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      }
+    if (image !== undefined && existingProject.image && existingProject.image !== image) {
+      deleteLocalFile(existingProject.image);
     }
 
     const project = await prisma.project.update({

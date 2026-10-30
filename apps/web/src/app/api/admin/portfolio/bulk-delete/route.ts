@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
+import { deleteLocalFile } from '@/lib/file-utils';
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -25,19 +26,8 @@ export async function POST(req: Request) {
 
     // Delete images
     projects.forEach(project => {
-      if (project.image && project.image.startsWith('/uploads/')) {
-        const oldFilename = project.image.split('/uploads/')[1];
-        if (oldFilename) {
-          const safeFilename = path.basename(oldFilename);
-          const filePath = path.join(process.cwd(), 'public', 'uploads', safeFilename);
-          if (fs.existsSync(filePath)) {
-            try {
-              fs.unlinkSync(filePath);
-            } catch (e) {
-              console.error("Failed to delete project image:", e);
-            }
-          }
-        }
+      if (project.image) {
+        deleteLocalFile(project.image);
       }
     });
 
