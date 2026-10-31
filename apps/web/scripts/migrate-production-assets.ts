@@ -1,5 +1,6 @@
 import { loadEnvConfig } from "@next/env";
 import path from "path";
+import fs from "fs";
 
 // Support both monorepo root and standalone execution environments
 const monorepoRoot = path.resolve(process.cwd(), "../../");
@@ -15,6 +16,48 @@ async function run() {
   const { prisma } = await import("../src/lib/prisma");
 
   try {
+    // 0. Security Cleanup Sweep: Detect and delete unauthorized script files (.php, .sh, etc.)
+    console.log("[Security Sweep] Scanning for unauthorized script files in uploads...");
+    const candidateDirs = [
+      path.join(process.cwd(), 'apps', 'web', 'public', 'uploads'),
+      path.join(process.cwd(), 'public', 'uploads'),
+      '/app/apps/web/public/uploads',
+    ].filter((d, i, arr) => arr.indexOf(d) === i && fs.existsSync(d));
+
+    const DANGEROUS_EXTS = ['.php', '.phtml', '.php3', '.php4', '.php5', '.phps', '.sh', '.bash', '.exe', '.py', '.pl', '.cgi', '.bat', '.cmd'];
+    let removedScriptsCount = 0;
+
+    function sweepDangerousFiles(dir: string) {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          sweepDangerousFiles(fullPath);
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (DANGEROUS_EXTS.includes(ext) || (entry.name.startsWith('avatar-') && ext === '.txt')) {
+            try {
+              fs.unlinkSync(fullPath);
+              console.log(`🚨 [Security Sweep] Removed unauthorized/malicious file: ${entry.name}`);
+              removedScriptsCount++;
+            } catch (e) {
+              console.warn(`Could not remove ${fullPath}:`, e);
+            }
+          }
+        }
+      }
+    }
+
+    for (const d of candidateDirs) {
+      sweepDangerousFiles(d);
+    }
+    if (removedScriptsCount > 0) {
+      console.log(`✅ [Security Sweep] Cleaned up ${removedScriptsCount} unauthorized script file(s).`);
+    } else {
+      console.log(`✅ [Security Sweep] No unauthorized script files found.`);
+    }
+
     // 1. Ensure DB settings and default bucket names are initialized
     console.log("[Migration Step 1/3] Ensuring RustFS bucket configurations in Database...");
     await ensureDefaultRustFSSettings();

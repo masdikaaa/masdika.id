@@ -4,6 +4,14 @@ import path from 'path';
 import { getUploadsDir } from '@/lib/file-utils';
 import { downloadPublicUploadFromRustFS } from '@/lib/rustfs';
 
+// Explicitly blocked dangerous executable or script extensions
+const FORBIDDEN_EXTENSIONS = new Set([
+  '.php', '.phtml', '.php3', '.php4', '.php5', '.phps',
+  '.sh', '.bash', '.exe', '.bat', '.cmd', '.py', '.pl', '.cgi',
+  '.env', '.config', '.htaccess', '.htpasswd', '.ini',
+  '.html', '.htm', '.xhtml', '.jsp', '.asp', '.aspx'
+]);
+
 const mimeTypes: Record<string, string> = {
   '.webp': 'image/webp',
   '.png': 'image/png',
@@ -33,17 +41,28 @@ export async function GET(
     const baseUploadsDir = path.normalize(getUploadsDir());
     const filePath = path.normalize(path.join(baseUploadsDir, ...resolvedParams.path));
     const ext = path.extname(filePath).toLowerCase();
+
+    // 0. HARD SECURITY GUARD: Block any request targeting script/executable files
+    if (FORBIDDEN_EXTENSIONS.has(ext)) {
+      console.warn(`[Security Alert] Blocked attempt to access forbidden file: ${relativeSubPath}`);
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+
     const fallbackContentType = mimeTypes[ext] || 'application/octet-stream';
+    const securityHeaders = {
+      'Content-Type': fallbackContentType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "default-src 'none'; sandbox"
+    };
 
     // 1. Try serving from local disk if it exists (strict directory traversal prevention)
     if (filePath.startsWith(baseUploadsDir + path.sep) || filePath === baseUploadsDir) {
       if (fs.existsSync(filePath)) {
         const fileBuffer = fs.readFileSync(filePath);
         return new NextResponse(new Uint8Array(fileBuffer), {
-          headers: {
-            'Content-Type': fallbackContentType,
-            'Cache-Control': 'public, max-age=31536000, immutable',
-          },
+          headers: securityHeaders,
         });
       }
     }
@@ -53,8 +72,8 @@ export async function GET(
     if (rustFSObject) {
       return new NextResponse(new Uint8Array(rustFSObject.buffer), {
         headers: {
+          ...securityHeaders,
           'Content-Type': rustFSObject.contentType || fallbackContentType,
-          'Cache-Control': 'public, max-age=31536000, immutable',
         },
       });
     }

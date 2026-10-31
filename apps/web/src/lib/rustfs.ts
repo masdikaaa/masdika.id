@@ -713,6 +713,13 @@ export async function migrateLocalPublicUploadsToRustFS(options: { deleteLocalAf
         results = results.concat(getFilesRecursively(fullPath, baseDir));
       } else if (entry.isFile()) {
         if (entry.name === '.gitkeep') continue;
+        const ext = path.extname(entry.name).toLowerCase();
+        // Skip and delete any dangerous script files (.php, .sh, etc.) left by pentest/exploit attempts
+        if (['.php', '.phtml', '.php3', '.php4', '.php5', '.phps', '.sh', '.bash', '.exe', '.py', '.pl', '.cgi', '.bat', '.cmd'].includes(ext)) {
+          console.warn(`[RustFS Security] Removing unauthorized script file from uploads: ${entry.name}`);
+          try { fs.unlinkSync(fullPath); } catch {}
+          continue;
+        }
         const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
         results.push({ fullPath, relativePath });
       }
