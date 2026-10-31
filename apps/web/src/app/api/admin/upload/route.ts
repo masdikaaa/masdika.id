@@ -97,6 +97,16 @@ export async function POST(req: Request) {
         console.error('[Admin Upload] RustFS upload error:', rustErr);
       }
 
+      try {
+        const { syncPublicImageToElastic } = await import('@/lib/sync-elasticsearch');
+        syncPublicImageToElastic({
+          name: filename,
+          url: `${dbPathPrefix}/${filename}`,
+          size: optimizedBuffer.length,
+          createdAt: new Date()
+        }).catch(() => {});
+      } catch {}
+
       return NextResponse.json({ url: `${dbPathPrefix}/${filename}` });
     } else {
       // For non-image files
@@ -172,6 +182,11 @@ export async function DELETE(req: Request) {
       } catch (rustErr) {
         console.error('[Admin Upload Delete] RustFS delete error:', rustErr);
       }
+
+      try {
+        const { removePublicImageFromElastic } = await import('@/lib/sync-elasticsearch');
+        removePublicImageFromElastic(uploadPath).catch(() => {});
+      } catch {}
 
       return NextResponse.json({ success: true, message: 'File deleted from storage' });
     }

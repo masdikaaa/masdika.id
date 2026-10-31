@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Trash2, Check, Image as ImageIcon, Search, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,10 +38,13 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const fetchMedia = async () => {
+  const fetchMedia = useCallback(async (query = "") => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/media');
+      const url = query.trim()
+        ? `/api/admin/media?q=${encodeURIComponent(query.trim())}`
+        : '/api/admin/media';
+      const res = await fetch(url);
       const data = await res.json();
       if (!data.error && Array.isArray(data)) {
         setMedia(data);
@@ -49,16 +53,30 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
       toast.error("Failed to load media files");
     } finally {
       setLoading(false);
+      setIsSearching(false);
     }
-  };
+  }, []);
 
+  // Initial load when modal opens
   useEffect(() => {
     if (isOpen) {
-      fetchMedia();
+      fetchMedia("");
       setSelectedFile(null);
       setSearchQuery("");
     }
-  }, [isOpen]);
+  }, [isOpen, fetchMedia]);
+
+  // Debounced search with Elasticsearch backend
+  useEffect(() => {
+    if (!isOpen) return;
+    if (searchQuery.trim()) {
+      setIsSearching(true);
+    }
+    const timer = setTimeout(() => {
+      fetchMedia(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, isOpen, fetchMedia]);
 
   const processUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -79,7 +97,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
       const data = await res.json();
       if (res.ok && data.url) {
         toast.success("Image uploaded!");
-        fetchMedia(); // Refresh list
+        fetchMedia(searchQuery); // Refresh list
       } else {
         toast.error(data.error || "Failed to upload image");
       }
@@ -147,10 +165,6 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
     }
   };
 
-  const filteredMedia = media.filter(file =>
-    file.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   if (!isOpen) return null;
 
   return (
@@ -177,32 +191,30 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
-              {media.length > 0 && (
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input
-                    type="text"
-                    placeholder="Search images..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={cn(
-                      "pl-9 pr-7 py-1.5 text-sm rounded-xl border transition-colors outline-none w-32 sm:w-48",
-                      isDark ? "bg-white/5 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500"
-                    )}
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+              <div className="relative">
+                <Search className={cn("w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2", isSearching ? "text-cyan-400 animate-pulse" : "text-zinc-400")} />
+                <input
+                  type="text"
+                  placeholder="Search images (Elasticsearch)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={cn(
+                    "pl-9 pr-7 py-1.5 text-sm rounded-xl border transition-colors outline-none w-36 sm:w-56",
+                    isDark ? "bg-white/5 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500"
                   )}
-                </div>
-              )}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
 
               <button 
-                onClick={fetchMedia}
+                onClick={() => fetchMedia(searchQuery)}
                 disabled={loading}
                 title="Refresh media"
                 className={cn("p-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
@@ -247,23 +259,25 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
                   <div className="w-8 h-8 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
                 </div>
               ) : media.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4", isDark ? "bg-white/5" : "bg-slate-100")}>
-                    <ImageIcon className="w-8 h-8 text-zinc-500" />
+                searchQuery ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No images match &ldquo;{searchQuery}&rdquo; in Elasticsearch</p>
+                    <button onClick={() => setSearchQuery("")} className="text-sm text-cyan-400 mt-2 hover:underline">
+                      Clear search
+                    </button>
                   </div>
-                  <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No media files found.</p>
-                  <p className={cn("text-sm mt-1", isDark ? "text-zinc-500" : "text-slate-400")}>Upload an image to get started.</p>
-                </div>
-              ) : filteredMedia.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No images match &ldquo;{searchQuery}&rdquo;</p>
-                  <button onClick={() => setSearchQuery("")} className="text-sm text-cyan-400 mt-2 hover:underline">
-                    Clear search
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4", isDark ? "bg-white/5" : "bg-slate-100")}>
+                      <ImageIcon className="w-8 h-8 text-zinc-500" />
+                    </div>
+                    <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No media files found.</p>
+                    <p className={cn("text-sm mt-1", isDark ? "text-zinc-500" : "text-slate-400")}>Upload an image to get started.</p>
+                  </div>
+                )
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {filteredMedia.map((file) => (
+                  {media.map((file) => (
                     <div 
                       key={file.url || file.name}
                       onClick={() => setSelectedFile(file)}

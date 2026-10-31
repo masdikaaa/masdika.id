@@ -1049,3 +1049,246 @@ export async function searchMediaElastic(
     return result.hits.hits.map((hit: any) => hit._source ? hit._source.id : parseInt(hit._id, 10));
   }, null);
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PUBLIC WEBSITE MEDIA / IMAGES ELASTICSEARCH INTEGRATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PUBLIC_IMAGE_INDEX = 'masdika-public-images';
+
+export interface ElasticPublicImage {
+  id: string;
+  name: string;
+  url: string;
+  folder: string;
+  size: number;
+  createdAt: string;
+}
+
+/**
+ * Initializes the Elasticsearch index for Public Website Images
+ */
+export async function initializePublicImageElasticIndex() {
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: PUBLIC_IMAGE_INDEX });
+    if (!exists) {
+      await client.indices.create({
+        index: PUBLIC_IMAGE_INDEX,
+        body: {
+          mappings: {
+            properties: {
+              id: { type: 'keyword' },
+              name: {
+                type: 'text',
+                analyzer: 'standard',
+                fields: {
+                  keyword: { type: 'keyword' }
+                }
+              },
+              url: { type: 'keyword' },
+              folder: { type: 'keyword' },
+              size: { type: 'long' },
+              createdAt: { type: 'date' }
+            }
+          }
+        }
+      });
+      console.log(`[Elasticsearch] Index ${PUBLIC_IMAGE_INDEX} created.`);
+    }
+  });
+}
+
+/**
+ * Syncs a single Public Image to Elasticsearch
+ */
+export async function syncPublicImageToElastic(item: {
+  name: string;
+  url: string;
+  size: number;
+  createdAt: Date | string;
+}) {
+  const cleanId = Buffer.from(item.url).toString('base64url');
+  const folder = item.url.startsWith('/uploads/')
+    ? item.url.replace(/^\/uploads\//, '').split('/')[0] || 'uploads'
+    : 'uploads';
+
+  const doc: ElasticPublicImage = {
+    id: cleanId,
+    name: item.name,
+    url: item.url,
+    folder,
+    size: item.size,
+    createdAt: new Date(item.createdAt).toISOString()
+  };
+
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: PUBLIC_IMAGE_INDEX });
+    if (!exists) {
+      await initializePublicImageElasticIndex();
+    }
+
+    await client.index({
+      index: PUBLIC_IMAGE_INDEX,
+      id: cleanId,
+      document: doc
+    });
+  });
+}
+
+/**
+ * Deletes a Public Image from Elasticsearch by url or filename
+ */
+export async function removePublicImageFromElastic(urlOrFilename: string) {
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: PUBLIC_IMAGE_INDEX });
+    if (!exists) return;
+
+    if (urlOrFilename.startsWith('/uploads/')) {
+      const cleanId = Buffer.from(urlOrFilename).toString('base64url');
+      await client.delete({
+        index: PUBLIC_IMAGE_INDEX,
+        id: cleanId
+      }).catch((e: any) => {
+        if (e.meta?.statusCode !== 404) console.warn('[ES Delete Image Warning]:', e.message);
+      });
+    } else {
+      await client.deleteByQuery({
+        index: PUBLIC_IMAGE_INDEX,
+        body: {
+          query: {
+            bool: {
+              should: [
+                { term: { "name.keyword": urlOrFilename } },
+                { wildcard: { url: `*${urlOrFilename}*` } }
+              ]
+            }
+          }
+        }
+      }).catch(() => {});
+    }
+  });
+}
+
+/**
+ * Bulk syncs all public images to Elasticsearch
+ */
+export async function syncAllPublicImagesToElastic(items: Array<{
+  name: string;
+  url: string;
+  size: number;
+  createdAt: Date | string;
+}>): Promise<{ count: number }> {
+  let count = 0;
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: PUBLIC_IMAGE_INDEX });
+    if (!exists) {
+      await initializePublicImageElasticIndex();
+    }
+
+    if (items.length === 0) return;
+
+    const operations = items.flatMap((item) => {
+      const cleanId = Buffer.from(item.url).toString('base64url');
+      const folder = item.url.startsWith('/uploads/')
+        ? item.url.replace(/^\/uploads\//, '').split('/')[0] || 'uploads'
+        : 'uploads';
+
+      const doc: ElasticPublicImage = {
+        id: cleanId,
+        name: item.name,
+        url: item.url,
+        folder,
+        size: item.size,
+        createdAt: new Date(item.createdAt).toISOString()
+      };
+
+      return [
+        { index: { _index: PUBLIC_IMAGE_INDEX, _id: cleanId } },
+        doc
+      ];
+    });
+
+    if (operations.length > 0) {
+      await client.bulk({ refresh: true, operations });
+      count = items.length;
+    }
+  });
+
+  return { count };
+}
+
+/**
+ * Searches Public Images in Elasticsearch using fuzzy, wildcard, and prefix matching
+ */
+export async function searchPublicImagesElastic(
+  query: string,
+  options?: { limit?: number }
+): Promise<Array<{ name: string; url: string; size: number; createdAt: string }> | null> {
+  return await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: PUBLIC_IMAGE_INDEX });
+    if (!exists) {
+      return null;
+    }
+
+    const trimmed = query.trim();
+    if (!trimmed) {
+      const allRes = await client.search({
+        index: PUBLIC_IMAGE_INDEX,
+        body: {
+          query: { match_all: {} },
+          sort: [{ createdAt: { order: 'desc' } }],
+          size: options?.limit || 100
+        }
+      });
+      return (allRes.hits.hits || []).map((hit: any) => ({
+        name: hit._source.name,
+        url: hit._source.url,
+        size: hit._source.size || 0,
+        createdAt: hit._source.createdAt
+      }));
+    }
+
+    const cleanLower = trimmed.toLowerCase();
+    const result = await client.search({
+      index: PUBLIC_IMAGE_INDEX,
+      body: {
+        query: {
+          bool: {
+            should: [
+              // 1. Exact match on filename keyword (highest score)
+              { term: { "name.keyword": { value: trimmed, boost: 10 } } },
+              // 2. Fuzzy match across name and folder
+              {
+                multi_match: {
+                  query: trimmed,
+                  fields: ['name^6', 'folder^2'],
+                  fuzziness: 'AUTO',
+                  prefix_length: 1,
+                  boost: 5
+                }
+              },
+              // 3. Substring wildcard match for partial filename search
+              { wildcard: { name: { value: `*${cleanLower}*`, boost: 3 } } },
+              // 4. Prefix match
+              { prefix: { name: { value: cleanLower, boost: 2 } } }
+            ],
+            minimum_should_match: 1
+          }
+        },
+        sort: [
+          { _score: { order: 'desc' } },
+          { createdAt: { order: 'desc' } }
+        ],
+        size: options?.limit || 100
+      }
+    });
+
+    return (result.hits.hits || []).map((hit: any) => ({
+      name: hit._source.name,
+      url: hit._source.url,
+      size: hit._source.size || 0,
+      createdAt: hit._source.createdAt
+    }));
+  }, null);
+}

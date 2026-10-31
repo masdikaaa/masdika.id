@@ -4,22 +4,43 @@ import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
 import { listPublicUploadsFromRustFS, deletePublicUploadFromRustFS } from '@/lib/rustfs';
+import {
+  searchPublicImagesElastic,
+  syncAllPublicImagesToElastic,
+  removePublicImageFromElastic
+} from '@/lib/sync-elasticsearch';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
+    const { searchParams } = new URL(req.url);
+    const search = (searchParams.get('search') || searchParams.get('q') || '').trim();
+
+    // 1. If searching, prioritize Elasticsearch fuzzy & keyword query
+    if (search) {
+      try {
+        const elasticResults = await searchPublicImagesElastic(search, { limit: 150 });
+        if (elasticResults !== null) {
+          return NextResponse.json(elasticResults);
+        }
+      } catch (esErr) {
+        console.warn('[Admin Media API] Elasticsearch search error, falling back:', esErr);
+      }
+    }
+
+    // 2. Fetch full collection from RustFS masdika-media & local disk
     const mediaMap = new Map<string, {
       name: string;
       url: string;
-      createdAt: Date;
+      createdAt: Date | string;
       size: number;
     }>();
 
-    // 1. Primary: List from RustFS masdika-media bucket
+    // A. Primary: List from RustFS masdika-media bucket
     try {
       const rustFSItems = await listPublicUploadsFromRustFS();
       for (const item of rustFSItems) {
@@ -34,7 +55,7 @@ export async function GET() {
       console.warn('[Admin Media API] RustFS listing error:', rustErr);
     }
 
-    // 2. Fallback / Coexistence: Scan local uploads directory for any unmigrated files
+    // B. Fallback / Coexistence: Scan local uploads directory for any unmigrated files
     try {
       const candidateSubFolders = ['media', 'banners', 'jobs', 'projects', ''];
       for (const sub of candidateSubFolders) {
@@ -64,11 +85,27 @@ export async function GET() {
       console.warn('[Admin Media API] Local disk scanning error:', localErr);
     }
 
-    const mediaFiles = Array.from(mediaMap.values()).sort((a, b) => {
+    let mediaFiles = Array.from(mediaMap.values());
+
+    // If search was requested but Elasticsearch was degraded, filter in-memory
+    if (search) {
+      const lower = search.toLowerCase();
+      mediaFiles = mediaFiles.filter(item =>
+        item.name.toLowerCase().includes(lower) ||
+        item.url.toLowerCase().includes(lower)
+      );
+    }
+
+    mediaFiles.sort((a, b) => {
       const timeA = new Date(a.createdAt).getTime();
       const timeB = new Date(b.createdAt).getTime();
       return timeB - timeA;
     });
+
+    // Auto-sync into Elasticsearch in background when initial list is loaded without search
+    if (!search && mediaFiles.length > 0) {
+      syncAllPublicImagesToElastic(mediaFiles).catch(() => {});
+    }
 
     return NextResponse.json(mediaFiles);
   } catch (error) {
@@ -108,6 +145,7 @@ export async function DELETE(req: Request) {
       try {
         await deletePublicUploadFromRustFS(cleanSubPath);
       } catch {}
+      removePublicImageFromElastic(url).catch(() => {});
     }
 
     // 2. Delete by filename across candidate locations
@@ -127,6 +165,7 @@ export async function DELETE(req: Request) {
           await deletePublicUploadFromRustFS(relativeKey);
         } catch {}
       }
+      removePublicImageFromElastic(safeFilename).catch(() => {});
     }
 
     return NextResponse.json({ success: true, message: 'Media deleted successfully' });
