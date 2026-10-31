@@ -2,6 +2,7 @@ import { prisma } from '../src/lib/prisma';
 import {
   getRustFSConfig,
   getRustFSS3Client,
+  getRustFSMediaClient,
   getRustFSTicketClient,
   ensureBucketExists,
   uploadTicketAttachmentToRustFS,
@@ -14,26 +15,45 @@ import fs from 'fs';
 import path from 'path';
 
 async function main() {
-  console.log('=== [1/4] Seeding rustfs_ticket_bucket in database ===');
+  console.log('=== [1/4] Seeding RustFS Buckets in Database ===');
+  await prisma.setting.upsert({
+    where: { key: 'rustfs_bucket' },
+    update: { value: 'masdika-cdn' },
+    create: { key: 'rustfs_bucket', value: 'masdika-cdn' }
+  });
+  await prisma.setting.upsert({
+    where: { key: 'rustfs_cdn_bucket' },
+    update: { value: 'masdika-cdn' },
+    create: { key: 'rustfs_cdn_bucket', value: 'masdika-cdn' }
+  });
+  await prisma.setting.upsert({
+    where: { key: 'rustfs_media_bucket' },
+    update: { value: 'masdika-media' },
+    create: { key: 'rustfs_media_bucket', value: 'masdika-media' }
+  });
   await prisma.setting.upsert({
     where: { key: 'rustfs_ticket_bucket' },
     update: { value: 'masdika-ticket' },
     create: { key: 'rustfs_ticket_bucket', value: 'masdika-ticket' }
   });
+
   invalidateRustFSCache();
   const config = await getRustFSConfig();
   console.log('RustFS Config:', {
     endpoint: config.endpoint,
-    bucket: config.bucket,
+    cdnBucket: config.cdnBucket,
+    mediaBucket: config.mediaBucket,
     ticketBucket: config.ticketBucket,
     enabled: config.enabled
   });
 
-  const { client: mediaClient, bucket: mediaBucket } = await getRustFSS3Client();
+  const { client: cdnClient, bucket: cdnBucket } = await getRustFSS3Client();
+  const { client: mediaClient, bucket: mediaBucket } = await getRustFSMediaClient();
   const { client: ticketClient, bucket: ticketBucket } = await getRustFSTicketClient();
+  await ensureBucketExists(cdnClient, cdnBucket);
   await ensureBucketExists(mediaClient, mediaBucket);
   await ensureBucketExists(ticketClient, ticketBucket);
-  console.log(`Buckets verified: '${mediaBucket}' and '${ticketBucket}'`);
+  console.log(`Verified buckets in RustFS: '${cdnBucket}' (CDN), '${mediaBucket}' (Media), and '${ticketBucket}' (Tickets)`);
 
   console.log('\n=== [2/4] Migrating Ticket Attachments to RustFS (masdika-ticket) ===');
   const ticketAttachments = await prisma.ticketAttachment.findMany();
@@ -123,6 +143,7 @@ async function main() {
   function getAllFiles(dirPath: string, arrayOfFiles: string[] = []): string[] {
     const files = fs.readdirSync(dirPath);
     for (const file of files) {
+      if (file === '.gitkeep') continue;
       const fullPath = path.join(dirPath, file);
       if (fs.statSync(fullPath).isDirectory()) {
         getAllFiles(fullPath, arrayOfFiles);
@@ -175,9 +196,9 @@ async function main() {
   console.log(`Public Uploads migration done: ${uploadsMigrated} migrated, ${uploadsSkipped} already in RustFS.`);
 
   console.log('\n=== [4/4] Verification Summary ===');
-  console.log(`✓ Database seed: rustfs_ticket_bucket = 'masdika-ticket'`);
-  console.log(`✓ Ticket attachments: ${ticketsMigrated + ticketsSkipped} verified in RustFS`);
-  console.log(`✓ Public uploads: ${uploadsMigrated + uploadsSkipped} verified in RustFS`);
+  console.log(`✓ Buckets: masdika-cdn (CDN), masdika-media (Media), masdika-ticket (Tickets)`);
+  console.log(`✓ Ticket attachments: ${ticketsMigrated + ticketsSkipped} verified in RustFS masdika-ticket`);
+  console.log(`✓ Public uploads: ${uploadsMigrated + uploadsSkipped} verified in RustFS masdika-media`);
   console.log(`✓ Local storage folders cleaned for lean CI/CD deployment!`);
 
   process.exit(0);
@@ -187,4 +208,3 @@ main().catch(err => {
   console.error('Migration failed:', err);
   process.exit(1);
 });
-

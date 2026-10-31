@@ -16,8 +16,10 @@ export interface RustFSConfig {
   endpoint: string;
   accessKey: string;
   secretKey: string;
-  bucket: string;
+  cdnBucket: string;
+  mediaBucket: string;
   ticketBucket: string;
+  bucket: string;
   enabled: boolean;
 }
 
@@ -52,6 +54,8 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
             'rustfs_access_key',
             'rustfs_secret_key',
             'rustfs_bucket',
+            'rustfs_cdn_bucket',
+            'rustfs_media_bucket',
             'rustfs_ticket_bucket',
             'rustfs_enabled'
           ]
@@ -67,7 +71,8 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const endpoint = (settingsMap['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || '').trim().replace(/\/+$/, '');
     const accessKey = (settingsMap['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '').trim();
     const secretKey = (settingsMap['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '').trim();
-    const bucket = (settingsMap['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media').trim();
+    const cdnBucket = (settingsMap['rustfs_cdn_bucket'] || settingsMap['rustfs_bucket'] || process.env.RUSTFS_CDN_BUCKET || process.env.RUSTFS_BUCKET || 'masdika-cdn').trim();
+    const mediaBucket = (settingsMap['rustfs_media_bucket'] || process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media').trim();
     const ticketBucket = (settingsMap['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
     const enabledRaw = settingsMap['rustfs_enabled'] ?? process.env.RUSTFS_ENABLED ?? 'false';
     const isConfigValid = Boolean(endpoint && accessKey && secretKey);
@@ -77,8 +82,10 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       endpoint,
       accessKey,
       secretKey,
-      bucket,
+      cdnBucket,
+      mediaBucket,
       ticketBucket,
+      bucket: cdnBucket,
       enabled
     };
     lastConfigFetch = now;
@@ -88,7 +95,8 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const endpoint = (process.env.RUSTFS_ENDPOINT || '').trim().replace(/\/+$/, '');
     const accessKey = (process.env.RUSTFS_ACCESS_KEY || '').trim();
     const secretKey = (process.env.RUSTFS_SECRET_KEY || '').trim();
-    const bucket = (process.env.RUSTFS_BUCKET || 'masdika-media').trim();
+    const cdnBucket = (process.env.RUSTFS_CDN_BUCKET || process.env.RUSTFS_BUCKET || 'masdika-cdn').trim();
+    const mediaBucket = (process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media').trim();
     const ticketBucket = (process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
     const enabledRaw = process.env.RUSTFS_ENABLED ?? 'false';
     const isConfigValid = Boolean(endpoint && accessKey && secretKey);
@@ -98,8 +106,10 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       endpoint,
       accessKey,
       secretKey,
-      bucket,
+      cdnBucket,
+      mediaBucket,
       ticketBucket,
+      bucket: cdnBucket,
       enabled
     };
   }
@@ -121,12 +131,32 @@ export async function getRustFSS3Client(): Promise<{ client: S3Client; bucket: s
     forcePathStyle: true, // Essential for self-hosted S3/RustFS/MinIO
   });
 
-  return { client, bucket: config.bucket, enabled: config.enabled };
+  return { client, bucket: config.cdnBucket || config.bucket, enabled: config.enabled };
 }
 
 /**
  * Creates an AWS S3Client instance configured for RustFS Ticket Attachments bucket
  */
+
+/**
+ * Creates an AWS S3Client instance configured for RustFS Website Media bucket (profile, blog, banners, etc.)
+ */
+export async function getRustFSMediaClient(): Promise<{ client: S3Client; bucket: string; enabled: boolean }> {
+  const config = await getRustFSConfig();
+
+  const client = new S3Client({
+    endpoint: config.endpoint,
+    region: 'us-east-1',
+    credentials: {
+      accessKeyId: config.accessKey,
+      secretAccessKey: config.secretKey,
+    },
+    forcePathStyle: true,
+  });
+
+  return { client, bucket: config.mediaBucket || 'masdika-media', enabled: config.enabled };
+}
+
 export async function getRustFSTicketClient(): Promise<{ client: S3Client; bucket: string; enabled: boolean }> {
   const config = await getRustFSConfig();
 
@@ -197,7 +227,8 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
       forcePathStyle: true,
     });
 
-    await ensureBucketExists(client, config.bucket);
+    await ensureBucketExists(client, config.cdnBucket || config.bucket || 'masdika-cdn');
+    await ensureBucketExists(client, config.mediaBucket || 'masdika-media');
     await ensureBucketExists(client, config.ticketBucket || 'masdika-ticket');
 
     // Test a tiny ping upload & delete
@@ -216,8 +247,8 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
 
     return {
       success: true,
-      message: `Successfully connected to RustFS at ${config.endpoint} and verified buckets '${config.bucket}' & '${config.ticketBucket || 'masdika-ticket'}'.`,
-      bucket: config.bucket
+      message: `Successfully connected to RustFS at ${config.endpoint} and verified buckets '${config.cdnBucket || config.bucket}' (CDN), '${config.mediaBucket || 'masdika-media'}' (Media) & '${config.ticketBucket || 'masdika-ticket'}' (Tickets).`,
+      bucket: config.cdnBucket || config.bucket
     };
   } catch (error: any) {
     console.error('[RustFS] Connection test failed:', error);
@@ -465,7 +496,7 @@ export async function uploadPublicUploadToRustFS(
   buffer: Buffer,
   mimeType = 'application/octet-stream'
 ): Promise<boolean> {
-  const { client, bucket, enabled } = await getRustFSS3Client();
+  const { client, bucket, enabled } = await getRustFSMediaClient();
   if (!enabled) return false;
 
   await ensureBucketExists(client, bucket);
@@ -491,7 +522,7 @@ export async function downloadPublicUploadFromRustFS(
   relativePath: string
 ): Promise<{ buffer: Buffer; contentType: string } | null> {
   try {
-    const { client, bucket, enabled } = await getRustFSS3Client();
+    const { client, bucket, enabled } = await getRustFSMediaClient();
     if (!enabled) return null;
 
     const cleanPath = relativePath.replace(/^[\/\\]+/, '').replace(/\\/g, '/');
@@ -537,7 +568,7 @@ export async function downloadPublicUploadFromRustFS(
  */
 export async function deletePublicUploadFromRustFS(relativePath: string): Promise<boolean> {
   try {
-    const { client, bucket, enabled } = await getRustFSS3Client();
+    const { client, bucket, enabled } = await getRustFSMediaClient();
     if (!enabled) return false;
 
     const cleanPath = relativePath.replace(/^[\/\\]+/, '').replace(/\\/g, '/');

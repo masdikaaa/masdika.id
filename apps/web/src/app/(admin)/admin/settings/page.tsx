@@ -106,7 +106,8 @@ export default function SettingsPage() {
     rustfs_endpoint: "",
     rustfs_access_key: "",
     rustfs_secret_key: "",
-    rustfs_bucket: "masdika-media",
+    rustfs_bucket: "masdika-cdn",
+    rustfs_media_bucket: "masdika-media",
     rustfs_ticket_bucket: "masdika-ticket",
     rustfs_enabled: false
   });
@@ -161,7 +162,8 @@ export default function SettingsPage() {
             rustfs_endpoint: data.settings?.rustfs_endpoint || "",
             rustfs_access_key: data.settings?.rustfs_access_key || "",
             rustfs_secret_key: data.settings?.rustfs_secret_key || "",
-            rustfs_bucket: data.settings?.rustfs_bucket || "masdika-media",
+            rustfs_bucket: data.settings?.rustfs_bucket || "masdika-cdn",
+            rustfs_media_bucket: data.settings?.rustfs_media_bucket || "masdika-media",
             rustfs_ticket_bucket: data.settings?.rustfs_ticket_bucket || "masdika-ticket",
             rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false
           });
@@ -231,6 +233,7 @@ export default function SettingsPage() {
           accessKey: formData.rustfs_access_key,
           secretKey: formData.rustfs_secret_key,
           bucket: formData.rustfs_bucket,
+          mediaBucket: formData.rustfs_media_bucket,
           ticketBucket: formData.rustfs_ticket_bucket,
         })
       });
@@ -1363,16 +1366,29 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className={labelClass}>Media Bucket Name *</label>
+                        <label className={labelClass}>File CDN Bucket Name *</label>
                         <input
                           type="text"
                           name="rustfs_bucket"
                           value={formData.rustfs_bucket}
                           onChange={handleChange}
+                          placeholder="masdika-cdn"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Dedicated bucket for File CDN, encrypted videos & sold resources</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Website Media Bucket Name *</label>
+                        <input
+                          type="text"
+                          name="rustfs_media_bucket"
+                          value={formData.rustfs_media_bucket}
+                          onChange={handleChange}
                           placeholder="masdika-media"
                           className={inputClass}
                         />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Main bucket for CDN files, media, blog & profile uploads</p>
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Bucket for profile avatars, blog articles, banners & website uploads</p>
                       </div>
 
                       <div className="space-y-2">

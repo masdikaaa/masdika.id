@@ -25,7 +25,8 @@ export async function GET() {
     settingsObj['rustfs_endpoint'] = settingsObj['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || '';
     settingsObj['rustfs_access_key'] = settingsObj['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '';
     settingsObj['rustfs_secret_key'] = settingsObj['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '';
-    settingsObj['rustfs_bucket'] = settingsObj['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media';
+    settingsObj['rustfs_bucket'] = settingsObj['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-cdn';
+    settingsObj['rustfs_media_bucket'] = settingsObj['rustfs_media_bucket'] || process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media';
     settingsObj['rustfs_ticket_bucket'] = settingsObj['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket';
     settingsObj['rustfs_enabled'] = settingsObj['rustfs_enabled'] ?? (process.env.RUSTFS_ENABLED ?? 'false');
 
@@ -48,7 +49,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_ticket_bucket, rustfs_enabled } = body;
+    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled } = body;
 
     // Update user
     const user = await prisma.user.findUnique({ where: { id: auth.userId } });
@@ -100,6 +101,7 @@ export async function PUT(req: Request) {
     if (rustfs_access_key !== undefined) settingsToUpdate.push({ key: 'rustfs_access_key', value: String(rustfs_access_key) });
     if (rustfs_secret_key !== undefined) settingsToUpdate.push({ key: 'rustfs_secret_key', value: String(rustfs_secret_key) });
     if (rustfs_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_bucket', value: String(rustfs_bucket) });
+    if (rustfs_media_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_media_bucket', value: String(rustfs_media_bucket) });
     if (rustfs_ticket_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_ticket_bucket', value: String(rustfs_ticket_bucket) });
     if (rustfs_enabled !== undefined) settingsToUpdate.push({ key: 'rustfs_enabled', value: String(rustfs_enabled) });
 
