@@ -64,6 +64,21 @@ spec:
       storage: 10Gi
 
 ---
+# PVC untuk Elasticsearch Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-es-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 25Gi
+
+---
 # PVC Terpusat untuk Web Storage (uploads, secure-media, tickets, ssh, upload-buffers)
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -98,6 +113,7 @@ data:
   DB_PORT: "5432"
   DB_NAME: "masdika"
   DB_USER: "masdika"
+  ELASTIC_URL: "http://elasticsearch:9200"
 
 ---
 # ==============================================================================
@@ -119,6 +135,7 @@ stringData:
   DATABASE_URL: "postgresql://masdika:Andikaferdi11@masdika-db:5432/masdika?schema=public"
   REDIS_PASSWORD: "Andikaferdi11"
   REDIS_URL: "redis://:Andikaferdi11@masdika-redis:6379"
+  ELASTIC_PASSWORD: "masdika_secret"
   SESSION_SECRET: "8d9f4c7f1a2e6b9d5e3f8a1c7d4b2e9f6a3c8d1e5f7b9a2c4d6e8f1a3b5c7d9e2f4a6b8c1d3e5f7a9b2c4d6e8f1a3b5"
   CRON_SECRET: "9Kf4Np7Xw2Qm8Rz1Tg6Yh3Uc5Vb9Ln2Ds7Ae4Fk8Mp1Qr6Xt3Zw9Hy2Nu5Cv7Bj1Pd8Rs4Wt6Yk2Lm9Gh3Jx7Zq5Vc1Fn8Tb4"
 
@@ -342,6 +359,132 @@ spec:
 
 ---
 # ==============================================================================
+# 5.1 SEARCH ENGINE (Elasticsearch 8.15)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-elasticsearch
+  namespace: masdika
+  labels:
+    app: masdika-elasticsearch
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-elasticsearch
+  template:
+    metadata:
+      labels:
+        app: masdika-elasticsearch
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: node.name
+              value: "masdika-elasticsearch"
+            - name: discovery.type
+              value: "single-node"
+            - name: bootstrap.memory_lock
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: "-Xms1536m -Xmx1536m"
+            - name: xpack.security.enabled
+              value: "true"
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          volumeMounts:
+            - name: es-data
+              mountPath: /usr/share/elasticsearch/data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "curl -s http://127.0.0.1:9200 >/dev/null || exit 1"
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "curl -s http://127.0.0.1:9200 >/dev/null || exit 1"
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "300m"
+              memory: "1.5Gi"
+            limits:
+              cpu: "2000m"
+              memory: "3Gi"
+      volumes:
+        - name: es-data
+          persistentVolumeClaim:
+            claimName: masdika-es-pvc
+
+---
+# Service untuk alias elasticsearch:9200 (kompatibel langsung dengan konfigurasi app & compose)
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: masdika
+  labels:
+    app: masdika-elasticsearch
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9200
+      targetPort: 9200
+      name: http
+    - port: 9300
+      targetPort: 9300
+      name: transport
+  selector:
+    app: masdika-elasticsearch
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-elasticsearch
+  namespace: masdika
+  labels:
+    app: masdika-elasticsearch
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9200
+      targetPort: 9200
+      name: http
+    - port: 9300
+      targetPort: 9300
+      name: transport
+  selector:
+    app: masdika-elasticsearch
+
+---
+# ==============================================================================
 # 6. APPLICATION (Next.js Standalone Web App)
 # ==============================================================================
 apiVersion: apps/v1
@@ -389,6 +532,13 @@ spec:
                 sleep 2
               done
               echo "Redis is online and accepting connections!"
+
+              echo "Checking Elasticsearch connection (elasticsearch:9200)..."
+              until nc -z -w 3 elasticsearch 9200; do
+                echo "Elasticsearch is not ready yet. Retrying in 3 seconds..."
+                sleep 3
+              done
+              echo "Elasticsearch is online and accepting connections!"
       containers:
         - name: app
           image: andikaferdialvianto/masdika-id:v1.0.1
@@ -417,6 +567,17 @@ spec:
                 secretKeyRef:
                   name: masdika-credentials
                   key: REDIS_URL
+            - name: ELASTIC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: masdika-config
+                  key: ELASTIC_URL
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
           volumeMounts:
             - name: app-storage
               mountPath: /app/apps/web/public/uploads
@@ -524,6 +685,13 @@ spec:
                 sleep 2
               done
               echo "Redis is online and accepting connections!"
+
+              echo "Checking Elasticsearch connection (elasticsearch:9200)..."
+              until nc -z -w 3 elasticsearch 9200; do
+                echo "Elasticsearch is not ready yet. Retrying in 3 seconds..."
+                sleep 3
+              done
+              echo "Elasticsearch is online and accepting connections!"
       containers:
         - name: worker
           image: andikaferdialvianto/masdika-id:v1.0.1
@@ -551,6 +719,17 @@ spec:
                 secretKeyRef:
                   name: masdika-credentials
                   key: REDIS_URL
+            - name: ELASTIC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: masdika-config
+                  key: ELASTIC_URL
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
           volumeMounts:
             - name: app-storage
               mountPath: /app/apps/web/public/uploads
