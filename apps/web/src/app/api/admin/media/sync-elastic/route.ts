@@ -69,3 +69,4 @@ export async function POST() {
     return NextResponse.json({ error: 'Failed to sync media to Elasticsearch' }, { status: 500 });
   }
 }
+

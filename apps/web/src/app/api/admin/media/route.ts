@@ -71,10 +71,18 @@ export async function GET(req: Request) {
           if (!mediaMap.has(url)) {
             try {
               const stats = fs.statSync(path.join(uploadsDir, entry.name));
+              let date = stats.mtime;
+              const tsMatch = entry.name.match(/[-_](\d{10,13})\.[a-zA-Z0-9]+$/);
+              if (tsMatch) {
+                const parsedTs = parseInt(tsMatch[1], 10);
+                if (!isNaN(parsedTs) && parsedTs > 1000000000000) {
+                  date = new Date(parsedTs);
+                }
+              }
               mediaMap.set(url, {
                 name: entry.name,
                 url,
-                createdAt: stats.mtime,
+                createdAt: date,
                 size: stats.size
               });
             } catch {}

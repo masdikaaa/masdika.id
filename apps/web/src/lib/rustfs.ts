@@ -637,17 +637,29 @@ export async function listPublicUploadsFromRustFS(prefix?: string): Promise<Rust
           const cleanKey = key.replace(/^\/+/, '');
           const url = cleanKey.startsWith('uploads/') ? `/${cleanKey}` : `/uploads/${cleanKey}`;
 
+          let date = obj.LastModified ? new Date(obj.LastModified) : new Date();
+          const tsMatch = fileName.match(/[-_](\d{10,13})\.[a-zA-Z0-9]+$/);
+          if (tsMatch) {
+            const parsedTs = parseInt(tsMatch[1], 10);
+            if (!isNaN(parsedTs) && parsedTs > 1000000000000) {
+              date = new Date(parsedTs);
+            }
+          }
+
           items.push({
             key,
             name: fileName,
             url,
             size: obj.Size || 0,
-            lastModified: obj.LastModified ? new Date(obj.LastModified) : new Date()
+            lastModified: date
           });
         }
       }
       continuationToken = res.NextContinuationToken;
     } while (continuationToken);
+
+    // Sort newest first
+    items.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
     return items;
   } catch (error) {

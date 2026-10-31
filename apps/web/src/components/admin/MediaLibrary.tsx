@@ -97,6 +97,16 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
       const data = await res.json();
       if (res.ok && data.url) {
         toast.success("Image uploaded!");
+        const filename = data.url.split('/').pop() || file.name;
+        const newFile: MediaFile = {
+          name: filename,
+          url: data.url,
+          createdAt: new Date().toISOString(),
+          size: file.size
+        };
+        // Place new upload at the very top immediately and auto-select
+        setMedia(prev => [newFile, ...prev.filter(m => m.url !== data.url)]);
+        setSelectedFile(newFile);
         fetchMedia(searchQuery); // Refresh list
       } else {
         toast.error(data.error || "Failed to upload image");
