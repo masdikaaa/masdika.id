@@ -92,6 +92,23 @@ RUN npx esbuild apps/web/scripts/vnc-proxy.ts \
     --external:http-proxy \
     --external:@next/env
 
+# Bundle asset migration script
+RUN npx esbuild apps/web/scripts/migrate-production-assets.ts \
+    --bundle \
+    --platform=node \
+    --outfile=apps/web/.next/standalone/apps/web/migrate-production-assets.js \
+    --external:next \
+    --external:ws \
+    --external:cookie \
+    --external:crypto \
+    --external:http \
+    --external:https \
+    --external:@prisma/client \
+    --external:@next/env \
+    --external:@aws-sdk/client-s3 \
+    --external:@elastic/elasticsearch \
+    --external:elastic-apm-node
+
 # ─── Stage 3: Lean production image ──────────────────────────────────────────
 FROM base AS runner
 WORKDIR /app

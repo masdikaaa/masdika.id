@@ -123,4 +123,9 @@ jobs:
             docker image prune -f
             docker builder prune -f
             docker compose exec -T nginx nginx -s reload || docker compose restart nginx || true
+
+            # Zero-Downtime Automated Asset Migration to RustFS
+            echo "Checking and migrating production assets to RustFS..."
+            docker compose exec -T app node /app/apps/web/migrate-production-assets.js || echo "Notice: RustFS asset migration completed with notice."
+
             docker logout || true

@@ -71,7 +71,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const endpoint = (settingsMap['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || '').trim().replace(/\/+$/, '');
     const accessKey = (settingsMap['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '').trim();
     const secretKey = (settingsMap['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '').trim();
-    const cdnBucket = (settingsMap['rustfs_cdn_bucket'] || settingsMap['rustfs_bucket'] || process.env.RUSTFS_CDN_BUCKET || process.env.RUSTFS_BUCKET || 'masdika-cdn').trim();
+    const cdnBucket = (settingsMap['rustfs_cdn_bucket'] || process.env.RUSTFS_CDN_BUCKET || (settingsMap['rustfs_bucket'] === 'masdika-cdn' ? 'masdika-cdn' : '') || 'masdika-cdn').trim();
     const mediaBucket = (settingsMap['rustfs_media_bucket'] || process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media').trim();
     const ticketBucket = (settingsMap['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
     const enabledRaw = settingsMap['rustfs_enabled'] ?? process.env.RUSTFS_ENABLED ?? 'false';
@@ -591,6 +591,310 @@ export async function deletePublicUploadFromRustFS(relativePath: string): Promis
   }
 }
 
+
+const EXTENSION_MIME_MAP: Record<string, string> = {
+  '.webp': 'image/webp',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.avif': 'image/avif',
+  '.pdf': 'application/pdf',
+  '.txt': 'text/plain',
+  '.csv': 'text/csv',
+  '.zip': 'application/zip',
+  '.rar': 'application/vnd.rar',
+  '.7z': 'application/x-7z-compressed',
+  '.tar': 'application/x-tar',
+  '.gz': 'application/gzip',
+  '.doc': 'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xls': 'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.ppt': 'application/vnd.ms-powerpoint',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mov': 'video/quicktime',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.ogg': 'audio/ogg',
+  '.json': 'application/json',
+};
+
+export function getMimeTypeFromExt(ext: string): string {
+  return EXTENSION_MIME_MAP[ext.toLowerCase()] || 'application/octet-stream';
+}
+
+/**
+ * Ensures standard default RustFS bucket settings exist in Prisma DB Setting table.
+ * Does not overwrite existing custom settings.
+ */
+export async function ensureDefaultRustFSSettings() {
+  const currentEndpoint = (process.env.RUSTFS_ENDPOINT || 'http://192.168.79.10:9000').trim();
+  const currentAccessKey = (process.env.RUSTFS_ACCESS_KEY || '').trim();
+  const currentSecretKey = (process.env.RUSTFS_SECRET_KEY || '').trim();
+
+  const defaults = [
+    { key: 'rustfs_cdn_bucket', value: 'masdika-cdn' },
+    { key: 'rustfs_media_bucket', value: 'masdika-media' },
+    { key: 'rustfs_ticket_bucket', value: 'masdika-ticket' },
+    { key: 'rustfs_bucket', value: 'masdika-cdn' },
+  ];
+
+  for (const item of defaults) {
+    const existing = await prisma.setting.findUnique({ where: { key: item.key } });
+    if (!existing) {
+      await prisma.setting.create({ data: item });
+    }
+  }
+
+  if (currentEndpoint) {
+    const existingEp = await prisma.setting.findUnique({ where: { key: 'rustfs_endpoint' } });
+    if (!existingEp) {
+      await prisma.setting.create({ data: { key: 'rustfs_endpoint', value: currentEndpoint } });
+    }
+  }
+  if (currentAccessKey) {
+    const existingAk = await prisma.setting.findUnique({ where: { key: 'rustfs_access_key' } });
+    if (!existingAk) {
+      await prisma.setting.create({ data: { key: 'rustfs_access_key', value: currentAccessKey } });
+    }
+  }
+  if (currentSecretKey) {
+    const existingSk = await prisma.setting.findUnique({ where: { key: 'rustfs_secret_key' } });
+    if (!existingSk) {
+      await prisma.setting.create({ data: { key: 'rustfs_secret_key', value: currentSecretKey } });
+    }
+  }
+  const existingEn = await prisma.setting.findUnique({ where: { key: 'rustfs_enabled' } });
+  if (!existingEn) {
+    await prisma.setting.create({ data: { key: 'rustfs_enabled', value: 'true' } });
+  }
+
+  invalidateRustFSCache();
+}
+
+/**
+ * Public Uploads Migration: Migrates all local files under public/uploads to RustFS (masdika-media)
+ */
+export async function migrateLocalPublicUploadsToRustFS(options: { deleteLocalAfterUpload?: boolean } = { deleteLocalAfterUpload: true }): Promise<{
+  total: number;
+  migrated: number;
+  skipped: number;
+  errors: number;
+  details: Array<{ key: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }>;
+}> {
+  const { client, bucket } = await getRustFSMediaClient();
+  await ensureBucketExists(client, bucket);
+
+  const candidateUploadsDirs = [
+    path.join(process.cwd(), 'apps', 'web', 'public', 'uploads'),
+    path.join(process.cwd(), 'public', 'uploads'),
+    path.resolve(__dirname, '../../../public/uploads'),
+    path.resolve(__dirname, '../../public/uploads'),
+    path.resolve(__dirname, '../public/uploads'),
+    '/app/apps/web/public/uploads',
+  ].filter((d, i, arr) => arr.indexOf(d) === i && fs.existsSync(d));
+
+  let migrated = 0;
+  let skipped = 0;
+  let errors = 0;
+  const details: Array<{ key: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }> = [];
+
+  function getFilesRecursively(dir: string, baseDir: string): Array<{ fullPath: string; relativePath: string }> {
+    let results: Array<{ fullPath: string; relativePath: string }> = [];
+    if (!fs.existsSync(dir)) return results;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        results = results.concat(getFilesRecursively(fullPath, baseDir));
+      } else if (entry.isFile()) {
+        if (entry.name === '.gitkeep') continue;
+        const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+        results.push({ fullPath, relativePath });
+      }
+    }
+    return results;
+  }
+
+  const processedKeys = new Set<string>();
+
+  for (const dir of candidateUploadsDirs) {
+    const files = getFilesRecursively(dir, dir);
+    for (const file of files) {
+      const key = `uploads/${file.relativePath}`;
+      if (processedKeys.has(key)) continue;
+      processedKeys.add(key);
+
+      try {
+        const stats = fs.statSync(file.fullPath);
+        let exists = false;
+        try {
+          await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+          exists = true;
+        } catch (err: any) {
+          if (err.name !== 'NotFound' && err.$metadata?.httpStatusCode !== 404 && err.Code !== 'NoSuchKey') {
+            try {
+              await client.send(new HeadObjectCommand({ Bucket: bucket, Key: file.relativePath }));
+              exists = true;
+            } catch {}
+          }
+        }
+
+        if (exists) {
+          skipped++;
+          details.push({ key, size: stats.size, status: 'skipped' });
+          if (options.deleteLocalAfterUpload && fs.existsSync(file.fullPath)) {
+            try { fs.unlinkSync(file.fullPath); } catch {}
+          }
+          continue;
+        }
+
+        const mimeType = getMimeTypeFromExt(path.extname(file.fullPath));
+        const fileStream = fs.createReadStream(file.fullPath);
+        await client.send(new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: fileStream,
+          ContentType: mimeType,
+          ContentLength: stats.size
+        }));
+
+        await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+
+        if (options.deleteLocalAfterUpload && fs.existsSync(file.fullPath)) {
+          try { fs.unlinkSync(file.fullPath); } catch {}
+        }
+
+        migrated++;
+        details.push({ key, size: stats.size, status: 'migrated' });
+      } catch (err: any) {
+        console.error(`[RustFS Uploads Migration] Error transferring ${key}:`, err);
+        errors++;
+        details.push({ key, size: 0, status: 'error', error: err?.message || 'Upload error' });
+      }
+    }
+  }
+
+  return { total: processedKeys.size, migrated, skipped, errors, details };
+}
+
+/**
+ * Ticket Attachments Migration: Migrates all local ticket files under storage/tickets to RustFS (masdika-ticket)
+ */
+export async function migrateLocalTicketAttachmentsToRustFS(options: { deleteLocalAfterUpload?: boolean } = { deleteLocalAfterUpload: true }): Promise<{
+  total: number;
+  migrated: number;
+  skipped: number;
+  errors: number;
+  details: Array<{ filename: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }>;
+}> {
+  const { client, bucket } = await getRustFSTicketClient();
+  await ensureBucketExists(client, bucket);
+
+  const candidateTicketDirs = [
+    path.join(process.cwd(), 'apps', 'web', 'storage', 'tickets'),
+    path.join(process.cwd(), 'storage', 'tickets'),
+    path.resolve(__dirname, '../../../storage/tickets'),
+    path.resolve(__dirname, '../../storage/tickets'),
+    path.resolve(__dirname, '../storage/tickets'),
+    '/app/apps/web/storage/tickets',
+  ].filter((d, i, arr) => arr.indexOf(d) === i && fs.existsSync(d));
+
+  let migrated = 0;
+  let skipped = 0;
+  let errors = 0;
+  const details: Array<{ filename: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }> = [];
+
+  const processedFiles = new Set<string>();
+
+  for (const dir of candidateTicketDirs) {
+    if (!fs.existsSync(dir)) continue;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (!entry.isFile() || entry.name === '.gitkeep') continue;
+      const filename = entry.name;
+      if (processedFiles.has(filename)) continue;
+      processedFiles.add(filename);
+
+      const fullPath = path.join(dir, filename);
+      try {
+        const stats = fs.statSync(fullPath);
+
+        let exists = false;
+        try {
+          await client.send(new HeadObjectCommand({ Bucket: bucket, Key: filename }));
+          exists = true;
+        } catch {}
+
+        if (exists) {
+          skipped++;
+          details.push({ filename, size: stats.size, status: 'skipped' });
+          if (options.deleteLocalAfterUpload && fs.existsSync(fullPath)) {
+            try { fs.unlinkSync(fullPath); } catch {}
+          }
+          continue;
+        }
+
+        const mimeType = getMimeTypeFromExt(path.extname(filename));
+        const fileStream = fs.createReadStream(fullPath);
+        await client.send(new PutObjectCommand({
+          Bucket: bucket,
+          Key: filename,
+          Body: fileStream,
+          ContentType: mimeType,
+          ContentLength: stats.size
+        }));
+
+        await client.send(new HeadObjectCommand({ Bucket: bucket, Key: filename }));
+
+        if (options.deleteLocalAfterUpload && fs.existsSync(fullPath)) {
+          try { fs.unlinkSync(fullPath); } catch {}
+        }
+
+        migrated++;
+        details.push({ filename, size: stats.size, status: 'migrated' });
+      } catch (err: any) {
+        console.error(`[RustFS Ticket Migration] Error transferring ${filename}:`, err);
+        errors++;
+        details.push({ filename, size: 0, status: 'error', error: err?.message || 'Upload error' });
+      }
+    }
+  }
+
+  return { total: processedFiles.size, migrated, skipped, errors, details };
+}
+
+/**
+ * Unified Local Asset Migration: Migrates public uploads, ticket attachments, and secure-media to RustFS
+ */
+export async function migrateAllLocalAssetsToRustFS(options: { deleteLocalAfterUpload?: boolean; silentIfEmpty?: boolean } = { deleteLocalAfterUpload: true }): Promise<{
+  publicUploads: { total: number; migrated: number; skipped: number; errors: number };
+  tickets: { total: number; migrated: number; skipped: number; errors: number };
+  secureMedia: { total: number; migrated: number; skipped: number; errors: number };
+  totalMigrated: number;
+  totalSkipped: number;
+  totalErrors: number;
+}> {
+  await ensureDefaultRustFSSettings();
+
+  const publicUploads = await migrateLocalPublicUploadsToRustFS(options);
+  const tickets = await migrateLocalTicketAttachmentsToRustFS(options);
+  const secureMedia = await migrateAllMediaToRustFS(options);
+
+  return {
+    publicUploads: { total: publicUploads.total, migrated: publicUploads.migrated, skipped: publicUploads.skipped, errors: publicUploads.errors },
+    tickets: { total: tickets.total, migrated: tickets.migrated, skipped: tickets.skipped, errors: tickets.errors },
+    secureMedia: { total: secureMedia.total, migrated: secureMedia.migrated, skipped: secureMedia.skipped, errors: secureMedia.errors },
+    totalMigrated: publicUploads.migrated + tickets.migrated + secureMedia.migrated,
+    totalSkipped: publicUploads.skipped + tickets.skipped + secureMedia.skipped,
+    totalErrors: publicUploads.errors + tickets.errors + secureMedia.errors
+  };
+}
 
 /**
  * Bulk migration function: Migrates all files from local storage/secure-media to RustFS

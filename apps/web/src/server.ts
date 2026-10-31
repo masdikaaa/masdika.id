@@ -242,6 +242,23 @@ app.prepare().then(async () => {
         console.warn('> [Job Queue Recovery] Startup check note:', err?.message || err);
       });
     }).catch(() => {});
+
+    // RustFS Zero-Downtime Background Local Assets Migration Check
+    setTimeout(() => {
+      import("./lib/rustfs").then(async ({ getRustFSConfig, migrateAllLocalAssetsToRustFS }) => {
+        try {
+          const config = await getRustFSConfig();
+          if (config.enabled) {
+            const res = await migrateAllLocalAssetsToRustFS({ deleteLocalAfterUpload: true, silentIfEmpty: true });
+            if (res.totalMigrated > 0) {
+              console.log(`> [RustFS Auto-Sync] Successfully migrated ${res.totalMigrated} production asset(s) to buckets.`);
+            }
+          }
+        } catch (err: any) {
+          console.warn('> [RustFS Auto-Sync] Startup check note:', err?.message || err);
+        }
+      }).catch(() => {});
+    }, 10000);
   });
 
   // ========================================

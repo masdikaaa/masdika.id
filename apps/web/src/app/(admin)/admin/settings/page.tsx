@@ -67,6 +67,34 @@ export default function SettingsPage() {
   const [updateActiveConfigAfterTransfer, setUpdateActiveConfigAfterTransfer] = useState(true);
   const [bucketMigrationResult, setBucketMigrationResult] = useState<any | null>(null);
 
+  // Local Assets Migration State
+  const [migratingLocalAssets, setMigratingLocalAssets] = useState(false);
+  const [localAssetsResult, setLocalAssetsResult] = useState<{ success: boolean; message: string; details?: any } | null>(null);
+
+  const handleMigrateLocalAssets = async () => {
+    setMigratingLocalAssets(true);
+    setLocalAssetsResult(null);
+    try {
+      const res = await fetch('/api/admin/rustfs/migrate-local-assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      setLocalAssetsResult({
+        success: res.ok && data.success,
+        message: data.message || (res.ok ? 'Local assets migrated successfully' : 'Migration failed'),
+        details: data.result
+      });
+    } catch (err: any) {
+      setLocalAssetsResult({
+        success: false,
+        message: err?.message || 'Failed to trigger local assets migration'
+      });
+    } finally {
+      setMigratingLocalAssets(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -1451,6 +1479,73 @@ export default function SettingsPage() {
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save RustFS Settings"}
                     </button>
+                  </div>
+                </motion.div>
+
+                {/* Local VPS Assets to RustFS Sync Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
+                  className={cn("rounded-2xl p-6 md:p-8 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className="flex items-center gap-4">
+                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <UploadCloud className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Local VPS Assets to RustFS Sync</h3>
+                        <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Migrate local server assets (<code className="text-cyan-400">public/uploads</code>, <code className="text-cyan-400">tickets</code>, <code className="text-cyan-400">secure-media</code>) to dedicated RustFS buckets.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleMigrateLocalAssets}
+                      disabled={migratingLocalAssets}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 cursor-pointer shrink-0"
+                    >
+                      {migratingLocalAssets ? (
+                        <div className="w-4 h-4 border-2 border-slate-950/20 border-t-slate-950 rounded-full animate-spin" />
+                      ) : (
+                        <UploadCloud className="w-4 h-4" />
+                      )}
+                      <span>{migratingLocalAssets ? "Syncing to RustFS..." : "Sync Local Files to RustFS"}</span>
+                    </button>
+                  </div>
+
+                  {localAssetsResult && (
+                    <div className={cn(
+                      "p-4 rounded-xl text-xs md:text-sm flex items-start gap-3 border",
+                      localAssetsResult.success
+                        ? isDark ? "bg-cyan-950/30 border-cyan-500/30 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                        : isDark ? "bg-rose-950/30 border-rose-500/30 text-rose-200" : "bg-rose-50 border-rose-200 text-rose-900"
+                    )}>
+                      {localAssetsResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 text-cyan-400 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />}
+                      <div className="space-y-1">
+                        <p className="font-semibold">{localAssetsResult.message}</p>
+                        {localAssetsResult.details && (
+                          <p className="text-xs opacity-80">
+                            Uploads: {localAssetsResult.details.publicUploads?.migrated || 0} migrated | Tickets: {localAssetsResult.details.tickets?.migrated || 0} migrated | CDN: {localAssetsResult.details.secureMedia?.migrated || 0} migrated
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                    <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <span className="text-xs font-semibold text-cyan-400">1. Website Media</span>
+                      <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Avatars, blog covers, banners, & opportunities -&gt; <code className="text-cyan-300">masdika-media</code></p>
+                    </div>
+                    <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <span className="text-xs font-semibold text-cyan-400">2. Ticket Attachments</span>
+                      <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>User & admin support screenshots/files -&gt; <code className="text-cyan-300">masdika-ticket</code></p>
+                    </div>
+                    <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <span className="text-xs font-semibold text-cyan-400">3. File CDN & Videos</span>
+                      <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Encrypted media & streamable videos -&gt; <code className="text-cyan-300">masdika-cdn</code></p>
+                    </div>
                   </div>
                 </motion.div>
 
