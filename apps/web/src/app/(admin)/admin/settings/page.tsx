@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings , RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, UploadCloud } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings , RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, UploadCloud, ArrowLeftRight } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,10 +50,22 @@ export default function SettingsPage() {
   // RustFS State
   const [testingRustFS, setTestingRustFS] = useState(false);
   const [rustFSTestResult, setRustFSTestResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [migratingRustFS, setMigratingRustFS] = useState(false);
-  const [migrationResult, setMigrationResult] = useState<any | null>(null);
   const [showSecretKey, setShowSecretKey] = useState(false);
-  const [deleteLocalAfterMigration, setDeleteLocalAfterMigration] = useState(true);
+
+  // Target Server / Bucket Migration State
+  const [targetConfig, setTargetConfig] = useState({
+    endpoint: "",
+    bucket: "",
+    accessKey: "",
+    secretKey: ""
+  });
+  const [showTargetSecretKey, setShowTargetSecretKey] = useState(false);
+  const [testingTarget, setTestingTarget] = useState(false);
+  const [targetTestResult, setTargetTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [migratingBucket, setMigratingBucket] = useState(false);
+  const [deleteSourceAfterTransfer, setDeleteSourceAfterTransfer] = useState(false);
+  const [updateActiveConfigAfterTransfer, setUpdateActiveConfigAfterTransfer] = useState(true);
+  const [bucketMigrationResult, setBucketMigrationResult] = useState<any | null>(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -235,29 +247,83 @@ export default function SettingsPage() {
     }
   };
 
-  const handleMigrateRustFS = async () => {
-    setMigratingRustFS(true);
-    setMigrationResult(null);
-    const toastId = toast.loading("Migrating all media to RustFS... please wait");
+  const handleTestTargetRustFS = async () => {
+    if (!targetConfig.endpoint || !targetConfig.accessKey || !targetConfig.secretKey || !targetConfig.bucket) {
+      toast.error("Please fill in all target server details first.");
+      return;
+    }
+    setTestingTarget(true);
+    setTargetTestResult(null);
+    const toastId = toast.loading("Testing connection to target RustFS server...");
     try {
-      const res = await fetch('/api/admin/rustfs/migrate', {
+      const res = await fetch('/api/admin/rustfs/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(targetConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setTargetTestResult({ success: true, message: data.message });
+      } else {
+        toast.error(data.message || "Connection to target server failed", { id: toastId });
+        setTargetTestResult({ success: false, message: data.message || "Failed to connect to target RustFS server" });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Connection to target server failed", { id: toastId });
+      setTargetTestResult({ success: false, message: e?.message || "Connection failed" });
+    } finally {
+      setTestingTarget(false);
+    }
+  };
+
+  const handleMigrateBucket = async () => {
+    if (!targetConfig.endpoint || !targetConfig.accessKey || !targetConfig.secretKey || !targetConfig.bucket) {
+      toast.error("Please fill in all target server details before migrating.");
+      return;
+    }
+
+    if (
+      targetConfig.endpoint.trim().replace(/\/+$/, '') === formData.rustfs_endpoint.trim().replace(/\/+$/, '') &&
+      targetConfig.bucket.trim() === formData.rustfs_bucket.trim()
+    ) {
+      toast.error("Target server and bucket cannot be identical to current active server and bucket!");
+      return;
+    }
+
+    setMigratingBucket(true);
+    setBucketMigrationResult(null);
+    const toastId = toast.loading("Transferring media objects to new server/bucket... please wait");
+    try {
+      const res = await fetch('/api/admin/rustfs/migrate-bucket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          deleteLocalAfterUpload: deleteLocalAfterMigration
+          target: targetConfig,
+          deleteSourceAfterTransfer,
+          updateActiveConfig: updateActiveConfigAfterTransfer
         })
       });
       const data = await res.json();
       if (data.success) {
         toast.success(data.message, { id: toastId });
-        setMigrationResult(data.result);
+        setBucketMigrationResult(data.result);
+        if (updateActiveConfigAfterTransfer) {
+          setFormData(prev => ({
+            ...prev,
+            rustfs_endpoint: targetConfig.endpoint,
+            rustfs_bucket: targetConfig.bucket,
+            rustfs_access_key: targetConfig.accessKey,
+            rustfs_secret_key: targetConfig.secretKey
+          }));
+        }
       } else {
-        toast.error(data.message || "Migration failed", { id: toastId });
+        toast.error(data.message || "Bucket migration failed", { id: toastId });
       }
     } catch (e: any) {
-      toast.error(e?.message || "Migration request failed", { id: toastId });
+      toast.error(e?.message || "Bucket migration failed", { id: toastId });
     } finally {
-      setMigratingRustFS(false);
+      setMigratingBucket(false);
     }
   };
 
@@ -1356,96 +1422,183 @@ export default function SettingsPage() {
                   </div>
                 </motion.div>
 
-                {/* Media Migration Card */}
+                {/* Cross-Server & Bucket Migration Card */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
                   className={cn("rounded-2xl p-6 md:p-10 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-indigo-50 border-indigo-200 text-indigo-700")}>
-                      <UploadCloud className="w-6 h-6" />
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className="flex items-center gap-4">
+                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-indigo-50 border-indigo-200 text-indigo-700")}>
+                        <ArrowLeftRight className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Cross-Server & Bucket Migration</h3>
+                        <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Seamlessly transfer all media & videos between RustFS servers or buckets at any time.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Media & Video Migration</h3>
-                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        Move existing videos and files from root folder (<code className="text-cyan-400">storage/secure-media</code>) to RustFS.
+                  </div>
+
+                  {/* Current Active Source Pill */}
+                  <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block">Current Source Server</span>
+                      <p className={cn("font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-700")}>
+                        {formData.rustfs_endpoint || "(Not configured)"} <span className="text-zinc-500">•</span> Bucket: <span className="text-cyan-400 font-semibold">{formData.rustfs_bucket || "(Not configured)"}</span>
                       </p>
                     </div>
+                    <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold w-fit", formData.rustfs_enabled ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20")}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", formData.rustfs_enabled ? "bg-emerald-400" : "bg-amber-400")} />
+                      {formData.rustfs_enabled ? "Source Active" : "Source Disabled"}
+                    </span>
                   </div>
 
-                  <div className={cn("p-4 rounded-xl border text-xs leading-relaxed space-y-2", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
-                    <p className="font-semibold text-cyan-400">Zero-Downtime Guarantee:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Files are uploaded directly into RustFS and verified with checksum/size check.</li>
-                      <li>Existing public sharing links, tokens, and video seeking will continue to function seamlessly without 404 errors.</li>
-                      <li>Local files in project directory are cleaned up safely once verified in RustFS.</li>
-                    </ul>
+                  {/* Target Server Destination Form */}
+                  <div className="space-y-4">
+                    <h4 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-800")}>
+                      Destination Server & Bucket Details
+                    </h4>
+
+                    {targetTestResult && (
+                      <div className={cn("p-3.5 rounded-xl border text-xs flex items-center gap-2.5", targetTestResult.success ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400")}>
+                        {targetTestResult.success ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
+                        <span>{targetTestResult.message}</span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <label className={labelClass}>Target RustFS S3 Endpoint *</label>
+                        <input
+                          type="text"
+                          value={targetConfig.endpoint}
+                          onChange={(e) => setTargetConfig(prev => ({ ...prev, endpoint: e.target.value }))}
+                          placeholder="http://new-ip:9000 or https://new-rustfs.domain.com"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP or URL of the new RustFS server with S3 port</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Target Bucket Name *</label>
+                        <input
+                          type="text"
+                          value={targetConfig.bucket}
+                          onChange={(e) => setTargetConfig(prev => ({ ...prev, bucket: e.target.value }))}
+                          placeholder="masdika-media"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Destination bucket name (auto-created if not exists)</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Target Access Key ID *</label>
+                        <input
+                          type="text"
+                          value={targetConfig.accessKey}
+                          onChange={(e) => setTargetConfig(prev => ({ ...prev, accessKey: e.target.value }))}
+                          placeholder="New Access Key ID"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Target Secret Access Key *</label>
+                        <div className="relative">
+                          <input
+                            type={showTargetSecretKey ? "text" : "password"}
+                            value={targetConfig.secretKey}
+                            onChange={(e) => setTargetConfig(prev => ({ ...prev, secretKey: e.target.value }))}
+                            placeholder="••••••••••••••••"
+                            className={cn(inputClass, "pr-10")}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowTargetSecretKey(!showTargetSecretKey)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
+                          >
+                            {showTargetSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="delLocal"
-                      checked={deleteLocalAfterMigration}
-                      onChange={(e) => setDeleteLocalAfterMigration(e.target.checked)}
-                      className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
-                    />
-                    <label htmlFor="delLocal" className={cn("text-xs font-semibold cursor-pointer select-none", isDark ? "text-zinc-300" : "text-slate-700")}>
-                      Delete local file from root project directory after successful upload & verification
+                  {/* Options */}
+                  <div className="space-y-3 pt-2">
+                    <label className="flex items-center gap-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={updateActiveConfigAfterTransfer}
+                        onChange={(e) => setUpdateActiveConfigAfterTransfer(e.target.checked)}
+                        className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
+                      />
+                      <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                        Automatically update active settings to destination server upon successful migration
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={deleteSourceAfterTransfer}
+                        onChange={(e) => setDeleteSourceAfterTransfer(e.target.checked)}
+                        className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
+                      />
+                      <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                        Delete objects from current source server/bucket after verified transfer (leave unchecked to keep backup)
+                      </span>
                     </label>
                   </div>
 
-                  {migrationResult && (
+                  {/* Migration Report */}
+                  {bucketMigrationResult && (
                     <div className={cn("p-5 rounded-xl border space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">Migration Report</h4>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-white/5 border-white/5" : "bg-white border-slate-200")}>
                           <span className="text-xs text-zinc-400 block">Total Files</span>
-                          <span className="text-lg font-extrabold text-white">{migrationResult.total}</span>
+                          <span className="text-lg font-extrabold text-white">{bucketMigrationResult.total}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")}>
-                          <span className="text-xs text-emerald-400 block">Migrated</span>
-                          <span className="text-lg font-extrabold text-emerald-400">{migrationResult.migrated}</span>
+                          <span className="text-xs text-emerald-400 block">Transferred</span>
+                          <span className="text-lg font-extrabold text-emerald-400">{bucketMigrationResult.migrated}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
-                          <span className="text-xs text-cyan-400 block">Already in RustFS</span>
-                          <span className="text-lg font-extrabold text-cyan-400">{migrationResult.skipped}</span>
+                          <span className="text-xs text-cyan-400 block">Already in Target</span>
+                          <span className="text-lg font-extrabold text-cyan-400">{bucketMigrationResult.skipped}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                           <span className="text-xs text-red-400 block">Errors</span>
-                          <span className="text-lg font-extrabold text-red-400">{migrationResult.errors}</span>
+                          <span className="text-lg font-extrabold text-red-400">{bucketMigrationResult.errors}</span>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="pt-2">
+                  {/* Action Buttons */}
+                  <div className="pt-2 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      onClick={handleMigrateRustFS}
-                      disabled={migratingRustFS}
-                      className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                      onClick={handleTestTargetRustFS}
+                      disabled={testingTarget || migratingBucket}
+                      className={cn("px-5 py-2.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50", isDark ? "bg-slate-800/80 border-slate-700 text-zinc-200 hover:bg-slate-800" : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200")}
                     >
-                      <UploadCloud className={cn("w-4 h-4", migratingRustFS && "animate-bounce")} />
-                      <span>{migratingRustFS ? "Migrating Media Files..." : "Run Migration Now"}</span>
+                      {testingTarget ? <div className="w-3.5 h-3.5 border-2 border-t-transparent border-cyan-400 rounded-full animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                      <span>{testingTarget ? "Testing..." : "Test Target Connection"}</span>
                     </button>
-                  </div>
-                </motion.div>
 
-                {/* CI/CD Integration Card */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                  className={cn("rounded-2xl p-6 md:p-8 space-y-4 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
-                >
-                  <div className="flex items-center gap-3">
-                    <Server className="w-5 h-5 text-cyan-400" />
-                    <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Automated CI/CD Deployment Integration</h3>
-                  </div>
-                  <p className={cn("text-xs md:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    To automatically move media files to RustFS and keep the project folder lean after every deployment, add this command to your deployment script or pipeline:
-                  </p>
-                  <div className="p-4 rounded-xl bg-[#060b14] border border-slate-800 font-mono text-xs text-cyan-300 flex items-center justify-between">
-                    <code>npm run storage:migrate-to-rustfs</code>
+                    <button
+                      type="button"
+                      onClick={handleMigrateBucket}
+                      disabled={migratingBucket || testingTarget}
+                      className="px-6 py-2.5 rounded-xl text-xs font-semibold transition-all bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                    >
+                      <ArrowLeftRight className={cn("w-4 h-4", migratingBucket && "animate-spin")} />
+                      <span>{migratingBucket ? "Migrating Media Objects..." : "Start Server / Bucket Migration"}</span>
+                    </button>
                   </div>
                 </motion.div>
               </motion.div>

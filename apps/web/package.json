@@ -8,7 +8,6 @@
     "start": "tsx src/server.ts",
     "worker": "tsx scripts/worker.ts",
     "vnc-proxy": "tsx scripts/vnc-proxy.ts",
-    "storage:migrate-to-rustfs": "tsx scripts/migrate-to-rustfs.ts",
     "lint": "eslint",
     "postinstall": "npx prisma generate"
   },
