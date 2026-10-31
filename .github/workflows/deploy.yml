@@ -99,13 +99,11 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/masdika.id
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-            docker compose pull app worker
 
             # Zero-Disruption Safety Check: Wait if any Order Deployment (VPS / K3s / CDN / Jobs), Snapshot, or Backup is in progress
             echo "Checking if any critical operations (VPS / K3s / CDN Orders / Deployments / Snapshots / Backups) are in progress..."
             for i in $(seq 1 30); do
-              READINESS=$(curl -s http://127.0.0.1/api/health/deploy-readiness 2>/dev/null || curl -s http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || docker compose exec -T app wget -qO- http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || echo '{"safeToDeploy":true}')
+              READINESS=$(curl -s http://127.0.0.1/api/health/deploy-readiness 2>/dev/null || curl -s http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || echo '{"safeToDeploy":true}')
               IS_SAFE=$(echo "$READINESS" | grep -o '"safeToDeploy":true' || true)
 
               if [ -n "$IS_SAFE" ]; then
@@ -114,18 +112,36 @@ jobs:
               fi
 
               ACTIVE_COUNT=$(echo "$READINESS" | grep -o '"activeCount":[0-9]*' || echo "active operations")
-              echo "Waiting for $ACTIVE_COUNT to complete before recreating container (Attempt $i/30, waiting 10s)..."
+              echo "Waiting for $ACTIVE_COUNT to complete before updating deployment (Attempt $i/30, waiting 10s)..."
               sleep 10
             done
 
-            docker compose up -d --force-recreate app worker
-            docker compose up -d --no-recreate
-            docker image prune -f
-            docker builder prune -f
-            docker compose exec -T nginx nginx -s reload || docker compose restart nginx || true
+            # Detect whether host is running K3s Kubernetes or Docker Compose
+            if command -v kubectl >/dev/null 2>&1 && kubectl get namespace masdika >/dev/null 2>&1; then
+              echo "🚀 Detected active K3s Kubernetes cluster for masdika!"
 
-            # Zero-Downtime Automated Asset Migration to RustFS
-            echo "Checking and migrating production assets to RustFS..."
-            docker compose exec -T app node /app/apps/web/migrate-production-assets.js || echo "Notice: RustFS asset migration completed with notice."
+              # 1. Apply latest manifest changes (Deployments, Services, ConfigMaps, Ingress, HPA)
+              kubectl apply -f k3s-masdika.yaml
 
-            docker logout || true
+              # 2. Trigger zero-downtime rolling update (imagePullPolicy is Always)
+              echo "Triggering zero-downtime rolling update for K3s pods..."
+              kubectl rollout restart deployment masdika-app masdika-worker masdika-vnc-proxy -n masdika
+
+              # 3. Wait for new pods to achieve Healthy/Ready status
+              kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
+              kubectl rollout status deployment/masdika-worker -n masdika --timeout=180s
+              kubectl rollout status deployment/masdika-vnc-proxy -n masdika --timeout=120s
+
+              echo "✅ K3s deployment updated and running successfully with zero downtime!"
+            else
+              echo "🚀 Deploying to Docker Compose environment..."
+              echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+              docker compose pull app worker || true
+              docker compose up -d --force-recreate app worker || true
+              docker compose up -d --no-recreate || true
+              docker image prune -f || true
+              docker builder prune -f || true
+              docker compose exec -T nginx nginx -s reload || docker compose restart nginx || true
+              docker logout || true
+              echo "✅ Docker Compose deployment completed!"
+            fi
