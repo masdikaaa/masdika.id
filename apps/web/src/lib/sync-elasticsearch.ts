@@ -500,3 +500,275 @@ export async function searchInvoicesElastic(
     return result.hits.hits.map((hit: any) => hit._source ? hit._source.id : parseInt(hit._id, 10));
   }, null);
 }
+
+
+export const TICKET_INDEX = 'masdika-tickets';
+
+/**
+ * Initializes the Elasticsearch index for Support Tickets with proper mappings for search
+ */
+export async function initializeTicketElasticIndex() {
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: TICKET_INDEX });
+    if (!exists) {
+      await client.indices.create({
+        index: TICKET_INDEX,
+        body: {
+          mappings: {
+            properties: {
+              id: { type: 'integer' },
+              ticketId: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              userId: { type: 'integer' },
+              userName: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              userEmail: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              subject: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              service: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              priority: { type: 'keyword' },
+              status: { type: 'keyword' },
+              message: { type: 'text', analyzer: 'standard' },
+              isReadByAdmin: { type: 'boolean' },
+              isReadByUser: { type: 'boolean' },
+              createdAt: { type: 'date' },
+              updatedAt: { type: 'date' }
+            }
+          }
+        }
+      });
+      console.log(`[Elasticsearch] Index ${TICKET_INDEX} created.`);
+    }
+  });
+}
+
+/**
+ * Syncs a single SupportTicket record to Elasticsearch
+ */
+export async function syncTicketToElastic(ticketIdOrId: number | string) {
+  const where = typeof ticketIdOrId === 'number' 
+    ? { id: ticketIdOrId } 
+    : { ticketId: ticketIdOrId };
+
+  const ticket = await prisma.supportTicket.findUnique({
+    where,
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      messages: {
+        select: { message: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+      }
+    }
+  });
+
+  if (!ticket) {
+    // If ticket was deleted, remove from ES
+    await withElastic(async (client) => {
+      if (typeof ticketIdOrId === 'number') {
+        await client.delete({
+          index: TICKET_INDEX,
+          id: ticketIdOrId.toString()
+        }).catch(e => {
+          if (e.meta?.statusCode !== 404) console.error(e);
+        });
+      }
+    });
+    return;
+  }
+
+  const rawEmail = ticket.user?.email || "";
+  let email = rawEmail;
+  if (rawEmail.startsWith('enc:')) {
+    try {
+      email = decryptDeterministic(rawEmail);
+    } catch {
+      email = rawEmail;
+    }
+  }
+  const rawName = ticket.user?.name || "";
+  let name = rawName;
+  if (rawName.startsWith('enc:')) {
+    try {
+      name = decryptDeterministic(rawName);
+    } catch {
+      name = rawName;
+    }
+  }
+
+  const messageText = ticket.messages?.map((m: any) => m.message).join(' ') || '';
+
+  const doc = {
+    id: ticket.id,
+    ticketId: ticket.ticketId,
+    userId: ticket.userId,
+    userName: name,
+    userEmail: email,
+    subject: ticket.subject,
+    service: ticket.service || '',
+    priority: ticket.priority,
+    status: ticket.status,
+    message: messageText,
+    isReadByAdmin: ticket.isReadByAdmin,
+    isReadByUser: ticket.isReadByUser,
+    createdAt: ticket.createdAt,
+    updatedAt: ticket.updatedAt
+  };
+
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: TICKET_INDEX });
+    if (!exists) {
+      await initializeTicketElasticIndex();
+    }
+
+    await client.index({
+      index: TICKET_INDEX,
+      id: ticket.id.toString(),
+      document: doc
+    });
+  });
+}
+
+/**
+ * Bulk syncs all tickets to Elasticsearch
+ */
+export async function syncAllTicketsToElastic(batchSize = 250): Promise<{ count: number }> {
+  let count = 0;
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: TICKET_INDEX });
+    if (!exists) {
+      await initializeTicketElasticIndex();
+    }
+
+    let cursor: number | undefined = undefined;
+    while (true) {
+      const tickets: any[] = await prisma.supportTicket.findMany({
+        take: batchSize,
+        skip: cursor ? 1 : 0,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { id: 'asc' },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          messages: {
+            select: { message: true, createdAt: true },
+            orderBy: { createdAt: 'desc' },
+            take: 5
+          }
+        }
+      });
+
+      if (tickets.length === 0) break;
+
+      const operations = tickets.flatMap((t: any) => {
+        const rawEmail = t.user?.email || "";
+        let email = rawEmail;
+        if (rawEmail.startsWith('enc:')) {
+          try {
+            email = decryptDeterministic(rawEmail);
+          } catch {
+            email = rawEmail;
+          }
+        }
+        const rawName = t.user?.name || "";
+        let name = rawName;
+        if (rawName.startsWith('enc:')) {
+          try {
+            name = decryptDeterministic(rawName);
+          } catch {
+            name = rawName;
+          }
+        }
+
+        const messageText = t.messages?.map((m: any) => m.message).join(' ') || '';
+
+        const doc = {
+          id: t.id,
+          ticketId: t.ticketId,
+          userId: t.userId,
+          userName: name,
+          userEmail: email,
+          subject: t.subject,
+          service: t.service || '',
+          priority: t.priority,
+          status: t.status,
+          message: messageText,
+          isReadByAdmin: t.isReadByAdmin,
+          isReadByUser: t.isReadByUser,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt
+        };
+
+        return [
+          { index: { _index: TICKET_INDEX, _id: t.id.toString() } },
+          doc
+        ];
+      });
+
+      if (operations.length > 0) {
+        await client.bulk({ refresh: true, operations });
+        count += tickets.length;
+      }
+
+      cursor = tickets[tickets.length - 1].id;
+      if (tickets.length < batchSize) break;
+    }
+  });
+
+  return { count };
+}
+
+/**
+ * Searches Tickets in Elasticsearch
+ */
+export async function searchTicketsElastic(
+  query: string,
+  options?: { userId?: number; status?: string; limit?: number }
+): Promise<number[] | null> {
+  return await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: TICKET_INDEX });
+    if (!exists) {
+      return null;
+    }
+
+    const must: any[] = [];
+    if (query && query.trim()) {
+      must.push({
+        multi_match: {
+          query: query.trim(),
+          fields: [
+            'ticketId^5',
+            'subject^4',
+            'userName^3',
+            'userEmail^3',
+            'service^2',
+            'message^2',
+            'priority'
+          ],
+          fuzziness: 'AUTO',
+          prefix_length: 1
+        }
+      });
+    }
+
+    const filter: any[] = [];
+    if (options?.userId !== undefined) {
+      filter.push({ term: { userId: options.userId } });
+    }
+    if (options?.status && options.status !== 'all') {
+      filter.push({ term: { status: options.status } });
+    }
+
+    const result = await client.search({
+      index: TICKET_INDEX,
+      body: {
+        query: must.length || filter.length ? {
+          bool: {
+            ...(must.length ? { must } : {}),
+            ...(filter.length ? { filter } : {})
+          }
+        } : { match_all: {} },
+        sort: [{ updatedAt: { order: 'desc' } }],
+        size: options?.limit || 100
+      }
+    });
+
+    return result.hits.hits.map((hit: any) => hit._source ? hit._source.id : parseInt(hit._id, 10));
+  }, null);
+}

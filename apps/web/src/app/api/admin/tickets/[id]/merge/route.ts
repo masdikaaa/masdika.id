@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { syncTicketToElastic } from '@/lib/sync-elasticsearch';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -61,6 +62,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         isSystem: true
       }
     });
+
+    // Sync both tickets to elastic
+    syncTicketToElastic(sourceTicket.id).catch(err => console.error('Failed to sync merged source ticket to elastic:', err));
+    syncTicketToElastic(targetTicket.id).catch(err => console.error('Failed to sync merged target ticket to elastic:', err));
 
     return NextResponse.json({ success: true, message: 'Tickets merged successfully' });
   } catch (error) {

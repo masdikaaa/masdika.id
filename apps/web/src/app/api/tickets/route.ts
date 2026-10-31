@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { sendTicketCreatedEmail } from '@/lib/email';
 import { encryptDeterministic, decryptDeterministic } from '@/lib/encryption';
+import { searchTicketsElastic, syncTicketToElastic } from '@/lib/sync-elasticsearch';
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,9 +12,19 @@ export async function GET(req: NextRequest) {
     
     const user = auth.user!;
 
-
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
+    const search = searchParams.get('search') || searchParams.get('q') || '';
+
+    // 1. Attempt Elasticsearch search if search query is provided
+    let elasticTicketIds: number[] | null = null;
+    if (search.trim()) {
+      elasticTicketIds = await searchTicketsElastic(search.trim(), {
+        userId: user.role !== 'ADMIN' ? user.id : undefined,
+        status: status || undefined,
+        limit: 150,
+      });
+    }
 
     const whereClause: any = {};
     
@@ -26,12 +37,13 @@ export async function GET(req: NextRequest) {
       whereClause.status = status;
     }
 
-    const search = searchParams.get('search');
-    if (search) {
+    if (elasticTicketIds !== null) {
+      whereClause.id = { in: elasticTicketIds };
+    } else if (search.trim()) {
       whereClause.OR = [
-        { ticketId: { contains: search } },
-        { subject: { contains: search } },
-        { user: { name: { contains: search } } }
+        { ticketId: { contains: search.trim(), mode: 'insensitive' } },
+        { subject: { contains: search.trim(), mode: 'insensitive' } },
+        { service: { contains: search.trim(), mode: 'insensitive' } }
       ];
     }
 
@@ -54,18 +66,36 @@ export async function GET(req: NextRequest) {
       prisma.supportTicket.count({ where: whereClause })
     ]);
 
+    let decryptedTickets = tickets.map(t => ({
+      ...t,
+      user: {
+        ...t.user,
+        email: decryptDeterministic(t.user.email),
+        name: t.user.name ? decryptDeterministic(t.user.name) : t.user.name
+      }
+    }));
+
+    // 2. In-memory fallback if Elasticsearch is offline / not configured and searching
+    if (elasticTicketIds === null && search.trim()) {
+      const q = search.trim().toLowerCase();
+      decryptedTickets = decryptedTickets.filter(t => {
+        const tId = (t.ticketId || '').toLowerCase();
+        const subj = (t.subject || '').toLowerCase();
+        const serv = (t.service || '').toLowerCase();
+        const uName = (t.user?.name || '').toLowerCase();
+        const uEmail = (t.user?.email || '').toLowerCase();
+        return tId.includes(q) || subj.includes(q) || serv.includes(q) || uName.includes(q) || uEmail.includes(q);
+      });
+    }
+
     return NextResponse.json({
-      tickets: tickets.map(t => ({
-        ...t,
-        user: {
-          ...t.user,
-          email: decryptDeterministic(t.user.email),
-          name: t.user.name ? decryptDeterministic(t.user.name) : t.user.name
-        }
-      })),
+      tickets: decryptedTickets,
       total,
       page,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
+      meta: {
+        source: elasticTicketIds !== null ? 'elasticsearch' : 'database'
+      }
     });
   } catch (error) {
     console.error('Fetch tickets error:', error);
@@ -201,6 +231,9 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    // Sync to Elasticsearch
+    syncTicketToElastic(ticket.id).catch(err => console.debug("ES syncTicket create:", err));
 
     // Send Emails
     // Notify User

@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { sendTicketReplyEmail } from '@/lib/email';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { syncTicketToElastic } from '@/lib/sync-elasticsearch';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -137,6 +138,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         ...(user.role !== 'ADMIN' ? { isReadByAdmin: false, isReadByUser: true } : { isReadByAdmin: true, isReadByUser: false })
       }
     });
+
+    // Sync to Elasticsearch
+    syncTicketToElastic(ticket.id).catch(err => console.debug("ES replyTicket:", err));
 
     // Send emails
     if (user.role === 'ADMIN') {

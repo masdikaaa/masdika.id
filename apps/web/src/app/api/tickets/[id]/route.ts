@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 
 import { decryptDeterministic } from '@/lib/encryption';
+import { syncTicketToElastic } from '@/lib/sync-elasticsearch';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -113,6 +114,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       where: { ticketId },
       data: dataToUpdate
     });
+
+    syncTicketToElastic(updated.id).catch(err => console.debug("ES patchTicket:", err));
 
     return NextResponse.json(updated);
   } catch (err) {

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { syncTicketToElastic } from '@/lib/sync-elasticsearch';
 
 export async function DELETE(
   req: NextRequest,
@@ -40,6 +41,9 @@ export async function DELETE(
 
     // Delete ticket from DB — cascades to messages + attachment rows
     await prisma.supportTicket.delete({ where: { ticketId } });
+
+    // Remove from Elasticsearch
+    syncTicketToElastic(ticket.id).catch(err => console.debug("ES sync delete ticket:", err));
 
     return NextResponse.json({ success: true });
   } catch (error) {

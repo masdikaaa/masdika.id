@@ -196,7 +196,7 @@ export default function AdminTicketsClient() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
             <span>Total Tickets:</span>
-            <span className="font-extrabold text-white">{totalCount}</span>
+            <span className="font-extrabold text-white">{data?.total ?? totalCount}</span>
           </div>
           <button
             onClick={() => mutate()}
