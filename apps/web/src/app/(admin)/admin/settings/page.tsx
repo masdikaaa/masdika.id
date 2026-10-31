@@ -1429,7 +1429,7 @@ export default function SettingsPage() {
                 >
                   <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6", isDark ? "border-slate-800" : "border-slate-200")}>
                     <div className="flex items-center gap-4">
-                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-indigo-50 border-indigo-200 text-indigo-700")}>
+                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                         <ArrowLeftRight className="w-6 h-6" />
                       </div>
                       <div>
