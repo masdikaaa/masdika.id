@@ -139,13 +139,22 @@ export async function PUT(req: Request) {
           const sharpModule = await import('sharp');
           const sharp = sharpModule.default || sharpModule;
           
-          await sharp(buffer)
+          const optimizedBuffer = await sharp(buffer)
             .resize(800, undefined, {
               withoutEnlargement: true,
               fit: 'inside',
             })
             .webp({ quality: 80 })
-            .toFile(filePath);
+            .toBuffer();
+          
+          fs.writeFileSync(filePath, optimizedBuffer);
+
+          try {
+            const { uploadPublicUploadToRustFS } = await import('@/lib/rustfs');
+            await uploadPublicUploadToRustFS(`avatars/${fileName}`, optimizedBuffer, 'image/webp');
+          } catch (rustErr) {
+            console.error('[Admin Profile Image] RustFS upload error:', rustErr);
+          }
           
           finalImagePath = `/uploads/avatars/${fileName}`;
         }
@@ -159,6 +168,10 @@ export async function PUT(req: Request) {
           if (fs.existsSync(oldFileAbsolutePath)) {
             fs.unlinkSync(oldFileAbsolutePath);
           }
+          try {
+            const { deletePublicUploadFromRustFS } = await import('@/lib/rustfs');
+            await deletePublicUploadFromRustFS(`avatars/${safeFilename}`);
+          } catch {}
         } catch (e) {
           console.error("Failed to delete old profile image:", e);
         }
