@@ -772,3 +772,280 @@ export async function searchTicketsElastic(
     return result.hits.hits.map((hit: any) => hit._source ? hit._source.id : parseInt(hit._id, 10));
   }, null);
 }
+
+
+export const MEDIA_INDEX = 'masdika-media';
+
+/**
+ * Initializes the Elasticsearch index for SecureMedia with proper mappings for search
+ */
+export async function initializeMediaElasticIndex() {
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: MEDIA_INDEX });
+    if (!exists) {
+      await client.indices.create({
+        index: MEDIA_INDEX,
+        body: {
+          mappings: {
+            properties: {
+              id: { type: 'integer' },
+              filename: { type: 'keyword' },
+              originalName: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              mimeType: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              size: { type: 'long' },
+              folderPath: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              isFolder: { type: 'boolean' },
+              isPinned: { type: 'boolean' },
+              isPublic: { type: 'boolean' },
+              token: { type: 'keyword' },
+              expiresAt: { type: 'date' },
+              userId: { type: 'integer' },
+              userName: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              userEmail: { type: 'text', analyzer: 'standard', fields: { keyword: { type: 'keyword' } } },
+              isAdminMedia: { type: 'boolean' },
+              createdAt: { type: 'date' }
+            }
+          }
+        }
+      });
+      console.log(`[Elasticsearch] Index ${MEDIA_INDEX} created.`);
+    }
+  });
+}
+
+/**
+ * Syncs a single SecureMedia item to Elasticsearch
+ */
+export async function syncMediaToElastic(mediaId: number) {
+  const media = await prisma.secureMedia.findUnique({
+    where: { id: mediaId },
+    include: {
+      user: { select: { id: true, name: true, email: true, role: true } }
+    }
+  });
+
+  if (!media) {
+    // If deleted, remove from ES
+    await withElastic(async (client) => {
+      await client.delete({
+        index: MEDIA_INDEX,
+        id: mediaId.toString()
+      }).catch(e => {
+        if (e.meta?.statusCode !== 404) console.error(e);
+      });
+    });
+    return;
+  }
+
+  const rawEmail = media.user?.email || "";
+  let email = rawEmail;
+  if (rawEmail.startsWith('enc:')) {
+    try {
+      email = decryptDeterministic(rawEmail);
+    } catch {
+      email = rawEmail;
+    }
+  }
+  const rawName = media.user?.name || "";
+  let name = rawName;
+  if (rawName.startsWith('enc:')) {
+    try {
+      name = decryptDeterministic(rawName);
+    } catch {
+      name = rawName;
+    }
+  }
+
+  const isAdminMedia = !media.userId || media.user?.role === 'ADMIN';
+
+  const doc = {
+    id: media.id,
+    filename: media.filename,
+    originalName: media.originalName,
+    mimeType: media.mimeType,
+    size: media.size,
+    folderPath: media.folderPath,
+    isFolder: media.isFolder,
+    isPinned: media.isPinned,
+    isPublic: media.isPublic,
+    token: media.token,
+    expiresAt: media.expiresAt,
+    userId: media.userId,
+    userName: name,
+    userEmail: email,
+    isAdminMedia,
+    createdAt: media.createdAt
+  };
+
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: MEDIA_INDEX });
+    if (!exists) {
+      await initializeMediaElasticIndex();
+    }
+
+    await client.index({
+      index: MEDIA_INDEX,
+      id: media.id.toString(),
+      document: doc
+    });
+  });
+}
+
+/**
+ * Bulk syncs all media items to Elasticsearch
+ */
+export async function syncAllMediaToElastic(batchSize = 250): Promise<{ count: number }> {
+  let count = 0;
+  await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: MEDIA_INDEX });
+    if (!exists) {
+      await initializeMediaElasticIndex();
+    }
+
+    let cursor: number | undefined = undefined;
+    while (true) {
+      const items: any[] = await prisma.secureMedia.findMany({
+        take: batchSize,
+        skip: cursor ? 1 : 0,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { id: 'asc' },
+        include: {
+          user: { select: { id: true, name: true, email: true, role: true } }
+        }
+      });
+
+      if (items.length === 0) break;
+
+      const operations = items.flatMap((m: any) => {
+        const rawEmail = m.user?.email || "";
+        let email = rawEmail;
+        if (rawEmail.startsWith('enc:')) {
+          try {
+            email = decryptDeterministic(rawEmail);
+          } catch {
+            email = rawEmail;
+          }
+        }
+        const rawName = m.user?.name || "";
+        let name = rawName;
+        if (rawName.startsWith('enc:')) {
+          try {
+            name = decryptDeterministic(rawName);
+          } catch {
+            name = rawName;
+          }
+        }
+
+        const isAdminMedia = !m.userId || m.user?.role === 'ADMIN';
+
+        const doc = {
+          id: m.id,
+          filename: m.filename,
+          originalName: m.originalName,
+          mimeType: m.mimeType,
+          size: m.size,
+          folderPath: m.folderPath,
+          isFolder: m.isFolder,
+          isPinned: m.isPinned,
+          isPublic: m.isPublic,
+          token: m.token,
+          expiresAt: m.expiresAt,
+          userId: m.userId,
+          userName: name,
+          userEmail: email,
+          isAdminMedia,
+          createdAt: m.createdAt
+        };
+
+        return [
+          { index: { _index: MEDIA_INDEX, _id: m.id.toString() } },
+          doc
+        ];
+      });
+
+      if (operations.length > 0) {
+        await client.bulk({ refresh: true, operations });
+        count += items.length;
+      }
+
+      cursor = items[items.length - 1].id;
+      if (items.length < batchSize) break;
+    }
+  });
+
+  return { count };
+}
+
+/**
+ * Searches Media in Elasticsearch
+ */
+export async function searchMediaElastic(
+  query: string,
+  options?: { folderPath?: string; isAdminMedia?: boolean; userId?: number; limit?: number }
+): Promise<number[] | null> {
+  return await withElastic(async (client) => {
+    const exists = await client.indices.exists({ index: MEDIA_INDEX });
+    if (!exists) {
+      return null;
+    }
+
+    const must: any[] = [];
+    if (query && query.trim()) {
+      must.push({
+        multi_match: {
+          query: query.trim(),
+          fields: [
+            'originalName^6',
+            'token^4',
+            'folderPath^2',
+            'mimeType^2',
+            'userName^2',
+            'userEmail^2'
+          ],
+          fuzziness: 'AUTO',
+          prefix_length: 1
+        }
+      });
+    }
+
+    const filter: any[] = [];
+    if (options?.isAdminMedia) {
+      filter.push({ term: { isAdminMedia: true } });
+    }
+    if (options?.userId !== undefined) {
+      filter.push({ term: { userId: options.userId } });
+    }
+    if (options?.folderPath && options.folderPath !== '/') {
+      filter.push({
+        bool: {
+          should: [
+            { term: { "folderPath.keyword": options.folderPath } },
+            { prefix: { "folderPath.keyword": `${options.folderPath}/` } }
+          ],
+          minimum_should_match: 1
+        }
+      });
+    }
+
+    const result = await client.search({
+      index: MEDIA_INDEX,
+      body: {
+        query: must.length || filter.length ? {
+          bool: {
+            ...(must.length ? { must } : {}),
+            ...(filter.length ? { filter } : {})
+          }
+        } : { match_all: {} },
+        sort: [
+          { _score: { order: 'desc' } },
+          { isPinned: { order: 'desc' } },
+          { isFolder: { order: 'desc' } },
+          { createdAt: { order: 'desc' } }
+        ],
+        size: options?.limit || 100
+      }
+    });
+
+    return result.hits.hits.map((hit: any) => hit._source ? hit._source.id : parseInt(hit._id, 10));
+  }, null);
+}

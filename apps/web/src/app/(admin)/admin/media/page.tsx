@@ -252,10 +252,19 @@ export default function AdminMediaLibrary() {
   const [isDragging, setIsDragging] = useState(false);
   const [previewItem, setPreviewItem] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   const [viewMode, setViewMode] = useUrlString<"grid" | "list">("viewMode", "grid", ["grid", "list"] as const);
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const ITEMS_PER_PAGE = 20;
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Folder state
   const [currentFolder, setCurrentFolder] = useUrlString<string>("currentFolder", "/");
@@ -274,10 +283,15 @@ export default function AdminMediaLibrary() {
     }
   }, []);
 
-  const fetchMedia = async () => {
+  const fetchMedia = async (searchOverride?: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/secure-media?folder=${encodeURIComponent(currentFolder)}`);
+      const activeSearch = searchOverride !== undefined ? searchOverride : debouncedSearch;
+      let url = `/api/admin/secure-media?folder=${encodeURIComponent(currentFolder)}`;
+      if (activeSearch && activeSearch.trim()) {
+        url += `&search=${encodeURIComponent(activeSearch.trim())}`;
+      }
+      const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setMedia(data);
@@ -291,7 +305,7 @@ export default function AdminMediaLibrary() {
 
   useEffect(() => {
     fetchMedia();
-  }, [currentFolder]);
+  }, [currentFolder, debouncedSearch]);
   
   useUpdateEffect(() => {
     setCurrentPage(1);
@@ -375,8 +389,10 @@ export default function AdminMediaLibrary() {
   };
 
   const navigateTo = (path: string) => {
+    setSearchQuery("");
     setCurrentFolder(path);
     const params = new URLSearchParams(window.location.search);
+    params.delete("searchQuery");
     if (path === "/") params.delete("folder");
     else params.set("folder", path);
     window.history.pushState(null, "", `?${params.toString()}`);
@@ -644,7 +660,12 @@ export default function AdminMediaLibrary() {
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
           <div className="relative flex-1 sm:min-w-[200px]">
             <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 /70", isDark ? "text-cyan-500" : "text-cyan-700")} />
-            <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={cn("w-full border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+            <input type="text" placeholder="Search files or folders..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={cn("w-full border rounded-xl py-2.5 pl-10 pr-9 text-sm focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+            {searchQuery && (
+              <button type="button" onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-0.5 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <div className={cn("flex border rounded-xl overflow-hidden shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
@@ -679,25 +700,42 @@ export default function AdminMediaLibrary() {
       </div>
 
       {/* Breadcrumbs */}
-      <motion.div variants={itemVariants} className={cn("flex items-center gap-2 mb-6 p-3.5 rounded-xl border overflow-x-auto whitespace-nowrap", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
-        {getBreadcrumbs().map((crumb, idx) => (
-          <div key={crumb.path} className="flex items-center gap-2">
-            {idx > 0 && <ChevronRight className="w-4 h-4 text-zinc-500" />}
-            <button 
-              onClick={() => navigateTo(crumb.path)} 
-              className={`text-sm font-bold transition-colors ${idx === getBreadcrumbs().length - 1 ? "text-cyan-400" : "text-zinc-400 hover:text-white"}`}
+      <motion.div variants={itemVariants} className={cn("flex items-center justify-between gap-3 mb-6 p-3.5 rounded-xl border overflow-x-auto whitespace-nowrap", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="flex items-center gap-2">
+          {getBreadcrumbs().map((crumb, idx) => (
+            <div key={crumb.path} className="flex items-center gap-2">
+              {idx > 0 && <ChevronRight className="w-4 h-4 text-zinc-500" />}
+              <button 
+                onClick={() => navigateTo(crumb.path)} 
+                className={`text-sm font-bold transition-colors ${idx === getBreadcrumbs().length - 1 ? "text-cyan-400" : "text-zinc-400 hover:text-white"}`}
+              >
+                {crumb.name}
+              </button>
+            </div>
+          ))}
+        </div>
+        {debouncedSearch && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs text-cyan-400 font-semibold bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5" />
+              <span>Results for: &ldquo;{debouncedSearch}&rdquo;</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="text-xs text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg transition-colors border border-white/5 cursor-pointer"
             >
-              {crumb.name}
+              Clear Search
             </button>
           </div>
-        ))}
+        )}
       </motion.div>
 
       {loading ? (
         <AdminLoader className="min-h-[250px] py-12" />
       ) : (
         (() => {
-          const filteredMedia = media.filter(item => item.originalName.toLowerCase().includes(searchQuery.toLowerCase()));
+          const filteredMedia = media;
           const totalPages = Math.ceil(filteredMedia.length / ITEMS_PER_PAGE);
           const paginatedMedia = filteredMedia.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
           
@@ -705,8 +743,12 @@ export default function AdminMediaLibrary() {
             return (
               <motion.div variants={itemVariants} className={cn("border rounded-2xl p-16 flex flex-col items-center justify-center text-center", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                 <Folder className={cn("w-16 h-16 mb-6", isDark ? "text-zinc-500" : "text-slate-400")} />
-                <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Folder is empty</h3>
-                <p className={cn("max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Create a folder or upload secure files here.</p>
+                <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
+                  {debouncedSearch ? "No matching files or folders found" : "Folder is empty"}
+                </h3>
+                <p className={cn("max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  {debouncedSearch ? "Try searching with a different filename, extension, or keyword." : "Create a folder or upload secure files here."}
+                </p>
               </motion.div>
             );
           }
@@ -720,7 +762,7 @@ export default function AdminMediaLibrary() {
                 return (
                 <div key={item.id} 
                      onClick={(e) => { if(e.ctrlKey) toggleSelect(item.id); else if(e.shiftKey) toggleSelect(item.id); }}
-                     onDoubleClick={() => item.isFolder && navigateTo(`${currentFolder === '/' ? '' : currentFolder}/${item.originalName}`)}
+                     onDoubleClick={() => item.isFolder && navigateTo(`${item.folderPath === '/' ? '' : item.folderPath}/${item.originalName}`)}
                      className={cn(
                        "border rounded-xl p-4 flex flex-col transition-all group cursor-pointer relative",
                        selectedIds.includes(item.id)
@@ -749,6 +791,12 @@ export default function AdminMediaLibrary() {
                   </div>
                   
                   <h3 className={cn("font-bold text-sm mb-1 truncate", isDark ? "text-white" : "text-slate-900")} title={item.originalName}>{item.originalName}</h3>
+                  {debouncedSearch && item.folderPath && (
+                    <div className="flex items-center gap-1 text-[11px] text-zinc-500 mb-1 truncate" title={`Folder: ${item.folderPath}`}>
+                      <Folder className="w-3 h-3 shrink-0 text-cyan-400" />
+                      <span className="truncate">{item.folderPath}</span>
+                    </div>
+                  )}
                   {!item.isFolder ? (
                     <div className="flex items-end justify-between mt-auto pt-2">
                       <div className="flex flex-col gap-1">
@@ -814,7 +862,7 @@ export default function AdminMediaLibrary() {
                     {paginatedMedia.map(item => {
                       const FileIcon = getFileIcon(item.mimeType, item.originalName, item.isFolder);
                       return (
-                        <tr key={item.id} onClick={(e) => { if(e.ctrlKey) toggleSelect(item.id); else if(e.shiftKey) toggleSelect(item.id); }} className={cn("transition-colors cursor-pointer group", selectedIds.includes(item.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))} onDoubleClick={() => item.isFolder && navigateTo(`${currentFolder === '/' ? '' : currentFolder}/${item.originalName}`)}>
+                        <tr key={item.id} onClick={(e) => { if(e.ctrlKey) toggleSelect(item.id); else if(e.shiftKey) toggleSelect(item.id); }} className={cn("transition-colors cursor-pointer group", selectedIds.includes(item.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))} onDoubleClick={() => item.isFolder && navigateTo(`${item.folderPath === '/' ? '' : item.folderPath}/${item.originalName}`)}>
                           <td className="px-5 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <button onClick={(e) => { e.stopPropagation(); toggleSelect(item.id); }} className={`w-5 h-5 border rounded flex items-center justify-center cursor-pointer transition-colors ${selectedIds.includes(item.id) ? 'bg-cyan-400 border-cyan-400 text-slate-950' : isDark ? "bg-[#060b14] border-slate-700 group-hover:border-cyan-500/50" : "bg-white border-slate-300 group-hover:border-cyan-600"}`}>
                               {selectedIds.includes(item.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
@@ -825,7 +873,15 @@ export default function AdminMediaLibrary() {
                               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${item.isFolder ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700") : (isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-500")}`}>
                                 <FileIcon className="w-4 h-4" />
                               </div>
-                              <span className={cn("font-bold truncate max-w-[300px] cursor-pointer group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{item.originalName}</span>
+                              <div className="flex flex-col min-w-0">
+                                <span className={cn("font-bold truncate max-w-[300px] cursor-pointer group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{item.originalName}</span>
+                                {debouncedSearch && item.folderPath && (
+                                  <span className="text-[11px] text-zinc-500 flex items-center gap-1 truncate max-w-[300px]" title={`Folder: ${item.folderPath}`}>
+                                    <Folder className="w-3 h-3 shrink-0 text-cyan-400" />
+                                    {item.folderPath}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className={cn("px-5 py-4 font-medium whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>{item.isFolder ? formatBytes(item.folderSize || 0) : formatBytes(item.size)}</td>

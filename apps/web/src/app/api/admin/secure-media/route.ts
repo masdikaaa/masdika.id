@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
+import { searchMediaElastic, syncMediaToElastic } from "@/lib/sync-elasticsearch";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -14,6 +15,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const folderPath = searchParams.get('folder') || '/';
+    const search = searchParams.get('search') || searchParams.get('q') || '';
 
     // Lazy Cleanup: Delete expired media
     const now = new Date();
@@ -30,22 +32,65 @@ export async function GET(req: NextRequest) {
         }
       }
       await prisma.secureMedia.delete({ where: { id: em.id } });
+      syncMediaToElastic(em.id).catch(() => {});
     }
 
-    const media = await prisma.secureMedia.findMany({
-      where: {
-        folderPath,
-        OR: [
-          { userId: null },
-          { user: { role: 'ADMIN' } },
-        ],
-      },
-      orderBy: [
-        { isPinned: 'desc' },
-        { isFolder: 'desc' },
-        { createdAt: 'desc' }
-      ]
-    });
+    let media: any[] = [];
+    let elasticMediaIds: number[] | null = null;
+
+    if (search.trim()) {
+      elasticMediaIds = await searchMediaElastic(search.trim(), {
+        isAdminMedia: true,
+        limit: 150
+      });
+
+      if (elasticMediaIds !== null) {
+        if (elasticMediaIds.length > 0) {
+          media = await prisma.secureMedia.findMany({
+            where: {
+              id: { in: elasticMediaIds },
+              OR: [
+                { userId: null },
+                { user: { role: 'ADMIN' } },
+              ],
+            }
+          });
+          // Sort according to Elasticsearch relevance ranking
+          media.sort((a, b) => elasticMediaIds!.indexOf(a.id) - elasticMediaIds!.indexOf(b.id));
+        }
+      } else {
+        // Fallback for local dev when Elasticsearch is not running
+        media = await prisma.secureMedia.findMany({
+          where: {
+            originalName: { contains: search.trim(), mode: 'insensitive' },
+            OR: [
+              { userId: null },
+              { user: { role: 'ADMIN' } },
+            ],
+          },
+          orderBy: [
+            { isPinned: 'desc' },
+            { isFolder: 'desc' },
+            { createdAt: 'desc' }
+          ]
+        });
+      }
+    } else {
+      media = await prisma.secureMedia.findMany({
+        where: {
+          folderPath,
+          OR: [
+            { userId: null },
+            { user: { role: 'ADMIN' } },
+          ],
+        },
+        orderBy: [
+          { isPinned: 'desc' },
+          { isFolder: 'desc' },
+          { createdAt: 'desc' }
+        ]
+      });
+    }
 
     const enrichedMedia = await Promise.all(media.map(async (item) => {
       if (item.isFolder) {
@@ -114,6 +159,7 @@ export async function POST(req: NextRequest) {
           token: uuidv4()
         }
       });
+      syncMediaToElastic(newFolder.id).catch(err => console.error('Failed to sync new folder to elastic:', err));
       return NextResponse.json({ success: true, folder: newFolder });
     }
 
@@ -127,13 +173,7 @@ export async function POST(req: NextRequest) {
         data: { originalName: sanitizedName }
       });
       
-      // If it's a folder, we need to update all children's folderPaths too. 
-      // Doing this recursively is complex without nested set model, but we can do a simple prefix update.
-      if (updated.isFolder) {
-        const oldPrefix = `${updated.folderPath === '/' ? '' : updated.folderPath}/${updated.originalName}`; // Wait, the old name is gone. We need it before update.
-        // Actually, we should fetch it before update.
-      }
-      // For now, let's keep it simple and maybe block renaming folders if they have children, or handle children path updates.
+      syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync rename to elastic:', err));
 
       return NextResponse.json({ success: true, media: updated });
     }
@@ -144,6 +184,7 @@ export async function POST(req: NextRequest) {
         where: { id: parseInt(id) },
         data: { folderPath: newFolderPath }
       });
+      syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync move to elastic:', err));
       return NextResponse.json({ success: true, media: updated });
     }
 
@@ -153,6 +194,7 @@ export async function POST(req: NextRequest) {
         where: { id: parseInt(id) },
         data: { isPinned: Boolean(isPinned) }
       });
+      syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync pin to elastic:', err));
       return NextResponse.json({ success: true, media: updated });
     }
 
@@ -166,6 +208,7 @@ export async function POST(req: NextRequest) {
         where: { id: parseInt(id) },
         data: { isPublic: nextPublic }
       });
+      syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync visibility to elastic:', err));
       return NextResponse.json({ success: true, media: updated });
     }
 
@@ -218,6 +261,8 @@ export async function DELETE(req: NextRequest) {
     await prisma.secureMedia.delete({
       where: { id: parseInt(id) }
     });
+
+    syncMediaToElastic(parseInt(id)).catch(err => console.error('Failed to delete media from elastic:', err));
 
     return NextResponse.json({ success: true });
   } catch (error) {

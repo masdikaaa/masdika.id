@@ -9,6 +9,7 @@ import { Transform } from "stream";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { requireAuth } from "@/lib/auth-middleware";
+import { syncMediaToElastic } from "@/lib/sync-elasticsearch";
 
 // Allow up to 10GB request body for this route
 export const maxDuration = 300;
@@ -192,6 +193,8 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      syncMediaToElastic(media.id).catch(err => console.error('Failed to sync media to elastic:', err));
+
       return NextResponse.json({ success: true, media });
     }
     // ── End large-file path ─────────────────────────────────────────────────────
@@ -274,6 +277,8 @@ export async function POST(req: NextRequest) {
         expiresAt,
       },
     });
+
+    syncMediaToElastic(media.id).catch(err => console.error('Failed to sync media to elastic:', err));
 
     return NextResponse.json({ success: true, media });
   } catch (error) {

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import fs from "fs";
 import path from "path";
 import { requireAuth } from '@/lib/auth-middleware';
+import { syncMediaToElastic } from '@/lib/sync-elasticsearch';
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -45,6 +46,9 @@ export async function POST(req: NextRequest) {
         id: { in: ids }
       }
     });
+
+    // Delete records from Elasticsearch
+    ids.forEach(id => syncMediaToElastic(id).catch(err => console.error('Bulk delete media elastic sync error:', err)));
 
     return NextResponse.json({ success: true, count: ids.length });
   } catch (error) {
