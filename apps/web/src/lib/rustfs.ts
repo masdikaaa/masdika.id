@@ -5,7 +5,8 @@ import {
   DeleteObjectCommand,
   HeadObjectCommand,
   CreateBucketCommand,
-  HeadBucketCommand
+  HeadBucketCommand,
+  ListObjectsV2Command
 } from '@aws-sdk/client-s3';
 import { prisma } from './prisma';
 import fs from 'fs';
@@ -1076,45 +1077,61 @@ export interface BucketMigrationParams {
     endpoint?: string;
     accessKey?: string;
     secretKey?: string;
+    cdnBucket?: string;
+    mediaBucket?: string;
+    ticketBucket?: string;
     bucket?: string;
   };
   target: {
     endpoint: string;
     accessKey: string;
     secretKey: string;
-    bucket: string;
+    cdnBucket?: string;
+    mediaBucket?: string;
+    ticketBucket?: string;
+    bucket?: string;
   };
   deleteSourceAfterTransfer?: boolean;
   updateActiveConfig?: boolean;
 }
 
 /**
- * Cross-Server & Bucket-to-Bucket Migration:
- * Transfers all media files from source RustFS server/bucket to target RustFS server/bucket
- * with zero-downtime, integrity verification, and optional active config update.
+ * Cross-Server & All-Bucket Migration:
+ * Seamlessly transfers all files across all 3 buckets (File CDN, Website Media, and Support Tickets)
+ * from source RustFS server to target RustFS server with zero-downtime, integrity verification,
+ * and optional active config update.
  */
 export async function migrateBucketToBucket(params: BucketMigrationParams): Promise<{
   total: number;
   migrated: number;
   skipped: number;
   errors: number;
-  details: Array<{ filename: string; originalName: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }>;
+  categories: {
+    cdn: { total: number; migrated: number; skipped: number; errors: number };
+    media: { total: number; migrated: number; skipped: number; errors: number };
+    ticket: { total: number; migrated: number; skipped: number; errors: number };
+  };
+  details: Array<{ bucket: string; key: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }>;
 }> {
   // 1. Resolve source config
   const activeConfig = await getRustFSConfig();
   const sourceEndpoint = (params.source?.endpoint || activeConfig.endpoint).trim().replace(/\/+$/, '');
   const sourceAccessKey = (params.source?.accessKey || activeConfig.accessKey).trim();
   const sourceSecretKey = (params.source?.secretKey || activeConfig.secretKey).trim();
-  const sourceBucket = (params.source?.bucket || activeConfig.bucket).trim();
+  const sourceCdnBucket = (params.source?.cdnBucket || params.source?.bucket || activeConfig.cdnBucket || 'masdika-cdn').trim();
+  const sourceMediaBucket = (params.source?.mediaBucket || activeConfig.mediaBucket || 'masdika-media').trim();
+  const sourceTicketBucket = (params.source?.ticketBucket || activeConfig.ticketBucket || 'masdika-ticket').trim();
 
   // 2. Resolve target config
   const targetEndpoint = params.target.endpoint.trim().replace(/\/+$/, '');
   const targetAccessKey = params.target.accessKey.trim();
   const targetSecretKey = params.target.secretKey.trim();
-  const targetBucket = params.target.bucket.trim();
+  const targetCdnBucket = (params.target.cdnBucket || params.target.bucket || 'masdika-cdn').trim();
+  const targetMediaBucket = (params.target.mediaBucket || 'masdika-media').trim();
+  const targetTicketBucket = (params.target.ticketBucket || 'masdika-ticket').trim();
 
-  if (!targetEndpoint || !targetAccessKey || !targetSecretKey || !targetBucket) {
-    throw new Error('All target destination fields (endpoint, accessKey, secretKey, bucket) are required.');
+  if (!targetEndpoint || !targetAccessKey || !targetSecretKey) {
+    throw new Error('All target destination fields (endpoint, accessKey, secretKey) are required.');
   }
 
   const sourceClient = new S3Client({
@@ -1137,131 +1154,170 @@ export async function migrateBucketToBucket(params: BucketMigrationParams): Prom
     forcePathStyle: true
   });
 
-  // Ensure target bucket exists
-  await ensureBucketExists(targetClient, targetBucket);
+  // Ensure all 3 target buckets exist
+  await ensureBucketExists(targetClient, targetCdnBucket);
+  await ensureBucketExists(targetClient, targetMediaBucket);
+  await ensureBucketExists(targetClient, targetTicketBucket);
 
-  // Find all file records in DB (excluding folders)
-  const mediaRecords = await prisma.secureMedia.findMany({
-    where: { isFolder: false },
-    select: { id: true, filename: true, originalName: true, size: true, mimeType: true }
-  });
+  const allDetails: Array<{ bucket: string; key: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }> = [];
 
-  let migrated = 0;
-  let skipped = 0;
-  let errors = 0;
-  const details: Array<{ filename: string; originalName: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }> = [];
-
-  for (const record of mediaRecords) {
+  // Helper to list all objects in a bucket via S3 API
+  async function listAllObjects(client: S3Client, bucket: string): Promise<string[]> {
+    const keys: string[] = [];
+    let continuationToken: string | undefined = undefined;
     try {
-      // 1. Check if already in target bucket
-      let alreadyInTarget = false;
-      try {
-        await targetClient.send(new HeadObjectCommand({
-          Bucket: targetBucket,
-          Key: record.filename
+      do {
+        const res: any = await client.send(new ListObjectsV2Command({
+          Bucket: bucket,
+          ContinuationToken: continuationToken
         }));
-        alreadyInTarget = true;
-      } catch (err: any) {
-        if (err.name !== 'NotFound' && err.$metadata?.httpStatusCode !== 404 && err.Code !== 'NoSuchKey') {
-          throw err;
+        if (res.Contents) {
+          for (const item of res.Contents) {
+            if (item.Key) keys.push(item.Key);
+          }
         }
-      }
-
-      if (alreadyInTarget) {
-        skipped++;
-        details.push({
-          filename: record.filename,
-          originalName: record.originalName,
-          size: record.size,
-          status: 'skipped'
-        });
-
-        if (params.deleteSourceAfterTransfer) {
-          try {
-            await sourceClient.send(new DeleteObjectCommand({
-              Bucket: sourceBucket,
-              Key: record.filename
-            }));
-          } catch {}
-        }
-        continue;
-      }
-
-      // 2. Fetch object from source bucket
-      const sourceObj = await sourceClient.send(new GetObjectCommand({
-        Bucket: sourceBucket,
-        Key: record.filename
-      }));
-
-      if (!sourceObj.Body) {
-        throw new Error('Source object body is empty or unreachable');
-      }
-
-      // Convert body to buffer
-      let bodyBuffer: Buffer;
-      if (sourceObj.Body instanceof Readable) {
-        const chunks: Buffer[] = [];
-        for await (const chunk of sourceObj.Body) {
-          chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-        }
-        bodyBuffer = Buffer.concat(chunks);
-      } else {
-        const bytes = await sourceObj.Body.transformToByteArray();
-        bodyBuffer = Buffer.from(bytes);
-      }
-
-      // 3. Put object to target bucket
-      await targetClient.send(new PutObjectCommand({
-        Bucket: targetBucket,
-        Key: record.filename,
-        Body: bodyBuffer,
-        ContentType: record.mimeType || sourceObj.ContentType || 'application/octet-stream',
-        ContentLength: bodyBuffer.length
-      }));
-
-      // 4. Verify object in target bucket
-      await targetClient.send(new HeadObjectCommand({
-        Bucket: targetBucket,
-        Key: record.filename
-      }));
-
-      // 5. Delete from source if requested
-      if (params.deleteSourceAfterTransfer) {
-        try {
-          await sourceClient.send(new DeleteObjectCommand({
-            Bucket: sourceBucket,
-            Key: record.filename
-          }));
-        } catch {}
-      }
-
-      migrated++;
-      details.push({
-        filename: record.filename,
-        originalName: record.originalName,
-        size: record.size,
-        status: 'migrated'
-      });
+        continuationToken = res.NextContinuationToken;
+      } while (continuationToken);
     } catch (err: any) {
-      console.error(`[Bucket Migration] Failed to transfer ${record.filename}:`, err);
-      errors++;
-      details.push({
-        filename: record.filename,
-        originalName: record.originalName,
-        size: record.size,
-        status: 'error',
-        error: err?.message || 'Transfer error'
-      });
+      console.warn(`[Migrate] Warning listing objects in source bucket ${bucket}:`, err?.message || err);
     }
+    return keys;
   }
 
+  // Transfer a single bucket pair
+  async function transferBucket(sourceBucket: string, targetBucket: string, extraKeys: string[] = []): Promise<{
+    total: number;
+    migrated: number;
+    skipped: number;
+    errors: number;
+  }> {
+    const bucketKeys = await listAllObjects(sourceClient, sourceBucket);
+    const combinedKeys = Array.from(new Set([...bucketKeys, ...extraKeys]));
+
+    let migrated = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    for (const key of combinedKeys) {
+      try {
+        // 1. Check if already in target bucket
+        let alreadyInTarget = false;
+        try {
+          await targetClient.send(new HeadObjectCommand({
+            Bucket: targetBucket,
+            Key: key
+          }));
+          alreadyInTarget = true;
+        } catch (err: any) {
+          if (err.name !== 'NotFound' && err.$metadata?.httpStatusCode !== 404 && err.Code !== 'NoSuchKey') {
+            throw err;
+          }
+        }
+
+        if (alreadyInTarget) {
+          skipped++;
+          allDetails.push({ bucket: targetBucket, key, size: 0, status: 'skipped' });
+          if (params.deleteSourceAfterTransfer) {
+            try {
+              await sourceClient.send(new DeleteObjectCommand({ Bucket: sourceBucket, Key: key }));
+            } catch {}
+          }
+          continue;
+        }
+
+        // 2. Fetch object from source
+        const sourceObj = await sourceClient.send(new GetObjectCommand({
+          Bucket: sourceBucket,
+          Key: key
+        }));
+
+        if (!sourceObj.Body) {
+          throw new Error('Source object body is empty or unreachable');
+        }
+
+        let bodyBuffer: Buffer;
+        if (sourceObj.Body instanceof Readable) {
+          const chunks: Buffer[] = [];
+          for await (const chunk of sourceObj.Body) {
+            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+          }
+          bodyBuffer = Buffer.concat(chunks);
+        } else {
+          const bytes = await sourceObj.Body.transformToByteArray();
+          bodyBuffer = Buffer.from(bytes);
+        }
+
+        // 3. Put to target
+        await targetClient.send(new PutObjectCommand({
+          Bucket: targetBucket,
+          Key: key,
+          Body: bodyBuffer,
+          ContentType: sourceObj.ContentType || 'application/octet-stream',
+          ContentLength: bodyBuffer.length
+        }));
+
+        // 4. Verify
+        await targetClient.send(new HeadObjectCommand({
+          Bucket: targetBucket,
+          Key: key
+        }));
+
+        // 5. Delete source if requested
+        if (params.deleteSourceAfterTransfer) {
+          try {
+            await sourceClient.send(new DeleteObjectCommand({ Bucket: sourceBucket, Key: key }));
+          } catch {}
+        }
+
+        migrated++;
+        allDetails.push({ bucket: targetBucket, key, size: bodyBuffer.length, status: 'migrated' });
+      } catch (err: any) {
+        console.error(`[Bucket Migration] Failed to transfer ${key} (${sourceBucket} -> ${targetBucket}):`, err);
+        errors++;
+        allDetails.push({ bucket: targetBucket, key, size: 0, status: 'error', error: err?.message || 'Transfer error' });
+      }
+    }
+
+    return { total: combinedKeys.length, migrated, skipped, errors };
+  }
+
+  // 1. Collect DB keys for CDN & Tickets to make sure zero files are missed
+  const secureMediaRecords = await prisma.secureMedia.findMany({
+    where: { isFolder: false },
+    select: { filename: true }
+  }).catch(() => []);
+  const extraCdnKeys = secureMediaRecords.map(r => r.filename);
+
+  const ticketRecords = await prisma.ticketAttachment.findMany({
+    select: { filename: true }
+  }).catch(() => []);
+  const extraTicketKeys = ticketRecords.map(r => r.filename);
+
+  console.log(`[Cross-Server Migration] Starting migration across all 3 buckets:`);
+  console.log(` 1. File CDN:        ${sourceCdnBucket} -> ${targetCdnBucket}`);
+  console.log(` 2. Website Media:   ${sourceMediaBucket} -> ${targetMediaBucket}`);
+  console.log(` 3. Support Tickets: ${sourceTicketBucket} -> ${targetTicketBucket}`);
+
+  // Migrate all 3 buckets
+  const cdnResult = await transferBucket(sourceCdnBucket, targetCdnBucket, extraCdnKeys);
+  const mediaResult = await transferBucket(sourceMediaBucket, targetMediaBucket);
+  const ticketResult = await transferBucket(sourceTicketBucket, targetTicketBucket, extraTicketKeys);
+
+  const totalMigrated = cdnResult.migrated + mediaResult.migrated + ticketResult.migrated;
+  const totalSkipped = cdnResult.skipped + mediaResult.skipped + ticketResult.skipped;
+  const totalErrors = cdnResult.errors + mediaResult.errors + ticketResult.errors;
+
   // If updateActiveConfig is true and no errors, update settings in DB
-  if (params.updateActiveConfig && errors === 0) {
+  if (params.updateActiveConfig && totalErrors === 0) {
     const settingsToUpdate = [
       { key: 'rustfs_endpoint', value: targetEndpoint },
       { key: 'rustfs_access_key', value: targetAccessKey },
       { key: 'rustfs_secret_key', value: targetSecretKey },
-      { key: 'rustfs_bucket', value: targetBucket }
+      { key: 'rustfs_cdn_bucket', value: targetCdnBucket },
+      { key: 'rustfs_bucket', value: targetCdnBucket },
+      { key: 'rustfs_media_bucket', value: targetMediaBucket },
+      { key: 'rustfs_ticket_bucket', value: targetTicketBucket },
+      { key: 'rustfs_enabled', value: 'true' }
     ];
     for (const s of settingsToUpdate) {
       await prisma.setting.upsert({
@@ -1274,11 +1330,15 @@ export async function migrateBucketToBucket(params: BucketMigrationParams): Prom
   }
 
   return {
-    total: mediaRecords.length,
-    migrated,
-    skipped,
-    errors,
-    details
+    total: cdnResult.total + mediaResult.total + ticketResult.total,
+    migrated: totalMigrated,
+    skipped: totalSkipped,
+    errors: totalErrors,
+    categories: {
+      cdn: cdnResult,
+      media: mediaResult,
+      ticket: ticketResult,
+    },
+    details: allDetails
   };
 }
-

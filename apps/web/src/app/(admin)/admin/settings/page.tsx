@@ -55,7 +55,9 @@ export default function SettingsPage() {
   // Target Server / Bucket Migration State
   const [targetConfig, setTargetConfig] = useState({
     endpoint: "",
-    bucket: "",
+    cdnBucket: "masdika-cdn",
+    mediaBucket: "masdika-media",
+    ticketBucket: "masdika-ticket",
     accessKey: "",
     secretKey: ""
   });
@@ -134,6 +136,7 @@ export default function SettingsPage() {
     rustfs_endpoint: "",
     rustfs_access_key: "",
     rustfs_secret_key: "",
+    rustfs_cdn_bucket: "masdika-cdn",
     rustfs_bucket: "masdika-cdn",
     rustfs_media_bucket: "masdika-media",
     rustfs_ticket_bucket: "masdika-ticket",
@@ -190,7 +193,8 @@ export default function SettingsPage() {
             rustfs_endpoint: data.settings?.rustfs_endpoint || "",
             rustfs_access_key: data.settings?.rustfs_access_key || "",
             rustfs_secret_key: data.settings?.rustfs_secret_key || "",
-            rustfs_bucket: data.settings?.rustfs_bucket || "masdika-cdn",
+            rustfs_cdn_bucket: data.settings?.rustfs_cdn_bucket || data.settings?.rustfs_bucket || "masdika-cdn",
+            rustfs_bucket: data.settings?.rustfs_cdn_bucket || data.settings?.rustfs_bucket || "masdika-cdn",
             rustfs_media_bucket: data.settings?.rustfs_media_bucket || "masdika-media",
             rustfs_ticket_bucket: data.settings?.rustfs_ticket_bucket || "masdika-ticket",
             rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false
@@ -282,18 +286,26 @@ export default function SettingsPage() {
   };
 
   const handleTestTargetRustFS = async () => {
-    if (!targetConfig.endpoint || !targetConfig.accessKey || !targetConfig.secretKey || !targetConfig.bucket) {
-      toast.error("Please fill in all target server details first.");
+    if (!targetConfig.endpoint || !targetConfig.accessKey || !targetConfig.secretKey) {
+      toast.error("Please fill in target endpoint, access key, and secret key first.");
       return;
     }
     setTestingTarget(true);
     setTargetTestResult(null);
-    const toastId = toast.loading("Testing connection to target RustFS server...");
+    const toastId = toast.loading("Testing connection to target RustFS server & verifying all 3 buckets...");
     try {
       const res = await fetch('/api/admin/rustfs/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(targetConfig)
+        body: JSON.stringify({
+          endpoint: targetConfig.endpoint,
+          accessKey: targetConfig.accessKey,
+          secretKey: targetConfig.secretKey,
+          cdnBucket: targetConfig.cdnBucket || 'masdika-cdn',
+          mediaBucket: targetConfig.mediaBucket || 'masdika-media',
+          ticketBucket: targetConfig.ticketBucket || 'masdika-ticket',
+          bucket: targetConfig.cdnBucket || 'masdika-cdn'
+        })
       });
       const data = await res.json();
       if (data.success) {
@@ -301,7 +313,7 @@ export default function SettingsPage() {
         setTargetTestResult({ success: true, message: data.message });
       } else {
         toast.error(data.message || "Connection to target server failed", { id: toastId });
-        setTargetTestResult({ success: false, message: data.message || "Failed to connect to target RustFS server" });
+        setTargetTestResult({ success: false, message: data.message || "Connection failed" });
       }
     } catch (e: any) {
       toast.error(e?.message || "Connection to target server failed", { id: toastId });
@@ -312,28 +324,32 @@ export default function SettingsPage() {
   };
 
   const handleMigrateBucket = async () => {
-    if (!targetConfig.endpoint || !targetConfig.accessKey || !targetConfig.secretKey || !targetConfig.bucket) {
-      toast.error("Please fill in all target server details before migrating.");
+    if (!targetConfig.endpoint || !targetConfig.accessKey || !targetConfig.secretKey) {
+      toast.error("Please fill in all target server credentials (endpoint, access key, secret key) before migrating.");
       return;
     }
 
-    if (
-      targetConfig.endpoint.trim().replace(/\/+$/, '') === formData.rustfs_endpoint.trim().replace(/\/+$/, '') &&
-      targetConfig.bucket.trim() === formData.rustfs_bucket.trim()
-    ) {
-      toast.error("Target server and bucket cannot be identical to current active server and bucket!");
-      return;
-    }
+    const cdnB = targetConfig.cdnBucket || 'masdika-cdn';
+    const mediaB = targetConfig.mediaBucket || 'masdika-media';
+    const ticketB = targetConfig.ticketBucket || 'masdika-ticket';
 
     setMigratingBucket(true);
     setBucketMigrationResult(null);
-    const toastId = toast.loading("Transferring media objects to new server/bucket... please wait");
+    const toastId = toast.loading("Transferring CDN, Media, and Ticket files to target server... please wait");
     try {
       const res = await fetch('/api/admin/rustfs/migrate-bucket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          target: targetConfig,
+          target: {
+            endpoint: targetConfig.endpoint,
+            accessKey: targetConfig.accessKey,
+            secretKey: targetConfig.secretKey,
+            cdnBucket: cdnB,
+            mediaBucket: mediaB,
+            ticketBucket: ticketB,
+            bucket: cdnB
+          },
           deleteSourceAfterTransfer,
           updateActiveConfig: updateActiveConfigAfterTransfer
         })
@@ -346,16 +362,22 @@ export default function SettingsPage() {
           setFormData(prev => ({
             ...prev,
             rustfs_endpoint: targetConfig.endpoint,
-            rustfs_bucket: targetConfig.bucket,
+            rustfs_cdn_bucket: cdnB,
+            rustfs_bucket: cdnB,
+            rustfs_media_bucket: mediaB,
+            rustfs_ticket_bucket: ticketB,
             rustfs_access_key: targetConfig.accessKey,
-            rustfs_secret_key: targetConfig.secretKey
+            rustfs_secret_key: targetConfig.secretKey,
+            rustfs_enabled: true
           }));
         }
       } else {
-        toast.error(data.message || "Bucket migration failed", { id: toastId });
+        toast.error(data.message || "Migration failed", { id: toastId });
+        setBucketMigrationResult({ error: data.message });
       }
     } catch (e: any) {
-      toast.error(e?.message || "Bucket migration failed", { id: toastId });
+      toast.error(e?.message || "Migration failed", { id: toastId });
+      setBucketMigrationResult({ error: e?.message });
     } finally {
       setMigratingBucket(false);
     }
@@ -1570,13 +1592,27 @@ export default function SettingsPage() {
 
                   {/* Current Active Source Pill */}
                   <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block">Current Source Server</span>
-                      <p className={cn("font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-700")}>
-                        {formData.rustfs_endpoint || "(Not configured)"} <span className="text-zinc-500">•</span> Bucket: <span className="text-cyan-400 font-semibold">{formData.rustfs_bucket || "(Not configured)"}</span>
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block">Current Source Server & Active Buckets</span>
+                      <p className={cn("font-mono text-xs font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
+                        {formData.rustfs_endpoint || "(Not configured)"}
                       </p>
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                        <span className="px-2.5 py-1 rounded-md bg-cyan-950/40 text-cyan-300 border border-cyan-800/40 text-[11px] font-medium flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                          CDN: <strong className="font-mono">{formData.rustfs_cdn_bucket || formData.rustfs_bucket || 'masdika-cdn'}</strong>
+                        </span>
+                        <span className="px-2.5 py-1 rounded-md bg-purple-950/40 text-purple-300 border border-purple-800/40 text-[11px] font-medium flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                          Media: <strong className="font-mono">{formData.rustfs_media_bucket || 'masdika-media'}</strong>
+                        </span>
+                        <span className="px-2.5 py-1 rounded-md bg-blue-950/40 text-blue-300 border border-blue-800/40 text-[11px] font-medium flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                          Tickets: <strong className="font-mono">{formData.rustfs_ticket_bucket || 'masdika-ticket'}</strong>
+                        </span>
+                      </div>
                     </div>
-                    <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold w-fit", formData.rustfs_enabled ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20")}>
+                    <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold w-fit shrink-0", formData.rustfs_enabled ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20")}>
                       <span className={cn("w-1.5 h-1.5 rounded-full", formData.rustfs_enabled ? "bg-emerald-400" : "bg-amber-400")} />
                       {formData.rustfs_enabled ? "Source Active" : "Source Disabled"}
                     </span>
@@ -1585,7 +1621,7 @@ export default function SettingsPage() {
                   {/* Target Server Destination Form */}
                   <div className="space-y-4">
                     <h4 className={cn("text-sm font-bold uppercase tracking-wider", isDark ? "text-zinc-300" : "text-slate-800")}>
-                      Destination Server & Bucket Details
+                      Destination Server & Buckets Details (CDN, Media, and Tickets)
                     </h4>
 
                     {targetTestResult && (
@@ -1596,7 +1632,7 @@ export default function SettingsPage() {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-2">
                         <label className={labelClass}>Target RustFS S3 Endpoint *</label>
                         <input
                           type="text"
@@ -1606,18 +1642,6 @@ export default function SettingsPage() {
                           className={inputClass}
                         />
                         <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP or URL of the new RustFS server with S3 port</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>Target Bucket Name *</label>
-                        <input
-                          type="text"
-                          value={targetConfig.bucket}
-                          onChange={(e) => setTargetConfig(prev => ({ ...prev, bucket: e.target.value }))}
-                          placeholder="masdika-media"
-                          className={inputClass}
-                        />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Destination bucket name (auto-created if not exists)</p>
                       </div>
 
                       <div className="space-y-2">
@@ -1651,6 +1675,45 @@ export default function SettingsPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* 3 Destination Buckets Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                      <div className="space-y-2">
+                        <label className={labelClass}>1. Target CDN Bucket *</label>
+                        <input
+                          type="text"
+                          value={targetConfig.cdnBucket}
+                          onChange={(e) => setTargetConfig(prev => ({ ...prev, cdnBucket: e.target.value }))}
+                          placeholder="masdika-cdn"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>For File CDN & encrypted videos</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>2. Target Media Bucket *</label>
+                        <input
+                          type="text"
+                          value={targetConfig.mediaBucket}
+                          onChange={(e) => setTargetConfig(prev => ({ ...prev, mediaBucket: e.target.value }))}
+                          placeholder="masdika-media"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>For avatars, blog, banners, & website uploads</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>3. Target Ticket Bucket *</label>
+                        <input
+                          type="text"
+                          value={targetConfig.ticketBucket}
+                          onChange={(e) => setTargetConfig(prev => ({ ...prev, ticketBucket: e.target.value }))}
+                          placeholder="masdika-ticket"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>For support ticket attachments</p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Options */}
@@ -1674,7 +1737,7 @@ export default function SettingsPage() {
                         {updateActiveConfigAfterTransfer && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                       </button>
                       <span className={cn("text-xs font-semibold transition-colors", isDark ? "text-zinc-300 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900")}>
-                        Automatically update active settings to destination server upon successful migration
+                        Automatically update active settings to destination server & all 3 buckets upon successful migration
                       </span>
                     </div>
 
@@ -1697,33 +1760,56 @@ export default function SettingsPage() {
                         {deleteSourceAfterTransfer && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
                       </button>
                       <span className={cn("text-xs font-semibold transition-colors", isDark ? "text-zinc-300 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900")}>
-                        Delete objects from current source server/bucket after verified transfer (leave unchecked to keep backup)
+                        Delete objects from current source server/buckets after verified transfer (leave unchecked to keep backup)
                       </span>
                     </div>
                   </div>
 
                   {/* Migration Report */}
                   {bucketMigrationResult && (
-                    <div className={cn("p-5 rounded-xl border space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">Migration Report</h4>
+                    <div className={cn("p-5 rounded-xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">Migration Report Across All 3 Buckets</h4>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-white/5 border-white/5" : "bg-white border-slate-200")}>
                           <span className="text-xs text-zinc-400 block">Total Files</span>
-                          <span className="text-lg font-extrabold text-white">{bucketMigrationResult.total}</span>
+                          <span className="text-lg font-extrabold text-white">{bucketMigrationResult.total || 0}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")}>
                           <span className="text-xs text-emerald-400 block">Transferred</span>
-                          <span className="text-lg font-extrabold text-emerald-400">{bucketMigrationResult.migrated}</span>
+                          <span className="text-lg font-extrabold text-emerald-400">{bucketMigrationResult.migrated || 0}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                           <span className="text-xs text-cyan-400 block">Already in Target</span>
-                          <span className="text-lg font-extrabold text-cyan-400">{bucketMigrationResult.skipped}</span>
+                          <span className="text-lg font-extrabold text-cyan-400">{bucketMigrationResult.skipped || 0}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                           <span className="text-xs text-red-400 block">Errors</span>
-                          <span className="text-lg font-extrabold text-red-400">{bucketMigrationResult.errors}</span>
+                          <span className="text-lg font-extrabold text-red-400">{bucketMigrationResult.errors || 0}</span>
                         </div>
                       </div>
+
+                      {bucketMigrationResult.categories && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200")}>
+                            <span className="font-semibold text-cyan-400 block mb-1">1. File CDN ({targetConfig.cdnBucket || 'masdika-cdn'})</span>
+                            <span className="text-zinc-400">
+                              {bucketMigrationResult.categories.cdn?.migrated || 0} transferred • {bucketMigrationResult.categories.cdn?.skipped || 0} skipped
+                            </span>
+                          </div>
+                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200")}>
+                            <span className="font-semibold text-purple-400 block mb-1">2. Website Media ({targetConfig.mediaBucket || 'masdika-media'})</span>
+                            <span className="text-zinc-400">
+                              {bucketMigrationResult.categories.media?.migrated || 0} transferred • {bucketMigrationResult.categories.media?.skipped || 0} skipped
+                            </span>
+                          </div>
+                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200")}>
+                            <span className="font-semibold text-blue-400 block mb-1">3. Ticket Attachments ({targetConfig.ticketBucket || 'masdika-ticket'})</span>
+                            <span className="text-zinc-400">
+                              {bucketMigrationResult.categories.ticket?.migrated || 0} transferred • {bucketMigrationResult.categories.ticket?.skipped || 0} skipped
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
