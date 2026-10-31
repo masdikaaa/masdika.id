@@ -28,9 +28,11 @@ import { cn } from "@/lib/utils";
 export default function AdminInvoicesPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (query?: string | React.MouseEvent) => {
     try {
-      const res = await fetch("/api/admin/invoices");
+      const q = typeof query === "string" ? query.trim() : searchQuery.trim();
+      const url = q ? `/api/admin/invoices?search=${encodeURIComponent(q)}` : "/api/admin/invoices";
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setInvoices(data.data || []);
@@ -61,13 +63,24 @@ export default function AdminInvoicesPage() {
   // Filtering
   const filteredInvoices = invoices.filter((inv) => {
     const matchesStatus = statusTab === "all" ? true : statusTab === "FAILED" ? ['FAILED', 'CANCELED', 'EXPIRED'].includes(inv.status) : inv.status === statusTab;
-    const term = searchQuery.toLowerCase();
+    const term = searchQuery.toLowerCase().trim();
+    if (!term) return matchesStatus;
+
     const invoiceId = (inv.invoiceNumber || inv.merchantOrderId || "").toLowerCase();
     const customerName = (inv.user?.name || "").toLowerCase();
     const customerEmail = (inv.user?.email || "").toLowerCase();
-    const planTitle = (inv.plan?.title || "").toLowerCase();
+    const planTitle = (inv.subscription?.plan?.name || inv.subscription?.plan?.title || inv.plan?.name || inv.plan?.title || "").toLowerCase();
+    const vpsHostname = (inv.vpsService?.hostname || "").toLowerCase();
+    const method = (inv.paymentMethod || "").toLowerCase();
 
-    return matchesStatus && (invoiceId.includes(term) || customerName.includes(term) || customerEmail.includes(term) || planTitle.includes(term));
+    return matchesStatus && (
+      invoiceId.includes(term) ||
+      customerName.includes(term) ||
+      customerEmail.includes(term) ||
+      planTitle.includes(term) ||
+      vpsHostname.includes(term) ||
+      method.includes(term)
+    );
   });
 
   // Pagination
@@ -77,8 +90,11 @@ export default function AdminInvoicesPage() {
   const paginatedInvoices = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
-    fetchInvoices();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchInvoices(searchQuery);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
 
   const handleValidateInvoice = async (id: number) => {

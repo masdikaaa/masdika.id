@@ -8,6 +8,7 @@ import {
   sendReactivatedEmail,
   sendAdminServiceReactivatedEmail
 } from '@/lib/email';
+import { syncInvoiceToElastic } from '@/lib/sync-elasticsearch';
 
 
 export async function POST(req: NextRequest) {
@@ -86,6 +87,9 @@ export async function POST(req: NextRequest) {
         // Another thread already processed this invoice
         return NextResponse.json({ success: true, message: 'Invoice already processed concurrently' });
       }
+
+      // Sync updated invoice to Elasticsearch
+      syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback:", e));
 
       // Decrypt user info for emails
       let customerName = 'Customer';
@@ -501,6 +505,7 @@ export async function POST(req: NextRequest) {
           reference
         }
       });
+      syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback failed:", e));
       
       if (invoice.subscriptionId) {
         await prisma.subscription.update({

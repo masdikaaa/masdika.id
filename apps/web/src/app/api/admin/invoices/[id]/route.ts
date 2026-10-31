@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
+import { syncInvoiceToElastic } from "@/lib/sync-elasticsearch";
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,10 +11,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     }
 
     const { id } = await params;
+    const invoiceId = parseInt(id);
 
     await prisma.invoice.delete({
-      where: { id: parseInt(id) }
+      where: { id: invoiceId }
     });
+
+    // Remove from Elasticsearch
+    syncInvoiceToElastic(invoiceId).catch(err => console.debug("ES sync delete invoice:", err));
 
     return NextResponse.json({ success: true });
   } catch (error) {

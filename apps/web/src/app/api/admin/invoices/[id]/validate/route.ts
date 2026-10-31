@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
+import { syncInvoiceToElastic } from '@/lib/sync-elasticsearch';
 
 export async function POST(
   req: Request,
@@ -42,6 +43,9 @@ export async function POST(
     if (updatedInvoice.count === 0) {
       return NextResponse.json({ error: 'Invoice already paid or processed concurrently' }, { status: 400 });
     }
+
+    // Sync to Elasticsearch
+    syncInvoiceToElastic(id).catch(err => console.debug("ES sync validate:", err));
 
     if (invoice.type === 'TOP_UP') {
       let fee = 0;

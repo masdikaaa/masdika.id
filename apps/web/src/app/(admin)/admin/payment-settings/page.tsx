@@ -105,83 +105,149 @@ export default function AdminPaymentSettingsPage() {
     const group = paymentMethods.filter(pm => pm.type === type);
     if (group.length === 0) return null;
 
+    const activeCount = group.filter(p => p.isActive).length;
+
     return (
-      <div className="mb-8">
-        <h3 className={cn("text-lg font-medium mb-4 border-b pb-2", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>{title}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mb-8 last:mb-0">
+        <div className={cn("flex items-center justify-between mb-4 border-b pb-2.5", isDark ? "border-slate-800" : "border-slate-200")}>
+          <div className="flex items-center gap-2.5">
+            <h3 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              {title}
+            </h3>
+            <span className={cn(
+              "text-xs px-2 py-0.5 rounded-full font-semibold border",
+              isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600"
+            )}>
+              {group.length}
+            </span>
+          </div>
+          <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            {activeCount} of {group.length} active
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
           {group.map((pm) => (
             <div 
               key={pm.id} 
               className={cn(
-                "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border transition-all cursor-pointer",
+                "flex flex-col justify-between p-4 rounded-xl border transition-all duration-200",
                 pm.isActive 
-                  ? (isDark ? "bg-[#060b14] border-emerald-500/50 hover:bg-[#060b14]/80 shadow-sm" : "bg-white border-emerald-500 shadow-sm") 
-                  : (isDark ? "bg-[#060b14]/40 border-slate-800/80 opacity-60 hover:opacity-80" : "bg-slate-50 border-slate-200 opacity-60 hover:opacity-80")
+                  ? (isDark ? "bg-[#070d18] border-cyan-500/40 hover:border-cyan-500/60 shadow-sm shadow-cyan-950/20" : "bg-white border-cyan-500/50 hover:border-cyan-500 shadow-sm") 
+                  : (isDark ? "bg-[#060b14]/50 border-slate-800/80 opacity-60 hover:opacity-85" : "bg-slate-50/80 border-slate-200 opacity-60 hover:opacity-85")
               )}
-              onClick={() => handleToggle(pm.id)}
             >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className={cn(
-                  "w-12 h-10 flex items-center justify-center shrink-0 rounded transition-colors overflow-hidden bg-white border",
-                  pm.isActive ? "border-emerald-500" : "border-slate-200 opacity-70"
-                )}>
-                  {pm.image ? (
-                    <img referrerPolicy="no-referrer" 
-                      src={pm.image} 
-                      alt={pm.name} 
-                      className={cn("w-full h-full object-contain p-1.5", pm.isActive ? "" : "grayscale")} 
-                      loading="lazy" decoding="async" />
-                  ) : (
-                    <>
-                      {type === "VIRTUAL_ACCOUNT" && <Building2 className="w-5 h-5 text-slate-800" />}
-                      {type === "EWALLET" && <Wallet className="w-5 h-5 text-slate-800" />}
-                      {type === "RETAIL" && <Store className="w-5 h-5 text-slate-800" />}
-                      {type === "QRIS" && <QrCode className="w-5 h-5 text-slate-800" />}
-                    </>
-                  )}
+              {/* Top row: Logo, Name & Toggle */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className={cn(
+                    "w-12 h-10 flex items-center justify-center shrink-0 rounded-lg overflow-hidden bg-white border p-1 transition-all shadow-xs",
+                    pm.isActive ? "border-slate-200 shadow-sm" : "border-slate-200/60 opacity-70"
+                  )}>
+                    {pm.image ? (
+                      <img 
+                        referrerPolicy="no-referrer" 
+                        src={pm.image} 
+                        alt={pm.name} 
+                        className={cn("w-full h-full object-contain", pm.isActive ? "" : "grayscale")} 
+                        loading="lazy" 
+                        decoding="async" 
+                      />
+                    ) : (
+                      <>
+                        {type === "VIRTUAL_ACCOUNT" && <Building2 className="w-5 h-5 text-slate-800" />}
+                        {type === "EWALLET" && <Wallet className="w-5 h-5 text-slate-800" />}
+                        {type === "RETAIL" && <Store className="w-5 h-5 text-slate-800" />}
+                        {type === "QRIS" && <QrCode className="w-5 h-5 text-slate-800" />}
+                      </>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div 
+                      className={cn("text-sm font-semibold tracking-tight leading-snug line-clamp-2", isDark ? "text-white" : "text-slate-900")} 
+                      title={pm.name}
+                    >
+                      {pm.name}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        pm.isActive ? "bg-cyan-400" : (isDark ? "bg-zinc-600" : "bg-slate-400")
+                      )} />
+                      <span className={cn(
+                        "text-[11px] font-medium",
+                        pm.isActive ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-zinc-500" : "text-slate-400")
+                      )}>
+                        {pm.isActive ? "Active" : "Disabled"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className={cn("text-sm font-semibold break-words leading-tight", isDark ? "text-white" : "text-slate-900")}>{pm.name}</div>
-                </div>
-              </div>
 
-              {/* Action row: Fee input & Toggle */}
-              <div 
-                className="flex items-center justify-between sm:justify-end gap-3 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-slate-800/40 w-full sm:w-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center gap-2">
-                  <span className={cn("text-[10px] font-bold uppercase tracking-wider shrink-0", isDark ? "text-zinc-500" : "text-slate-500")}>Fee Rp</span>
-                  <input 
-                    type="number" 
-                    value={pm.fee} 
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? 0 : parseInt(e.target.value);
-                      setPaymentMethods(prev => prev.map(p => p.id === pm.id ? { ...p, fee: val } : p));
-                    }}
-                    className={cn("border rounded-lg px-2.5 py-1 text-xs w-20 sm:w-24 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
-                  />
-                  <button 
-                    onClick={() => handleUpdateFee(pm.id, pm.fee)}
-                    className="text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm shrink-0"
-                  >
-                    Save
-                  </button>
-                </div>
-                
+                {/* Toggle switch */}
                 <button
                   type="button"
                   onClick={() => handleToggle(pm.id)}
+                  aria-label={`Toggle ${pm.name}`}
                   className={cn(
                     "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2",
                     pm.isActive ? "bg-cyan-400" : (isDark ? "bg-slate-800" : "bg-slate-300")
                   )}
                 >
                   <span className={cn(
-                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 ring-0 transition duration-200 ease-in-out",
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full ring-0 transition duration-200 ease-in-out shadow-sm",
                     pm.isActive ? "translate-x-5 bg-slate-950" : "translate-x-0 bg-white"
                   )} />
                 </button>
+              </div>
+
+              {/* Bottom row: Fee input & Save */}
+              <div 
+                className={cn(
+                  "pt-2.5 border-t flex items-center justify-between gap-2.5",
+                  isDark ? "border-slate-800/60" : "border-slate-100"
+                )}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex flex-col">
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Fee Admin
+                  </span>
+                  <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    Per transaksi
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className={cn(
+                    "relative flex items-center rounded-lg border overflow-hidden transition-colors focus-within:border-cyan-500",
+                    isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  )}>
+                    <span className={cn(
+                      "pl-2 pr-1 text-[11px] font-bold select-none",
+                      isDark ? "text-zinc-500" : "text-slate-400"
+                    )}>
+                      Rp
+                    </span>
+                    <input 
+                      type="number" 
+                      value={pm.fee} 
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setPaymentMethods(prev => prev.map(p => p.id === pm.id ? { ...p, fee: val } : p));
+                      }}
+                      className="w-20 sm:w-24 py-1 pr-2 text-xs font-semibold bg-transparent focus:outline-none"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <button 
+                    onClick={() => handleUpdateFee(pm.id, pm.fee)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm shrink-0 cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             </div>
           ))}
