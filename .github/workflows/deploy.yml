@@ -116,18 +116,34 @@ jobs:
               sleep 10
             done
 
-            # Detect whether host is running K3s Kubernetes or Docker Compose
-            if command -v kubectl >/dev/null 2>&1 && kubectl get namespace masdika >/dev/null 2>&1; then
-              echo "🚀 Detected active K3s Kubernetes cluster for masdika!"
+            # Setup KUBECONFIG for non-root SSH user if available
+            export KUBECONFIG="${HOME}/.kube/config"
+            if [ ! -f "$KUBECONFIG" ] && [ -r "/etc/rancher/k3s/k3s.yaml" ]; then
+              export KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
+            fi
 
-              # 1. Apply latest manifest changes (Deployments, Services, ConfigMaps, Ingress, HPA)
+            # Detect whether host is running an active K3s Kubernetes cluster
+            if command -v kubectl >/dev/null 2>&1 && kubectl get nodes >/dev/null 2>&1; then
+              echo "🚀 Detected active K3s Kubernetes cluster!"
+
+              # 1. Ensure namespace masdika exists
+              kubectl get namespace masdika >/dev/null 2>&1 || kubectl create namespace masdika
+
+              # 2. Ensure secret masdika-env exists from server's .env file if available
+              if [ -f .env ] && ! kubectl get secret masdika-env -n masdika >/dev/null 2>&1; then
+                echo "Creating secret masdika-env from .env file..."
+                kubectl create secret generic masdika-env --from-env-file=.env -n masdika || true
+              fi
+
+              # 3. Apply latest manifest changes (Deployments, Services, ConfigMaps, Ingress, HPA)
+              echo "Applying k3s-masdika.yaml manifest..."
               kubectl apply -f k3s-masdika.yaml
 
-              # 2. Trigger zero-downtime rolling update (imagePullPolicy is Always)
+              # 4. Trigger zero-downtime rolling update (imagePullPolicy is Always)
               echo "Triggering zero-downtime rolling update for K3s pods..."
               kubectl rollout restart deployment masdika-app masdika-worker masdika-vnc-proxy -n masdika
 
-              # 3. Wait for new pods to achieve Healthy/Ready status
+              # 5. Wait for new pods to achieve Healthy/Ready status
               kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
               kubectl rollout status deployment/masdika-worker -n masdika --timeout=180s
               kubectl rollout status deployment/masdika-vnc-proxy -n masdika --timeout=120s
