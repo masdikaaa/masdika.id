@@ -12,7 +12,8 @@
     "dev": "npm run dev --workspace=@masdika/web",
     "lint": "npm run lint --workspace=@masdika/web",
     "start": "npm run start --workspace=@masdika/web",
-    "worker": "npm run worker --workspace=@masdika/web"
+    "worker": "npm run worker --workspace=@masdika/web",
+    "storage:migrate-all-to-rustfs": "npm run storage:migrate-all-to-rustfs --workspace=@masdika/web"
   },
   "dependencies": {
     "ssh2": "^1.17.0"

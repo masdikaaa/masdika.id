@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
+import { uploadPublicUploadToRustFS, deletePublicUploadFromRustFS } from '@/lib/rustfs';
 
 /**
  * Validate image file by checking magic bytes (file signature).
@@ -77,13 +78,24 @@ export async function POST(req: Request) {
       const sharpModule = await import('sharp');
       const sharp = sharpModule.default || sharpModule;
 
-      await sharp(buffer)
+      const optimizedBuffer = await sharp(buffer)
         .resize(1200, undefined, {
           withoutEnlargement: true,
           fit: 'inside',
         })
         .webp({ quality: 80 })
-        .toFile(filePath);
+        .toBuffer();
+
+      try {
+        fs.writeFileSync(filePath, optimizedBuffer);
+      } catch {}
+
+      const relativeUploadPath = safeFolder ? `${safeFolder}/${filename}` : filename;
+      try {
+        await uploadPublicUploadToRustFS(relativeUploadPath, optimizedBuffer, 'image/webp');
+      } catch (rustErr) {
+        console.error('[Admin Upload] RustFS upload error:', rustErr);
+      }
 
       return NextResponse.json({ url: `${dbPathPrefix}/${filename}` });
     } else {
@@ -100,7 +112,17 @@ export async function POST(req: Request) {
       const filename = `${filePrefix}-${Date.now()}.${ext}`;
       const filePath = path.join(uploadsDir, filename);
 
-      fs.writeFileSync(filePath, buffer, { mode: 0o644 });
+      try {
+        fs.writeFileSync(filePath, buffer, { mode: 0o644 });
+      } catch {}
+
+      const relativeUploadPath = safeFolder ? `${safeFolder}/${filename}` : filename;
+      try {
+        await uploadPublicUploadToRustFS(relativeUploadPath, buffer, file.type || 'application/octet-stream');
+      } catch (rustErr) {
+        console.error('[Admin Upload] RustFS upload error:', rustErr);
+      }
+
       return NextResponse.json({ url: `${dbPathPrefix}/${filename}` });
     }
   } catch (error) {
@@ -144,6 +166,13 @@ export async function DELETE(req: Request) {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
+
+      try {
+        await deletePublicUploadFromRustFS(filename);
+      } catch (rustErr) {
+        console.error('[Admin Upload Delete] RustFS delete error:', rustErr);
+      }
+
       return NextResponse.json({ success: true, message: 'File deleted from storage' });
     }
     

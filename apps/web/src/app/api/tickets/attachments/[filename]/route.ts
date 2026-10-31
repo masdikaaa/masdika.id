@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { downloadTicketAttachmentFromRustFS } from '@/lib/rustfs';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   try {
@@ -33,12 +34,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     }
 
     const filePath = attachment.path;
-    let fileBuffer;
+    let fileBuffer: Buffer | null = await downloadTicketAttachmentFromRustFS(filename);
     
-    try {
-      fileBuffer = await fs.readFile(filePath);
-    } catch (e) {
-      return new NextResponse('File not found on disk', { status: 404 });
+    if (!fileBuffer) {
+      try {
+        fileBuffer = await fs.readFile(filePath);
+      } catch (e) {
+        return new NextResponse('File not found', { status: 404 });
+      }
     }
 
     // Set correct headers
@@ -50,7 +53,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
     headers.set('X-Content-Type-Options', 'nosniff');
 
-    return new NextResponse(fileBuffer, { status: 200, headers });
+    return new NextResponse(new Uint8Array(fileBuffer), { status: 200, headers });
   } catch (error) {
     console.error('Serve ticket attachment error:', error);
     return new NextResponse('Internal Server Error', { status: 500 });

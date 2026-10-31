@@ -107,6 +107,7 @@ export default function SettingsPage() {
     rustfs_access_key: "",
     rustfs_secret_key: "",
     rustfs_bucket: "masdika-media",
+    rustfs_ticket_bucket: "masdika-ticket",
     rustfs_enabled: false
   });
 
@@ -161,6 +162,7 @@ export default function SettingsPage() {
             rustfs_access_key: data.settings?.rustfs_access_key || "",
             rustfs_secret_key: data.settings?.rustfs_secret_key || "",
             rustfs_bucket: data.settings?.rustfs_bucket || "masdika-media",
+            rustfs_ticket_bucket: data.settings?.rustfs_ticket_bucket || "masdika-ticket",
             rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false
           });
           if (data.settings?.profileImage) {
@@ -229,6 +231,7 @@ export default function SettingsPage() {
           accessKey: formData.rustfs_access_key,
           secretKey: formData.rustfs_secret_key,
           bucket: formData.rustfs_bucket,
+          ticketBucket: formData.rustfs_ticket_bucket,
         })
       });
       const data = await res.json();
@@ -1360,7 +1363,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className={labelClass}>Bucket Name *</label>
+                        <label className={labelClass}>Media Bucket Name *</label>
                         <input
                           type="text"
                           name="rustfs_bucket"
@@ -1369,7 +1372,20 @@ export default function SettingsPage() {
                           placeholder="masdika-media"
                           className={inputClass}
                         />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Bucket name in RustFS (auto-created if not exists)</p>
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Main bucket for CDN files, media, blog & profile uploads</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Ticket Attachments Bucket *</label>
+                        <input
+                          type="text"
+                          name="rustfs_ticket_bucket"
+                          value={formData.rustfs_ticket_bucket}
+                          onChange={handleChange}
+                          placeholder="masdika-ticket"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Dedicated bucket for support ticket attachments (auto-created if not exists)</p>
                       </div>
 
                       <div className="space-y-2">

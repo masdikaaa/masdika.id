@@ -5,6 +5,7 @@ import { sendTicketReplyEmail } from '@/lib/email';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { syncTicketToElastic } from '@/lib/sync-elasticsearch';
+import { uploadTicketAttachmentToRustFS } from '@/lib/rustfs';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -96,7 +97,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
           const filePath = path.join(storageDir, uniqueFilename);
           
-          await fs.writeFile(filePath, buffer);
+          try {
+            await uploadTicketAttachmentToRustFS(uniqueFilename, buffer, file.type || 'application/octet-stream');
+          } catch (rustErr) {
+            console.error('[Ticket Reply Attachment] RustFS upload error, fallback to local disk:', rustErr);
+            await fs.writeFile(filePath, buffer);
+          }
           
           attachmentData.push({
             filename: uniqueFilename,

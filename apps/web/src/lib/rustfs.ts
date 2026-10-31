@@ -17,6 +17,7 @@ export interface RustFSConfig {
   accessKey: string;
   secretKey: string;
   bucket: string;
+  ticketBucket: string;
   enabled: boolean;
 }
 
@@ -51,6 +52,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
             'rustfs_access_key',
             'rustfs_secret_key',
             'rustfs_bucket',
+            'rustfs_ticket_bucket',
             'rustfs_enabled'
           ]
         }
@@ -66,6 +68,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const accessKey = (settingsMap['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '').trim();
     const secretKey = (settingsMap['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '').trim();
     const bucket = (settingsMap['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media').trim();
+    const ticketBucket = (settingsMap['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
     const enabledRaw = settingsMap['rustfs_enabled'] ?? process.env.RUSTFS_ENABLED ?? 'false';
     const isConfigValid = Boolean(endpoint && accessKey && secretKey);
     const enabled = (enabledRaw === 'true' || enabledRaw === '1') && isConfigValid;
@@ -75,6 +78,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       accessKey,
       secretKey,
       bucket,
+      ticketBucket,
       enabled
     };
     lastConfigFetch = now;
@@ -85,6 +89,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const accessKey = (process.env.RUSTFS_ACCESS_KEY || '').trim();
     const secretKey = (process.env.RUSTFS_SECRET_KEY || '').trim();
     const bucket = (process.env.RUSTFS_BUCKET || 'masdika-media').trim();
+    const ticketBucket = (process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
     const enabledRaw = process.env.RUSTFS_ENABLED ?? 'false';
     const isConfigValid = Boolean(endpoint && accessKey && secretKey);
     const enabled = (enabledRaw === 'true' || enabledRaw === '1') && isConfigValid;
@@ -94,6 +99,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       accessKey,
       secretKey,
       bucket,
+      ticketBucket,
       enabled
     };
   }
@@ -117,6 +123,26 @@ export async function getRustFSS3Client(): Promise<{ client: S3Client; bucket: s
 
   return { client, bucket: config.bucket, enabled: config.enabled };
 }
+
+/**
+ * Creates an AWS S3Client instance configured for RustFS Ticket Attachments bucket
+ */
+export async function getRustFSTicketClient(): Promise<{ client: S3Client; bucket: string; enabled: boolean }> {
+  const config = await getRustFSConfig();
+
+  const client = new S3Client({
+    endpoint: config.endpoint,
+    region: 'us-east-1',
+    credentials: {
+      accessKeyId: config.accessKey,
+      secretAccessKey: config.secretKey,
+    },
+    forcePathStyle: true,
+  });
+
+  return { client, bucket: config.ticketBucket || 'masdika-ticket', enabled: config.enabled };
+}
+
 
 /**
  * Ensures that the target bucket exists in RustFS, creating it if necessary
@@ -172,6 +198,7 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
     });
 
     await ensureBucketExists(client, config.bucket);
+    await ensureBucketExists(client, config.ticketBucket || 'masdika-ticket');
 
     // Test a tiny ping upload & delete
     const testKey = `.masdika-ping-${Date.now()}.txt`;
@@ -189,7 +216,7 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
 
     return {
       success: true,
-      message: `Successfully connected to RustFS at ${config.endpoint} and verified bucket '${config.bucket}'.`,
+      message: `Successfully connected to RustFS at ${config.endpoint} and verified buckets '${config.bucket}' & '${config.ticketBucket || 'masdika-ticket'}'.`,
       bucket: config.bucket
     };
   } catch (error: any) {
@@ -337,6 +364,202 @@ export async function deleteFromRustFS(key: string): Promise<boolean> {
     return false;
   }
 }
+
+
+/**
+ * Ticket Attachments: Upload buffer to RustFS ticket bucket
+ */
+export async function uploadTicketAttachmentToRustFS(
+  key: string,
+  buffer: Buffer,
+  mimeType = 'application/octet-stream'
+): Promise<boolean> {
+  const { client, bucket, enabled } = await getRustFSTicketClient();
+  if (!enabled) return false;
+
+  await ensureBucketExists(client, bucket);
+
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: buffer,
+    ContentType: mimeType,
+    ContentLength: buffer.length
+  }));
+
+  return true;
+}
+
+/**
+ * Ticket Attachments: Download buffer from RustFS ticket bucket
+ */
+export async function downloadTicketAttachmentFromRustFS(key: string): Promise<Buffer | null> {
+  try {
+    const { client, bucket, enabled } = await getRustFSTicketClient();
+    if (!enabled) return null;
+
+    const res = await client.send(new GetObjectCommand({
+      Bucket: bucket,
+      Key: key
+    }));
+
+    if (!res.Body) return null;
+
+    const stream = res.Body as Readable;
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  } catch (err: any) {
+    if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404 || err.Code === 'NoSuchKey') {
+      return null;
+    }
+    console.error(`[RustFS] Error downloading ticket attachment ${key}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Ticket Attachments: Check if attachment exists in RustFS ticket bucket
+ */
+export async function checkTicketAttachmentInRustFS(key: string): Promise<boolean> {
+  try {
+    const { client, bucket, enabled } = await getRustFSTicketClient();
+    if (!enabled) return false;
+
+    await client.send(new HeadObjectCommand({
+      Bucket: bucket,
+      Key: key
+    }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Ticket Attachments: Delete attachment from RustFS ticket bucket
+ */
+export async function deleteTicketAttachmentFromRustFS(key: string): Promise<boolean> {
+  try {
+    const { client, bucket, enabled } = await getRustFSTicketClient();
+    if (!enabled) return false;
+
+    await client.send(new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: key
+    }));
+    return true;
+  } catch (err: any) {
+    console.error(`[RustFS] Error deleting ticket attachment ${key}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Public Uploads (Profile, Blog, Banners, Jobs, Projects): Upload buffer to RustFS media bucket
+ */
+export async function uploadPublicUploadToRustFS(
+  relativePath: string,
+  buffer: Buffer,
+  mimeType = 'application/octet-stream'
+): Promise<boolean> {
+  const { client, bucket, enabled } = await getRustFSS3Client();
+  if (!enabled) return false;
+
+  await ensureBucketExists(client, bucket);
+
+  const cleanPath = relativePath.replace(/^[\/\\]+/, '').replace(/\\/g, '/');
+  const fullKey = cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`;
+
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: fullKey,
+    Body: buffer,
+    ContentType: mimeType,
+    ContentLength: buffer.length
+  }));
+
+  return true;
+}
+
+/**
+ * Public Uploads: Download buffer from RustFS media bucket
+ */
+export async function downloadPublicUploadFromRustFS(
+  relativePath: string
+): Promise<{ buffer: Buffer; contentType: string } | null> {
+  try {
+    const { client, bucket, enabled } = await getRustFSS3Client();
+    if (!enabled) return null;
+
+    const cleanPath = relativePath.replace(/^[\/\\]+/, '').replace(/\\/g, '/');
+    const candidateKeys = [
+      cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`,
+      cleanPath.replace(/^uploads\//, '')
+    ];
+
+    for (const key of candidateKeys) {
+      try {
+        const res = await client.send(new GetObjectCommand({
+          Bucket: bucket,
+          Key: key
+        }));
+
+        if (!res.Body) continue;
+
+        const stream = res.Body as Readable;
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        return {
+          buffer: Buffer.concat(chunks),
+          contentType: res.ContentType || 'application/octet-stream'
+        };
+      } catch (err: any) {
+        if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404 || err.Code === 'NoSuchKey') {
+          continue;
+        }
+        throw err;
+      }
+    }
+    return null;
+  } catch (err: any) {
+    console.error(`[RustFS] Error downloading public upload ${relativePath}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Public Uploads: Delete upload from RustFS media bucket
+ */
+export async function deletePublicUploadFromRustFS(relativePath: string): Promise<boolean> {
+  try {
+    const { client, bucket, enabled } = await getRustFSS3Client();
+    if (!enabled) return false;
+
+    const cleanPath = relativePath.replace(/^[\/\\]+/, '').replace(/\\/g, '/');
+    const candidateKeys = [
+      cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`,
+      cleanPath.replace(/^uploads\//, '')
+    ];
+
+    for (const key of candidateKeys) {
+      try {
+        await client.send(new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: key
+        }));
+      } catch {}
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 
 /**
  * Bulk migration function: Migrates all files from local storage/secure-media to RustFS

@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { sendTicketCreatedEmail } from '@/lib/email';
 import { encryptDeterministic, decryptDeterministic } from '@/lib/encryption';
 import { searchTicketsElastic, syncTicketToElastic } from '@/lib/sync-elasticsearch';
+import { uploadTicketAttachmentToRustFS } from '@/lib/rustfs';
 
 export async function GET(req: NextRequest) {
   try {
@@ -197,7 +198,14 @@ export async function POST(req: NextRequest) {
           const ext = path.extname(file.name);
           const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
           const filePath = path.join(storageDir, uniqueFilename);
-          await fs.writeFile(filePath, buffer);
+          
+          try {
+            await uploadTicketAttachmentToRustFS(uniqueFilename, buffer, file.type || 'application/octet-stream');
+          } catch (rustErr) {
+            console.error('[Ticket Attachment] RustFS upload error, fallback to local disk:', rustErr);
+            await fs.writeFile(filePath, buffer);
+          }
+
           attachmentData.push({
             filename: uniqueFilename,
             originalName: file.name,

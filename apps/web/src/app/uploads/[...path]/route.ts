@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getUploadsDir } from '@/lib/file-utils';
+import { downloadPublicUploadFromRustFS } from '@/lib/rustfs';
 
 const mimeTypes: Record<string, string> = {
   '.webp': 'image/webp',
@@ -28,33 +29,37 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
+    const relativeSubPath = resolvedParams.path.join('/');
     const baseUploadsDir = path.normalize(getUploadsDir());
     const filePath = path.normalize(path.join(baseUploadsDir, ...resolvedParams.path));
-
-    // Prevent directory traversal (Strict Check)
-    // We add path.sep (e.g., '/' or '\') to the end to prevent bypasses where an attacker 
-    // tries to access a directory like 'public/uploads-backup' which shares the same string prefix.
-    if (!filePath.startsWith(baseUploadsDir + path.sep) && filePath !== baseUploadsDir) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (!fs.existsSync(filePath)) {
-      return new NextResponse('Not Found', { status: 404 });
-    }
-
-    const fileBuffer = fs.readFileSync(filePath);
-    
-    // Determine the content type based on file extension
     const ext = path.extname(filePath).toLowerCase();
-    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    const fallbackContentType = mimeTypes[ext] || 'application/octet-stream';
 
-    // Set cache control headers to allow browsers to cache images
-    return new NextResponse(fileBuffer, {
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    });
+    // 1. Try serving from local disk if it exists (strict directory traversal prevention)
+    if (filePath.startsWith(baseUploadsDir + path.sep) || filePath === baseUploadsDir) {
+      if (fs.existsSync(filePath)) {
+        const fileBuffer = fs.readFileSync(filePath);
+        return new NextResponse(new Uint8Array(fileBuffer), {
+          headers: {
+            'Content-Type': fallbackContentType,
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
+        });
+      }
+    }
+
+    // 2. Fallback / Primary from RustFS S3 Object Storage
+    const rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath);
+    if (rustFSObject) {
+      return new NextResponse(new Uint8Array(rustFSObject.buffer), {
+        headers: {
+          'Content-Type': rustFSObject.contentType || fallbackContentType,
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      });
+    }
+
+    return new NextResponse('Not Found', { status: 404 });
   } catch (error) {
     console.error('Error serving upload file:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
