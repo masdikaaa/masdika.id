@@ -79,7 +79,7 @@ spec:
       storage: 25Gi
 
 ---
-# PVC Terpusat untuk Web Storage (uploads, secure-media, tickets, ssh, upload-buffers)
+# PVC Terpusat untuk Web Storage (ssh keys & upload-buffers sementara, aset utama sudah di RustFS)
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -91,7 +91,7 @@ spec:
   storageClassName: local-path
   resources:
     requests:
-      storage: 158Gi
+      storage: 10Gi
 
 ---
 # ==============================================================================
