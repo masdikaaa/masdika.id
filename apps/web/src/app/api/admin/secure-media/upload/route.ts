@@ -183,6 +183,13 @@ export async function POST(req: NextRequest) {
         const uploaded = await uploadFileToRustFS(filePath, uniqueFilename, resolvedMime);
         if (uploaded && existsSync(filePath)) {
           unlinkSync(filePath);
+          try {
+            const readdirSync = (await import('fs')).readdirSync;
+            const rmdirSync = (await import('fs')).rmdirSync;
+            if (existsSync(secureDir) && readdirSync(secureDir).length === 0) {
+              rmdirSync(secureDir);
+            }
+          } catch {}
         }
       } catch (e) {
         console.warn('[Upload Chunk] RustFS upload failed, keeping on local disk as fallback:', e);
@@ -255,11 +262,7 @@ export async function POST(req: NextRequest) {
     else if (expiresIn === "1w") { expiresAt = new Date(); expiresAt.setDate(expiresAt.getDate() + 7); }
     else if (expiresIn === "1m") { expiresAt = new Date(); expiresAt.setMonth(expiresAt.getMonth() + 1); }
 
-    // Storage
-    const secureDir = path.join(process.cwd(), "storage", "secure-media");
-    await mkdir(secureDir, { recursive: true });
     const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-    const filePath = path.join(secureDir, uniqueFilename);
 
     // Encrypt & write
     const encryptionKeyHex = process.env.MEDIA_ENCRYPTION_KEY;
@@ -282,6 +285,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!savedToRustFS) {
+      const secureDir = path.join(process.cwd(), "storage", "secure-media");
+      await mkdir(secureDir, { recursive: true });
+      const filePath = path.join(secureDir, uniqueFilename);
       await writeFile(filePath, finalBuffer, { mode: 0o600 });
     }
 

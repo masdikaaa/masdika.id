@@ -170,6 +170,13 @@ export async function POST(req: NextRequest) {
       const uploaded = await uploadFileToRustFS(filePath, uniqueFilename, resolvedMime);
       if (uploaded && existsSync(filePath)) {
         unlinkSync(filePath);
+        try {
+          const readdirSync = (await import('fs')).readdirSync;
+          const rmdirSync = (await import('fs')).rmdirSync;
+          if (existsSync(secureDir) && readdirSync(secureDir).length === 0) {
+            rmdirSync(secureDir);
+          }
+        } catch {}
       }
     } catch (e) {
       console.warn('[User CDN Upload] RustFS upload failed, keeping on local disk as fallback:', e);
