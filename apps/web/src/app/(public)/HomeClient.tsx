@@ -366,7 +366,7 @@ export function HomeClient({
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="max-w-2xl relative z-30 order-2 lg:order-1"
+              className="max-w-2xl relative z-30 order-1"
             >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -438,7 +438,7 @@ export function HomeClient({
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-              className="relative flex items-center justify-center mt-4 lg:mt-0 order-1 lg:order-2"
+              className="relative flex items-center justify-center mt-4 lg:mt-0 order-2"
             >
               <HeroAvatarFrame
                 imageSrc="/masdika.webp"
