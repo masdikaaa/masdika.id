@@ -6,6 +6,7 @@ import path from "path";
 import * as crypto from "crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { verifySessionToken } from "@/lib/session";
+import { downloadBufferFromRustFS, deleteFromRustFS } from "@/lib/rustfs";
 
 const INLINE_ALLOWED_MIME = new Set([
   "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
@@ -81,23 +82,12 @@ export async function GET(
 
     // Expiry check
     if (media.expiresAt && media.expiresAt < new Date()) {
+      deleteFromRustFS(media.filename).catch(() => {});
       const secureDir = path.join(process.cwd(), "storage", "secure-media");
       const fp = path.join(secureDir, media.filename);
       if (fs.existsSync(fp)) fs.unlinkSync(fp);
       await prisma.secureMedia.delete({ where: { id: media.id } });
       return new NextResponse("Link has expired", { status: 410 });
-    }
-
-    const secureDir = path.join(process.cwd(), "storage", "secure-media");
-
-    // Path traversal guard
-    const filePath = path.resolve(secureDir, media.filename);
-    if (!filePath.startsWith(path.resolve(secureDir) + path.sep)) {
-      return new NextResponse("Forbidden", { status: 403 });
-    }
-
-    if (!fs.existsSync(filePath)) {
-      return new NextResponse("File Not Found on Disk", { status: 404 });
     }
 
     const inlineRequested = req.nextUrl.searchParams.get("inline") === "true";
@@ -109,6 +99,22 @@ export async function GET(
     const rateLimitMax = inlineRequested ? 300 : 60;
     if (!(await checkRateLimit(rateLimitKey, ip, rateLimitMax, 60))) {
       return new NextResponse("Too Many Requests", { status: 429 });
+    }
+
+    // Retrieve file buffer: Check RustFS first, then fallback to local disk
+    let encryptedBuf: Buffer | null = await downloadBufferFromRustFS(media.filename);
+
+    if (!encryptedBuf) {
+      const secureDir = path.join(process.cwd(), "storage", "secure-media");
+      const filePath = path.resolve(secureDir, media.filename);
+      // Path traversal guard
+      if (filePath.startsWith(path.resolve(secureDir) + path.sep) && fs.existsSync(filePath)) {
+        encryptedBuf = fs.readFileSync(filePath);
+      }
+    }
+
+    if (!encryptedBuf) {
+      return new NextResponse("File Not Found", { status: 404 });
     }
 
     // QuickTime (.mov) and ISO MP4 share the same ISO-BMFF container format.
@@ -134,8 +140,6 @@ export async function GET(
       "Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges",
     };
 
-    // Read entire file into buffer and decrypt in-memory.
-    const encryptedBuf = fs.readFileSync(filePath);
     const encryptionKeyHex = process.env.MEDIA_ENCRYPTION_KEY;
 
     let outputBuf: Buffer;

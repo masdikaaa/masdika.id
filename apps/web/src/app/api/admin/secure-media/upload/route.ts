@@ -3,13 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import * as crypto from "crypto";
 import { mkdir, writeFile, open, unlink, stat } from "fs/promises";
-import { createReadStream, createWriteStream } from "fs";
+import { createReadStream, createWriteStream, existsSync, unlinkSync } from "fs";
 import { pipeline } from "stream/promises";
 import { Transform } from "stream";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { requireAuth } from "@/lib/auth-middleware";
 import { syncMediaToElastic } from "@/lib/sync-elasticsearch";
+import { uploadBufferToRustFS, uploadFileToRustFS } from "@/lib/rustfs";
 
 // Allow up to 10GB request body for this route
 export const maxDuration = 300;
@@ -177,6 +178,15 @@ export async function POST(req: NextRequest) {
         await pipeline(createReadStream(tempPath), ws);
       }
 
+      // Upload stream to RustFS and cleanup local disk
+      try {
+        const uploaded = await uploadFileToRustFS(filePath, uniqueFilename, resolvedMime);
+        if (uploaded && existsSync(filePath)) {
+          unlinkSync(filePath);
+        }
+      } catch (e) {
+        console.warn('[Upload Chunk] RustFS upload failed, keeping on local disk as fallback:', e);
+      }
 
       const shareToken = uuidv4();
       const media = await prisma.secureMedia.create({
@@ -253,14 +263,26 @@ export async function POST(req: NextRequest) {
 
     // Encrypt & write
     const encryptionKeyHex = process.env.MEDIA_ENCRYPTION_KEY;
+    let finalBuffer: Buffer;
     if (encryptionKeyHex && encryptionKeyHex.length >= 64) {
       const key = Buffer.from(encryptionKeyHex.substring(0, 64), "hex");
       const iv  = crypto.randomBytes(16);
       const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
       const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
-      await writeFile(filePath, Buffer.concat([iv, encrypted]), { mode: 0o600 });
+      finalBuffer = Buffer.concat([iv, encrypted]);
     } else {
-      await writeFile(filePath, buffer, { mode: 0o600 });
+      finalBuffer = buffer;
+    }
+
+    let savedToRustFS = false;
+    try {
+      savedToRustFS = await uploadBufferToRustFS(uniqueFilename, finalBuffer, resolvedMime);
+    } catch (e) {
+      console.warn('[Upload] RustFS upload failed, falling back to local disk:', e);
+    }
+
+    if (!savedToRustFS) {
+      await writeFile(filePath, finalBuffer, { mode: 0o600 });
     }
 
     const shareToken = uuidv4();

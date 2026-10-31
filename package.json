@@ -12,6 +12,7 @@
     "dev": "npm run dev --workspace=@masdika/web",
     "lint": "npm run lint --workspace=@masdika/web",
     "start": "npm run start --workspace=@masdika/web",
+    "storage:migrate-to-rustfs": "npm run storage:migrate-to-rustfs --workspace=@masdika/web",
     "worker": "npm run worker --workspace=@masdika/web"
   },
   "dependencies": {

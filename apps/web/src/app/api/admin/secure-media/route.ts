@@ -5,6 +5,7 @@ import path from "path";
 import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
 import { searchMediaElastic, syncMediaToElastic } from "@/lib/sync-elasticsearch";
+import { deleteFromRustFS } from "@/lib/rustfs";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -249,7 +250,8 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: "Folder is not empty" }, { status: 400 });
       }
     } else {
-      // Delete from filesystem
+      // Delete from RustFS & filesystem
+      deleteFromRustFS(media.filename).catch(() => {});
       const secureDir = path.join(process.cwd(), "storage", "secure-media");
       const filePath = path.join(secureDir, media.filename);
       if (fs.existsSync(filePath)) {

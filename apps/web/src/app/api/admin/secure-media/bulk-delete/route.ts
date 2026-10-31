@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { requireAuth } from '@/lib/auth-middleware';
 import { syncMediaToElastic } from '@/lib/sync-elasticsearch';
+import { deleteFromRustFS } from '@/lib/rustfs';
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -27,9 +28,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Delete files
+    // Delete files from filesystem & RustFS
     const secureDir = path.join(process.cwd(), "storage", "secure-media");
     mediaItems.forEach(media => {
+      deleteFromRustFS(media.filename).catch(() => {});
       const filePath = path.join(secureDir, media.filename);
       if (fs.existsSync(filePath)) {
         try {

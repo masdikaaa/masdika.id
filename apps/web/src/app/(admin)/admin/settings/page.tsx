@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings , RefreshCw, Info } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings , RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, UploadCloud } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const isDark = theme === "dark";
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services'] as const });
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage'] as const });
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, desc: 'Manage personal info' },
@@ -28,6 +28,7 @@ export default function SettingsPage() {
     { id: 'seo', label: 'SEO', icon: Search, desc: 'Meta tags & Favicon' },
     { id: 'security', label: 'Security', icon: Shield, desc: 'Passwords & 2FA' },
     { id: 'services', label: 'Services', icon: Settings, desc: 'Service Management' },
+    { id: 'storage', label: 'RustFS Storage', icon: HardDrive, desc: 'S3-Compatible CDN Storage' },
   ];
 
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
@@ -45,6 +46,14 @@ export default function SettingsPage() {
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [faviconKey, setFaviconKey] = useState(0); // to force refresh image
   useEffect(() => { setFaviconKey(Date.now()); }, []);
+
+  // RustFS State
+  const [testingRustFS, setTestingRustFS] = useState(false);
+  const [rustFSTestResult, setRustFSTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [migratingRustFS, setMigratingRustFS] = useState(false);
+  const [migrationResult, setMigrationResult] = useState<any | null>(null);
+  const [showSecretKey, setShowSecretKey] = useState(false);
+  const [deleteLocalAfterMigration, setDeleteLocalAfterMigration] = useState(true);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -80,7 +89,13 @@ export default function SettingsPage() {
     vps_enabled: true,
     k3s_enabled: true,
     cdn_enabled: true,
-    tax_rate: "0"
+    tax_rate: "0",
+
+    rustfs_endpoint: "http://192.168.79.10:9000",
+    rustfs_access_key: "39b45c5dd5b53d8c4baba0b7",
+    rustfs_secret_key: "a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1",
+    rustfs_bucket: "masdika-media",
+    rustfs_enabled: true
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -128,7 +143,13 @@ export default function SettingsPage() {
             vps_enabled: data.settings?.vps_enabled !== "false",
             k3s_enabled: data.settings?.k3s_enabled !== "false",
             cdn_enabled: data.settings?.cdn_enabled !== "false",
-            tax_rate: data.settings?.tax_rate || "0"
+            tax_rate: data.settings?.tax_rate || "0",
+
+            rustfs_endpoint: data.settings?.rustfs_endpoint || "http://192.168.79.10:9000",
+            rustfs_access_key: data.settings?.rustfs_access_key || "39b45c5dd5b53d8c4baba0b7",
+            rustfs_secret_key: data.settings?.rustfs_secret_key || "a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1",
+            rustfs_bucket: data.settings?.rustfs_bucket || "masdika-media",
+            rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : true
           });
           if (data.settings?.profileImage) {
             setProfilePreview(data.settings?.profileImage);
@@ -180,6 +201,63 @@ export default function SettingsPage() {
     } finally {
       setIsDeletingProfile(false);
       setShowDeleteProfileModal(false);
+    }
+  };
+
+  const handleTestRustFS = async () => {
+    setTestingRustFS(true);
+    setRustFSTestResult(null);
+    const toastId = toast.loading("Testing connection to RustFS...");
+    try {
+      const res = await fetch('/api/admin/rustfs/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: formData.rustfs_endpoint,
+          accessKey: formData.rustfs_access_key,
+          secretKey: formData.rustfs_secret_key,
+          bucket: formData.rustfs_bucket,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setRustFSTestResult({ success: true, message: data.message });
+      } else {
+        toast.error(data.message || "Connection failed", { id: toastId });
+        setRustFSTestResult({ success: false, message: data.message || "Failed to connect to RustFS" });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Connection failed", { id: toastId });
+      setRustFSTestResult({ success: false, message: e?.message || "Connection failed" });
+    } finally {
+      setTestingRustFS(false);
+    }
+  };
+
+  const handleMigrateRustFS = async () => {
+    setMigratingRustFS(true);
+    setMigrationResult(null);
+    const toastId = toast.loading("Migrating all media to RustFS... please wait");
+    try {
+      const res = await fetch('/api/admin/rustfs/migrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deleteLocalAfterUpload: deleteLocalAfterMigration
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setMigrationResult(data.result);
+      } else {
+        toast.error(data.message || "Migration failed", { id: toastId });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Migration request failed", { id: toastId });
+    } finally {
+      setMigratingRustFS(false);
     }
   };
 
@@ -1137,6 +1215,239 @@ export default function SettingsPage() {
       </motion.div>
 
 
+              </motion.div>
+            )}
+
+            {activeTab === 'storage' && (
+              <motion.div key="storage" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-6">
+                {/* RustFS Configuration Card */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className="flex items-center gap-4">
+                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <HardDrive className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS S3 Object Storage</h2>
+                        <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Distributed S3-compatible high-performance object storage for File CDN & videos.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleTestRustFS}
+                        disabled={testingRustFS}
+                        className={cn("px-4 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                      >
+                        <RefreshCw className={cn("w-3.5 h-3.5", testingRustFS && "animate-spin")} />
+                        <span>{testingRustFS ? "Testing..." : "Test Connection"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {rustFSTestResult && (
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", rustFSTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                      {rustFSTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
+                      <div className="text-xs md:text-sm">
+                        <span className="font-bold">{rustFSTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
+                        <span>{rustFSTestResult.message}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 relative z-20">
+                    {/* Toggle Enable RustFS */}
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border transition-colors", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <div className="pr-4">
+                        <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable RustFS Storage</h3>
+                        <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          When enabled, all new videos and files are stored in RustFS. If disabled or unreachable, system seamlessly falls back to local disk storage.
+                        </p>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => setFormData({ ...formData, rustfs_enabled: !formData.rustfs_enabled })}
+                        className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none ${formData.rustfs_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
+                      >
+                        <span className="sr-only">Toggle RustFS</span>
+                        <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.rustfs_enabled ? 'translate-x-2.5' : '-translate-x-2.5'}`} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <label className={labelClass}>RustFS S3 Endpoint *</label>
+                        <input
+                          type="text"
+                          name="rustfs_endpoint"
+                          value={formData.rustfs_endpoint}
+                          onChange={handleChange}
+                          placeholder="http://192.168.79.10:9000"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP or domain of your RustFS server with S3 port (e.g. http://192.168.79.10:9000)</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Bucket Name *</label>
+                        <input
+                          type="text"
+                          name="rustfs_bucket"
+                          value={formData.rustfs_bucket}
+                          onChange={handleChange}
+                          placeholder="masdika-media"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Bucket name in RustFS (auto-created if not exists)</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Access Key ID *</label>
+                        <input
+                          type="text"
+                          name="rustfs_access_key"
+                          value={formData.rustfs_access_key}
+                          onChange={handleChange}
+                          placeholder="39b45c5dd5b53d8c4baba0b7"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Secret Access Key *</label>
+                        <div className="relative">
+                          <input
+                            type={showSecretKey ? "text" : "password"}
+                            name="rustfs_secret_key"
+                            value={formData.rustfs_secret_key}
+                            onChange={handleChange}
+                            placeholder="••••••••••••••••"
+                            className={cn(inputClass, "pr-10")}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSecretKey(!showSecretKey)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
+                          >
+                            {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={cn("pt-6 border-t flex items-center justify-between flex-wrap gap-4", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Changes take effect immediately across all uploads and streaming routes.
+                    </p>
+                    <button 
+                      onClick={handleSave} 
+                      disabled={saving} 
+                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
+                    >
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />} 
+                      {saving ? "Saving..." : "Save RustFS Settings"}
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* Media Migration Card */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-indigo-50 border-indigo-200 text-indigo-700")}>
+                      <UploadCloud className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Media & Video Migration</h3>
+                      <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Move existing videos and files from root folder (<code className="text-cyan-400">storage/secure-media</code>) to RustFS.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={cn("p-4 rounded-xl border text-xs leading-relaxed space-y-2", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
+                    <p className="font-semibold text-cyan-400">Zero-Downtime Guarantee:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Files are uploaded directly into RustFS and verified with checksum/size check.</li>
+                      <li>Existing public sharing links, tokens, and video seeking will continue to function seamlessly without 404 errors.</li>
+                      <li>Local files in project directory are cleaned up safely once verified in RustFS.</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="delLocal"
+                      checked={deleteLocalAfterMigration}
+                      onChange={(e) => setDeleteLocalAfterMigration(e.target.checked)}
+                      className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
+                    />
+                    <label htmlFor="delLocal" className={cn("text-xs font-semibold cursor-pointer select-none", isDark ? "text-zinc-300" : "text-slate-700")}>
+                      Delete local file from root project directory after successful upload & verification
+                    </label>
+                  </div>
+
+                  {migrationResult && (
+                    <div className={cn("p-5 rounded-xl border space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">Migration Report</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div className={cn("p-3 rounded-lg border", isDark ? "bg-white/5 border-white/5" : "bg-white border-slate-200")}>
+                          <span className="text-xs text-zinc-400 block">Total Files</span>
+                          <span className="text-lg font-extrabold text-white">{migrationResult.total}</span>
+                        </div>
+                        <div className={cn("p-3 rounded-lg border", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")}>
+                          <span className="text-xs text-emerald-400 block">Migrated</span>
+                          <span className="text-lg font-extrabold text-emerald-400">{migrationResult.migrated}</span>
+                        </div>
+                        <div className={cn("p-3 rounded-lg border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                          <span className="text-xs text-cyan-400 block">Already in RustFS</span>
+                          <span className="text-lg font-extrabold text-cyan-400">{migrationResult.skipped}</span>
+                        </div>
+                        <div className={cn("p-3 rounded-lg border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
+                          <span className="text-xs text-red-400 block">Errors</span>
+                          <span className="text-lg font-extrabold text-red-400">{migrationResult.errors}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={handleMigrateRustFS}
+                      disabled={migratingRustFS}
+                      className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                    >
+                      <UploadCloud className={cn("w-4 h-4", migratingRustFS && "animate-bounce")} />
+                      <span>{migratingRustFS ? "Migrating Media Files..." : "Run Migration Now"}</span>
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* CI/CD Integration Card */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                  className={cn("rounded-2xl p-6 md:p-8 space-y-4 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Server className="w-5 h-5 text-cyan-400" />
+                    <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Automated CI/CD Deployment Integration</h3>
+                  </div>
+                  <p className={cn("text-xs md:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    To automatically move media files to RustFS and keep the project folder lean after every deployment, add this command to your deployment script or pipeline:
+                  </p>
+                  <div className="p-4 rounded-xl bg-[#060b14] border border-slate-800 font-mono text-xs text-cyan-300 flex items-center justify-between">
+                    <code>npm run storage:migrate-to-rustfs</code>
+                  </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>

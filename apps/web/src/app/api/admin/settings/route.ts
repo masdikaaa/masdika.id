@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
+import { invalidateRustFSCache } from '@/lib/rustfs';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -20,6 +21,12 @@ export async function GET() {
       acc[curr.key] = curr.value;
       return acc;
     }, {});
+
+    settingsObj['rustfs_endpoint'] = settingsObj['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || 'http://192.168.79.10:9000';
+    settingsObj['rustfs_access_key'] = settingsObj['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '39b45c5dd5b53d8c4baba0b7';
+    settingsObj['rustfs_secret_key'] = settingsObj['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || 'a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1';
+    settingsObj['rustfs_bucket'] = settingsObj['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media';
+    settingsObj['rustfs_enabled'] = settingsObj['rustfs_enabled'] ?? (process.env.RUSTFS_ENABLED ?? 'true');
 
     return NextResponse.json({
       user: {
@@ -40,7 +47,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate } = body;
+    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_enabled } = body;
 
     // Update user
     const user = await prisma.user.findUnique({ where: { id: auth.userId } });
@@ -88,6 +95,11 @@ export async function PUT(req: Request) {
     if (promo_banner_url !== undefined) settingsToUpdate.push({ key: 'promo_banner_url', value: promo_banner_url });
     if (promo_banner_active !== undefined) settingsToUpdate.push({ key: 'promo_banner_active', value: String(promo_banner_active) });
     if (tax_rate !== undefined) settingsToUpdate.push({ key: 'tax_rate', value: String(tax_rate) });
+    if (rustfs_endpoint !== undefined) settingsToUpdate.push({ key: 'rustfs_endpoint', value: String(rustfs_endpoint) });
+    if (rustfs_access_key !== undefined) settingsToUpdate.push({ key: 'rustfs_access_key', value: String(rustfs_access_key) });
+    if (rustfs_secret_key !== undefined) settingsToUpdate.push({ key: 'rustfs_secret_key', value: String(rustfs_secret_key) });
+    if (rustfs_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_bucket', value: String(rustfs_bucket) });
+    if (rustfs_enabled !== undefined) settingsToUpdate.push({ key: 'rustfs_enabled', value: String(rustfs_enabled) });
 
     for (const setting of settingsToUpdate) {
       await prisma.setting.upsert({
@@ -96,6 +108,8 @@ export async function PUT(req: Request) {
         create: { key: setting.key, value: setting.value }
       });
     }
+
+    invalidateRustFSCache();
 
     // Update profile image
     if (profileImage !== undefined) {

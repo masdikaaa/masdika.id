@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import * as crypto from "crypto";
 import { mkdir, writeFile, open, unlink } from "fs/promises";
-import { createReadStream, createWriteStream } from "fs";
+import { createReadStream, createWriteStream, existsSync, unlinkSync } from "fs";
 import { pipeline } from "stream/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { requireAuth } from '@/lib/auth-middleware';
 import { getActiveSubscription } from "@/lib/subscription";
+import { uploadFileToRustFS } from "@/lib/rustfs";
+import { syncMediaToElastic } from "@/lib/sync-elasticsearch";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -163,6 +165,16 @@ export async function POST(req: NextRequest) {
 
     await unlink(tempPath).catch(() => {});
 
+    // Upload to RustFS and cleanup local disk
+    try {
+      const uploaded = await uploadFileToRustFS(filePath, uniqueFilename, resolvedMime);
+      if (uploaded && existsSync(filePath)) {
+        unlinkSync(filePath);
+      }
+    } catch (e) {
+      console.warn('[User CDN Upload] RustFS upload failed, keeping on local disk as fallback:', e);
+    }
+
     const shareToken = uuidv4();
     const media = await prisma.secureMedia.create({
       data: {
@@ -177,6 +189,8 @@ export async function POST(req: NextRequest) {
         userId: userId,
       },
     });
+
+    syncMediaToElastic(media.id).catch(() => {});
 
     return NextResponse.json({ 
       success: true, 
