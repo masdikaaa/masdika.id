@@ -6,7 +6,9 @@
 #   - Tunnel: Cloudflare Tunnel (cloudflared) -> pointing to http://localhost:80
 #   - Database: PostgreSQL 18 Alpine (PersistentVolume: local-path)
 #   - Cache / Queue: Redis 7 Alpine (PersistentVolume: local-path)
-#   - Web Application: Next.js Standalone (masdika-app)
+#   - Search Engine: Elasticsearch 8.15 (PersistentVolume: local-path)
+#   - Storage: RustFS Object Storage (Media, CDN, Tickets) + Local Temp Buffers
+#   - Web Application: Next.js Standalone (masdika-app) + HPA Autoscaler (1-5 pods)
 #   - Background Worker: Node Queue / Cron Worker (masdika-worker)
 #   - VNC Proxy: Dedicated WebSocket Proxy for VNC Console (masdika-vnc-proxy)
 #
