@@ -26,6 +26,11 @@ export async function POST(req: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Validate ICO magic bytes (00 00 01 00)
+    if (buffer.length < 4 || buffer[0] !== 0x00 || buffer[1] !== 0x00 || buffer[2] !== 0x01 || buffer[3] !== 0x00) {
+      return NextResponse.json({ error: 'File content does not match a valid ICO format' }, { status: 400 });
+    }
     
     // Make sure the src/app directory exists (it should, but just in case)
     const appDir = path.dirname(FAVICON_PATH);
