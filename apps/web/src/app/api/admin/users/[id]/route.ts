@@ -6,6 +6,8 @@ import { decryptDeterministic } from '@/lib/encryption';
 import { syncCustomerToElastic } from '@/lib/sync-elasticsearch';
 import path from 'path';
 import { unlink } from 'fs/promises';
+import { existsSync } from 'fs';
+import { deleteFromRustFS } from '@/lib/rustfs';
 
 export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -129,14 +131,22 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
       where: { userId: user.id, isFolder: false }
     });
 
-    const secureDir = path.join(process.cwd(), "storage", "secure-media");
+    const candidateDirs = [
+      path.join(process.cwd(), "storage", "secure-media"),
+      path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+    ];
     for (const file of secureFiles) {
       if (file.filename) {
-        const filePath = path.join(secureDir, file.filename);
-        try {
-          await unlink(filePath);
-        } catch (e) {
-          console.error(`Failed to delete file ${filePath}:`, e);
+        deleteFromRustFS(file.filename).catch(() => {});
+        for (const dir of candidateDirs) {
+          const filePath = path.join(dir, file.filename);
+          if (existsSync(filePath)) {
+            try {
+              await unlink(filePath);
+            } catch (e) {
+              console.error(`Failed to delete file ${filePath}:`, e);
+            }
+          }
         }
       }
     }

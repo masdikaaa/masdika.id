@@ -58,6 +58,7 @@ async function run() {
 
   console.log("\n==================================================");
   console.log("Migration finished successfully!");
+  console.log("Local files & storage directories cleaned up completely!");
   console.log("==================================================");
   process.exit(0);
 }

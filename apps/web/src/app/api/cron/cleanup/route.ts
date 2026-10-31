@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { sendVpcDeletedEmail, sendCloudflareCleanupEmail } from '@/lib/email';
 import fs from 'fs';
 import path from 'path';
+import { deleteFromRustFS } from '@/lib/rustfs';
 
 export async function GET(req: Request) {
   try {
@@ -23,10 +24,16 @@ export async function GET(req: Request) {
     let deletedCount = 0;
 
     for (const em of expiredMedia) {
-      const secureDir = path.join(process.cwd(), "storage", "secure-media");
-      const filePath = path.join(secureDir, em.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      deleteFromRustFS(em.filename).catch(() => {});
+      const candidateDirs = [
+        path.join(process.cwd(), "storage", "secure-media"),
+        path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+      ];
+      for (const dir of candidateDirs) {
+        const filePath = path.join(dir, em.filename);
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch {}
+        }
       }
       await prisma.secureMedia.delete({ where: { id: em.id } });
       deletedCount++;

@@ -29,15 +29,20 @@ export async function POST(req: NextRequest) {
     });
 
     // Delete files from filesystem & RustFS
-    const secureDir = path.join(process.cwd(), "storage", "secure-media");
+    const candidateDirs = [
+      path.join(process.cwd(), "storage", "secure-media"),
+      path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+    ];
     mediaItems.forEach(media => {
       deleteFromRustFS(media.filename).catch(() => {});
-      const filePath = path.join(secureDir, media.filename);
-      if (fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-        } catch (e) {
-          console.error("Failed to delete secure media file:", e);
+      for (const dir of candidateDirs) {
+        const filePath = path.join(dir, media.filename);
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (e) {
+            console.error("Failed to delete secure media file:", e);
+          }
         }
       }
     });

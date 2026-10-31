@@ -5,6 +5,7 @@ import path from "path";
 import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
 import { hasActiveSubscription } from "@/lib/subscription";
+import { deleteFromRustFS } from "@/lib/rustfs";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN', 'USER'] });
@@ -252,11 +253,17 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: "Folder is not empty" }, { status: 400 });
       }
     } else {
-      // Delete from filesystem
-      const secureDir = path.join(process.cwd(), "storage", "secure-media");
-      const filePath = path.join(secureDir, media.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      // Delete from RustFS & filesystem
+      deleteFromRustFS(media.filename).catch(() => {});
+      const candidateDirs = [
+        path.join(process.cwd(), "storage", "secure-media"),
+        path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+      ];
+      for (const dir of candidateDirs) {
+        const filePath = path.join(dir, media.filename);
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch {}
+        }
       }
     }
 

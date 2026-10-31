@@ -22,11 +22,11 @@ export async function GET() {
       return acc;
     }, {});
 
-    settingsObj['rustfs_endpoint'] = settingsObj['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || 'http://192.168.79.10:9000';
-    settingsObj['rustfs_access_key'] = settingsObj['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '39b45c5dd5b53d8c4baba0b7';
-    settingsObj['rustfs_secret_key'] = settingsObj['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || 'a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1';
+    settingsObj['rustfs_endpoint'] = settingsObj['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || '';
+    settingsObj['rustfs_access_key'] = settingsObj['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '';
+    settingsObj['rustfs_secret_key'] = settingsObj['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '';
     settingsObj['rustfs_bucket'] = settingsObj['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media';
-    settingsObj['rustfs_enabled'] = settingsObj['rustfs_enabled'] ?? (process.env.RUSTFS_ENABLED ?? 'true');
+    settingsObj['rustfs_enabled'] = settingsObj['rustfs_enabled'] ?? (process.env.RUSTFS_ENABLED ?? 'false');
 
     return NextResponse.json({
       user: {

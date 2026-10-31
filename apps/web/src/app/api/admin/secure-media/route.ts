@@ -252,10 +252,15 @@ export async function DELETE(req: NextRequest) {
     } else {
       // Delete from RustFS & filesystem
       deleteFromRustFS(media.filename).catch(() => {});
-      const secureDir = path.join(process.cwd(), "storage", "secure-media");
-      const filePath = path.join(secureDir, media.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      const candidateDirs = [
+        path.join(process.cwd(), "storage", "secure-media"),
+        path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+      ];
+      for (const dir of candidateDirs) {
+        const filePath = path.join(dir, media.filename);
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch {}
+        }
       }
     }
 

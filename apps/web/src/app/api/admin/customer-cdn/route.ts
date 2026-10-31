@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
+import { deleteFromRustFS } from "@/lib/rustfs";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ["ADMIN"] });
@@ -180,15 +181,21 @@ export async function DELETE(req: NextRequest) {
     await prisma.mediaRating.deleteMany({ where: { mediaId } });
     await prisma.mediaComment.deleteMany({ where: { mediaId } });
 
-    // Delete from filesystem if not a directory
+    // Delete from RustFS & filesystem if not a directory
     if (!media.isFolder) {
-      const secureDir = path.join(process.cwd(), "storage", "secure-media");
-      const filePath = path.join(secureDir, media.filename);
-      if (fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-        } catch (err) {
-          console.warn("Could not delete file from disk:", err);
+      deleteFromRustFS(media.filename).catch(() => {});
+      const candidateDirs = [
+        path.join(process.cwd(), "storage", "secure-media"),
+        path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+      ];
+      for (const dir of candidateDirs) {
+        const filePath = path.join(dir, media.filename);
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (err) {
+            console.warn("Could not delete file from disk:", err);
+          }
         }
       }
     }

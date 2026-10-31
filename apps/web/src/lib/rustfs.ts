@@ -62,30 +62,39 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       return acc;
     }, {} as Record<string, string>);
 
-    const endpoint = settingsMap['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || 'http://192.168.79.10:9000';
-    const accessKey = settingsMap['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '39b45c5dd5b53d8c4baba0b7';
-    const secretKey = settingsMap['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || 'a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1';
-    const bucket = settingsMap['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media';
-    const enabledRaw = settingsMap['rustfs_enabled'] ?? process.env.RUSTFS_ENABLED ?? 'true';
-    const enabled = enabledRaw === 'true' || enabledRaw === '1';
+    const endpoint = (settingsMap['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || '').trim().replace(/\/+$/, '');
+    const accessKey = (settingsMap['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '').trim();
+    const secretKey = (settingsMap['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '').trim();
+    const bucket = (settingsMap['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-media').trim();
+    const enabledRaw = settingsMap['rustfs_enabled'] ?? process.env.RUSTFS_ENABLED ?? 'false';
+    const isConfigValid = Boolean(endpoint && accessKey && secretKey);
+    const enabled = (enabledRaw === 'true' || enabledRaw === '1') && isConfigValid;
 
     cachedConfig = {
-      endpoint: endpoint.trim().replace(/\/+$/, ''), // Strip trailing slash
-      accessKey: accessKey.trim(),
-      secretKey: secretKey.trim(),
-      bucket: bucket.trim(),
+      endpoint,
+      accessKey,
+      secretKey,
+      bucket,
       enabled
     };
     lastConfigFetch = now;
     return cachedConfig;
   } catch (error) {
     console.error('[RustFS] Error reading settings from DB, falling back to process.env:', error);
+    const endpoint = (process.env.RUSTFS_ENDPOINT || '').trim().replace(/\/+$/, '');
+    const accessKey = (process.env.RUSTFS_ACCESS_KEY || '').trim();
+    const secretKey = (process.env.RUSTFS_SECRET_KEY || '').trim();
+    const bucket = (process.env.RUSTFS_BUCKET || 'masdika-media').trim();
+    const enabledRaw = process.env.RUSTFS_ENABLED ?? 'false';
+    const isConfigValid = Boolean(endpoint && accessKey && secretKey);
+    const enabled = (enabledRaw === 'true' || enabledRaw === '1') && isConfigValid;
+
     return {
-      endpoint: (process.env.RUSTFS_ENDPOINT || 'http://192.168.79.10:9000').trim().replace(/\/+$/, ''),
-      accessKey: (process.env.RUSTFS_ACCESS_KEY || '39b45c5dd5b53d8c4baba0b7').trim(),
-      secretKey: (process.env.RUSTFS_SECRET_KEY || 'a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1').trim(),
-      bucket: (process.env.RUSTFS_BUCKET || 'masdika-media').trim(),
-      enabled: (process.env.RUSTFS_ENABLED ?? 'true') === 'true'
+      endpoint,
+      accessKey,
+      secretKey,
+      bucket,
+      enabled
     };
   }
 }
@@ -143,6 +152,14 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
 }> {
   try {
     const config = customConfig ? { ...(await getRustFSConfig()), ...customConfig } : await getRustFSConfig();
+
+    if (!config.endpoint || !config.accessKey || !config.secretKey) {
+      return {
+        success: false,
+        message: 'Endpoint, Access Key, and Secret Key must all be provided.',
+        bucket: config.bucket || 'masdika-media'
+      };
+    }
 
     const client = new S3Client({
       endpoint: config.endpoint,
@@ -335,10 +352,14 @@ export async function migrateAllMediaToRustFS(options: { deleteLocalAfterUpload?
   const { client, bucket } = await getRustFSS3Client();
   await ensureBucketExists(client, bucket);
 
-  const secureDir = path.join(process.cwd(), 'storage', 'secure-media');
-  if (!fs.existsSync(secureDir)) {
-    return { total: 0, migrated: 0, skipped: 0, errors: 0, details: [] };
-  }
+  const candidateSecureDirs = [
+    path.join(process.cwd(), 'storage', 'secure-media'),
+    path.join(process.cwd(), 'apps', 'web', 'storage', 'secure-media'),
+    path.resolve(__dirname, '../../../storage/secure-media'),
+    path.resolve(__dirname, '../../storage/secure-media'),
+    path.resolve(__dirname, '../storage/secure-media'),
+    '/app/apps/web/storage/secure-media'
+  ].filter((d, i, arr) => arr.indexOf(d) === i && fs.existsSync(d));
 
   // Find all file records in DB (excluding folders)
   const mediaRecords = await prisma.secureMedia.findMany({
@@ -351,8 +372,26 @@ export async function migrateAllMediaToRustFS(options: { deleteLocalAfterUpload?
   let errors = 0;
   const details: Array<{ filename: string; originalName: string; size: number; status: 'migrated' | 'skipped' | 'error'; error?: string }> = [];
 
+  const deleteFileEverywhere = (filename: string) => {
+    for (const dir of candidateSecureDirs) {
+      const p = path.join(dir, filename);
+      if (fs.existsSync(p)) {
+        try {
+          fs.unlinkSync(p);
+        } catch {}
+      }
+    }
+  };
+
   for (const record of mediaRecords) {
-    const localPath = path.join(secureDir, record.filename);
+    let localPath: string | null = null;
+    for (const dir of candidateSecureDirs) {
+      const p = path.join(dir, record.filename);
+      if (fs.existsSync(p)) {
+        localPath = p;
+        break;
+      }
+    }
 
     try {
       // 1. Check if already exists in RustFS
@@ -366,15 +405,15 @@ export async function migrateAllMediaToRustFS(options: { deleteLocalAfterUpload?
           status: 'skipped'
         });
 
-        // If local file still exists and cleanup was requested, delete it safely
-        if (options.deleteLocalAfterUpload && fs.existsSync(localPath)) {
-          fs.unlinkSync(localPath);
+        // If local file still exists and cleanup was requested, delete it safely from all local folders
+        if (options.deleteLocalAfterUpload) {
+          deleteFileEverywhere(record.filename);
         }
         continue;
       }
 
       // 2. Check if local file exists on disk
-      if (!fs.existsSync(localPath)) {
+      if (!localPath) {
         errors++;
         details.push({
           filename: record.filename,
@@ -395,9 +434,9 @@ export async function migrateAllMediaToRustFS(options: { deleteLocalAfterUpload?
         throw new Error('Verification failed: object not found in RustFS after upload');
       }
 
-      // 5. Delete local file safely
+      // 5. Delete local file safely everywhere
       if (options.deleteLocalAfterUpload) {
-        fs.unlinkSync(localPath);
+        deleteFileEverywhere(record.filename);
       }
 
       migrated++;
@@ -417,6 +456,44 @@ export async function migrateAllMediaToRustFS(options: { deleteLocalAfterUpload?
         status: 'error',
         error: err?.message || 'Unknown error during upload'
       });
+    }
+  }
+
+  // 6. Sweep any orphaned files on disk and upload/delete them
+  for (const dir of candidateSecureDirs) {
+    try {
+      if (fs.existsSync(dir)) {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+          const full = path.join(dir, file);
+          const stat = fs.statSync(full);
+          if (stat.isFile()) {
+            const verified = await checkObjectInRustFS(file);
+            if (!verified.exists) {
+              await uploadFileToRustFS(full, file, 'application/octet-stream');
+            }
+            if (options.deleteLocalAfterUpload) {
+              fs.unlinkSync(full);
+            }
+          }
+        }
+      }
+    } catch (sweepErr) {
+      console.warn(`[RustFS Migration] Sweep warning for ${dir}:`, sweepErr);
+    }
+  }
+
+  // 7. Ensure no local folder remains if cleanup was requested
+  if (options.deleteLocalAfterUpload) {
+    for (const dir of candidateSecureDirs) {
+      try {
+        if (fs.existsSync(dir)) {
+          fs.rmSync(dir, { recursive: true, force: true });
+          console.log(`[RustFS Migration] Completely removed local storage folder: ${dir}`);
+        }
+      } catch (rmErr) {
+        console.warn(`[RustFS Migration] Could not remove folder ${dir}:`, rmErr);
+      }
     }
   }
 

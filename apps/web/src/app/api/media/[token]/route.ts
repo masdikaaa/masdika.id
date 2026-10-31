@@ -83,9 +83,16 @@ export async function GET(
     // Expiry check
     if (media.expiresAt && media.expiresAt < new Date()) {
       deleteFromRustFS(media.filename).catch(() => {});
-      const secureDir = path.join(process.cwd(), "storage", "secure-media");
-      const fp = path.join(secureDir, media.filename);
-      if (fs.existsSync(fp)) fs.unlinkSync(fp);
+      const candidateDirs = [
+        path.join(process.cwd(), "storage", "secure-media"),
+        path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+      ];
+      for (const dir of candidateDirs) {
+        const fp = path.join(dir, media.filename);
+        if (fs.existsSync(fp)) {
+          try { fs.unlinkSync(fp); } catch {}
+        }
+      }
       await prisma.secureMedia.delete({ where: { id: media.id } });
       return new NextResponse("Link has expired", { status: 410 });
     }
@@ -105,11 +112,18 @@ export async function GET(
     let encryptedBuf: Buffer | null = await downloadBufferFromRustFS(media.filename);
 
     if (!encryptedBuf) {
-      const secureDir = path.join(process.cwd(), "storage", "secure-media");
-      const filePath = path.resolve(secureDir, media.filename);
-      // Path traversal guard
-      if (filePath.startsWith(path.resolve(secureDir) + path.sep) && fs.existsSync(filePath)) {
-        encryptedBuf = fs.readFileSync(filePath);
+      const candidateDirs = [
+        path.join(process.cwd(), "storage", "secure-media"),
+        path.join(process.cwd(), "apps", "web", "storage", "secure-media"),
+        path.resolve(__dirname, "../../../../../storage/secure-media"),
+        "/app/apps/web/storage/secure-media"
+      ];
+      for (const dir of candidateDirs) {
+        const filePath = path.resolve(dir, media.filename);
+        if (filePath.startsWith(path.resolve(dir) + path.sep) && fs.existsSync(filePath)) {
+          encryptedBuf = fs.readFileSync(filePath);
+          break;
+        }
       }
     }
 

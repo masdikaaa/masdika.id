@@ -91,11 +91,11 @@ export default function SettingsPage() {
     cdn_enabled: true,
     tax_rate: "0",
 
-    rustfs_endpoint: "http://192.168.79.10:9000",
-    rustfs_access_key: "39b45c5dd5b53d8c4baba0b7",
-    rustfs_secret_key: "a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1",
+    rustfs_endpoint: "",
+    rustfs_access_key: "",
+    rustfs_secret_key: "",
     rustfs_bucket: "masdika-media",
-    rustfs_enabled: true
+    rustfs_enabled: false
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -145,11 +145,11 @@ export default function SettingsPage() {
             cdn_enabled: data.settings?.cdn_enabled !== "false",
             tax_rate: data.settings?.tax_rate || "0",
 
-            rustfs_endpoint: data.settings?.rustfs_endpoint || "http://192.168.79.10:9000",
-            rustfs_access_key: data.settings?.rustfs_access_key || "39b45c5dd5b53d8c4baba0b7",
-            rustfs_secret_key: data.settings?.rustfs_secret_key || "a73fd5f8f9c867a3ef2af79c6ef74aa6291f41a20293fc88ab0845bc952012c1",
+            rustfs_endpoint: data.settings?.rustfs_endpoint || "",
+            rustfs_access_key: data.settings?.rustfs_access_key || "",
+            rustfs_secret_key: data.settings?.rustfs_secret_key || "",
             rustfs_bucket: data.settings?.rustfs_bucket || "masdika-media",
-            rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : true
+            rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false
           });
           if (data.settings?.profileImage) {
             setProfilePreview(data.settings?.profileImage);
@@ -1287,10 +1287,10 @@ export default function SettingsPage() {
                           name="rustfs_endpoint"
                           value={formData.rustfs_endpoint}
                           onChange={handleChange}
-                          placeholder="http://192.168.79.10:9000"
+                          placeholder="http://192.168.x.x:9000 or https://s3.yourdomain.com"
                           className={inputClass}
                         />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP or domain of your RustFS server with S3 port (e.g. http://192.168.79.10:9000)</p>
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP or domain of your RustFS server with S3 port (e.g. http://192.168.x.x:9000)</p>
                       </div>
 
                       <div className="space-y-2">
@@ -1313,7 +1313,7 @@ export default function SettingsPage() {
                           name="rustfs_access_key"
                           value={formData.rustfs_access_key}
                           onChange={handleChange}
-                          placeholder="39b45c5dd5b53d8c4baba0b7"
+                          placeholder="Your RustFS Access Key"
                           className={inputClass}
                         />
                       </div>
