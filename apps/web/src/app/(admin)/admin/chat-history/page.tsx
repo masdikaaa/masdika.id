@@ -7,6 +7,7 @@ import { Bot, Search, Trash2, CheckCircle, ChevronLeft, ChevronRight, Eye, X, Al
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 type ChatSessionItem = {
   id: number;
@@ -235,14 +236,6 @@ export default function AdminChatHistoryPage() {
     return <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-500/20 border border-zinc-500/20", isDark ? "text-zinc-400" : "text-slate-500")}>Ended ({endLabel})</span>;
   };
 
-  if (loading && sessions.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
-      </div>
-    );
-  }
-
   return (
     <div className="w-full">
       {/* Header */}
@@ -400,7 +393,13 @@ export default function AdminChatHistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {sessions.length === 0 ? (
+              {loading && sessions.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center">
+                    <AdminLoader className="min-h-[200px]" />
+                  </td>
+                </tr>
+              ) : sessions.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-16 text-center">
                     <div className={cn("w-16 h-16 mx-auto mb-4 rounded-2xl border flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800 text-zinc-600" : "bg-slate-100 border-slate-200 text-slate-400")}>

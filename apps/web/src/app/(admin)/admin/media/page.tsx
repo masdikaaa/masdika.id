@@ -10,6 +10,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
 import { motion, AnimatePresence } from "framer-motion";
 import { Select } from "@/components/ui/Select";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 // ─── Preview helpers ──────────────────────────────────────────────────────────
 
@@ -693,7 +694,7 @@ export default function AdminMediaLibrary() {
       </motion.div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64"><RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} /></div>
+        <AdminLoader className="min-h-[250px] py-12" />
       ) : (
         (() => {
           const filteredMedia = media.filter(item => item.originalName.toLowerCase().includes(searchQuery.toLowerCase()));

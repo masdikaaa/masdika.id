@@ -7,6 +7,7 @@ import { Mail, Trash2, Search, Calendar, Users, AlertCircle, CheckCircle, Check 
 import { useTheme } from "@/components/ThemeProvider";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { toast } from "sonner";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 interface Subscriber {
   id: number;
@@ -246,9 +247,8 @@ export default function NewsletterPage() {
       <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           {loading ? (
-            <div className={cn("p-12 text-center flex flex-col items-center gap-4", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-400" : "text-slate-400")} />
-              <p>Loading subscribers...</p>
+            <div className="p-12 text-center flex items-center justify-center">
+              <AdminLoader className="min-h-[200px]" />
             </div>
           ) : filteredSubscribers.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">

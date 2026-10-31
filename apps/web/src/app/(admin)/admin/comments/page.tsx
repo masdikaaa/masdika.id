@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { motion } from "framer-motion";
+import { AdminLoader } from "@/components/admin/AdminLoader";
 
 export default function AdminCommentsPage() {
   const { theme } = useTheme();
@@ -252,14 +253,6 @@ export default function AdminCommentsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
-      </div>
-    );
-  }
-
   const renderCommentContent = (text: string) => {
     if (!text) return null;
     const parts = text.split(/(@\w+)/g);
@@ -486,8 +479,14 @@ export default function AdminCommentsPage() {
       </div>
 
       <div className="space-y-4 w-full">
-        {filteredComments.map((comment) => (
-          <div key={comment.id} className={cn("border p-6 rounded-2xl relative overflow-hidden group flex gap-4 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        {loading ? (
+          <div className={cn("rounded-2xl p-12 text-center border relative overflow-hidden", isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
+            <AdminLoader className="min-h-[200px]" />
+          </div>
+        ) : (
+          <>
+            {filteredComments.map((comment) => (
+              <div key={comment.id} className={cn("border p-6 rounded-2xl relative overflow-hidden group flex gap-4 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="pt-2 shrink-0">
               <button onClick={() => toggleSelect(comment.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(comment.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
                 {selectedIds.includes(comment.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
@@ -642,6 +641,8 @@ export default function AdminCommentsPage() {
               {searchQuery || filterTab !== "all" ? "No comments matching your search criteria." : "There are currently no blog comments."}
             </p>
           </div>
+        )}
+          </>
         )}
       </div>
 
