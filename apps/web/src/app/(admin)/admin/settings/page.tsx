@@ -1528,29 +1528,51 @@ export default function SettingsPage() {
 
                   {/* Options */}
                   <div className="space-y-3 pt-2">
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={updateActiveConfigAfterTransfer}
-                        onChange={(e) => setUpdateActiveConfigAfterTransfer(e.target.checked)}
-                        className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
-                      />
-                      <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    <div 
+                      onClick={() => setUpdateActiveConfigAfterTransfer(!updateActiveConfigAfterTransfer)} 
+                      className="flex items-center gap-3 cursor-pointer select-none group"
+                    >
+                      <button 
+                        type="button" 
+                        onClick={(e) => { e.stopPropagation(); setUpdateActiveConfigAfterTransfer(!updateActiveConfigAfterTransfer); }}
+                        className={cn(
+                          "w-5 h-5 border rounded flex items-center justify-center shrink-0 cursor-pointer transition-colors",
+                          updateActiveConfigAfterTransfer 
+                            ? "bg-cyan-400 border-cyan-400 text-slate-950" 
+                            : isDark 
+                              ? "bg-[#060b14] border-slate-700 group-hover:border-cyan-500/50" 
+                              : "bg-white border-slate-300 group-hover:border-cyan-600"
+                        )}
+                      >
+                        {updateActiveConfigAfterTransfer && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
+                      </button>
+                      <span className={cn("text-xs font-semibold transition-colors", isDark ? "text-zinc-300 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900")}>
                         Automatically update active settings to destination server upon successful migration
                       </span>
-                    </label>
+                    </div>
 
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={deleteSourceAfterTransfer}
-                        onChange={(e) => setDeleteSourceAfterTransfer(e.target.checked)}
-                        className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 cursor-pointer"
-                      />
-                      <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    <div 
+                      onClick={() => setDeleteSourceAfterTransfer(!deleteSourceAfterTransfer)} 
+                      className="flex items-center gap-3 cursor-pointer select-none group"
+                    >
+                      <button 
+                        type="button" 
+                        onClick={(e) => { e.stopPropagation(); setDeleteSourceAfterTransfer(!deleteSourceAfterTransfer); }}
+                        className={cn(
+                          "w-5 h-5 border rounded flex items-center justify-center shrink-0 cursor-pointer transition-colors",
+                          deleteSourceAfterTransfer 
+                            ? "bg-cyan-400 border-cyan-400 text-slate-950" 
+                            : isDark 
+                              ? "bg-[#060b14] border-slate-700 group-hover:border-cyan-500/50" 
+                              : "bg-white border-slate-300 group-hover:border-cyan-600"
+                        )}
+                      >
+                        {deleteSourceAfterTransfer && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
+                      </button>
+                      <span className={cn("text-xs font-semibold transition-colors", isDark ? "text-zinc-300 group-hover:text-white" : "text-slate-700 group-hover:text-slate-900")}>
                         Delete objects from current source server/bucket after verified transfer (leave unchecked to keep backup)
                       </span>
-                    </label>
+                    </div>
                   </div>
 
                   {/* Migration Report */}
