@@ -592,6 +592,70 @@ export async function deletePublicUploadFromRustFS(relativePath: string): Promis
   }
 }
 
+export interface RustFSPublicMediaItem {
+  key: string;
+  name: string;
+  url: string;
+  size: number;
+  lastModified: Date;
+}
+
+/**
+ * Lists all public media images from RustFS (masdika-media bucket)
+ */
+export async function listPublicUploadsFromRustFS(prefix?: string): Promise<RustFSPublicMediaItem[]> {
+  try {
+    const { client, bucket, enabled } = await getRustFSMediaClient();
+    if (!enabled) return [];
+
+    const items: RustFSPublicMediaItem[] = [];
+    let continuationToken: string | undefined = undefined;
+
+    do {
+      const command: ListObjectsV2Command = new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+        MaxKeys: 1000
+      });
+      const res: any = await client.send(command);
+      if (res.Contents) {
+        for (const obj of res.Contents) {
+          if (!obj.Key) continue;
+          const key = obj.Key;
+
+          // Skip folders, .gitkeep, and test pings
+          if (key.endsWith('/') || key.endsWith('.gitkeep') || key.startsWith('.masdika-ping-')) continue;
+
+          // Exclude avatars (avatars belong to user profile accounts, not general website media)
+          if (key.startsWith('uploads/avatars/') || key.startsWith('avatars/')) continue;
+
+          // Filter image extensions only
+          if (!/\.(webp|png|jpg|jpeg|gif|svg|avif)$/i.test(key)) continue;
+
+          const fileName = path.basename(key);
+          const cleanKey = key.replace(/^\/+/, '');
+          const url = cleanKey.startsWith('uploads/') ? `/${cleanKey}` : `/uploads/${cleanKey}`;
+
+          items.push({
+            key,
+            name: fileName,
+            url,
+            size: obj.Size || 0,
+            lastModified: obj.LastModified ? new Date(obj.LastModified) : new Date()
+          });
+        }
+      }
+      continuationToken = res.NextContinuationToken;
+    } while (continuationToken);
+
+    return items;
+  } catch (error) {
+    console.error('[RustFS] Error listing public uploads from media bucket:', error);
+    return [];
+  }
+}
+
 
 const EXTENSION_MIME_MAP: Record<string, string> = {
   '.webp': 'image/webp',

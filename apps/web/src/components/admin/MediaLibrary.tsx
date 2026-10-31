@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, Trash2, Check, Image as ImageIcon } from "lucide-react";
+import { X, Upload, Trash2, Check, Image as ImageIcon, Search, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+
 interface MediaFile {
   name: string;
   url: string;
@@ -25,6 +26,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [media, setMedia] = useState<MediaFile[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
@@ -40,10 +42,10 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
     try {
       const res = await fetch('/api/admin/media');
       const data = await res.json();
-      if (!data.error) {
+      if (!data.error && Array.isArray(data)) {
         setMedia(data);
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to load media files");
     } finally {
       setLoading(false);
@@ -54,6 +56,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
     if (isOpen) {
       fetchMedia();
       setSelectedFile(null);
+      setSearchQuery("");
     }
   }, [isOpen]);
 
@@ -78,9 +81,9 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
         toast.success("Image uploaded!");
         fetchMedia(); // Refresh list
       } else {
-        toast.error("Failed to upload image");
+        toast.error(data.error || "Failed to upload image");
       }
-    } catch (err) {
+    } catch {
       toast.error("Upload failed");
     } finally {
       setUploading(false);
@@ -122,7 +125,9 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
     setIsDeleting(true);
     
     try {
-      const res = await fetch(`/api/admin/media?filename=${encodeURIComponent(fileToDelete)}`, {
+      const target = media.find(m => m.name === fileToDelete);
+      const urlParam = target?.url ? `&url=${encodeURIComponent(target.url)}` : '';
+      const res = await fetch(`/api/admin/media?filename=${encodeURIComponent(fileToDelete)}${urlParam}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -133,7 +138,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
         const data = await res.json();
         toast.error(data.error || "Failed to delete image");
       }
-    } catch (err) {
+    } catch {
       toast.error("Something went wrong");
     } finally {
       setIsDeleting(false);
@@ -141,6 +146,10 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
       setFileToDelete(null);
     }
   };
+
+  const filteredMedia = media.filter(file =>
+    file.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (!isOpen) return null;
 
@@ -154,16 +163,57 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
           className={cn("w-full max-w-5xl h-[85vh] rounded-3xl border flex flex-col overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
         >
           {/* Header */}
-          <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-slate-50")}>
-            <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-              <ImageIcon className="w-5 h-5" />
-              {title}
-            </h2>
-            <div className="flex items-center gap-4">
+          <div className={cn("flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6 border-b shrink-0", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-slate-50")}>
+            <div className="flex items-center gap-3">
+              <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <ImageIcon className="w-5 h-5 text-cyan-400" />
+                {title}
+              </h2>
+              {media.length > 0 && (
+                <span className={cn("text-xs px-2.5 py-0.5 rounded-full font-medium", isDark ? "bg-white/10 text-slate-300" : "bg-slate-200 text-slate-700")}>
+                  {media.length} {media.length === 1 ? 'file' : 'files'}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              {media.length > 0 && (
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    type="text"
+                    placeholder="Search images..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={cn(
+                      "pl-9 pr-7 py-1.5 text-sm rounded-xl border transition-colors outline-none w-32 sm:w-48",
+                      isDark ? "bg-white/5 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500"
+                    )}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <button 
+                onClick={fetchMedia}
+                disabled={loading}
+                title="Refresh media"
+                className={cn("p-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
+              >
+                <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+              </button>
+
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className={cn("flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
+                className={cn("flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}
               >
                 <Upload className="w-4 h-4" />
                 {uploading ? "Uploading..." : "Upload New"}
@@ -204,16 +254,23 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
                   <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No media files found.</p>
                   <p className={cn("text-sm mt-1", isDark ? "text-zinc-500" : "text-slate-400")}>Upload an image to get started.</p>
                 </div>
+              ) : filteredMedia.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>No images match &ldquo;{searchQuery}&rdquo;</p>
+                  <button onClick={() => setSearchQuery("")} className="text-sm text-cyan-400 mt-2 hover:underline">
+                    Clear search
+                  </button>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {media.map((file) => (
+                  {filteredMedia.map((file) => (
                     <div 
-                      key={file.name}
+                      key={file.url || file.name}
                       onClick={() => setSelectedFile(file)}
-                      className={cn("relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all", selectedFile?.name === file.name ? 'border-cyan-500' : isDark ? 'border-white/5 hover:border-white/20' : 'border-slate-200 hover:border-slate-300')}
+                      className={cn("relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all", (selectedFile?.url === file.url || selectedFile?.name === file.name) ? 'border-cyan-500' : isDark ? 'border-white/5 hover:border-white/20' : 'border-slate-200 hover:border-slate-300')}
                     >
                       <img referrerPolicy="no-referrer" src={file.url} alt={file.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                      {selectedFile?.name === file.name && (
+                      {(selectedFile?.url === file.url || selectedFile?.name === file.name) && (
                         <div className="absolute top-2 right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
                           <Check className="w-3.5 h-3.5 text-white" />
                         </div>
