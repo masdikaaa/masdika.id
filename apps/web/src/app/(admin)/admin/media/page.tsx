@@ -798,10 +798,10 @@ export default function AdminMediaLibrary() {
                     </div>
                   )}
                   {!item.isFolder ? (
-                    <div className="flex items-end justify-between mt-auto pt-2">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs font-medium text-zinc-500">{formatBytes(item.size)}</span>
-                        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <div className="mt-auto pt-2 space-y-1.5">
+                      <span className="text-xs font-medium text-zinc-500 block">{formatBytes(item.size)}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           {item.expiresAt ? (
                             <span className="text-[10px] font-bold tracking-wider uppercase text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded border border-orange-400/20 w-fit">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
                           ) : (
@@ -822,12 +822,24 @@ export default function AdminMediaLibrary() {
                             {item.isPublic === false ? "Private" : "Public"}
                           </button>
                         </div>
-                      </div>
-                      <div className="flex gap-1 pb-1">
-                        {getPreviewType(item.mimeType, item.originalName) !== "none" && (
-                          <button onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }} className={cn("p-1.5 rounded-lg hover:bg-cyan-500/10 transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}><Eye className="w-4 h-4" /></button>
-                        )}
-                        <button onClick={(e) => { e.stopPropagation(); copyLink(item.token); }} className={cn("p-1.5 rounded-lg hover:bg-cyan-500/10 transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}><LinkIcon className="w-4 h-4" /></button>
+                        <div className="flex items-center gap-0.5 shrink-0 -mr-1">
+                          {getPreviewType(item.mimeType, item.originalName) !== "none" && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }}
+                              title="Preview"
+                              className={cn("p-1 rounded-lg hover:bg-cyan-500/10 transition-colors flex items-center justify-center cursor-pointer", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-700 hover:text-cyan-800")}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); copyLink(item.token); }}
+                            title="Copy Link"
+                            className={cn("p-1 rounded-lg hover:bg-cyan-500/10 transition-colors flex items-center justify-center cursor-pointer", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-700 hover:text-cyan-800")}
+                          >
+                            <LinkIcon className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ) : (

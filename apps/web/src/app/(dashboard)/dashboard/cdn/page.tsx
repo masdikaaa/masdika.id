@@ -858,10 +858,10 @@ export default function UserCDNLibrary() {
                     
                     <h3 className={cn("font-bold text-sm mb-1 truncate relative z-10", isDark ? "text-white" : "text-slate-900")} title={item.originalName}>{item.originalName}</h3>
                     {!item.isFolder ? (
-                      <div className="flex items-end justify-between mt-auto pt-4 relative z-10">
-                        <div className="flex flex-col gap-1">
-                          <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{formatBytes(item.size)}</span>
-                          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                      <div className="mt-auto pt-4 space-y-1.5 relative z-10">
+                        <span className={cn("text-xs font-medium block", isDark ? "text-zinc-400" : "text-slate-500")}>{formatBytes(item.size)}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             {item.expiresAt ? (
                               <span className="text-[10px] font-bold tracking-wider text-orange-400 uppercase bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded w-fit">Exp: {new Date(item.expiresAt).toLocaleDateString()}</span>
                             ) : (
@@ -883,12 +883,12 @@ export default function UserCDNLibrary() {
                               {item.isPublic === false ? "Private" : "Public"}
                             </button>
                           </div>
-                        </div>
-                        <div className="flex gap-1.5">
-                          {getPreviewType(item.mimeType, item.originalName) !== "none" && (
-                            <button onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }} disabled={isSuspended} className="text-cyan-400 p-2 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-lg transition-colors disabled:opacity-50"><Eye className="w-4 h-4" /></button>
-                          )}
-                          <button onClick={(e) => { e.stopPropagation(); copyLink(item.token); }} disabled={isSuspended} className="text-cyan-400 p-2 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-lg transition-colors disabled:opacity-50"><LinkIcon className="w-4 h-4" /></button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {getPreviewType(item.mimeType, item.originalName) !== "none" && (
+                              <button onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }} disabled={isSuspended} title="Preview" className="text-cyan-400 p-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer"><Eye className="w-4 h-4" /></button>
+                            )}
+                            <button onClick={(e) => { e.stopPropagation(); copyLink(item.token); }} disabled={isSuspended} title="Copy Link" className="text-cyan-400 p-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer"><LinkIcon className="w-4 h-4" /></button>
+                          </div>
                         </div>
                       </div>
                     ) : (
