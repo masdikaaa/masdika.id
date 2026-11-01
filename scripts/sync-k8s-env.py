@@ -36,3 +36,4 @@ with open(clean_file, "w", encoding="utf-8") as out:
     out.write("\n".join(clean_lines) + "\n")
 
 print(f"Generated {clean_file} with {len(clean_lines)} sanitized environment variables.")
+

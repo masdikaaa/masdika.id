@@ -154,9 +154,15 @@ jobs:
               echo "Applying k3s-masdika.yaml manifest..."
               kubectl apply -f k3s-masdika.yaml
 
-              # 5. Trigger zero-downtime rolling update for K3s pods
-              echo "Triggering zero-downtime rolling update for K3s pods..."
-              kubectl rollout restart deployment masdika-app masdika-worker masdika-vnc-proxy -n masdika
+              # 5. Trigger zero-downtime rolling update with exact commit SHA
+              echo "Updating deployments to newly built image tag (${{ github.sha }})..."
+              if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+                kubectl set image deployment/masdika-app app=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }} -n masdika
+                kubectl set image deployment/masdika-worker worker=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }} -n masdika
+                kubectl set image deployment/masdika-vnc-proxy vnc-proxy=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }} -n masdika
+              else
+                kubectl rollout restart deployment masdika-app masdika-worker masdika-vnc-proxy -n masdika
+              fi
 
               # 6. Wait for new pods to achieve Healthy/Ready status
               kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
