@@ -160,6 +160,9 @@ spec:
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - KILL
           args:
             - "-c"
             - "io_method=sync"
