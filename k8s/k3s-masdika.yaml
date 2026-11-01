@@ -149,6 +149,7 @@ spec:
       labels:
         app: masdika-db
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 70
         runAsUser: 70
@@ -286,6 +287,7 @@ spec:
       labels:
         app: masdika-redis
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 999
       containers:
@@ -393,6 +395,7 @@ spec:
       labels:
         app: masdika-elasticsearch
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 1000
       containers:
@@ -522,6 +525,7 @@ spec:
       labels:
         app: masdika-app
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 1001 # GID nodejs agar permissions mount uploads writable oleh user nextjs
       initContainers:
@@ -677,6 +681,7 @@ spec:
       labels:
         app: masdika-worker
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 1001
       initContainers:
@@ -805,6 +810,7 @@ spec:
       labels:
         app: masdika-vnc-proxy
     spec:
+      automountServiceAccountToken: false
       initContainers:
         - name: wait-for-dependencies
           image: busybox:1.36
