@@ -135,29 +135,30 @@ jobs:
                 kubectl create secret generic masdika-env --from-env-file=.env -n masdika || true
               fi
 
-              # 3. Apply latest manifest changes (Deployments, Services, ConfigMaps, Ingress, HPA)
+              # 3. Ensure Docker Hub registry secret exists for pulling private images
+              if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] && [ -n "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+                kubectl create secret docker-registry dockerhub-secret \
+                  --docker-server=https://index.docker.io/v1/ \
+                  --docker-username="${{ secrets.DOCKERHUB_USERNAME }}" \
+                  --docker-password="${{ secrets.DOCKERHUB_TOKEN }}" \
+                  -n masdika --dry-run=client -o yaml | kubectl apply -f -
+              fi
+
+              # 4. Apply latest manifest changes (Deployments, Services, ConfigMaps, Ingress, HPA)
               echo "Applying k3s-masdika.yaml manifest..."
               kubectl apply -f k3s-masdika.yaml
 
-              # 4. Trigger zero-downtime rolling update (imagePullPolicy is Always)
+              # 5. Trigger zero-downtime rolling update for K3s pods
               echo "Triggering zero-downtime rolling update for K3s pods..."
               kubectl rollout restart deployment masdika-app masdika-worker masdika-vnc-proxy -n masdika
 
-              # 5. Wait for new pods to achieve Healthy/Ready status
+              # 6. Wait for new pods to achieve Healthy/Ready status
               kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
               kubectl rollout status deployment/masdika-worker -n masdika --timeout=180s
               kubectl rollout status deployment/masdika-vnc-proxy -n masdika --timeout=120s
 
               echo "✅ K3s deployment updated and running successfully with zero downtime!"
             else
-              echo "🚀 Deploying to Docker Compose environment..."
-              echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-              docker compose pull app worker || true
-              docker compose up -d --force-recreate app worker || true
-              docker compose up -d --no-recreate || true
-              docker image prune -f || true
-              docker builder prune -f || true
-              docker compose exec -T nginx nginx -s reload || docker compose restart nginx || true
-              docker logout || true
-              echo "✅ Docker Compose deployment completed!"
+              echo "❌ Error: K3s cluster not found or unreachable! Docker Compose fallback has been permanently disabled as requested."
+              exit 1
             fi

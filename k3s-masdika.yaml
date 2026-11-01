@@ -165,14 +165,20 @@ spec:
         app: masdika-db
     spec:
       securityContext:
-        fsGroup: 999
-        runAsUser: 999
-        runAsGroup: 999
+        fsGroup: 70
+        runAsUser: 70
+        runAsGroup: 70
       containers:
         - name: postgres
-          image: postgres:18
+          image: postgres:18-alpine
           imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
           args:
+            - "-c"
+            - "io_method=sync"
             - "-c"
             - "max_connections=300"
             - "-c"
@@ -201,8 +207,6 @@ spec:
                 secretKeyRef:
                   name: masdika-credentials
                   key: POSTGRES_PASSWORD
-            - name: POSTGRES_INITDB_ARGS
-              value: "--auth-local=trust"
           ports:
             - containerPort: 5432
               name: postgres
@@ -216,16 +220,17 @@ spec:
               command:
                 - sh
                 - -c
-                - "pg_isready -h 127.0.0.1 -p 5432"
-            failureThreshold: 30
+                - "pg_isready -U masdika -h 127.0.0.1 -p 5432"
+            initialDelaySeconds: 15
             periodSeconds: 5
             timeoutSeconds: 5
+            failureThreshold: 60
           livenessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - "pg_isready -h 127.0.0.1 -p 5432"
+                - "pg_isready -U masdika -h 127.0.0.1 -p 5432"
             initialDelaySeconds: 30
             periodSeconds: 15
             timeoutSeconds: 5
@@ -235,7 +240,7 @@ spec:
               command:
                 - sh
                 - -c
-                - "pg_isready -h 127.0.0.1 -p 5432"
+                - "pg_isready -U masdika -h 127.0.0.1 -p 5432"
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 3
@@ -562,6 +567,8 @@ spec:
                 sleep 3
               done
               echo "Elasticsearch is online and accepting connections!"
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
         - name: app
           image: andikaferdialvianto/masdika-id:v1.0.1
@@ -715,6 +722,8 @@ spec:
                 sleep 3
               done
               echo "Elasticsearch is online and accepting connections!"
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
         - name: worker
           image: andikaferdialvianto/masdika-id:v1.0.1
@@ -832,6 +841,8 @@ spec:
                 sleep 2
               done
               echo "Redis is online and accepting connections!"
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
         - name: vnc-proxy
           image: andikaferdialvianto/masdika-id:v1.0.1
