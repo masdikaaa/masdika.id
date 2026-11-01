@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: masdika-app-pdb
+  namespace: masdika
+  labels:
+    app: masdika-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: masdika-app

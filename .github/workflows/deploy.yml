@@ -39,6 +39,9 @@ jobs:
       - name: Lint Code
         run: npm run lint
 
+      - name: Dependency Security Audit
+        run: npm audit --audit-level=high || echo "Dependency audit completed with non-blocking advisories"
+
       - name: Run Tests (if configured)
         run: npm run test || echo "No tests configured yet, skipping..."
 
@@ -102,6 +105,19 @@ jobs:
             NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # ==========================================
+      # CONTAINER VULNERABILITY SCAN (TRIVY)
+      # ==========================================
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: '${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   # ==========================================
   # JOB 4: GITOPS MANIFEST UPDATE (ArgoCD Auto-Sync)
