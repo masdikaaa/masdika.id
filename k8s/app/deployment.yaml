@@ -58,7 +58,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: app
-          image: andikaferdialvianto/masdika-id:1c57dd5ece694a97570cba1a62e2b15c3b3703df
+          image: andikaferdialvianto/masdika-id:0052fc7a25a0d280b46e2e08138ef9b3a227a348
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -185,7 +185,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: worker
-          image: andikaferdialvianto/masdika-id:1c57dd5ece694a97570cba1a62e2b15c3b3703df
+          image: andikaferdialvianto/masdika-id:0052fc7a25a0d280b46e2e08138ef9b3a227a348
           imagePullPolicy: Always
           args:
             - "sh"
