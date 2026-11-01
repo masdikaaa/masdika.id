@@ -80,6 +80,9 @@ spec:
               app: masdika-app
         - podSelector:
             matchLabels:
+              app: masdika-worker
+        - podSelector:
+            matchLabels:
               app: masdika-kibana
         - podSelector:
             matchLabels:
