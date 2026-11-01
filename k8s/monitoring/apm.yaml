@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-apm-server
+  namespace: masdika
+  labels:
+    app: masdika-apm-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-apm-server
+  template:
+    metadata:
+      labels:
+        app: masdika-apm-server
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: apm-server
+          image: docker.elastic.co/apm/apm-server:8.15.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - apm-server
+            - -e
+            - -E
+            - apm-server.host=0.0.0.0:8200
+            - -E
+            - apm-server.rum.enabled=true
+            - -E
+            - output.elasticsearch.hosts=["http://elasticsearch:9200"]
+            - -E
+            - output.elasticsearch.username=elastic
+            - -E
+            - output.elasticsearch.password=$(ELASTIC_PASSWORD)
+          env:
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
+          ports:
+            - containerPort: 8200
+              name: apm
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8200
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8200
+            initialDelaySeconds: 15
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-apm-server
+  namespace: masdika
+  labels:
+    app: masdika-apm-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8200
+      targetPort: 8200
+      name: apm
+  selector:
+    app: masdika-apm-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apm-server
+  namespace: masdika
+  labels:
+    app: masdika-apm-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8200
+      targetPort: 8200
+      name: apm
+  selector:
+    app: masdika-apm-server
