@@ -26,6 +26,9 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-vnc-proxy
+        - podSelector:
+            matchLabels:
+              app: masdika-backup
       ports:
         - protocol: TCP
           port: 5432
@@ -55,6 +58,9 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-vnc-proxy
+        - podSelector:
+            matchLabels:
+              app: masdika-backup
       ports:
         - protocol: TCP
           port: 6379

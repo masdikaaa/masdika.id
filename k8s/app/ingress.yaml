@@ -1,5 +1,5 @@
 # ==============================================================================
-# 9. TRAEFIK MIDDLEWARE (Security Headers & 10GB Upload Buffering)
+# 9. TRAEFIK MIDDLEWARE (Security Headers & 10GB Upload Buffering & Rate Limiting)
 # ==============================================================================
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -23,6 +23,16 @@ spec:
     maxRequestBodyBytes: 10737418240 # 10 GB limit untuk upload ISO / VM Image / Media
     memRequestBodyBytes: 2097152     # 2 MB buffer di memory sebelum spool ke disk
 ---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-ratelimit
+  namespace: masdika
+spec:
+  rateLimit:
+    average: 150
+    burst: 50
+---
 # ==============================================================================
 # 10. TRAEFIK INGRESS
 # Mengatur routing HTTP & WebSocket langsung dari port 80 Traefik K3s.
@@ -35,7 +45,7 @@ metadata:
   namespace: masdika
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd,masdika-masdika-buffering@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd,masdika-masdika-buffering@kubernetescrd,masdika-masdika-ratelimit@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
