@@ -101,6 +101,7 @@ mongo_shared_data
 nginx
 prometheus
 logstash
+k8s
 k3s-masdika.yaml
 docker-compose.yml
 set_secrets.bat

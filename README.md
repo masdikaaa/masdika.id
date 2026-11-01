@@ -88,7 +88,7 @@ Jika Anda ingin menjalankan secara manual di server Ubuntu/Debian:
 
 ## ☸️ Panduan Deployment Kubernetes (K3s)
 
-Aplikasi ini sudah dilengkapi dengan manifest siap pakai di file [`k3s-masdika.yaml`](k3s-masdika.yaml). Konfigurasi ini mendukung **Traefik Ingress Bawaan K3s**, **Penyimpanan Persisten (200 GB)**, **InitContainers Anti-Crash**, dan **Horizontal Pod Autoscaler (HPA)**.
+Aplikasi ini sudah dilengkapi dengan manifest siap pakai di file [`k8s/k3s-masdika.yaml`](k8s/k3s-masdika.yaml). Konfigurasi ini mendukung **Traefik Ingress Bawaan K3s**, **Penyimpanan Persisten (200 GB)**, **InitContainers Anti-Crash**, dan **Horizontal Pod Autoscaler (HPA)**.
 
 ### 1. Prasyarat
 - Server VPS dengan **K3s** yang sudah aktif (Traefik Ingress bawaan K3s aktif).
@@ -109,7 +109,7 @@ sudo kubectl create secret generic masdika-env --from-env-file=.env -n masdika
 #### Langkah B: Jalankan Manifest All-in-One
 Eksekusi manifest Kubernetes:
 ```bash
-sudo kubectl apply -f k3s-masdika.yaml
+sudo kubectl apply -f k8s/k3s-masdika.yaml
 ```
 
 Semua service (PostgreSQL 18, Redis 7, Next.js Web App, Background Worker, VNC Proxy, dan Traefik Ingress) akan berjalan secara teratur dan terlindungi dari *race-condition* saat database booting.

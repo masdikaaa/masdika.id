@@ -1,10 +1,20 @@
-name: CI/CD Pipeline
+name: CI/CD GitOps Pipeline
 
 on:
   push:
     branches:
       - master
       - main
+    paths-ignore:
+      - 'k8s/**'
+      - 'README.md'
+      - 'design.md'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - '.gitignore'
+
+permissions:
+  contents: write
 
 jobs:
   # ==========================================
@@ -60,7 +70,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:v1.0.1
             ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
@@ -68,109 +77,57 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ==========================================
-  # JOB 3: CONTINUOUS DEPLOYMENT
+  # JOB 3: GITOPS MANIFEST UPDATE (ArgoCD Auto-Sync)
   # ==========================================
-  cd:
-    name: CD - Deploy to VPS
+  gitops-deploy:
+    name: GitOps - Update Image Tag for ArgoCD
     needs: docker-build
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
-
-      - name: Sync Files to Server via rsync
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-avzr --delete"
-          SOURCE: "./"
-          REMOTE_HOST: ${{ secrets.SERVER_IP }}
-          REMOTE_USER: ${{ secrets.SERVER_USER }}
-          REMOTE_PORT: ${{ secrets.SSH_PORT }}
-          TARGET: "/home/${{ secrets.SERVER_USER }}/masdika.id"
-          EXCLUDE: "/.git/, /.env, /node_modules/, /postgres_data/, /redis_data/, /grafana_data/, /prometheus_data/, /elasticsearch_data/, /apps/web/public/uploads/, /apps/web/storage/"
-
-      - name: Pull Image & Graceful Reload
-        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /home/${{ secrets.SERVER_USER }}/masdika.id
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-            # Zero-Disruption Safety Check: Wait if any Order Deployment (VPS / K3s / CDN / Jobs), Snapshot, or Backup is in progress
-            echo "Checking if any critical operations (VPS / K3s / CDN Orders / Deployments / Snapshots / Backups) are in progress..."
-            for i in $(seq 1 30); do
-              READINESS=$(curl -s http://127.0.0.1/api/health/deploy-readiness 2>/dev/null || curl -s http://127.0.0.1:3000/api/health/deploy-readiness 2>/dev/null || echo '{"safeToDeploy":true}')
-              IS_SAFE=$(echo "$READINESS" | grep -o '"safeToDeploy":true' || true)
+      - name: Update Image Tag in Kubernetes Manifest
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          MANIFEST_FILE="k8s/k3s-masdika.yaml"
 
-              if [ -n "$IS_SAFE" ]; then
-                echo "System is clear! No active service order deployment, K3s installation, snapshot, or backup in progress. Safe to deploy."
-                break
-              fi
+          echo "Updating $MANIFEST_FILE with new image tag: $IMAGE_TAG"
 
-              ACTIVE_COUNT=$(echo "$READINESS" | grep -o '"activeCount":[0-9]*' || echo "active operations")
-              echo "Waiting for $ACTIVE_COUNT to complete before updating deployment (Attempt $i/30, waiting 10s)..."
-              sleep 10
-            done
+          python3 -c "
+          import re
+          with open('$MANIFEST_FILE', 'r') as f:
+              content = f.read()
 
-            # Setup KUBECONFIG for non-root SSH user if available
-            export KUBECONFIG="${HOME}/.kube/config"
-            if [ ! -f "$KUBECONFIG" ] && [ -r "/etc/rancher/k3s/k3s.yaml" ]; then
-              export KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
-            fi
+          new_content, count = re.subn(
+              r'(image:\s+[^\s]+/masdika-id:)[a-zA-Z0-9_.-]+',
+              rf'\g<1>$IMAGE_TAG',
+              content
+          )
 
-            # Detect whether host is running an active K3s Kubernetes cluster
-            if command -v kubectl >/dev/null 2>&1 && kubectl get nodes >/dev/null 2>&1; then
-              echo "🚀 Detected active K3s Kubernetes cluster!"
+          with open('$MANIFEST_FILE', 'w') as f:
+              f.write(new_content)
 
-              # 1. Ensure namespace masdika exists
-              kubectl get namespace masdika >/dev/null 2>&1 || kubectl create namespace masdika
+          print(f'Successfully updated {count} container images to tag $IMAGE_TAG')
+          "
 
-              # 2. Ensure secret masdika-env is synced cleanly from server's .env file if available
-              if [ -f .env ]; then
-                echo "Syncing secret masdika-env from cleaned .env..."
-                if [ -f scripts/sync-k8s-env.py ]; then
-                  python3 scripts/sync-k8s-env.py || true
-                fi
-                if [ -f .env.clean ]; then
-                  kubectl create secret generic masdika-env --from-env-file=.env.clean -n masdika --dry-run=client -o yaml | kubectl apply -f -
-                  rm -f .env.clean
-                fi
-              fi
+          echo "=== Manifest Diff ==="
+          git diff "$MANIFEST_FILE"
 
-              # 3. Ensure Docker Hub registry secret exists for pulling private images
-              if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] && [ -n "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
-                kubectl create secret docker-registry dockerhub-secret \
-                  --docker-server=https://index.docker.io/v1/ \
-                  --docker-username="${{ secrets.DOCKERHUB_USERNAME }}" \
-                  --docker-password="${{ secrets.DOCKERHUB_TOKEN }}" \
-                  -n masdika --dry-run=client -o yaml | kubectl apply -f -
-              fi
+      - name: Commit & Push GitOps Manifest
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-              # 4. Apply latest manifest changes (Deployments, Services, ConfigMaps, Ingress, HPA)
-              echo "Applying k3s-masdika.yaml manifest..."
-              kubectl apply -f k3s-masdika.yaml
+          git add k8s/k3s-masdika.yaml
 
-              # 5. Trigger zero-downtime rolling update with exact commit SHA
-              echo "Updating deployments to newly built image tag (${{ github.sha }})..."
-              if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
-                kubectl set image deployment/masdika-app app=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }} -n masdika
-                kubectl set image deployment/masdika-worker worker=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }} -n masdika
-                kubectl set image deployment/masdika-vnc-proxy vnc-proxy=${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }} -n masdika
-              else
-                kubectl rollout restart deployment masdika-app masdika-worker masdika-vnc-proxy -n masdika
-              fi
-
-              # 6. Wait for new pods to achieve Healthy/Ready status
-              kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
-              kubectl rollout status deployment/masdika-worker -n masdika --timeout=180s
-              kubectl rollout status deployment/masdika-vnc-proxy -n masdika --timeout=120s
-
-              echo "✅ K3s deployment updated and running successfully with zero downtime!"
-            else
-              echo "❌ Error: K3s cluster not found or unreachable! Docker Compose fallback has been permanently disabled as requested."
-              exit 1
-            fi
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(gitops): update image tag to ${{ github.sha }} [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+            echo "🚀 Manifest successfully pushed to Git! ArgoCD will automatically detect and reconcile the deployment."
+          else
+            echo "No changes in manifest. Skipping commit."
+          fi
