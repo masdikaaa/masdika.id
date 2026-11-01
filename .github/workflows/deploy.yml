@@ -110,6 +110,8 @@ jobs:
     name: GitOps - Update Image Tag for ArgoCD
     needs: docker-build
     runs-on: ubuntu-24.04
+    env:
+      MANIFEST_FILE: k8s/app/deployment.yaml
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -121,8 +123,6 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          MANIFEST_FILE="k8s/app/deployment.yaml"
-
           echo "Updating $MANIFEST_FILE with new image tag: $IMAGE_TAG"
 
           python3 -c "
@@ -151,6 +151,7 @@ jobs:
         env:
           COMMIT_SHA: ${{ github.sha }}
           TARGET_BRANCH: ${{ github.ref_name }}
+          MANIFEST_FILE: k8s/app/deployment.yaml
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
