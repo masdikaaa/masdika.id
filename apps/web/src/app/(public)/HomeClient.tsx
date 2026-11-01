@@ -33,7 +33,6 @@ import {
   SiNextdotjs,
   SiPostgresql,
 } from "react-icons/si";
-import { FcGoogle } from "react-icons/fc";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -133,11 +132,11 @@ const INFRASTRUCTURE_STACK = [
     iconColor: "text-[#F38020]",
   },
   {
-    name: "Google",
-    category: "Global Ecosystem",
-    description: "Global network peering, OAuth 2.0 identity, upstream DNS & cloud ecosystem.",
-    icon: FcGoogle,
-    iconColor: "",
+    name: "Kubernetes",
+    category: "Container Orchestration",
+    description: "Production-grade container orchestration, self-healing workloads & elastic pod autoscaling.",
+    icon: SiKubernetes,
+    iconColor: "text-[#326CE5] dark:text-[#326CE5]",
   },
   {
     name: "Next.js",
