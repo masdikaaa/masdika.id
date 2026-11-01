@@ -205,24 +205,37 @@ spec:
           volumeMounts:
             - name: db-data
               mountPath: /var/lib/postgresql/data
+            - name: dshm
+              mountPath: /dev/shm
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "pg_isready -h 127.0.0.1 -p 5432"
+            failureThreshold: 30
+            periodSeconds: 5
+            timeoutSeconds: 5
           livenessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - pg_isready -U "${POSTGRES_USER:-masdika}" -d "${POSTGRES_DB:-masdika}"
-            initialDelaySeconds: 15
-            periodSeconds: 10
+                - "pg_isready -h 127.0.0.1 -p 5432"
+            initialDelaySeconds: 30
+            periodSeconds: 15
             timeoutSeconds: 5
+            failureThreshold: 5
           readinessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - pg_isready -U "${POSTGRES_USER:-masdika}" -d "${POSTGRES_DB:-masdika}"
-            initialDelaySeconds: 5
+                - "pg_isready -h 127.0.0.1 -p 5432"
+            initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 3
+            failureThreshold: 5
           resources:
             requests:
               cpu: "200m"
@@ -234,6 +247,10 @@ spec:
         - name: db-data
           persistentVolumeClaim:
             claimName: masdika-db-pvc
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
 
 ---
 apiVersion: v1
