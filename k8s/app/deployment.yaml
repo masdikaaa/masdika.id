@@ -60,6 +60,16 @@ spec:
         - name: app
           image: andikaferdialvianto/masdika-id:c876f8b4cee58d5d6766446447be8ff1aa9b5355
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 3000
               name: http
@@ -187,6 +197,16 @@ spec:
         - name: worker
           image: andikaferdialvianto/masdika-id:c876f8b4cee58d5d6766446447be8ff1aa9b5355
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           args:
             - "sh"
             - "-c"
@@ -296,6 +316,16 @@ spec:
         - name: vnc-proxy
           image: andikaferdialvianto/masdika-id:c876f8b4cee58d5d6766446447be8ff1aa9b5355
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           args:
             - "sh"
             - "-c"
@@ -338,3 +368,4 @@ spec:
             limits:
               cpu: "1000m"
               memory: "512Mi"
+

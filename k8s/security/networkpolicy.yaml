@@ -1,0 +1,92 @@
+# ==============================================================================
+# ZERO TRUST NETWORK POLICIES (Enterprise Database & Cache Isolation)
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masdika-db-isolation
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+    security.kubernetes.io/tier: database
+spec:
+  podSelector:
+    matchLabels:
+      app: masdika-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-app
+        - podSelector:
+            matchLabels:
+              app: masdika-worker
+        - podSelector:
+            matchLabels:
+              app: masdika-vnc-proxy
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masdika-redis-isolation
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+    security.kubernetes.io/tier: cache
+spec:
+  podSelector:
+    matchLabels:
+      app: masdika-redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-app
+        - podSelector:
+            matchLabels:
+              app: masdika-worker
+        - podSelector:
+            matchLabels:
+              app: masdika-vnc-proxy
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masdika-es-isolation
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+    security.kubernetes.io/tier: search
+spec:
+  podSelector:
+    matchLabels:
+      app: masdika-elasticsearch
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-app
+        - podSelector:
+            matchLabels:
+              app: masdika-kibana
+        - podSelector:
+            matchLabels:
+              app: masdika-logstash
+        - podSelector:
+            matchLabels:
+              app: masdika-apm-server
+      ports:
+        - protocol: TCP
+          port: 9200

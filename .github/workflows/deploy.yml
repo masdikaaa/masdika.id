@@ -111,11 +111,30 @@ jobs:
             --severity ERROR
 
   # ==========================================
-  # STAGE 5: BUILD & PUSH DOCKER IMAGE
+  # STAGE 5: IAC - K8S MANIFEST COMPLIANCE SCAN (Parallel)
+  # ==========================================
+  k8s-security:
+    name: 5. IaC - K8s Manifest Security Scan
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Run Trivy K8s Manifest Misconfiguration Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'k8s/'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+  # ==========================================
+  # STAGE 6: BUILD & PUSH DOCKER IMAGE
   # ==========================================
   docker-build:
-    name: 5. Build & Push Docker Image
-    needs: [code-quality, dependency-audit, automated-tests, sast-security]
+    name: 6. Build & Push Docker Image
+    needs: [code-quality, dependency-audit, automated-tests, sast-security, k8s-security]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -145,10 +164,10 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ==========================================
-  # STAGE 6: CONTAINER SECURITY SCAN (TRIVY)
+  # STAGE 7: CONTAINER SECURITY SCAN (TRIVY)
   # ==========================================
   container-security:
-    name: 6. Container Security (Trivy Scan)
+    name: 7. Container Security (Trivy Scan)
     needs: docker-build
     runs-on: ubuntu-24.04
     steps:
@@ -169,10 +188,10 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
   # ==========================================
-  # STAGE 7: GITOPS MANIFEST UPDATE (ArgoCD Auto-Sync)
+  # STAGE 8: GITOPS MANIFEST UPDATE (ArgoCD Auto-Sync)
   # ==========================================
   gitops-deploy:
-    name: 7. GitOps - Update ArgoCD Manifest
+    name: 8. GitOps - Update ArgoCD Manifest
     needs: container-security
     runs-on: ubuntu-24.04
     env:
@@ -232,10 +251,10 @@ jobs:
           fi
 
   # ==========================================
-  # STAGE 8: POST-DEPLOY VERIFICATION GATE
+  # STAGE 9: POST-DEPLOY VERIFICATION GATE
   # ==========================================
   post-deploy-gate:
-    name: 8. Post-Deploy Health Gate
+    name: 9. Post-Deploy Health Gate
     needs: gitops-deploy
     runs-on: ubuntu-24.04
     steps:
@@ -258,4 +277,5 @@ jobs:
           echo "Manifest File: k8s/app/deployment.yaml"
           echo "Sync Method: ArgoCD Automated GitOps Pull"
           echo "Health Protection: Kubernetes PodDisruptionBudget (PDB minAvailable: 1)"
+          echo "DevSecOps Controls: SAST (Semgrep), SCA (Audit), IaC (Trivy K8s), Container CVE (Trivy), NetworkPolicy Zero-Trust, CIS Hardening"
           echo "=========================================================="
