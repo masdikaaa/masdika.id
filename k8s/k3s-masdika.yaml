@@ -116,6 +116,7 @@ data:
   DB_NAME: "masdika"
   DB_USER: "masdika"
   ELASTIC_URL: "http://elasticsearch:9200"
+  LOGSTASH_URL: "http://logstash:5044"
   NEXT_PUBLIC_APP_URL: "https://masdika.id"
 
 ---
