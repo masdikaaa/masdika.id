@@ -605,18 +605,7 @@ spec:
                   key: ELASTIC_PASSWORD
                   optional: true
           volumeMounts:
-            - name: app-storage
-              mountPath: /app/apps/web/public/uploads
-              subPath: uploads
-            - name: app-storage
-              mountPath: /app/apps/web/storage/secure-media
-              subPath: secure-media
-            - name: app-storage
-              mountPath: /app/apps/web/storage/tickets
-              subPath: tickets
-            - name: app-storage
-              mountPath: /app/apps/web/storage/ssh
-              subPath: ssh
+            # Buffer sementara untuk chunked uploads raw streaming (aset permanen disimpan di RustFS)
             - name: app-storage
               mountPath: /app/apps/web/storage/upload-buffers
               subPath: upload-buffers
@@ -760,18 +749,7 @@ spec:
                   key: ELASTIC_PASSWORD
                   optional: true
           volumeMounts:
-            - name: app-storage
-              mountPath: /app/apps/web/public/uploads
-              subPath: uploads
-            - name: app-storage
-              mountPath: /app/apps/web/storage/secure-media
-              subPath: secure-media
-            - name: app-storage
-              mountPath: /app/apps/web/storage/tickets
-              subPath: tickets
-            - name: app-storage
-              mountPath: /app/apps/web/storage/ssh
-              subPath: ssh
+            # Buffer sementara untuk chunked uploads raw streaming (aset permanen disimpan di RustFS)
             - name: app-storage
               mountPath: /app/apps/web/storage/upload-buffers
               subPath: upload-buffers
