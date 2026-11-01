@@ -524,7 +524,7 @@ metadata:
   labels:
     app: masdika-app
 spec:
-  replicas: 1
+  # Replicas dikelola dinamis oleh HPA (1 - 5 pods)
   strategy:
     type: RollingUpdate
     rollingUpdate:
