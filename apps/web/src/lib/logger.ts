@@ -20,7 +20,8 @@ export const logger = {
     else console.log(`[${level.toUpperCase()}]`, logOutput);
 
     // Jika LOGSTASH_URL disetting (misal http://localhost:5044 atau http://logstash:5044 di Docker)
-    const logstashUrl = process.env.LOGSTASH_URL;
+    const rawLogstashUrl = process.env.LOGSTASH_URL;
+    const logstashUrl = rawLogstashUrl ? rawLogstashUrl.replace(/^["']|["']$/g, '').trim() : undefined;
     if (!logstashUrl) return; // Abaikan jika tidak ada setting Logstash
 
     try {

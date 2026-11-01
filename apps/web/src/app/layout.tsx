@@ -40,7 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error("Failed to fetch meta_description", error);
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
+  const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
+  const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
   const timestamp = Date.now();
   const ogImageUrl = `/og-image.webp?v=${timestamp}`;
 

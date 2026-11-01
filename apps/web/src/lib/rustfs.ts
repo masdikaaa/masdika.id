@@ -1125,16 +1125,32 @@ export async function migrateAllMediaToRustFS(options: { deleteLocalAfterUpload?
     }
   }
 
-  // 7. Ensure no local folder remains if cleanup was requested
+  // 7. Ensure no local files remain if cleanup was requested
   if (options.deleteLocalAfterUpload) {
     for (const dir of candidateSecureDirs) {
       try {
         if (fs.existsSync(dir)) {
-          fs.rmSync(dir, { recursive: true, force: true });
-          console.log(`[RustFS Migration] Completely removed local storage folder: ${dir}`);
+          // If mounted volume, empty contents instead of deleting root directory
+          const entries = fs.readdirSync(dir);
+          for (const entry of entries) {
+            try {
+              fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
+            } catch {}
+          }
+          try {
+            fs.rmdirSync(dir);
+            console.log(`[RustFS Migration] Completely removed local storage folder: ${dir}`);
+          } catch (rmdirErr: any) {
+            // EBUSY / ENOTEMPTY is expected if dir is a Kubernetes/Docker mount point
+            if (rmdirErr?.code !== 'EBUSY') {
+              // Silently ignore mountpoint locks
+            }
+          }
         }
-      } catch (rmErr) {
-        console.warn(`[RustFS Migration] Could not remove folder ${dir}:`, rmErr);
+      } catch (rmErr: any) {
+        if (rmErr?.code !== 'EBUSY') {
+          console.warn(`[RustFS Migration] Could not remove folder ${dir}:`, rmErr);
+        }
       }
     }
   }

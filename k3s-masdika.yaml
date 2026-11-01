@@ -116,6 +116,7 @@ data:
   DB_NAME: "masdika"
   DB_USER: "masdika"
   ELASTIC_URL: "http://elasticsearch:9200"
+  NEXT_PUBLIC_APP_URL: "https://masdika.id"
 
 ---
 # ==============================================================================
@@ -946,7 +947,7 @@ metadata:
   name: masdika-ingress
   namespace: masdika
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd,masdika-masdika-buffering@kubernetescrd
 spec:
   ingressClassName: traefik
