@@ -26,48 +26,64 @@ Platform ini mengadopsi prinsip **Modern GitOps (ArgoCD)** dan **Zero-Trust DevS
 
 ## 🏛️ Arsitektur Infrastruktur (Enterprise Standard)
 
+<p align="center">
+  <img src="docs/architecture.svg" alt="Masdika.ID Enterprise High-Availability Architecture" width="100%" />
+</p>
+
+<details>
+  <summary><b>🔍 Klik di sini untuk melihat Diagram Deklaratif (Versi Kode Mermaid)</b></summary>
+  <br>
+
 ```mermaid
 flowchart TD
-    subgraph Edge ["Internet & Edge Layer"]
-        User(["Client / Public Traffic"]) --> CF["Cloudflare Zero Trust / Tunnel"]
-        CF --> Traefik["Traefik v3 Ingress Controller"]
-        Traefik --> MW_H["Middleware: masdika-headers\n(HSTS, CSP, Nosniff, X-Frame)"]
-        Traefik --> MW_B["Middleware: masdika-buffering\n(10GB ISO / Media Upload Buffer)"]
-        Traefik --> MW_R["Middleware: masdika-ratelimit\n(Token Bucket 150/s, Burst 50)"]
+    classDef edge fill:#08182b,stroke:#0ea5e9,stroke-width:2px,color:#f0f9ff;
+    classDef app fill:#062621,stroke:#10b981,stroke-width:2px,color:#f0fdf4;
+    classDef data fill:#181033,stroke:#8b5cf6,stroke-width:2px,color:#f5f3ff;
+    classDef obs fill:#261804,stroke:#f59e0b,stroke-width:2px,color:#fffbeb;
+    classDef gitops fill:#260e18,stroke:#f43f5e,stroke-width:2px,color:#fff1f2;
+
+    subgraph Edge ["🌐 1. Edge & Traffic Ingress Layer"]
+        User(["Client / Public Traffic"]):::edge --> CF["Cloudflare Zero Trust / Tunnel"]:::edge
+        CF --> Traefik["Traefik v3 Ingress Controller"]:::edge
+        Traefik --> MW_H["Middleware: masdika-headers\n(HSTS, CSP, Nosniff, X-Frame)"]:::edge
+        Traefik --> MW_B["Middleware: masdika-buffering\n(10GB ISO / Media Upload Buffer)"]:::edge
+        Traefik --> MW_R["Middleware: masdika-ratelimit\n(Token Bucket 150/s, Burst 50)"]:::edge
     end
 
-    subgraph AppTier ["Application Tier (Kubernetes Namespace: masdika)"]
-        MW_R --> App["masdika-app (Next.js 15 Standalone)\n(preStop: 5s, HPA 1-5, PDB min=1, non-root 1001)"]
-        MW_R --> VNC["masdika-vnc-proxy (WebSocket VNC Node.js)"]
-        Worker["masdika-worker (Queue & Auto Billing Engine)"]
+    subgraph AppTier ["⚡ 2. Application Tier (Namespace: masdika)"]
+        MW_R --> App["masdika-app (Next.js 15 Standalone)\n(preStop: 5s, HPA 1-5, PDB min=1, non-root 1001)"]:::app
+        MW_R --> VNC["masdika-vnc-proxy (WebSocket VNC Node.js)"]:::app
+        Worker["masdika-worker (Queue & Auto Billing Engine)"]:::app
     end
 
-    subgraph ZeroTrustNetwork ["Data Tier (Isolated by Zero-Trust NetworkPolicy)"]
-        App --> DB[("PostgreSQL 18 Alpine\n(Port 5432 - PVC 30GB)")]
+    subgraph ZeroTrustNetwork ["🛡️ 3. Zero-Trust Data Tier (Isolated NetworkPolicy)"]
+        App --> DB[("PostgreSQL 18 Alpine\n(Port 5432 - PVC 30GB)")]:::data
         Worker --> DB
-        App --> Redis[("Redis 7 In-Memory Cache\n(Port 6379 - PVC 10GB)")]
+        App --> Redis[("Redis 7 In-Memory Cache\n(Port 6379 - PVC 10GB)")]:::data
         Worker --> Redis
-        CronBackup["CronJob: masdika-postgres-backup\n(Jadwal: 02:00 UTC | gzip -9 | 7d Pruning)"] -.->|Authorized 5432| DB
-        CronBackup --> BackupStorage[("masdika-backup-pvc\n(15GB Backup Storage)")]
+        CronBackup["CronJob: masdika-postgres-backup\n(Jadwal: 02:00 UTC | gzip -9 | 7d Pruning)"]:::data -.->|Authorized 5432| DB
+        CronBackup --> BackupStorage[("masdika-backup-pvc\n(15GB Backup Storage)")]:::data
     end
 
-    subgraph ObservabilityTier ["Full-Stack Observability Tier"]
-        App -.->|APM Node Tracer HTTP 202| APMServer["masdika-apm-server"]
-        APMServer --> Elastic[("Elasticsearch 8.11")]
-        Elastic --> Kibana["Kibana Dashboard"]
-        NodeExporter["Node Exporter"] --> Prom["Prometheus"] --> Grafana["Grafana Dashboard"]
-        AppLogs["Container Stdout"] --> Loki["Grafana Loki"]
+    subgraph ObservabilityTier ["📊 4. Full-Stack Observability Tier"]
+        App -.->|APM Node Tracer HTTP 202| APMServer["masdika-apm-server"]:::obs
+        APMServer --> Elastic[("Elasticsearch 8.11")]:::obs
+        Elastic --> Kibana["Kibana Dashboard"]:::obs
+        NodeExporter["Node Exporter"]:::obs --> Prom["Prometheus"]:::obs --> Grafana["Grafana Dashboard"]:::obs
+        AppLogs["Container Stdout"]:::obs --> Loki["Grafana Loki"]:::obs
     end
 
-    subgraph GitOpsCI ["DevSecOps & GitOps Workflow"]
-        Developer(["Developer Push master"]) --> GHA["GitHub Actions CI/CD"]
-        GHA --> SAST["SAST (Semgrep) & SCA (Trivy Scan)"]
-        GHA --> Docker["Build Multi-Stage Image & Trivy Container Scan"]
-        GHA --> PushTag["Update Image Tag di k8s/app/deployment.yaml"]
-        PushTag --> ArgoCD["ArgoCD Controller (192.168.79.15)"]
+    subgraph GitOpsCI ["🚀 5. DevSecOps & GitOps Pipeline"]
+        Developer(["Developer Push master"]):::gitops --> GHA["GitHub Actions CI/CD"]:::gitops
+        GHA --> SAST["SAST (Semgrep) & SCA (Trivy Scan)"]:::gitops
+        GHA --> Docker["Build Multi-Stage Image & Trivy Container Scan"]:::gitops
+        GHA --> PushTag["Update Image Tag di k8s/app/deployment.yaml"]:::gitops
+        PushTag --> ArgoCD["ArgoCD Controller (192.168.79.15)"]:::gitops
         ArgoCD -->|Auto Sync & Reconcile| AppTier
     end
 ```
+
+</details>
 
 ---
 
