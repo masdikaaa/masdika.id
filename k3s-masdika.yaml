@@ -164,6 +164,10 @@ spec:
       labels:
         app: masdika-db
     spec:
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+        runAsGroup: 999
       containers:
         - name: postgres
           image: postgres:18
