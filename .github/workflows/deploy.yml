@@ -110,7 +110,7 @@ jobs:
       # CONTAINER VULNERABILITY SCAN (TRIVY)
       # ==========================================
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }}'
           format: 'table'
