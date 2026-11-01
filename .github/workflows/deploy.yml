@@ -244,6 +244,8 @@ jobs:
 
           if ! git diff --staged --quiet; then
             git commit -m "chore(gitops): update image tag to $COMMIT_SHA [skip ci]"
+            # Pull latest remote changes with rebase to prevent non-fast-forward rejection
+            git pull --rebase origin "$TARGET_BRANCH"
             git push origin HEAD:"$TARGET_BRANCH"
             echo "🚀 Manifest successfully pushed to Git! ArgoCD will automatically detect and reconcile the deployment."
           else

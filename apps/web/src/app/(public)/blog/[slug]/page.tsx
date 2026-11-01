@@ -152,7 +152,7 @@ const getRecentPosts = async (currentSlug: string) => {
         published: true,
         slug: { not: currentSlug }
       },
-      take: 4,
+      take: 3,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,

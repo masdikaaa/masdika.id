@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { CodeBlock } from "@/components/ui/CodeBlock";
-import { Calendar, Clock, ChevronLeft, Heart, Share2, MessageCircle } from "lucide-react";
+import { Calendar, Clock, ChevronLeft, Heart, Share2, MessageCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ImageZoom } from "@/components/ui/ImageZoom";
@@ -117,12 +117,6 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
     }
     return headings;
   });
-
-  // Drag to scroll logic
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
   // Reaction State
   const [reactionCount, setReactionCount] = useState(initialPost?.reactionsCount || 0);
@@ -456,74 +450,196 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
           </div>
         </div>
 
-        {/* Recent Articles Slider / Drag Scroll */}
+        {/* Recent Articles Section */}
         {recentPosts && recentPosts.length > 0 && (
           <div className="mb-20" ref={recentPostsRef}>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                Recent Articles
-              </h2>
-              <Link href="/blog" className={cn("text-sm font-semibold transition-colors flex items-center gap-1 group", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700")}>
-                View all articles
-                <span className="transition-transform group-hover:translate-x-1">→</span>
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-[var(--border-primary)]">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-7 rounded-full bg-cyan-500 shadow-sm shadow-cyan-500/50" />
+                <h2 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                  Recent Articles
+                </h2>
+              </div>
+              <Link href="/blog" className={cn("text-sm font-semibold transition-colors flex items-center gap-1.5 group", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700")}>
+                <span>View all articles</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
 
-            <div
-              ref={scrollRef}
-              onMouseDown={(e) => {
-                setIsDragging(true);
-                setStartX(e.pageX - (scrollRef.current?.offsetLeft || 0));
-                setScrollLeft(scrollRef.current?.scrollLeft || 0);
-              }}
-              onMouseLeave={() => setIsDragging(false)}
-              onMouseUp={() => setIsDragging(false)}
-              onMouseMove={(e) => {
-                if (!isDragging) return;
-                e.preventDefault();
-                const x = e.pageX - (scrollRef.current?.offsetLeft || 0);
-                const walk = (x - startX) * 1.5;
-                if (scrollRef.current) scrollRef.current.scrollLeft = scrollLeft - walk;
-              }}
-              className={cn(
-                "flex gap-6 overflow-x-auto pb-4 select-none scrollbar-none snap-x snap-mandatory cursor-grab active:cursor-grabbing",
-                isDragging ? "pointer-events-none" : ""
-              )}
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {recentPosts.map((recent: any) => (
-                <Link
-                  key={recent.id}
-                  href={`/blog/${recent.slug}`}
-                  className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start group pointer-events-auto"
-                >
-                  <div className={cn("w-full h-56 sm:h-64 relative overflow-hidden rounded-2xl border mb-4", isDark ? "bg-gradient-to-br from-[#121212] to-[#0a0a0a] border-white/10" : "bg-slate-100 border-black/5")}>
-                    {recent.image ? (
-                      <img referrerPolicy="no-referrer" src={recent.image} alt={recent.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" draggable={false} loading="lazy" decoding="async" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-cyan-500/30 group-hover:text-cyan-500/50 transition-colors text-6xl font-black">{recent.title[0]}</div>
+            {recentPosts.length === 1 ? (
+              /* Single Article: Sleek Featured Responsive Card */
+              <div className="w-full">
+                {recentPosts.map((recent: any) => (
+                  <Link
+                    key={recent.id}
+                    href={`/blog/${recent.slug}`}
+                    className={cn(
+                      "group block rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1",
+                      isDark
+                        ? "bg-[#111116]/90 border-white/10 hover:border-cyan-500/40 hover:shadow-cyan-500/5"
+                        : "bg-white border-slate-200/90 hover:border-cyan-500/40 hover:shadow-cyan-500/10 shadow-sm"
                     )}
-                    <div className={cn("absolute inset-0 pointer-events-none z-10 opacity-90", isDark ? "bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]" : "bg-gradient-to-b from-transparent via-transparent to-white")}></div>
-                    <div className="absolute top-3 left-3 z-20">
-                      <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md backdrop-blur-md border", isDark ? "bg-cyan-950/60 text-cyan-400 border-cyan-500/30" : "bg-white/80 text-cyan-700 border-cyan-200")}>
-                        {recent.category?.name || "DevOps"}
-                      </span>
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
+                      {/* Left: Thumbnail Cover */}
+                      <div className="md:col-span-5 relative min-h-[220px] sm:min-h-[260px] md:min-h-[280px] overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                        {recent.image ? (
+                          <img
+                            referrerPolicy="no-referrer"
+                            src={recent.image}
+                            alt={recent.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            draggable={false}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-cyan-500/30 group-hover:text-cyan-500/50 transition-colors text-6xl font-black">
+                            {recent.title?.[0] || "B"}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
+                        <div className="absolute top-3.5 left-3.5 z-10">
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg backdrop-blur-md border shadow-sm",
+                            isDark ? "bg-black/70 text-cyan-400 border-cyan-500/30" : "bg-white/95 text-cyan-700 border-cyan-200 shadow-sm"
+                          )}>
+                            {recent.category?.name || "Article"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Article Details */}
+                      <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-3">
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-cyan-500" />
+                              {new Date(recent.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-cyan-500" />
+                              {recent.readTime || 5} min read
+                            </span>
+                          </div>
+
+                          <h3 className={cn(
+                            "text-xl sm:text-2xl font-bold tracking-tight line-clamp-2 mb-3 leading-snug transition-colors",
+                            isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600"
+                          )}>
+                            {recent.title}
+                          </h3>
+
+                          <p className={cn(
+                            "text-sm leading-relaxed line-clamp-3 mb-6",
+                            isDark ? "text-zinc-400" : "text-slate-600"
+                          )}>
+                            {recent.excerpt}
+                          </p>
+                        </div>
+
+                        <div className={cn(
+                          "pt-4 border-t flex items-center justify-between text-sm font-semibold transition-colors mt-auto",
+                          isDark ? "border-white/10 text-cyan-400 group-hover:text-cyan-300" : "border-slate-100 text-cyan-600 group-hover:text-cyan-700"
+                        )}>
+                          <span className="inline-flex items-center gap-2">
+                            <span>Read Article</span>
+                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1.5" />
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <h4 className={cn("font-bold text-base line-clamp-2 mb-1.5 transition-colors leading-snug", isDark ? "text-zinc-200 group-hover:text-cyan-400" : "text-slate-800 group-hover:text-cyan-600")}>
-                    {recent.title}
-                  </h4>
-                  <p className={cn("text-xs line-clamp-2 leading-relaxed mb-3", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    {recent.excerpt}
-                  </p>
-                  <div className="flex items-center gap-3 text-[11px] font-medium text-zinc-500">
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(recent.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {recent.readTime || 5} min read</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              /* Multiple Articles: Responsive Symmetrical Grid */
+              <div className={cn(
+                "grid gap-6 sm:gap-8",
+                recentPosts.length === 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              )}>
+                {recentPosts.map((recent: any) => (
+                  <Link
+                    key={recent.id}
+                    href={`/blog/${recent.slug}`}
+                    className={cn(
+                      "group flex flex-col h-full rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5",
+                      isDark
+                        ? "bg-[#111116]/90 border-white/10 hover:border-cyan-500/40 hover:shadow-cyan-500/5"
+                        : "bg-white border-slate-200/90 hover:border-cyan-500/40 hover:shadow-cyan-500/10 shadow-sm"
+                    )}
+                  >
+                    {/* Cover Thumbnail */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                      {recent.image ? (
+                        <img
+                          referrerPolicy="no-referrer"
+                          src={recent.image}
+                          alt={recent.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          draggable={false}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-cyan-500/30 group-hover:text-cyan-500/50 transition-colors text-6xl font-black">
+                          {recent.title?.[0] || "B"}
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
+                      <div className="absolute top-3.5 left-3.5 z-10">
+                        <span className={cn(
+                          "text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg backdrop-blur-md border shadow-sm",
+                          isDark ? "bg-black/70 text-cyan-400 border-cyan-500/30" : "bg-white/95 text-cyan-700 border-cyan-200 shadow-sm"
+                        )}>
+                          {recent.category?.name || "Article"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-5 sm:p-6 flex flex-col flex-1">
+                      <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-3">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-cyan-500" />
+                          {new Date(recent.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-cyan-500" />
+                          {recent.readTime || 5} min read
+                        </span>
+                      </div>
+
+                      <h3 className={cn(
+                        "text-base sm:text-lg font-bold leading-snug line-clamp-2 mb-2 transition-colors",
+                        isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600"
+                      )}>
+                        {recent.title}
+                      </h3>
+
+                      <p className={cn(
+                        "text-xs sm:text-sm leading-relaxed line-clamp-2 mb-4 flex-1",
+                        isDark ? "text-zinc-400" : "text-slate-600"
+                      )}>
+                        {recent.excerpt}
+                      </p>
+
+                      <div className={cn(
+                        "pt-4 border-t flex items-center justify-between text-xs sm:text-sm font-semibold transition-colors mt-auto",
+                        isDark ? "border-white/10 text-cyan-400 group-hover:text-cyan-300" : "border-slate-100 text-cyan-600 group-hover:text-cyan-700"
+                      )}>
+                        <span className="inline-flex items-center gap-1.5">
+                          <span>Read Article</span>
+                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
