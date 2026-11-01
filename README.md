@@ -24,66 +24,25 @@ Platform ini mengadopsi prinsip **Modern GitOps (ArgoCD)** dan **Zero-Trust DevS
 
 ---
 
-## 🏛️ Arsitektur Infrastruktur (Enterprise Standard)
+## 🏛️ Matriks Arsitektur & Spesifikasi Infrastruktur (Enterprise Standard)
 
-<p align="center">
-  <img src="docs/architecture.svg" alt="Masdika.ID Enterprise High-Availability Architecture" width="100%" />
-</p>
+Seluruh arsitektur sistem diklasifikasikan ke dalam 5 lapisan (*tier*) modular dengan konfigurasi keandalan tinggi dan isolasi keamanan Zero-Trust:
 
-<details>
-  <summary><b>🔍 Klik di sini untuk melihat Diagram Deklaratif (Versi Kode Mermaid)</b></summary>
-  <br>
-
-```mermaid
-flowchart TD
-    classDef edge fill:#08182b,stroke:#0ea5e9,stroke-width:2px,color:#f0f9ff;
-    classDef app fill:#062621,stroke:#10b981,stroke-width:2px,color:#f0fdf4;
-    classDef data fill:#181033,stroke:#8b5cf6,stroke-width:2px,color:#f5f3ff;
-    classDef obs fill:#261804,stroke:#f59e0b,stroke-width:2px,color:#fffbeb;
-    classDef gitops fill:#260e18,stroke:#f43f5e,stroke-width:2px,color:#fff1f2;
-
-    subgraph Edge ["🌐 1. Edge & Traffic Ingress Layer"]
-        User(["Client / Public Traffic"]):::edge --> CF["Cloudflare Zero Trust / Tunnel"]:::edge
-        CF --> Traefik["Traefik v3 Ingress Controller"]:::edge
-        Traefik --> MW_H["Middleware: masdika-headers\n(HSTS, CSP, Nosniff, X-Frame)"]:::edge
-        Traefik --> MW_B["Middleware: masdika-buffering\n(10GB ISO / Media Upload Buffer)"]:::edge
-        Traefik --> MW_R["Middleware: masdika-ratelimit\n(Token Bucket 150/s, Burst 50)"]:::edge
-    end
-
-    subgraph AppTier ["⚡ 2. Application Tier (Namespace: masdika)"]
-        MW_R --> App["masdika-app (Next.js 15 Standalone)\n(preStop: 5s, HPA 1-5, PDB min=1, non-root 1001)"]:::app
-        MW_R --> VNC["masdika-vnc-proxy (WebSocket VNC Node.js)"]:::app
-        Worker["masdika-worker (Queue & Auto Billing Engine)"]:::app
-    end
-
-    subgraph ZeroTrustNetwork ["🛡️ 3. Zero-Trust Data Tier (Isolated NetworkPolicy)"]
-        App --> DB[("PostgreSQL 18 Alpine\n(Port 5432 - PVC 30GB)")]:::data
-        Worker --> DB
-        App --> Redis[("Redis 7 In-Memory Cache\n(Port 6379 - PVC 10GB)")]:::data
-        Worker --> Redis
-        CronBackup["CronJob: masdika-postgres-backup\n(Jadwal: 02:00 UTC | gzip -9 | 7d Pruning)"]:::data -.->|Authorized 5432| DB
-        CronBackup --> BackupStorage[("masdika-backup-pvc\n(15GB Backup Storage)")]:::data
-    end
-
-    subgraph ObservabilityTier ["📊 4. Full-Stack Observability Tier"]
-        App -.->|APM Node Tracer HTTP 202| APMServer["masdika-apm-server"]:::obs
-        APMServer --> Elastic[("Elasticsearch 8.11")]:::obs
-        Elastic --> Kibana["Kibana Dashboard"]:::obs
-        NodeExporter["Node Exporter"]:::obs --> Prom["Prometheus"]:::obs --> Grafana["Grafana Dashboard"]:::obs
-        AppLogs["Container Stdout"]:::obs --> Loki["Grafana Loki"]:::obs
-    end
-
-    subgraph GitOpsCI ["🚀 5. DevSecOps & GitOps Pipeline"]
-        Developer(["Developer Push master"]):::gitops --> GHA["GitHub Actions CI/CD"]:::gitops
-        GHA --> SAST["SAST (Semgrep) & SCA (Trivy Scan)"]:::gitops
-        GHA --> Docker["Build Multi-Stage Image & Trivy Container Scan"]:::gitops
-        GHA --> PushTag["Update Image Tag di k8s/app/deployment.yaml"]:::gitops
-        PushTag --> ArgoCD["ArgoCD Controller (192.168.79.15)"]:::gitops
-        ArgoCD -->|Auto Sync & Reconcile| AppTier
-    end
-```
-
-</details>
+| Layer / Tier | Komponen & Service | Port & Routing | High Availability & Scaling | Proteksi Keamanan (DevSecOps) | Status |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| **🌐 Layer 1: Edge & Ingress Gateway** | **Cloudflare Zero Trust**<br>• Daemon: `cloudflared`<br>• SSL Termination | `443` (HTTPS)<br>`wss` (WebSocket) | Anycast Global Edge Routing<br>SLA 100% Uptime | • L3/L4 DDoS Mitigation Otomatis<br>• Masking IP Asli Server<br>• Web Crypto WAF Rules | `Active` |
+| | **Traefik v3 Ingress**<br>• Ingress Controller Native K3s<br>• Dynamic EndpointSlice | Host `80`, `443`<br>Entrypoint: `web`, `websecure` | Dynamic Re-routing tanpa restart<br>Active Health Probing | • **`masdika-headers`**: HSTS, CSP, Nosniff, X-Frame<br>• **`masdika-buffering`**: 10GB Upload Spooling<br>• **`masdika-ratelimit`**: Token Bucket 150 req/s (Burst 50) | `Active` |
+| **⚡ Layer 2: Application Tier** | **masdika-app**<br>• Next.js 15 Standalone Web App<br>• Base: Node.js 22 Alpine | Internal `3000`<br>Path: `/` | • **HPA**: 1 – 5 Pods Dinamis (CPU 70%, RAM 80%)<br>• **PDB**: `minAvailable: 1`<br>• **preStop**: `sleep 5` (Zero Packet Drop) | • Non-Root User (`UID 1001`, `GID 1001`)<br>• SecurityContext: `drop: [ALL]`<br>• Seccomp: `RuntimeDefault`<br>• `automountServiceAccountToken: false` | `Active` |
+| | **masdika-worker**<br>• BullMQ Queue & Billing Engine<br>• Background Worker | Internal Service<br>Health: `8080` | Strategy: `Recreate`<br>Memory Limit: 1 GiB | • Otomasi isolasi akun & penonaktifan invoice kedaluwarsa<br>• Polling metrik Proxmox VE terenkripsi | `Active` |
+| | **masdika-vnc-proxy**<br>• Dedicated WebSocket Console Tunnel<br>• Node.js WS Reverse Proxy | Internal `3001`<br>Path: `/api/ws` | Strategy: `Recreate`<br>WebSocket Keep-Alive Ping | • Dedicated WSS tunneling ke Proxmox VE<br>• Token tiket otentikasi sesi one-time | `Active` |
+| **🛡️ Layer 3: Zero-Trust Data Tier** | **PostgreSQL 18**<br>• Database Relasional Utama<br>• PVC: `masdika-db-pvc` (30 GB) | Internal `5432`<br>ClusterIP | Shared Buffers: 512 MB<br>Max Connections: 300<br>Effective Cache: 1.5 GB | • **NetworkPolicy: `masdika-db-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `backup`<br>• Running User: UID `70` (postgres) | `Active` |
+| | **Redis 7**<br>• In-Memory Cache & Key-Value<br>• PVC: `masdika-redis-pvc` (10 GB) | Internal `6379`<br>ClusterIP | In-Memory Engine<br>AOF Data Persistence | • **NetworkPolicy: `masdika-redis-isolation`**<br>  Port 6379 diblokir total dari luar pod resmi<br>• Password Authentication & Protected Mode | `Active` |
+| | **Automated Disaster Recovery**<br>• CronJob: `masdika-postgres-backup`<br>• PVC: `masdika-backup-pvc` (15 GB) | Batch Task<br>Jadwal: `0 2 * * *` | Concurrency: `Forbid`<br>BackoffLimit: `3`<br>History: 3 Sukses, 5 Gagal | • Harian `pg_dump` terkompresi `gzip -9` (~180 KB)<br>• Auto-Pruning: Hapus otomatis backup > 7 hari<br>• Volume fisik terisolasi di disk server | `Active` |
+| **📊 Layer 4: Observability & APM** | **Elastic APM Server**<br>• APM Intake Engine v8.11.0<br>• Agent: `elastic-apm-node` | Internal `8200`<br>Path: `/intake/v2` | Native ClusterIP Service<br>Distributed Trace Intake | • Streaming real-time distributed tracing (HTTP 202)<br>• Transaction profiling & database query timing | `Active` |
+| | **Elasticsearch 8.11**<br>• Data Store Log & Trace<br>• PVC: `masdika-es-pvc` (25 GB) | Internal `9200`<br>ClusterIP | JVM Heap: 1 GB<br>Single-Node Optimized | • **NetworkPolicy: `masdika-es-isolation`**<br>  Hanya bisa diakses APM, Kibana, dan Logstash | `Active` |
+| | **Prometheus & Grafana**<br>• Metrik K3s & Visualisasi Dashboard<br>• PVC: 10 GB + 5 GB | Host Ingress:<br>`grafana.masdika.id`<br>`prometheus.masdika.id` | Scrape interval: 15s<br>Metrics via Node Exporter | • Multi-Role Access Control (Admin / Viewer)<br>• Alert Manager & Hardware Health Dashboard | `Active` |
+| **🚀 Layer 5: DevSecOps & GitOps** | **GitHub Actions**<br>• CI/CD Pipeline (`deploy.yml`)<br>• Runner: Ubuntu 24.04 | Webhook GitHub<br>Push ke `master` | 9 Tahapan Otomatis<br>Sequential & Parallel Gates | • **SAST**: Semgrep static code analysis<br>• **SCA**: Trivy filesystem & npm audit scanner<br>• **Container CVE**: Trivy Docker image scanner<br>• **Concurrency Lock**: Serialized GitOps manifest push | `Active` |
+| | **ArgoCD GitOps Engine**<br>• Kontroler: `192.168.79.15`<br>• Target: `https://192.168.79.4:6443` | Web UI & gRPC<br>Path: `k8s/` | Auto-Sync (Prune enabled)<br>Self-Healing Controller | • Git sebagai *Single Source of Truth* mutlak<br>• Audit trail berbasis Git commit SHA tanpa drift | `Active` |
 
 ---
 
