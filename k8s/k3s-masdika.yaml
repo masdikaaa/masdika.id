@@ -567,7 +567,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: app
-          image: andikaferdialvianto/masdika-id:d15592f09dcc7e60ecd65d8c3860d4141c008db7
+          image: andikaferdialvianto/masdika-id:4e3943e0cf98a5745a2967e9c87e27a7fd40ed26
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -712,7 +712,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: worker
-          image: andikaferdialvianto/masdika-id:d15592f09dcc7e60ecd65d8c3860d4141c008db7
+          image: andikaferdialvianto/masdika-id:4e3943e0cf98a5745a2967e9c87e27a7fd40ed26
           imagePullPolicy: Always
           args:
             - "sh"
@@ -821,7 +821,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: vnc-proxy
-          image: andikaferdialvianto/masdika-id:d15592f09dcc7e60ecd65d8c3860d4141c008db7
+          image: andikaferdialvianto/masdika-id:4e3943e0cf98a5745a2967e9c87e27a7fd40ed26
           imagePullPolicy: Always
           args:
             - "sh"
