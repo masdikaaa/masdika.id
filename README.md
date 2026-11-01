@@ -1,162 +1,256 @@
 <div align="center">
   <h1>🚀 Masdika.ID</h1>
-  <p><strong>Platform Manajemen Cloud, VPS & Portofolio Developer Modern</strong></p>
-  <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/PostgreSQL-18-blue?logo=postgresql" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Docker-Swarm-blue?logo=docker" alt="Docker" />
-  <img src="https://img.shields.io/badge/Kubernetes-K3s-326CE5?logo=kubernetes" alt="Kubernetes K3s" />
-  <img src="https://img.shields.io/badge/Ingress-Traefik-24A1C1?logo=traefik" alt="Traefik" />
-  <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions" alt="CI/CD" />
+  <p><strong>Platform Cloud Infrastructure, VPS Provider, dan Developer Hub Skala Enterprise</strong></p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-15.3-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+    <img src="https://img.shields.io/badge/Kubernetes-K3s-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kubernetes K3s" />
+    <img src="https://img.shields.io/badge/GitOps-ArgoCD-F3702A?style=for-the-badge&logo=argo&logoColor=white" alt="ArgoCD" />
+    <img src="https://img.shields.io/badge/DevSecOps-Trivy_%26_Semgrep-00599C?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="DevSecOps" />
+    <img src="https://img.shields.io/badge/PostgreSQL-18_Alpine-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 18" />
+    <img src="https://img.shields.io/badge/Observability-Elastic_APM-005571?style=for-the-badge&logo=elastic&logoColor=white" alt="Elastic APM" />
+    <img src="https://img.shields.io/badge/Monitoring-Prometheus_%26_Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Monitoring" />
+    <img src="https://img.shields.io/badge/Ingress-Traefik_v3-24A1C1?style=for-the-badge&logo=traefik&logoColor=white" alt="Traefik" />
+  </p>
 </div>
 
-<br>
+---
 
-Selamat datang di repositori resmi **Masdika.ID**. Proyek ini adalah aplikasi web modern berperforma tinggi yang dibangun menggunakan Next.js (App Router), Prisma, dan PostgreSQL. Platform ini berfungsi sebagai layanan **Cloud Hosting & VPS Provider**, yang terintegrasi langsung dengan portofolio pribadi, blog teknis, dan pusat komunitas developer.
+## 📖 Ringkasan Platform
+
+**Masdika.ID** adalah platform web modern berperforma tinggi dan berstandar enterprise yang mengintegrasikan layanan **Cloud & VPS Hosting Provider** dengan ekosistem portofolio developer, blog rekayasa perangkat lunak, dan monitoring infrastruktur terdistribusi.
+
+Platform ini mengadopsi prinsip **Modern GitOps (ArgoCD)** dan **Zero-Trust DevSecOps**, di mana seluruh status infrastruktur, konfigurasi jaringan, hingga deployment aplikasi dikelola secara deklaratif melalui Git (*Single Source of Truth*).
 
 ---
 
-## ✨ Fitur Utama
+## 🏛️ Arsitektur Infrastruktur (Enterprise Standard)
 
-### 💻 Provider Cloud & VPS (Bisnis Utama)
-- **Otomasi Provisioning VPS**: Pembuatan dan deployment instance Virtual Private Server (VPS) secara otomatis via Proxmox API.
-- **Area Klien & Sistem Billing**: Integrasi payment gateway (Duitku), manajemen invoice otomatis, saldo akun, dan dasbor klien yang aman.
-- **Monitoring Sumber Daya Real-Time**: Pelacakan penggunaan CPU, RAM, dan Disk VPS secara live menggunakan integrasi Prometheus & Grafana.
-- **Sistem Tiket Bantuan (Support Ticket)**: Manajemen tiket bantuan pelanggan langsung dari dashboard.
+```mermaid
+flowchart TD
+    subgraph Edge ["Internet & Edge Layer"]
+        User(["Client / Public Traffic"]) --> CF["Cloudflare Zero Trust / Tunnel"]
+        CF --> Traefik["Traefik v3 Ingress Controller"]
+        Traefik --> MW_H["Middleware: masdika-headers\n(HSTS, CSP, Nosniff, X-Frame)"]
+        Traefik --> MW_B["Middleware: masdika-buffering\n(10GB ISO / Media Upload Buffer)"]
+        Traefik --> MW_R["Middleware: masdika-ratelimit\n(Token Bucket 150/s, Burst 50)"]
+    end
 
-### 🌐 Hub Developer & Portofolio
-- **Portofolio Personal & Resume**: Menampilkan proyek, keterampilan, sertifikasi, dan riwayat pengalaman dengan antarmuka yang modern, cepat, dan responsif.
-- **Blog Teknis & Artikel Seri**: Sistem blog lengkap untuk membagikan wawasan seputar infrastruktur cloud, DevOps, dan Linux.
-- **Otomasi K3s / Kubernetes**: Pembuatan dan pelacakan log instalasi cluster K3s secara otomatis pada instance VPS klien.
-- **Komunitas Developer**: Direktori grup WhatsApp IT & developer dengan proteksi Anti-Spam dan Anti-SSRF.
+    subgraph AppTier ["Application Tier (Kubernetes Namespace: masdika)"]
+        MW_R --> App["masdika-app (Next.js 15 Standalone)\n(preStop: 5s, HPA 1-5, PDB min=1, non-root 1001)"]
+        MW_R --> VNC["masdika-vnc-proxy (WebSocket VNC Node.js)"]
+        Worker["masdika-worker (Queue & Auto Billing Engine)"]
+    end
 
-### 🛠️ Panel Kontrol Admin
-- **Manajemen Infrastruktur**: Dasbor terpusat untuk mengelola node server, memantau alert sistem, audit resource, dan mengelola pengguna.
-- **Alat Utilitas**: Dilengkapi fitur URL shortener, File CDN / secure media manager, dan media review.
+    subgraph ZeroTrustNetwork ["Data Tier (Isolated by Zero-Trust NetworkPolicy)"]
+        App --> DB[("PostgreSQL 18 Alpine\n(Port 5432 - PVC 30GB)")]
+        Worker --> DB
+        App --> Redis[("Redis 7 In-Memory Cache\n(Port 6379 - PVC 10GB)")]
+        Worker --> Redis
+        CronBackup["CronJob: masdika-postgres-backup\n(Jadwal: 02:00 UTC | gzip -9 | 7d Pruning)"] -.->|Authorized 5432| DB
+        CronBackup --> BackupStorage[("masdika-backup-pvc\n(15GB Backup Storage)")]
+    end
 
----
+    subgraph ObservabilityTier ["Full-Stack Observability Tier"]
+        App -.->|APM Node Tracer HTTP 202| APMServer["masdika-apm-server"]
+        APMServer --> Elastic[("Elasticsearch 8.11")]
+        Elastic --> Kibana["Kibana Dashboard"]
+        NodeExporter["Node Exporter"] --> Prom["Prometheus"] --> Grafana["Grafana Dashboard"]
+        AppLogs["Container Stdout"] --> Loki["Grafana Loki"]
+    end
 
-## 🏗️ Teknologi yang Digunakan (Tech Stack)
-
-Arsitektur aplikasi dirancang untuk skalabilitas, keamanan, dan pemantauan menyeluruh:
-
-- **Frontend & Backend**: [Next.js](https://nextjs.org/) (App Router) dengan Tailwind CSS & Framer Motion.
-- **Database**: PostgreSQL 18 (Dikelola menggunakan Prisma ORM).
-- **Cache & Antrean (Queue)**: Redis 7.
-- **Logging & Monitoring**: ELK Stack (Elasticsearch, Logstash, Kibana) & Prometheus + Grafana.
-- **Deployment**: Docker Compose V2, K3s (Kubernetes), Traefik Ingress Controller, Nginx, & GitHub Actions (CI/CD).
-
----
-
-## 🚀 CI/CD & Deployment Produksi (Docker Compose)
-
-Platform ini mendukung alur **Zero-Touch Deployment** otomatis menggunakan **GitHub Actions**:
-
-1. Lakukan `push` kode ke branch `master`.
-2. GitHub Actions runner terhubung secara aman ke server VPS melalui SSH.
-3. Sinkronisasi kode berjalan otomatis via `rsync` (mengabaikan data sensitif seperti `.env`, `postgres_data`, dsb).
-4. Skrip otomatis memicu `docker compose up -d --build` untuk memperbarui aplikasi tanpa memutus layanan.
-
-### Panduan Setup Manual (Docker Compose)
-Jika Anda ingin menjalankan secara manual di server Ubuntu/Debian:
-
-1. **Clone repositori**
-   ```bash
-   git clone https://github.com/masdikaaa/masdika.id.git
-   cd masdika
-   ```
-
-2. **Konfigurasi file `.env`**
-   Salin atau buat file `.env` di root folder dengan variabel koneksi:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://masdika:password@db:5432/masdika?schema=public"
-   
-   # Redis
-   REDIS_PASSWORD="password-redis-anda"
-   
-   # Kredensial Keamanan
-   SESSION_SECRET="kunci-rahasia-sesi-anda"
-   CRON_SECRET="kunci-rahasia-cron-anda"
-   ```
-
-3. **Jalankan dengan Docker Compose**
-   ```bash
-   docker compose up -d --build
-   ```
-
----
-
-## ☸️ Panduan Deployment Kubernetes (K3s)
-
-Aplikasi ini sudah dilengkapi dengan manifest siap pakai di file [`k8s/k3s-masdika.yaml`](k8s/k3s-masdika.yaml). Konfigurasi ini mendukung **Traefik Ingress Bawaan K3s**, **Penyimpanan Persisten (200 GB)**, **InitContainers Anti-Crash**, dan **Horizontal Pod Autoscaler (HPA)**.
-
-### 1. Prasyarat
-- Server VPS dengan **K3s** yang sudah aktif (Traefik Ingress bawaan K3s aktif).
-- File konfigurasi `.env` production yang berada di direktori project.
-
-### 2. Langkah Deployment
-
-#### Langkah A: Buat Namespace & Import `.env` ke Secret Kubernetes
-Anda **tidak perlu** menyalin variabel satu per satu ke dalam YAML. Cukup import otomatis file `.env` ke dalam Secret Kubernetes:
-```bash
-# 1. Buat namespace masdika
-sudo kubectl create namespace masdika
-
-# 2. Masukkan seluruh konfigurasi .env ke secret masdika-env
-sudo kubectl create secret generic masdika-env --from-env-file=.env -n masdika
-```
-
-#### Langkah B: Jalankan Manifest All-in-One
-Eksekusi manifest Kubernetes:
-```bash
-sudo kubectl apply -f k8s/k3s-masdika.yaml
-```
-
-Semua service (PostgreSQL 18, Redis 7, Next.js Web App, Background Worker, VNC Proxy, dan Traefik Ingress) akan berjalan secara teratur dan terlindungi dari *race-condition* saat database booting.
-
-#### Langkah C: Hubungkan ke Cloudflare Tunnel (`cloudflared`)
-Karena Traefik bawaan K3s otomatis mendengarkan port `80` di host server:
-1. Masuk ke **Cloudflare Zero Trust Dashboard** > **Networks** > **Tunnels** > Pilih Tunnel Anda.
-2. Tambahkan **Public Hostname**:
-   - **Type**: `HTTP`
-   - **URL**: `localhost:80` (atau `127.0.0.1:80`)
-3. Buka tab **Additional application settings** > **HTTP Settings** > Aktifkan toggle **WebSockets** ke posisi `ON` (wajib aktif untuk VNC console dan chat).
-4. Klik **Save hostname**.
-
----
-
-### 🔍 Perintah Berguna untuk Monitoring K3s
-
-```bash
-# Pantau status seluruh pod yang sedang berjalan
-sudo kubectl get pods -n masdika -w
-
-# Pantau status Auto-Scaling HPA (skala pod otomatis 1-5 pod berdasarkan beban CPU/RAM)
-sudo kubectl get hpa -n masdika -w
-
-# Cek pemakaian CPU & RAM riil per pod
-sudo kubectl top pods -n masdika
-
-# Lihat live logs aplikasi web
-sudo kubectl logs -n masdika -l app=masdika-app -f
-
-# Lakukan restart aplikasi web tanpa downtime (Rolling Restart)
-sudo kubectl rollout restart deployment masdika-app -n masdika
+    subgraph GitOpsCI ["DevSecOps & GitOps Workflow"]
+        Developer(["Developer Push master"]) --> GHA["GitHub Actions CI/CD"]
+        GHA --> SAST["SAST (Semgrep) & SCA (Trivy Scan)"]
+        GHA --> Docker["Build Multi-Stage Image & Trivy Container Scan"]
+        GHA --> PushTag["Update Image Tag di k8s/app/deployment.yaml"]
+        PushTag --> ArgoCD["ArgoCD Controller (192.168.79.15)"]
+        ArgoCD -->|Auto Sync & Reconcile| AppTier
+    end
 ```
 
 ---
 
-## 🔒 Keamanan & DevSecOps
+## ✨ Fitur-Fitur Utama
 
-- **Persistensi Data Mutlak**: Seluruh volume database (`postgres_data`), cache (`redis_data`), dan penyimpanan web (`uploads`, `secure-media`, `tickets`, `ssh`) dipisahkan ke Persistent Volume khusus sehingga aman dari risiko terhapus saat update.
-- **Eksekusi Non-Root**: Seluruh container aplikasi berjalan menggunakan user non-root (`nextjs`, GID: `1001`) demi mencegah eskalasi hak akses sistem.
-- **Rate Limiting & Anti-Spam**: Proteksi otomatis terhadap serangan brute-force dan spam pada endpoint publik.
+### 1. ☁️ Cloud & VPS Hosting Provider
+* **Otomasi Provisioning VPS**: Integrasi langsung dengan API Proxmox VE untuk otomatisasi pembuatan VM, OS deployment, dan alokasi resource.
+* **Console Server Real-Time**: Akses visual terminal langsung dari browser menggunakan dedicated WebSocket VNC Proxy (`/api/ws`).
+* **Sistem Billing Otomatis**: Integrasi payment gateway Duitku, webhook verifikasi pembayaran otomatis, dan auto-suspension/activation via BullMQ background worker.
+* **Monitoring Resource Live**: Visualisasi grafik realtime untuk penggunaan CPU, memori, bandwidth, dan disk I/O.
+
+### 2. 🌐 Developer Hub & Technical Blog
+* **Arsitektur Next.js 15 App Router**: Server-Side Rendering (SSR) dan Static Site Generation (SSG) dengan performa sub-second LCP.
+* **Desain Adaptif & Paritas Tema**: Tampilan Dark & Light mode dengan keselarasan tipografi dan grid layout responsif pada artikel dan portofolio.
+* **Manajemen Media Aman**: Buffer upload hingga 10 GB untuk ISO/media dengan proteksi Anti-SSRF dan validasi MIME-type ketat.
+
+### 3. 🛡️ DevSecOps & Keamanan Siber
+* **Static Application Security Testing (SAST)**: Scanning kode sumber otomatis via Semgrep pada setiap push.
+* **Software Composition Analysis (SCA)**: Audit dependensi via `npm audit` dan Trivy fs scanner untuk mencegah kerentanan CVE pada supply chain.
+* **Container Hardening**: Image Docker distroless/alpine, non-root user (UID `1001`), `drop: ALL capabilities`, dan profil seccomp `RuntimeDefault`.
+* **Zero-Trust Network Policies**: Database PostgreSQL, Redis, dan Elasticsearch diisolasi secara total di layer K8s CNI sehingga hanya pod yang diizinkan yang dapat melakukan koneksi.
 
 ---
 
-## 🤝 Kontribusi
+## 🗂️ Struktur Direktori Proyek
 
-Kontribusi, laporan bug, dan saran fitur sangat kami hargai! Silakan buat *issue* atau kirimkan *pull request*.
+```text
+masdika.id/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml             # Pipeline CI/CD DevSecOps & GitOps Auto-Deploy
+├── apps/
+│   └── web/                      # Kode sumber utama Next.js 15 (Web & API)
+│       ├── src/
+│       │   ├── app/              # App Router (Public, Dashboard, Admin, API)
+│       │   ├── components/       # UI Components & Atomic Design
+│       │   └── lib/              # Database Prisma, Auth, Redis, & Utility
+│       ├── worker.js             # Background worker queue & auto billing
+│       └── vnc-proxy.js          # Dedicated WebSocket Proxy untuk VNC Console
+├── k8s/                          # Manifest Deklaratif Kubernetes (ArgoCD Single Source of Truth)
+│   ├── app/
+│   │   ├── deployment.yaml       # Deployment masdika-app, worker, & vnc-proxy (preStop 5s)
+│   │   ├── hpa.yaml              # Horizontal Pod Autoscaler (1-5 pod dinamis)
+│   │   ├── ingress.yaml          # Traefik Ingress, Rate Limiting, & Buffering Middleware
+│   │   ├── pdb.yaml              # PodDisruptionBudget (Zero-downtime cluster maintenance)
+│   │   ├── pvc.yaml              # Persistent Storage Volume Claims
+│   │   └── service.yaml          # K8s Internal Services & ClusterIP
+│   ├── base/
+│   │   ├── namespace.yaml        # Namespace 'masdika'
+│   │   └── configmap.yaml        # Konfigurasi environment terpusat
+│   ├── databases/
+│   │   ├── postgres.yaml         # PostgreSQL 18 Engine & Performance Tuned Config
+│   │   ├── redis.yaml            # Redis 7 In-Memory Cache & Key-Value Store
+│   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
+│   │   └── backup-cronjob.yaml   # Disaster Recovery Backup Otomatis (Daily pg_dump + gzip)
+│   ├── monitoring/
+│   │   ├── apm.yaml              # Elastic APM Server (Distributed Tracing)
+│   │   ├── prometheus.yaml       # Prometheus Server & Metrics Scraper
+│   │   ├── grafana.yaml          # Grafana Dashboard & Visualisasi
+│   │   ├── kibana.yaml           # Kibana Observability UI
+│   │   └── loki.yaml             # Grafana Loki Log Aggregator
+│   └── security/
+│       └── networkpolicy.yaml    # Zero-Trust Network Isolation Policies
+├── Dockerfile                    # Multi-stage production container build
+├── package.json                  # Workspace dependensi monorepo
+└── README.md                     # Dokumentasi teknis sistem
+```
 
 ---
-*Dikembangkan dengan ❤️ oleh [Masdika](https://masdika.id).*
+
+## 🚀 Pipeline CI/CD & GitOps Workflow
+
+Pipeline di [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) mengeksekusi 9 tahapan otomatis tanpa intervensi manual:
+
+```text
+[Push to master]
+       │
+       ├──► 1. Code Quality & Linting (ESLint, TypeCheck)
+       ├──► 2. SCA - Dependency Audit (npm audit)
+       ├──► 3. Unit & Integration Testing
+       ├──► 4. SAST - Security Scanner (Semgrep Static Analysis)
+       ├──► 5. IaC & Manifest Security Scan (Trivy Config)
+       │
+       ▼ (Setelah seluruh gate keamanan lolos)
+       6. Multi-Stage Docker Build & Push ke Docker Hub
+       │
+       ▼
+       7. Container Vulnerability Scan (Trivy CVE Severity Check)
+       │
+       ▼
+       8. GitOps Manifest Update (Concurrency-Locked Atomic Update Image Tag)
+       │
+       ▼
+[ArgoCD Sync] ──► Rollout Pods di K3s Cluster secara Zero-Downtime
+       │
+       ▼
+       9. Post-Deploy Health Gate (Verifikasi HTTP Status & Endpoint Health)
+```
+
+---
+
+## 🛡️ Disaster Recovery (Automated Backup)
+
+Database PostgreSQL dilengkapi dengan automated disaster recovery cronjob di [`k8s/databases/backup-cronjob.yaml`](k8s/databases/backup-cronjob.yaml):
+
+* **Jadwal Eksekusi**: Setiap hari pukul `02:00 UTC` (09:00 WIB).
+* **Mekanisme**: Menjalankan `pg_dump` dengan kompresi tingkat tinggi `gzip -9` secara konsisten tanpa mengunci tabel (*non-blocking*).
+* **Penyimpanan**: Disimpan di volume terisolasi `masdika-backup-pvc` (15 GB).
+* **Siklus Retensi**: Otomatis membersihkan (*auto-prune*) backup yang lebih lama dari 7 hari untuk efisiensi disk.
+* **Lokasi Fisik di Node**:
+  ```bash
+  /var/lib/rancher/k3s/storage/pvc-*_masdika_masdika-backup-pvc/
+  ```
+
+---
+
+## 🛠️ Cheatsheet Operasional Kubernetes (K3s)
+
+Berikut perintah penting untuk pemeliharaan dan inspeksi cluster via SSH di node server (`192.168.79.4`):
+
+### 1. Status Pod & Ingress
+```bash
+# Cek semua pod dan node placement di namespace masdika
+kubectl get pods -n masdika -o wide
+
+# Pantau status Ingress dan Traefik Middleware (Headers, Buffering, Rate Limit)
+kubectl get ingress,middleware -n masdika
+
+# Pantau Horizontal Pod Autoscaler (HPA)
+kubectl get hpa -n masdika
+```
+
+### 2. Observability & Log APM
+```bash
+# Pantau log Elastic APM Server (pastikan intake event HTTP 202)
+kubectl logs -n masdika deployment/masdika-apm-server --tail 50 -f
+
+# Pantau log aplikasi utama (Next.js)
+kubectl logs -n masdika deployment/masdika-app -c app --tail 100 -f
+
+# Pantau log background worker
+kubectl logs -n masdika deployment/masdika-worker --tail 100 -f
+```
+
+### 3. Manajemen Backup Database
+```bash
+# Lihat file backup yang sudah tersedia di storage
+sudo ls -lh /var/lib/rancher/k3s/storage/*masdika-backup-pvc/
+
+# Memicu backup database secara instan/manual di luar jadwal
+kubectl create job --from=cronjob/masdika-postgres-backup manual-backup-$(date +%s) -n masdika
+
+# Download file backup dari server ke komputer lokal via SCP
+scp andika@192.168.79.4:/var/lib/rancher/k3s/storage/*masdika-backup-pvc/masdika_db_*.sql.gz ./
+```
+
+### 4. Rolling Restart Aplikasi (Zero-Downtime)
+```bash
+# Restart pod Next.js dengan aman (didukung preStop 5s graceful shutdown)
+kubectl rollout restart deployment masdika-app -n masdika
+kubectl rollout status deployment masdika-app -n masdika
+```
+
+---
+
+## 🔒 Konfigurasi Environment & Secrets
+
+Environment variables sensitif dikelola melalui Kubernetes Secret `masdika-credentials`:
+
+| Key Secret | Deskripsi |
+| :--- | :--- |
+| `DATABASE_URL` | URL koneksi internal ke PostgreSQL (`postgresql://masdika:...@masdika-db:5432/masdika`) |
+| `REDIS_URL` | URL koneksi internal ke Redis (`redis://:...@masdika-redis:6379`) |
+| `POSTGRES_USER` | Username superuser database PostgreSQL |
+| `POSTGRES_PASSWORD` | Password otentikasi database PostgreSQL |
+| `POSTGRES_DB` | Nama default database (`masdika`) |
+| `SESSION_SECRET` | Kunci enkripsi token sesi pengguna |
+| `CRON_SECRET` | Token verifikasi API endpoint cron internal |
+| `ELASTIC_PASSWORD` | Password otentikasi Elasticsearch & APM Server |
+
+---
+
+## 👨‍💻 Kontribusi & Hak Cipta
+
+Repositori ini dikelola dan dipelihara secara aktif oleh **[Masdika](https://masdika.id)**.  
+Lisensi dan kepemilikan kode tunduk pada kebijakan privasi dan hak cipta resmi Masdika.ID.
