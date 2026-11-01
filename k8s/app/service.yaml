@@ -13,3 +13,20 @@ spec:
       name: http
   selector:
     app: masdika-app
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-vnc-proxy
+  namespace: masdika
+  labels:
+    app: masdika-vnc-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3001
+      targetPort: 3001
+      name: vnc-proxy
+  selector:
+    app: masdika-vnc-proxy
