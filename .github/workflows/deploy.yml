@@ -103,6 +103,7 @@ jobs:
             --config "p/secrets" \
             --exclude="node_modules" \
             --exclude=".next" \
+            --exclude=".github" \
             --exclude="apps/web/public/novnc*" \
             --exclude="*.sql" \
             --exclude="*.md" \
@@ -233,15 +234,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Verify Deployment Summary
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          COMMIT_SHA: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
         run: |
           echo "=========================================================="
           echo "🚀 RELEASE SUMMARY & GITOPS DEPLOYMENT SUCCESSFUL"
           echo "=========================================================="
-          echo "Repository: ${{ github.repository }}"
-          echo "Commit SHA: ${{ github.sha }}"
-          echo "Ref/Branch: ${{ github.ref_name }}"
-          echo "Triggered By: ${{ github.actor }}"
-          echo "Docker Image: ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }}"
+          echo "Repository: $REPO"
+          echo "Commit SHA: $COMMIT_SHA"
+          echo "Ref/Branch: $BRANCH"
+          echo "Triggered By: $ACTOR"
+          echo "Docker Image: $DOCKER_USER/masdika-id:$COMMIT_SHA"
           echo "Manifest File: k8s/app/deployment.yaml"
           echo "Sync Method: ArgoCD Automated GitOps Pull"
           echo "Health Protection: Kubernetes PodDisruptionBudget (PDB minAvailable: 1)"
