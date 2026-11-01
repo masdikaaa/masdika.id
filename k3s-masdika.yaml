@@ -201,6 +201,8 @@ spec:
                 secretKeyRef:
                   name: masdika-credentials
                   key: POSTGRES_PASSWORD
+            - name: POSTGRES_INITDB_ARGS
+              value: "--auth-local=trust"
           ports:
             - containerPort: 5432
               name: postgres
