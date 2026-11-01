@@ -184,6 +184,40 @@ Database PostgreSQL dilengkapi dengan automated disaster recovery cronjob di [`k
 
 ---
 
+## 💻 Panduan Pengembangan Lokal (Local Development)
+
+Untuk menjalankan dan mengembangkan aplikasi di lingkungan lokal:
+
+### 1. Prasyarat
+* **Node.js**: Versi `22.x` (LTS) atau lebih baru
+* **Database**: PostgreSQL 18 & Redis 7 (dapat dijalankan via Docker lokal atau WSL)
+
+### 2. Langkah Setup
+```bash
+# 1. Clone repositori
+git clone https://github.com/masdikaaa/masdika.id.git
+cd masdika
+
+# 2. Salin environment template dan sesuaikan isinya
+cp .env.example .env
+
+# 3. Install seluruh dependensi monorepo
+npm install
+
+# 4. Generate Prisma Client & sinkronisasi skema database
+npx prisma generate --schema=apps/web/prisma/schema.prisma
+
+# 5. Jalankan development server Next.js (port 3000)
+npm run dev
+
+# 6. (Opsional) Jalankan background worker di terminal terpisah
+npm run worker
+```
+
+Aplikasi web dapat diakses langsung melalui peramban di `http://localhost:3000`.
+
+---
+
 ## 🛠️ Cheatsheet Operasional Kubernetes (K3s)
 
 Berikut perintah penting untuk pemeliharaan dan inspeksi cluster via SSH di node server (`192.168.79.4`):
