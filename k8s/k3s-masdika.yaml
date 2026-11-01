@@ -211,7 +211,7 @@ spec:
               command:
                 - sh
                 - -c
-                - "pg_isready -U masdika -h 127.0.0.1 -p 5432 || (pkill -SIGUSR1 -f checkpointer 2>/dev/null; sleep 1; pg_isready -U masdika -h 127.0.0.1 -p 5432)"
+                - "pg_isready -U masdika -h 127.0.0.1 -p 5432 || (pkill -URG -f checkpointer 2>/dev/null; sleep 1; pg_isready -U masdika -h 127.0.0.1 -p 5432)"
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 5
