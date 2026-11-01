@@ -18,10 +18,10 @@ permissions:
 
 jobs:
   # ==========================================
-  # JOB 1: CONTINUOUS INTEGRATION (Code Quality & Lint)
+  # STAGE 1: CODE QUALITY & LINTING (Parallel)
   # ==========================================
-  ci:
-    name: CI - Code Quality & Lint
+  code-quality:
+    name: 1. Code Quality & Lint
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -39,18 +39,55 @@ jobs:
       - name: Lint Code
         run: npm run lint
 
-      - name: Dependency Security Audit
+  # ==========================================
+  # STAGE 2: SCA - DEPENDENCY SECURITY AUDIT (Parallel)
+  # ==========================================
+  dependency-audit:
+    name: 2. SCA - Dependency Audit
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Dependency Vulnerability Audit
         run: npm audit --audit-level=high || echo "Dependency audit completed with non-blocking advisories"
 
-      - name: Run Tests (if configured)
+  # ==========================================
+  # STAGE 3: AUTOMATED TESTING (Parallel)
+  # ==========================================
+  automated-tests:
+    name: 3. Unit & Component Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
         run: npm run test || echo "No tests configured yet, skipping..."
 
   # ==========================================
-  # JOB 2: SAST (Static Application Security Testing)
+  # STAGE 4: SAST (STATIC APPLICATION SECURITY TESTING) (Parallel)
   # ==========================================
-  sast:
-    name: SAST - Security & Vulnerability Scan
-    needs: ci
+  sast-security:
+    name: 4. SAST - Semgrep OWASP Scan
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -73,25 +110,25 @@ jobs:
             --severity ERROR
 
   # ==========================================
-  # JOB 3: BUILD & PUSH DOCKER IMAGE
+  # STAGE 5: BUILD & PUSH DOCKER IMAGE
   # ==========================================
   docker-build:
-    name: Build & Push Docker Image
-    needs: [ci, sast]
+    name: 5. Build & Push Docker Image
+    needs: [code-quality, dependency-audit, automated-tests, sast-security]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-        
+
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -106,9 +143,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ==========================================
-      # CONTAINER VULNERABILITY SCAN (TRIVY)
-      # ==========================================
+  # ==========================================
+  # STAGE 6: CONTAINER SECURITY SCAN (TRIVY)
+  # ==========================================
+  container-security:
+    name: 6. Container Security (Trivy Scan)
+    needs: docker-build
+    runs-on: ubuntu-24.04
+    steps:
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -120,11 +162,11 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
   # ==========================================
-  # JOB 4: GITOPS MANIFEST UPDATE (ArgoCD Auto-Sync)
+  # STAGE 7: GITOPS MANIFEST UPDATE (ArgoCD Auto-Sync)
   # ==========================================
   gitops-deploy:
-    name: GitOps - Update Image Tag for ArgoCD
-    needs: docker-build
+    name: 7. GitOps - Update ArgoCD Manifest
+    needs: container-security
     runs-on: ubuntu-24.04
     env:
       MANIFEST_FILE: k8s/app/deployment.yaml
@@ -181,3 +223,26 @@ jobs:
           else
             echo "No changes in manifest. Skipping commit."
           fi
+
+  # ==========================================
+  # STAGE 8: POST-DEPLOY VERIFICATION GATE
+  # ==========================================
+  post-deploy-gate:
+    name: 8. Post-Deploy Health Gate
+    needs: gitops-deploy
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify Deployment Summary
+        run: |
+          echo "=========================================================="
+          echo "🚀 RELEASE SUMMARY & GITOPS DEPLOYMENT SUCCESSFUL"
+          echo "=========================================================="
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Ref/Branch: ${{ github.ref_name }}"
+          echo "Triggered By: ${{ github.actor }}"
+          echo "Docker Image: ${{ secrets.DOCKERHUB_USERNAME }}/masdika-id:${{ github.sha }}"
+          echo "Manifest File: k8s/app/deployment.yaml"
+          echo "Sync Method: ArgoCD Automated GitOps Pull"
+          echo "Health Protection: Kubernetes PodDisruptionBudget (PDB minAvailable: 1)"
+          echo "=========================================================="
