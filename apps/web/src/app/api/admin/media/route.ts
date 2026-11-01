@@ -57,7 +57,7 @@ export async function GET(req: Request) {
 
     // B. Fallback / Coexistence: Scan local uploads directory for any unmigrated files
     try {
-      const candidateSubFolders = ['media', 'banners', 'jobs', 'projects', ''];
+      const candidateSubFolders = ['blog', 'media', 'banners', 'jobs', 'projects', ''];
       for (const sub of candidateSubFolders) {
         const uploadsDir = sub ? getUploadsDir(sub) : getUploadsDir();
         if (!fs.existsSync(uploadsDir)) continue;
@@ -159,7 +159,7 @@ export async function DELETE(req: Request) {
     // 2. Delete by filename across candidate locations
     if (filename) {
       const safeFilename = path.basename(filename);
-      const candidateFolders = ['media', 'banners', 'jobs', 'projects', ''];
+      const candidateFolders = ['blog', 'media', 'banners', 'jobs', 'projects', ''];
 
       for (const sub of candidateFolders) {
         // Local disk

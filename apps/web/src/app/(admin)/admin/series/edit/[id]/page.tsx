@@ -541,6 +541,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           setMediaInsertCallback(null);
         }}
         title="Select Image"
+        folder="blog"
       />
 
       <ConfirmModal isOpen={!!deleteEpId} onClose={() => setDeleteEpId(null)} onConfirm={handleDeleteEpisode}

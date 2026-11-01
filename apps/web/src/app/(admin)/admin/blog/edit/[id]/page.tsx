@@ -545,6 +545,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         isOpen={showMediaLibrary} 
         onClose={() => setShowMediaLibrary(false)} 
         onSelect={handleMediaSelect} 
+        folder="blog"
       />
 
       <ConfirmModal

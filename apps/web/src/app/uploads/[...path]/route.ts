@@ -68,7 +68,12 @@ export async function GET(
     }
 
     // 2. Fallback / Primary from RustFS S3 Object Storage
-    const rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath);
+    let rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath);
+    if (!rustFSObject && relativeSubPath.startsWith('media/')) {
+      rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath.replace(/^media\//, 'blog/'));
+    } else if (!rustFSObject && relativeSubPath.startsWith('blog/')) {
+      rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath.replace(/^blog\//, 'media/'));
+    }
     if (rustFSObject) {
       return new NextResponse(new Uint8Array(rustFSObject.buffer), {
         headers: {

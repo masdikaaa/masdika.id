@@ -385,6 +385,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
           setFormData(prev => ({ ...prev, image: url }));
         }}
         title="Select Project Image"
+        folder="projects"
       />
     </motion.div>
   );

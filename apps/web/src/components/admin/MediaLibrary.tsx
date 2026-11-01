@@ -20,9 +20,16 @@ interface MediaLibraryProps {
   onClose: () => void;
   onSelect: (url: string, name: string) => void;
   title?: string;
+  folder?: string;
 }
 
-export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media Library" }: MediaLibraryProps) {
+export default function MediaLibrary({ 
+  isOpen, 
+  onClose, 
+  onSelect, 
+  title = "Media Library",
+  folder = "blog"
+}: MediaLibraryProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [media, setMedia] = useState<MediaFile[]>([]);
@@ -86,7 +93,7 @@ export default function MediaLibrary({ isOpen, onClose, onSelect, title = "Media
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('folder', 'media');
+    formData.append('folder', folder || 'blog');
 
     setUploading(true);
     try {
