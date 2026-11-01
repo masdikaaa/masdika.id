@@ -194,6 +194,9 @@ jobs:
     name: 8. GitOps - Update ArgoCD Manifest
     needs: container-security
     runs-on: ubuntu-24.04
+    concurrency:
+      group: gitops-deploy-${{ github.ref }}
+      cancel-in-progress: false
     env:
       MANIFEST_FILE: k8s/app/deployment.yaml
     steps:
@@ -203,16 +206,25 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Update Image Tag in Kubernetes Manifest
+      - name: Update & Push Image Tag to GitOps Manifest
         env:
-          IMAGE_TAG: ${{ github.sha }}
+          COMMIT_SHA: ${{ github.sha }}
+          TARGET_BRANCH: ${{ github.ref_name }}
+          MANIFEST_FILE: k8s/app/deployment.yaml
         run: |
-          echo "Updating $MANIFEST_FILE with new image tag: $IMAGE_TAG"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          python3 -c "
+          SUCCESS=0
+          for i in {1..5}; do
+            echo "=== Attempt $i: Fetching latest remote and updating manifest ==="
+            git fetch origin "$TARGET_BRANCH"
+            git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+
+            python3 -c "
           import os, re
           manifest = os.environ.get('MANIFEST_FILE', 'k8s/app/deployment.yaml')
-          tag = os.environ.get('IMAGE_TAG')
+          tag = os.environ.get('COMMIT_SHA')
           with open(manifest, 'r') as f:
               content = f.read()
 
@@ -228,28 +240,30 @@ jobs:
           print(f'Successfully updated {count} container images to tag {tag}')
           "
 
-          echo "=== Manifest Diff ==="
-          git diff "$MANIFEST_FILE"
+            git diff "$MANIFEST_FILE"
+            git add "$MANIFEST_FILE"
 
-      - name: Commit & Push GitOps Manifest
-        env:
-          COMMIT_SHA: ${{ github.sha }}
-          TARGET_BRANCH: ${{ github.ref_name }}
-          MANIFEST_FILE: k8s/app/deployment.yaml
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            if git diff --staged --quiet; then
+              echo "Manifest is already up-to-date with tag $COMMIT_SHA."
+              SUCCESS=1
+              break
+            fi
 
-          git add "$MANIFEST_FILE"
-
-          if ! git diff --staged --quiet; then
             git commit -m "chore(gitops): update image tag to $COMMIT_SHA [skip ci]"
-            # Pull latest remote changes with rebase to prevent non-fast-forward rejection
-            git pull --rebase origin "$TARGET_BRANCH"
-            git push origin HEAD:"$TARGET_BRANCH"
-            echo "🚀 Manifest successfully pushed to Git! ArgoCD will automatically detect and reconcile the deployment."
-          else
-            echo "No changes in manifest. Skipping commit."
+
+            if git push origin "$TARGET_BRANCH"; then
+              echo "🚀 Manifest successfully pushed to Git! ArgoCD will automatically detect and reconcile the deployment."
+              SUCCESS=1
+              break
+            else
+              echo "Push rejected (remote moved ahead). Retrying in 2 seconds..."
+              sleep 2
+            fi
+          done
+
+          if [ $SUCCESS -ne 1 ]; then
+            echo "Failed to push image tag update after 5 attempts."
+            exit 1
           fi
 
   # ==========================================
