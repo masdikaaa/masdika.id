@@ -159,9 +159,7 @@ spec:
           image: postgres:18-alpine
           imagePullPolicy: IfNotPresent
           securityContext:
-            capabilities:
-              add:
-                - SYS_PTRACE
+            allowPrivilegeEscalation: false
           args:
             - "-c"
             - "io_method=sync"
