@@ -121,13 +121,13 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          MANIFEST_FILE="k8s/k3s-masdika.yaml"
+          MANIFEST_FILE="k8s/app/deployment.yaml"
 
           echo "Updating $MANIFEST_FILE with new image tag: $IMAGE_TAG"
 
           python3 -c "
           import os, re
-          manifest = os.environ.get('MANIFEST_FILE', 'k8s/k3s-masdika.yaml')
+          manifest = os.environ.get('MANIFEST_FILE', 'k8s/app/deployment.yaml')
           tag = os.environ.get('IMAGE_TAG')
           with open(manifest, 'r') as f:
               content = f.read()
@@ -155,7 +155,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add k8s/k3s-masdika.yaml
+          git add "$MANIFEST_FILE"
 
           if ! git diff --staged --quiet; then
             git commit -m "chore(gitops): update image tag to $COMMIT_SHA [skip ci]"

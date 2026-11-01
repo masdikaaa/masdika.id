@@ -1,0 +1,49 @@
+# ==============================================================================
+# 11. HORIZONTAL POD AUTOSCALER (HPA)
+# Mengatur auto-scaling otomatis untuk aplikasi web Next.js (masdika-app)
+# berdasarkan penggunaan CPU dan RAM.
+# K3s sudah menyertakan 'metrics-server' secara default sehingga HPA langsung aktif.
+# ==============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: masdika-app-hpa
+  namespace: masdika
+  labels:
+    app: masdika-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: masdika-app
+  minReplicas: 1 # Minimal 1 pod berjalan (hemat RAM/CPU saat sepi)
+  maxReplicas: 5 # Maksimal 5 pod berjalan otomatis saat traffic melonjak
+  metrics:
+    # Scale up jika rata-rata CPU melebihi 75% dari request (300m)
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    # Scale up jika rata-rata Memory melebihi 80% dari request (512Mi)
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleDown:
+      # Jeda 5 menit stabil sebelum pod dikurangi agar tidak fluktuatif (flapping)
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60

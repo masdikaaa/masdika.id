@@ -1,0 +1,81 @@
+# ==============================================================================
+# 6. NODE EXPORTER (Host Hardware Metrics for Prometheus)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-node-exporter
+  namespace: masdika
+  labels:
+    app: masdika-node-exporter
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-node-exporter
+  template:
+    metadata:
+      labels:
+        app: masdika-node-exporter
+    spec:
+      hostPID: true
+      automountServiceAccountToken: false
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--path.rootfs=/host"
+          ports:
+            - containerPort: 9100
+              hostPort: 9100
+              name: metrics
+          volumeMounts:
+            - name: rootfs
+              mountPath: /host
+              readOnly: true
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "300m"
+              memory: "128Mi"
+      volumes:
+        - name: rootfs
+          hostPath:
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter
+  namespace: masdika
+  labels:
+    app: masdika-node-exporter
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9100
+      targetPort: 9100
+      name: metrics
+  selector:
+    app: masdika-node-exporter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-node-exporter
+  namespace: masdika
+  labels:
+    app: masdika-node-exporter
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9100
+      targetPort: 9100
+      name: metrics
+  selector:
+    app: masdika-node-exporter

@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00-namespace.yaml
+  - 01-config.yaml
+  - app/deployment.yaml
+  - app/service.yaml
+  - app/vnc-proxy.yaml
+  - app/hpa.yaml
+  - app/ingress.yaml
+  - databases/postgres.yaml
+  - databases/redis.yaml
+  - databases/elasticsearch.yaml
+  - databases/storage.yaml
+  - monitoring/01-pvc.yaml
+  - monitoring/logstash.yaml
+  - monitoring/kibana.yaml
+  - monitoring/prometheus.yaml
+  - monitoring/loki.yaml
+  - monitoring/node-exporter.yaml
+  - monitoring/grafana.yaml
+  - monitoring/ingress.yaml

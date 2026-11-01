@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-prometheus-config
+  namespace: masdika
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: "prometheus"
+        static_configs:
+          - targets: ["localhost:9090"]
+
+      - job_name: "node-exporter"
+        static_configs:
+          - targets: ["masdika-node-exporter:9100"]
+
+      - job_name: "masdika-app"
+        metrics_path: "/api/metrics"
+        static_configs:
+          - targets: ["masdika-app:3000"]
+---
+# ==============================================================================
+# 5. PROMETHEUS (Metrics Aggregation & Monitoring)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-prometheus
+  namespace: masdika
+  labels:
+    app: masdika-prometheus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-prometheus
+  template:
+    metadata:
+      labels:
+        app: masdika-prometheus
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: prometheus
+          image: prom/prometheus:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=15d"
+            - "--web.enable-lifecycle"
+          ports:
+            - containerPort: 9090
+              hostPort: 9090
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+      volumes:
+        - name: config
+          configMap:
+            name: masdika-prometheus-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: masdika-prometheus-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: masdika
+  labels:
+    app: masdika-prometheus
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      name: http
+  selector:
+    app: masdika-prometheus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-prometheus
+  namespace: masdika
+  labels:
+    app: masdika-prometheus
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      name: http
+  selector:
+    app: masdika-prometheus

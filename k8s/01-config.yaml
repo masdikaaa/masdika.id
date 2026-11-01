@@ -1,0 +1,22 @@
+# ==============================================================================
+# 2. CONFIGMAP (Non-sensitive application settings)
+# ==============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-config
+  namespace: masdika
+data:
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TZ: "Asia/Jakarta"
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  USE_REDIS: "true"
+  DB_HOST: "masdika-db"
+  DB_PORT: "5432"
+  DB_NAME: "masdika"
+  DB_USER: "masdika"
+  ELASTIC_URL: "http://elasticsearch:9200"
+  LOGSTASH_URL: "http://logstash:5044"
+  NEXT_PUBLIC_APP_URL: "https://masdika.id"

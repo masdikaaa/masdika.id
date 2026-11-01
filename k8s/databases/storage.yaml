@@ -1,0 +1,13 @@
+# PVC Terpusat untuk Web Storage (ssh keys & upload-buffers sementara, aset utama sudah di RustFS)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-storage-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi

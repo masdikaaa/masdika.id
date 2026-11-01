@@ -1,0 +1,45 @@
+# ==============================================================================
+# 9. TRAEFIK INGRESS (Public Access for Observability Dashboards)
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: masdika-monitoring-ingress
+  namespace: masdika
+  labels:
+    app: masdika-monitoring
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: masdika-security-headers@kubernetescrd
+spec:
+  rules:
+    - host: grafana.masdika.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-grafana
+                port:
+                  number: 3000
+    - host: kibana.masdika.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-kibana
+                port:
+                  number: 5601
+    - host: prometheus.masdika.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-prometheus
+                port:
+                  number: 9090

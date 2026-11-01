@@ -1,0 +1,117 @@
+# ==============================================================================
+# 2. CONFIGMAPS (Pipelines, Scrape Configs & DataSources)
+# ==============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-logstash-config
+  namespace: masdika
+data:
+  logstash.conf: |
+    input {
+      http {
+        port => 5044
+        codec => json
+      }
+    }
+    filter {
+      # JSON logs are parsed directly by the http input codec
+    }
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch:9200"]
+        user => "elastic"
+        password => "${ELASTIC_PASSWORD}"
+        index => "logstash-%{+YYYY.MM.dd}"
+      }
+    }
+---
+# ==============================================================================
+# 3. LOGSTASH (Log Ingestion Pipeline for Next.js App)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-logstash
+  namespace: masdika
+  labels:
+    app: masdika-logstash
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-logstash
+  template:
+    metadata:
+      labels:
+        app: masdika-logstash
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:8.15.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
+            - name: LS_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+            - name: xpack.monitoring.enabled
+              value: "false"
+          ports:
+            - containerPort: 5044
+              hostPort: 5044
+              name: http-log
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/logstash/pipeline/logstash.conf
+              subPath: logstash.conf
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1.5Gi"
+      volumes:
+        - name: config
+          configMap:
+            name: masdika-logstash-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: masdika
+  labels:
+    app: masdika-logstash
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5044
+      targetPort: 5044
+      name: http-log
+  selector:
+    app: masdika-logstash
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-logstash
+  namespace: masdika
+  labels:
+    app: masdika-logstash
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5044
+      targetPort: 5044
+      name: http-log
+  selector:
+    app: masdika-logstash

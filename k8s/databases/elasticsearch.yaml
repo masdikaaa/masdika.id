@@ -1,0 +1,137 @@
+# PVC untuk Elasticsearch Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-es-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 25Gi
+---
+# ==============================================================================
+# 5.1 SEARCH ENGINE (Elasticsearch 8.15)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-elasticsearch
+  namespace: masdika
+  labels:
+    app: masdika-elasticsearch
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-elasticsearch
+  template:
+    metadata:
+      labels:
+        app: masdika-elasticsearch
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: node.name
+              value: "masdika-elasticsearch"
+            - name: discovery.type
+              value: "single-node"
+            - name: bootstrap.memory_lock
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: "-Xms1536m -Xmx1536m"
+            - name: xpack.security.enabled
+              value: "true"
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          volumeMounts:
+            - name: es-data
+              mountPath: /usr/share/elasticsearch/data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "curl -s http://127.0.0.1:9200 >/dev/null || exit 1"
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "curl -s http://127.0.0.1:9200 >/dev/null || exit 1"
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "300m"
+              memory: "1.5Gi"
+            limits:
+              cpu: "2000m"
+              memory: "3Gi"
+      volumes:
+        - name: es-data
+          persistentVolumeClaim:
+            claimName: masdika-es-pvc
+---
+# Service untuk alias elasticsearch:9200 (kompatibel langsung dengan konfigurasi app & compose)
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: masdika
+  labels:
+    app: masdika-elasticsearch
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9200
+      targetPort: 9200
+      name: http
+    - port: 9300
+      targetPort: 9300
+      name: transport
+  selector:
+    app: masdika-elasticsearch
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-elasticsearch
+  namespace: masdika
+  labels:
+    app: masdika-elasticsearch
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9200
+      targetPort: 9200
+      name: http
+    - port: 9300
+      targetPort: 9300
+      name: transport
+  selector:
+    app: masdika-elasticsearch

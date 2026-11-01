@@ -1,0 +1,60 @@
+# ==============================================================================
+# 9. TRAEFIK MIDDLEWARE (Security Headers & 10GB Upload Buffering)
+# ==============================================================================
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-headers
+  namespace: masdika
+spec:
+  headers:
+    customResponseHeaders:
+      X-Frame-Options: "SAMEORIGIN"
+      X-XSS-Protection: "1; mode=block"
+      X-Content-Type-Options: "nosniff"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-buffering
+  namespace: masdika
+spec:
+  buffering:
+    maxRequestBodyBytes: 10737418240 # 10 GB limit untuk upload ISO / VM Image / Media
+    memRequestBodyBytes: 2097152     # 2 MB buffer di memory sebelum spool ke disk
+---
+# ==============================================================================
+# 10. TRAEFIK INGRESS
+# Mengatur routing HTTP & WebSocket langsung dari port 80 Traefik K3s.
+# Traefik secara otomatis mendengarkan port 80 & 443 di host OS K3s.
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: masdika-ingress
+  namespace: masdika
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd,masdika-masdika-buffering@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          # 1. Dedicated WebSocket Proxy untuk VNC Console
+          - path: /api/ws
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-vnc-proxy
+                port:
+                  number: 3001
+
+          # 2. Aplikasi Web Utama (Next.js)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000

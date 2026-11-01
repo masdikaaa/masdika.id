@@ -1,0 +1,119 @@
+# PVC untuk Redis Data & AOF persistence
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-redis-pvc
+  namespace: masdika
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+# ==============================================================================
+# 5. CACHE & QUEUE (Redis 7)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-redis
+  namespace: masdika
+  labels:
+    app: masdika-redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-redis
+  template:
+    metadata:
+      labels:
+        app: masdika-redis
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              if [ -n "$REDIS_PASSWORD" ]; then
+                exec redis-server --requirepass "$REDIS_PASSWORD" --bind 0.0.0.0 --appendonly yes --appendfsync everysec --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --tcp-backlog 511
+              else
+                exec redis-server --bind 0.0.0.0 --appendonly yes --appendfsync everysec --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --tcp-backlog 511
+              fi
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: REDIS_PASSWORD
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  if [ -n "$REDIS_PASSWORD" ]; then
+                    redis-cli -a "$REDIS_PASSWORD" ping | grep -q PONG
+                  else
+                    redis-cli ping | grep -q PONG
+                  fi
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  if [ -n "$REDIS_PASSWORD" ]; then
+                    redis-cli -a "$REDIS_PASSWORD" ping | grep -q PONG
+                  else
+                    redis-cli ping | grep -q PONG
+                  fi
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: masdika-redis-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-redis
+  namespace: masdika
+  labels:
+    app: masdika-redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  selector:
+    app: masdika-redis
