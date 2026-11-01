@@ -118,33 +118,39 @@ jobs:
           fetch-depth: 0
 
       - name: Update Image Tag in Kubernetes Manifest
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE_TAG="${{ github.sha }}"
           MANIFEST_FILE="k8s/k3s-masdika.yaml"
 
           echo "Updating $MANIFEST_FILE with new image tag: $IMAGE_TAG"
 
           python3 -c "
-          import re
-          with open('$MANIFEST_FILE', 'r') as f:
+          import os, re
+          manifest = os.environ.get('MANIFEST_FILE', 'k8s/k3s-masdika.yaml')
+          tag = os.environ.get('IMAGE_TAG')
+          with open(manifest, 'r') as f:
               content = f.read()
 
           new_content, count = re.subn(
               r'(image:\s+[^\s]+/masdika-id:)[a-zA-Z0-9_.-]+',
-              rf'\g<1>$IMAGE_TAG',
+              rf'\g<1>{tag}',
               content
           )
 
-          with open('$MANIFEST_FILE', 'w') as f:
+          with open(manifest, 'w') as f:
               f.write(new_content)
 
-          print(f'Successfully updated {count} container images to tag $IMAGE_TAG')
+          print(f'Successfully updated {count} container images to tag {tag}')
           "
 
           echo "=== Manifest Diff ==="
           git diff "$MANIFEST_FILE"
 
       - name: Commit & Push GitOps Manifest
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          TARGET_BRANCH: ${{ github.ref_name }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -152,8 +158,8 @@ jobs:
           git add k8s/k3s-masdika.yaml
 
           if ! git diff --staged --quiet; then
-            git commit -m "chore(gitops): update image tag to ${{ github.sha }} [skip ci]"
-            git push origin HEAD:${{ github.ref_name }}
+            git commit -m "chore(gitops): update image tag to $COMMIT_SHA [skip ci]"
+            git push origin HEAD:"$TARGET_BRANCH"
             echo "🚀 Manifest successfully pushed to Git! ArgoCD will automatically detect and reconcile the deployment."
           else
             echo "No changes in manifest. Skipping commit."

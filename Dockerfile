@@ -129,7 +129,9 @@ ENV NEXT_SHARP_PATH=/app/node_modules/sharp
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
-# Container starts as root, entrypoint.sh fixes permissions then drops to nextjs via su-exec
+# Switch to non-root user for container security
+USER nextjs
+
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
