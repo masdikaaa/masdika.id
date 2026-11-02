@@ -6,14 +6,17 @@
     <img src="https://img.shields.io/badge/Next.js-16.4-black?style=for-the-badge&logo=next.js" alt="Next.js" />
     <img src="https://img.shields.io/badge/Kubernetes-K3s-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kubernetes K3s" />
     <img src="https://img.shields.io/badge/GitOps-ArgoCD-F3702A?style=for-the-badge&logo=argo&logoColor=white" alt="ArgoCD" />
-    <img src="https://img.shields.io/badge/DevSecOps-Trivy_%26_Semgrep-00599C?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="DevSecOps" />
-    <img src="https://img.shields.io/badge/PostgreSQL-18_Alpine-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 18" />
+    <img src="https://img.shields.io/badge/Security-Bitnami_Sealed_Secrets-009688?style=for-the-badge&logo=bitnami&logoColor=white" alt="Sealed Secrets" />
+    <img src="https://img.shields.io/badge/Policy-Kyverno_Admission-00ADD8?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kyverno" />
+    <img src="https://img.shields.io/badge/Runtime_Sec-Falco_eBPF-002F40?style=for-the-badge&logo=falco&logoColor=white" alt="Falco eBPF" />
+    <img src="https://img.shields.io/badge/DevSecOps-GitLeaks_%26_Trivy_%26_Semgrep-00599C?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="DevSecOps" />
+    <img src="https://img.shields.io/badge/PostgreSQL-CNPG_HA_Cluster-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL CNPG HA" />
+    <img src="https://img.shields.io/badge/Elastic_Stack-8.11_Observability-005571?style=for-the-badge&logo=elastic&logoColor=white" alt="Elastic Stack" />
     <img src="https://img.shields.io/badge/Object_Storage-RustFS_S3-E95420?style=for-the-badge&logo=amazons3&logoColor=white" alt="RustFS S3" />
     <img src="https://img.shields.io/badge/Testing-Vitest_39_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Testing" />
     <img src="https://img.shields.io/badge/SRE-SLO_99.9%25_%26_Error_Budget-4CAF50?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Google SRE" />
     <img src="https://img.shields.io/badge/Resilience-Circuit_Breaker-FFB300?style=for-the-badge&logo=circuitverse&logoColor=white" alt="Circuit Breaker" />
     <img src="https://img.shields.io/badge/Chaos-Chaos_Monkey_Drills-8E24AA?style=for-the-badge&logo=linux&logoColor=white" alt="Chaos Engineering" />
-    <img src="https://img.shields.io/badge/Monitoring-Prometheus_%26_Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Monitoring" />
     <img src="https://img.shields.io/badge/Access-Private%20%2F%20Proprietary-e11d48?style=for-the-badge&logo=lock&logoColor=white" alt="Private Repo" />
   </p>
 </div>
@@ -22,39 +25,45 @@
 
 ## 📖 Ringkasan Platform
 
-**Masdika.ID** adalah platform web modern berperforma tinggi dan berstandar enterprise yang mengintegrasikan layanan **Cloud & VPS Hosting Provider** dengan ekosistem portofolio developer, blog rekayasa perangkat lunak, dan monitoring infrastruktur terdistribusi.
+**Masdika.ID** adalah platform cloud infrastructure, VPS provider, dan developer portal berstandar enterprise yang mengintegrasikan layanan komputasi terdistribusi, API hub berlatensi rendah, serta observabilitas infrastruktur modern.
 
-Platform ini mengadopsi prinsip **Tier-1 Tech Engineering (Gojek / Google SRE / Netflix Standard)**:
-* **GitOps Deklaratif (ArgoCD)**: Seluruh status infrastruktur, konfigurasi jaringan, hingga deployment aplikasi dikelola secara deklaratif melalui Git (*Single Source of Truth*).
-* **Automated CI/CD DevSecOps**: 9 tahapan pipeline otomatis meliputi SAST (Semgrep), SCA (Trivy), container vulnerability scanning, dan automated unit tests (Vitest).
-* **High Availability & Autoscaling**: Horizontal Pod Autoscaler (HPA 1-5 pod dinamis) dan PodDisruptionBudget (PDB).
-* **Resilience & Circuit Breaker**: Proteksi kaskade kegagalan database dan fallback degradasi anggun (*graceful degradation*).
-* **Enterprise SRE SLI/SLO Cockpit**: Pengukuran kuantitatif ketersediaan *Three-Nines* (99.9%), *Monthly Error Budget*, dan *Release Gate Policy* di Grafana.
-* **Chaos Engineering**: Robot Chaos Monkey otomatis untuk menguji ketahanan bencana dan membuktikan *self-healing* tanpa downtime.
-* **Military-Grade Disaster Recovery**: Dump database otomatis terenkripsi GPG AES-256 yang disinkronkan offsite ke RustFS Cloud Storage S3 dengan siklus retensi 14 hari.
+Platform ini mengadopsi standar **Tier-1 Tech Engineering (Gojek / Tokopedia / Google SRE / Netflix Standard)**:
+* **Zero-Trust GitOps Deklaratif**: Seluruh status infrastruktur dikelola via Git sebagai *Single Source of Truth* melalui ArgoCD, dipadukan dengan **Bitnami Sealed Secrets** untuk enkripsi rahasia asimetris yang aman di-commit ke Git.
+* **Shift-Left DevSecOps Pipeline**: Proteksi kebocoran kredensial sejak laptop developer menggunakan **GitLeaks pre-commit hook**, verifikasi integritas kode di CI/CD dengan **Semgrep (SAST)**, audit dependensi **Trivy (SCA)**, dan Docker container vulnerability scanner.
+* **Kubernetes Admission Control (Kyverno)**: Kebijakan kepatuhan klaster otomatis yang menolak pod *privileged*, mewajibkan non-root user, membatasi hak akses kernel (drop all capabilities), dan mewajibkan batas alokasi memori (*memory limits*).
+* **eBPF Runtime Threat Detection (Falco)**: Pemantauan syscall Linux di level kernel secara real-time untuk mendeteksi eksekusi shell mencurigakan (`/bin/sh`, `/bin/bash`) atau manipulasi file biner sistem di dalam kontainer.
+* **High Availability & Autoscaling**: Horizontal Pod Autoscaler (**HPA minReplicas: 2**, maxReplicas: 5) untuk mencegah degradasi 502 saat rolling deploy dan chaos testing, dipadu PodDisruptionBudget (PDB).
+* **High Availability Data Tier (CloudNativePG Ready)**: Arsitektur replikasi database PostgreSQL streaming primary-replica dengan automated sub-second failover.
+* **Resilience & Circuit Breaker**: Proteksi kaskade kegagalan database dengan Martin Fowler state machine (*fail-fast & graceful degradation*).
+* **Enterprise SRE Cockpit & SLO 99.9%**: Pengukuran kuantitatif ketersediaan *Three-Nines*, pelacakan *Monthly Error Budget*, multi-window burn-rate alerts, dan *Release Gate Policy* di Grafana.
+* **Full-Stack Elastic Observability**: Elastic Stack 8.11 (Elasticsearch, Kibana, APM, Filebeat, Metricbeat, Heartbeat Synthetics) dengan indeks teroptimasi metadata host fisik dan **Index Lifecycle Management (ILM)** retensi otomatis 14 hari.
+* **Automated Disaster Recovery**: Backup terjadwal terenkripsi simetris GPG AES-256 yang disinkronkan offsite ke RustFS Cloud Storage S3 dengan retensi rotasi 14 hari.
 
 ---
 
 ## 🏛️ Matriks Arsitektur & Spesifikasi Infrastruktur (Enterprise Standard)
 
-Seluruh arsitektur sistem diklasifikasikan ke dalam 5 lapisan (*tier*) modular dengan konfigurasi keandalan tinggi dan isolasi keamanan Zero-Trust:
+Seluruh arsitektur sistem diklasifikasikan ke dalam 6 lapisan (*tier*) modular dengan konfigurasi keandalan tinggi dan isolasi keamanan Zero-Trust:
 
 | Layer / Tier | Komponen & Service | Port & Routing | High Availability & Resilience | Proteksi Keamanan (DevSecOps / SRE) | Status |
 | :--- | :--- | :--- | :--- | :--- | :---: |
-| **🌐 Layer 1: Edge & Ingress Gateway** | **Cloudflare Zero Trust**<br>• Daemon: `cloudflared`<br>• SSL Termination | `443` (HTTPS)<br>`wss` (WebSocket) | Anycast Global Edge Routing<br>SLA 100% Uptime | • L3/L4 DDoS Mitigation Otomatis<br>• Masking IP Asli Server<br>• Web Crypto WAF Rules | `Active` |
-| | **Traefik v3 Ingress**<br>• Ingress Controller Native K3s<br>• Dynamic EndpointSlice | Host `80`, `443`<br>Entrypoint: `web`, `websecure` | Dynamic Re-routing tanpa restart<br>Active Health Probing | • **`masdika-headers`**: HSTS, CSP, Nosniff, X-Frame<br>• **`masdika-buffering`**: 10GB Upload Spooling<br>• **`masdika-ratelimit`**: Token Bucket 150 req/s (Burst 50) | `Active` |
-| **⚡ Layer 2: Application Tier** | **masdika-app**<br>• Next.js 16 Standalone Web App<br>• Base: Node.js 22 Alpine | Internal `3000`<br>Path: `/` | • **HPA**: 1 – 5 Pods Dinamis (Target CPU 75%, RAM 80%)<br>• **PDB**: `minAvailable: 1`<br>• **preStop**: `sleep 5` (Zero Packet Drop) | • Non-Root User (`UID 1001`, `GID 1001`)<br>• SecurityContext: `drop: [ALL]`<br>• Seccomp: `RuntimeDefault`<br>• `automountServiceAccountToken: false` | `Active` |
+| **🌐 Layer 1: Edge & Ingress Gateway** | **Cloudflare Zero Trust**<br>• Daemon: `cloudflared`<br>• SSL Termination | `443` (HTTPS)<br>`wss` (WebSocket) | Anycast Global Edge Routing<br>SLA 100% Uptime | • L3/L4 DDoS Mitigation Otomatis<br>• Masking IP Asli Server<br>• Web Crypto WAF Rules & Bot Fight | `Active` |
+| | **Traefik v3 Ingress**<br>• Ingress Controller Native K3s<br>• Dynamic EndpointSlice | Host `80`, `443`<br>Entrypoint: `web`, `websecure` | Dynamic Re-routing tanpa restart<br>Active Health Probing | • **`masdika-headers`**: HSTS, CSP, Nosniff, X-Frame<br>• **`masdika-buffering`**: 10GB Upload Spooling<br>• **`masdika-ratelimit`**: Token Bucket 150 req/s (Burst 50)<br>• **Internal Cluster Only**: Ingress Prometheus publik dinonaktifkan (akses via Grafana/ClusterIP) | `Active` |
+| **⚡ Layer 2: Application Tier** | **masdika-app**<br>• Next.js 16 Standalone Web App<br>• Base: Node.js 22 Alpine | Internal `3000`<br>Path: `/` | • **HPA**: 2 – 5 Pods Dinamis (Target CPU 75%, RAM 80%)<br>• **PDB**: `minAvailable: 1`<br>• **preStop**: `sleep 5` (Zero Packet Drop) | • Non-Root User (`UID 1001`, `GID 1001`)<br>• SecurityContext: `drop: [ALL]`<br>• Seccomp: `RuntimeDefault`<br>• `automountServiceAccountToken: false` | `Active` |
 | | **Circuit Breaker Engine**<br>• Martin Fowler State Machine<br>• Prisma Query Wrapper | In-Process<br>Telemetry: `/api/metrics` | • **State**: `CLOSED`, `OPEN`, `HALF_OPEN`<br>• Timeout: 4.000ms<br>• Trip Threshold: 50% Failures<br>• Reset Window: 10.000ms | • **Graceful Degradation**: Mencegah *cascading failure* saat DB lambat<br>• Menyajikan respons fallback instan agar web tidak hang<br>• Export metrik real-time ke Prometheus | `Active` |
 | | **masdika-worker**<br>• BullMQ Queue & Billing Engine<br>• Background Worker | Internal Service<br>Health: `8080` | Strategy: `Recreate`<br>Memory Limit: 1 GiB | • Otomasi isolasi akun & penonaktifan invoice kedaluwarsa<br>• Polling metrik Proxmox VE terenkripsi | `Active` |
 | | **masdika-vnc-proxy**<br>• Dedicated WebSocket Console Tunnel<br>• Node.js WS Reverse Proxy | Internal `3001`<br>Path: `/api/ws` | Strategy: `Recreate`<br>WebSocket Keep-Alive Ping | • Dedicated WSS tunneling ke Proxmox VE<br>• Token tiket otentikasi sesi one-time | `Active` |
-| **🛡️ Layer 3: Zero-Trust Data Tier** | **PostgreSQL 18**<br>• Database Relasional Utama<br>• PVC: `masdika-db-pvc` (30 GB) | Internal `5432`<br>ClusterIP | Shared Buffers: 512 MB<br>Max Connections: 300<br>Effective Cache: 1.5 GB | • **NetworkPolicy: `masdika-db-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `backup`<br>• Running User: UID `70` (postgres) | `Active` |
+| **🛡️ Layer 3: Zero-Trust Data Tier** | **PostgreSQL 18**<br>• Database Relasional Utama<br>• CloudNativePG (CNPG) Ready | Internal `5432`<br>ClusterIP | Shared Buffers: 512 MB<br>Streaming Replication (Standby)<br>Sub-second Failover | • **NetworkPolicy: `masdika-db-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `backup`<br>• Running User: UID `70` (postgres) | `Active` |
 | | **Redis 7**<br>• In-Memory Cache & Key-Value<br>• PVC: `masdika-redis-pvc` (10 GB) | Internal `6379`<br>ClusterIP | In-Memory Engine<br>AOF Data Persistence | • **NetworkPolicy: `masdika-redis-isolation`**<br>  Port 6379 diblokir total dari luar pod resmi<br>• Password Authentication & Protected Mode | `Active` |
 | | **RustFS Cloud Object Storage**<br>• S3 Compatible Bucket Storage<br>• Endpoint: `192.168.79.10:9000` | Port `9000`<br>S3 REST API | Distributed Bucket Engine<br>• `masdika-database` (Backup DB)<br>• `masdika-media` (Upload User)<br>• `masdika-cdn` (Static Assets)<br>• `masdika-ticket` (Attachments) | • Access Key & Secret Key terenkripsi<br>• Isolasi data offsite independen dari host K3s | `Active` |
 | | **Automated Disaster Recovery (DR)**<br>• CronJob: `masdika-postgres-backup`<br>• PVC: `masdika-backup-pvc` (15 GB) | Batch Task<br>Jadwal: `0 2 * * *`<br>(09:00 WIB) | Concurrency: `Forbid`<br>BackoffLimit: `3`<br>Multi-tier Cloud Sync | • **GPG Enkripsi Simetris AES-256** (`.sql.gz.gpg`)<br>• Sinkronisasi otomatis ke RustFS S3 `masdika-database`<br>• **Retensi 14 Hari**: Auto-pruning lokal PVC & offsite RustFS | `Active` |
 | **📊 Layer 4: SRE Observability & SOC** | **Enterprise SRE Cockpit**<br>• Dashboard: `masdika-sre-cockpit`<br>• Standar Google SRE / Gojek | Host Ingress:<br>`grafana.masdika.id`<br>Port `3001` | Multiwindow Multi-burn-rate Alerting<br>Auto Health Gating | • **SLO Ketersediaan 99.9% (Three-Nines)**<br>• **Monthly Error Budget Tracking** (Toleransi max 43.2 min/bulan)<br>• **1h Error Budget Burn Rate**<br>• **SRE Release Gate Policy**: `PERMITTED` vs `CODE FREEZE`<br>• **Latency SLI**: % request < 300ms (Target: 95%) | `Active` |
-| | **Security Operations Center (SOC)**<br>• Dashboard: `masdika-soc-cockpit`<br>• Threat Cockpit & Audit Stream | Grafana Panel<br>Data Source: Loki & Promtail | Audit Host Real-Time<br>Web Threat Profiling | • Audit Host `/var/log/auth.log`: Deteksi SSH Brute-Force, Login Ilegal, & Sudo Elevation (Whitelisted user: `andika`)<br>• Live Request & Threat Audit Stream (Auto-filter cron noise)<br>• Alerting deteksi probe/scanner bot HTTP 401/403/404 | `Active` |
-| | **Elastic Observability Suite (Gojek & Tokopedia Standard)**<br>• Kibana Observability Suite (`kibana.masdika.id`)<br>• Elastic APM, Filebeat, Metricbeat, Heartbeat | Ingress `kibana.masdika.id`<br>Port `5601`<br>ClusterIP Services | Full-Stack Enterprise Observability<br>• Logs rate & explorer<br>• Host inventory & metrics<br>• APM waterfall traces<br>• Synthetic uptime & SSL check | • **ECS Log Streaming (`logs-masdika.app-default`)**: Log JSON terstruktur terpetakan ke Elastic Common Schema dengan korelasi `trace.id` & `transaction.id`<br>• **Cluster Log Harvester (`filebeat-8.15.0`)**: DaemonSet menyerap seluruh stdout/stderr container pod Kubernetes<br>• **Host & K8s Metrics (`metricbeat-8.15.0`)**: DaemonSet memantau CPU %, Memory %, Load 15, dan Network TX/RX node fisik Masdika<br>• **Synthetics & SSL Monitor (`heartbeat-8.15.0`)**: 5 probe otomatis (Web, API Health, PostgreSQL, Redis, Elasticsearch) + pemantau kadaluarsa sertifikat TLS/SSL | `Active` |
-| **🚀 Layer 5: DevSecOps, Chaos & GitOps** | **GitHub Actions Pipeline**<br>• Workflow: `.github/workflows/deploy.yml`<br>• Runner: Ubuntu 24.04 | Webhook GitHub<br>Push ke `master` | 9 Tahapan Otomatis<br>Strict Quality Gates | • **Stage 3 Unit Testing**: Wajib lulus 39 test Vitest (tanpa bypass)<br>• **Stage 4 SAST**: Semgrep OWASP scanner<br>• **Stage 5 SCA**: Trivy IaC manifest scan<br>• **Stage 7 Container Scan**: Trivy Docker CVE scanner | `Active` |
+| | **Elastic Observability Suite**<br>• Kibana (`kibana.masdika.id`)<br>• APM, Filebeat, Metricbeat, Heartbeat | Ingress `kibana.masdika.id`<br>Port `5601`<br>ClusterIP Services | Full-Stack Enterprise Observability<br>• Logs rate & explorer<br>• Host inventory & metrics<br>• APM waterfall traces<br>• Synthetic uptime & SSL check | • **ECS Log Streaming (`logs-masdika.app-default`)**: Terpetakan ke Elastic Common Schema dengan trace ID<br>• **Filebeat 8.15**: DaemonSet log harvester container K8s<br>• **Metricbeat 8.15**: Memantau Host Physical OS metadata (Ubuntu 26.04), CPU, Memory, Network TX/RX<br>• **ILM Retention Policy**: 14 hari retensi otomatis indeks Elasticsearch | `Active` |
+| | **Security Operations Center (SOC)**<br>• Dashboard: `masdika-soc-cockpit`<br>• Threat Cockpit & Audit Stream | Grafana Panel<br>Data Source: Loki & Promtail | Audit Host Real-Time<br>Web Threat Profiling | • Audit Host `/var/log/auth.log`: Deteksi SSH Brute-Force, Login Ilegal, & Sudo Elevation<br>• Live Request & Threat Audit Stream (Auto-filter cron noise)<br>• Alerting deteksi probe/scanner bot HTTP 401/403/404 | `Active` |
+| **🛡️ Layer 5: Policy Engine & Runtime Security** | **Kyverno Policy Engine**<br>• Admission Controller Webhook<br>• Namespace: `kyverno` (4 Pods) | Dynamic Webhook<br>Port `9443` | Mutating & Validating Webhook<br>High Availability Architecture | • **`disallow-privileged-containers`**: Blokir kontainer dengan hak root kernel<br>• **`require-run-as-non-root`**: Cegah pod berjalan sebagai user UID 0<br>• **`drop-all-capabilities`**: Hapus seluruh Linux capabilities berbahaya<br>• **`require-memory-limits`**: Mencegah serangan OOM exhaustion pada node | `Active` |
+| | **Falco eBPF Threat Engine**<br>• Runtime Security Agent<br>• Namespace: `falco` (DaemonSet) | Kernel Probe<br>eBPF Ring Buffer | Non-invasive Kernel Tracing<br>Real-Time Event Processing | • **Terminal Shell Spawn Detection**: Peringatan seketika saat `/bin/bash` atau `/bin/sh` dieksekusi di kontainer<br>• **Sensitive File Access**: Deteksi pembacaan `/etc/shadow` atau modifikasi binary sistem<br>• Integrasi notifikasi langsung ke syslog / event stream | `Active` |
+| **🚀 Layer 6: DevSecOps, Chaos & GitOps** | **Bitnami Sealed Secrets**<br>• Controller: `kube-system`<br>• Public Key Cryptography | Asymmetric Encryption<br>RSA 4096-bit | GitOps Native Secret Management | • Enkripsi kredensial di lokal menggunakan public cert klaster<br>• File `*.sealed.yaml` aman disimpan secara terbuka di Git<br>• Dekripsi otomatis oleh controller di dalam klaster | `Active` |
+| | **GitLeaks Pre-Commit Hooks**<br>• Runner: Local Node.js<br>• Config: `.gitleaks.toml` | Git Hook Trigger<br>`pre-commit` | Shift-Left Secret Leak Prevention | • Mencegah commit jika terdapat token API, private key, atau database password di kode sumber | `Active` |
 | | **Chaos Engineering Controller**<br>• CronJob: `masdika-chaos-drill`<br>• CLI: `scripts/chaos-experiment.sh` | Jadwal: Minggu 03:00 UTC<br>On-Demand CLI | Disaster Resilience Verification<br>Self-Healing Validation | • **Chaos Monkey Pod Kill**: Terminasi pod acak dengan verifikasi uptime kontinu<br>• **CPU Burn Drill**: Uji reaksi autoscaling HPA<br>• **Circuit Breaker Drill**: Uji simulasi kegagalan dependensi | `Active` |
 | | **ArgoCD GitOps Engine**<br>• Kontroler: `192.168.79.15`<br>• Target: `https://192.168.79.4:6443` | Web UI & gRPC<br>Path: `k8s/` | Auto-Sync (Prune enabled)<br>Self-Healing Controller | • Git sebagai *Single Source of Truth* mutlak<br>• Rekonsiliasi tanpa drift berbasis Git commit SHA | `Active` |
 
@@ -87,6 +96,54 @@ Masdika menerapkan manajemen keandalan sistem berbasis metrik kuantitatif (*Serv
 
 ---
 
+## 🔒 Bitnami Sealed Secrets & GitOps Workflow
+
+Untuk menjamin prinsip Zero-Trust dan GitOps *Single Source of Truth*, Masdika menggunakan **Bitnami Sealed Secrets**:
+
+```text
+[ Developer Local ]
+   │  .env / Plain Secret
+   │
+   ▼  kubeseal (atau node scripts/seal-secret.js)
+   │  (Dienkripsi asimetris dengan Public Certificate K3s)
+   │
+[ SealedSecret YAML (*.sealed.yaml) ] ──► Aman di-commit ke GitHub Repo
+                                                  │
+                                                  ▼ (ArgoCD Sync ke K3s)
+                                      [ Sealed Secrets Controller ]
+                                                  │  (Mendekripsi menggunakan Private Key internal)
+                                                  ▼
+                                      [ Native Kubernetes Secret ]
+```
+
+### Cara Menghasilkan Sealed Secret Baru:
+```bash
+# Menggunakan utility helper Masdika
+node scripts/seal-secret.js --name masdika-secret --namespace masdika --from-env .env --out k8s/base/masdika-secret.sealed.yaml
+
+# Atau menggunakan kubeseal CLI langsung
+kubeseal --cert scripts/sealed-secrets-cert.pem --format yaml < k8s/base/secret.yaml > k8s/base/secret.sealed.yaml
+```
+
+---
+
+## 🛡️ Kyverno Admission Controller & Falco Runtime Security
+
+### 1. Kyverno Policy Engine ([`k8s/security/kyverno-policies.yaml`](k8s/security/kyverno-policies.yaml))
+Kyverno bertindak sebagai satpam gerbang admission di K3s cluster:
+* **`disallow-privileged-containers`**: Menolak pod yang mencoba meminta flag `privileged: true`.
+* **`require-run-as-non-root`**: Memaksa setiap container menyertakan `runAsNonRoot: true` dan melarang UID 0.
+* **`drop-all-capabilities`**: Memastikan container membuang hak akses Linux kernel (`capabilities: drop: [ALL]`).
+* **`require-memory-limits`**: Mencegah kebocoran memori pod yang dapat mengganggu kestabilan node fisik.
+
+### 2. Falco eBPF Runtime Threat Detection ([`k8s/security/falco.yaml`](k8s/security/falco.yaml))
+Falco beroperasi menggunakan eBPF probe di level kernel Linux node host:
+* Mendeteksi secara instan jika penyerang membobol kontainer dan memicu shell terlarang (`Notice: A shell was spawned in a container with an attached terminal`).
+* Mengaudit perubahan pada direktori biner sistem (`/bin`, `/sbin`, `/usr/bin`).
+* Melaporkan insiden keamanan secara langsung untuk aksi isolasi pod otomatis.
+
+---
+
 ## ⚡ Circuit Breaker & Graceful Degradation (Anti-Cascading Failure)
 
 Diimplementasikan melalui modul native TypeScript di [`apps/web/src/lib/circuit-breaker.ts`](apps/web/src/lib/circuit-breaker.ts) dan diintegrasikan ke Prisma Client di [`apps/web/src/lib/prisma.ts`](apps/web/src/lib/prisma.ts):
@@ -107,7 +164,7 @@ Masdika dilengkapi dengan framework uji bencana terotomatisasi untuk membuktikan
 ### 1. Automated Weekly Chaos Monkey ([`k8s/chaos/chaos-cronjob.yaml`](k8s/chaos/chaos-cronjob.yaml))
 * Berjalan otomatis di jam tenang (setiap hari Minggu pukul 03:00 UTC).
 * Memilih pod aplikasi secara acak dan mematikannya secara paksa (`kubectl delete pod --now`).
-* Memvalidasi bahwa **PodDisruptionBudget (`masdika-app-pdb`)** menjaga ketersediaan web, dan ReplicaSet meregenerasi pod pengganti hingga `Ready` dalam waktu $< 60$ detik.
+* Memvalidasi bahwa **PodDisruptionBudget (`masdika-app-pdb`)** dan **HPA (`minReplicas: 2`)** menjaga ketersediaan web tanpa 502 Bad Gateway.
 
 ### 2. SRE Chaos Interactive CLI Tool ([`scripts/chaos-experiment.sh`](scripts/chaos-experiment.sh))
 Dapat dijalankan langsung di server untuk menguji skenario bencana:
@@ -207,6 +264,7 @@ masdika.id/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml             # Pipeline CI/CD 9-Tahap DevSecOps & GitOps
+├── .gitleaks.toml                 # Konfigurasi Deteksi Kebocoran Secret GitLeaks
 ├── apps/
 │   └── web/                      # Aplikasi Utama Next.js 16 (Web & API)
 │       ├── src/
@@ -227,7 +285,7 @@ masdika.id/
 ├── k8s/                          # Manifest Kubernetes Deklaratif (ArgoCD Single Source of Truth)
 │   ├── app/
 │   │   ├── deployment.yaml       # Deployment masdika-app, worker, & vnc-proxy (preStop 5s)
-│   │   ├── hpa.yaml              # Horizontal Pod Autoscaler (1-5 pod, CPU 75%, RAM 80%)
+│   │   ├── hpa.yaml              # Horizontal Pod Autoscaler (min: 2, max: 5 pod, CPU 75%, RAM 80%)
 │   │   ├── ingress.yaml          # Traefik Ingress Controller, Rate Limiting & Buffering
 │   │   ├── pdb.yaml              # PodDisruptionBudget (minAvailable: 1)
 │   │   ├── pvc.yaml              # Persistent Storage Volume Claims
@@ -239,6 +297,7 @@ masdika.id/
 │   │   └── chaos-cronjob.yaml    # Automated SRE Chaos Monkey CronJob (Weekly Drill)
 │   ├── databases/
 │   │   ├── postgres.yaml         # PostgreSQL 18 Production Engine
+│   │   ├── postgres-ha.yaml      # CloudNativePG High Availability Cluster Specification
 │   │   ├── redis.yaml            # Redis 7 In-Memory Cache
 │   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
 │   │   └── backup-cronjob.yaml   # Disaster Recovery (GPG AES-256 + RustFS S3 Sync)
@@ -256,9 +315,13 @@ masdika.id/
 │   │   ├── loki.yaml             # Loki Log Aggregator
 │   │   └── promtail.yaml         # Promtail Log Agent (Host /var/log/auth.log)
 │   └── security/
-│       └── networkpolicy.yaml    # Zero-Trust CNI Network Isolation Policies
+│       ├── networkpolicy.yaml    # Zero-Trust CNI Network Isolation Policies
+│       ├── kyverno-policies.yaml # Kyverno Admission Controller Policies
+│       └── falco.yaml            # Falco eBPF Runtime Threat Detection DaemonSet
 ├── scripts/
 │   ├── chaos-experiment.sh       # SRE Chaos Interactive CLI Tool (pod-kill, cpu-burn, full-drill)
+│   ├── pre-commit-secret-scan.js # GitLeaks Pre-Commit Validation Hook
+│   ├── seal-secret.js            # Generator Bitnami Sealed Secrets
 │   └── sync-k8s-env.py           # Sinkronisasi K8s secret dari file .env
 ├── Dockerfile                    # Multi-stage production container build
 ├── package.json                  # Workspace monorepo root & script runners
@@ -277,7 +340,7 @@ cd masdika
 # 2. Siapkan file konfigurasi environment
 cp .env.example .env
 
-# 3. Install seluruh dependensi
+# 3. Install seluruh dependensi & pre-commit hooks
 npm install
 
 # 4. Jalankan pengujian unit otomatis
@@ -294,7 +357,28 @@ npm run dev
 
 ## 🛠️ Cheatsheet Operasional SRE & DevOps (Server: 192.168.79.4)
 
-### 1. Manajemen SRE & Chaos Drills
+### 1. Manajemen Secret & GitOps (Bitnami Sealed Secrets)
+```bash
+# Enkripsi secret lokal menjadi SealedSecret yang aman di-commit
+node scripts/seal-secret.js --name masdika-secret --namespace masdika --from-env .env --out k8s/base/masdika-secret.sealed.yaml
+
+# Memeriksa status dekripsi SealedSecret oleh controller
+sudo kubectl get sealedsecrets -n masdika
+```
+
+### 2. Kebijakan Keamanan (Kyverno & Falco)
+```bash
+# Memeriksa kebijakan cluster Kyverno yang aktif
+sudo kubectl get clusterpolicy
+
+# Melihat laporan kepatuhan pod terhadap kebijakan Kyverno
+sudo kubectl get polr -A
+
+# Memantau log deteksi ancaman kernel real-time dari Falco
+sudo kubectl logs -n falco daemonset/falco -c falco -f --tail=50
+```
+
+### 3. Manajemen SRE, HPA & Chaos Drills
 ```bash
 # Menjalankan latihan Chaos Monkey Pod Kill mandiri dengan probe uptime live
 ./scripts/chaos-experiment.sh pod-kill
@@ -305,45 +389,21 @@ npm run dev
 # Menjalankan seluruh rangkaian latihan Game Day SRE
 ./scripts/chaos-experiment.sh full-drill
 
-# Memicu Chaos Monkey CronJob terjadwal secara manual di Kubernetes
-sudo kubectl create job --from=cronjob/masdika-chaos-drill test-chaos-$(date +%s) -n masdika
-```
-
-### 2. Status Cluster & Autoscaler
-```bash
-# Memeriksa status pod di namespace masdika
-sudo kubectl get pods -n masdika -o wide
-
-# Memantau metrik HPA (CPU & Memory Utilization)
+# Memeriksa status HPA (minReplicas 2, maxReplicas 5)
 sudo kubectl get hpa -n masdika
-
-# Memeriksa kepatuhan PodDisruptionBudget
-sudo kubectl get pdb -n masdika
 ```
 
-### 3. Disaster Recovery & RustFS Backup
+### 4. Observability & Elastic ILM Retention
 ```bash
-# Memicu backup database manual (Dump -> GPG Enkripsi -> Upload RustFS S3)
-sudo kubectl create job --from=cronjob/masdika-postgres-backup manual-backup-$(date +%s) -n masdika
+# Memeriksa status ILM Policy 14 hari di Elasticsearch
+curl -s -u elastic:PASSWORD http://10.43.100.120:9200/_ilm/policy/masdika-ilm-14days | jq .
 
-# Memeriksa file backup terenkripsi di disk lokal server
-sudo ls -lh /var/lib/rancher/k3s/storage/*masdika-backup-pvc/
+# Memeriksa indeks data dan sisa disk node Elasticsearch
+curl -s -u elastic:PASSWORD http://10.43.100.120:9200/_cat/indices?v
+curl -s -u elastic:PASSWORD http://10.43.100.120:9200/_cat/allocation?v
 
-# Memeriksa file backup di RustFS S3 bucket masdika-database (via rclone)
-rclone lsf rustfs:masdika-database
-```
-
-### 4. Observability & Log Auditing
-```bash
 # Memantau log aplikasi web (Next.js)
 sudo kubectl logs -n masdika deployment/masdika-app -c app --tail 100 -f
-
-# Memeriksa aturan alert Prometheus yang aktif
-curl -s http://10.43.90.61:9090/api/v1/rules | jq '.data.groups[].name'
-
-# Buka Grafana Dashboard di browser
-http://192.168.79.4:3001
-# -> Masuk ke Dashboards -> Masdika Platform -> SRE Cockpit - SLI, SLO (99.9%) & Error Budget
 ```
 
 ---

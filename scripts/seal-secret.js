@@ -61,3 +61,4 @@ if (outputPath) {
   console.log('\n--- SealedSecret YAML ---');
   console.log(sealedYaml);
 }
+
