@@ -1546,7 +1546,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{job=\"host-auth\"}",
+              "expr": "{job=\"host-auth\"} != \"agetty\"",
               "refId": "A"
             }
           ]
