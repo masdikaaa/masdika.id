@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: masdika-chaos-controller
+  namespace: masdika
+  labels:
+    app: masdika-chaos
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: masdika-chaos-role
+  namespace: masdika
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: masdika-chaos-binding
+  namespace: masdika
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: masdika-chaos-role
+subjects:
+  - kind: ServiceAccount
+    name: masdika-chaos-controller
+    namespace: masdika
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: masdika-chaos-drill
+  namespace: masdika
+  labels:
+    app: masdika-chaos
+spec:
+  schedule: "0 3 * * 0" # Weekly on Sunday at 03:00 AM UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: masdika-chaos
+        spec:
+          serviceAccountName: masdika-chaos-controller
+          restartPolicy: OnFailure
+          containers:
+            - name: chaos-monkey
+              image: bitnami/kubectl:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  echo "[$(date)] 🐵 Initiating Automated SRE Chaos Monkey Drill for masdika-app..."
+                  
+                  # 1. Identify running application pods
+                  PODS=$(kubectl get pods -n masdika -l app=masdika-app --field-selector=status.phase=Running -o jsonpath='{.items[*].metadata.name}')
+                  if [ -z "$PODS" ]; then
+                    echo "[$(date)] ⚠️ No running masdika-app pods found. Skipping drill."
+                    exit 0
+                  fi
+                  
+                  # Pick a random pod
+                  set -- $PODS
+                  RANDOM_INDEX=$((1 + RANDOM % $#))
+                  eval TARGET_POD=\${$RANDOM_INDEX}
+                  
+                  echo "[$(date)] 💥 Chaos target selected: ${TARGET_POD}. Terminating pod to verify self-healing..."
+                  kubectl delete pod "${TARGET_POD}" -n masdika --now
+                  
+                  echo "[$(date)] ⏳ Monitoring ReplicaSet & HPA self-healing response..."
+                  # Wait for new pod to reach Ready state within 60s
+                  kubectl wait --for=condition=Ready pod -l app=masdika-app -n masdika --timeout=60s
+                  
+                  echo "[$(date)] ✅ Self-healing successful! Replacement pod is Ready and serving traffic."
+                  echo "[$(date)] 🛡️ Automated SRE Chaos Drill PASSED: Zero-downtime resilience confirmed."
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi

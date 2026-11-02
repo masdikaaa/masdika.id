@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { circuitBreakerRegistry } from '@/lib/circuit-breaker';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,8 @@ export async function GET() {
     '# HELP masdika_app_info Application metadata info.',
     '# TYPE masdika_app_info gauge',
     'masdika_app_info{version="1.0.1",app="masdika-web"} 1',
+    '',
+    ...circuitBreakerRegistry.toPrometheusMetrics(),
     ''
   ].join('\n');
 

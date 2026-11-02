@@ -74,6 +74,12 @@ data:
         static_configs:
           - targets: ["masdika-promtail:9080"]
 
+      # Masdika Web Application (Node.js Heap, Circuit Breakers, Uptime)
+      - job_name: "masdika-app"
+        metrics_path: "/api/metrics"
+        static_configs:
+          - targets: ["masdika-app:3000"]
+
       # Ingress Controller (Traefik 4 Golden Signals: Traffic, Latency p95/p99, Error Rate 5xx/4xx)
       - job_name: "traefik"
         kubernetes_sd_configs:

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { dbCircuitBreaker } from './circuit-breaker';
 
 const globalForPrisma3 = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -56,7 +57,16 @@ export const prisma = (
              if (operation === 'count') return 0
              return null
           }
-          return query(args)
+          return dbCircuitBreaker.execute(
+            () => query(args),
+            (err) => {
+              console.warn(`[Prisma:CircuitBreaker] DB degraded on ${String(model)}.${operation}: ${err.message}`);
+              if (operation === 'findMany') return [] as any;
+              if (operation === 'findUnique' || operation === 'findFirst') return null as any;
+              if (operation === 'count') return 0 as any;
+              throw err;
+            }
+          );
         },
       },
     },
