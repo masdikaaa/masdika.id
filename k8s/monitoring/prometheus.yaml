@@ -167,6 +167,9 @@ spec:
         - name: prometheus
           image: prom/prometheus:latest
           imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Asia/Jakarta"
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus"

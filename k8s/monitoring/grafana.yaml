@@ -92,6 +92,10 @@ spec:
           image: grafana/grafana:latest
           imagePullPolicy: IfNotPresent
           env:
+            - name: TZ
+              value: "Asia/Jakarta"
+            - name: GF_DATE_FORMATS_DEFAULT_TIMEZONE
+              value: "Asia/Jakarta"
             - name: GF_SECURITY_ADMIN_USER
               value: "admin"
             - name: GF_SECURITY_ADMIN_PASSWORD

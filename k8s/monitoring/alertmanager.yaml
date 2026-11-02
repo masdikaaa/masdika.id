@@ -166,12 +166,12 @@ data:
                       {{ end }}
                       <tr>
                         <td style="color: #64748b; padding: 3px 0;">Started At:</td>
-                        <td style="color: #94a3b8; padding: 3px 0;">{{ .StartsAt.Format "Mon, 02 Jan 2006 15:04:05 MST" }}</td>
+                        <td style="color: #94a3b8; padding: 3px 0;">{{ .StartsAt.Local.Format "Mon, 02 Jan 2006 15:04:05 MST" }}</td>
                       </tr>
                       {{ if eq .Status "resolved" }}
                       <tr>
                         <td style="color: #64748b; padding: 3px 0;">Resolved At:</td>
-                        <td style="color: #94a3b8; padding: 3px 0;">{{ .EndsAt.Format "Mon, 02 Jan 2006 15:04:05 MST" }}</td>
+                        <td style="color: #94a3b8; padding: 3px 0;">{{ .EndsAt.Local.Format "Mon, 02 Jan 2006 15:04:05 MST" }}</td>
                       </tr>
                       {{ end }}
                     </table>
@@ -246,6 +246,9 @@ spec:
         - name: alertmanager
           image: prom/alertmanager:v0.27.0
           imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Asia/Jakarta"
           args:
             - "--config.file=/etc/alertmanager/alertmanager.yml"
             - "--storage.path=/alertmanager"

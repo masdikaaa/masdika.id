@@ -42,6 +42,8 @@ spec:
           image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
           imagePullPolicy: IfNotPresent
           env:
+            - name: TZ
+              value: "Asia/Jakarta"
             - name: node.name
               value: "masdika-elasticsearch"
             - name: discovery.type
@@ -91,7 +93,7 @@ spec:
               memory: "1.5Gi"
             limits:
               cpu: "2000m"
-              memory: "3Gi"
+              memory: "4Gi"
       volumes:
         - name: es-data
           persistentVolumeClaim:
