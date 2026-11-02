@@ -20,6 +20,7 @@ export interface RustFSConfig {
   cdnBucket: string;
   mediaBucket: string;
   ticketBucket: string;
+  databaseBucket: string;
   bucket: string;
   enabled: boolean;
 }
@@ -58,6 +59,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
             'rustfs_cdn_bucket',
             'rustfs_media_bucket',
             'rustfs_ticket_bucket',
+            'rustfs_database_bucket',
             'rustfs_enabled'
           ]
         }
@@ -75,6 +77,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const cdnBucket = (settingsMap['rustfs_cdn_bucket'] || process.env.RUSTFS_CDN_BUCKET || (settingsMap['rustfs_bucket'] === 'masdika-cdn' ? 'masdika-cdn' : '') || 'masdika-cdn').trim();
     const mediaBucket = (settingsMap['rustfs_media_bucket'] || process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media').trim();
     const ticketBucket = (settingsMap['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
+    const databaseBucket = (settingsMap['rustfs_database_bucket'] || process.env.RUSTFS_DATABASE_BUCKET || 'masdika-database').trim();
     const enabledRaw = settingsMap['rustfs_enabled'] ?? process.env.RUSTFS_ENABLED ?? 'false';
     const isConfigValid = Boolean(endpoint && accessKey && secretKey);
     const enabled = (enabledRaw === 'true' || enabledRaw === '1') && isConfigValid;
@@ -86,6 +89,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       cdnBucket,
       mediaBucket,
       ticketBucket,
+      databaseBucket,
       bucket: cdnBucket,
       enabled
     };
@@ -99,6 +103,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
     const cdnBucket = (process.env.RUSTFS_CDN_BUCKET || process.env.RUSTFS_BUCKET || 'masdika-cdn').trim();
     const mediaBucket = (process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media').trim();
     const ticketBucket = (process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket').trim();
+    const databaseBucket = (process.env.RUSTFS_DATABASE_BUCKET || 'masdika-database').trim();
     const enabledRaw = process.env.RUSTFS_ENABLED ?? 'false';
     const isConfigValid = Boolean(endpoint && accessKey && secretKey);
     const enabled = (enabledRaw === 'true' || enabledRaw === '1') && isConfigValid;
@@ -110,6 +115,7 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
       cdnBucket,
       mediaBucket,
       ticketBucket,
+      databaseBucket,
       bucket: cdnBucket,
       enabled
     };
