@@ -83,6 +83,7 @@ data:
               node: masdika
               __path__: /var/log/auth.log
         pipeline_stages:
+          # 1. Total SSH Logins (All users)
           - regex:
               expression: '.*(?P<ssh_accepted>Accepted (?:password|publickey)).*'
           - metrics:
@@ -92,6 +93,19 @@ data:
                 source: ssh_accepted
                 config:
                   action: inc
+
+          # 2. Authorized SSH Logins (User andika)
+          - regex:
+              expression: '.*(?P<ssh_andika>Accepted (?:password|publickey) for andika from).*'
+          - metrics:
+              ssh_andika_logins_total:
+                type: Counter
+                description: "Total authorized SSH logins by user andika"
+                source: ssh_andika
+                config:
+                  action: inc
+
+          # 3. Failed SSH Attempts / Brute-force
           - regex:
               expression: '.*(?P<ssh_failed>(?:Failed password|authentication failure|Invalid user)).*'
           - metrics:
@@ -101,6 +115,8 @@ data:
                 source: ssh_failed
                 config:
                   action: inc
+
+          # 4. Total Sudo Executions (All users)
           - regex:
               expression: '.*(?P<sudo_exec>sudo:.*COMMAND=).*'
           - metrics:
@@ -108,6 +124,17 @@ data:
                 type: Counter
                 description: "Total sudo privilege escalation commands executed"
                 source: sudo_exec
+                config:
+                  action: inc
+
+          # 5. Authorized Sudo Executions (User andika)
+          - regex:
+              expression: '.*(?P<sudo_andika>sudo:\s*andika\s*:.*COMMAND=).*'
+          - metrics:
+              sudo_andika_executions_total:
+                type: Counter
+                description: "Total authorized sudo commands executed by andika"
+                source: sudo_andika
                 config:
                   action: inc
 ---
