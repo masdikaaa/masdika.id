@@ -27,7 +27,7 @@ data:
             "y": 0
           },
           "type": "gauge",
-          "title": "CPU Utilization",
+          "title": "Host CPU Utilization",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -74,7 +74,7 @@ data:
             "y": 0
           },
           "type": "gauge",
-          "title": "Memory Utilization",
+          "title": "Host Memory Utilization",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -121,7 +121,7 @@ data:
             "y": 0
           },
           "type": "gauge",
-          "title": "Root Disk Usage",
+          "title": "Host Root Disk Usage",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -168,7 +168,7 @@ data:
             "y": 0
           },
           "type": "stat",
-          "title": "System Uptime",
+          "title": "Host System Uptime",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -208,7 +208,7 @@ data:
             "y": 5
           },
           "type": "timeseries",
-          "title": "CPU Usage History",
+          "title": "Host CPU Usage History",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -241,7 +241,7 @@ data:
             "y": 5
           },
           "type": "timeseries",
-          "title": "Memory Distribution",
+          "title": "Host Memory Distribution",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -331,7 +331,7 @@ data:
             "y": 13
           },
           "type": "timeseries",
-          "title": "Network Throughput (Traffic I/O)",
+          "title": "Host Network Traffic (I/O)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -384,7 +384,7 @@ data:
       "timezone": "browser",
       "title": "Server & Node Infrastructure",
       "uid": "masdika-node-infra",
-      "version": 1
+      "version": 2
     }
   app-health.json: |-
     {
@@ -407,28 +407,13 @@ data:
             "y": 0
           },
           "type": "stat",
-          "title": "Application Status",
+          "title": "Total Running Pods",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "DOWN",
-                      "color": "red"
-                    },
-                    "1": {
-                      "text": "HEALTHY",
-                      "color": "green"
-                    }
-                  }
-                }
-              ],
               "color": {
                 "mode": "thresholds"
               },
@@ -436,12 +421,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
                     "color": "green",
-                    "value": 1
+                    "value": null
                   }
                 ]
               }
@@ -450,8 +431,8 @@ data:
           },
           "targets": [
             {
-              "expr": "masdika_app_status or vector(1)",
-              "legendFormat": "Status",
+              "expr": "count(count by (pod) (container_memory_working_set_bytes{namespace='masdika', container!='POD', container!=''}))",
+              "legendFormat": "Running Pods",
               "refId": "A"
             }
           ]
@@ -465,47 +446,7 @@ data:
             "y": 0
           },
           "type": "stat",
-          "title": "App Process Uptime",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "s",
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "blue",
-                    "value": null
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "targets": [
-            {
-              "expr": "process_uptime_seconds",
-              "legendFormat": "Uptime",
-              "refId": "A"
-            }
-          ]
-        },
-        {
-          "id": 3,
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 12,
-            "y": 0
-          },
-          "type": "stat",
-          "title": "Node.js Heap Memory Used",
+          "title": "Total Pods RAM In-Use",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -525,11 +466,11 @@ data:
                   },
                   {
                     "color": "orange",
-                    "value": 500000000
+                    "value": 3000000000
                   },
                   {
                     "color": "red",
-                    "value": 1000000000
+                    "value": 6000000000
                   }
                 ]
               }
@@ -538,8 +479,56 @@ data:
           },
           "targets": [
             {
-              "expr": "nodejs_heap_size_used_bytes",
-              "legendFormat": "Heap Used",
+              "expr": "sum(container_memory_working_set_bytes{namespace='masdika', container!='POD', container!=''})",
+              "legendFormat": "Total RAM",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Total Pods Disk In-Use",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 10000000000
+                  },
+                  {
+                    "color": "red",
+                    "value": 25000000000
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sum(container_fs_usage_bytes{namespace='masdika', container!='POD', container!=''}) or sum(kubelet_volume_stats_used_bytes{namespace='masdika'})",
+              "legendFormat": "Total Pods Disk",
               "refId": "A"
             }
           ]
@@ -578,7 +567,7 @@ data:
           "targets": [
             {
               "expr": "sum(up)",
-              "legendFormat": "Targets UP",
+              "legendFormat": "Scrape Targets UP",
               "refId": "A"
             }
           ]
@@ -586,13 +575,13 @@ data:
         {
           "id": 5,
           "gridPos": {
-            "h": 8,
+            "h": 9,
             "w": 12,
             "x": 0,
             "y": 5
           },
           "type": "timeseries",
-          "title": "Node.js Heap Memory Growth (Used vs Total)",
+          "title": "RAM Usage per Pod (Working Set)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -610,32 +599,22 @@ data:
           },
           "targets": [
             {
-              "expr": "nodejs_heap_size_total_bytes",
-              "legendFormat": "Heap Total",
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace='masdika', container!='POD', container!=''})",
+              "legendFormat": "{{pod}}",
               "refId": "A"
-            },
-            {
-              "expr": "nodejs_heap_size_used_bytes",
-              "legendFormat": "Heap Used",
-              "refId": "B"
-            },
-            {
-              "expr": "nodejs_resident_memory_bytes",
-              "legendFormat": "RSS (Resident Set)",
-              "refId": "C"
             }
           ]
         },
         {
           "id": 6,
           "gridPos": {
-            "h": 8,
+            "h": 9,
             "w": 12,
             "x": 12,
             "y": 5
           },
           "type": "timeseries",
-          "title": "App Process CPU Rate",
+          "title": "CPU Rate per Pod (Usage %)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -653,14 +632,80 @@ data:
           },
           "targets": [
             {
-              "expr": "rate(process_cpu_user_seconds_total[1m]) * 100",
-              "legendFormat": "User CPU %",
+              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace='masdika', container!='POD', container!=''}[1m])) * 100",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 14
+          },
+          "type": "timeseries",
+          "title": "PVC Storage Volume Capacity & Used (Disk)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 15
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "kubelet_volume_stats_capacity_bytes{namespace='masdika'}",
+              "legendFormat": "{{persistentvolumeclaim}} - Capacity",
               "refId": "A"
             },
             {
-              "expr": "rate(process_cpu_system_seconds_total[1m]) * 100",
-              "legendFormat": "System CPU %",
+              "expr": "kubelet_volume_stats_used_bytes{namespace='masdika'}",
+              "legendFormat": "{{persistentvolumeclaim}} - Used",
               "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 14
+          },
+          "type": "timeseries",
+          "title": "Container Filesystem Storage In-Use (Disk)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 20
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sum by (pod) (container_fs_usage_bytes{namespace='masdika', container!='POD', container!=''})",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
             }
           ]
         }
@@ -669,8 +714,9 @@ data:
       "schemaVersion": 39,
       "tags": [
         "masdika",
-        "nextjs",
-        "app"
+        "pods",
+        "workloads",
+        "cadvisor"
       ],
       "time": {
         "from": "now-1h",
@@ -688,7 +734,7 @@ data:
       "timezone": "browser",
       "title": "Masdika Web App & Pods Health",
       "uid": "masdika-app-health",
-      "version": 1
+      "version": 2
     }
   loki-logs.json: |-
     {
@@ -711,7 +757,7 @@ data:
             "y": 0
           },
           "type": "logs",
-          "title": "Live Container Logs (Loki Stream - namespace: masdika)",
+          "title": "Live Container Logs (Promtail Stream - namespace: masdika)",
           "datasource": {
             "type": "loki",
             "uid": "P8E80F9AEF21F6940"
@@ -753,5 +799,5 @@ data:
       "timezone": "browser",
       "title": "Centralized Logs Explorer (Loki)",
       "uid": "masdika-loki-logs",
-      "version": 1
+      "version": 2
     }

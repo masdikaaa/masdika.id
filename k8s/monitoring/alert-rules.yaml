@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-prometheus-rules
+  namespace: masdika
+  labels:
+    app: masdika-prometheus
+data:
+  alert-rules.yaml: |
+    groups:
+      - name: masdika-infrastructure-alerts
+        rules:
+          # 1. Host Node Disk Running Out
+          - alert: HostDiskRunningOut
+            expr: (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100 > 85
+            for: 5m
+            labels:
+              severity: critical
+              tier: infrastructure
+            annotations:
+              summary: "Root Disk Usage is above 85% on node {{ $labels.instance }}"
+              description: "Root filesystem on {{ $labels.instance }} is currently {{ printf \"%.2f\" $value }}% full. Immediate cleanup required."
+
+          # 2. Host Node Memory High
+          - alert: HostMemoryRunningOut
+            expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+            for: 5m
+            labels:
+              severity: warning
+              tier: infrastructure
+            annotations:
+              summary: "Host RAM Usage is above 85% on node {{ $labels.instance }}"
+              description: "Memory consumption on {{ $labels.instance }} is currently {{ printf \"%.2f\" $value }}%."
+
+          # 3. Host Node CPU High
+          - alert: HostCpuHighUsage
+            expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+            for: 5m
+            labels:
+              severity: warning
+              tier: infrastructure
+            annotations:
+              summary: "Host CPU Usage is above 85% on node {{ $labels.instance }}"
+              description: "CPU load on {{ $labels.instance }} is currently {{ printf \"%.2f\" $value }}%."
+
+      - name: masdika-pod-workload-alerts
+        rules:
+          # 4. Pod / Container Memory Usage Exceeding 85% of Limit
+          - alert: PodMemoryUsageHigh
+            expr: (container_memory_working_set_bytes{namespace="masdika", container!="", container!="POD"} / container_spec_memory_limit_bytes{namespace="masdika", container!="", container!="POD"}) * 100 > 85
+            for: 3m
+            labels:
+              severity: warning
+              tier: workload
+            annotations:
+              summary: "Pod Memory usage > 85% limit: {{ $labels.pod }} ({{ $labels.container }})"
+              description: "Container {{ $labels.container }} in pod {{ $labels.pod }} has used {{ printf \"%.2f\" $value }}% of its allocated memory limit. Risk of OOMKill."
+
+          # 5. Pod / Container Filesystem Usage Exceeding 85%
+          - alert: PodDiskUsageHigh
+            expr: (container_fs_usage_bytes{namespace="masdika", container!="", container!="POD"} / container_fs_limit_bytes{namespace="masdika", container!="", container!="POD"}) * 100 > 85
+            for: 3m
+            labels:
+              severity: critical
+              tier: workload
+            annotations:
+              summary: "Pod Filesystem usage > 85%: {{ $labels.pod }} ({{ $labels.container }})"
+              description: "Container {{ $labels.container }} in pod {{ $labels.pod }} has used {{ printf \"%.2f\" $value }}% of its filesystem limit."
+
+          # 6. PersistentVolumeClaim (PVC) Storage Filling Up (> 85%)
+          - alert: PvcStorageRunningOut
+            expr: (kubelet_volume_stats_used_bytes{namespace="masdika"} / kubelet_volume_stats_capacity_bytes{namespace="masdika"}) * 100 > 85
+            for: 5m
+            labels:
+              severity: critical
+              tier: storage
+            annotations:
+              summary: "PVC Storage > 85% Full: {{ $labels.persistentvolumeclaim }}"
+              description: "PersistentVolumeClaim {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} is {{ printf \"%.2f\" $value }}% full."
+
+          # 7. Pod CrashLooping or Restarting
+          - alert: PodCrashLooping
+            expr: rate(kube_pod_container_status_restarts_total{namespace="masdika"}[15m]) * 60 > 0.2
+            for: 2m
+            labels:
+              severity: critical
+              tier: workload
+            annotations:
+              summary: "Pod is crashlooping: {{ $labels.pod }}"
+              description: "Pod {{ $labels.pod }} (container {{ $labels.container }}) in namespace {{ $labels.namespace }} is restarting frequently."
+
+          # 8. Main Web App Status Down
+          - alert: MasdikaAppDown
+            expr: up{job="masdika-app"} == 0
+            for: 1m
+            labels:
+              severity: critical
+              tier: application
+            annotations:
+              summary: "masdika-app endpoint is DOWN"
+              description: "Prometheus cannot scrape masdika-app on port 3000. Service may be unavailable."
