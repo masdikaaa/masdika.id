@@ -145,7 +145,7 @@ data:
         rules:
           # 12. Host SSH Login Detected (Immediate Audit Notification)
           - alert: HostSSHLoginDetected
-            expr: increase(ssh_accepted_logins_total[2m]) > 0
+            expr: increase(promtail_custom_ssh_accepted_logins_total[2m]) > 0
             for: 0m
             labels:
               severity: critical
@@ -156,7 +156,7 @@ data:
 
           # 13. SSH Brute-Force Attack Spike
           - alert: HostSSHBruteForceAttempt
-            expr: increase(ssh_failed_logins_total[2m]) >= 5
+            expr: increase(promtail_custom_ssh_failed_logins_total[2m]) >= 5
             for: 0m
             labels:
               severity: critical
@@ -167,7 +167,7 @@ data:
 
           # 14. Sudo Privilege Escalation Detected
           - alert: HostSudoPrivilegeElevation
-            expr: increase(sudo_executions_total[2m]) > 0
+            expr: increase(promtail_custom_sudo_executions_total[2m]) > 0
             for: 0m
             labels:
               severity: warning

@@ -1283,7 +1283,7 @@ data:
           },
           "targets": [
             {
-              "expr": "(increase(ssh_failed_logins_total[5m]) > 5) * 3 or (increase(ssh_accepted_logins_total[5m]) > 0) * 2 or (sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[5m])) > 0) * 1 or vector(0)",
+              "expr": "(increase(promtail_custom_ssh_failed_logins_total[5m]) > 5) * 3 or (increase(promtail_custom_ssh_accepted_logins_total[5m]) > 0) * 2 or (sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[5m])) > 0) * 1 or vector(0)",
               "legendFormat": "Threat Level",
               "refId": "A"
             }
@@ -1315,7 +1315,7 @@ data:
           },
           "targets": [
             {
-              "expr": "ssh_accepted_logins_total or vector(0)",
+              "expr": "promtail_custom_ssh_accepted_logins_total or vector(0)",
               "legendFormat": "Logins",
               "refId": "A"
             }
@@ -1363,7 +1363,7 @@ data:
           },
           "targets": [
             {
-              "expr": "ssh_failed_logins_total or vector(0)",
+              "expr": "promtail_custom_ssh_failed_logins_total or vector(0)",
               "legendFormat": "Failures",
               "refId": "A"
             }
@@ -1395,7 +1395,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sudo_executions_total or vector(0)",
+              "expr": "promtail_custom_sudo_executions_total or vector(0)",
               "legendFormat": "Commands",
               "refId": "A"
             }
@@ -1460,17 +1460,17 @@ data:
           },
           "targets": [
             {
-              "expr": "rate(ssh_accepted_logins_total[2m])",
+              "expr": "rate(promtail_custom_ssh_accepted_logins_total[2m])",
               "legendFormat": "Successful SSH Logins/s",
               "refId": "A"
             },
             {
-              "expr": "rate(ssh_failed_logins_total[2m])",
+              "expr": "rate(promtail_custom_ssh_failed_logins_total[2m])",
               "legendFormat": "Failed SSH Attempts/s",
               "refId": "B"
             },
             {
-              "expr": "rate(sudo_executions_total[2m])",
+              "expr": "rate(promtail_custom_sudo_executions_total[2m])",
               "legendFormat": "Sudo Escalations/s",
               "refId": "C"
             }

@@ -83,33 +83,33 @@ data:
               node: masdika
               __path__: /var/log/auth.log
         pipeline_stages:
-          - match:
-              selector: '{job="host-auth"} |= "Accepted"'
-              stages:
-                - metrics:
-                    ssh_accepted_logins_total:
-                      type: Counter
-                      description: "Total successful SSH logins on the host"
-                      config:
-                        action: inc
-          - match:
-              selector: '{job="host-auth"} |~ "(?i)(Failed password|authentication failure|Invalid user)"'
-              stages:
-                - metrics:
-                    ssh_failed_logins_total:
-                      type: Counter
-                      description: "Total failed SSH authentication attempts on the host"
-                      config:
-                        action: inc
-          - match:
-              selector: '{job="host-auth"} |~ "sudo:.*COMMAND="'
-              stages:
-                - metrics:
-                    sudo_executions_total:
-                      type: Counter
-                      description: "Total sudo privilege escalation commands executed"
-                      config:
-                        action: inc
+          - regex:
+              expression: '.*(?P<ssh_accepted>Accepted (?:password|publickey)).*'
+          - metrics:
+              ssh_accepted_logins_total:
+                type: Counter
+                description: "Total successful SSH logins on the host"
+                source: ssh_accepted
+                config:
+                  action: inc
+          - regex:
+              expression: '.*(?P<ssh_failed>(?:Failed password|authentication failure|Invalid user)).*'
+          - metrics:
+              ssh_failed_logins_total:
+                type: Counter
+                description: "Total failed SSH authentication attempts on the host"
+                source: ssh_failed
+                config:
+                  action: inc
+          - regex:
+              expression: '.*(?P<sudo_exec>sudo:.*COMMAND=).*'
+          - metrics:
+              sudo_executions_total:
+                type: Counter
+                description: "Total sudo privilege escalation commands executed"
+                source: sudo_exec
+                config:
+                  action: inc
 ---
 apiVersion: apps/v1
 kind: DaemonSet
