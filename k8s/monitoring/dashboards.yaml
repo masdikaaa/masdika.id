@@ -1283,7 +1283,7 @@ data:
           },
           "targets": [
             {
-              "expr": "(increase(promtail_custom_ssh_failed_logins_total[5m]) > 5) * 3 or (increase(promtail_custom_ssh_accepted_logins_total[5m]) > 0) * 2 or (sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[5m])) > 0) * 1 or vector(0)",
+              "expr": "max((sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[5m])) > bool 0) * 1 or (sum(increase(promtail_custom_ssh_accepted_logins_total[5m])) > bool 0) * 2 or (sum(increase(promtail_custom_ssh_failed_logins_total[5m])) > bool 5) * 3 or vector(0))",
               "legendFormat": "Threat Level",
               "refId": "A"
             }
@@ -1315,7 +1315,7 @@ data:
           },
           "targets": [
             {
-              "expr": "promtail_custom_ssh_accepted_logins_total or vector(0)",
+              "expr": "sum(promtail_custom_ssh_accepted_logins_total) or vector(0)",
               "legendFormat": "Logins",
               "refId": "A"
             }
@@ -1363,7 +1363,7 @@ data:
           },
           "targets": [
             {
-              "expr": "promtail_custom_ssh_failed_logins_total or vector(0)",
+              "expr": "sum(promtail_custom_ssh_failed_logins_total) or vector(0)",
               "legendFormat": "Failures",
               "refId": "A"
             }
@@ -1395,7 +1395,7 @@ data:
           },
           "targets": [
             {
-              "expr": "promtail_custom_sudo_executions_total or vector(0)",
+              "expr": "sum(promtail_custom_sudo_executions_total) or vector(0)",
               "legendFormat": "Commands",
               "refId": "A"
             }
@@ -1560,7 +1560,7 @@ data:
             "y": 13
           },
           "type": "logs",
-          "title": "Application Security & Blocked SSRF Logs",
+          "title": "Application Security & Live Request Audit Stream",
           "datasource": {
             "type": "loki",
             "uid": "P8E80F9AEF21F6940"
@@ -1573,7 +1573,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{app=\"masdika-app\"} |~ \"(?i)(ssrf|attack|forbidden|unauthorized|blocked|malicious)\"",
+              "expr": "{app=\"masdika-app\"}",
               "refId": "A"
             }
           ]
