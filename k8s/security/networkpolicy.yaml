@@ -96,6 +96,9 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-apm-server
+        - podSelector:
+            matchLabels:
+              app: masdika-grafana
       ports:
         - protocol: TCP
           port: 9200

@@ -11,26 +11,56 @@ data:
         type: prometheus
         access: proxy
         url: http://masdika-prometheus:9090
+        uid: "PBFA97CFB590B2093"
         isDefault: true
         editable: true
+        jsonData:
+          timeInterval: "15s"
+          httpMethod: "POST"
 
       - name: Loki
         type: loki
         access: proxy
         url: http://masdika-loki:3100
+        uid: "P8E80F9AEF21F6940"
         isDefault: false
         editable: true
+        jsonData:
+          maxLines: 1000
 
       - name: Elasticsearch
         type: elasticsearch
         access: proxy
         url: http://elasticsearch:9200
+        uid: "P31C819B24CF3C3C7"
         database: "logstash-*"
+        basicAuth: true
+        basicAuthUser: "elastic"
+        secureJsonData:
+          basicAuthPassword: "Andikaferdi11"
         jsonData:
           esVersion: "8.15.0"
           timeField: "@timestamp"
         isDefault: false
         editable: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-grafana-dashboard-providers
+  namespace: masdika
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'Masdika Monitoring'
+        orgId: 1
+        folder: 'Masdika Platform'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /etc/grafana/provisioning/dashboards/json
 ---
 # ==============================================================================
 # 8. GRAFANA (Unified Metrics & Logs Visualization Dashboard)
@@ -73,7 +103,7 @@ spec:
             - name: GF_USERS_ALLOW_SIGN_UP
               value: "false"
             - name: GF_SERVER_ROOT_URL
-              value: "http://192.168.79.4:3001"
+              value: "https://grafana.masdika.id/"
           ports:
             - containerPort: 3000
               hostPort: 3001
@@ -83,6 +113,11 @@ spec:
               mountPath: /var/lib/grafana
             - name: datasources
               mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboard-providers
+              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+              subPath: dashboards.yaml
+            - name: dashboards-json
+              mountPath: /etc/grafana/provisioning/dashboards/json
           resources:
             requests:
               cpu: "100m"
@@ -97,6 +132,12 @@ spec:
         - name: datasources
           configMap:
             name: masdika-grafana-datasources
+        - name: dashboard-providers
+          configMap:
+            name: masdika-grafana-dashboard-providers
+        - name: dashboards-json
+          configMap:
+            name: masdika-grafana-dashboards
 ---
 apiVersion: v1
 kind: Service

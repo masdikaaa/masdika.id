@@ -10,7 +10,7 @@ metadata:
     app: masdika-monitoring
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: masdika-security-headers@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd
 spec:
   rules:
     - host: grafana.masdika.id

@@ -1,0 +1,757 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-grafana-dashboards
+  namespace: masdika
+  labels:
+    app: masdika-grafana
+data:
+  node-infra.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": true,
+      "panels": [
+        {
+          "id": 1,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "type": "gauge",
+          "title": "CPU Utilization",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 85
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[1m])) * 100)",
+              "legendFormat": "CPU Usage %",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "type": "gauge",
+          "title": "Memory Utilization",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 75
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+              "legendFormat": "RAM Usage %",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "type": "gauge",
+          "title": "Root Disk Usage",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 75
+                  },
+                  {
+                    "color": "red",
+                    "value": 88
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "100 - ((node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'}) * 100)",
+              "legendFormat": "Disk Usage %",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "System Uptime",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "time() - node_boot_time_seconds",
+              "legendFormat": "Uptime",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "type": "timeseries",
+          "title": "CPU Usage History",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 15
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "avg by (mode) (rate(node_cpu_seconds_total[1m])) * 100",
+              "legendFormat": "{{mode}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "type": "timeseries",
+          "title": "Memory Distribution",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 20
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "node_memory_MemTotal_bytes",
+              "legendFormat": "Total",
+              "refId": "A"
+            },
+            {
+              "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+              "legendFormat": "Used",
+              "refId": "B"
+            },
+            {
+              "expr": "node_memory_MemAvailable_bytes",
+              "legendFormat": "Available",
+              "refId": "C"
+            },
+            {
+              "expr": "node_memory_Cached_bytes + node_memory_Buffers_bytes",
+              "legendFormat": "Cached & Buffers",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 13
+          },
+          "type": "timeseries",
+          "title": "System Load Average (1m, 5m, 15m)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth"
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "node_load1",
+              "legendFormat": "Load 1m",
+              "refId": "A"
+            },
+            {
+              "expr": "node_load5",
+              "legendFormat": "Load 5m",
+              "refId": "B"
+            },
+            {
+              "expr": "node_load15",
+              "legendFormat": "Load 15m",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 13
+          },
+          "type": "timeseries",
+          "title": "Network Throughput (Traffic I/O)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 10
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~'lo|veth.*|flannel.*|cni.*'}[1m]))",
+              "legendFormat": "Receive (Inbound)",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(node_network_transmit_bytes_total{device!~'lo|veth.*|flannel.*|cni.*'}[1m]))",
+              "legendFormat": "Transmit (Outbound)",
+              "refId": "B"
+            }
+          ]
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": [
+        "masdika",
+        "infrastructure",
+        "node"
+      ],
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Server & Node Infrastructure",
+      "uid": "masdika-node-infra",
+      "version": 1
+    }
+  app-health.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": true,
+      "panels": [
+        {
+          "id": 1,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Application Status",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "DOWN",
+                      "color": "red"
+                    },
+                    "1": {
+                      "text": "HEALTHY",
+                      "color": "green"
+                    }
+                  }
+                }
+              ],
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "masdika_app_status or vector(1)",
+              "legendFormat": "Status",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "App Process Uptime",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "process_uptime_seconds",
+              "legendFormat": "Uptime",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Node.js Heap Memory Used",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 500000000
+                  },
+                  {
+                    "color": "red",
+                    "value": 1000000000
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "nodejs_heap_size_used_bytes",
+              "legendFormat": "Heap Used",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Active Monitored Targets",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sum(up)",
+              "legendFormat": "Targets UP",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "type": "timeseries",
+          "title": "Node.js Heap Memory Growth (Used vs Total)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 15
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "nodejs_heap_size_total_bytes",
+              "legendFormat": "Heap Total",
+              "refId": "A"
+            },
+            {
+              "expr": "nodejs_heap_size_used_bytes",
+              "legendFormat": "Heap Used",
+              "refId": "B"
+            },
+            {
+              "expr": "nodejs_resident_memory_bytes",
+              "legendFormat": "RSS (Resident Set)",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "type": "timeseries",
+          "title": "App Process CPU Rate",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 20
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "rate(process_cpu_user_seconds_total[1m]) * 100",
+              "legendFormat": "User CPU %",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(process_cpu_system_seconds_total[1m]) * 100",
+              "legendFormat": "System CPU %",
+              "refId": "B"
+            }
+          ]
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": [
+        "masdika",
+        "nextjs",
+        "app"
+      ],
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Masdika Web App & Pods Health",
+      "uid": "masdika-app-health",
+      "version": 1
+    }
+  loki-logs.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": true,
+      "panels": [
+        {
+          "id": 1,
+          "gridPos": {
+            "h": 20,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "type": "logs",
+          "title": "Live Container Logs (Loki Stream - namespace: masdika)",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "options": {
+            "showLabels": true,
+            "wrapLogMessage": true,
+            "enableLogDetails": true,
+            "sortOrder": "Descending",
+            "dedupStrategy": "none"
+          },
+          "targets": [
+            {
+              "expr": "{namespace=\"masdika\"}",
+              "refId": "A"
+            }
+          ]
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 39,
+      "tags": [
+        "masdika",
+        "loki",
+        "logs"
+      ],
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Centralized Logs Explorer (Loki)",
+      "uid": "masdika-loki-logs",
+      "version": 1
+    }
