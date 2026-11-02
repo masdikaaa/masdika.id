@@ -72,6 +72,7 @@ export default function SkillsPage() {
       skills: [
         { name: "Docker", level: 95, icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" },
         { name: "Kubernetes & K3s", level: 88, icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-plain.svg" },
+        { name: "Helm", level: 82, icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/helm/helm-original.svg" },
       ]
     },
     {
@@ -87,6 +88,7 @@ export default function SkillsPage() {
       skills: [
         { name: "Terraform", level: 90, icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/terraform/terraform-original.svg" },
         { name: "Ansible", level: 85, icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ansible/ansible-original.svg" },
+        { name: "OpenTofu", level: 82, icon: "https://cdn.simpleicons.org/opentofu/FFDA1A" },
       ]
     },
     {

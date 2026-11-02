@@ -1,0 +1,25 @@
+# Gitleaks Configuration for Masdika Platform
+title = "Masdika Gitleaks Security Rules"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlisted paths, test files, and benign patterns"
+paths = [
+  '''node_modules/''',
+  '''\.next/''',
+  '''package-lock\.json''',
+  '''pnpm-lock\.yaml''',
+  '''dist/''',
+  '''build/''',
+  '''\.git/''',
+  '''k8s/monitoring/dashboards\.yaml''',
+  '''apps/web/public/novnc/''',
+]
+regexes = [
+  '''dummy''',
+  '''example''',
+  '''REDACTED''',
+  '''placeholder''',
+]

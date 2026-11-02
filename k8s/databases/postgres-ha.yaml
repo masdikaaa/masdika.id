@@ -1,0 +1,66 @@
+# ==============================================================================
+# CloudNativePG (CNPG) High-Availability PostgreSQL Cluster
+# Architecture: 1 Primary + 1 Streaming Standby Replica (Automated Failover)
+# ==============================================================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: masdika-pg-secret
+  namespace: masdika
+type: kubernetes.io/basic-auth
+stringData:
+  username: masdika
+  password: Andikaferdi11
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: masdika-pg-ha
+  namespace: masdika
+  labels:
+    app.kubernetes.io/name: masdika-pg-ha
+    app.kubernetes.io/instance: masdika-pg-ha
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.2
+
+  inheritedMetadata:
+    annotations:
+      container.apparmor.security.beta.kubernetes.io/postgres: unconfined
+      container.apparmor.security.beta.kubernetes.io/initdb: unconfined
+      container.apparmor.security.beta.kubernetes.io/bootstrap-controller: unconfined
+
+  primaryUpdateStrategy: unsupervised
+
+  failoverDelay: 0
+  minSyncReplicas: 0
+  maxSyncReplicas: 0
+
+  storage:
+    size: 20Gi
+    storageClass: local-path
+
+  bootstrap:
+    initdb:
+      database: masdika
+      owner: masdika
+      secret:
+        name: masdika-pg-secret
+
+  postgresql:
+    parameters:
+      max_connections: "300"
+      shared_buffers: "512MB"
+      effective_cache_size: "1536MB"
+      work_mem: "4MB"
+      random_page_cost: "1.1"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
