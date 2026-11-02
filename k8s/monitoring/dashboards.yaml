@@ -494,7 +494,7 @@ data:
             "y": 0
           },
           "type": "stat",
-          "title": "Total Pods Disk In-Use",
+          "title": "Cluster Node Disk In-Use (/)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -514,11 +514,11 @@ data:
                   },
                   {
                     "color": "orange",
-                    "value": 10000000000
+                    "value": 140000000000
                   },
                   {
                     "color": "red",
-                    "value": 25000000000
+                    "value": 170000000000
                   }
                 ]
               }
@@ -527,8 +527,8 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kubelet_volume_stats_used_bytes{namespace=\"masdika\"})",
-              "legendFormat": "Total Pods Disk",
+              "expr": "node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_avail_bytes{mountpoint=\"/\"}",
+              "legendFormat": "Used Disk (/dev/sda1)",
               "refId": "A"
             }
           ]
