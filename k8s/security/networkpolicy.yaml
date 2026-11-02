@@ -32,9 +32,6 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-heartbeat
-        - podSelector:
-            matchLabels:
-              app: masdika-es-sync
       ports:
         - protocol: TCP
           port: 5432
@@ -70,9 +67,6 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-heartbeat
-        - podSelector:
-            matchLabels:
-              app: masdika-es-sync
       ports:
         - protocol: TCP
           port: 6379
@@ -114,9 +108,6 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-heartbeat
-        - podSelector:
-            matchLabels:
-              app: masdika-es-sync
         - podSelector:
             matchLabels:
               app: masdika-filebeat
