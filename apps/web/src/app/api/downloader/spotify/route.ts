@@ -47,6 +47,8 @@ export async function POST(req: Request) {
     // Proxy the request to a Spotify Downloader API provider
     // Note: In production, replace this with your actual Spotify scraping API or RapidAPI endpoint.
     const response = await fetch(`https://api.fabdl.com/spotify/get?url=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      redirect: 'error',
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0'

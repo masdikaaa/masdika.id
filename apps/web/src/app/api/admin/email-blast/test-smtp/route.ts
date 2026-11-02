@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+import net from 'net';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getEmailBlastSmtpSettings } from '@/lib/email-blast-smtp';
+import { isPrivateIp } from '@/lib/ssrf';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +39,38 @@ export async function POST(req: Request) {
       return NextResponse.json({
         error: 'SMTP Password is required for connection test'
       }, { status: 400 });
+    }
+
+    // SSRF Prevention: Block internal loopback and private cluster addresses from TCP scan
+    const lowerHost = host.toLowerCase();
+    if (
+      lowerHost === 'localhost' ||
+      lowerHost.endsWith('.localhost') ||
+      lowerHost.endsWith('.local') ||
+      lowerHost.endsWith('.internal') ||
+      lowerHost.endsWith('.lan') ||
+      lowerHost === '0.0.0.0'
+    ) {
+      return NextResponse.json({ error: 'Connection to local or internal network hostnames is prohibited.' }, { status: 400 });
+    }
+
+    if (net.isIP(host)) {
+      if (isPrivateIp(host)) {
+        return NextResponse.json({ error: 'Connection to private/internal IP address is prohibited.' }, { status: 400 });
+      }
+    } else {
+      try {
+        const addresses = await dns.promises.lookup(host, { all: true });
+        for (const addr of addresses) {
+          if (isPrivateIp(addr.address)) {
+            return NextResponse.json({
+              error: `Host '${host}' resolves to restricted private address (${addr.address}).`
+            }, { status: 400 });
+          }
+        }
+      } catch (dnsErr: any) {
+        return NextResponse.json({ error: `Could not resolve SMTP host: ${dnsErr.message}` }, { status: 400 });
+      }
     }
 
     const startTime = Date.now();

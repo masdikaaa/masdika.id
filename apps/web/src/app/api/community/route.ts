@@ -3,6 +3,7 @@ import { getClientIp } from '@/lib/get-ip';
 import { prisma } from '@/lib/prisma';
 import { sendAdminCommunityNotificationEmail } from '@/lib/email';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { validateSafeUrl } from '@/lib/ssrf';
 
 // ─── Allowed link hosts ───────────────────────────────────────────────────────
 const WA_ALLOWED_HOST = 'chat.whatsapp.com';
@@ -53,6 +54,20 @@ export async function POST(req: Request) {
     if (typeof link !== 'string' || !isValidGroupLink(link)) {
       return NextResponse.json(
         { error: 'Invalid group invite link. Please use a WhatsApp (chat.whatsapp.com) or Telegram (t.me) link.' },
+        { status: 400 }
+      );
+    }
+
+    // SSRF Prevention: Ensure host does not resolve to internal/private IP
+    const ssrfCheck = await validateSafeUrl(link, {
+      allowedProtocols: ['https:'],
+      allowedDomains: [WA_ALLOWED_HOST, ...TG_ALLOWED_HOSTS],
+      allowedPorts: [443],
+    });
+
+    if (!ssrfCheck.safe) {
+      return NextResponse.json(
+        { error: 'Invalid group invite link or restricted IP address.' },
         { status: 400 }
       );
     }

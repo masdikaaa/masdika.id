@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { validateSafeUrl } from '@/lib/ssrf';
 
 // Whitelist of allowed domains for image proxying
 const ALLOWED_DOMAINS = [
@@ -7,23 +8,6 @@ const ALLOWED_DOMAINS = [
   'web.whatsapp.com',
   'static.whatsapp.net',
 ];
-
-function isAllowedUrl(urlString: string): boolean {
-  try {
-    const url = new URL(urlString);
-    
-    // Only allow HTTPS
-    if (url.protocol !== 'https:') return false;
-    
-    // Check against whitelist
-    const hostname = url.hostname.toLowerCase();
-    return ALLOWED_DOMAINS.some(domain => 
-      hostname === domain || hostname.endsWith('.' + domain)
-    );
-  } catch {
-    return false;
-  }
-}
 
 export async function GET(req: Request) {
   try {
@@ -34,12 +18,24 @@ export async function GET(req: Request) {
       return new NextResponse('Missing url parameter', { status: 400 });
     }
 
-    // Validate URL against whitelist to prevent SSRF
-    if (!isAllowedUrl(url)) {
-      return new NextResponse('URL domain not allowed', { status: 403 });
+    // Enterprise SSRF Mitigation:
+    // 1. Enforce HTTPS only
+    // 2. Enforce strict port 443
+    // 3. Enforce whitelist of legitimate image CDN domains
+    // 4. Resolve DNS to ensure destination does not point to internal/private IP space
+    const validation = await validateSafeUrl(url, {
+      allowedProtocols: ['https:'],
+      allowedDomains: ALLOWED_DOMAINS,
+      allowedPorts: [443],
+    });
+
+    if (!validation.safe) {
+      return new NextResponse(`URL not allowed: ${validation.reason}`, { status: 403 });
     }
 
     const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'error', // Crucial SSRF mitigation: refuse HTTP redirects to prevent redirecting to internal IPs
       headers: {
         'User-Agent': 'WhatsApp/2.21.12.21 A',
         'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'

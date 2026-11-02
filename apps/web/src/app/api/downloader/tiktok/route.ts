@@ -46,7 +46,10 @@ export async function POST(req: Request) {
     await enforceApiLimit(userId!, 'TIKTOK');
 
     // Proxy the request to tikwm API
-    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
+    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      redirect: 'error'
+    });
     
     if (!response.ok) {
       throw new Error(`Failed to fetch from TikTok scraper: ${response.statusText}`);
