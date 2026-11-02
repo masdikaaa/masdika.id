@@ -13,6 +13,7 @@
     "dev": "npm run dev --workspace=@masdika/web",
     "lint": "npm run lint --workspace=@masdika/web",
     "start": "npm run start --workspace=@masdika/web",
+    "test": "npm run test --workspace=@masdika/web",
     "worker": "npm run worker --workspace=@masdika/web"
   },
   "overrides": {

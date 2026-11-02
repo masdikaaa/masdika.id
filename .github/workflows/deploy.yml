@@ -81,7 +81,7 @@ jobs:
         run: npm ci
 
       - name: Run Tests
-        run: npm run test || echo "No tests configured yet, skipping..."
+        run: npm run test
 
   # ==========================================
   # STAGE 4: SAST (STATIC APPLICATION SECURITY TESTING) (Parallel)

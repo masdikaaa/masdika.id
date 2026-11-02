@@ -38,10 +38,6 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 70
-            runAsGroup: 70
-            fsGroup: 70
             seccompProfile:
               type: RuntimeDefault
           containers:
@@ -73,25 +69,69 @@ spec:
                     secretKeyRef:
                       name: masdika-credentials
                       key: POSTGRES_DB
+                - name: ENCRYPTION_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: masdika-env
+                      key: ENCRYPTION_KEY
+                - name: RUSTFS_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      name: masdika-credentials
+                      key: RUSTFS_ENDPOINT
+                - name: RUSTFS_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: masdika-credentials
+                      key: RUSTFS_ACCESS_KEY
+                - name: RUSTFS_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: masdika-credentials
+                      key: RUSTFS_SECRET_KEY
+                - name: RUSTFS_DATABASE_BUCKET
+                  valueFrom:
+                    secretKeyRef:
+                      name: masdika-credentials
+                      key: RUSTFS_DATABASE_BUCKET
               command:
                 - /bin/sh
                 - -c
                 - |
                   set -euo pipefail
+                  echo "[$(date)] Installing disaster recovery backup tools (gnupg, rclone)..."
+                  apk add --no-cache gnupg rclone
+
+                  export RCLONE_CONFIG_RUSTFS_TYPE="s3"
+                  export RCLONE_CONFIG_RUSTFS_PROVIDER="Minio"
+                  export RCLONE_CONFIG_RUSTFS_ENDPOINT="${RUSTFS_ENDPOINT}"
+                  export RCLONE_CONFIG_RUSTFS_ACCESS_KEY_ID="${RUSTFS_ACCESS_KEY}"
+                  export RCLONE_CONFIG_RUSTFS_SECRET_ACCESS_KEY="${RUSTFS_SECRET_KEY}"
+
                   TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-                  BACKUP_FILE="/backups/masdika_db_${TIMESTAMP}.sql.gz"
-                  echo "[$(date)] Starting PostgreSQL backup for database: ${PGDATABASE}..."
+                  BACKUP_FILE="/backups/masdika_db_${TIMESTAMP}.sql.gz.gpg"
+                  echo "[$(date)] Starting PostgreSQL dump, gzip compression, and GPG AES256 encryption..."
                   
-                  # Dump with gzip compression
-                  pg_dump -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d "${PGDATABASE}" --clean --if-exists --no-owner --no-privileges | gzip -9 > "${BACKUP_FILE}"
+                  pg_dump -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d "${PGDATABASE}" --clean --if-exists --no-owner --no-privileges \
+                    | gzip -9 \
+                    | gpg --batch --yes --passphrase "${ENCRYPTION_KEY}" --cipher-algo AES256 -c -o "${BACKUP_FILE}"
                   
                   SIZE=$(du -h "${BACKUP_FILE}" | cut -f1)
-                  echo "[$(date)] Backup completed successfully: ${BACKUP_FILE} (${SIZE})"
+                  echo "[$(date)] Encrypted backup created successfully: ${BACKUP_FILE} (${SIZE})"
                   
-                  # Retention policy: Prune backups older than 7 days
-                  echo "[$(date)] Pruning backups older than 7 days..."
-                  find /backups -type f -name "masdika_db_*.sql.gz" -mtime +7 -exec rm -v {} \;
-                  echo "[$(date)] Disaster Recovery Backup Lifecycle finished."
+                  echo "[$(date)] Syncing offsite backup to RustFS S3 bucket (${RUSTFS_DATABASE_BUCKET})..."
+                  rclone copyto "${BACKUP_FILE}" "rustfs:${RUSTFS_DATABASE_BUCKET}/$(basename ${BACKUP_FILE})"
+                  echo "[$(date)] RustFS Cloud sync completed successfully."
+
+                  # Retention policy: Prune local PVC backups older than 14 days
+                  echo "[$(date)] Pruning local PVC backups older than 14 days..."
+                  find /backups -type f -name "masdika_db_*.sql.gz*" -mtime +14 -exec rm -v {} \;
+
+                  # Retention policy: Prune remote RustFS backups older than 14 days
+                  echo "[$(date)] Pruning remote RustFS S3 backups older than 14 days..."
+                  rclone delete --min-age 14d "rustfs:${RUSTFS_DATABASE_BUCKET}"
+
+                  echo "[$(date)] Disaster Recovery Backup Lifecycle completed successfully."
               resources:
                 requests:
                   cpu: 100m

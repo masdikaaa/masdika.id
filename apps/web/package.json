@@ -9,7 +9,8 @@
     "worker": "tsx scripts/worker.ts",
     "vnc-proxy": "tsx scripts/vnc-proxy.ts",
     "lint": "eslint",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "test": "vitest run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",
@@ -86,7 +87,8 @@
     "source-map-support": "^0.5.21",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "dompurify": "^3.4.11",
