@@ -527,7 +527,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(container_fs_usage_bytes{namespace='masdika', container!='POD', container!=''}) or sum(kubelet_volume_stats_used_bytes{namespace='masdika'})",
+              "expr": "sum(kubelet_volume_stats_used_bytes{namespace='masdika'})",
               "legendFormat": "Total Pods Disk",
               "refId": "A"
             }
@@ -685,14 +685,14 @@ data:
             "y": 14
           },
           "type": "timeseries",
-          "title": "Container Filesystem Storage In-Use (Disk)",
+          "title": "PVC Storage Volume Usage Rate (%)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
-              "unit": "bytes",
+              "unit": "percent",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "smooth",
@@ -703,8 +703,8 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (pod) (container_fs_usage_bytes{namespace='masdika', container!='POD', container!=''})",
-              "legendFormat": "{{pod}}",
+              "expr": "(kubelet_volume_stats_used_bytes{namespace='masdika'} / kubelet_volume_stats_capacity_bytes{namespace='masdika'}) * 100",
+              "legendFormat": "{{persistentvolumeclaim}}",
               "refId": "A"
             }
           ]

@@ -91,11 +91,11 @@ data:
 
           # 8. Main Web App Status Down
           - alert: MasdikaAppDown
-            expr: up{job="masdika-app"} == 0
+            expr: absent(container_memory_working_set_bytes{namespace="masdika", pod=~"masdika-app-.*", container="app"}) == 1
             for: 1m
             labels:
               severity: critical
               tier: application
             annotations:
-              summary: "masdika-app endpoint is DOWN"
-              description: "Prometheus cannot scrape masdika-app on port 3000. Service may be unavailable."
+              summary: "masdika-app container is DOWN"
+              description: "The masdika-app pod/container is not running in Kubernetes namespace masdika."
