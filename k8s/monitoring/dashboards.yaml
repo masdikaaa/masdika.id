@@ -59,7 +59,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[1m])) * 100)",
+              "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100)",
               "legendFormat": "CPU Usage %",
               "refId": "A"
             }
@@ -153,7 +153,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 - ((node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'}) * 100)",
+              "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100)",
               "legendFormat": "Disk Usage %",
               "refId": "A"
             }
@@ -349,12 +349,12 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(rate(node_network_receive_bytes_total{device!~'lo|veth.*|flannel.*|cni.*'}[1m]))",
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|veth.*|flannel.*|cni.*\"}[1m]))",
               "legendFormat": "Receive (Inbound)",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(node_network_transmit_bytes_total{device!~'lo|veth.*|flannel.*|cni.*'}[1m]))",
+              "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|flannel.*|cni.*\"}[1m]))",
               "legendFormat": "Transmit (Outbound)",
               "refId": "B"
             }
@@ -431,7 +431,7 @@ data:
           },
           "targets": [
             {
-              "expr": "count(count by (pod) (container_memory_working_set_bytes{namespace='masdika', container!='POD', container!=''}))",
+              "expr": "count(count by (pod) (container_memory_working_set_bytes{namespace=\"masdika\", container!=\"POD\", container!=\"\"}))",
               "legendFormat": "Running Pods",
               "refId": "A"
             }
@@ -479,7 +479,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace='masdika', container!='POD', container!=''})",
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"masdika\", container!=\"POD\", container!=\"\"})",
               "legendFormat": "Total RAM",
               "refId": "A"
             }
@@ -527,7 +527,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kubelet_volume_stats_used_bytes{namespace='masdika'})",
+              "expr": "sum(kubelet_volume_stats_used_bytes{namespace=\"masdika\"})",
               "legendFormat": "Total Pods Disk",
               "refId": "A"
             }
@@ -599,7 +599,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace='masdika', container!='POD', container!=''})",
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"masdika\", container!=\"POD\", container!=\"\"})",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
@@ -632,7 +632,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace='masdika', container!='POD', container!=''}[1m])) * 100",
+              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"masdika\", container!=\"POD\", container!=\"\"}[1m])) * 100",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
@@ -665,12 +665,12 @@ data:
           },
           "targets": [
             {
-              "expr": "kubelet_volume_stats_capacity_bytes{namespace='masdika'}",
+              "expr": "kubelet_volume_stats_capacity_bytes{namespace=\"masdika\"}",
               "legendFormat": "{{persistentvolumeclaim}} - Capacity",
               "refId": "A"
             },
             {
-              "expr": "kubelet_volume_stats_used_bytes{namespace='masdika'}",
+              "expr": "kubelet_volume_stats_used_bytes{namespace=\"masdika\"}",
               "legendFormat": "{{persistentvolumeclaim}} - Used",
               "refId": "B"
             }
@@ -703,7 +703,7 @@ data:
           },
           "targets": [
             {
-              "expr": "(kubelet_volume_stats_used_bytes{namespace='masdika'} / kubelet_volume_stats_capacity_bytes{namespace='masdika'}) * 100",
+              "expr": "(kubelet_volume_stats_used_bytes{namespace=\"masdika\"} / kubelet_volume_stats_capacity_bytes{namespace=\"masdika\"}) * 100",
               "legendFormat": "{{persistentvolumeclaim}}",
               "refId": "A"
             }
