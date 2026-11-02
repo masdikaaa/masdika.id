@@ -16,7 +16,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: masdika-app
-  minReplicas: 1 # Minimal 1 pod berjalan (hemat RAM/CPU saat sepi)
+  minReplicas: 2 # Minimal 2 pod berjalan (High Availability & Zero-Downtime)
   maxReplicas: 5 # Maksimal 5 pod berjalan otomatis saat traffic melonjak
   metrics:
     # Scale up jika rata-rata CPU melebihi 75% dari request (300m)

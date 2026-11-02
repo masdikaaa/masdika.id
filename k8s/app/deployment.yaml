@@ -9,7 +9,8 @@ metadata:
   labels:
     app: masdika-app
 spec:
-  # Replicas dikelola dinamis oleh HPA (1 - 5 pods)
+  # Replicas dikelola dinamis oleh HPA (2 - 5 pods)
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
