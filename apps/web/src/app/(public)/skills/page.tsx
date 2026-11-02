@@ -21,7 +21,7 @@ import {
   Layers
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { SiKubernetes } from "react-icons/si";
+import { SiKubernetes, SiMikrotik } from "react-icons/si";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -50,7 +50,15 @@ export default function SkillsPage() {
       .catch(err => console.error("Error fetching certifications:", err));
   }, []);
 
-  const categories = [
+  type SkillItem = {
+    name: string;
+    level: number;
+    icon?: string;
+    iconComponent?: React.ComponentType<{ className?: string }>;
+    invert?: boolean;
+  };
+
+  const categories: { title: string; skills: SkillItem[] }[] = [
     {
       title: "Cloud Platforms",
       skills: [
@@ -95,7 +103,7 @@ export default function SkillsPage() {
       skills: [
         { name: "Proxmox VE", level: 95, icon: "https://cdn.simpleicons.org/proxmox/E57000" },
         { name: "WireGuard Mesh", level: 90, icon: "https://cdn.simpleicons.org/wireguard/88171A" },
-        { name: "MikroTik RouterOS", level: 85, icon: "https://cdn.simpleicons.org/mikrotik/white" },
+        { name: "MikroTik RouterOS", level: 85, iconComponent: SiMikrotik },
         { name: "OpenVPN", level: 80, icon: "https://cdn.simpleicons.org/openvpn/EA7E20" },
       ]
     }
@@ -187,8 +195,8 @@ export default function SkillsPage() {
           {/* Categories Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             {categories.map((category, i) => (
-              <div key={i}>
-                <div className="h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col justify-between">
+              <div key={i} className="h-full">
+                <div className="h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors duration-200 p-6 sm:p-8 flex flex-col justify-start">
                   <div className="mb-6 pb-4 border-b border-[var(--border-primary)] flex items-center justify-between">
                     <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
                       {category.title}
@@ -204,17 +212,21 @@ export default function SkillsPage() {
                         <div className="flex justify-between items-center mb-2.5 gap-4">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-10 h-10 shrink-0 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-center p-2 transition-colors">
-                              <img
-                                referrerPolicy="no-referrer"
-                                src={skill.icon}
-                                alt={skill.name}
-                                className={cn(
-                                  "w-full h-full object-contain max-w-full max-h-full",
-                                  skill.invert && "dark:filter dark:invert dark:brightness-0 dark:saturate-100"
-                                )}
-                                loading="lazy"
-                                decoding="async"
-                              />
+                              {skill.iconComponent ? (
+                                <skill.iconComponent className="w-full h-full text-slate-800 dark:text-white" />
+                              ) : (
+                                <img
+                                  referrerPolicy="no-referrer"
+                                  src={skill.icon}
+                                  alt={skill.name}
+                                  className={cn(
+                                    "w-full h-full object-contain max-w-full max-h-full",
+                                    skill.invert && "dark:filter dark:invert dark:brightness-0 dark:saturate-100"
+                                  )}
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              )}
                             </div>
                             <span className="font-bold text-sm sm:text-base text-[var(--text-primary)] truncate">
                               {skill.name}
