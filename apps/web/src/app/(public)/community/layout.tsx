@@ -13,19 +13,35 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error("Error fetching community meta description:", error);
   }
 
-  const title = 'Community Groups';
+  const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
+  const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
+  const title = 'Developer Community Groups';
+  const ogImageUrl = '/og-image.webp';
+
   return {
     title,
     description,
     openGraph: {
       title,
       description,
-      images: ['/og-image.webp'],
+      url: `${siteUrl}/community`,
+      siteName: 'Masdika',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: 'Masdika Developer Community',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
     },
     twitter: {
+      card: 'summary_large_image',
       title,
       description,
-      images: ['/og-image.webp'],
+      images: [ogImageUrl],
     },
   };
 }

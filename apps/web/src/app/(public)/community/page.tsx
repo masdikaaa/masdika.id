@@ -1,14 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { Metadata } from "next";
 import CommunityClient from "./CommunityClient";
 import { getCachedData } from "@/lib/cache";
 
-export const dynamic = 'force-dynamic';
-
-export const metadata: Metadata = {
-  title: 'Developer Community',
-  description: 'Join developer communities on WhatsApp and Telegram to discuss, learn, and grow together.',
-};
+export const revalidate = 60;
 
 export default async function CommunityPage() {
   const groups = await getCachedData('community:groups_page', 300, () =>
