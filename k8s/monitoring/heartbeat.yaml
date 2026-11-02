@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-heartbeat-config
+  namespace: masdika
+  labels:
+    app: masdika-heartbeat
+data:
+  heartbeat.yml: |
+    heartbeat.monitors:
+      # 1. Masdika Web Public Production
+      - type: http
+        id: masdika-production-web
+        name: "Masdika Web (masdika.id)"
+        hosts: ["https://www.masdika.id"]
+        schedule: '@every 15s'
+        timeout: 10s
+        check.request.headers:
+          User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) MasdikaHeartbeat/1.0'
+        check.response.status: [200, 301]
+
+      # 2. Masdika API Health Check
+      - type: http
+        id: masdika-api-health
+        name: "Masdika API Health (/api/health)"
+        hosts: ["https://www.masdika.id/api/health"]
+        schedule: '@every 15s'
+        timeout: 5s
+        check.request.headers:
+          User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) MasdikaHeartbeat/1.0'
+        check.response.status: 200
+
+      # 3. PostgreSQL Database TCP Port
+      - type: tcp
+        id: masdika-postgresql
+        name: "PostgreSQL Database (5432)"
+        hosts: ["masdika-db:5432"]
+        schedule: '@every 30s'
+        timeout: 5s
+
+      # 4. Redis Cache TCP Port
+      - type: tcp
+        id: masdika-redis
+        name: "Redis Cache (6379)"
+        hosts: ["masdika-redis:6379"]
+        schedule: '@every 30s'
+        timeout: 5s
+
+      # 5. Elasticsearch Cluster HTTP
+      - type: http
+        id: masdika-elasticsearch
+        name: "Elasticsearch Cluster (9200)"
+        hosts: ["http://elasticsearch:9200"]
+        username: "elastic"
+        password: "${ELASTIC_PASSWORD}"
+        schedule: '@every 30s'
+        timeout: 5s
+
+    output.elasticsearch:
+      hosts: ["http://elasticsearch:9200"]
+      username: "elastic"
+      password: "${ELASTIC_PASSWORD}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-heartbeat
+  namespace: masdika
+  labels:
+    app: masdika-heartbeat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-heartbeat
+  template:
+    metadata:
+      labels:
+        app: masdika-heartbeat
+    spec:
+      containers:
+        - name: heartbeat
+          image: docker.elastic.co/beats/heartbeat:8.15.0
+          imagePullPolicy: IfNotPresent
+          args: [
+            "-c", "/etc/heartbeat.yml",
+            "-e",
+          ]
+          env:
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/heartbeat.yml
+              readOnly: true
+              subPath: heartbeat.yml
+      volumes:
+        - name: config
+          configMap:
+            defaultMode: 0640
+            name: masdika-heartbeat-config

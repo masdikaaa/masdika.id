@@ -29,6 +29,9 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-backup
+        - podSelector:
+            matchLabels:
+              app: masdika-heartbeat
       ports:
         - protocol: TCP
           port: 5432
@@ -61,6 +64,9 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-backup
+        - podSelector:
+            matchLabels:
+              app: masdika-heartbeat
       ports:
         - protocol: TCP
           port: 6379
@@ -99,6 +105,15 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-grafana
+        - podSelector:
+            matchLabels:
+              app: masdika-heartbeat
+        - podSelector:
+            matchLabels:
+              app: masdika-filebeat
+        - podSelector:
+            matchLabels:
+              app: masdika-metricbeat
       ports:
         - protocol: TCP
           port: 9200

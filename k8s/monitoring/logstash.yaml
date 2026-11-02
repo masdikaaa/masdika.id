@@ -15,14 +15,72 @@ data:
       }
     }
     filter {
-      # JSON logs are parsed directly by the http input codec
+      # Map fields to Elastic Common Schema (ECS)
+      if [level] {
+        mutate {
+          add_field => { "[log][level]" => "%{level}" }
+        }
+      }
+      if [app] {
+        mutate {
+          add_field => { "[service][name]" => "%{app}" }
+        }
+      } else {
+        mutate {
+          add_field => { "[service][name]" => "masdika-web" }
+        }
+      }
+      if [env] {
+        mutate {
+          add_field => { "[service][environment]" => "%{env}" }
+        }
+      } else {
+        mutate {
+          add_field => { "[service][environment]" => "production" }
+        }
+      }
+      if ![host][name] {
+        mutate {
+          add_field => { "[host][name]" => "masdika" }
+        }
+      }
+      # Distributed Tracing correlation (APM trace.id & transaction.id)
+      if [context][trace_id] {
+        mutate {
+          add_field => { "[trace][id]" => "%{[context][trace_id]}" }
+        }
+      }
+      if [context][transaction_id] {
+        mutate {
+          add_field => { "[transaction][id]" => "%{[context][transaction_id]}" }
+        }
+      }
+      # HTTP & Client metadata
+      if [context][ip] {
+        mutate {
+          add_field => { "[client][ip]" => "%{[context][ip]}" }
+        }
+      }
+      if [context][method] {
+        mutate {
+          add_field => { "[http][request][method]" => "%{[context][method]}" }
+        }
+      }
+      if [context][url] {
+        mutate {
+          add_field => { "[url][path]" => "%{[context][url]}" }
+        }
+      }
     }
     output {
       elasticsearch {
         hosts => ["http://elasticsearch:9200"]
         user => "elastic"
         password => "${ELASTIC_PASSWORD}"
-        index => "logstash-%{+YYYY.MM.dd}"
+        data_stream => "true"
+        data_stream_type => "logs"
+        data_stream_dataset => "masdika.app"
+        data_stream_namespace => "default"
       }
     }
 ---

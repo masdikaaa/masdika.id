@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: masdika-metricbeat
+  namespace: masdika
+  labels:
+    app: masdika-metricbeat
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: masdika-metricbeat
+  labels:
+    app: masdika-metricbeat
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/stats
+      - nodes/metrics
+      - nodes/proxy
+      - namespaces
+      - events
+      - pods
+      - services
+      - resourcequotas
+      - limitranges
+      - persistentvolumeclaims
+      - persistentvolumes
+      - configmaps
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+      - daemonsets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: masdika-metricbeat
+subjects:
+  - kind: ServiceAccount
+    name: masdika-metricbeat
+    namespace: masdika
+roleRef:
+  kind: ClusterRole
+  name: masdika-metricbeat
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: masdika-metricbeat-config
+  namespace: masdika
+  labels:
+    app: masdika-metricbeat
+data:
+  metricbeat.yml: |
+    metricbeat.config.modules:
+      path: ${path.config}/modules.d/*.yml
+      reload.enabled: false
+
+    metricbeat.modules:
+      - module: system
+        period: 10s
+        metricsets:
+          - cpu
+          - load
+          - memory
+          - network
+          - process_summary
+          - uptime
+          - filesystem
+          - fsstat
+        process.include_top_n:
+          by_cpu: 5
+          by_memory: 5
+        processes: ['.*']
+
+      - module: kubernetes
+        period: 15s
+        node: ${NODE_NAME}
+        hosts: ["https://${NODE_NAME}:10250"]
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        ssl.verification_mode: "none"
+        metricsets:
+          - node
+          - system
+          - pod
+          - container
+          - volume
+
+    output.elasticsearch:
+      hosts: ["http://elasticsearch:9200"]
+      username: "elastic"
+      password: "${ELASTIC_PASSWORD}"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: masdika-metricbeat
+  namespace: masdika
+  labels:
+    app: masdika-metricbeat
+spec:
+  selector:
+    matchLabels:
+      app: masdika-metricbeat
+  template:
+    metadata:
+      labels:
+        app: masdika-metricbeat
+    spec:
+      serviceAccountName: masdika-metricbeat
+      terminationGracePeriodSeconds: 30
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: metricbeat
+          image: docker.elastic.co/beats/metricbeat:8.15.0
+          imagePullPolicy: IfNotPresent
+          args: [
+            "-c", "/etc/metricbeat.yml",
+            "-e",
+            "-system.hostfs=/hostfs",
+          ]
+          env:
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: ELASTIC_PASSWORD
+                  optional: true
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            runAsUser: 0
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/metricbeat.yml
+              readOnly: true
+              subPath: metricbeat.yml
+            - name: proc
+              mountPath: /hostfs/proc
+              readOnly: true
+            - name: sys
+              mountPath: /hostfs/sys
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            defaultMode: 0640
+            name: masdika-metricbeat-config
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys

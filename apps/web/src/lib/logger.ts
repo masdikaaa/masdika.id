@@ -25,10 +25,32 @@ export const logger = {
     if (!logstashUrl) return; // Abaikan jika tidak ada setting Logstash
 
     try {
+      // Automatic Elastic APM Distributed Tracing Correlation (Gojek / Tokopedia Enterprise standard)
+      let traceId: string | undefined;
+      let transactionId: string | undefined;
+      try {
+        const apm = (global as any).elasticApm || (typeof require !== 'undefined' ? require('elastic-apm-node') : null);
+        if (apm && apm.isStarted && apm.isStarted()) {
+          const ids = apm.currentTraceIds;
+          if (ids) {
+            traceId = ids['trace.id'];
+            transactionId = ids['transaction.id'];
+          }
+        }
+      } catch {
+        // APM trace capture fallback
+      }
+
+      const mergedContext = {
+        ...(context || {}),
+        ...(traceId ? { trace_id: traceId } : {}),
+        ...(transactionId ? { transaction_id: transactionId } : {}),
+      };
+
       const payload: LogPayload = {
         level,
         message,
-        context,
+        context: mergedContext,
         app: 'masdika-web',
         env: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
