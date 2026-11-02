@@ -70,6 +70,22 @@ data:
         static_configs:
           - targets: ["masdika-node-exporter:9100"]
 
+      # Ingress Controller (Traefik 4 Golden Signals: Traffic, Latency p95/p99, Error Rate 5xx/4xx)
+      - job_name: "traefik"
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ["kube-system"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            regex: traefik
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            regex: metrics
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
 
       # cAdvisor Container Metrics (RAM, CPU, and Disk of each Pod)
       - job_name: "kubernetes-cadvisor"

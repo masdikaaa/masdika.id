@@ -99,3 +99,41 @@ data:
             annotations:
               summary: "masdika-app container is DOWN"
               description: "The masdika-app pod/container is not running in Kubernetes namespace masdika."
+
+      # ------------------------------------------------------------------------
+      # Group 3: SRE Golden Signals & SLO Error Budget Rules (Tokopedia Standard)
+      # ------------------------------------------------------------------------
+      - name: masdika-sre-golden-signals
+        rules:
+          # 9. HTTP 5xx Error Rate > 1% (SLO Error Budget Burn)
+          - alert: HighHttp5xxRate
+            expr: (sum(rate(traefik_entrypoint_requests_total{code=~"5.."}[2m])) / sum(rate(traefik_entrypoint_requests_total[2m]))) * 100 > 1
+            for: 2m
+            labels:
+              severity: critical
+              tier: ingress
+            annotations:
+              summary: "HTTP 5xx Error Rate > 1% on Ingress (SLO Violation)"
+              description: "Traefik reports elevated HTTP 5xx errors across incoming public traffic. Error budget is depleting fast."
+
+          # 10. High Request Latency p99 (> 1.5s)
+          - alert: HighRequestLatencyP99
+            expr: histogram_quantile(0.99, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) > 1.5
+            for: 3m
+            labels:
+              severity: warning
+              tier: ingress
+            annotations:
+              summary: "p99 Request Latency > 1.5s (Degraded Performance)"
+              description: "99th percentile response time exceeds 1.5 seconds across ingress endpoints."
+
+          # 11. High Request Latency p95 (> 800ms)
+          - alert: HighRequestLatencyP95
+            expr: histogram_quantile(0.95, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+              tier: ingress
+            annotations:
+              summary: "p95 Request Latency > 800ms"
+              description: "95th percentile response time exceeds 800ms. Check database query performance and app memory pressure."
