@@ -11,6 +11,7 @@
     <img src="https://img.shields.io/badge/Observability-Elastic_APM-005571?style=for-the-badge&logo=elastic&logoColor=white" alt="Elastic APM" />
     <img src="https://img.shields.io/badge/Monitoring-Prometheus_%26_Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Monitoring" />
     <img src="https://img.shields.io/badge/Ingress-Traefik_v3-24A1C1?style=for-the-badge&logo=traefik&logoColor=white" alt="Traefik" />
+    <img src="https://img.shields.io/badge/Access-Private%20%2F%20Proprietary-e11d48?style=for-the-badge&logo=lock&logoColor=white" alt="Private Repo" />
   </p>
 </div>
 
@@ -383,7 +384,12 @@ Environment variables sensitif dikelola melalui Kubernetes Secret `masdika-crede
 
 ---
 
-## 👨‍💻 Kontribusi & Hak Cipta
+## 🔒 Lisensi & Hak Cipta (Private & Proprietary)
 
-Repositori ini dikelola dan dipelihara secara aktif oleh **[Masdika](https://masdika.id)**.  
-Lisensi dan kepemilikan kode tunduk pada kebijakan privasi dan hak cipta resmi Masdika.ID.
+Seluruh kode sumber, arsitektur sistem, aset visual, dan konfigurasi infrastruktur dalam repositori ini dilindungi oleh hak cipta dan bersifat **Proprietary & Private** untuk penggunaan personal / internal oleh **[Masdika](https://masdika.id)**.
+
+> [!CAUTION]
+> **PEMBERITAHUAN PRIVASI & HAK CIPTA (ALL RIGHTS RESERVED):**  
+> Repositori ini bukan proyek *open-source*. Dilarang keras menyalin, membagikan, mendistribusikan ulang, memodifikasi, mempublikasikan, melisensikan ulang (*sub-license*), atau menggunakan sebagian maupun seluruh kode dan aset dalam repositori ini untuk keperluan publik atau komersial pihak ketiga tanpa izin tertulis langsung dari pemilik hak cipta.  
+> 
+> Hak cipta © 2026 **Masdika.ID**. Seluruh hak dilindungi oleh undang-undang.
