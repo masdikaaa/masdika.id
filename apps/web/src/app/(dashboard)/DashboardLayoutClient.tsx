@@ -116,6 +116,7 @@ export default function DashboardLayoutClient({
   impersonatorAdminName?: string;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isStoppingImpersonation, setIsStoppingImpersonation] = useState(false);
 
   const handleStopImpersonation = async () => {
@@ -128,7 +129,7 @@ export default function DashboardLayoutClient({
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success(data.message || 'Kembali ke sesi admin');
-        window.location.href = data.redirectUrl || '/admin/customers';
+        router.push(data.redirectUrl || '/admin/customers');
       } else {
         toast.error(data.error || 'Gagal mengakhiri impersonasi');
         setIsStoppingImpersonation(false);
@@ -216,11 +217,11 @@ export default function DashboardLayoutClient({
       await fetch('/api/auth/logout', { method: 'POST' });
       toast.success("Signed out successfully");
       setTimeout(() => {
-        window.location.href = '/login';
+        router.push('/login');
       }, 500);
     } catch (error) {
       toast.error("Failed to sign out");
-      window.location.href = '/login';
+      router.push('/login');
     }
   };
 

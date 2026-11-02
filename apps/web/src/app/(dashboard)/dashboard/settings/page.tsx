@@ -3,6 +3,7 @@
 import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2, History, RefreshCw, Laptop, Tablet, Globe, LogOut, ChevronLeft, ChevronRight, Clock, Calendar, ShieldAlert, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -77,6 +78,7 @@ const OtpInput = ({ value, onChange, isDanger = false }: { value: string; onChan
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const inputClass = isDark ? inputClassDark : inputClassLight;
@@ -183,7 +185,7 @@ export default function SettingsPage() {
       if (res.ok && data.success) {
         if (data.isCurrentDevice) {
           toast.success('Signed out of this session successfully.');
-          window.location.href = '/login';
+          router.push('/login');
           return;
         }
         toast.success(data.message || 'Device session revoked successfully.');

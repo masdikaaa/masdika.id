@@ -595,9 +595,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
       } else if (res.ok && data.success) {
         toast.success("Server deployment started!");
         if (data.k3sClusterId) {
-          window.location.href = `/dashboard/k3s/${data.k3sClusterId}`;
+          router.push(`/dashboard/k3s/${data.k3sClusterId}`);
         } else {
-          window.location.href = `/dashboard/vps/${data.vpsId}`;
+          router.push(`/dashboard/vps/${data.vpsId}`);
         }
       } else {
         toast.error(data.error || "Failed to create order");

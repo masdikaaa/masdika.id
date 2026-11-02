@@ -94,7 +94,7 @@ export default function ApiLabClient({ project }: { project: any }) {
 
 
   const generateKey = () => {
-    window.location.href = '/dashboard/api-keys';
+    router.push('/dashboard/api-keys');
   };
 
   const testEndpoint = async () => {

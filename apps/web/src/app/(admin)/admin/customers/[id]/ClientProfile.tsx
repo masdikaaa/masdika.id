@@ -579,7 +579,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success(data.message || `Berhasil masuk sebagai ${user.name}`, { id: toastId });
-        window.location.href = data.redirectUrl || '/dashboard';
+        router.push(data.redirectUrl || '/dashboard');
       } else {
         toast.error(data.error || 'Gagal masuk sebagai klien', { id: toastId });
         setIsImpersonating(false);

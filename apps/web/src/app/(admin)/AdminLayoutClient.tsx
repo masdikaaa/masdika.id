@@ -67,6 +67,7 @@ export default function AdminLayout({
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
   const pathname = usePathname();
+  const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -143,13 +144,13 @@ export default function AdminLayout({
       await fetch('/api/auth/logout', { method: 'POST' });
       toast.success("Signed out successfully");
       setTimeout(() => {
-        window.location.href = '/login';
+        router.push('/login');
       }, 500);
     } catch (error) {
       console.error('Logout failed', error);
       toast.error("Failed to sign out");
       setTimeout(() => {
-        window.location.href = '/login';
+        router.push('/login');
       }, 500);
     }
   };

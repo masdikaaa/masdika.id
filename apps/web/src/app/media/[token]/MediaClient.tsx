@@ -310,7 +310,12 @@ export default function MediaClient({
       URL.revokeObjectURL(url);
       setDlProgress(100);
     } catch {
-      window.location.href = downloadUrl;
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = media?.originalName ?? "download";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } finally {
       setDownloading(false);
       setTimeout(() => setDlProgress(0), 1000);
