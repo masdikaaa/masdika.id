@@ -9,8 +9,10 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
-      smtp_smarthost: 'smtp.gmail.com:587'
-      smtp_from: 'alerts@masdika.id'
+      smtp_smarthost: 'mail.masdika.id:587'
+      smtp_from: 'info@masdika.id'
+      smtp_auth_username: 'info@masdika.id'
+      smtp_auth_password_file: '/etc/alertmanager/secrets/smtp-password'
       smtp_require_tls: true
 
     route:
@@ -68,6 +70,9 @@ spec:
               mountPath: /etc/alertmanager
             - name: storage
               mountPath: /alertmanager
+            - name: smtp-secret
+              mountPath: /etc/alertmanager/secrets
+              readOnly: true
           resources:
             requests:
               cpu: 20m
@@ -81,6 +86,12 @@ spec:
             name: masdika-alertmanager-config
         - name: storage
           emptyDir: {}
+        - name: smtp-secret
+          secret:
+            secretName: masdika-credentials
+            items:
+              - key: SMTP_AUTH_PASSWORD
+                path: smtp-password
 ---
 apiVersion: v1
 kind: Service
@@ -97,3 +108,4 @@ spec:
       name: http
   selector:
     app: masdika-alertmanager
+

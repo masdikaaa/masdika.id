@@ -110,6 +110,22 @@ spec:
                   name: masdika-credentials
                   key: ELASTIC_PASSWORD
                   optional: true
+            - name: GF_SMTP_ENABLED
+              value: "true"
+            - name: GF_SMTP_HOST
+              value: "mail.masdika.id:587"
+            - name: GF_SMTP_USER
+              value: "info@masdika.id"
+            - name: GF_SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: masdika-credentials
+                  key: SMTP_AUTH_PASSWORD
+                  optional: true
+            - name: GF_SMTP_FROM_ADDRESS
+              value: "info@masdika.id"
+            - name: GF_SMTP_FROM_NAME
+              value: "Masdika Monitoring Alert"
           ports:
             - containerPort: 3000
               hostPort: 3001
