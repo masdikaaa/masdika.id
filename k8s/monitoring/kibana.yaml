@@ -38,6 +38,12 @@ spec:
                   optional: true
             - name: SERVER_PUBLICBASEURL
               value: "https://kibana.masdika.id"
+            - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+              value: "masdika-encrypted-saved-objects-key-32chars-prod"
+            - name: XPACK_SECURITY_ENCRYPTIONKEY
+              value: "masdika-kibana-security-encryption-key-32chars-prod"
+            - name: XPACK_REPORTING_ENCRYPTIONKEY
+              value: "masdika-kibana-reporting-encryption-key-32chars-prod"
           ports:
             - containerPort: 5601
               hostPort: 5601
