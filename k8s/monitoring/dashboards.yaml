@@ -1560,7 +1560,7 @@ data:
             "y": 13
           },
           "type": "logs",
-          "title": "Application Security & Live Request Audit Stream",
+          "title": "Application Security & External Request Stream",
           "datasource": {
             "type": "loki",
             "uid": "P8E80F9AEF21F6940"
@@ -1573,7 +1573,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{app=\"masdika-app\"}",
+              "expr": "{app=\"masdika-app\"} !~ \"(?i)(vps-scheduler|hourly-billing|resource-monitor)\"",
               "refId": "A"
             }
           ]
