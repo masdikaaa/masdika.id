@@ -1430,7 +1430,6 @@ data:
         "sre",
         "slo",
         "error-budget",
-        "gojek",
         "traefik",
         "masdika"
       ],
