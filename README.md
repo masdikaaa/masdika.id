@@ -193,6 +193,130 @@ Aplikasi web dapat diakses langsung melalui peramban di `http://localhost:3000`.
 
 ---
 
+## 🐳 Panduan Deployment dengan Docker Compose (Standalone Server)
+
+Mode deployment ini cocok untuk server VPS mandiri (*single-node*) tanpa klaster Kubernetes, atau untuk pengujian integrasi staging secara cepat.
+
+### 1. Prasyarat Sistem
+* **OS**: Ubuntu 22.04 / 24.04 LTS atau Debian 12
+* **Docker Engine**: Versi 24.x ke atas & Docker Compose V2 (`docker compose version`)
+* **Spesifikasi Minimum**: 4 GB RAM, 2 vCPU
+
+### 2. Langkah Deployment
+```bash
+# 1. Clone repositori ke server
+git clone https://github.com/masdikaaa/masdika.id.git
+cd masdika
+
+# 2. Siapkan file konfigurasi environment .env
+cp .env.example .env
+nano .env  # Lengkapi kredensial DATABASE_URL, REDIS_PASSWORD, SESSION_SECRET, dsb.
+
+# 3. Build image dan jalankan seluruh container di background
+docker compose up -d --build
+
+# 4. Verifikasi status dan healthcheck container
+docker compose ps
+
+# 5. Jalankan migrasi skema database Prisma (jika database baru)
+docker compose exec app npx prisma migrate deploy --schema=apps/web/prisma/schema.prisma
+```
+
+### 3. Manajemen Layanan Docker
+```bash
+# Melihat log realtime seluruh service
+docker compose logs -f --tail=100
+
+# Melihat log khusus web app
+docker compose logs -f app
+
+# Melakukan restart layanan tanpa menghapus data volume
+docker compose restart app worker
+
+# Menghentikan seluruh container dengan aman
+docker compose down
+```
+
+---
+
+## ☸️ Panduan Deployment dengan Kubernetes (K3s Production)
+
+Platform ini dirancang secara natif untuk berjalan di atas Kubernetes K3s dengan dukungan penuh **GitOps (ArgoCD)**, **Traefik Ingress Controller**, **Zero-Trust NetworkPolicies**, dan **Zero-Packet-Drop Rolling Updates**.
+
+### 🌟 Metode 1: Otomatis via GitOps ArgoCD (Rekomendasi Resmi Produksi)
+Dalam arsitektur resmi produksi, Anda **tidak perlu menjalankan `kubectl apply` manual** saat melakukan rilis baru:
+1. Developer melakukan `push` atau merge ke branch `master`.
+2. Pipeline GitHub Actions (`deploy.yml`) otomatis menjalankan SAST, SCA, Trivy Container CVE Scan, dan memperbarui tag image pada manifest [`k8s/app/deployment.yaml`](k8s/app/deployment.yaml).
+3. **ArgoCD Controller** di `192.168.79.15` secara otomatis mendeteksi perubahan Git dan melakukan rekonsiliasi (*Self-Healing & Auto-Sync*) ke klaster K3s tanpa downtime.
+4. Jika ingin memicu sinkronisasi instan via CLI:
+   ```bash
+   argocd app sync masdika-app
+   ```
+
+---
+
+### 🛠️ Metode 2: Deployment Manual via Manifest Deklaratif (`kubectl`)
+Jika Anda menyiapkan klaster Kubernetes baru dari nol tanpa kontroler ArgoCD:
+
+#### 1. Buat Namespace & Base Configuration
+```bash
+# Terapkan namespace masdika
+kubectl apply -f k8s/base/namespace.yaml
+
+# Terapkan ConfigMap global
+kubectl apply -f k8s/base/configmap.yaml
+```
+
+#### 2. Buat Kubernetes Secret Kredensial
+Buat Secret `masdika-credentials` yang menampung seluruh variabel sensitif:
+```bash
+kubectl create secret generic masdika-credentials \
+  --namespace=masdika \
+  --from-literal=DATABASE_URL="postgresql://masdika:Andikaferdi11@masdika-db:5432/masdika?schema=public" \
+  --from-literal=REDIS_URL="redis://:Andikaferdi11@masdika-redis:6379" \
+  --from-literal=POSTGRES_USER="masdika" \
+  --from-literal=POSTGRES_PASSWORD="Andikaferdi11" \
+  --from-literal=POSTGRES_DB="masdika" \
+  --from-literal=REDIS_PASSWORD="Andikaferdi11" \
+  --from-literal=SESSION_SECRET="kunci-rahasia-sesi-minimal-32-karakter" \
+  --from-literal=CRON_SECRET="kunci-rahasia-cron-api" \
+  --from-literal=ELASTIC_PASSWORD="Andikaferdi11" \
+  --from-literal=GRAFANA_ADMIN_PASSWORD="Andikaferdi11" \
+  --from-literal=KIBANA_PASSWORD="Andikaferdi11"
+```
+
+#### 3. Terapkan Database, Cache & Storage PVC
+```bash
+kubectl apply -f k8s/databases/
+```
+*Manifest ini akan mendirikan PostgreSQL 18, Redis 7, Elasticsearch, serta CronJob backup otomatis.*
+
+#### 4. Terapkan Zero-Trust Network Policies
+```bash
+kubectl apply -f k8s/security/
+```
+*Mengaktifkan firewall CNI yang memblokir akses ke database dari luar pod resmi.*
+
+#### 5. Terapkan Monitoring & APM Stack
+```bash
+kubectl apply -f k8s/monitoring/
+```
+*Mendeploy Elastic APM Server, Prometheus, Grafana, Kibana, dan Loki.*
+
+#### 6. Terapkan Aplikasi Web, Worker, VNC Proxy & Ingress
+```bash
+kubectl apply -f k8s/app/
+```
+*Mendeploy `masdika-app` (didukung HPA 1-5 pod & preStop connection draining), `masdika-worker`, `masdika-vnc-proxy`, dan Traefik Ingress dengan middleware Rate Limiter & Security Headers.*
+
+#### 7. Verifikasi Status Rollout
+```bash
+kubectl get pods -n masdika -o wide
+kubectl get ingress,middleware,cronjob -n masdika
+```
+
+---
+
 ## 🛠️ Cheatsheet Operasional Kubernetes (K3s)
 
 Berikut perintah penting untuk pemeliharaan dan inspeksi cluster via SSH di node server (`192.168.79.4`):
