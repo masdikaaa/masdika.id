@@ -91,3 +91,4 @@ describe('PAYG VPS Hourly Rate Calculation - vps-billing-rate.ts', () => {
     expect(getEffectiveHourlyRate(vpsSuspended, mockPricing)).toBe(0);
   });
 });
+

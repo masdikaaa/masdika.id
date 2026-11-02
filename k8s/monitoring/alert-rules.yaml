@@ -197,3 +197,30 @@ data:
             annotations:
               summary: "🛑 Ingress Rate-Limiting Active (HTTP 429 Surge)"
               description: "Traefik rate-limiting middleware is aggressively throttling incoming malicious traffic (>5 req/s blocked with HTTP 429). Ingress DDoS/scraping mitigation active."
+
+      # ==========================================
+      # 5. ENTERPRISE SRE SLI/SLO & ERROR BUDGET ALERTS
+      # ==========================================
+      - name: masdika-sre-slo-alerts
+        rules:
+          # 17. SRE Availability SLO Breach (< 99.9% Three-Nines)
+          - alert: SREAvailabilitySLOBreach
+            expr: clamp_max((1 - ((sum(increase(traefik_service_requests_total{service=~"masdika-masdika-app.*", code=~"5.."}[1h])) or vector(0)) / (sum(increase(traefik_service_requests_total{service=~"masdika-masdika-app.*"}[1h])) or vector(1)))) * 100, 100) < 99.9
+            for: 5m
+            labels:
+              severity: critical
+              tier: sre
+            annotations:
+              summary: "?? SRE SLO Breach: Masdika Availability Dropped Below 99.9%"
+              description: "Platform availability in the last 1 hour has fallen below the 99.9% Three-Nines SLO. Immediate SRE triage required."
+
+          # 18. SRE Error Budget Rapid Burn (> 14.4x normal rate)
+          - alert: SREErrorBudgetRapidBurn
+            expr: (((sum(rate(traefik_service_requests_total{service=~"masdika-masdika-app.*", code=~"5.."}[1h])) or vector(0)) / (sum(rate(traefik_service_requests_total{service=~"masdika-masdika-app.*"}[1h])) or vector(1))) / 0.001) > 14.4
+            for: 2m
+            labels:
+              severity: critical
+              tier: sre
+            annotations:
+              summary: "?? SRE Emergency: Error Budget Rapidly Burning (>14x Rate)"
+              description: "The 30-day error budget is burning 14.4x faster than normal. At this rate, 2% of the entire monthly budget is consumed every single hour. Activate incident response."

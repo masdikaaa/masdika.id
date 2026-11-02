@@ -816,20 +816,20 @@ data:
         {
           "id": 1,
           "gridPos": {
-            "h": 6,
+            "h": 5,
             "w": 6,
             "x": 0,
             "y": 0
           },
           "type": "gauge",
-          "title": "SLO Availability (Target: 99.9%)",
+          "title": "Availability SLI (Target: 99.9% Three-Nines)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
-              "min": 95,
+              "min": 98,
               "max": 100,
               "unit": "percent",
               "thresholds": {
@@ -854,7 +854,7 @@ data:
           },
           "targets": [
             {
-              "expr": "clamp_max((1 - (sum(rate(traefik_entrypoint_requests_total{code=~\"5..\"}[1h])) / (sum(rate(traefik_entrypoint_requests_total[1h])) > 0))) * 100, 100) or vector(100)",
+              "expr": "clamp_max((1 - ((sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[24h])) or vector(0)) / (sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[24h])) or vector(1)))) * 100, 100)",
               "legendFormat": "Availability %",
               "refId": "A"
             }
@@ -863,13 +863,270 @@ data:
         {
           "id": 2,
           "gridPos": {
-            "h": 6,
+            "h": 5,
             "w": 6,
             "x": 6,
             "y": 0
           },
+          "type": "gauge",
+          "title": "Monthly Error Budget Remaining",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "unit": "percent",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 20
+                  },
+                  {
+                    "color": "green",
+                    "value": 50
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "clamp_min(clamp_max(((((1 - ((sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[24h])) or vector(0)) / (sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[24h])) or vector(1)))) * 100) - 99.9) / 0.1) * 100, 100), 0)",
+              "legendFormat": "Budget Remaining %",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
           "type": "stat",
-          "title": "Inbound Traffic (Realtime RPS & Total Processed)",
+          "title": "1h Error Budget Burn Rate",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "unit": "short",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 14.4
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "clamp_min(((sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[1h])) or vector(0)) / (sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[1h])) or vector(1))) / 0.001, 0)",
+              "legendFormat": "Burn Rate (1x = normal)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "SRE Release Gate Policy",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 20,
+                    "to": 100,
+                    "result": {
+                      "text": "PERMITTED (HEALTHY)",
+                      "color": "green"
+                    }
+                  }
+                },
+                {
+                  "type": "range",
+                  "options": {
+                    "from": 0,
+                    "to": 19.999,
+                    "result": {
+                      "text": "CODE FREEZE (BLOCKED)",
+                      "color": "red"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 20
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "clamp_min(clamp_max(((((1 - ((sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[24h])) or vector(0)) / (sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[24h])) or vector(1)))) * 100) - 99.9) / 0.1) * 100, 100), 0)",
+              "legendFormat": "Policy",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 5
+          },
+          "type": "gauge",
+          "title": "Latency SLI (<300ms, Target: 95%)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "min": 80,
+              "max": 100,
+              "unit": "percent",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 90
+                  },
+                  {
+                    "color": "green",
+                    "value": 95
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "clamp_max(((sum(increase(traefik_service_request_duration_seconds_bucket{service=~\"masdika-masdika-app.*\", le=\"0.3\"}[24h])) or vector(0)) / (sum(increase(traefik_service_request_duration_seconds_count{service=~\"masdika-masdika-app.*\"}[24h])) or vector(1))) * 100, 100)",
+              "legendFormat": "Fast Requests %",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 5
+          },
+          "type": "stat",
+          "title": "Downtime Consumed (24h Window)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "unit": "m",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 10
+                  },
+                  {
+                    "color": "red",
+                    "value": 43.2
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "(((sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[24h])) or vector(0)) / (sum(increase(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[24h])) or vector(1))) * 1440)",
+              "legendFormat": "Minutes Lost",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 5
+          },
+          "type": "stat",
+          "title": "Inbound Traffic (RPS & Total Volume)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -891,38 +1148,54 @@ data:
             },
             "overrides": [
               {
-                "matcher": { "id": "byName", "options": "Current RPS" },
-                "properties": [{ "id": "unit", "value": "reqps" }]
+                "matcher": {
+                  "id": "byName",
+                  "options": "Current RPS"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "reqps"
+                  }
+                ]
               },
               {
-                "matcher": { "id": "byName", "options": "Total Processed" },
-                "properties": [{ "id": "unit", "value": "short" }]
+                "matcher": {
+                  "id": "byName",
+                  "options": "Total Processed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  }
+                ]
               }
             ]
           },
           "targets": [
             {
-              "expr": "sum(rate(traefik_entrypoint_requests_total[1m])) or vector(0)",
+              "expr": "sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[1m])) or vector(0)",
               "legendFormat": "Current RPS",
               "refId": "A"
             },
             {
-              "expr": "sum(traefik_entrypoint_requests_total)",
+              "expr": "sum(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"})",
               "legendFormat": "Total Processed",
               "refId": "B"
             }
           ]
         },
         {
-          "id": 3,
+          "id": 8,
           "gridPos": {
-            "h": 6,
+            "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 0
+            "x": 18,
+            "y": 5
           },
           "type": "stat",
-          "title": "HTTP 5xx Error Rate (%)",
+          "title": "Live Server Error Rate (%)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -942,7 +1215,7 @@ data:
                   },
                   {
                     "color": "orange",
-                    "value": 0.5
+                    "value": 0.1
                   },
                   {
                     "color": "red",
@@ -955,70 +1228,87 @@ data:
           },
           "targets": [
             {
-              "expr": "((sum(rate(traefik_entrypoint_requests_total{code=~\"5..\"}[1m])) / (sum(rate(traefik_entrypoint_requests_total[1m])) > 0)) * 100) or vector(0)",
+              "expr": "((sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[1m])) or vector(0)) / (sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[1m])) or vector(1))) * 100",
               "legendFormat": "5xx Error %",
               "refId": "A"
             }
           ]
         },
         {
-          "id": 4,
+          "id": 9,
           "gridPos": {
-            "h": 6,
-            "w": 6,
-            "x": 18,
-            "y": 0
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 10
           },
-          "type": "stat",
-          "title": "Latency (p95 Tail)",
+          "type": "timeseries",
+          "title": "SLO Availability & Target (99.9%)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
-              "unit": "ms",
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
+              "unit": "percent",
+              "min": 98,
+              "max": 100.2,
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 15
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "SLO Target 99.9% (Three Nines)"
+                },
+                "properties": [
                   {
-                    "color": "green",
-                    "value": null
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
                   },
                   {
-                    "color": "orange",
-                    "value": 500
-                  },
-                  {
-                    "color": "red",
-                    "value": 1000
+                    "id": "custom.lineStyle",
+                    "value": {
+                      "dash": [
+                        10,
+                        10
+                      ]
+                    }
                   }
                 ]
               }
-            },
-            "overrides": []
+            ]
           },
           "targets": [
             {
-              "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_sum[15m])) / (sum(rate(traefik_entrypoint_request_duration_seconds_count[15m])) > 0) * 1000) or (sum(traefik_entrypoint_request_duration_seconds_sum) / sum(traefik_entrypoint_request_duration_seconds_count) * 1000)",
-              "legendFormat": "Response Latency",
+              "expr": "clamp_max((1 - ((sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\", code=~\"5..\"}[15m])) or vector(0)) / (sum(rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[15m])) or vector(1)))) * 100, 100)",
+              "legendFormat": "SLI Availability %",
               "refId": "A"
+            },
+            {
+              "expr": "vector(99.9)",
+              "legendFormat": "SLO Target 99.9% (Three Nines)",
+              "refId": "B"
             }
           ]
         },
         {
-          "id": 5,
+          "id": 10,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
-            "x": 0,
-            "y": 6
+            "x": 12,
+            "y": 10
           },
           "type": "timeseries",
-          "title": "Traffic (RPS by HTTP Status Code)",
+          "title": "Inbound Traffic (RPS by Status Code)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -1036,22 +1326,22 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (code) (rate(traefik_entrypoint_requests_total[1m]))",
+              "expr": "sum by (code) (rate(traefik_service_requests_total{service=~\"masdika-masdika-app.*\"}[1m]))",
               "legendFormat": "HTTP {{code}}",
               "refId": "A"
             }
           ]
         },
         {
-          "id": 6,
+          "id": 11,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
-            "x": 12,
-            "y": 6
+            "x": 0,
+            "y": 18
           },
           "type": "timeseries",
-          "title": "Latency Quantiles (p50, p90, p95, p99)",
+          "title": "Response Latency Quantiles (p50, p90, p95, p99)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -1069,34 +1359,34 @@ data:
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+              "expr": "histogram_quantile(0.50, sum(rate(traefik_service_request_duration_seconds_bucket{service=~\"masdika-masdika-app.*\"}[5m])) by (le)) * 1000",
               "legendFormat": "p50 (Median)",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.90, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+              "expr": "histogram_quantile(0.90, sum(rate(traefik_service_request_duration_seconds_bucket{service=~\"masdika-masdika-app.*\"}[5m])) by (le)) * 1000",
               "legendFormat": "p90",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+              "expr": "histogram_quantile(0.95, sum(rate(traefik_service_request_duration_seconds_bucket{service=~\"masdika-masdika-app.*\"}[5m])) by (le)) * 1000",
               "legendFormat": "p95",
               "refId": "C"
             },
             {
-              "expr": "histogram_quantile(0.99, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+              "expr": "histogram_quantile(0.99, sum(rate(traefik_service_request_duration_seconds_bucket{service=~\"masdika-masdika-app.*\"}[5m])) by (le)) * 1000",
               "legendFormat": "p99 (Tail)",
               "refId": "D"
             }
           ]
         },
         {
-          "id": 7,
+          "id": 12,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
-            "x": 0,
-            "y": 15
+            "x": 12,
+            "y": 18
           },
           "type": "timeseries",
           "title": "Saturation (Host & Pods CPU / RAM %)",
@@ -1128,46 +1418,8 @@ data:
             },
             {
               "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"masdika\",container!=\"POD\",container!=\"\"}[1m])) * 100",
-              "legendFormat": "Total Pods CPU %",
+              "legendFormat": "Pods Total CPU %",
               "refId": "C"
-            }
-          ]
-        },
-        {
-          "id": 8,
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 15
-          },
-          "type": "timeseries",
-          "title": "Saturation (PVC Storage Volume %)",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "percent",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "fillOpacity": 20
-              }
-            },
-            "overrides": []
-          },
-          "targets": [
-            {
-              "expr": "(kubelet_volume_stats_used_bytes{namespace=\"masdika\"} / kubelet_volume_stats_capacity_bytes{namespace=\"masdika\"}) * 100",
-              "legendFormat": "{{persistentvolumeclaim}}",
-              "refId": "A"
-            },
-            {
-              "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100)",
-              "legendFormat": "Host Root Disk",
-              "refId": "B"
             }
           ]
         }
@@ -1177,7 +1429,8 @@ data:
       "tags": [
         "sre",
         "slo",
-        "golden-signals",
+        "error-budget",
+        "gojek",
         "traefik",
         "masdika"
       ],
@@ -1195,9 +1448,9 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "SRE Cockpit - The 4 Golden Signals & SLOs",
+      "title": "SRE Cockpit - SLI, SLO (99.9%) & Error Budget",
       "uid": "masdika-sre-cockpit",
-      "version": 1
+      "version": 2
     }
   soc-security.json: |-
     {
