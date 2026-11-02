@@ -321,8 +321,7 @@ masdika.id/
 ├── scripts/
 │   ├── chaos-experiment.sh       # SRE Chaos Interactive CLI Tool (pod-kill, cpu-burn, full-drill)
 │   ├── pre-commit-secret-scan.js # GitLeaks Pre-Commit Validation Hook
-│   ├── seal-secret.js            # Generator Bitnami Sealed Secrets
-│   └── sync-k8s-env.py           # Sinkronisasi K8s secret dari file .env
+│   └── seal-secret.js            # Generator Bitnami Sealed Secrets
 ├── Dockerfile                    # Multi-stage production container build
 ├── package.json                  # Workspace monorepo root & script runners
 └── README.md                     # Dokumentasi teknis sistem
