@@ -26,6 +26,11 @@ data:
       receiver: 'email-admin'
       routes:
         - match:
+            tier: security
+          receiver: 'email-admin'
+          group_wait: 5s
+          repeat_interval: 30m
+        - match:
             severity: critical
           receiver: 'email-admin'
           repeat_interval: 1h
@@ -37,7 +42,7 @@ data:
             send_resolved: true
             html: '{{ template "email.masdika.html" . }}'
             headers:
-              Subject: '{{ if eq .Status "firing" }}🚨 [FIRING - {{ .CommonLabels.severity | toUpper }}]{{ else }}✅ [RESOLVED]{{ end }} {{ .CommonLabels.alertname }} ({{ if .CommonLabels.pod }}{{ .CommonLabels.pod }}{{ else }}{{ .CommonLabels.instance }}{{ end }})'
+              Subject: '{{ if eq .CommonLabels.tier "security" }}🛡️ [SOC ALERT - {{ .CommonLabels.severity | toUpper }}]{{ else if eq .Status "firing" }}🚨 [FIRING - {{ .CommonLabels.severity | toUpper }}]{{ else }}✅ [RESOLVED]{{ end }} {{ .CommonLabels.alertname }} ({{ if .CommonLabels.pod }}{{ .CommonLabels.pod }}{{ else }}{{ .CommonLabels.instance }}{{ end }})'
 
   email.tmpl: |
     {{ define "email.masdika.html" }}
@@ -61,7 +66,7 @@ data:
                     <tr>
                       <td>
                         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255, 255, 255, 0.85); margin-bottom: 6px;">
-                          MASDIKA CLOUD PLATFORM • SRE INCIDENT NOTIFIER
+                          {{ if eq .CommonLabels.tier "security" }}MASDIKA SOC • INTRUSION &amp; SECURITY ALERT{{ else }}MASDIKA CLOUD PLATFORM • SRE INCIDENT NOTIFIER{{ end }}
                         </div>
                         <div style="font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.2;">
                           {{ if eq .Status "firing" }}🚨 [FIRING] {{ .CommonLabels.alertname }}{{ else }}✅ [RESOLVED] {{ .CommonLabels.alertname }}{{ end }}

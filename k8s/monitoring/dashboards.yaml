@@ -1199,3 +1199,410 @@ data:
       "uid": "masdika-sre-cockpit",
       "version": 1
     }
+  soc-security.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": true,
+      "panels": [
+        {
+          "id": 1,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Host Security & Threat Posture",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "blue",
+                    "value": 2
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "SECURE / NORMAL",
+                      "color": "green",
+                      "index": 0
+                    },
+                    "1": {
+                      "text": "ATTACKS MITIGATED (429)",
+                      "color": "yellow",
+                      "index": 1
+                    },
+                    "2": {
+                      "text": "SSH SESSION ACTIVE",
+                      "color": "blue",
+                      "index": 2
+                    },
+                    "3": {
+                      "text": "CRITICAL: BRUTE-FORCE",
+                      "color": "red",
+                      "index": 3
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "(increase(ssh_failed_logins_total[5m]) > 5) * 3 or (increase(ssh_accepted_logins_total[5m]) > 0) * 2 or (sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[5m])) > 0) * 1 or vector(0)",
+              "legendFormat": "Threat Level",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 6,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "SSH Accepted Logins",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "ssh_accepted_logins_total or vector(0)",
+              "legendFormat": "Logins",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 10,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "SSH Failed Logins (Brute-Force)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "unit": "short",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "ssh_failed_logins_total or vector(0)",
+              "legendFormat": "Failures",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 15,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Host Sudo Invocations",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "purple"
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sudo_executions_total or vector(0)",
+              "legendFormat": "Commands",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 19,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "Rate-Limited Attacks (429)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "orange"
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sum(traefik_entrypoint_requests_total{code=\"429\"}) or vector(0)",
+              "legendFormat": "Dropped Req",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "type": "timeseries",
+          "title": "Host Authentication & Privilege Auditing Timeline",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 15
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "rate(ssh_accepted_logins_total[2m])",
+              "legendFormat": "Successful SSH Logins/s",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(ssh_failed_logins_total[2m])",
+              "legendFormat": "Failed SSH Attempts/s",
+              "refId": "B"
+            },
+            {
+              "expr": "rate(sudo_executions_total[2m])",
+              "legendFormat": "Sudo Escalations/s",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "type": "timeseries",
+          "title": "Web Attack Probes & Scanner Activity Timeline",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "fillOpacity": 20
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[1m]))",
+              "legendFormat": "Rate-Limited (429)",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"403\"}[1m]))",
+              "legendFormat": "Forbidden (403)",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"404\"}[1m]))",
+              "legendFormat": "Path Probes (404)",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"401\"}[1m]))",
+              "legendFormat": "Unauthorized (401)",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "gridPos": {
+            "h": 10,
+            "w": 14,
+            "x": 0,
+            "y": 13
+          },
+          "type": "logs",
+          "title": "Live Host Security Audit Log Stream (/var/log/auth.log)",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "options": {
+            "showLabels": false,
+            "wrapLogMessage": true,
+            "enableLogDetails": true,
+            "sortOrder": "Descending"
+          },
+          "targets": [
+            {
+              "expr": "{job=\"host-auth\"}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "gridPos": {
+            "h": 10,
+            "w": 10,
+            "x": 14,
+            "y": 13
+          },
+          "type": "logs",
+          "title": "Application Security & Blocked SSRF Logs",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "options": {
+            "showLabels": false,
+            "wrapLogMessage": true,
+            "enableLogDetails": true,
+            "sortOrder": "Descending"
+          },
+          "targets": [
+            {
+              "expr": "{app=\"masdika-app\"} |~ \"(?i)(ssrf|attack|forbidden|unauthorized|blocked|malicious)\"",
+              "refId": "A"
+            }
+          ]
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 39,
+      "tags": [
+        "soc",
+        "security",
+        "threat-intel",
+        "masdika",
+        "sre"
+      ],
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Security Operations Center (SOC) & Threat Intelligence Cockpit",
+      "uid": "masdika-soc-security",
+      "version": 1
+    }

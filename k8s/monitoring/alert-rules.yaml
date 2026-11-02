@@ -137,3 +137,63 @@ data:
             annotations:
               summary: "p95 Request Latency > 800ms"
               description: "95th percentile response time exceeds 800ms. Check database query performance and app memory pressure."
+
+      # ------------------------------------------------------------------------
+      # Group 4: SOC, Intrusion Detection & Threat Intelligence Alerts
+      # ------------------------------------------------------------------------
+      - name: masdika-security-alerts
+        rules:
+          # 12. Host SSH Login Detected (Immediate Audit Notification)
+          - alert: HostSSHLoginDetected
+            expr: increase(ssh_accepted_logins_total[2m]) > 0
+            for: 0m
+            labels:
+              severity: critical
+              tier: security
+            annotations:
+              summary: "🚨 Host SSH Login Detected on masdika"
+              description: "A successful SSH session login was authenticated on Linux host masdika. Review /var/log/auth.log or Grafana SOC Cockpit immediately to verify authorized administrative access."
+
+          # 13. SSH Brute-Force Attack Spike
+          - alert: HostSSHBruteForceAttempt
+            expr: increase(ssh_failed_logins_total[2m]) >= 5
+            for: 0m
+            labels:
+              severity: critical
+              tier: security
+            annotations:
+              summary: "🛡️ Host SSH Brute-Force Authentication Spike"
+              description: "More than 5 failed SSH authentication attempts detected in under 2 minutes on host masdika. Potential brute-force dictionary attack in progress."
+
+          # 14. Sudo Privilege Escalation Detected
+          - alert: HostSudoPrivilegeElevation
+            expr: increase(sudo_executions_total[2m]) > 0
+            for: 0m
+            labels:
+              severity: warning
+              tier: security
+            annotations:
+              summary: "⚠️ Sudo Privilege Escalation Executed"
+              description: "A command was executed with elevated root privileges via sudo on Linux host masdika. Check audit logs to confirm authorization."
+
+          # 15. Web Attack Scanner / Vulnerability Probe Spike
+          - alert: WebAttackScannerSpike
+            expr: sum(rate(traefik_entrypoint_requests_total{code=~"401|403|404"}[2m])) > 15
+            for: 1m
+            labels:
+              severity: warning
+              tier: security
+            annotations:
+              summary: "🔍 Web Attack Probe / Scanner Spike Detected"
+              description: "Abnormal surge in HTTP 401/403/404 errors (>15 req/s) detected on Traefik ingress. Possible vulnerability scanning, path directory traversal, or automated exploit bots."
+
+          # 16. Web Rate Limit Throttling Attack (DDoS / Scraping)
+          - alert: WebRateLimitThrottlingSpike
+            expr: sum(rate(traefik_entrypoint_requests_total{code="429"}[2m])) > 5
+            for: 1m
+            labels:
+              severity: warning
+              tier: security
+            annotations:
+              summary: "🛑 Ingress Rate-Limiting Active (HTTP 429 Surge)"
+              description: "Traefik rate-limiting middleware is aggressively throttling incoming malicious traffic (>5 req/s blocked with HTTP 429). Ingress DDoS/scraping mitigation active."

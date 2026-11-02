@@ -70,6 +70,10 @@ data:
         static_configs:
           - targets: ["masdika-node-exporter:9100"]
 
+      - job_name: "promtail"
+        static_configs:
+          - targets: ["masdika-promtail:9080"]
+
       # Ingress Controller (Traefik 4 Golden Signals: Traffic, Latency p95/p99, Error Rate 5xx/4xx)
       - job_name: "traefik"
         kubernetes_sd_configs:
