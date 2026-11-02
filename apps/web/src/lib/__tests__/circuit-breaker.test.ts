@@ -129,3 +129,4 @@ describe('Circuit Breaker & Graceful Degradation Engine', () => {
     expect(res).toBe('mock_data');
   });
 });
+

@@ -258,3 +258,4 @@ export async function withCircuitBreaker<T>(
   const breaker = circuitBreakerRegistry.getOrCreate(name, options);
   return breaker.execute(action, fallback);
 }
+
