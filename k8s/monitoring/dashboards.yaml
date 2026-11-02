@@ -869,14 +869,13 @@ data:
             "y": 0
           },
           "type": "stat",
-          "title": "Traffic Rate (Inbound RPS)",
+          "title": "Inbound Traffic (Realtime RPS & Total Processed)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
-              "unit": "reqps",
               "color": {
                 "mode": "thresholds"
               },
@@ -890,13 +889,27 @@ data:
                 ]
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Current RPS" },
+                "properties": [{ "id": "unit", "value": "reqps" }]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Total Processed" },
+                "properties": [{ "id": "unit", "value": "short" }]
+              }
+            ]
           },
           "targets": [
             {
               "expr": "sum(rate(traefik_entrypoint_requests_total[1m])) or vector(0)",
-              "legendFormat": "Total RPS",
+              "legendFormat": "Current RPS",
               "refId": "A"
+            },
+            {
+              "expr": "sum(traefik_entrypoint_requests_total)",
+              "legendFormat": "Total Processed",
+              "refId": "B"
             }
           ]
         },
@@ -990,8 +1003,8 @@ data:
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) * 1000 or vector(0)",
-              "legendFormat": "p95 Latency",
+              "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_sum[15m])) / (sum(rate(traefik_entrypoint_request_duration_seconds_count[15m])) > 0) * 1000) or (sum(traefik_entrypoint_request_duration_seconds_sum) / sum(traefik_entrypoint_request_duration_seconds_count) * 1000)",
+              "legendFormat": "Response Latency",
               "refId": "A"
             }
           ]
