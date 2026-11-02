@@ -80,9 +80,13 @@ data:
           - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
             regex: traefik
             action: keep
-          - source_labels: [__meta_kubernetes_pod_container_port_name]
-            regex: metrics
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            regex: "8080"
             action: keep
+          - source_labels: [__meta_kubernetes_pod_ip]
+            regex: (.+)
+            target_label: __address__
+            replacement: ${1}:9100
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
 
