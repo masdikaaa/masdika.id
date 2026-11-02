@@ -30,6 +30,7 @@ export async function GET(req: Request) {
     });
 
     if (!validation.safe) {
+      console.warn(`[SECURITY ALERT] [SSRF BLOCKED] Destination rejected: ${url} (Reason: ${validation.reason})`);
       return new NextResponse(`URL not allowed: ${validation.reason}`, { status: 403 });
     }
 

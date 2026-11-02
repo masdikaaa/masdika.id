@@ -66,6 +66,7 @@ export async function POST(req: Request) {
     });
 
     if (!ssrfCheck.safe) {
+      console.warn(`[SECURITY ALERT] [SSRF BLOCKED] Community link probe rejected: ${link} (Reason: ${ssrfCheck.reason})`);
       return NextResponse.json(
         { error: 'Invalid group invite link or restricted IP address.' },
         { status: 400 }
