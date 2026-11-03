@@ -247,7 +247,7 @@ export function PortfolioDetailContent({
     : "Completed";
 
   return (
-    <div className="pt-24 md:pt-32 pb-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div className="pt-24 md:pt-32 pb-20 lg:pb-28 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       
       {/* Back Navigation Bar */}
       <div className="mb-6 md:mb-8 flex items-center justify-between">

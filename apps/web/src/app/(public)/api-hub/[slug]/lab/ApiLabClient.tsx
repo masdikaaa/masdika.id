@@ -188,7 +188,7 @@ export default function ApiLabClient({ project }: { project: any }) {
   };
 
   return (
-    <div className={cn("min-h-screen pt-28 md:pt-32 pb-32 lg:pb-40 px-4 relative overflow-hidden bg-transparent", isDark ? "text-white" : "text-slate-900")}>
+    <div className={cn("min-h-screen pt-28 md:pt-32 pb-20 lg:pb-28 px-4 relative overflow-hidden bg-transparent", isDark ? "text-white" : "text-slate-900")}>
       <div className="max-w-6xl mx-auto relative z-10 pt-10">
 
         <div className="flex items-center mb-8">

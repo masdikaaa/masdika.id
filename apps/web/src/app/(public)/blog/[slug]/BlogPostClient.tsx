@@ -248,7 +248,7 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
 
   if (!post) {
     return (
-      <div className="pt-28 md:pt-32 pb-12 lg:pb-16 text-center min-h-screen">
+      <div className="pt-28 md:pt-32 pb-20 lg:pb-28 text-center min-h-screen">
         <h1 className={cn("text-3xl font-bold mb-4", isDark ? "bg-gradient-to-br from-cyan-400 to-cyan-200 bg-clip-text text-transparent" : "text-slate-900")}>Post not found</h1>
         <Link href="/blog" className={cn("hover:underline", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-500")}>Return to Blog</Link>
       </div>
@@ -257,7 +257,7 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
 
   return (
     <div className="w-full max-w-full overflow-x-hidden min-w-0">
-      <div className="pt-28 md:pt-32 pb-12 lg:pb-16 max-w-4xl mx-auto px-5 sm:px-6 lg:px-8">
+      <div className="pt-28 md:pt-32 pb-20 lg:pb-28 max-w-4xl mx-auto px-5 sm:px-6 lg:px-8">
         <header className="mb-12 relative">
           <div className="relative z-10">
             <Link href="/blog" className={cn("inline-flex items-center text-sm font-medium mb-8 transition-colors gap-2 group", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-600")}>

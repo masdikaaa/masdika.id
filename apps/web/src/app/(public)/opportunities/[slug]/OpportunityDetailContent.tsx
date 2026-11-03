@@ -56,7 +56,7 @@ export function OpportunityDetailContent({ opportunity }: { opportunity: Opportu
   const backLink = opportunity.type === 'JOBS' ? '/vacancies' : opportunity.type === 'EVENT' ? '/events' : '/opportunities';
 
   return (
-    <div className="pt-28 md:pt-32 pb-12 lg:pb-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="pt-28 md:pt-32 pb-20 lg:pb-28 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <AnimatedSection className="mb-8">
         <header className="mb-12 relative">
           {/* Subtle left-aligned glow */}

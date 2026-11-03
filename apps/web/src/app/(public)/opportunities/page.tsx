@@ -68,7 +68,7 @@ export default async function OpportunitiesPage() {
   };
 
   return (
-    <div className="pt-28 md:pt-32 pb-12 lg:pb-16 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="pt-28 md:pt-32 pb-20 lg:pb-28 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           
           <AnimatedSection className="text-center max-w-3xl mx-auto mb-16 pt-10">
             <span className="text-cyan-500 font-bold tracking-[0.2em] text-xs mb-4 block">
