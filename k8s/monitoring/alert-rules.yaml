@@ -224,3 +224,30 @@ data:
             annotations:
               summary: "?? SRE Emergency: Error Budget Rapidly Burning (>14x Rate)"
               description: "The 30-day error budget is burning 14.4x faster than normal. At this rate, 2% of the entire monthly budget is consumed every single hour. Activate incident response."
+
+      # ==========================================
+      # 6. CONTINUOUS SECURITY & CVE ALERTS (TRIVY OPERATOR)
+      # ==========================================
+      - name: masdika-security-cve-alerts
+        rules:
+          # 19. Trivy Critical Image Vulnerability Detected
+          - alert: TrivyCriticalVulnerabilityFound
+            expr: sum(trivy_image_vulnerabilities{severity="Critical"}) > 0
+            for: 10m
+            labels:
+              severity: critical
+              tier: security
+            annotations:
+              summary: "🚨 Critical Vulnerability (CVE) Detected in Running Container Image"
+              description: "Trivy Operator detected Critical severity CVE(s) in active cluster workloads. Immediate patch or base image upgrade required."
+
+          # 20. Trivy Exposed Secret in Workload Configuration
+          - alert: TrivyExposedSecretDetected
+            expr: sum(trivy_exposedsecret_secrets{severity=~"Critical|High"}) > 0
+            for: 5m
+            labels:
+              severity: critical
+              tier: security
+            annotations:
+              summary: "🚨 Exposed Secret / Credential Detected in Cluster Workload"
+              description: "Trivy Operator exposed secret scanner found sensitive token(s)/secret(s) unencrypted in cluster configurations."

@@ -168,6 +168,9 @@ spec:
               app: masdika-kibana
         - podSelector:
             matchLabels:
+              app: masdika-vector
+        - podSelector:
+            matchLabels:
               app: masdika-logstash
         - podSelector:
             matchLabels:
@@ -187,3 +190,39 @@ spec:
       ports:
         - protocol: TCP
           port: 9200
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masdika-vector-isolation
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+    security.kubernetes.io/tier: telemetry-pipeline
+spec:
+  podSelector:
+    matchLabels:
+      app: masdika-vector
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-app
+        - podSelector:
+            matchLabels:
+              app: masdika-worker
+        - podSelector:
+            matchLabels:
+              app: masdika-vnc-proxy
+      ports:
+        - protocol: TCP
+          port: 5044
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-prometheus
+      ports:
+        - protocol: TCP
+          port: 9090

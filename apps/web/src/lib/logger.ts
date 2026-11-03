@@ -19,10 +19,10 @@ export const logger = {
     else if (level === 'warn') console.warn(`[${level.toUpperCase()}]`, logOutput);
     else console.log(`[${level.toUpperCase()}]`, logOutput);
 
-    // Jika LOGSTASH_URL disetting (misal http://localhost:5044 atau http://logstash:5044 di Docker)
-    const rawLogstashUrl = process.env.LOGSTASH_URL;
-    const logstashUrl = rawLogstashUrl ? rawLogstashUrl.replace(/^["']|["']$/g, '').trim() : undefined;
-    if (!logstashUrl) return; // Abaikan jika tidak ada setting Logstash
+    // Telemetry Pipeline Endpoint: Vector.dev (Ultra-Lightweight Rust Pipeline) / Logstash
+    const rawPipelineUrl = process.env.VECTOR_URL || process.env.LOGSTASH_URL;
+    const pipelineUrl = rawPipelineUrl ? rawPipelineUrl.replace(/^["']|["']$/g, '').trim() : undefined;
+    if (!pipelineUrl) return; // Abaikan jika tidak ada setting telemetry pipeline
 
     try {
       // Automatic Elastic APM Distributed Tracing Correlation (Gojek / Tokopedia Enterprise standard)
@@ -56,19 +56,19 @@ export const logger = {
         timestamp: new Date().toISOString(),
       };
 
-      // Kirim ke Logstash (non-blocking / tidak menggunakan await di luar agar tidak melambatkan aplikasi)
-      fetch(logstashUrl, {
+      // Kirim ke Vector/Logstash (non-blocking / tidak menggunakan await di luar agar tidak melambatkan aplikasi)
+      fetch(pipelineUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        // Timeout pendek agar Next.js tidak hang jika Logstash mati
+        // Timeout pendek agar Next.js tidak hang jika pipeline log sedang busy
         signal: AbortSignal.timeout(3000), 
       }).catch((err) => {
-        // Jangan crash aplikasi jika gagal mengirim ke Logstash
-        console.error('[LOGSTASH_ERROR] Gagal mengirim log:', err.message);
+        // Jangan crash aplikasi jika gagal mengirim ke pipeline
+        console.error('[LOG_PIPELINE_ERROR] Gagal mengirim log:', err.message);
       });
     } catch (error) {
-      console.error('[LOGSTASH_ERROR] Error internal saat menyusun log:', error);
+      console.error('[LOG_PIPELINE_ERROR] Error internal saat menyusun log:', error);
     }
   },
 

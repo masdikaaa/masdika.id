@@ -74,6 +74,16 @@ data:
         static_configs:
           - targets: ["masdika-promtail:9080"]
 
+      # Vector.dev Log Pipeline Telemetry (Events in/out, throughput, error rate)
+      - job_name: "vector"
+        static_configs:
+          - targets: ["masdika-vector:9090"]
+
+      # Continuous Vulnerability Scanning & Compliance (Trivy Operator)
+      - job_name: "trivy-operator"
+        static_configs:
+          - targets: ["trivy-operator.trivy-system.svc:8080"]
+
       # Masdika Web Application (Node.js Heap, Circuit Breakers, Uptime)
       - job_name: "masdika-app"
         metrics_path: "/api/metrics"

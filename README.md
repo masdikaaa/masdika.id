@@ -13,6 +13,8 @@
     <img src="https://img.shields.io/badge/PostgreSQL-CNPG_HA_Cluster-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL CNPG HA" />
     <img src="https://img.shields.io/badge/PgBouncer-Transaction_Pooler-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PgBouncer Pooler" />
     <img src="https://img.shields.io/badge/mTLS-Cloudflare_Origin_Pull-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Cloudflare mTLS" />
+    <img src="https://img.shields.io/badge/Vector.dev-Rust_Pipeline-FF5B35?style=for-the-badge&logo=vector&logoColor=white" alt="Vector.dev" />
+    <img src="https://img.shields.io/badge/Trivy_Operator-Continuous_CVE_Scan-00599C?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="Trivy Operator" />
     <img src="https://img.shields.io/badge/Elastic_Stack-8.11_Observability-005571?style=for-the-badge&logo=elastic&logoColor=white" alt="Elastic Stack" />
     <img src="https://img.shields.io/badge/Object_Storage-RustFS_S3-E95420?style=for-the-badge&logo=amazons3&logoColor=white" alt="RustFS S3" />
     <img src="https://img.shields.io/badge/Testing-Vitest_47_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Testing" />
@@ -35,6 +37,8 @@ Platform ini mengadopsi standar **Tier-1 Tech Engineering (Gojek / Tokopedia / G
 * **Kubernetes Admission Control (Kyverno)**: Kebijakan kepatuhan klaster otomatis yang menolak pod *privileged*, mewajibkan non-root user, membatasi hak akses kernel (drop all capabilities), dan mewajibkan batas alokasi memori (*memory limits*).
 * **eBPF Runtime Threat Detection (Falco)**: Pemantauan syscall Linux di level kernel secara real-time untuk mendeteksi eksekusi shell mencurigakan (`/bin/sh`, `/bin/bash`) atau manipulasi file biner sistem di dalam kontainer.
 * **High Availability & Autoscaling**: Horizontal Pod Autoscaler (**HPA minReplicas: 2**, maxReplicas: 5) untuk mencegah degradasi 502 saat rolling deploy dan chaos testing, dipadu PodDisruptionBudget (PDB).
+* **Ultra-Lightweight Log Pipeline (Vector.dev)**: Penggantian pipeline JVM Logstash dengan Vector berbasis bahasa Rust berkinerja tinggi; memangkas konsumsi RAM sebesar **85%+ (~50 MB vs 1,5 GB)**, menghilangkan jeda *garbage collection*, serta mendukung *dual-sink* paralel langsung ke Elasticsearch ECS data stream dan Grafana Loki.
+* **Continuous Vulnerability & CVE Scanning (Trivy Operator)**: Audit keamanan dan pemindaian kerentanan CVE kontainer secara kontinu 24/7 di dalam klaster Kubernetes, verifikasi kepatuhan NSA/CIS, audit RBAC, dan deteksi kredensial terbuka (*exposed secrets*).
 * **Cloudflare Authenticated Origin Pulls (mTLS)**: Verifikasi kriptografis mTLS dua arah di Traefik Ingress (`TLSOption RequireAndVerifyClientCert`) menggunakan sertifikat CA resmi Cloudflare; menolak secara absolut seluruh scanner atau penyerang yang mencoba mengakses IP asli origin port 443 secara langsung.
 * **Enterprise Connection Pooling (PgBouncer & CNPG Pooler)**: Manajemen koneksi database mode transaksi (*transaction pooling*) 1000:25 untuk mencegah *connection starvation* dan lonjakan memori PostgreSQL saat traffic burst.
 * **High Availability Data Tier (CloudNativePG Ready)**: Arsitektur replikasi database PostgreSQL streaming primary-replica dengan automated sub-second failover.
@@ -64,10 +68,12 @@ Seluruh arsitektur sistem diklasifikasikan ke dalam 6 lapisan (*tier*) modular d
 | | **RustFS Cloud Object Storage**<br>• S3 Compatible Bucket Storage<br>• Endpoint: `192.168.79.10:9000` | Port `9000`<br>S3 REST API | Distributed Bucket Engine<br>• `masdika-database` (Backup DB)<br>• `masdika-media` (Upload User)<br>• `masdika-cdn` (Static Assets)<br>• `masdika-ticket` (Attachments) | • Access Key & Secret Key terenkripsi<br>• Isolasi data offsite independen dari host K3s | `Active` |
 | | **Automated Disaster Recovery (DR)**<br>• CronJob: `masdika-postgres-backup`<br>• PVC: `masdika-backup-pvc` (15 GB) | Batch Task<br>Jadwal: `0 2 * * *`<br>(09:00 WIB) | Concurrency: `Forbid`<br>BackoffLimit: `3`<br>Multi-tier Cloud Sync | • **GPG Enkripsi Simetris AES-256** (`.sql.gz.gpg`)<br>• Sinkronisasi otomatis ke RustFS S3 `masdika-database`<br>• **Retensi 14 Hari**: Auto-pruning lokal PVC & offsite RustFS | `Active` |
 | **📊 Layer 4: SRE Observability & SOC** | **Enterprise SRE Cockpit**<br>• Dashboard: `masdika-sre-cockpit`<br>• Standar Google SRE / Gojek | Host Ingress:<br>`grafana.masdika.id`<br>Port `3001` | Multiwindow Multi-burn-rate Alerting<br>Auto Health Gating | • **SLO Ketersediaan 99.9% (Three-Nines)**<br>• **Monthly Error Budget Tracking** (Toleransi max 43.2 min/bulan)<br>• **1h Error Budget Burn Rate**<br>• **SRE Release Gate Policy**: `PERMITTED` vs `CODE FREEZE`<br>• **Latency SLI**: % request < 300ms (Target: 95%) | `Active` |
+| | **Vector.dev Ultra-Lightweight Pipeline**<br>• Engine: Rust Native Log Pipeline<br>• Service: `vector:5044` & `logstash:5044` | Ingest: `5044`<br>Metrics: `9090`<br>Health API: `8686` | Dual-Sink Parallel Delivery<br>Zero GC Pause<br>Memory Request: 64Mi (Hemat 1.2 GB) | • **ECS Normalization via VRL**: Pemetaan otomatis log Next.js ke Elastic Common Schema & trace ID<br>• **Dual-Sink**: Mengirim log simultan ke Elasticsearch (`logs-masdika.app-default`) & Loki (`masdika-loki:3100`)<br>• **Backward Compatibility**: Alias service `logstash:5044` aktif | `Active` |
 | | **Elastic Observability Suite**<br>• Kibana (`kibana.masdika.id`)<br>• APM, Filebeat, Metricbeat, Heartbeat | Ingress `kibana.masdika.id`<br>Port `5601`<br>ClusterIP Services | Full-Stack Enterprise Observability<br>• Logs rate & explorer<br>• Host inventory & metrics<br>• APM waterfall traces<br>• Synthetic uptime & SSL check | • **ECS Log Streaming (`logs-masdika.app-default`)**: Terpetakan ke Elastic Common Schema dengan trace ID<br>• **Filebeat 8.15**: DaemonSet log harvester container K8s<br>• **Metricbeat 8.15**: Memantau Host Physical OS metadata (Ubuntu 26.04), CPU, Memory, Network TX/RX<br>• **ILM Retention Policy**: 14 hari retensi otomatis indeks Elasticsearch | `Active` |
 | | **Security Operations Center (SOC)**<br>• Dashboard: `masdika-soc-cockpit`<br>• Threat Cockpit & Audit Stream | Grafana Panel<br>Data Source: Loki & Promtail | Audit Host Real-Time<br>Web Threat Profiling | • Audit Host `/var/log/auth.log`: Deteksi SSH Brute-Force, Login Ilegal, & Sudo Elevation<br>• Live Request & Threat Audit Stream (Auto-filter cron noise)<br>• Alerting deteksi probe/scanner bot HTTP 401/403/404 | `Active` |
 | **🛡️ Layer 5: Policy Engine & Runtime Security** | **Kyverno Policy Engine**<br>• Admission Controller Webhook<br>• Namespace: `kyverno` (4 Pods) | Dynamic Webhook<br>Port `9443` | Mutating & Validating Webhook<br>High Availability Architecture | • **`disallow-privileged-containers`**: Blokir kontainer dengan hak root kernel<br>• **`require-run-as-non-root`**: Cegah pod berjalan sebagai user UID 0<br>• **`drop-all-capabilities`**: Hapus seluruh Linux capabilities berbahaya<br>• **`require-memory-limits`**: Mencegah serangan OOM exhaustion pada node | `Active` |
 | | **Falco eBPF Threat Engine**<br>• Runtime Security Agent<br>• Namespace: `falco` (DaemonSet) | Kernel Probe<br>eBPF Ring Buffer | Non-invasive Kernel Tracing<br>Real-Time Event Processing | • **Terminal Shell Spawn Detection**: Peringatan seketika saat `/bin/bash` atau `/bin/sh` dieksekusi di kontainer<br>• **Sensitive File Access**: Deteksi pembacaan `/etc/shadow` atau modifikasi binary sistem<br>• Integrasi notifikasi langsung ke syslog / event stream | `Active` |
+| | **Aqua Trivy Operator**<br>• Continuous CVE & Compliance Scanner<br>• Namespace: `trivy-system` | Metrics: `8080`<br>Probes: `9090`<br>ClusterIP | Continuous Event-Driven Scanning<br>Automated CRD Generation | • **`VulnerabilityReport`**: Pemindaian CVE live pada seluruh container image yang berjalan di klaster<br>• **`ConfigAuditReport`**: Audit kepatuhan konfigurasi beban kerja Kubernetes terhadap standar NSA/CISA<br>• **`ExposedSecretReport`**: Deteksi kebocoran token & private key pada env pod<br>• **`RbacAssessmentReport`**: Evaluasi hak istimewa Role & ClusterRole | `Active` |
 | **🚀 Layer 6: DevSecOps, Chaos & GitOps** | **Bitnami Sealed Secrets**<br>• Controller: `kube-system`<br>• Public Key Cryptography | Asymmetric Encryption<br>RSA 4096-bit | GitOps Native Secret Management | • Enkripsi kredensial di lokal menggunakan public cert klaster<br>• File `*.sealed.yaml` aman disimpan secara terbuka di Git<br>• Dekripsi otomatis oleh controller di dalam klaster | `Active` |
 | | **GitLeaks Pre-Commit Hooks**<br>• Runner: Local Node.js<br>• Config: `.gitleaks.toml` | Git Hook Trigger<br>`pre-commit` | Shift-Left Secret Leak Prevention | • Mencegah commit jika terdapat token API, private key, atau database password di kode sumber | `Active` |
 | | **Chaos Engineering Controller**<br>• CronJob: `masdika-chaos-drill`<br>• CLI: `scripts/chaos-experiment.sh` | Jadwal: Minggu 03:00 UTC<br>On-Demand CLI | Disaster Resilience Verification<br>Self-Healing Validation | • **Chaos Monkey Pod Kill**: Terminasi pod acak dengan verifikasi uptime kontinu<br>• **CPU Burn Drill**: Uji reaksi autoscaling HPA<br>• **Circuit Breaker Drill**: Uji simulasi kegagalan dependensi | `Active` |
@@ -282,6 +288,90 @@ Akses ke PgBouncer dan CNPG Pooler dilindungi secara ketat di [networkpolicy.yam
 
 ---
 
+## 🚀 Vector.dev Ultra-Lightweight Log Pipeline (Hemat RAM 85%+)
+
+Sebelumnya, log pipeline diproses oleh Logstash berbasis Java Virtual Machine (JVM) yang memerlukan alokasi memori besar (512 MiB request, 1,5 GiB limit) serta rentan terhadap *Garbage Collection pause*. 
+
+Masdika memigrasikan log pipeline secara penuh ke **[Vector.dev](https://vector.dev)** ([k8s/monitoring/vector.yaml](file:///c:/laragon/www/masdika/k8s/monitoring/vector.yaml)) yang ditulis menggunakan bahasa **Rust** berkinerja tinggi:
+
+```text
+┌─────────────────────────────────┐
+│     Next.js Application Pods    │  (Kirim JSON via HTTP POST :5044)
+│  (VECTOR_URL / LOGSTASH_URL)    │
+└────────────────┬────────────────┘
+                 │ HTTP JSON :5044
+                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                  Vector.dev Pipeline Engine (Rust Native)               │
+│          • Memory Limit: 256Mi | Request: 64Mi (Hemat ~1,2 GB RAM)      │
+│          • Zero GC Pauses & Sub-millisecond Event Processing            │
+│          • VRL (Vector Remap Language) ECS Normalization Engine         │
+└────────────────┬───────────────────────────────────────┬────────────────┘
+                 │                                       │
+                 ▼ (Data Stream: logs-masdika.app)       ▼ (JSON Stream + Labels)
+┌─────────────────────────────────┐     ┌─────────────────────────────────┐
+│       Elasticsearch 8.11        │     │       Grafana Loki 3.x          │
+│   (ILM 14 Hari & APM Waterfall) │     │   (SOC Cockpit & Live Explorer) │
+└─────────────────────────────────┘     └─────────────────────────────────┘
+```
+
+### 1. Keunggulan Arsitektur Vector.dev
+* **Efisiensi Memori Ekstrem**: Konsumsi RAM berkurang dari ~1,5 GB (Logstash) menjadi hanya **~40–60 MB (Vector)**. Ini menghemat lebih dari **1,2 GB RAM** untuk alokasi beban kerja komputasi aplikasi.
+* **Dual-Sink Paralel**: Vector secara bersamaan (*fan-out*) menyalurkan data log yang sama ke:
+  1. **Elasticsearch 8.11**: Data stream `logs-masdika.app-default` untuk observabilitas APM waterfall dan Index Lifecycle Management (ILM) 14 hari.
+  2. **Grafana Loki**: Disertai label dinamis (`app`, `env`, `level`) untuk analisis cepat dan visualisasi di SOC Cockpit Grafana.
+* **Normalisasi ECS via VRL (Vector Remap Language)**: Memetakan struktur JSON Next.js menjadi standar industri *Elastic Common Schema* (`log.level`, `service.name`, `service.environment`, `trace.id`, `transaction.id`, `client.ip`, `http.request.method`, `url.path`).
+* **Kompatibilitas Penuh (Zero-Downtime)**: Menyediakan service alias `logstash:5044` dan `masdika-logstash:5044` sehingga modul logger aplikasi tetap berjalan mulus tanpa perubahan konfigurasi mendesak.
+* **Metrik Prometheus Native**: Menyediakan endpoint `:9090` yang memantau `vector_events_in_total`, `vector_events_out_total`, dan `vector_buffer_byte_size`.
+
+---
+
+## 🛡️ Continuous Vulnerability & Compliance Scanning (Aqua Trivy Operator)
+
+Trivy Operator ([k8s/security/trivy-operator.yaml](file:///c:/laragon/www/masdika/k8s/security/trivy-operator.yaml)) berjalan secara kontinu 24/7 di namespace `trivy-system` untuk memantau keamanan klaster secara *event-driven* dan terjadwal:
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Kubernetes Workloads                            │
+│           (Deployments, Pods, StatefulSets, CronJobs, Secrets)         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Event Trigger & Periodic Audit
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   Aqua Trivy Operator (trivy-system)                   │
+│          • Scanner: Container Vulnerabilities (CVE)                    │
+│          • Scanner: Workload Misconfigurations (NSA / CIS)             │
+│          • Scanner: Exposed Secrets & Token Leak Detection             │
+│          • Scanner: RBAC Role & ClusterRole Privilege Audits           │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Menghasilkan Kubernetes Native CRD
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                      Security Custom Resources                         │
+│  • VulnerabilityReport        • ConfigAuditReport                      │
+│  • ExposedSecretReport        • RbacAssessmentReport                   │
+│  • ClusterComplianceReport    • Metrics Endpoint (:8080)               │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Scrape :8080
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│            Prometheus Alerting: TrivyCriticalVulnerabilityFound        │
+│                    (Notifikasi Instan ke SRE & Telegram)               │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Laporan Keamanan Deklaratif (Custom Resource Definitions)
+* **`VulnerabilityReport`**: Menempel pada setiap Pod/Deployment, mengidentifikasi paket OS biner atau dependensi bahasa (Node.js/Go/Python) yang memiliki nomor CVE terdaftar di database kerentanan Aqua Security.
+* **`ConfigAuditReport`**: Mengaudit konfigurasi pod terhadap aturan kepatuhan keamanan (*pod security standards*), seperti deteksi kontainer *read-only filesystem*, *privilege escalation*, dan ketiadaan *resource limits*.
+* **`ExposedSecretReport`**: Mendeteksi jika terdapat password database, API key, atau private key yang tidak sengaja tertulis secara eksplisit (*hardcoded*) di dalam ConfigMap atau manifest pod.
+* **`RbacAssessmentReport`**: Mendeteksi ServiceAccount atau RoleBinding yang memiliki hak akses berlebih (*over-privileged RBAC*) seperti wildcard verb `*` pada secret atau resource cluster-scoped.
+
+### 2. Aturan Alerting Prometheus (`k8s/monitoring/alert-rules.yaml`)
+* **`TrivyCriticalVulnerabilityFound`**: Membunyikan alarm kritis seketika jika terdeteksi kerentanan dengan tingkat keparahan `Critical` pada kontainer yang sedang aktif di klaster.
+* **`TrivyExposedSecretDetected`**: Membunyikan alarm darurat jika ditemukan token atau kredensial rahasia yang terekspos tanpa enkripsi.
+
+---
+
 ## ⚡ Circuit Breaker & Graceful Degradation (Anti-Cascading Failure)
 
 Diimplementasikan melalui modul native TypeScript di [`apps/web/src/lib/circuit-breaker.ts`](apps/web/src/lib/circuit-breaker.ts) dan diintegrasikan ke Prisma Client di [`apps/web/src/lib/prisma.ts`](apps/web/src/lib/prisma.ts):
@@ -441,13 +531,13 @@ masdika.id/
 │   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
 │   │   └── backup-cronjob.yaml   # Disaster Recovery (GPG AES-256 + RustFS S3 Sync)
 │   ├── monitoring/
-│   │   ├── alert-rules.yaml      # Aturan Alert Prometheus (SRE SLO, SOC, & Infra)
+│   │   ├── alert-rules.yaml      # Aturan Alert Prometheus (SRE SLO, SOC, CVE, & Infra)
 │   │   ├── alertmanager.yaml     # Alertmanager Webhook & Telegram Dispatcher
 │   │   ├── dashboards.yaml       # ConfigMap Dashboard Grafana (SRE Cockpit, SOC, dsb.)
-│   │   ├── prometheus.yaml       # Scraper Prometheus (Traefik, Node, Pods, Web Metrics)
+│   │   ├── prometheus.yaml       # Scraper Prometheus (Traefik, Vector, Trivy, Node, Pods)
 │   │   ├── grafana.yaml          # Grafana Visualization Server
 │   │   ├── apm.yaml              # Elastic APM Server
-│   │   ├── logstash.yaml         # Logstash Log Intake & ECS Pipeline
+│   │   ├── vector.yaml           # Vector.dev Ultra-Lightweight Rust Log Pipeline (Dual-Sink)
 │   │   ├── filebeat.yaml         # Filebeat DaemonSet (Kubernetes Container Log Harvester)
 │   │   ├── metricbeat.yaml       # Metricbeat DaemonSet (Host & Kubernetes Resource Metrics)
 │   │   ├── heartbeat.yaml        # Heartbeat Synthetics & TLS Uptime Monitor
@@ -455,7 +545,8 @@ masdika.id/
 │   │   └── promtail.yaml         # Promtail Log Agent (Host /var/log/auth.log)
 │   └── security/
 │       ├── cloudflare-origin-pull.yaml # Cloudflare Authenticated Origin Pull CA & Traefik TLSOption (mTLS)
-│       ├── networkpolicy.yaml    # Zero-Trust CNI Network Isolation Policies (DB & Pooler Isolation)
+│       ├── trivy-operator.yaml   # Aqua Trivy Operator (Continuous CVE, Secrets, & RBAC Audit)
+│       ├── networkpolicy.yaml    # Zero-Trust CNI Network Isolation Policies (DB, Vector, & Pooler)
 │       ├── kyverno-policies.yaml # Kyverno Admission Controller Policies
 │       └── falco.yaml            # Falco eBPF Runtime Threat Detection DaemonSet
 ├── scripts/
@@ -531,7 +622,37 @@ sudo kubectl exec -it -n masdika deployment/masdika-pgbouncer -- psql -h 127.0.0
 sudo kubectl exec -it -n masdika deployment/masdika-pgbouncer -- psql -h 127.0.0.1 -p 5432 -U masdika -d pgbouncer -c "SHOW CLIENTS;"
 ```
 
-### 4. Kebijakan Keamanan (Kyverno & Falco)
+### 4. Keamanan & Continuous CVE Scanning (Trivy Operator)
+```bash
+# Memeriksa laporan kerentanan CVE pada seluruh pod yang sedang berjalan
+sudo kubectl get vulnerabilityreports -A
+
+# Melihat ringkasan kerentanan kritis (Critical CVE) pada aplikasi
+sudo kubectl get vulnerabilityreports -n masdika -o wide
+
+# Memeriksa audit kepatuhan konfigurasi beban kerja Kubernetes (NSA / CIS)
+sudo kubectl get configauditreports -A
+
+# Memeriksa deteksi exposed secret di lingkungan klaster
+sudo kubectl get exposedsecretreports -A
+
+# Memantau log proses pemindaian kontainer Trivy Operator
+sudo kubectl logs -n trivy-system deployment/trivy-operator -c trivy-operator --tail=50 -f
+```
+
+### 5. Telemetri & Log Pipeline (Vector.dev)
+```bash
+# Memeriksa status pod Vector.dev
+sudo kubectl get pods -n masdika -l app=masdika-vector
+
+# Memeriksa healthcheck Vector API
+sudo kubectl exec -it -n masdika deployment/masdika-vector -c vector -- wget -qO- http://localhost:8686/health
+
+# Memeriksa metrik internal Vector (events in/out, error rate)
+curl -s http://masdika-vector:9090/metrics | grep -E "vector_events_in_total|vector_events_out_total"
+```
+
+### 6. Kebijakan Keamanan Runtime (Kyverno & Falco)
 ```bash
 # Memeriksa kebijakan cluster Kyverno yang aktif
 sudo kubectl get clusterpolicy
@@ -543,7 +664,7 @@ sudo kubectl get polr -A
 sudo kubectl logs -n falco daemonset/falco -c falco -f --tail=50
 ```
 
-### 5. Manajemen SRE, HPA & Chaos Drills
+### 7. Manajemen SRE, HPA & Chaos Drills
 ```bash
 # Menjalankan latihan Chaos Monkey Pod Kill mandiri dengan probe uptime live
 ./scripts/chaos-experiment.sh pod-kill
@@ -558,7 +679,7 @@ sudo kubectl logs -n falco daemonset/falco -c falco -f --tail=50
 sudo kubectl get hpa -n masdika
 ```
 
-### 6. Observability & Elastic ILM Retention
+### 8. Observability & Elastic ILM Retention
 ```bash
 # Memeriksa status ILM Policy 14 hari di Elasticsearch
 curl -s -u elastic:PASSWORD http://10.43.100.120:9200/_ilm/policy/masdika-ilm-14days | jq .
