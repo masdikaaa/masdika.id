@@ -16,6 +16,7 @@ import { AdminLoader } from '@/components/admin/AdminLoader';
 import { Select } from '@/components/ui/Select';
 import { LastSeenBadge } from '@/components/ui/LastSeenBadge';
 import { isUserOnline } from '@/lib/last-seen';
+import { EMAIL_LOGO_DATA_URI } from "@/lib/email-assets";
 
 const formatInvoiceNumber = (num: string) => {
   if (!num) return num;
@@ -303,16 +304,26 @@ export default function ClientProfile({ userId }: { userId: string }) {
       </style>
     `;
 
+    // Process body to ensure all images and header banners render 100% reliably in admin preview
+    let processedBody = rawBody
+      // Replace remote or relative logo-email references with embedded high-performance Data URI
+      .replace(/https?:\/\/[^\s"'<>]+\/logo-email\.webp(?:\?[^\s"'<>]*)?/gi, EMAIL_LOGO_DATA_URI)
+      .replace(/(["'])\/logo-email\.webp(?:\?[^\s"'<>]*)?\1/gi, `$1${EMAIL_LOGO_DATA_URI}$1`)
+      // Force eager loading so images don't get stuck due to modal iframe lazy-loading observer bug
+      .replace(/loading=["']lazy["']/gi, 'loading="eager"');
+
+    const baseTag = typeof window !== "undefined" ? `<base href="${window.location.origin}/" />` : "";
+
     // If it's already a full HTML document (e.g. templates, email blasts, system emails)
-    const isFullHtml = /<!DOCTYPE|<html|<body|<table/i.test(rawBody);
+    const isFullHtml = /<!DOCTYPE|<html|<body|<table/i.test(processedBody);
     if (isFullHtml) {
-      if (rawBody.includes("<head>")) {
-        return rawBody.replace("<head>", `<head>${fontInject}`);
+      if (processedBody.includes("<head>")) {
+        return processedBody.replace("<head>", `<head>${baseTag}${fontInject}`);
       }
-      if (rawBody.includes("<html")) {
-        return rawBody.replace(/<html[^>]*>/, `$&<head>${fontInject}</head>`);
+      if (processedBody.includes("<html")) {
+        return processedBody.replace(/<html[^>]*>/, `$&<head>${baseTag}${fontInject}</head>`);
       }
-      return `${fontInject}${rawBody}`;
+      return `${baseTag}${fontInject}${processedBody}`;
     }
 
     // For plain text or simple snippets, render original body directly without any container or wrapper
@@ -321,6 +332,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  ${baseTag}
   ${fontInject}
   <style>
     body {
@@ -333,7 +345,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
   </style>
 </head>
 <body>
-  ${rawBody}
+  ${processedBody}
 </body>
 </html>`;
   };

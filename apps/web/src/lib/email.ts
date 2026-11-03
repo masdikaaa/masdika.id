@@ -534,7 +534,7 @@ export const getBaseHtml = (content: string, location: string = 'Surabaya, Indon
           <!-- Header -->
           <tr>
             <td class="header" align="center" style="padding: 0; border-bottom: none; border-top-left-radius: 16px; border-top-right-radius: 16px; overflow: hidden; background-color: #0f172a;">
-              <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/logo-email.webp?v=2" alt="Header Banner" width="600" style="display: block; width: 100%; max-width: 600px; height: auto; border-top-left-radius: 16px; border-top-right-radius: 16px;" loading="lazy" decoding="async" />
+              <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/logo-email.webp?v=2" alt="Header Banner" width="600" style="display: block; width: 100%; max-width: 600px; height: auto; border-top-left-radius: 16px; border-top-right-radius: 16px;" loading="eager" decoding="async" />
             </td>
           </tr>
           
