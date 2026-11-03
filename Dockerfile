@@ -126,6 +126,7 @@ COPY --chown=nextjs:nodejs package.json ./package.json
 # from deps stage (which includes next, react, ws, cookie, @swc/helpers, and
 # Alpine-compatible sharp). NO npm install runs here to avoid pruning.
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+RUN rm -rf /app/node_modules/minimatch /app/node_modules/@typescript-eslint /app/node_modules/postcss-selector-parser
 
 ENV NEXT_SHARP_PATH=/app/node_modules/sharp
 

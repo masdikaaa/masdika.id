@@ -48,6 +48,7 @@ metadata:
     app: masdika-loki
 spec:
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   selector:
@@ -65,7 +66,7 @@ spec:
         runAsGroup: 10001
       containers:
         - name: loki
-          image: grafana/loki:3.0.0
+          image: grafana/loki:latest
           imagePullPolicy: IfNotPresent
           args:
             - "-config.file=/etc/loki/loki.yaml"

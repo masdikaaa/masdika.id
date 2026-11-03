@@ -243,6 +243,7 @@ metadata:
     app: masdika-alertmanager
 spec:
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   selector:
@@ -256,7 +257,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: alertmanager
-          image: prom/alertmanager:v0.27.0
+          image: prom/alertmanager:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ

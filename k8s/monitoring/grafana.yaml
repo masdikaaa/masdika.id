@@ -74,6 +74,7 @@ metadata:
     app: masdika-grafana
 spec:
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   selector:

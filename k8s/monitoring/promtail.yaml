@@ -160,7 +160,7 @@ spec:
           operator: Exists
       containers:
         - name: promtail
-          image: grafana/promtail:3.0.0
+          image: grafana/promtail:latest
           imagePullPolicy: IfNotPresent
           args:
             - "-config.file=/etc/promtail/promtail.yaml"
