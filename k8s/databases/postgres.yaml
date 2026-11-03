@@ -38,6 +38,7 @@ spec:
       labels:
         app: masdika-db
     spec:
+      terminationGracePeriodSeconds: 60
       automountServiceAccountToken: false
       securityContext:
         fsGroup: 70
@@ -57,7 +58,7 @@ spec:
             - "-c"
             - "recovery_init_sync_method=fsync"
             - "-c"
-            - "fsync=off"
+            - "synchronous_commit=off"
             - "-c"
             - "max_connections=300"
             - "-c"
@@ -110,7 +111,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 5
-            failureThreshold: 60
+            failureThreshold: 120
           livenessProbe:
             exec:
               command:
