@@ -11,9 +11,11 @@
     <img src="https://img.shields.io/badge/Runtime_Sec-Falco_eBPF-002F40?style=for-the-badge&logo=falco&logoColor=white" alt="Falco eBPF" />
     <img src="https://img.shields.io/badge/DevSecOps-GitLeaks_%26_Trivy_%26_Semgrep-00599C?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="DevSecOps" />
     <img src="https://img.shields.io/badge/PostgreSQL-CNPG_HA_Cluster-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL CNPG HA" />
+    <img src="https://img.shields.io/badge/PgBouncer-Transaction_Pooler-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PgBouncer Pooler" />
+    <img src="https://img.shields.io/badge/mTLS-Cloudflare_Origin_Pull-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Cloudflare mTLS" />
     <img src="https://img.shields.io/badge/Elastic_Stack-8.11_Observability-005571?style=for-the-badge&logo=elastic&logoColor=white" alt="Elastic Stack" />
     <img src="https://img.shields.io/badge/Object_Storage-RustFS_S3-E95420?style=for-the-badge&logo=amazons3&logoColor=white" alt="RustFS S3" />
-    <img src="https://img.shields.io/badge/Testing-Vitest_39_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Testing" />
+    <img src="https://img.shields.io/badge/Testing-Vitest_47_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Testing" />
     <img src="https://img.shields.io/badge/SRE-SLO_99.9%25_%26_Error_Budget-4CAF50?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Google SRE" />
     <img src="https://img.shields.io/badge/Resilience-Circuit_Breaker-FFB300?style=for-the-badge&logo=circuitverse&logoColor=white" alt="Circuit Breaker" />
     <img src="https://img.shields.io/badge/Chaos-Chaos_Monkey_Drills-8E24AA?style=for-the-badge&logo=linux&logoColor=white" alt="Chaos Engineering" />
@@ -33,6 +35,8 @@ Platform ini mengadopsi standar **Tier-1 Tech Engineering (Gojek / Tokopedia / G
 * **Kubernetes Admission Control (Kyverno)**: Kebijakan kepatuhan klaster otomatis yang menolak pod *privileged*, mewajibkan non-root user, membatasi hak akses kernel (drop all capabilities), dan mewajibkan batas alokasi memori (*memory limits*).
 * **eBPF Runtime Threat Detection (Falco)**: Pemantauan syscall Linux di level kernel secara real-time untuk mendeteksi eksekusi shell mencurigakan (`/bin/sh`, `/bin/bash`) atau manipulasi file biner sistem di dalam kontainer.
 * **High Availability & Autoscaling**: Horizontal Pod Autoscaler (**HPA minReplicas: 2**, maxReplicas: 5) untuk mencegah degradasi 502 saat rolling deploy dan chaos testing, dipadu PodDisruptionBudget (PDB).
+* **Cloudflare Authenticated Origin Pulls (mTLS)**: Verifikasi kriptografis mTLS dua arah di Traefik Ingress (`TLSOption RequireAndVerifyClientCert`) menggunakan sertifikat CA resmi Cloudflare; menolak secara absolut seluruh scanner atau penyerang yang mencoba mengakses IP asli origin port 443 secara langsung.
+* **Enterprise Connection Pooling (PgBouncer & CNPG Pooler)**: Manajemen koneksi database mode transaksi (*transaction pooling*) 1000:25 untuk mencegah *connection starvation* dan lonjakan memori PostgreSQL saat traffic burst.
 * **High Availability Data Tier (CloudNativePG Ready)**: Arsitektur replikasi database PostgreSQL streaming primary-replica dengan automated sub-second failover.
 * **Resilience & Circuit Breaker**: Proteksi kaskade kegagalan database dengan Martin Fowler state machine (*fail-fast & graceful degradation*).
 * **Enterprise SRE Cockpit & SLO 99.9%**: Pengukuran kuantitatif ketersediaan *Three-Nines*, pelacakan *Monthly Error Budget*, multi-window burn-rate alerts, dan *Release Gate Policy* di Grafana.
@@ -48,12 +52,14 @@ Seluruh arsitektur sistem diklasifikasikan ke dalam 6 lapisan (*tier*) modular d
 | Layer / Tier | Komponen & Service | Port & Routing | High Availability & Resilience | Proteksi Keamanan (DevSecOps / SRE) | Status |
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | **🌐 Layer 1: Edge & Ingress Gateway** | **Cloudflare Zero Trust**<br>• Daemon: `cloudflared`<br>• SSL Termination | `443` (HTTPS)<br>`wss` (WebSocket) | Anycast Global Edge Routing<br>SLA 100% Uptime | • L3/L4 DDoS Mitigation Otomatis<br>• Masking IP Asli Server<br>• Web Crypto WAF Rules & Bot Fight | `Active` |
-| | **Traefik v3 Ingress**<br>• Ingress Controller Native K3s<br>• Dynamic EndpointSlice | Host `80`, `443`<br>Entrypoint: `web`, `websecure` | Dynamic Re-routing tanpa restart<br>Active Health Probing | • **`masdika-headers`**: HSTS, CSP, Nosniff, X-Frame<br>• **`masdika-buffering`**: 10GB Upload Spooling<br>• **`masdika-ratelimit`**: Token Bucket 150 req/s (Burst 50)<br>• **Internal Cluster Only**: Ingress Prometheus publik dinonaktifkan (akses via Grafana/ClusterIP) | `Active` |
+| | **Cloudflare Authenticated Origin Pulls (mTLS)**<br>• CA Secret: `cloudflare-origin-pull-ca`<br>• Traefik `TLSOption` | Port `443` (TLS)<br>Entrypoint: `websecure` | Strict Client Certificate Verification<br>Mutual TLS (mTLS) | • **Anti-Bypass Shield**: Seluruh koneksi HTTPS langsung ke IP fisik server tanpa sertifikat klien resmi Cloudflare ditolak seketika (*TLS Handshake Rejected*)<br>• **`clientAuthType: RequireAndVerifyClientCert`**<br>• Mengunci origin hanya melayani traffic sah dari Cloudflare Edge | `Active` |
+| | **Traefik v3 Ingress**<br>• Ingress Controller Native K3s<br>• Dynamic EndpointSlice | Host `80`, `443`<br>Entrypoint: `web`, `websecure` | Dynamic Re-routing tanpa restart<br>Active Health Probing | • **`masdika-headers`**: HSTS, CSP, Nosniff, X-Frame<br>• **`masdika-buffering`**: 10GB Upload Spooling<br>• **`masdika-ratelimit`**: Token Bucket 150 req/s (Burst 50)<br>• **mTLS Binding**: `traefik.ingress.kubernetes.io/router.tls.options: masdika-cloudflare-origin-pull@kubernetescrd`<br>• **Internal Cluster Only**: Ingress Prometheus publik dinonaktifkan (akses via Grafana/ClusterIP) | `Active` |
 | **⚡ Layer 2: Application Tier** | **masdika-app**<br>• Next.js 16 Standalone Web App<br>• Base: Node.js 22 Alpine | Internal `3000`<br>Path: `/` | • **HPA**: 2 – 5 Pods Dinamis (Target CPU 75%, RAM 80%)<br>• **PDB**: `minAvailable: 1`<br>• **preStop**: `sleep 5` (Zero Packet Drop) | • Non-Root User (`UID 1001`, `GID 1001`)<br>• SecurityContext: `drop: [ALL]`<br>• Seccomp: `RuntimeDefault`<br>• `automountServiceAccountToken: false` | `Active` |
 | | **Circuit Breaker Engine**<br>• Martin Fowler State Machine<br>• Prisma Query Wrapper | In-Process<br>Telemetry: `/api/metrics` | • **State**: `CLOSED`, `OPEN`, `HALF_OPEN`<br>• Timeout: 4.000ms<br>• Trip Threshold: 50% Failures<br>• Reset Window: 10.000ms | • **Graceful Degradation**: Mencegah *cascading failure* saat DB lambat<br>• Menyajikan respons fallback instan agar web tidak hang<br>• Export metrik real-time ke Prometheus | `Active` |
 | | **masdika-worker**<br>• BullMQ Queue & Billing Engine<br>• Background Worker | Internal Service<br>Health: `8080` | Strategy: `Recreate`<br>Memory Limit: 1 GiB | • Otomasi isolasi akun & penonaktifan invoice kedaluwarsa<br>• Polling metrik Proxmox VE terenkripsi | `Active` |
 | | **masdika-vnc-proxy**<br>• Dedicated WebSocket Console Tunnel<br>• Node.js WS Reverse Proxy | Internal `3001`<br>Path: `/api/ws` | Strategy: `Recreate`<br>WebSocket Keep-Alive Ping | • Dedicated WSS tunneling ke Proxmox VE<br>• Token tiket otentikasi sesi one-time | `Active` |
-| **🛡️ Layer 3: Zero-Trust Data Tier** | **PostgreSQL 18**<br>• Database Relasional Utama<br>• CloudNativePG (CNPG) Ready | Internal `5432`<br>ClusterIP | Shared Buffers: 512 MB<br>Streaming Replication (Standby)<br>Sub-second Failover | • **NetworkPolicy: `masdika-db-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `backup`<br>• Running User: UID `70` (postgres) | `Active` |
+| **🛡️ Layer 3: Zero-Trust Data Tier** | **PostgreSQL 18 & CNPG HA**<br>• Database Relasional Utama<br>• CloudNativePG (CNPG) Ready | Internal `5432`<br>ClusterIP | Shared Buffers: 512 MB<br>Streaming Replication (Standby)<br>Sub-second Failover | • **NetworkPolicy: `masdika-db-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `backup`, `pgbouncer`, `masdika-pg-pooler`<br>• Running User: UID `70` (postgres) | `Active` |
+| | **PgBouncer & CNPG Pooler**<br>• Enterprise Connection Pooling<br>• Service: `masdika-pg-pooler` & `masdika-pgbouncer` | Internal `5432`<br>ClusterIP | • **Transaction Pooling Mode** (`poolMode: transaction`)<br>• 2 Replicas High Availability<br>• Scaling 1000 Klien $\rightarrow$ 25 DB Koneksi | • **Zero Connection Starvation**: Mencegah lonjakan proses server PostgreSQL & OOM saat lonjakan request Next.js/BullMQ<br>• **NetworkPolicy**: `masdika-pooler-isolation` & `masdika-cnpg-pooler-isolation` mengunci akses hanya dari pod resmi aplikasi<br>• **Prisma Client Ready**: Kompatibel dengan `@prisma/adapter-pg` & parameter `?pgbouncer=true` | `Active` |
 | | **Redis 7**<br>• In-Memory Cache & Key-Value<br>• PVC: `masdika-redis-pvc` (10 GB) | Internal `6379`<br>ClusterIP | In-Memory Engine<br>AOF Data Persistence | • **NetworkPolicy: `masdika-redis-isolation`**<br>  Port 6379 diblokir total dari luar pod resmi<br>• Password Authentication & Protected Mode | `Active` |
 | | **RustFS Cloud Object Storage**<br>• S3 Compatible Bucket Storage<br>• Endpoint: `192.168.79.10:9000` | Port `9000`<br>S3 REST API | Distributed Bucket Engine<br>• `masdika-database` (Backup DB)<br>• `masdika-media` (Upload User)<br>• `masdika-cdn` (Static Assets)<br>• `masdika-ticket` (Attachments) | • Access Key & Secret Key terenkripsi<br>• Isolasi data offsite independen dari host K3s | `Active` |
 | | **Automated Disaster Recovery (DR)**<br>• CronJob: `masdika-postgres-backup`<br>• PVC: `masdika-backup-pvc` (15 GB) | Batch Task<br>Jadwal: `0 2 * * *`<br>(09:00 WIB) | Concurrency: `Forbid`<br>BackoffLimit: `3`<br>Multi-tier Cloud Sync | • **GPG Enkripsi Simetris AES-256** (`.sql.gz.gpg`)<br>• Sinkronisasi otomatis ke RustFS S3 `masdika-database`<br>• **Retensi 14 Hari**: Auto-pruning lokal PVC & offsite RustFS | `Active` |
@@ -144,6 +150,138 @@ Falco beroperasi menggunakan eBPF probe di level kernel Linux node host:
 
 ---
 
+## 🔐 Cloudflare Authenticated Origin Pulls (mTLS) di Traefik Ingress
+
+Secara default, Cloudflare menyembunyikan alamat IP asli server origin. Namun, jika penyerang melakukan *port scanning* langsung ke blok IP VPS (port 443), mereka berpotensi membypass proteksi WAF, DDoS mitigation, dan rate limiting Cloudflare.
+
+Untuk menutup celah ini secara absolut, Masdika mengaktifkan **Cloudflare Authenticated Origin Pulls (Mutual TLS / mTLS)** di Traefik Ingress:
+
+```text
+┌──────────────────┐               ┌────────────────────────────────────────────────────────┐
+│  Client Browser  │ ──HTTPS──►    │                 Cloudflare Global Edge                 │
+└──────────────────┘               │ (WAF Rules, L3/L4 DDoS Mitigation, Bot Fight Mode)     │
+                                   └───────────────────────────┬────────────────────────────┘
+                                                               │ mTLS Handshake (Client Cert)
+                                                               │ [CN: origin-pull.cloudflare.net]
+                                                               ▼
+                                   ┌────────────────────────────────────────────────────────┐
+                                   │                    K3s Host Node                       │
+                                   │                                                        │
+┌──────────────────┐               │  ┌──────────────────────────────────────────────────┐  │
+│ Penyerang / Bot  │ ──Direct IP───┼─►│ Traefik v3 (TLSOption: RequireAndVerifyClientCert)│  │
+│ (Port 443 Scan)  │   (No Cert)   │  │ ❌ DITOLAK: SSL Handshake Failed (Bad Cert Alert)│  │
+└──────────────────┘               │  └────────────────────────┬─────────────────────────┘  │
+                                   │                           │ ✅ Lolos mTLS Handshake     │
+                                   │                           ▼                            │
+                                   │  ┌──────────────────────────────────────────────────┐  │
+                                   │  │ masdika-app (Next.js) / masdika-vnc-proxy Pods   │  │
+                                   │  └──────────────────────────────────────────────────┘  │
+                                   └────────────────────────────────────────────────────────┘
+```
+
+### 1. Komponen Kriptografi & Deklaratif (`k8s/security/cloudflare-origin-pull.yaml`)
+* **Sertifikat CA Resmi Cloudflare (`cloudflare-origin-pull-ca`)**:
+  Kubernetes Secret berisi Root CA publik Cloudflare Authenticated Origin Pull (`origin-pull.cloudflare.net`, serial `57:91:ba:95:56:c2:2e:61`, berlaku hingga November 2029).
+* **Traefik TLSOption (`cloudflare-origin-pull`)**:
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: TLSOption
+metadata:
+  name: cloudflare-origin-pull
+  namespace: masdika
+spec:
+  minVersion: VersionTLS12
+  clientAuth:
+    secretNames:
+      - cloudflare-origin-pull-ca
+    clientAuthType: RequireAndVerifyClientCert
+```
+* **Penerapan pada Ingress Router (`k8s/app/ingress.yaml` & `k8s/monitoring/ingress.yaml`)**:
+```yaml
+annotations:
+  traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+  traefik.ingress.kubernetes.io/router.tls: "true"
+  traefik.ingress.kubernetes.io/router.tls.options: masdika-cloudflare-origin-pull@kubernetescrd
+```
+
+---
+
+## 🚰 PgBouncer & CNPG Enterprise Connection Pooling (High Scalability Data Tier)
+
+Di PostgreSQL standar, setiap koneksi klien memerlukan 1 proses dedicated OS (*fork process*) yang mengonsumsi ~10–20 MB memori per koneksi dan memicu *CPU context switching*. Ketika puluhan pod Next.js dan BullMQ worker melakukan query bersamaan, batas `max_connections` cepat tercapai (*connection starvation*) dan memicu latensi tinggi.
+
+Masdika menerapkan **PgBouncer Connection Pooling** dengan mode transaksi (*Transaction Pooling*):
+
+```text
+┌─────────────────────────────────┐
+│     Next.js Application Pods    │  (100 - 1.000 Koneksi Klien Ringan)
+│   (HPA: 2 - 5 Pods) + Workers   │
+└────────────────┬────────────────┘
+                 │ TCP :5432
+                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│              PgBouncer Pooler (2 Replicas / High Availability)          │
+│          • CNPG Native Pooler: masdika-pg-pooler:5432                   │
+│          • Standalone PgBouncer: masdika-pgbouncer:5432                 │
+│          • Pool Mode: TRANSACTION (poolMode: transaction)               │
+│          • max_client_conn: 1000 | default_pool_size: 25                │
+└────────────────────────────────┬────────────────────────────────────────┘
+                                 │ Dikelola Rapi & Sangat Hemat
+                                 │ (Hanya 25 Koneksi Server Aktif)
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      PostgreSQL Database Backend                        │
+│   (Shared Buffers: 512MB, CPU Tetap Rendah, Zero Connection Exhaustion) │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Keunggulan Mode Transaksi (Transaction Pooling)
+* **Koneksi Server Hanya Dipinjam Saat SQL Berjalan**: Begitu transaksi (`BEGIN ... COMMIT`) selesai dalam hitungan milidetik, koneksi backend langsung dilepaskan kembali ke pool untuk melayani request klien berikutnya.
+* **Rasio Efisiensi 40:1**: Mampu menangani hingga **1.000 koneksi concurrent** dari sisi aplikasi hanya dengan **25 koneksi nyata** ke server PostgreSQL.
+* **Pembersihan State Otomatis**: Dilengkapi parameter `SERVER_RESET_QUERY: "DISCARD ALL"` dan `IGNORE_STARTUP_PARAMETERS: "extra_float_digits"` untuk mencegah *leakage session state*.
+
+### 2. Dual Deployment Option:
+1. **CloudNativePG Native Pooler CRD (Direkomendasikan untuk HA)** ([k8s/databases/postgres-ha.yaml](file:///c:/laragon/www/masdika/k8s/databases/postgres-ha.yaml)):
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: masdika-pg-pooler
+  namespace: masdika
+spec:
+  cluster:
+    name: masdika-pg-ha
+  instances: 2
+  type: rw
+  pgbouncer:
+    poolMode: transaction
+    parameters:
+      max_client_conn: "1000"
+      default_pool_size: "25"
+      min_pool_size: "5"
+      reserve_pool_size: "5"
+      max_db_connections: "100"
+```
+   *Service Endpoint*: `masdika-pg-pooler:5432` (otomatis mengarahkan ke primary instance yang sedang aktif).
+2. **Standalone PgBouncer Deployment** ([k8s/databases/pgbouncer.yaml](file:///c:/laragon/www/masdika/k8s/databases/pgbouncer.yaml)):
+   * Disediakan khusus untuk deployment single-instance (`masdika-db:5432`).
+   * Multi-replica (2 pods) dengan non-root user (UID `70`), liveness/readiness probe TCP 5432.
+   * *Service Endpoint*: `masdika-pgbouncer:5432`.
+
+### 3. Integrasi Prisma ORM
+Prisma Client di [prisma.ts](file:///c:/laragon/www/masdika/apps/web/src/lib/prisma.ts) menggunakan adapter `@prisma/adapter-pg` dengan *connection pooler flag*:
+```env
+# Format Connection String untuk PgBouncer
+DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@masdika-pg-pooler:5432/${DB_NAME}?pgbouncer=true"
+```
+
+### 4. Zero-Trust Network Policy Isolation
+Akses ke PgBouncer dan CNPG Pooler dilindungi secara ketat di [networkpolicy.yaml](file:///c:/laragon/www/masdika/k8s/security/networkpolicy.yaml):
+* Kebijakan **`masdika-pooler-isolation`** dan **`masdika-cnpg-pooler-isolation`** hanya mengizinkan ingress TCP port 5432 dari pod `masdika-app`, `masdika-worker`, `masdika-vnc-proxy`, dan probe `masdika-heartbeat`.
+* Database backend (`masdika-db-isolation`) mengizinkan koneksi dari PgBouncer dan CNPG Pooler, serta pod `masdika-backup` untuk proses `pg_dump` terjadwal.
+
+---
+
 ## ⚡ Circuit Breaker & Graceful Degradation (Anti-Cascading Failure)
 
 Diimplementasikan melalui modul native TypeScript di [`apps/web/src/lib/circuit-breaker.ts`](apps/web/src/lib/circuit-breaker.ts) dan diintegrasikan ke Prisma Client di [`apps/web/src/lib/prisma.ts`](apps/web/src/lib/prisma.ts):
@@ -202,7 +340,7 @@ Penyelamatan data database PostgreSQL menggunakan arsitektur *Disaster Recovery*
 
 ## 🧪 Pengujian Otomatis (Automated Testing Suite)
 
-Sistem dilengkapi dengan **39 unit test otomatis** menggunakan **Vitest**:
+Sistem dilengkapi dengan **47 unit test otomatis** menggunakan **Vitest**:
 
 ```bash
 # Menjalankan seluruh test suite lokal
@@ -235,7 +373,7 @@ Setiap commit baru ke branch `master` diverifikasi secara ketat melalui 9 gerban
        │
        ├──► 1. Code Quality & Linting (ESLint, TypeScript Strict Check)
        ├──► 2. SCA - Dependency Audit (npm audit security scan)
-       ├──► 3. Automated Unit Testing (Vitest - Wajib 39 Test Lulus 100%)
+       ├──► 3. Automated Unit Testing (Vitest - Wajib 47 Test Lulus 100%)
        ├──► 4. SAST - Semgrep OWASP Security Scanner
        ├──► 5. IaC - K8s Manifest Security Compliance Scan
        │
@@ -278,7 +416,7 @@ masdika.id/
 │       │       ├── ssrf.ts            # Modul Pertahanan Anti-SSRF & DNS Rebinding
 │       │       ├── encryption.ts      # Enkripsi AES-256 & Hashing Scrypt
 │       │       ├── billing.ts         # Helper Kalkulasi & Formatting Billing
-│       │       └── __tests__/         # 39 Unit Tests Vitest
+│       │       └── __tests__/         # 47 Unit Tests Vitest
 │       ├── vitest.config.mts     # Konfigurasi Vitest Runner
 │       ├── worker.js             # BullMQ Background Worker & Auto-Billing
 │       └── vnc-proxy.js          # WebSocket Proxy untuk VNC Console
@@ -297,7 +435,8 @@ masdika.id/
 │   │   └── chaos-cronjob.yaml    # Automated SRE Chaos Monkey CronJob (Weekly Drill)
 │   ├── databases/
 │   │   ├── postgres.yaml         # PostgreSQL 18 Production Engine
-│   │   ├── postgres-ha.yaml      # CloudNativePG High Availability Cluster Specification
+│   │   ├── postgres-ha.yaml      # CloudNativePG HA Cluster + Built-in PgBouncer Pooler CRD
+│   │   ├── pgbouncer.yaml        # Standalone PgBouncer Deployment & Service (Transaction Mode)
 │   │   ├── redis.yaml            # Redis 7 In-Memory Cache
 │   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
 │   │   └── backup-cronjob.yaml   # Disaster Recovery (GPG AES-256 + RustFS S3 Sync)
@@ -315,7 +454,8 @@ masdika.id/
 │   │   ├── loki.yaml             # Loki Log Aggregator
 │   │   └── promtail.yaml         # Promtail Log Agent (Host /var/log/auth.log)
 │   └── security/
-│       ├── networkpolicy.yaml    # Zero-Trust CNI Network Isolation Policies
+│       ├── cloudflare-origin-pull.yaml # Cloudflare Authenticated Origin Pull CA & Traefik TLSOption (mTLS)
+│       ├── networkpolicy.yaml    # Zero-Trust CNI Network Isolation Policies (DB & Pooler Isolation)
 │       ├── kyverno-policies.yaml # Kyverno Admission Controller Policies
 │       └── falco.yaml            # Falco eBPF Runtime Threat Detection DaemonSet
 ├── scripts/
@@ -365,7 +505,33 @@ node scripts/seal-secret.js --name masdika-secret --namespace masdika --from-env
 sudo kubectl get sealedsecrets -n masdika
 ```
 
-### 2. Kebijakan Keamanan (Kyverno & Falco)
+### 2. Keamanan Edge & Ingress (Cloudflare Origin Pull mTLS)
+```bash
+# Memeriksa status TLSOption mTLS Cloudflare di Traefik
+sudo kubectl get tlsoption -n masdika
+
+# Memeriksa Secret CA Origin Pull
+sudo kubectl get secret cloudflare-origin-pull-ca -n masdika
+
+# Uji coba verifikasi penolakan mTLS (koneksi langsung tanpa cert harus ditolak)
+curl -k -v https://192.168.79.4/ 2>&1 | grep -i "bad certificate\|tls"
+```
+
+### 3. Operasional Database & PgBouncer Connection Pooling
+```bash
+# Memeriksa status CNPG Pooler (CloudNativePG PgBouncer)
+sudo kubectl get pooler -n masdika
+
+# Memeriksa pod & service PgBouncer
+sudo kubectl get pods -n masdika -l app=masdika-pgbouncer
+sudo kubectl get svc -n masdika -l app.kubernetes.io/name=masdika-pgbouncer
+
+# Memeriksa statistik pool koneksi PgBouncer langsung via psql console
+sudo kubectl exec -it -n masdika deployment/masdika-pgbouncer -- psql -h 127.0.0.1 -p 5432 -U masdika -d pgbouncer -c "SHOW POOLS;"
+sudo kubectl exec -it -n masdika deployment/masdika-pgbouncer -- psql -h 127.0.0.1 -p 5432 -U masdika -d pgbouncer -c "SHOW CLIENTS;"
+```
+
+### 4. Kebijakan Keamanan (Kyverno & Falco)
 ```bash
 # Memeriksa kebijakan cluster Kyverno yang aktif
 sudo kubectl get clusterpolicy
@@ -377,7 +543,7 @@ sudo kubectl get polr -A
 sudo kubectl logs -n falco daemonset/falco -c falco -f --tail=50
 ```
 
-### 3. Manajemen SRE, HPA & Chaos Drills
+### 5. Manajemen SRE, HPA & Chaos Drills
 ```bash
 # Menjalankan latihan Chaos Monkey Pod Kill mandiri dengan probe uptime live
 ./scripts/chaos-experiment.sh pod-kill
@@ -392,7 +558,7 @@ sudo kubectl logs -n falco daemonset/falco -c falco -f --tail=50
 sudo kubectl get hpa -n masdika
 ```
 
-### 4. Observability & Elastic ILM Retention
+### 6. Observability & Elastic ILM Retention
 ```bash
 # Memeriksa status ILM Policy 14 hari di Elasticsearch
 curl -s -u elastic:PASSWORD http://10.43.100.120:9200/_ilm/policy/masdika-ilm-14days | jq .

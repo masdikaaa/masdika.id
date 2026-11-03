@@ -64,3 +64,41 @@ spec:
     limits:
       cpu: "2"
       memory: 2Gi
+
+---
+# ==============================================================================
+# CloudNativePG (CNPG) Native PgBouncer Connection Pooler
+# Architecture: 2 Replicas, High-Performance Transaction Pooling
+# Service: masdika-pg-pooler:5432 -> masdika-pg-ha-rw:5432
+# ==============================================================================
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: masdika-pg-pooler
+  namespace: masdika
+  labels:
+    app.kubernetes.io/name: masdika-pg-pooler
+    app.kubernetes.io/instance: masdika-pg-ha
+    cnpg.io/poolerName: masdika-pg-pooler
+spec:
+  cluster:
+    name: masdika-pg-ha
+  instances: 2
+  type: rw
+  pgbouncer:
+    poolMode: transaction
+    parameters:
+      max_client_conn: "1000"
+      default_pool_size: "25"
+      min_pool_size: "5"
+      reserve_pool_size: "5"
+      max_db_connections: "100"
+      server_reset_query: "DISCARD ALL"
+      ignore_startup_parameters: "extra_float_digits"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

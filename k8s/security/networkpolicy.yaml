@@ -32,6 +32,76 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-heartbeat
+        - podSelector:
+            matchLabels:
+              app: masdika-pgbouncer
+        - podSelector:
+            matchLabels:
+              cnpg.io/poolerName: masdika-pg-pooler
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masdika-pooler-isolation
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+    security.kubernetes.io/tier: connection-pooler
+spec:
+  podSelector:
+    matchLabels:
+      app: masdika-pgbouncer
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-app
+        - podSelector:
+            matchLabels:
+              app: masdika-worker
+        - podSelector:
+            matchLabels:
+              app: masdika-vnc-proxy
+        - podSelector:
+            matchLabels:
+              app: masdika-heartbeat
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masdika-cnpg-pooler-isolation
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+    security.kubernetes.io/tier: connection-pooler
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/poolerName: masdika-pg-pooler
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masdika-app
+        - podSelector:
+            matchLabels:
+              app: masdika-worker
+        - podSelector:
+            matchLabels:
+              app: masdika-vnc-proxy
+        - podSelector:
+            matchLabels:
+              app: masdika-heartbeat
       ports:
         - protocol: TCP
           port: 5432
