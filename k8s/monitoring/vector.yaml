@@ -16,7 +16,12 @@ metadata:
 data:
   vector.yaml: |
     # --------------------------------------------------------------------------
-    # API & Health Engine
+    # Global Settings: Use /tmp for state to guarantee non-root permissions
+    # --------------------------------------------------------------------------
+    data_dir: "/tmp/vector"
+
+    # --------------------------------------------------------------------------
+    # API & Health Engine (Probes & Diagnostic)
     # --------------------------------------------------------------------------
     api:
       enabled: true
@@ -28,28 +33,30 @@ data:
     # --------------------------------------------------------------------------
     sources:
       app_http_logs:
-        type: http_server
+        type: "http_server"
         address: "0.0.0.0:5044"
-        encoding: json
+        path: "/"
         strict_path: false
+        decoding:
+          codec: "json"
 
       internal_metrics:
-        type: internal_metrics
+        type: "internal_metrics"
 
     # --------------------------------------------------------------------------
     # Transforms: Elastic Common Schema (ECS) Normalization via VRL
     # --------------------------------------------------------------------------
     transforms:
       ecs_parser:
-        type: remap
+        type: "remap"
         inputs:
-          - app_http_logs
+          - "app_http_logs"
         source: |
-          # If payload arrived with nested JSON in string format, decode it
+          # If message string contains nested JSON, parse and merge fields
           if is_string(.message) {
             parsed, err = parse_json(.message)
             if err == null {
-              . = merge(., parsed)
+              . |= parsed
             }
           }
 
@@ -61,8 +68,17 @@ data:
           }
 
           # Service & Environment Metadata
-          .service.name = to_string(.app) ?? "masdika-web"
-          .service.environment = to_string(.env) ?? "production"
+          if exists(.app) {
+            .service.name = to_string!(.app)
+          } else {
+            .service.name = "masdika-web"
+          }
+
+          if exists(.env) {
+            .service.environment = to_string!(.env)
+          } else {
+            .service.environment = "production"
+          }
 
           # Host Physical & Container Metadata
           .host.name = "masdika"
@@ -89,46 +105,52 @@ data:
           # Standardized ISO-8601 Timestamp
           ."@timestamp" = .timestamp ?? now()
 
+          # Export simple top-level fields for Grafana Loki label templating
+          .app_name = .service.name
+          .env_name = .service.environment
+          .log_level = .log.level
+
     # --------------------------------------------------------------------------
     # Sinks: Dual-Sink to Elasticsearch & Grafana Loki + Prometheus Exporter
     # --------------------------------------------------------------------------
     sinks:
       elasticsearch:
-        type: elasticsearch
+        type: "elasticsearch"
         inputs:
-          - ecs_parser
+          - "ecs_parser"
         endpoints:
           - "http://elasticsearch:9200"
         auth:
-          strategy: basic
-          user: elastic
+          strategy: "basic"
+          user: "elastic"
           password: "${ELASTIC_PASSWORD}"
-        mode: data_stream
+        mode: "data_stream"
         data_stream:
-          type: logs
-          dataset: masdika.app
-          namespace: default
-        compression: gzip
+          type: "logs"
+          dataset: "masdika.app"
+          namespace: "default"
+        compression: "gzip"
         batch:
           max_events: 500
           timeout_secs: 1.0
 
       loki:
-        type: loki
+        type: "loki"
         inputs:
-          - ecs_parser
+          - "ecs_parser"
         endpoint: "http://masdika-loki:3100"
         labels:
-          app: '{{ service.name }}'
-          env: '{{ service.environment }}'
-          level: '{{ log.level }}'
+          job: "vector-app"
+          app: "{{ app_name }}"
+          env: "{{ env_name }}"
+          level: "{{ log_level }}"
         encoding:
-          codec: json
+          codec: "json"
 
       prometheus_metrics:
-        type: prometheus_exporter
+        type: "prometheus_exporter"
         inputs:
-          - internal_metrics
+          - "internal_metrics"
         address: "0.0.0.0:9090"
 ---
 apiVersion: apps/v1
@@ -222,13 +244,13 @@ spec:
               mountPath: /etc/vector/vector.yaml
               subPath: vector.yaml
               readOnly: true
-            - name: data
-              mountPath: /var/lib/vector
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           configMap:
             name: masdika-vector-config
-        - name: data
+        - name: tmp
           emptyDir: {}
 ---
 # Primary Vector Service
@@ -320,4 +342,3 @@ spec:
       protocol: TCP
   selector:
     app: masdika-vector
-
