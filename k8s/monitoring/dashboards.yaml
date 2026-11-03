@@ -2299,15 +2299,243 @@ data:
           ]
         },
         {
-          "id": 9,
+          "id": 12,
           "gridPos": {
-            "h": 12,
+            "h": 14,
             "w": 24,
             "x": 0,
             "y": 8
           },
           "type": "table",
-          "title": "🛡️ Container Image Vulnerability Inventory (Trivy Operator)",
+          "title": "🔍 Detailed CVE Vulnerability Explorer (Per-CVE ID, Package, CVSS & Patch Info)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": true,
+                "filterable": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CVE ID"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "View CVE Details on NVD (${__value.raw})",
+                        "url": "https://nvd.nist.gov/vuln/detail/${__value.raw}",
+                        "targetBlank": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Critical": {
+                            "color": "red",
+                            "index": 0
+                          },
+                          "High": {
+                            "color": "orange",
+                            "index": 1
+                          },
+                          "Medium": {
+                            "color": "yellow",
+                            "index": 2
+                          },
+                          "Low": {
+                            "color": "blue",
+                            "index": 3
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CVSS"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 80
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Package"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 170
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Installed"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Fixed In"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 130
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Description"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 380
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            },
+            "sortBy": [
+              {
+                "displayName": "CVSS",
+                "desc": true
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "trivy_vulnerability_id > 0",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true,
+                  "name": true,
+                  "class": true,
+                  "image_digest": true,
+                  "image_registry": true,
+                  "last_modified_date": true,
+                  "package_type": true,
+                  "pkg_path": true,
+                  "published_date": true,
+                  "resource_kind": true,
+                  "target": true
+                },
+                "indexByName": {
+                  "vuln_id": 0,
+                  "severity": 1,
+                  "vuln_score": 2,
+                  "resource": 3,
+                  "installed_version": 4,
+                  "fixed_version": 5,
+                  "container_name": 6,
+                  "image_repository": 7,
+                  "image_tag": 8,
+                  "namespace": 9,
+                  "resource_name": 10,
+                  "vuln_title": 11
+                },
+                "renameByName": {
+                  "vuln_id": "CVE ID",
+                  "severity": "Severity",
+                  "vuln_score": "CVSS",
+                  "resource": "Package",
+                  "installed_version": "Installed",
+                  "fixed_version": "Fixed In",
+                  "container_name": "Container",
+                  "image_repository": "Image Repository",
+                  "image_tag": "Tag",
+                  "namespace": "Namespace",
+                  "resource_name": "Workload",
+                  "vuln_title": "Description"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "type": "table",
+          "title": "🛡️ Container Image Vulnerability Inventory (Summary by Container)",
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
@@ -2472,7 +2700,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 20
+            "y": 33
           },
           "type": "bargauge",
           "title": "Top Critical & High CVEs by Workload",
@@ -2523,7 +2751,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 20
+            "y": 33
           },
           "type": "bargauge",
           "title": "Critical Vulnerabilities by Image Repository",
@@ -2595,5 +2823,5 @@ data:
       "timezone": "browser",
       "title": "Trivy Container Security & Vulnerability Matrix",
       "uid": "masdika-trivy-cve",
-      "version": 1
+      "version": 2
     }
