@@ -34,6 +34,9 @@ spec:
               app: masdika-heartbeat
         - podSelector:
             matchLabels:
+              app: masdika-pgbouncer
+        - podSelector:
+            matchLabels:
               cnpg.io/poolerName: masdika-pg-pooler
       ports:
         - protocol: TCP
@@ -42,7 +45,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: masdika-cnpg-pooler-isolation
+  name: masdika-pooler-isolation
   namespace: masdika
   labels:
     app.kubernetes.io/part-of: masdika
@@ -50,7 +53,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      cnpg.io/poolerName: masdika-pg-pooler
+      app: masdika-pgbouncer
   policyTypes:
     - Ingress
   ingress:

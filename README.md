@@ -246,29 +246,11 @@ Masdika menerapkan **PgBouncer Connection Pooling** dengan mode transaksi (*Tran
 * **Rasio Efisiensi 40:1**: Mampu menangani hingga **1.000 koneksi concurrent** dari sisi aplikasi hanya dengan **25 koneksi nyata** ke server PostgreSQL.
 * **Pembersihan State Otomatis**: Dilengkapi parameter `SERVER_RESET_QUERY: "DISCARD ALL"` dan `IGNORE_STARTUP_PARAMETERS: "extra_float_digits"` untuk mencegah *leakage session state*.
 
-### 2. Dual Deployment Option:
-1. **CloudNativePG Native Pooler CRD (Direkomendasikan untuk HA)** ([k8s/databases/postgres-ha.yaml](file:///c:/laragon/www/masdika/k8s/databases/postgres-ha.yaml)):
-```yaml
-apiVersion: postgresql.cnpg.io/v1
-kind: Pooler
-metadata:
-  name: masdika-pg-pooler
-  namespace: masdika
-spec:
-  cluster:
-    name: masdika-pg-ha
-  instances: 2
-  type: rw
-  pgbouncer:
-    poolMode: transaction
-    parameters:
-      max_client_conn: "1000"
-      default_pool_size: "25"
-      min_pool_size: "5"
-      reserve_pool_size: "5"
-      max_db_connections: "100"
-```
-   *Service Endpoint*: `masdika-pg-pooler:5432` dan alias `masdika-pgbouncer:5432` (keduanya otomatis mengarahkan ke primary instance yang sedang aktif secara multi-replica HA).
+### 2. Standalone PgBouncer Deployment:
+1. **Enterprise PgBouncer Deployment** ([k8s/databases/pgbouncer.yaml](file:///c:/laragon/www/masdika/k8s/databases/pgbouncer.yaml)):
+   * Didedikasikan untuk engine produksi (masdika-db:5432).
+   * Multi-replica (2 pods) dengan non-root user (UID 70), liveness/readiness probe TCP 5432.
+   * *Service Endpoints*: masdika-pgbouncer:5432 dan masdika-pg-pooler:5432.
 
 ### 3. Integrasi Prisma ORM
 Prisma Client di [prisma.ts](file:///c:/laragon/www/masdika/apps/web/src/lib/prisma.ts) menggunakan adapter `@prisma/adapter-pg` dengan *connection pooler flag*:
@@ -521,7 +503,7 @@ masdika.id/
 │   │   └── chaos-cronjob.yaml    # Automated SRE Chaos Monkey CronJob (Weekly Drill)
 │   ├── databases/
 │   │   ├── postgres.yaml         # PostgreSQL 18 Production Engine
-│   │   ├── postgres-ha.yaml      # CloudNativePG HA Cluster + Built-in PgBouncer Pooler CRD & Alias Svc
+│   │   ├── pgbouncer.yaml        # Standalone PgBouncer Deployment (2 Replicas, Transaction Mode)
 │   │   ├── redis.yaml            # Redis 7 In-Memory Cache
 │   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
 │   │   └── backup-cronjob.yaml   # Disaster Recovery (GPG AES-256 + RustFS S3 Sync)
@@ -698,3 +680,5 @@ Seluruh kode sumber, arsitektur sistem, aset visual, dan konfigurasi infrastrukt
 > Repositori ini bukan proyek *open-source*. Dilarang keras menyalin, membagikan, mendistribusikan ulang, memodifikasi, mempublikasikan, melisensikan ulang (*sub-license*), atau menggunakan sebagian maupun seluruh kode dan aset dalam repositori ini untuk keperluan publik atau komersial pihak ketiga tanpa izin tertulis langsung dari pemilik hak cipta.  
 > 
 > Hak cipta © 2026 **Masdika.ID**. Seluruh hak dilindungi oleh undang-undang.
+
+
