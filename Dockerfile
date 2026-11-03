@@ -117,6 +117,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/prisma ./apps/web/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/prisma.config.ts ./apps/web/
+COPY --chown=nextjs:nodejs apps/web/package.json ./apps/web/package.json
+COPY --chown=nextjs:nodejs package.json ./package.json
 
 # CRITICAL: Override the standalone's minimal node_modules with the FULL node_modules
 # from deps stage (which includes next, react, ws, cookie, @swc/helpers, and

@@ -2,8 +2,8 @@
 // npm install --save-dev prisma dotenv
 import path from "path";
 import { config } from "dotenv";
-// Load .env from monorepo root (2 levels up from apps/web)
-config({ path: path.resolve(process.cwd(), "../../.env"), override: true });
+// Load .env from monorepo root (2 levels up from apps/web) if present
+config({ path: path.resolve(process.cwd(), "../../.env"), override: false });
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
@@ -12,6 +12,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DATABASE_URL"] || "postgresql://dummy:dummy@localhost:5432/dummy?schema=public",
   },
 });
