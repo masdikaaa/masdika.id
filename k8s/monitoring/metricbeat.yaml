@@ -141,7 +141,7 @@ spec:
           args: [
             "run", "-c", "/etc/metricbeat.yml",
             "-e",
-            "-system.hostfs=/hostfs",
+            "--system.hostfs=/hostfs",
           ]
           env:
             - name: ELASTIC_PASSWORD
