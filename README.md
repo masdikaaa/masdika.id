@@ -268,11 +268,7 @@ spec:
       reserve_pool_size: "5"
       max_db_connections: "100"
 ```
-   *Service Endpoint*: `masdika-pg-pooler:5432` (otomatis mengarahkan ke primary instance yang sedang aktif).
-2. **Standalone PgBouncer Deployment** ([k8s/databases/pgbouncer.yaml](file:///c:/laragon/www/masdika/k8s/databases/pgbouncer.yaml)):
-   * Disediakan khusus untuk deployment single-instance (`masdika-db:5432`).
-   * Multi-replica (2 pods) dengan non-root user (UID `70`), liveness/readiness probe TCP 5432.
-   * *Service Endpoint*: `masdika-pgbouncer:5432`.
+   *Service Endpoint*: `masdika-pg-pooler:5432` dan alias `masdika-pgbouncer:5432` (keduanya otomatis mengarahkan ke primary instance yang sedang aktif secara multi-replica HA).
 
 ### 3. Integrasi Prisma ORM
 Prisma Client di [prisma.ts](file:///c:/laragon/www/masdika/apps/web/src/lib/prisma.ts) menggunakan adapter `@prisma/adapter-pg` dengan *connection pooler flag*:
@@ -525,8 +521,7 @@ masdika.id/
 │   │   └── chaos-cronjob.yaml    # Automated SRE Chaos Monkey CronJob (Weekly Drill)
 │   ├── databases/
 │   │   ├── postgres.yaml         # PostgreSQL 18 Production Engine
-│   │   ├── postgres-ha.yaml      # CloudNativePG HA Cluster + Built-in PgBouncer Pooler CRD
-│   │   ├── pgbouncer.yaml        # Standalone PgBouncer Deployment & Service (Transaction Mode)
+│   │   ├── postgres-ha.yaml      # CloudNativePG HA Cluster + Built-in PgBouncer Pooler CRD & Alias Svc
 │   │   ├── redis.yaml            # Redis 7 In-Memory Cache
 │   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
 │   │   └── backup-cronjob.yaml   # Disaster Recovery (GPG AES-256 + RustFS S3 Sync)

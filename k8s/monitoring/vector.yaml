@@ -320,3 +320,4 @@ spec:
       protocol: TCP
   selector:
     app: masdika-vector
+

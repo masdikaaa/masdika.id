@@ -102,3 +102,25 @@ spec:
     limits:
       cpu: 500m
       memory: 512Mi
+
+---
+# ==============================================================================
+# PgBouncer Service Alias (masdika-pgbouncer:5432)
+# Points directly to the healthy CNPG Pooler pods
+# ==============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-pgbouncer
+  namespace: masdika
+  labels:
+    app.kubernetes.io/name: masdika-pg-pooler
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: pgbouncer
+      protocol: TCP
+  selector:
+    cnpg.io/poolerName: masdika-pg-pooler
