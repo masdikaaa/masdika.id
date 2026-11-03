@@ -58,6 +58,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [confirmPowerModal, setConfirmPowerModal] = useState<{
+    action: "start" | "shutdown" | "stop" | "reboot";
+    title: string;
+    description: string;
+    confirmText: string;
+    variant: "danger" | "warning" | "success";
+    icon: React.ReactNode;
+  } | null>(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [activeTab, setActiveTab] = useUrlTab<string>("overview");
 
@@ -1121,6 +1129,52 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     }
   };
 
+  const promptPowerAction = (action: "start" | "shutdown" | "stop" | "reboot") => {
+    const hostname = vps?.hostname || "VPS";
+    switch (action) {
+      case "start":
+        setConfirmPowerModal({
+          action,
+          title: "Start Virtual Machine",
+          description: `Are you sure you want to boot up ${hostname}? Your virtual machine will start and compute billing will resume.`,
+          confirmText: "Start VPS",
+          variant: "success",
+          icon: <Play className="w-8 h-8 fill-current" />,
+        });
+        break;
+      case "shutdown":
+        setConfirmPowerModal({
+          action,
+          title: "Graceful Shutdown",
+          description: `Are you sure you want to shut down ${hostname}? An ACPI powerdown signal will be sent to gracefully close all applications and stop the OS safely.`,
+          confirmText: "Graceful Shutdown",
+          variant: "warning",
+          icon: <Power className="w-8 h-8" />,
+        });
+        break;
+      case "stop":
+        setConfirmPowerModal({
+          action,
+          title: "Force Stop Virtual Machine",
+          description: `Are you sure you want to force power off ${hostname} immediately? Power will be cut abruptly, which may result in data loss or filesystem damage if files are open.`,
+          confirmText: "Force Stop",
+          variant: "danger",
+          icon: <Square className="w-8 h-8 fill-current" />,
+        });
+        break;
+      case "reboot":
+        setConfirmPowerModal({
+          action,
+          title: "Reboot Virtual Machine",
+          description: `Are you sure you want to reboot ${hostname}? The operating system will restart and all active network connections will be briefly disconnected.`,
+          confirmText: "Reboot VPS",
+          variant: "warning",
+          icon: <RotateCcw className="w-8 h-8" />,
+        });
+        break;
+    }
+  };
+
   const handleAction = async (action: string) => {
     if (action === "console") {
       openConsole();
@@ -1137,6 +1191,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
       if (res.ok) {
         toast.success(`Action '${action}' executed successfully.`);
+        setConfirmPowerModal(null);
         fetchVpsDetails();
       } else {
         const data = await res.json();
@@ -1447,7 +1502,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* Action Buttons */}
             <div className="flex flex-wrap md:flex-nowrap gap-2 z-10 w-full md:w-auto mt-4 md:mt-0 justify-start sm:justify-end">
               <button
-                onClick={() => handleAction("start")}
+                onClick={() => promptPowerAction("start")}
                 disabled={actionLoading || isRunning || vps.status === 'SUSPENDED' || vps.status === 'TERMINATED'}
                 className={cn(
                   "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-bold focus:outline-none cursor-pointer",
@@ -1461,7 +1516,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <span className="hidden sm:inline">Start</span>
               </button>
               <button
-                onClick={() => handleAction("shutdown")}
+                onClick={() => promptPowerAction("shutdown")}
                 disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
                 className={cn(
                   "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-bold focus:outline-none cursor-pointer",
@@ -1475,7 +1530,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <span className="hidden sm:inline">Shutdown</span>
               </button>
               <button
-                onClick={() => handleAction("stop")}
+                onClick={() => promptPowerAction("stop")}
                 disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
                 className={cn(
                   "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-bold focus:outline-none cursor-pointer",
@@ -1489,7 +1544,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <span className="hidden sm:inline">Stop</span>
               </button>
               <button
-                onClick={() => handleAction("reboot")}
+                onClick={() => promptPowerAction("reboot")}
                 disabled={actionLoading || !isRunning || vps.status === 'TERMINATED'}
                 className={cn(
                   "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border rounded-xl transition-all shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-bold focus:outline-none cursor-pointer",
@@ -3703,6 +3758,23 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!confirmPowerModal}
+        onClose={() => setConfirmPowerModal(null)}
+        onConfirm={() => {
+          if (confirmPowerModal) {
+            handleAction(confirmPowerModal.action);
+          }
+        }}
+        title={confirmPowerModal?.title || ""}
+        description={confirmPowerModal?.description || ""}
+        confirmText={confirmPowerModal?.confirmText || "Confirm"}
+        cancelText="Cancel"
+        variant={confirmPowerModal?.variant || "warning"}
+        icon={confirmPowerModal?.icon}
+        isLoading={actionLoading}
+      />
 
       <ConfirmModal
         isOpen={showReinstallModal}

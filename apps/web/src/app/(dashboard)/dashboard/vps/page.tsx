@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { Pagination } from "@/components/ui/Pagination";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Link from "next/link";
 
 const getOsIcon = (osTemplate: string) => {
@@ -89,8 +90,6 @@ export default function MyVpsPage() {
   }, []);
 
   const handleAction = async (vpsId: number, action: string) => {
-    setConfirmModal(null);
-
     setActionLoading((prev) => ({ ...prev, [vpsId]: true }));
     try {
       const res = await fetch("/api/user/vps/action", {
@@ -102,6 +101,7 @@ export default function MyVpsPage() {
 
       if (res.ok) {
         toast.success(`Action '${action}' executed successfully.`);
+        setConfirmModal(null);
         fetchVps();
       } else {
         toast.error(data.error || "Failed to execute action");
@@ -142,100 +142,148 @@ export default function MyVpsPage() {
   const executeAction = async () => {
     if (!actionConfirm) return;
     const action = actionConfirm;
-    setActionConfirm(null);
     setBulkLoading(true);
     let successCount = 0;
     let lastError = "";
 
-    if (action === "delete") {
-      for (const id of selectedVps) {
-        try {
-          const res = await fetch(`/api/user/vps/${id}`, { method: "DELETE" });
-          if (res.ok) {
-            successCount++;
-          } else {
-            const data = await res.json().catch(() => ({}));
-            lastError = data.error || "Failed to delete instance";
+    try {
+      if (action === "delete") {
+        for (const id of selectedVps) {
+          try {
+            const res = await fetch(`/api/user/vps/${id}`, { method: "DELETE" });
+            if (res.ok) {
+              successCount++;
+            } else {
+              const data = await res.json().catch(() => ({}));
+              lastError = data.error || "Failed to delete instance";
+            }
+          } catch (e: any) {
+            lastError = e.message || "Network error";
           }
-        } catch (e: any) {
-          lastError = e.message || "Network error";
+        }
+
+        if (successCount === selectedVps.length) {
+          toast.success(`Successfully deleted ${successCount} VPS instances.`);
+        } else if (successCount > 0) {
+          toast.warning(`Deleted ${successCount} instances, but some failed: ${lastError}`);
+        } else {
+          toast.error(`Failed to delete: ${lastError}`);
+        }
+      } else {
+        for (const id of selectedVps) {
+          try {
+            const res = await fetch("/api/user/vps/action", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ vpsId: id, action }),
+            });
+            if (res.ok) {
+              successCount++;
+            } else {
+              const data = await res.json().catch(() => ({}));
+              lastError = data.error || `Failed to execute ${action}`;
+            }
+          } catch (e: any) {
+            lastError = e.message || "Network error";
+          }
+        }
+
+        if (successCount === selectedVps.length) {
+          toast.success(`Successfully executed ${action} on ${successCount} instances.`);
+        } else if (successCount > 0) {
+          toast.warning(`Executed on ${successCount} instances, but some failed: ${lastError}`);
+        } else {
+          toast.error(`Failed to execute ${action}: ${lastError}`);
         }
       }
-
-      if (successCount === selectedVps.length) {
-        toast.success(`Successfully deleted ${successCount} VPS instances.`);
-      } else if (successCount > 0) {
-        toast.warning(`Deleted ${successCount} instances, but some failed: ${lastError}`);
-      } else {
-        toast.error(`Failed to delete: ${lastError}`);
-      }
-    } else {
-      for (const id of selectedVps) {
-        try {
-          const res = await fetch("/api/user/vps/action", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ vpsId: id, action }),
-          });
-          if (res.ok) {
-            successCount++;
-          } else {
-            const data = await res.json().catch(() => ({}));
-            lastError = data.error || `Failed to execute ${action}`;
-          }
-        } catch (e: any) {
-          lastError = e.message || "Network error";
-        }
-      }
-
-      if (successCount === selectedVps.length) {
-        toast.success(`Successfully executed ${action} on ${successCount} instances.`);
-      } else if (successCount > 0) {
-        toast.warning(`Executed on ${successCount} instances, but some failed: ${lastError}`);
-      } else {
-        toast.error(`Failed to execute ${action}: ${lastError}`);
-      }
+    } finally {
+      setBulkLoading(false);
+      setActionConfirm(null);
+      fetchVps();
+      setSelectedVps([]);
     }
-
-    setBulkLoading(false);
-    fetchVps();
-    setSelectedVps([]);
   };
 
-  const getActionConfig = (act: string) => {
-    switch (act) {
+  const getSingleActionModalConfig = (item: { vpsId: number; action: string; hostname: string }) => {
+    switch (item.action) {
       case "start":
         return {
-          icon: <Play className="w-5 h-5 text-emerald-400" />,
-          bg: "bg-emerald-500/10 border border-emerald-500/20",
-          buttonClass: "bg-emerald-500 hover:bg-emerald-400 text-slate-950",
-          title: "Start",
-          desc: "Are you sure you want to start the selected VPS instances?",
+          title: "Start Virtual Machine",
+          description: `Are you sure you want to boot up ${item.hostname}? Your virtual machine will start and compute billing will resume.`,
+          confirmText: "Start VPS",
+          variant: "success" as const,
+          icon: <Play className="w-8 h-8 fill-current" />,
         };
       case "shutdown":
         return {
-          icon: <Power className="w-5 h-5 text-amber-400" />,
-          bg: "bg-amber-500/10 border border-amber-500/20",
-          buttonClass: "bg-amber-500 hover:bg-amber-400 text-slate-950",
-          title: "Shutdown",
-          desc: "Are you sure you want to gracefully shutdown the selected VPS instances?",
+          title: "Graceful Shutdown",
+          description: `Are you sure you want to shut down ${item.hostname}? An ACPI powerdown signal will be sent to gracefully close all applications and stop the OS safely.`,
+          confirmText: "Graceful Shutdown",
+          variant: "warning" as const,
+          icon: <Power className="w-8 h-8" />,
+        };
+      case "stop":
+        return {
+          title: "Force Stop Virtual Machine",
+          description: `Are you sure you want to force power off ${item.hostname} immediately? Power will be cut abruptly, which may result in data loss or filesystem corruption if files are open.`,
+          confirmText: "Force Stop",
+          variant: "danger" as const,
+          icon: <Square className="w-8 h-8 fill-current" />,
         };
       case "reboot":
         return {
-          icon: <RotateCcw className="w-5 h-5 text-cyan-400" />,
-          bg: "bg-cyan-500/10 border border-cyan-500/20",
-          buttonClass: "bg-cyan-400 hover:bg-cyan-300 text-slate-950",
-          title: "Reboot",
-          desc: "Are you sure you want to reboot the selected VPS instances?",
+          title: "Reboot Virtual Machine",
+          description: `Are you sure you want to reboot ${item.hostname}? The operating system will restart and all active network connections will be briefly disconnected.`,
+          confirmText: "Reboot VPS",
+          variant: "warning" as const,
+          icon: <RotateCcw className="w-8 h-8" />,
+        };
+      default:
+        return {
+          title: `${item.action} VPS`,
+          description: `Are you sure you want to execute ${item.action} on ${item.hostname}?`,
+          confirmText: "Confirm",
+          variant: "warning" as const,
+          icon: <AlertTriangle className="w-8 h-8" />,
+        };
+    }
+  };
+
+  const getBulkActionModalConfig = (act: string, count: number) => {
+    const plural = count > 1 ? "Instances" : "Instance";
+    switch (act) {
+      case "start":
+        return {
+          title: `Start ${count} VPS ${plural}`,
+          description: `Are you sure you want to start ${count} selected virtual machines? They will boot up and resume compute billing.`,
+          confirmText: `Start All (${count})`,
+          variant: "success" as const,
+          icon: <Play className="w-8 h-8 fill-current" />,
+        };
+      case "shutdown":
+        return {
+          title: `Shutdown ${count} VPS ${plural}`,
+          description: `Are you sure you want to send a graceful ACPI shutdown signal to ${count} selected virtual machines?`,
+          confirmText: `Shutdown All (${count})`,
+          variant: "warning" as const,
+          icon: <Power className="w-8 h-8" />,
+        };
+      case "reboot":
+        return {
+          title: `Reboot ${count} VPS ${plural}`,
+          description: `Are you sure you want to reboot ${count} selected virtual machines? Active customer connections will drop momentarily.`,
+          confirmText: `Reboot All (${count})`,
+          variant: "warning" as const,
+          icon: <RotateCcw className="w-8 h-8" />,
         };
       case "delete":
       default:
         return {
-          icon: <AlertTriangle className="w-5 h-5 text-rose-400" />,
-          bg: "bg-rose-500/10 border border-rose-500/20",
-          buttonClass: "bg-rose-500 hover:bg-rose-400 text-white",
-          title: "Delete",
-          desc: "This action is permanent and cannot be undone.",
+          title: `Delete ${count} VPS ${plural}`,
+          description: `WARNING: Are you sure you want to permanently delete ${count} selected virtual machines? All data will be destroyed immediately and cannot be recovered.`,
+          confirmText: `Delete All (${count})`,
+          variant: "danger" as const,
+          icon: <AlertTriangle className="w-8 h-8" />,
         };
     }
   };
@@ -1359,147 +1407,34 @@ export default function MyVpsPage() {
 
       {/* Single Instance Action Confirmation Modal */}
       {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-          <div
-            className={cn(
-              "border w-full max-w-sm rounded-2xl p-5 shadow-2xl relative",
-              isDark ? "bg-[#0a0a0c] border-white/[0.1]" : "bg-white border-slate-200"
-            )}
-          >
-            <button
-              onClick={() => setConfirmModal(null)}
-              className={cn(
-                "absolute top-4 right-4 p-1 rounded-lg transition-colors",
-                isDark ? "text-zinc-500 hover:text-white hover:bg-white/[0.06]" : "text-slate-400 hover:text-slate-900"
-              )}
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <div className="flex items-center gap-3 mb-3.5">
-              <div
-                className={cn(
-                  "w-9 h-9 rounded-xl flex items-center justify-center border",
-                  confirmModal.action === "start"
-                    ? isDark
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                      : "bg-emerald-50 border-emerald-200 text-emerald-700"
-                    : confirmModal.action === "stop"
-                    ? isDark
-                      ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                      : "bg-rose-50 border-rose-200 text-rose-700"
-                    : confirmModal.action === "shutdown"
-                    ? isDark
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                      : "bg-amber-50 border-amber-200 text-amber-700"
-                    : isDark
-                    ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
-                    : "bg-cyan-50 border-cyan-200 text-cyan-700"
-                )}
-              >
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-              <h2 className={cn("text-base font-bold capitalize", isDark ? "text-white" : "text-slate-900")}>
-                {confirmModal.action} Instance
-              </h2>
-            </div>
-
-            <p className={cn("text-xs sm:text-sm mb-5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Are you sure you want to <strong>{confirmModal.action}</strong> the server{" "}
-              <strong className={cn("font-mono", isDark ? "text-white" : "text-slate-900")}>
-                {confirmModal.hostname}
-              </strong>
-              ?
-              {confirmModal.action === "stop" && (
-                <span className="block mt-2 text-rose-400 font-medium text-xs">
-                  Warning: Forced power off may cause unsaved data loss. Use Shutdown for a graceful ACPI exit.
-                </span>
-              )}
-            </p>
-
-            <div className="flex justify-end gap-2.5">
-              <button
-                onClick={() => setConfirmModal(null)}
-                className={cn(
-                  "px-3.5 py-2 rounded-xl border transition-colors text-xs font-semibold",
-                  isDark
-                    ? "text-zinc-300 border-white/[0.08] hover:bg-white/[0.04]"
-                    : "text-slate-700 border-slate-200 hover:bg-slate-50"
-                )}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleAction(confirmModal.vpsId, confirmModal.action)}
-                className={cn(
-                  "px-4 py-2 rounded-xl font-bold transition-colors text-xs",
-                  confirmModal.action === "start"
-                    ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
-                    : confirmModal.action === "stop"
-                    ? "bg-rose-500 hover:bg-rose-400 text-white"
-                    : confirmModal.action === "shutdown"
-                    ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
-                    : "bg-cyan-400 hover:bg-cyan-300 text-slate-950"
-                )}
-              >
-                Confirm {confirmModal.action}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          isOpen={!!confirmModal}
+          onClose={() => setConfirmModal(null)}
+          onConfirm={() => handleAction(confirmModal.vpsId, confirmModal.action)}
+          title={getSingleActionModalConfig(confirmModal).title}
+          description={getSingleActionModalConfig(confirmModal).description}
+          confirmText={getSingleActionModalConfig(confirmModal).confirmText}
+          cancelText="Cancel"
+          variant={getSingleActionModalConfig(confirmModal).variant}
+          icon={getSingleActionModalConfig(confirmModal).icon}
+          isLoading={actionLoading[confirmModal.vpsId] || false}
+        />
       )}
 
       {/* Bulk Action Confirmation Modal */}
       {actionConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div
-            className={cn(
-              "border rounded-2xl p-5 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200",
-              isDark ? "bg-[#0a0a0c] border-white/[0.1]" : "bg-white border-slate-200"
-            )}
-          >
-            <div className="flex items-start gap-3.5 mb-4">
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                  getActionConfig(actionConfirm).bg
-                )}
-              >
-                {getActionConfig(actionConfirm).icon}
-              </div>
-              <div>
-                <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                  {getActionConfig(actionConfirm).title} {selectedVps.length} VPS{" "}
-                  {selectedVps.length > 1 ? "Instances" : "Instance"}
-                </h3>
-                <p className={cn("text-xs sm:text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  {getActionConfig(actionConfirm).desc}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2.5 mt-5">
-              <button
-                onClick={() => setActionConfirm(null)}
-                className={cn(
-                  "px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors",
-                  isDark
-                    ? "text-zinc-300 border-white/[0.08] hover:bg-white/[0.04]"
-                    : "text-slate-700 border-slate-200 hover:bg-slate-50"
-                )}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={executeAction}
-                className={cn(
-                  "px-4 py-2 rounded-xl text-xs font-bold transition-colors",
-                  getActionConfig(actionConfirm).buttonClass
-                )}
-              >
-                Confirm {getActionConfig(actionConfirm).title}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          isOpen={!!actionConfirm}
+          onClose={() => setActionConfirm(null)}
+          onConfirm={executeAction}
+          title={getBulkActionModalConfig(actionConfirm, selectedVps.length).title}
+          description={getBulkActionModalConfig(actionConfirm, selectedVps.length).description}
+          confirmText={getBulkActionModalConfig(actionConfirm, selectedVps.length).confirmText}
+          cancelText="Cancel"
+          variant={getBulkActionModalConfig(actionConfirm, selectedVps.length).variant}
+          icon={getBulkActionModalConfig(actionConfirm, selectedVps.length).icon}
+          isLoading={bulkLoading}
+        />
       )}
     </div>
   );
