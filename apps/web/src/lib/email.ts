@@ -5,7 +5,7 @@ import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
 const FROM_EMAIL = process.env.SMTP_FROM_EMAIL || 'no-reply@masdika.id';
 const FROM_NAME = process.env.SMTP_FROM_NAME || 'Masdika.ID';
 
-let transporterInstance: nodemailer.Transporter | null = null;
+let transporterInstance: ReturnType<typeof nodemailer.createTransport> | null = null;
 
 export const logEmailRecord = async ({
   userId,
@@ -118,7 +118,7 @@ export const getTransporter = () => {
     };
 
     // Background verify connection pool to warm up sockets
-    transporterInstance.verify().catch((err) => {
+    transporterInstance.verify().catch((err: any) => {
       console.warn('SMTP connection pool warm-up warning:', err?.message || err);
     });
   }
