@@ -55,6 +55,8 @@ spec:
             - "-c"
             - "io_method=sync"
             - "-c"
+            - "recovery_init_sync_method=fsync"
+            - "-c"
             - "max_connections=300"
             - "-c"
             - "shared_buffers=512MB"
