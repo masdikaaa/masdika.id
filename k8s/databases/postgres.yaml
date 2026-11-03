@@ -57,6 +57,8 @@ spec:
             - "-c"
             - "recovery_init_sync_method=fsync"
             - "-c"
+            - "fsync=off"
+            - "-c"
             - "max_connections=300"
             - "-c"
             - "shared_buffers=512MB"
