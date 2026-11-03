@@ -47,8 +47,8 @@ data:
           # If message string contains nested JSON, parse and merge fields
           if is_string(.message) {
             parsed, err = parse_json(.message)
-            if err == null {
-              . |= parsed
+            if err == null && is_object(parsed) {
+              . |= object!(parsed)
             }
           }
 
@@ -96,9 +96,9 @@ data:
 
           # Standardized ISO-8601 Timestamp
           if exists(.timestamp) {
-            @timestamp = parse_timestamp(.timestamp, "%+") ?? now()
+            .timestamp = parse_timestamp(.timestamp, "%+") ?? now()
           } else {
-            @timestamp = now()
+            .timestamp = now()
           }
 
           # Export simple top-level fields for Grafana Loki label templating
