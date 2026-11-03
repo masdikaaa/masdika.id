@@ -1858,3 +1858,742 @@ data:
       "uid": "masdika-soc-security",
       "version": 1
     }
+  trivy-security.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": true,
+      "panels": [
+        {
+          "id": 1,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "🚨 Masdika App Critical CVEs",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": []
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_image_vulnerabilities{severity=\"Critical\", image_repository=~\".*masdika.*\"}) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "⚠️ Masdika App High CVEs",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_image_vulnerabilities{severity=\"High\", image_repository=~\".*masdika.*\"}) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "🔑 Exposed Secrets in Cluster",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_exposedsecret_secrets) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "type": "stat",
+          "title": "📦 Total Monitored Container Images",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "background",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "count(count by (image_repository, image_tag) (trivy_image_vulnerabilities)) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 4
+          },
+          "type": "stat",
+          "title": "Cluster-Wide Critical CVEs",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 50
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_image_vulnerabilities{severity=\"Critical\"}) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 4
+          },
+          "type": "stat",
+          "title": "Cluster-Wide High CVEs",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 100
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_image_vulnerabilities{severity=\"High\"}) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 4
+          },
+          "type": "stat",
+          "title": "Cluster-Wide Medium CVEs",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_image_vulnerabilities{severity=\"Medium\"}) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 4
+          },
+          "type": "stat",
+          "title": "Config Audit Critical Checks",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          },
+          "targets": [
+            {
+              "expr": "sum(trivy_configaudit_checks{severity=\"Critical\"}) or vector(0)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "type": "table",
+          "title": "🛡️ Container Image Vulnerability Inventory (Trivy Operator)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 10
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "Critical": {
+                            "color": "red",
+                            "index": 0
+                          }
+                        }
+                      },
+                      {
+                        "type": "value",
+                        "options": {
+                          "High": {
+                            "color": "orange",
+                            "index": 1
+                          }
+                        }
+                      },
+                      {
+                        "type": "value",
+                        "options": {
+                          "Medium": {
+                            "color": "yellow",
+                            "index": 2
+                          }
+                        }
+                      },
+                      {
+                        "type": "value",
+                        "options": {
+                          "Low": {
+                            "color": "blue",
+                            "index": 3
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "CVE Count"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "sortBy": [
+              {
+                "displayName": "CVE Count",
+                "desc": true
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "trivy_image_vulnerabilities > 0",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true,
+                  "name": true,
+                  "image_digest": true,
+                  "image_registry": true
+                },
+                "renameByName": {
+                  "namespace": "Namespace",
+                  "resource_kind": "Kind",
+                  "resource_name": "Workload",
+                  "container_name": "Container",
+                  "image_repository": "Image Repository",
+                  "image_tag": "Tag",
+                  "severity": "Severity",
+                  "Value": "CVE Count"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 20
+          },
+          "type": "bargauge",
+          "title": "Top Critical & High CVEs by Workload",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "topk(8, sum by (resource_name, severity) (trivy_image_vulnerabilities{severity=~\"Critical|High\"}))",
+              "legendFormat": "{{ resource_name }} ({{ severity }})",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 20
+          },
+          "type": "bargauge",
+          "title": "Critical Vulnerabilities by Image Repository",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            }
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "topk(8, sum by (image_repository, image_tag) (trivy_image_vulnerabilities{severity=\"Critical\"}))",
+              "legendFormat": "{{ image_repository }}:{{ image_tag }}",
+              "refId": "A"
+            }
+          ]
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": [
+        "security",
+        "cve",
+        "trivy",
+        "vulnerabilities",
+        "masdika",
+        "soc"
+      ],
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Trivy Container Security & Vulnerability Matrix",
+      "uid": "masdika-trivy-cve",
+      "version": 1
+    }
