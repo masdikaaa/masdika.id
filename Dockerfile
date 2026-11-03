@@ -1,5 +1,6 @@
 # Base image - Alpine for minimal footprint
 FROM node:22-alpine AS base
+RUN apk update && apk upgrade --no-cache
 
 # ─── Stage 1: Install ALL dependencies (including Alpine-compatible sharp) ───
 FROM base AS deps

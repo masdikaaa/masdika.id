@@ -230,16 +230,16 @@ data:
       # ==========================================
       - name: masdika-security-cve-alerts
         rules:
-          # 19. Trivy Critical Image Vulnerability Detected
+          # 19. Trivy Critical Image Vulnerability Detected (Actionable Workloads)
           - alert: TrivyCriticalVulnerabilityFound
-            expr: sum(trivy_image_vulnerabilities{severity="Critical"}) > 0
-            for: 10m
+            expr: max by (namespace, container_name, image_repository, image_tag) (trivy_image_vulnerabilities{severity="Critical", image_repository=~".*masdika.*"}) > 2
+            for: 15m
             labels:
               severity: critical
               tier: security
             annotations:
-              summary: "🚨 Critical Vulnerability (CVE) Detected in Running Container Image"
-              description: "Trivy Operator detected Critical severity CVE(s) in active cluster workloads. Immediate patch or base image upgrade required."
+              summary: "🚨 Critical Vulnerability (CVE) Detected in {{ $labels.container_name }}"
+              description: "Trivy Operator detected Critical severity CVE(s) in application container {{ $labels.container_name }} ({{ $labels.image_repository }}:{{ $labels.image_tag }}). Immediate patch or base image upgrade required."
 
           # 20. Trivy Exposed Secret in Workload Configuration
           - alert: TrivyExposedSecretDetected
@@ -251,3 +251,14 @@ data:
             annotations:
               summary: "🚨 Exposed Secret / Credential Detected in Cluster Workload"
               description: "Trivy Operator exposed secret scanner found sensitive token(s)/secret(s) unencrypted in cluster configurations."
+
+          # 21. Infrastructure Upstream CVE Advisory (Audit Level)
+          - alert: TrivyInfrastructureVulnerabilityAdvisory
+            expr: sum(trivy_image_vulnerabilities{severity="Critical", image_repository!~".*masdika.*"}) > 100
+            for: 1h
+            labels:
+              severity: warning
+              tier: security-audit
+            annotations:
+              summary: "⚠️ High Volume of Upstream Vendor CVEs in Cluster Infrastructure"
+              description: "Total critical vulnerabilities in third-party infrastructure images exceeded 100. Review Trivy reports in Grafana Security Dashboard."

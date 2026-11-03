@@ -3048,6 +3048,7 @@ data:
   trivy.tag: "0.59.1"
   trivy.imagePullPolicy: "IfNotPresent"
   trivy.additionalVulnerabilityReportFields: ""
+  trivy.ignoreUnfixed: "true"
   trivy.severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
   trivy.slow: "true"
   trivy.skipJavaDBUpdate: "false"
