@@ -16,17 +16,9 @@ metadata:
 data:
   vector.yaml: |
     # --------------------------------------------------------------------------
-    # Global Settings: Use /tmp for state to guarantee non-root permissions
+    # Global Settings
     # --------------------------------------------------------------------------
-    data_dir: "/tmp/vector"
-
-    # --------------------------------------------------------------------------
-    # API & Health Engine (Probes & Diagnostic)
-    # --------------------------------------------------------------------------
-    api:
-      enabled: true
-      address: "0.0.0.0:8686"
-      playground: false
+    data_dir: "/var/lib/vector"
 
     # --------------------------------------------------------------------------
     # Sources: Ingest HTTP JSON logs & Vector telemetry metrics
@@ -84,26 +76,30 @@ data:
           .host.name = "masdika"
 
           # Distributed APM Tracing Correlation (Elastic APM / OpenTelemetry)
-          if exists(.context.trace_id) {
-            .trace.id = to_string!(.context.trace_id)
-          }
-          if exists(.context.transaction_id) {
-            .transaction.id = to_string!(.context.transaction_id)
-          }
-
-          # HTTP Request & Client Metadata
-          if exists(.context.ip) {
-            .client.ip = to_string!(.context.ip)
-          }
-          if exists(.context.method) {
-            .http.request.method = to_string!(.context.method)
-          }
-          if exists(.context.url) {
-            .url.path = to_string!(.context.url)
+          if is_object(.context) {
+            if exists(.context.trace_id) {
+              .trace.id = to_string!(.context.trace_id)
+            }
+            if exists(.context.transaction_id) {
+              .transaction.id = to_string!(.context.transaction_id)
+            }
+            if exists(.context.ip) {
+              .client.ip = to_string!(.context.ip)
+            }
+            if exists(.context.method) {
+              .http.request.method = to_string!(.context.method)
+            }
+            if exists(.context.url) {
+              .url.path = to_string!(.context.url)
+            }
           }
 
           # Standardized ISO-8601 Timestamp
-          ."@timestamp" = .timestamp ?? now()
+          if exists(.timestamp) {
+            @timestamp = parse_timestamp(.timestamp, "%+") ?? now()
+          } else {
+            @timestamp = now()
+          }
 
           # Export simple top-level fields for Grafana Loki label templating
           .app_name = .service.name
@@ -123,7 +119,7 @@ data:
         auth:
           strategy: "basic"
           user: "elastic"
-          password: "${ELASTIC_PASSWORD}"
+          password: "${ELASTIC_PASSWORD:-Andikaferdi11}"
         mode: "data_stream"
         data_stream:
           type: "logs"
@@ -180,13 +176,6 @@ spec:
         app.kubernetes.io/name: vector
     spec:
       automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        seccompProfile:
-          type: RuntimeDefault
       containers:
         - name: vector
           image: timberio/vector:0.43.0-alpine
@@ -210,14 +199,8 @@ spec:
             - containerPort: 9090
               name: metrics
               protocol: TCP
-            - containerPort: 8686
-              name: api
-              protocol: TCP
           securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
+            runAsUser: 0
           readinessProbe:
             tcpSocket:
               port: 5044
@@ -242,13 +225,13 @@ spec:
               mountPath: /etc/vector/vector.yaml
               subPath: vector.yaml
               readOnly: true
-            - name: tmp
-              mountPath: /tmp
+            - name: data
+              mountPath: /var/lib/vector
       volumes:
         - name: config
           configMap:
             name: masdika-vector-config
-        - name: tmp
+        - name: data
           emptyDir: {}
 ---
 # Primary Vector Service
@@ -270,10 +253,6 @@ spec:
     - port: 9090
       targetPort: 9090
       name: metrics
-      protocol: TCP
-    - port: 8686
-      targetPort: 8686
-      name: api
       protocol: TCP
   selector:
     app: masdika-vector
