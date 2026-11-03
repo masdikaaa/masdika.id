@@ -10,8 +10,6 @@ metadata:
     app: masdika-monitoring
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.tls.options: masdika-cloudflare-origin-pull@kubernetescrd
     traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd
 spec:
   rules:
