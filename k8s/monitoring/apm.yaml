@@ -20,7 +20,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: apm-server
-          image: docker.elastic.co/apm/apm-server:8.15.0
+          image: docker.elastic.co/apm/apm-server:8.17.2
           imagePullPolicy: IfNotPresent
           command:
             - apm-server

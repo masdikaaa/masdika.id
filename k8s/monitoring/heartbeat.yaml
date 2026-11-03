@@ -82,7 +82,7 @@ spec:
     spec:
       containers:
         - name: heartbeat
-          image: docker.elastic.co/beats/heartbeat:8.15.0
+          image: docker.elastic.co/beats/heartbeat:8.17.2
           imagePullPolicy: IfNotPresent
           args: [
             "-c", "/etc/heartbeat.yml",

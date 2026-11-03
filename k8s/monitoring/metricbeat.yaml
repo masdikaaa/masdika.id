@@ -136,7 +136,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: metricbeat
-          image: docker.elastic.co/beats/metricbeat:8.15.0
+          image: docker.elastic.co/beats/metricbeat:8.17.2
           imagePullPolicy: IfNotPresent
           args: [
             "-c", "/etc/metricbeat.yml",

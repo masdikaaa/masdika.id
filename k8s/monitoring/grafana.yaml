@@ -39,7 +39,7 @@ data:
         secureJsonData:
           basicAuthPassword: $__env{ELASTIC_PASSWORD}
         jsonData:
-          esVersion: "8.15.0"
+          esVersion: "8.17.2"
           timeField: "@timestamp"
         isDefault: false
         editable: true
