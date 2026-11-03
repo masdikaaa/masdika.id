@@ -303,6 +303,15 @@ export default function VpsManagementPage() {
   const [consoleLoading, setConsoleLoading] = useState<number | null>(null);
   const [showSuspendModal, setShowSuspendModal] = useState<VpsService | null>(null);
   const [showTerminateModal, setShowTerminateModal] = useState<VpsService | null>(null);
+  const [confirmActionModal, setConfirmActionModal] = useState<{
+    vps: VpsService;
+    action: "start" | "shutdown" | "stop" | "reboot" | "unsuspend";
+    title: string;
+    description: string;
+    confirmText: string;
+    variant: "danger" | "warning" | "success";
+    icon: React.ReactNode;
+  } | null>(null);
   const [suspendReason, setSuspendReason] = useState("");
   const [showResetPasswordModal, setShowResetPasswordModal] = useState<VpsService | null>(null);
   const [newPassword, setNewPassword] = useState("");
@@ -463,6 +472,67 @@ export default function VpsManagementPage() {
     }
   };
 
+  const promptVpsAction = (vps: VpsService, action: "start" | "shutdown" | "stop" | "reboot" | "unsuspend") => {
+    const vmidLabel = vps.vmid ? `VMID ${vps.vmid}` : `#${vps.id}`;
+    switch (action) {
+      case "start":
+        setConfirmActionModal({
+          vps,
+          action,
+          title: "Start Virtual Machine",
+          description: `Are you sure you want to boot up ${vps.hostname} (${vmidLabel})? This will start the VM instance and resume PAYG compute billing.`,
+          confirmText: "Start VPS",
+          variant: "success",
+          icon: <Play className="w-8 h-8 fill-current" />,
+        });
+        break;
+      case "shutdown":
+        setConfirmActionModal({
+          vps,
+          action,
+          title: "Shutdown Virtual Machine",
+          description: `Are you sure you want to gracefully shut down ${vps.hostname} (${vmidLabel})? An ACPI powerdown signal will be sent to let the guest OS safely stop services.`,
+          confirmText: "Graceful Shutdown",
+          variant: "warning",
+          icon: <Power className="w-8 h-8" />,
+        });
+        break;
+      case "stop":
+        setConfirmActionModal({
+          vps,
+          action,
+          title: "Force Stop Virtual Machine",
+          description: `Are you sure you want to force power off ${vps.hostname} (${vmidLabel}) immediately? This is an abrupt hard stop and may cause filesystem or data corruption.`,
+          confirmText: "Force Stop",
+          variant: "danger",
+          icon: <Square className="w-8 h-8 fill-current" />,
+        });
+        break;
+      case "reboot":
+        setConfirmActionModal({
+          vps,
+          action,
+          title: "Reboot Virtual Machine",
+          description: `Are you sure you want to reboot ${vps.hostname} (${vmidLabel})? Guest operating system processes will restart and active connections will drop.`,
+          confirmText: "Reboot VPS",
+          variant: "warning",
+          icon: <RefreshCcw className="w-8 h-8" />,
+        });
+        break;
+      case "unsuspend":
+        setConfirmActionModal({
+          vps,
+          action,
+          title: "Unsuspend Virtual Machine",
+          description: `Are you sure you want to unsuspend ${vps.hostname} (${vmidLabel})? The suspension lock will be lifted and the user will regain full access to their VPS.`,
+          confirmText: "Unsuspend VPS",
+          variant: "success",
+          icon: <ShieldAlert className="w-8 h-8" />,
+        });
+        break;
+    }
+  };
+
   const handleVpsAction = async (vpsId: number, action: string, reason?: string) => {
     try {
       setActionLoading(vpsId);
@@ -475,6 +545,7 @@ export default function VpsManagementPage() {
         toast.success(`Action ${action} completed successfully`);
         if (action === "suspend") setShowSuspendModal(null);
         if (action === "terminate") setShowTerminateModal(null);
+        setConfirmActionModal(null);
         fetchVpsServices();
       } else {
         const data = await res.json();
@@ -2274,14 +2345,14 @@ export default function VpsManagementPage() {
                               <>
                                 {(vps.status === 'RUNNING' || vps.status === 'STOPPED') && (
                                   <>
-                                    <button onClick={() => handleVpsAction(vps.id, "start")} disabled={vps.status === 'RUNNING'} title="Start" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200")}><Play className="w-4 h-4" /></button>
-                                    <button onClick={() => handleVpsAction(vps.id, "shutdown")} disabled={vps.status === 'STOPPED'} title="Shutdown" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border-orange-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200")}><Power className="w-4 h-4" /></button>
-                                    <button onClick={() => handleVpsAction(vps.id, "stop")} disabled={vps.status === 'STOPPED'} title="Force Stop" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200")}><Square className="w-4 h-4" /></button>
-                                    <button onClick={() => handleVpsAction(vps.id, "reboot")} disabled={vps.status === 'STOPPED'} title="Reboot" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}><RefreshCcw className="w-4 h-4" /></button>
+                                    <button onClick={() => promptVpsAction(vps, "start")} disabled={vps.status === 'RUNNING'} title="Start" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200")}><Play className="w-4 h-4" /></button>
+                                    <button onClick={() => promptVpsAction(vps, "shutdown")} disabled={vps.status === 'STOPPED'} title="Shutdown" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border-orange-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200")}><Power className="w-4 h-4" /></button>
+                                    <button onClick={() => promptVpsAction(vps, "stop")} disabled={vps.status === 'STOPPED'} title="Force Stop" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200")}><Square className="w-4 h-4" /></button>
+                                    <button onClick={() => promptVpsAction(vps, "reboot")} disabled={vps.status === 'STOPPED'} title="Reboot" className={cn("p-2 rounded-lg transition-colors border disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}><RefreshCcw className="w-4 h-4" /></button>
                                   </>
                                 )}
                                 {vps.status === 'SUSPENDED' ? (
-                                  <button onClick={() => handleVpsAction(vps.id, "unsuspend")} title="Unsuspend" className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200")}><ShieldAlert className="w-4 h-4" /></button>
+                                  <button onClick={() => promptVpsAction(vps, "unsuspend")} title="Unsuspend" className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200")}><ShieldAlert className="w-4 h-4" /></button>
                                 ) : (
                                   <button onClick={() => setShowSuspendModal(vps)} title="Suspend" className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border-orange-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200")}><ShieldAlert className="w-4 h-4" /></button>
                                 )}
@@ -2562,6 +2633,24 @@ export default function VpsManagementPage() {
           </div>
         </div>
       )}
+
+      {/* VPS Action Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!confirmActionModal}
+        onClose={() => setConfirmActionModal(null)}
+        onConfirm={() => {
+          if (confirmActionModal) {
+            handleVpsAction(confirmActionModal.vps.id, confirmActionModal.action);
+          }
+        }}
+        title={confirmActionModal?.title || ""}
+        description={confirmActionModal?.description || ""}
+        confirmText={confirmActionModal?.confirmText || "Confirm"}
+        cancelText="Cancel"
+        variant={confirmActionModal?.variant || "warning"}
+        icon={confirmActionModal?.icon}
+        isLoading={actionLoading === confirmActionModal?.vps.id}
+      />
 
       {/* Terminate Modal */}
       <ConfirmModal
