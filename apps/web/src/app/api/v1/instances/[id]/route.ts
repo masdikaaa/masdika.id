@@ -139,7 +139,7 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
       });
       await tx.vpsService.update({
         where: { id: vps.id },
-        data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null, autoRenew: false },
+        data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null, autoRenew: false, terminationDate: new Date() },
       });
     });
 

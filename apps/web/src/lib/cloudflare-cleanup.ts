@@ -16,26 +16,85 @@ export async function userHasActiveVps(userId: number): Promise<boolean> {
 }
 
 /**
+ * Checks if a user's VPS termination grace period (default 3 days) has expired.
+ * - If user still has an active VPS: returns false (protected).
+ * - If user's latest VPS was terminated within the grace period (< 3 days ago): returns false (still in 3-day grace period).
+ * - If user has no active VPS AND at least 3 days have elapsed since the latest termination (or user never had a VPS): returns true (ready for cleanup).
+ */
+export async function userVpsGracePeriodExpired(userId: number, graceDays = 3): Promise<boolean> {
+  const hasActive = await userHasActiveVps(userId);
+  if (hasActive) return false;
+
+  const threshold = new Date();
+  threshold.setDate(threshold.getDate() - graceDays);
+
+  const recentlyTerminatedVps = await prisma.vpsService.findFirst({
+    where: {
+      userId,
+      status: { in: ['TERMINATED', 'TERMINATING'] },
+      OR: [
+        { terminationDate: { gt: threshold } },
+        { updatedAt: { gt: threshold } }
+      ]
+    }
+  });
+
+  if (recentlyTerminatedVps) {
+    // Terminated recently (within 3 days) -> grace period is still active
+    return false;
+  }
+
+  // Grace period expired (terminated > 3 days ago or never had VPS)
+  return true;
+}
+
+/**
  * Automatically cleans up all Cloudflare Tunnels and Domains belonging to a user,
- * BUT ONLY IF the user has NO active (non-terminated) VPS services remaining.
+ * enforcing a 3-day grace period by default.
  *
- * If the user still has at least one VPS service (even if the VPS is turned off /
- * powered down / inactive), their tunnels and domains are strictly PROTECTED
- * and will NEVER be deleted automatically.
+ * Rules:
+ * 1. If the user still has an active VPS service (even if turned off / offline / stopped),
+ *    tunnels and domains are strictly PROTECTED and will NEVER be deleted.
+ * 2. If the user's VPS was recently terminated (within 3 days),
+ *    tunnels and domains are PROTECTED for the 3-day grace period.
+ * 3. After 3 days without any active VPS, the resources are cleanly deleted.
  */
 export async function cleanupUserCloudflareResourcesIfNoActiveVps(
   userId: number,
-  reason = 'All associated VPS services have been terminated or no longer exist.'
+  options?: {
+    reason?: string;
+    enforceGracePeriod?: boolean;
+    graceDays?: number;
+  }
 ) {
-  const hasVps = await userHasActiveVps(userId);
-  if (hasVps) {
-    return {
-      success: true,
-      skipped: true,
-      message: 'User still has an active VPS service. Cloudflare tunnels and domains are preserved.',
-      deletedTunnels: 0,
-      deletedDomains: 0
-    };
+  const enforceGracePeriod = options?.enforceGracePeriod ?? true;
+  const graceDays = options?.graceDays ?? 3;
+  const reason =
+    options?.reason ||
+    'All associated VPS services have been terminated or no longer exist (3-day grace period expired).';
+
+  if (enforceGracePeriod) {
+    const expired = await userVpsGracePeriodExpired(userId, graceDays);
+    if (!expired) {
+      return {
+        success: true,
+        skipped: true,
+        message: 'User still has an active VPS or is within the 3-day termination grace period. Cloudflare tunnels and domains are preserved.',
+        deletedTunnels: 0,
+        deletedDomains: 0
+      };
+    }
+  } else {
+    const hasVps = await userHasActiveVps(userId);
+    if (hasVps) {
+      return {
+        success: true,
+        skipped: true,
+        message: 'User still has an active VPS service. Cloudflare tunnels and domains are preserved.',
+        deletedTunnels: 0,
+        deletedDomains: 0
+      };
+    }
   }
 
   const cfToken = process.env.CLOUDFLARE_API_TOKEN;

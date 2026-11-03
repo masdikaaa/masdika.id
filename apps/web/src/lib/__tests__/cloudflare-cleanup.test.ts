@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { userHasActiveVps, cleanupUserCloudflareResourcesIfNoActiveVps } from '../cloudflare-cleanup';
+import { userHasActiveVps, userVpsGracePeriodExpired, cleanupUserCloudflareResourcesIfNoActiveVps } from '../cloudflare-cleanup';
 import { prisma } from '@/lib/prisma';
 import { sendCloudflareCleanupEmail } from '@/lib/email';
 
@@ -7,6 +7,7 @@ vi.mock('@/lib/prisma', () => ({
   prisma: {
     vpsService: {
       count: vi.fn(),
+      findFirst: vi.fn(),
     },
     cloudflareTunnel: {
       findMany: vi.fn(),
@@ -20,7 +21,7 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 vi.mock('@/lib/email', () => ({
-  sendCloudflareCleanupEmail: vi.fn(),
+  sendCloudflareCleanupEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('Cloudflare Lifecycle & Auto-Cleanup - cloudflare-cleanup.ts', () => {
@@ -56,12 +57,44 @@ describe('Cloudflare Lifecycle & Auto-Cleanup - cloudflare-cleanup.ts', () => {
     });
   });
 
+  describe('userVpsGracePeriodExpired', () => {
+    it('should return false if user still has an active VPS', async () => {
+      vi.mocked(prisma.vpsService.count).mockResolvedValueOnce(1);
+
+      const result = await userVpsGracePeriodExpired(103, 3);
+      expect(result).toBe(false);
+    });
+
+    it('should return false if user VPS was terminated recently (< 3 days ago)', async () => {
+      vi.mocked(prisma.vpsService.count).mockResolvedValueOnce(0);
+      // Recently terminated VPS found
+      vi.mocked(prisma.vpsService.findFirst).mockResolvedValueOnce({
+        id: 99,
+        userId: 104,
+        status: 'TERMINATED',
+        terminationDate: new Date(),
+      } as any);
+
+      const result = await userVpsGracePeriodExpired(104, 3);
+      expect(result).toBe(false); // Still within 3-day grace period
+    });
+
+    it('should return true if user has no active VPS and termination happened > 3 days ago', async () => {
+      vi.mocked(prisma.vpsService.count).mockResolvedValueOnce(0);
+      // No recently terminated VPS (terminated > 3 days ago or never had VPS)
+      vi.mocked(prisma.vpsService.findFirst).mockResolvedValueOnce(null);
+
+      const result = await userVpsGracePeriodExpired(105, 3);
+      expect(result).toBe(true); // Grace period expired!
+    });
+  });
+
   describe('cleanupUserCloudflareResourcesIfNoActiveVps', () => {
     it('should PRESERVE tunnels and domains if user still has an active VPS (even if VPS is offline/stopped)', async () => {
       // User has 1 active VPS
       vi.mocked(prisma.vpsService.count).mockResolvedValueOnce(1);
 
-      const result = await cleanupUserCloudflareResourcesIfNoActiveVps(103);
+      const result = await cleanupUserCloudflareResourcesIfNoActiveVps(106);
 
       expect(result.skipped).toBe(true);
       expect(result.deletedTunnels).toBe(0);
@@ -75,13 +108,34 @@ describe('Cloudflare Lifecycle & Auto-Cleanup - cloudflare-cleanup.ts', () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    it('should AUTOMATICALLY DELETE tunnels and domains if user has NO active VPS (e.g. terminated)', async () => {
+    it('should PRESERVE tunnels and domains during the 3-day grace period after VPS termination', async () => {
+      // User has 0 active VPS
+      vi.mocked(prisma.vpsService.count).mockResolvedValueOnce(0);
+      // But VPS was terminated within the last 3 days
+      vi.mocked(prisma.vpsService.findFirst).mockResolvedValueOnce({
+        id: 101,
+        status: 'TERMINATED',
+        terminationDate: new Date(),
+      } as any);
+
+      const result = await cleanupUserCloudflareResourcesIfNoActiveVps(107, { enforceGracePeriod: true });
+
+      expect(result.skipped).toBe(true);
+      expect(result.deletedTunnels).toBe(0);
+      expect(result.deletedDomains).toBe(0);
+      expect(result.message).toContain('3-day termination grace period');
+      expect(prisma.cloudflareTunnel.delete).not.toHaveBeenCalled();
+    });
+
+    it('should AUTOMATICALLY DELETE tunnels and domains AFTER 3-day grace period expires', async () => {
       // User has NO active VPS
       vi.mocked(prisma.vpsService.count).mockResolvedValueOnce(0);
+      // No recently terminated VPS (grace period expired)
+      vi.mocked(prisma.vpsService.findFirst).mockResolvedValueOnce(null);
 
       // Mock user tunnels
       vi.mocked(prisma.cloudflareTunnel.findMany).mockResolvedValueOnce([
-        { id: 1, cfTunnelId: 'cf-tunnel-uuid-1', name: 'my-tunnel', userId: 104 } as any,
+        { id: 1, cfTunnelId: 'cf-tunnel-uuid-1', name: 'my-tunnel', userId: 108 } as any,
       ]);
       vi.mocked(prisma.cloudflareTunnel.delete).mockResolvedValueOnce({} as any);
 
@@ -91,13 +145,13 @@ describe('Cloudflare Lifecycle & Auto-Cleanup - cloudflare-cleanup.ts', () => {
           id: 10,
           cfZoneId: 'cf-zone-id-1',
           domain: 'example.com',
-          userId: 104,
+          userId: 108,
           user: { email: 'user@example.com', name: 'User Test' },
         } as any,
       ]);
       vi.mocked(prisma.cloudflareDomain.delete).mockResolvedValueOnce({} as any);
 
-      const result = await cleanupUserCloudflareResourcesIfNoActiveVps(104);
+      const result = await cleanupUserCloudflareResourcesIfNoActiveVps(108);
 
       expect(result.skipped).toBe(false);
       expect(result.deletedTunnels).toBe(1);
@@ -127,4 +181,3 @@ describe('Cloudflare Lifecycle & Auto-Cleanup - cloudflare-cleanup.ts', () => {
     });
   });
 });
-

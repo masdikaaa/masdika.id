@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendVpcDeletedEmail, sendCloudflareCleanupEmail } from '@/lib/email';
-import { userHasActiveVps } from '@/lib/cloudflare-cleanup';
+import { userHasActiveVps, userVpsGracePeriodExpired } from '@/lib/cloudflare-cleanup';
 import fs from 'fs';
 import path from 'path';
 import { deleteFromRustFS } from '@/lib/rustfs';
@@ -106,9 +106,9 @@ export async function GET(req: Request) {
     });
 
     for (const d of staleDomains) {
-      const hasVps = await userHasActiveVps(d.userId);
-      if (hasVps) {
-        // User still has an active VPS, preserve their domain setup
+      const graceExpired = await userVpsGracePeriodExpired(d.userId);
+      if (!graceExpired) {
+        // User still has an active VPS or 3-day grace period after termination is still active
         continue;
       }
 
@@ -122,13 +122,13 @@ export async function GET(req: Request) {
       }
       await prisma.cloudflareDomain.delete({ where: { id: d.id } });
       deletedCfDomains++;
-      console.log(`Auto-cleaned up stale pending domain (no active VPS): ${d.domain}`);
+      console.log(`Auto-cleaned up stale pending domain (grace period expired): ${d.domain}`);
       if (d.user && d.user.email) {
         await sendCloudflareCleanupEmail(d.user.email, d.user.name || "Customer", d.domain, "Domain has been inactive/pending for more than 3 days and no active VPS services exist on your account.");
       }
     }
 
-    // 2. Delete active domains ONLY if the user has NO active VPS
+    // 2. Delete active domains ONLY if the user has NO active VPS AND 3-day grace period expired
     // (If the user still has an active VPS, even if the VPS is turned off / offline, PRESERVE their domain!)
     const activeDomains = await prisma.cloudflareDomain.findMany({
       where: {
@@ -139,9 +139,9 @@ export async function GET(req: Request) {
     });
 
     for (const d of activeDomains) {
-      const hasVps = await userHasActiveVps(d.userId);
-      if (hasVps) {
-        // User still has an active VPS. DO NOT DELETE!
+      const graceExpired = await userVpsGracePeriodExpired(d.userId);
+      if (!graceExpired) {
+        // User still has an active VPS or 3-day grace period is still active. DO NOT DELETE!
         continue;
       }
 
@@ -155,7 +155,7 @@ export async function GET(req: Request) {
       }
       await prisma.cloudflareDomain.delete({ where: { id: d.id } });
       deletedCfDomains++;
-      console.log(`Auto-cleaned up active domain (no active VPS remaining): ${d.domain}`);
+      console.log(`Auto-cleaned up active domain (grace period expired): ${d.domain}`);
       if (d.user && d.user.email) {
         await sendCloudflareCleanupEmail(d.user.email, d.user.name || "Customer", d.domain, "Domain was removed because no associated active VPS services exist on your account.");
       }
@@ -163,7 +163,7 @@ export async function GET(req: Request) {
 
     // 3. Stale tunnels cleanup
     // CRITICAL: If the user still has an active VPS (even if turned off / mati / offline),
-    // NEVER delete their tunnel. Only delete if the user has NO active VPS (e.g. terminated).
+    // or is within the 3-day grace period, NEVER delete their tunnel.
     const staleDBTunnels = await prisma.cloudflareTunnel.findMany({
        where: {
           createdAt: { lt: threeDaysAgo }
@@ -172,10 +172,10 @@ export async function GET(req: Request) {
     });
 
     for (const t of staleDBTunnels) {
-      // Check if user still has an active VPS
-      const hasVps = await userHasActiveVps(t.userId);
-      if (hasVps) {
-        // User still has an active VPS (the VPS may simply be stopped / offline). DO NOT DELETE!
+      // Check if 3-day grace period has expired without active VPS
+      const graceExpired = await userVpsGracePeriodExpired(t.userId);
+      if (!graceExpired) {
+        // User still has an active VPS (the VPS may simply be stopped / offline) or within grace period. DO NOT DELETE!
         continue;
       }
 

@@ -283,7 +283,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     // 4. Mark as TERMINATED
     await prisma.vpsService.update({
       where: { id: vps.id },
-      data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null } // Clear vmid, vpcIp, and vpcId so they can be reused
+      data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null, terminationDate: new Date() } // Clear vmid, vpcIp, and vpcId so they can be reused
     });
 
     // Auto-cleanup Cloudflare tunnels and domains if this user has no remaining active VPS services

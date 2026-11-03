@@ -581,7 +581,8 @@ export async function GET(req: Request) {
               status: 'TERMINATED',
               vmid: null,
               vpcIp: null,
-              vpcId: null 
+              vpcId: null,
+              terminationDate: new Date() 
             }
           });
           
