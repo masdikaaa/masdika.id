@@ -152,6 +152,18 @@ data:
                         <td style="color: #e2e8f0; font-family: monospace; font-weight: 600; padding: 3px 0;">{{ .Labels.container }}</td>
                       </tr>
                       {{ end }}
+                      {{ if .Labels.container_name }}
+                      <tr>
+                        <td style="color: #64748b; padding: 3px 0;">Container:</td>
+                        <td style="color: #e2e8f0; font-family: monospace; font-weight: 600; padding: 3px 0;">{{ .Labels.container_name }}</td>
+                      </tr>
+                      {{ end }}
+                      {{ if .Labels.image_repository }}
+                      <tr>
+                        <td style="color: #64748b; padding: 3px 0;">Target Image:</td>
+                        <td style="color: #38bdf8; font-family: monospace; font-weight: 600; padding: 3px 0;">{{ .Labels.image_repository }}:{{ .Labels.image_tag }}</td>
+                      </tr>
+                      {{ end }}
                       {{ if .Labels.persistentvolumeclaim }}
                       <tr>
                         <td style="color: #64748b; padding: 3px 0;">PVC Storage:</td>
