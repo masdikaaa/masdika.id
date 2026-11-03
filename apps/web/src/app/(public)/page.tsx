@@ -25,7 +25,7 @@ const fetchProjects = () =>
       },
     },
     orderBy: { createdAt: "desc" },
-    take: 4,
+    take: 3,
   });
 
 const fetchPosts = async () => {

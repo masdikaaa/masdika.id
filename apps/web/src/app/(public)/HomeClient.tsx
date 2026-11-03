@@ -241,7 +241,7 @@ export function HomeClient({
         .then((res) => res.json())
         .then((data) => {
           if (!data.error && Array.isArray(data)) {
-            setPortfolioProjects(data.slice(0, 4));
+            setPortfolioProjects(data.slice(0, 3));
           }
         })
         .catch((err) => console.error("Error fetching portfolio:", err));
@@ -791,7 +791,7 @@ export function HomeClient({
               <p className="text-sm text-[var(--text-muted)] max-w-xs mx-auto">Projects will appear here once they are added to the database.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-sm sm:max-w-none mx-auto">
               {portfolioProjects.map((project, index) => {
                 const techList = project.techStack
                   ? project.techStack.split(",").map((t: string) => t.trim()).filter(Boolean)
@@ -830,20 +830,20 @@ export function HomeClient({
                         </div>
 
                         {/* Unobstructed 16:10 Image */}
-                        <div className="relative aspect-[16/10] w-full overflow-hidden">
+                        <div className="relative aspect-[16/9] w-full overflow-hidden">
                           <Image
                             referrerPolicy="no-referrer"
                             src={project.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}
                             alt={project.title}
                             fill
-                            sizes="(max-width: 768px) 100vw, 50vw"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             className="object-cover object-top transition-transform duration-700 ease-out group-hover/img:scale-[1.03]"
                           />
                         </div>
                       </Link>
 
                       {/* Card Body */}
-                      <div className="p-4 sm:p-6 lg:p-7 flex flex-col flex-1">
+                      <div className="p-4 sm:p-5 flex flex-col flex-1">
                         {/* Tech Stack Chips */}
                         {techList.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-3 sm:mb-3.5">
@@ -865,7 +865,7 @@ export function HomeClient({
                         )}
 
                         <Link href={project.slug ? `/portfolio/${project.slug}` : "#"} className="group/title focus:outline-none mb-1.5 sm:mb-2">
-                          <h3 className="text-base sm:text-lg lg:text-xl font-bold transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400 leading-snug">
+                          <h3 className="text-base sm:text-lg font-bold line-clamp-1 transition-colors text-[var(--text-primary)] group-hover/title:text-cyan-600 dark:group-hover/title:text-cyan-400 leading-snug">
                             {project.title}
                           </h3>
                         </Link>
