@@ -236,6 +236,7 @@ export default function CloudflaredPage() {
   const [deleteTunnelModal, setDeleteTunnelModal] = useState<Tunnel | null>(null);
   const [deleteTunnelLoading, setDeleteTunnelLoading] = useState(false);
   const [deletingRouteRule, setDeletingRouteRule] = useState<any | null>(null);
+  const [deleteRouteLoading, setDeleteRouteLoading] = useState(false);
 
   // Create tunnel flow
   const [showCreateTunnel, setShowCreateTunnel] = useState(false);
@@ -529,14 +530,20 @@ export default function CloudflaredPage() {
   };
 
   const handleDeleteRoute = async (rule: any) => {
-    const deletePromise = fetch(`/api/tunnels/route?tunnelId=${tunnelId}&hostname=${rule.hostname}&path=${encodeURIComponent(rule.path || "")}`, {
+    const targetTunnelId = tunnelId || viewingTunnel?.id || editingTunnelId;
+    if (!targetTunnelId) {
+      toast.error("Tunnel ID not found");
+      return;
+    }
+
+    const deletePromise = fetch(`/api/tunnels/route?tunnelId=${targetTunnelId}&hostname=${encodeURIComponent(rule.hostname)}&path=${encodeURIComponent(rule.path || "")}`, {
       method: "DELETE"
     }).then(async (res) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete route");
       
       // Refresh ingress rules
-      const refreshRes = await fetch(`/api/tunnels/${editingTunnelId || viewingTunnel?.id}`);
+      const refreshRes = await fetch(`/api/tunnels/${targetTunnelId}`);
       if (refreshRes.ok) {
         const refreshData = await refreshRes.json();
         setExistingIngress(refreshData.ingress || []);
@@ -544,7 +551,7 @@ export default function CloudflaredPage() {
       return data;
     });
 
-    toast.promise(deletePromise, {
+    return toast.promise(deletePromise, {
       loading: "Deleting route...",
       success: "Route deleted successfully",
       error: (err) => err.message
@@ -821,10 +828,10 @@ export default function CloudflaredPage() {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => handleEditRoute(rule)} className={cn("p-2 rounded-lg transition-colors", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-cyan-400" : "hover:bg-slate-200 text-slate-500 hover:text-cyan-600")} title="Edit route">
+                            <button onClick={() => handleEditRoute(rule)} className={cn("p-2 rounded-lg transition-colors cursor-pointer", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-cyan-400" : "hover:bg-slate-200 text-slate-500 hover:text-cyan-600")} title="Edit route">
                               <Pencil className="w-4 h-4" />
                             </button>
-                            <button onClick={() => setDeletingRouteRule(rule)} className={cn("p-2 rounded-lg transition-colors", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-red-400" : "hover:bg-slate-200 text-slate-500 hover:text-red-600")} title="Delete route">
+                            <button onClick={() => setDeletingRouteRule(rule)} className={cn("p-2 rounded-lg transition-colors cursor-pointer", isDark ? "hover:bg-white/10 text-zinc-400 hover:text-red-400" : "hover:bg-slate-200 text-slate-500 hover:text-red-600")} title="Delete route">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -862,6 +869,32 @@ export default function CloudflaredPage() {
             </div>
           </div>
         )}
+
+        {/* ==================== DELETE ROUTE MODAL (VIEWING TUNNEL) ==================== */}
+        <ConfirmModal
+          isOpen={deletingRouteRule !== null}
+          title="Delete Route"
+          description={`Are you sure you want to delete the route for ${deletingRouteRule?.hostname || ""}${deletingRouteRule?.path || ""}? This action cannot be undone.`}
+          confirmText="Delete Route"
+          variant="danger"
+          isLoading={deleteRouteLoading}
+          onConfirm={async () => {
+            if (deletingRouteRule) {
+              setDeleteRouteLoading(true);
+              try {
+                await handleDeleteRoute(deletingRouteRule);
+                setDeletingRouteRule(null);
+              } catch {
+                // error handled in toast.promise
+              } finally {
+                setDeleteRouteLoading(false);
+              }
+            }
+          }}
+          onClose={() => {
+            if (!deleteRouteLoading) setDeletingRouteRule(null);
+          }}
+        />
       </div>
     );
   }
@@ -1537,17 +1570,26 @@ export default function CloudflaredPage() {
       <ConfirmModal
         isOpen={deletingRouteRule !== null}
         title="Delete Route"
-        description={`Are you sure you want to delete the route for ${deletingRouteRule?.hostname || ""}? This action cannot be undone.`}
+        description={`Are you sure you want to delete the route for ${deletingRouteRule?.hostname || ""}${deletingRouteRule?.path || ""}? This action cannot be undone.`}
         confirmText="Delete Route"
         variant="danger"
+        isLoading={deleteRouteLoading}
         onConfirm={async () => {
           if (deletingRouteRule) {
-            const rule = deletingRouteRule;
-            setDeletingRouteRule(null);
-            await handleDeleteRoute(rule);
+            setDeleteRouteLoading(true);
+            try {
+              await handleDeleteRoute(deletingRouteRule);
+              setDeletingRouteRule(null);
+            } catch {
+              // error handled in toast.promise
+            } finally {
+              setDeleteRouteLoading(false);
+            }
           }
         }}
-        onClose={() => setDeletingRouteRule(null)}
+        onClose={() => {
+          if (!deleteRouteLoading) setDeletingRouteRule(null);
+        }}
       />
     </div>
   );
