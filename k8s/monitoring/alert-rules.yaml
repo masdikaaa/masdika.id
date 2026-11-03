@@ -116,27 +116,27 @@ data:
               summary: "HTTP 5xx Error Rate > 1% on Ingress (SLO Violation)"
               description: "Traefik reports elevated HTTP 5xx errors across incoming public traffic. Error budget is depleting fast."
 
-          # 10. High Request Latency p99 (> 1.5s)
+          # 10. High Request Latency p99 (> 2.5s under sustained traffic)
           - alert: HighRequestLatencyP99
-            expr: histogram_quantile(0.99, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) > 1.5
-            for: 5m
-            labels:
-              severity: warning
-              tier: ingress
-            annotations:
-              summary: "p99 Request Latency > 1.5s (Degraded Performance)"
-              description: "99th percentile response time exceeds 1.5 seconds across ingress endpoints."
-
-          # 11. High Request Latency p95 (> 800ms)
-          - alert: HighRequestLatencyP95
-            expr: histogram_quantile(0.95, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) > 0.8
+            expr: (histogram_quantile(0.99, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) > 2.5) and (sum(rate(traefik_entrypoint_requests_total[5m])) > 2)
             for: 10m
             labels:
               severity: warning
               tier: ingress
             annotations:
-              summary: "p95 Request Latency > 800ms"
-              description: "95th percentile response time exceeds 800ms. Check database query performance and app memory pressure."
+              summary: "p99 Request Latency > 2.5s (Sustained Ingress Degradation)"
+              description: "99th percentile response time exceeds 2.5 seconds across ingress endpoints under active traffic (> 2 req/s) for 10 minutes."
+
+          # 11. High Request Latency p95 (> 1.2s under sustained traffic)
+          - alert: HighRequestLatencyP95
+            expr: (histogram_quantile(0.95, sum(rate(traefik_entrypoint_request_duration_seconds_bucket[5m])) by (le)) > 1.2) and (sum(rate(traefik_entrypoint_requests_total[5m])) > 2)
+            for: 10m
+            labels:
+              severity: warning
+              tier: ingress
+            annotations:
+              summary: "p95 Request Latency > 1.2s (Degraded Performance)"
+              description: "95th percentile response time exceeds 1.2 seconds across ingress endpoints under active traffic (> 2 req/s) for 10 minutes."
 
       # ------------------------------------------------------------------------
       # Group 4: SOC, Intrusion Detection & Threat Intelligence Alerts

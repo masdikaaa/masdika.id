@@ -111,11 +111,18 @@ spec:
             - name: app-storage
               mountPath: /app/apps/web/storage/upload-buffers
               subPath: upload-buffers
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 2
+            timeoutSeconds: 3
           livenessProbe:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 25
+            initialDelaySeconds: 10
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 3
@@ -123,9 +130,9 @@ spec:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
             failureThreshold: 2
           lifecycle:
             preStop:
