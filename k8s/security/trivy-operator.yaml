@@ -2992,9 +2992,9 @@ metadata:
     app.kubernetes.io/managed-by: kubectl
 data:
   OPERATOR_LOG_DEV_MODE: "false"
-  OPERATOR_SCAN_JOB_TTL: ""
+  OPERATOR_SCAN_JOB_TTL: "30s"
   OPERATOR_SCAN_JOB_TIMEOUT: "5m"
-  OPERATOR_CONCURRENT_SCAN_JOBS_LIMIT: "10"
+  OPERATOR_CONCURRENT_SCAN_JOBS_LIMIT: "2"
   OPERATOR_CONCURRENT_NODE_COLLECTOR_LIMIT: "1"
   OPERATOR_SCAN_JOB_RETRY_AFTER: "30s"
   OPERATOR_BATCH_DELETE_LIMIT: "10"
@@ -3109,6 +3109,7 @@ metadata:
     app.kubernetes.io/managed-by: kubectl
 spec:
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   selector:
@@ -3135,7 +3136,7 @@ spec:
             - name: OPERATOR_EXCLUDE_NAMESPACES
               value: ""
             - name: OPERATOR_TARGET_WORKLOADS
-              value: "pod,replicaset,replicationcontroller,statefulset,daemonset,cronjob,job"
+              value: "pod,replicaset,replicationcontroller,statefulset,daemonset,cronjob"
             - name: OPERATOR_SERVICE_ACCOUNT
               value: "trivy-operator"
           envFrom:
