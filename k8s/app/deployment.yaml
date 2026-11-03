@@ -11,7 +11,7 @@ metadata:
 spec:
   # Replicas dikelola dinamis oleh HPA (2 - 5 pods)
   replicas: 2
-  revisionHistoryLimit: 2
+  revisionHistoryLimit: 0
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -61,7 +61,7 @@ spec:
       containers:
         - name: app
           image: andikaferdialvianto/masdika-id:6014919011416de2304ab1c56580e8cc09751b08
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
@@ -166,7 +166,7 @@ metadata:
     app: masdika-worker
 spec:
   replicas: 1
-  revisionHistoryLimit: 2
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   selector:
@@ -213,7 +213,7 @@ spec:
       containers:
         - name: worker
           image: andikaferdialvianto/masdika-id:6014919011416de2304ab1c56580e8cc09751b08
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
@@ -295,7 +295,7 @@ metadata:
     app: masdika-vnc-proxy
 spec:
   replicas: 1
-  revisionHistoryLimit: 2
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   selector:
@@ -333,7 +333,7 @@ spec:
       containers:
         - name: vnc-proxy
           image: andikaferdialvianto/masdika-id:6014919011416de2304ab1c56580e8cc09751b08
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

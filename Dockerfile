@@ -100,7 +100,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache openssl vips dcron wget su-exec postgresql-client docker-cli iputils mtr traceroute bind-tools
+RUN apk add --no-cache openssl vips dcron wget su-exec postgresql-client docker-cli iputils mtr traceroute bind-tools && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /opt/yarn*
 
 
 
