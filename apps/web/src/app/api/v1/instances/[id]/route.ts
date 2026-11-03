@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { authenticateReseller, apiError, parseId, proxmoxBusyResponse } from "@/lib/reseller-api";
+import { cleanupUserCloudflareResourcesIfNoActiveVps } from "@/lib/cloudflare-cleanup";
 
 export const dynamic = "force-dynamic";
 
@@ -141,6 +142,13 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
         data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null, autoRenew: false },
       });
     });
+
+    // Auto-cleanup Cloudflare tunnels and domains if this user has no remaining active VPS services
+    if (vps.userId) {
+      cleanupUserCloudflareResourcesIfNoActiveVps(vps.userId).catch((err) => {
+        console.error("[RESELLER_API] Failed to auto-cleanup Cloudflare resources after instance deletion:", err);
+      });
+    }
 
     return NextResponse.json({ success: true, message: `Instance ${vps.id} has been successfully destroyed` });
   } catch (error: any) {

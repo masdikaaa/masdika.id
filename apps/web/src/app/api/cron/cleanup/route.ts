@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendVpcDeletedEmail, sendCloudflareCleanupEmail } from '@/lib/email';
+import { userHasActiveVps } from '@/lib/cloudflare-cleanup';
 import fs from 'fs';
 import path from 'path';
 import { deleteFromRustFS } from '@/lib/rustfs';
@@ -90,9 +91,12 @@ export async function GET(req: Request) {
 
     // --- Smart Cloudflare Cleanup Logic ---
     let deletedCfDomains = 0;
+    let deletedCfTunnels = 0;
     const cfToken = process.env.CLOUDFLARE_API_TOKEN;
+    const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
     // 1. Delete domains that have been pending/inactive for > 3 days
+    // ONLY if the user has no active VPS. If user has active VPS, protect their domain.
     const staleDomains = await prisma.cloudflareDomain.findMany({
       where: {
         status: { notIn: ["active", "healthy"] },
@@ -102,6 +106,12 @@ export async function GET(req: Request) {
     });
 
     for (const d of staleDomains) {
+      const hasVps = await userHasActiveVps(d.userId);
+      if (hasVps) {
+        // User still has an active VPS, preserve their domain setup
+        continue;
+      }
+
       if (cfToken) {
         try {
           await fetch(`https://api.cloudflare.com/client/v4/zones/${d.cfZoneId}`, {
@@ -112,25 +122,29 @@ export async function GET(req: Request) {
       }
       await prisma.cloudflareDomain.delete({ where: { id: d.id } });
       deletedCfDomains++;
-      console.log(`Auto-cleaned up stale pending domain: ${d.domain}`);
+      console.log(`Auto-cleaned up stale pending domain (no active VPS): ${d.domain}`);
       if (d.user && d.user.email) {
-        await sendCloudflareCleanupEmail(d.user.email, d.user.name || "Customer", d.domain, "Domain has been inactive/pending for more than 3 days.");
+        await sendCloudflareCleanupEmail(d.user.email, d.user.name || "Customer", d.domain, "Domain has been inactive/pending for more than 3 days and no active VPS services exist on your account.");
       }
     }
 
-    // 2. Delete active domains that have been pointed for > 3 days but the user has NO tunnels (unused)
-    const unusedActiveDomains = await prisma.cloudflareDomain.findMany({
+    // 2. Delete active domains ONLY if the user has NO active VPS
+    // (If the user still has an active VPS, even if the VPS is turned off / offline, PRESERVE their domain!)
+    const activeDomains = await prisma.cloudflareDomain.findMany({
       where: {
         status: "active",
         createdAt: { lt: threeDaysAgo },
-        user: {
-           cloudflareTunnels: { none: {} }
-        }
       },
       include: { user: true }
     });
 
-    for (const d of unusedActiveDomains) {
+    for (const d of activeDomains) {
+      const hasVps = await userHasActiveVps(d.userId);
+      if (hasVps) {
+        // User still has an active VPS. DO NOT DELETE!
+        continue;
+      }
+
       if (cfToken) {
         try {
           await fetch(`https://api.cloudflare.com/client/v4/zones/${d.cfZoneId}`, {
@@ -141,15 +155,15 @@ export async function GET(req: Request) {
       }
       await prisma.cloudflareDomain.delete({ where: { id: d.id } });
       deletedCfDomains++;
-      console.log(`Auto-cleaned up unused active domain (no tunnels): ${d.domain}`);
+      console.log(`Auto-cleaned up active domain (no active VPS remaining): ${d.domain}`);
       if (d.user && d.user.email) {
-        await sendCloudflareCleanupEmail(d.user.email, d.user.name || "Customer", d.domain, "Domain was active but no tunnels were configured for more than 3 days.");
+        await sendCloudflareCleanupEmail(d.user.email, d.user.name || "Customer", d.domain, "Domain was removed because no associated active VPS services exist on your account.");
       }
     }
 
-    // 3. Delete stale tunnels that haven't been used in 3 days
-    let deletedCfTunnels = 0;
-    const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    // 3. Stale tunnels cleanup
+    // CRITICAL: If the user still has an active VPS (even if turned off / mati / offline),
+    // NEVER delete their tunnel. Only delete if the user has NO active VPS (e.g. terminated).
     const staleDBTunnels = await prisma.cloudflareTunnel.findMany({
        where: {
           createdAt: { lt: threeDaysAgo }
@@ -158,6 +172,14 @@ export async function GET(req: Request) {
     });
 
     for (const t of staleDBTunnels) {
+      // Check if user still has an active VPS
+      const hasVps = await userHasActiveVps(t.userId);
+      if (hasVps) {
+        // User still has an active VPS (the VPS may simply be stopped / offline). DO NOT DELETE!
+        continue;
+      }
+
+      // User has no active VPS: safe to cleanup
       if (cfToken && cfAccountId) {
          try {
            const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/cfd_tunnel/${t.cfTunnelId}`, {
@@ -172,6 +194,12 @@ export async function GET(req: Request) {
              const lastActive = tunnelData.conns_inactive_at ? new Date(tunnelData.conns_inactive_at) : new Date(tunnelData.created_at);
              
              if (isInactive && lastActive < threeDaysAgo) {
+               // Disconnect connections
+               await fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/cfd_tunnel/${t.cfTunnelId}/connections`, {
+                 method: 'DELETE',
+                 headers: { 'Authorization': `Bearer ${cfToken}`, 'Content-Type': 'application/json' }
+               }).catch(() => {});
+
                // Delete from CF
                await fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/cfd_tunnel/${t.cfTunnelId}`, {
                  method: 'DELETE',
@@ -180,7 +208,7 @@ export async function GET(req: Request) {
                // Delete from DB
                await prisma.cloudflareTunnel.delete({ where: { id: t.id } });
                deletedCfTunnels++;
-               console.log(`Auto-cleaned up stale tunnel: ${t.name}`);
+               console.log(`Auto-cleaned up stale tunnel (no active VPS): ${t.name}`);
              }
            } else if (data.errors && data.errors.length > 0 && data.errors[0].code === 1003) {
              // 1003 usually means tunnel not found in CF, clean up DB

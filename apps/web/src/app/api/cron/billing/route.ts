@@ -5,6 +5,7 @@ import { decryptDeterministic } from '@/lib/encryption';
 import { ProxmoxClient } from '@/lib/proxmox';
 import { createDuitkuTransaction } from '@/lib/duitku';
 import { attemptAutoUnsuspendAll } from '@/lib/auto-unsuspend';
+import { cleanupUserCloudflareResourcesIfNoActiveVps } from '@/lib/cloudflare-cleanup';
 
 
 function generateOrderId(prefix: string = 'INV') {
@@ -595,6 +596,13 @@ export async function GET(req: Request) {
             data: { isAttached: false, vpsId: null }
           });
         });
+
+        // Auto-cleanup Cloudflare tunnels and domains if this user has no remaining active VPS services
+        if (vps.userId) {
+          cleanupUserCloudflareResourcesIfNoActiveVps(vps.userId).catch((err) => {
+            console.error(`[Auto-Cleanup] Failed to cleanup Cloudflare resources for billing terminated VPS user ${vps.userId}:`, err);
+          });
+        }
         
         const email = decryptDeterministic(vps.user.email) || vps.user.email;
         const name = decryptDeterministic(vps.user.name) || vps.user.name;

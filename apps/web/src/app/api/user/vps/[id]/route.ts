@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { getBandwidthOptions } from "@/lib/vps-bandwidth";
+import { cleanupUserCloudflareResourcesIfNoActiveVps } from "@/lib/cloudflare-cleanup";
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -283,6 +284,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await prisma.vpsService.update({
       where: { id: vps.id },
       data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null } // Clear vmid, vpcIp, and vpcId so they can be reused
+    });
+
+    // Auto-cleanup Cloudflare tunnels and domains if this user has no remaining active VPS services
+    cleanupUserCloudflareResourcesIfNoActiveVps(vps.userId).catch((err) => {
+      console.error("[Auto-Cleanup] Failed to cleanup Cloudflare resources after user VPS deletion:", err);
     });
 
     return NextResponse.json({ success: true, message: "VPS Terminated successfully" });

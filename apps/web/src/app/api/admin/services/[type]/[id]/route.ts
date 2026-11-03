@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
+import { cleanupUserCloudflareResourcesIfNoActiveVps } from '@/lib/cloudflare-cleanup';
 
 import { ProxmoxClient } from '@/lib/proxmox';
 
@@ -45,6 +46,11 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
           }
           await prisma.vpsIpAssignment.deleteMany({ where: { vpsId: id } });
           result = await prisma.vpsService.delete({ where: { id } }); 
+          if (vpsHard && vpsHard.userId) {
+            cleanupUserCloudflareResourcesIfNoActiveVps(vpsHard.userId).catch((err) => {
+              console.error("[Auto-Cleanup] Failed to cleanup Cloudflare resources after admin VPS hard delete:", err);
+            });
+          }
           break;
         case 'kubernetes': 
           await prisma.vpsService.deleteMany({ where: { kubernetesClusterId: id } });
@@ -96,6 +102,11 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
           where: { id },
           data: { status: statusValue, vmid: null, vpcIp: null, vpcId: null, terminationDate: new Date() }
         });
+        if (vpsSoft && vpsSoft.userId) {
+          cleanupUserCloudflareResourcesIfNoActiveVps(vpsSoft.userId).catch((err) => {
+            console.error("[Auto-Cleanup] Failed to cleanup Cloudflare resources after admin VPS termination:", err);
+          });
+        }
         break;
       }
       case 'kubernetes': {
