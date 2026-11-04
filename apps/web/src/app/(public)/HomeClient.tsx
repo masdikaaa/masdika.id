@@ -482,56 +482,67 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-x-10 lg:gap-y-6 items-stretch">
 
-            {/* Stats column */}
-            <FadeIn direction="right" duration={0.7} className="lg:col-span-4 flex flex-col gap-4">
-              <div className="rounded-2xl p-10 flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)]">
-                <p className="text-7xl font-black text-[var(--text-primary)] mb-1">4+</p>
-                <p className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
+            {/* Row 1, Left: 4+ Years Card */}
+            <FadeIn direction="right" duration={0.7} className="lg:col-span-4 flex">
+              <div className="w-full h-full rounded-2xl p-8 lg:p-10 flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)]">
+                <p className="text-6xl lg:text-7xl font-black text-[var(--text-primary)] mb-2 leading-none">4+</p>
+                <p className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
                   Years of<br />Experience
                 </p>
               </div>
+            </FadeIn>
 
-              <div className="rounded-2xl p-5 flex items-center gap-4 border border-[var(--border-primary)] bg-[var(--surface)]">
-                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", iconBoxStyle)}>
-                  <Server className={cn("w-5 h-5", iconAccent)} />
+            {/* Row 1, Right: About Me Heading & Lead */}
+            <FadeIn direction="left" delay={0.1} duration={0.7} className="lg:col-span-8 flex flex-col justify-center">
+              <span className={cn("text-xs font-semibold uppercase tracking-widest mb-3 block", iconAccent)}>
+                About Me
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-5 leading-[1.15]">
+                Boost business with Modern Cloud
+              </h2>
+              <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+                As a dedicated DevOps and Cloud Engineer, I specialize in automating workflows, managing multi-cloud deployments, and scaling organizational infrastructure. I ensure your environments are secure, efficient, and highly available.
+              </p>
+            </FadeIn>
+
+            {/* Row 2, Left: Infrastructure Card (aligned horizontally with Architecture & Automation) */}
+            <FadeIn direction="up" delay={0.15} duration={0.7} className="lg:col-span-4 flex">
+              <div className="w-full h-full rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border", iconBoxStyle)}>
+                      <Server className={cn("w-4 h-4", iconAccent)} />
+                    </div>
+                    <h3 className="font-bold text-[var(--text-primary)]">Infrastructure</h3>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                    50+ Deployments
+                  </span>
                 </div>
-                <div>
-                  <p className="font-bold text-[var(--text-primary)]">Infrastructure</p>
-                  <p className="text-sm text-[var(--text-muted)]">50+ Deployments</p>
-                </div>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Provisioning and operating high-availability production servers and multi-cloud clusters.
+                </p>
               </div>
             </FadeIn>
 
-            {/* Text column */}
-            <FadeIn direction="left" delay={0.15} duration={0.7} className="lg:col-span-8 flex flex-col justify-center">
-              <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
-                About Me
-              </span>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-6 leading-[1.15]">
-                Boost business with Modern Cloud
-              </h2>
-              <p className="text-base md:text-lg text-[var(--text-secondary)] mb-10 leading-relaxed max-w-2xl">
-                As a dedicated DevOps and Cloud Engineer, I specialize in automating workflows, managing multi-cloud deployments, and scaling organizational infrastructure. I ensure your environments are secure, efficient, and highly available.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { icon: Layout, title: "Architecture", desc: "Designing resilient, scalable, and cost-effective cloud architectures tailored to your needs." },
-                  { icon: Code, title: "Automation", desc: "Implementing robust CI/CD pipelines and infrastructure as code for rapid deployments." },
-                ].map((card, i) => (
-                  <div key={i} className="rounded-xl p-5 border border-[var(--border-primary)] bg-[var(--surface)]">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", iconBoxStyle)}>
-                        <card.icon className={cn("w-4 h-4", iconAccent)} />
-                      </div>
-                      <h3 className="font-bold text-[var(--text-primary)]">{card.title}</h3>
+            {/* Row 2, Right: Architecture & Automation Cards */}
+            <FadeIn direction="up" delay={0.2} duration={0.7} className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+              {[
+                { icon: Layout, title: "Architecture", desc: "Designing resilient, scalable, and cost-effective cloud architectures tailored to your needs." },
+                { icon: Code, title: "Automation", desc: "Implementing robust CI/CD pipelines and infrastructure as code for rapid deployments." },
+              ].map((card, i) => (
+                <div key={i} className="w-full h-full rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border", iconBoxStyle)}>
+                      <card.icon className={cn("w-4 h-4", iconAccent)} />
                     </div>
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{card.desc}</p>
+                    <h3 className="font-bold text-[var(--text-primary)]">{card.title}</h3>
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{card.desc}</p>
+                </div>
+              ))}
             </FadeIn>
           </div>
         </div>
