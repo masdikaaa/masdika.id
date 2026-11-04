@@ -131,7 +131,9 @@ function EpisodeCard({ ep, index, totalEpisodes, seriesSlug, seriesImage }: Epis
 
         {/* Title */}
         <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 line-clamp-2 leading-snug mb-3 transition-colors">
-          {ep.title}
+          <Link href={`/series/${seriesSlug}/${ep.slug}`}>
+            {ep.title}
+          </Link>
         </h3>
 
         {/* Excerpt */}
@@ -147,10 +149,13 @@ function EpisodeCard({ ep, index, totalEpisodes, seriesSlug, seriesImage }: Epis
           <span className="text-xs text-[var(--text-muted)] font-medium">
             Module {index + 1} of {totalEpisodes}
           </span>
-          <span className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-            Watch
-            <ChevronRight className="w-4 h-4" />
-          </span>
+          <Link
+            href={`/series/${seriesSlug}/${ep.slug}`}
+            className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all"
+          >
+            <span>Watch</span>
+            <ChevronRight className="w-4 h-4 transition-transform" />
+          </Link>
         </div>
       </div>
     </article>
