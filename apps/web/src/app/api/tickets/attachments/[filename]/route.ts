@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { promises as fs } from 'fs';
-import path from 'path';
-import { downloadTicketAttachmentFromRustFS } from '@/lib/rustfs';
+import { getTicketAttachmentStreamFromRustFS, downloadTicketAttachmentFromRustFS } from '@/lib/rustfs';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   try {
@@ -33,6 +32,26 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
       return new NextResponse('Forbidden', { status: 403 });
     }
 
+    const headers = new Headers();
+    headers.set('Content-Type', attachment.mimeType);
+    headers.set('Content-Disposition', `inline; filename="${attachment.originalName}"`);
+    headers.set('Cache-Control', 'private, max-age=86400');
+    headers.set('Accept-Ranges', 'bytes');
+    headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
+    headers.set('X-Content-Type-Options', 'nosniff');
+
+    const rangeHeader = req.headers.get('range');
+    const rustStream = await getTicketAttachmentStreamFromRustFS(filename, rangeHeader);
+    if (rustStream) {
+      headers.set('Content-Length', String(rustStream.contentLength));
+      if (rustStream.contentRange) headers.set('Content-Range', rustStream.contentRange);
+      if (rustStream.etag) headers.set('ETag', rustStream.etag);
+      return new NextResponse(rustStream.stream, {
+        status: rustStream.statusCode,
+        headers,
+      });
+    }
+
     const filePath = attachment.path;
     let fileBuffer: Buffer | null = await downloadTicketAttachmentFromRustFS(filename);
     
@@ -43,15 +62,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
         return new NextResponse('File not found', { status: 404 });
       }
     }
-
-    // Set correct headers
-    const headers = new Headers();
-    headers.set('Content-Type', attachment.mimeType);
-    headers.set('Content-Disposition', `inline; filename="${attachment.originalName}"`);
-    
-    // Security headers to prevent XSS (forces modern browsers not to execute scripts)
-    headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
-    headers.set('X-Content-Type-Options', 'nosniff');
 
     return new NextResponse(new Uint8Array(fileBuffer), { status: 200, headers });
   } catch (error) {

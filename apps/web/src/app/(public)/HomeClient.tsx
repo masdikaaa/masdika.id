@@ -60,42 +60,75 @@ const PRODUCTS = [
   {
     icon: Code,
     title: "API Hub",
+    subtitle: "Developer Gateway & Telemetry",
     description:
-      "A centralized hub to discover, manage, and consume high-performance APIs with seamless integration and monitoring.",
+      "Centralized API gateway with automated key rotation, real-time latency telemetry, and per-route rate limiting.",
     href: "/api-hub",
     type: "SaaS",
+    sla: "99.95% SLA",
+    specs: ["REST & Webhook", "Rate Limiting", "Live Analytics"],
+    cta: "Explore API Hub",
   },
   {
     icon: SiKubernetes,
     title: "Managed K3s",
+    subtitle: "Lightweight Kubernetes Engine",
     description:
-      "Lightweight, production-ready Kubernetes clusters optimized for edge and IoT, fully managed for you.",
+      "Production-ready K3s clusters with isolated control planes, Traefik ingress, and automated kubeconfig provisioning.",
     href: "/k3s",
     type: "PaaS",
+    sla: "99.95% SLA",
+    specs: ["Dedicated Node", "Auto TLS Ingress", "Instant Kubeconfig"],
+    cta: "Deploy K3s Cluster",
   },
   {
     icon: Terminal,
     title: "High-Performance VPS",
+    subtitle: "Proxmox KVM Virtualization",
     description:
-      "Blazing fast Virtual Private Servers with dedicated resources, SSD & HDD storage options, and root access.",
+      "Dedicated vCPU Intel Xeon instances with NVMe SSD or high-capacity HDD storage, full root SSH, and private VPC networking.",
     href: "/vps",
     type: "IaaS",
+    sla: "99.98% SLA",
+    specs: ["Full Root Access", "NVMe SSD & HDD", "Up to 1 Gbps"],
+    cta: "Configure VPS",
   },
   {
     icon: Link2,
     title: "URL Shortener",
+    subtitle: "Branded Links & Click Analytics",
     description:
-      "Fast, reliable, and trackable short links to optimize your marketing campaigns and share URLs gracefully.",
+      "Low-latency edge link redirection with custom aliases, QR code generation, and geographic click stream analytics.",
     href: "/shortener",
     type: "SaaS",
+    sla: "99.99% SLA",
+    specs: ["Custom Slugs", "Geo Analytics", "Instant Redirect"],
+    cta: "Create Short Link",
   },
   {
     icon: Cloud,
     title: "File CDN",
+    subtitle: "S3-Backed Object Storage",
     description:
-      "Global edge network to securely host, manage, and deliver your files and media globally with low latency.",
+      "High-throughput S3-compatible object storage powered by RustFS with byte-range video streaming and token access control.",
     href: "/file-cdn",
     type: "PaaS",
+    sla: "99.99% SLA",
+    specs: ["RustFS S3 Engine", "Range Streaming", "Public & Private"],
+    cta: "Explore File CDN",
+  },
+  {
+    icon: Server,
+    title: "Custom Enterprise Infra",
+    subtitle: "Bespoke Cluster & BGP Peering",
+    description:
+      "Need custom bare-metal topologies, multi-node HA database clusters, or dedicated MikroTik/WireGuard site-to-site tunnels?",
+    href: "/contact",
+    type: "Enterprise",
+    sla: "Custom SLA",
+    specs: ["Dedicated Hardware", "BGP / WireGuard", "24/7 SRE Support"],
+    cta: "Consult Architecture",
+    isCustom: true,
   },
 ];
 
@@ -638,43 +671,69 @@ export function HomeClient({
             </p>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
             {PRODUCTS.map((prod, i) => (
-              <FadeIn key={i} delay={i * 0.08} direction="up" className="h-full">
+              <FadeIn key={i} delay={i * 0.06} direction="up" className="h-full">
                 <Link
                   href={prod.href}
-                  className="block group h-full rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-colors duration-200"
+                  className={cn(
+                    "block group h-full rounded-2xl border bg-[var(--surface)] transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500",
+                    prod.isCustom
+                      ? "border-dashed border-cyan-500/35 hover:border-cyan-400 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.12)]"
+                      : "border-[var(--border-primary)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)]"
+                  )}
                 >
-                  <div className="relative h-full p-6 flex flex-col">
-                    <div className="flex items-start justify-between mb-5">
-                      <div className={cn("w-11 h-11 rounded-lg flex items-center justify-center border", iconBoxStyle)}>
-                        {prod.title === "Managed K3s"
-                          ? <prod.icon className={cn("w-5 h-5", iconAccent)} />
-                          : <prod.icon className={cn("w-5 h-5", iconAccent)} strokeWidth={1.5} />
-                        }
+                  <div className="relative h-full p-6 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-3 mb-5">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-transform duration-300 group-hover:scale-105", iconBoxStyle)}>
+                            {prod.title === "Managed K3s"
+                              ? <prod.icon className={cn("w-5 h-5", iconAccent)} />
+                              : <prod.icon className={cn("w-5 h-5", iconAccent)} strokeWidth={1.75} />
+                            }
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 block truncate">
+                              {prod.subtitle}
+                            </span>
+                            <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                              {prod.title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] shrink-0">
+                          {prod.type}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {prod.type && (
-                          <Badge variant="neutral" size="sm">
-                            {prod.type}
-                          </Badge>
-                        )}
-                        <Badge variant="success" size="sm" dot>
-                          98.99%
-                        </Badge>
+
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
+                        {prod.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1.5 mb-6">
+                        {prod.specs.map((spec) => (
+                          <span
+                            key={spec}
+                            className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/25 transition-colors"
+                          >
+                            {spec}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
-                    <h3 className="text-base font-bold mb-2 text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
-                      {prod.title}
-                    </h3>
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed flex-grow mb-5">
-                      {prod.description}
-                    </p>
+                    <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between gap-2 mt-auto">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {prod.sla}
+                      </span>
 
-                    <div className={cn("flex items-center gap-2 mt-auto text-sm font-semibold", iconAccent)}>
-                      View Details
-                      <ArrowRight className={cn("w-3.5 h-3.5 group-hover:translate-x-1 transition-transform", iconAccent)} />
+                      <span className={cn("inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold", iconAccent)}>
+                        {prod.cta}
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </span>
                     </div>
                   </div>
                 </Link>
@@ -766,41 +825,127 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="bottom-left" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16">
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
             <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
-              Solutions
+              Solutions &amp; Consulting
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-5 leading-[1.15]">
               Premium IT Services
             </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              End-to-end infrastructure engineering, zero-downtime cloud migrations, and production reliability consulting.
+            </p>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
             {[
-              { icon: Server, title: "Cloud Migration", desc: "Seamlessly move your on-premise infrastructure to AWS or GCP with zero downtime." },
-              { icon: Database, title: "Database Optimization", desc: "Scale and tune your SQL and NoSQL databases for high performance and reliability." },
-              { icon: Lock, title: "Security & DevSecOps", desc: "Implementing robust security policies and automated vulnerability scanning in pipelines." },
-              { icon: Cloud, title: "Cloud Architecture", desc: "Designing scalable, resilient, and cost-effective cloud architectures tailored to your needs." },
-              { icon: Terminal, title: "Infrastructure as Code", desc: "Automate provisioning with Terraform and Ansible for consistent, repeatable environments." },
-              { icon: Activity, title: "Monitoring & Logging", desc: "Implement comprehensive observability with Prometheus, Grafana, and ELK stack." },
+              {
+                icon: Server,
+                code: "SRV-01",
+                domain: "Migration",
+                title: "Cloud Migration",
+                desc: "Zero-downtime workload cutovers from legacy on-premise racks to AWS, GCP, or Proxmox private cloud.",
+                stack: ["AWS / GCP", "Proxmox VE", "Zero-Downtime"],
+                outcome: "Seamless Cutover",
+              },
+              {
+                icon: Database,
+                code: "SRV-02",
+                domain: "Data Layer",
+                title: "Database Optimization",
+                desc: "High-availability PostgreSQL/MySQL clustering, query execution plan tuning, and automated PITR backups.",
+                stack: ["PostgreSQL", "MySQL", "Redis Cluster"],
+                outcome: "Sub-ms Query Tuning",
+              },
+              {
+                icon: Lock,
+                code: "SRV-03",
+                domain: "Zero-Trust",
+                title: "Security & DevSecOps",
+                desc: "Automated SAST/DAST pipeline gates, container image signing, WAF hardening, and WireGuard mesh ACLs.",
+                stack: ["WireGuard", "Cloudflare WAF", "Trivy / SAST"],
+                outcome: "Hardened Posture",
+              },
+              {
+                icon: Cloud,
+                code: "SRV-04",
+                domain: "Multi-Cloud",
+                title: "Cloud Architecture",
+                desc: "Designing fault-tolerant, multi-AZ topologies with BGP routing, elastic autoscaling, and FinOps cost control.",
+                stack: ["Multi-AZ", "BGP Routing", "FinOps"],
+                outcome: "99.99% High-Availability",
+              },
+              {
+                icon: Terminal,
+                code: "SRV-05",
+                domain: "Automation",
+                title: "Infrastructure as Code",
+                desc: "Declarative, version-controlled infrastructure provisioning using modular Terraform, OpenTofu, and Ansible.",
+                stack: ["Terraform", "Ansible", "GitOps CI/CD"],
+                outcome: "100% Reproducible",
+              },
+              {
+                icon: Activity,
+                code: "SRV-06",
+                domain: "Telemetry",
+                title: "Monitoring & Logging",
+                desc: "Full-stack observability with Prometheus metrics, Grafana dashboards, Loki log aggregation, and on-call alerting.",
+                stack: ["Prometheus", "Grafana", "ELK / Loki"],
+                outcome: "Real-Time Alerting",
+              },
             ].map((srv, idx) => (
-              <Link
-                href="/services"
-                key={idx}
-                className="block group h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.1)] transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-              >
-                <div className="p-6 flex flex-col h-full">
-                  <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-5 border transition-all duration-300", iconBoxStyle)}>
-                    <srv.icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+              <FadeIn key={idx} delay={idx * 0.06} direction="up" className="h-full">
+                <Link
+                  href="/services"
+                  className="block group h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.1)] transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+                >
+                  <div className="p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <div className="flex items-start justify-between gap-3 mb-5">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-transform duration-300 group-hover:scale-105", iconBoxStyle)}>
+                            <srv.icon className="w-5 h-5" strokeWidth={1.75} />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 block">
+                              {srv.domain} • {srv.code}
+                            </span>
+                            <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                              {srv.title}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
+                        {srv.desc}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1.5 mb-6">
+                        {srv.stack.map((item) => (
+                          <span
+                            key={item}
+                            className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] group-hover:border-cyan-500/25 transition-colors"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between gap-2 mt-auto">
+                      <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                        Target: <strong className="text-[var(--text-primary)] font-semibold">{srv.outcome}</strong>
+                      </span>
+
+                      <span className={cn("inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold", iconAccent)}>
+                        Learn More
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{srv.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed flex-1 mb-5">{srv.desc}</p>
-                  <div className="flex items-center gap-2 text-sm font-semibold mt-auto text-zinc-500 dark:text-zinc-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all">
-                    <span>Learn More</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </FadeIn>
             ))}
           </div>
         </div>

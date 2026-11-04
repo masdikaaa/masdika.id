@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { Readable } from 'stream';
 import { getUploadsDir } from '@/lib/file-utils';
-import { downloadPublicUploadFromRustFS } from '@/lib/rustfs';
+import { getPublicUploadStreamFromRustFS } from '@/lib/rustfs';
 
 // Explicitly blocked dangerous executable or script extensions
 const FORBIDDEN_EXTENSIONS = new Set([
@@ -18,6 +19,14 @@ const mimeTypes: Record<string, string> = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.avif': 'image/avif',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mov': 'video/mp4',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.ogg': 'audio/ogg',
   '.pdf': 'application/pdf',
   '.txt': 'text/plain',
   '.csv': 'text/csv',
@@ -49,9 +58,11 @@ export async function GET(
     }
 
     const fallbackContentType = mimeTypes[ext] || 'application/octet-stream';
-    const securityHeaders = {
+    const rangeHeader = request.headers.get('range');
+    const securityHeaders: Record<string, string> = {
       'Content-Type': fallbackContentType,
       'Cache-Control': 'public, max-age=31536000, immutable',
+      'Accept-Ranges': 'bytes',
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Content-Security-Policy': "default-src 'none'; sandbox"
@@ -60,26 +71,70 @@ export async function GET(
     // 1. Try serving from local disk if it exists (strict directory traversal prevention)
     if (filePath.startsWith(baseUploadsDir + path.sep) || filePath === baseUploadsDir) {
       if (fs.existsSync(filePath)) {
-        const fileBuffer = fs.readFileSync(filePath);
-        return new NextResponse(new Uint8Array(fileBuffer), {
-          headers: securityHeaders,
+        const stat = fs.statSync(filePath);
+        const totalSize = stat.size;
+
+        if (rangeHeader && rangeHeader.startsWith('bytes=')) {
+          const parts = rangeHeader.replace(/bytes=/, '').split('-');
+          let start = parts[0] ? parseInt(parts[0], 10) : NaN;
+          let end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+          if (isNaN(start)) {
+            start = totalSize - parseInt(parts[1], 10);
+            end = totalSize - 1;
+          }
+          if (start >= totalSize || start < 0) {
+            return new NextResponse(null, {
+              status: 416,
+              headers: { 'Content-Range': `bytes */${totalSize}` },
+            });
+          }
+          end = Math.min(end, totalSize - 1);
+          const chunkSize = end - start + 1;
+          const nodeStream = fs.createReadStream(filePath, { start, end });
+          const webStream = Readable.toWeb(nodeStream) as unknown as ReadableStream<Uint8Array>;
+          return new NextResponse(webStream, {
+            status: 206,
+            headers: {
+              ...securityHeaders,
+              'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+              'Content-Length': String(chunkSize),
+            },
+          });
+        }
+
+        const nodeStream = fs.createReadStream(filePath);
+        const webStream = Readable.toWeb(nodeStream) as unknown as ReadableStream<Uint8Array>;
+        return new NextResponse(webStream, {
+          headers: {
+            ...securityHeaders,
+            'Content-Length': String(totalSize),
+          },
         });
       }
     }
 
-    // 2. Fallback / Primary from RustFS S3 Object Storage
-    let rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath);
-    if (!rustFSObject && relativeSubPath.startsWith('media/')) {
-      rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath.replace(/^media\//, 'blog/'));
-    } else if (!rustFSObject && relativeSubPath.startsWith('blog/')) {
-      rustFSObject = await downloadPublicUploadFromRustFS(relativeSubPath.replace(/^blog\//, 'media/'));
+    // 2. Direct Zero-Copy Stream from RustFS S3 Object Storage
+    let rustStream = await getPublicUploadStreamFromRustFS(relativeSubPath, rangeHeader);
+    if (!rustStream && relativeSubPath.startsWith('media/')) {
+      rustStream = await getPublicUploadStreamFromRustFS(relativeSubPath.replace(/^media\//, 'blog/'), rangeHeader);
+    } else if (!rustStream && relativeSubPath.startsWith('blog/')) {
+      rustStream = await getPublicUploadStreamFromRustFS(relativeSubPath.replace(/^blog\//, 'media/'), rangeHeader);
     }
-    if (rustFSObject) {
-      return new NextResponse(new Uint8Array(rustFSObject.buffer), {
-        headers: {
-          ...securityHeaders,
-          'Content-Type': rustFSObject.contentType || fallbackContentType,
-        },
+    if (rustStream) {
+      const headers: Record<string, string> = {
+        ...securityHeaders,
+        'Content-Type': rustStream.contentType || fallbackContentType,
+        'Content-Length': String(rustStream.contentLength),
+      };
+      if (rustStream.contentRange) {
+        headers['Content-Range'] = rustStream.contentRange;
+      }
+      if (rustStream.etag) {
+        headers['ETag'] = rustStream.etag;
+      }
+      return new NextResponse(rustStream.stream, {
+        status: rustStream.statusCode,
+        headers,
       });
     }
 

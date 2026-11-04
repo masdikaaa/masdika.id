@@ -28,7 +28,14 @@ export interface RustFSConfig {
 // In-memory cached config with TTL to prevent DB hammering on high-frequency streaming
 let cachedConfig: RustFSConfig | null = null;
 let lastConfigFetch = 0;
-const CACHE_TTL_MS = 15000; // 15 seconds
+const CACHE_TTL_MS = 60000; // 60 seconds
+
+// Singleton S3Client cache keyed by endpoint + accessKey + secretKey for TCP keep-alive connection pooling
+let cachedS3Client: S3Client | null = null;
+let cachedS3ClientSignature = '';
+
+// Cache verified buckets so PutObject doesn't send redundant HeadBucket RTTs on every upload
+const verifiedBucketsCache = new Set<string>();
 
 /**
  * Invalidate the in-memory RustFS config cache (e.g. after updating settings in Admin Panel)
@@ -36,6 +43,27 @@ const CACHE_TTL_MS = 15000; // 15 seconds
 export function invalidateRustFSCache() {
   cachedConfig = null;
   lastConfigFetch = 0;
+  cachedS3Client = null;
+  cachedS3ClientSignature = '';
+  verifiedBucketsCache.clear();
+}
+
+function getOrCreateS3Client(config: RustFSConfig): S3Client {
+  const sig = `${config.endpoint}|${config.accessKey}|${config.secretKey}`;
+  if (cachedS3Client && cachedS3ClientSignature === sig) {
+    return cachedS3Client;
+  }
+  cachedS3Client = new S3Client({
+    endpoint: config.endpoint,
+    region: 'us-east-1',
+    credentials: {
+      accessKeyId: config.accessKey,
+      secretAccessKey: config.secretKey,
+    },
+    forcePathStyle: true, // Essential for self-hosted S3/RustFS/MinIO
+  });
+  cachedS3ClientSignature = sig;
+  return cachedS3Client;
 }
 
 /**
@@ -123,75 +151,54 @@ export async function getRustFSConfig(): Promise<RustFSConfig> {
 }
 
 /**
- * Creates an AWS S3Client instance configured for RustFS S3-compatible API
+ * Creates or returns a cached AWS S3Client instance configured for RustFS S3-compatible API
  */
 export async function getRustFSS3Client(): Promise<{ client: S3Client; bucket: string; enabled: boolean }> {
   const config = await getRustFSConfig();
-
-  const client = new S3Client({
-    endpoint: config.endpoint,
-    region: 'us-east-1',
-    credentials: {
-      accessKeyId: config.accessKey,
-      secretAccessKey: config.secretKey,
-    },
-    forcePathStyle: true, // Essential for self-hosted S3/RustFS/MinIO
-  });
-
-  return { client, bucket: config.cdnBucket || config.bucket, enabled: config.enabled };
+  return {
+    client: getOrCreateS3Client(config),
+    bucket: config.cdnBucket || config.bucket,
+    enabled: config.enabled,
+  };
 }
 
 /**
- * Creates an AWS S3Client instance configured for RustFS Ticket Attachments bucket
- */
-
-/**
- * Creates an AWS S3Client instance configured for RustFS Website Media bucket (profile, blog, banners, etc.)
+ * Creates or returns a cached AWS S3Client instance configured for RustFS Website Media bucket (profile, blog, banners, etc.)
  */
 export async function getRustFSMediaClient(): Promise<{ client: S3Client; bucket: string; enabled: boolean }> {
   const config = await getRustFSConfig();
-
-  const client = new S3Client({
-    endpoint: config.endpoint,
-    region: 'us-east-1',
-    credentials: {
-      accessKeyId: config.accessKey,
-      secretAccessKey: config.secretKey,
-    },
-    forcePathStyle: true,
-  });
-
-  return { client, bucket: config.mediaBucket || 'masdika-media', enabled: config.enabled };
+  return {
+    client: getOrCreateS3Client(config),
+    bucket: config.mediaBucket || 'masdika-media',
+    enabled: config.enabled,
+  };
 }
 
 export async function getRustFSTicketClient(): Promise<{ client: S3Client; bucket: string; enabled: boolean }> {
   const config = await getRustFSConfig();
-
-  const client = new S3Client({
-    endpoint: config.endpoint,
-    region: 'us-east-1',
-    credentials: {
-      accessKeyId: config.accessKey,
-      secretAccessKey: config.secretKey,
-    },
-    forcePathStyle: true,
-  });
-
-  return { client, bucket: config.ticketBucket || 'masdika-ticket', enabled: config.enabled };
+  return {
+    client: getOrCreateS3Client(config),
+    bucket: config.ticketBucket || 'masdika-ticket',
+    enabled: config.enabled,
+  };
 }
-
 
 /**
  * Ensures that the target bucket exists in RustFS, creating it if necessary
  */
 export async function ensureBucketExists(client: S3Client, bucket: string): Promise<boolean> {
+  if (verifiedBucketsCache.has(bucket)) {
+    return true;
+  }
   try {
     await client.send(new HeadBucketCommand({ Bucket: bucket }));
+    verifiedBucketsCache.add(bucket);
     return true;
   } catch (err: any) {
     if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404 || err.Code === 'NoSuchBucket') {
       try {
         await client.send(new CreateBucketCommand({ Bucket: bucket }));
+        verifiedBucketsCache.add(bucket);
         console.log(`[RustFS] Bucket '${bucket}' created successfully.`);
         return true;
       } catch (createErr) {
@@ -354,6 +361,129 @@ export async function checkObjectInRustFS(key: string): Promise<{
 }
 
 /**
+ * Streams an object directly from RustFS with optional HTTP Range support (zero full-file RAM buffering)
+ */
+export async function getObjectStreamFromRustFS(
+  key: string,
+  rangeHeader?: string | null
+): Promise<{
+  stream: ReadableStream<Uint8Array>;
+  contentLength: number;
+  contentRange?: string;
+  contentType?: string;
+  etag?: string;
+  statusCode: number;
+} | null> {
+  try {
+    const { client, bucket, enabled } = await getRustFSS3Client();
+    if (!enabled) return null;
+
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ...(rangeHeader ? { Range: rangeHeader } : {}),
+    });
+
+    const res = await client.send(command);
+    if (!res.Body) return null;
+
+    // AWS SDK v3 Body has transformToWebStream() in Node 18+, fallback to Readable.toWeb
+    const webStream: ReadableStream<Uint8Array> =
+      typeof (res.Body as any).transformToWebStream === 'function'
+        ? (res.Body as any).transformToWebStream()
+        : (Readable.toWeb(res.Body as Readable) as unknown as ReadableStream<Uint8Array>);
+
+    return {
+      stream: webStream,
+      contentLength: res.ContentLength ?? 0,
+      contentRange: res.ContentRange,
+      contentType: res.ContentType,
+      etag: res.ETag,
+      statusCode: res.ContentRange || rangeHeader ? 206 : 200,
+    };
+  } catch (err: any) {
+    if (
+      err.name === 'NotFound' ||
+      err.name === 'NoSuchKey' ||
+      err.$metadata?.httpStatusCode === 404 ||
+      err.$metadata?.httpStatusCode === 416
+    ) {
+      return null;
+    }
+    console.error(`[RustFS] Error streaming ${key}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Streams a public upload object directly from RustFS media bucket with optional HTTP Range support
+ */
+export async function getPublicUploadStreamFromRustFS(
+  relativePath: string,
+  rangeHeader?: string | null
+): Promise<{
+  stream: ReadableStream<Uint8Array>;
+  contentLength: number;
+  contentRange?: string;
+  contentType: string;
+  etag?: string;
+  statusCode: number;
+} | null> {
+  try {
+    const { client, bucket, enabled } = await getRustFSMediaClient();
+    if (!enabled) return null;
+
+    const cleanPath = relativePath.replace(/^[\/\\]+/, '').replace(/\\/g, '/');
+    const candidateKeys = [
+      cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`,
+      cleanPath.replace(/^uploads\//, ''),
+    ];
+
+    for (const key of candidateKeys) {
+      try {
+        const res = await client.send(
+          new GetObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            ...(rangeHeader ? { Range: rangeHeader } : {}),
+          })
+        );
+
+        if (!res.Body) continue;
+
+        const webStream: ReadableStream<Uint8Array> =
+          typeof (res.Body as any).transformToWebStream === 'function'
+            ? (res.Body as any).transformToWebStream()
+            : (Readable.toWeb(res.Body as Readable) as unknown as ReadableStream<Uint8Array>);
+
+        return {
+          stream: webStream,
+          contentLength: res.ContentLength ?? 0,
+          contentRange: res.ContentRange,
+          contentType: res.ContentType || 'application/octet-stream',
+          etag: res.ETag,
+          statusCode: res.ContentRange || rangeHeader ? 206 : 200,
+        };
+      } catch (err: any) {
+        if (
+          err.name === 'NotFound' ||
+          err.name === 'NoSuchKey' ||
+          err.Code === 'NoSuchKey' ||
+          err.$metadata?.httpStatusCode === 404
+        ) {
+          continue;
+        }
+        throw err;
+      }
+    }
+    return null;
+  } catch (err: any) {
+    console.error(`[RustFS] Error streaming public upload ${relativePath}:`, err);
+    return null;
+  }
+}
+
+/**
  * Downloads an object buffer from RustFS into memory
  */
 export async function downloadBufferFromRustFS(key: string): Promise<Buffer | null> {
@@ -426,6 +556,61 @@ export async function uploadTicketAttachmentToRustFS(
   }));
 
   return true;
+}
+
+/**
+ * Ticket Attachments: Stream attachment directly from RustFS ticket bucket with HTTP Range support
+ */
+export async function getTicketAttachmentStreamFromRustFS(
+  key: string,
+  rangeHeader?: string | null
+): Promise<{
+  stream: ReadableStream<Uint8Array>;
+  contentLength: number;
+  contentRange?: string;
+  contentType?: string;
+  etag?: string;
+  statusCode: number;
+} | null> {
+  try {
+    const { client, bucket, enabled } = await getRustFSTicketClient();
+    if (!enabled) return null;
+
+    const res = await client.send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        ...(rangeHeader ? { Range: rangeHeader } : {}),
+      })
+    );
+
+    if (!res.Body) return null;
+
+    const webStream: ReadableStream<Uint8Array> =
+      typeof (res.Body as any).transformToWebStream === 'function'
+        ? (res.Body as any).transformToWebStream()
+        : (Readable.toWeb(res.Body as Readable) as unknown as ReadableStream<Uint8Array>);
+
+    return {
+      stream: webStream,
+      contentLength: res.ContentLength ?? 0,
+      contentRange: res.ContentRange,
+      contentType: res.ContentType,
+      etag: res.ETag,
+      statusCode: res.ContentRange || rangeHeader ? 206 : 200,
+    };
+  } catch (err: any) {
+    if (
+      err.name === 'NotFound' ||
+      err.name === 'NoSuchKey' ||
+      err.Code === 'NoSuchKey' ||
+      err.$metadata?.httpStatusCode === 404
+    ) {
+      return null;
+    }
+    console.error(`[RustFS] Error streaming ticket attachment ${key}:`, err);
+    return null;
+  }
 }
 
 /**
