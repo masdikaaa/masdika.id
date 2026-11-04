@@ -14,15 +14,13 @@ import { cn } from "@/lib/utils";
 import { MediaEngagement } from "@/components/media/MediaEngagement";
 import { PremiumLoader } from "@/components/ui/PremiumLoader";
 
-// Dynamically import Video.js player to prevent SSR window issues
+// Dynamically import Video.js player to prevent SSR window issues (no second spinner)
 const VideoPlayer = dynamic(
   () => import("@/components/media/VideoPlayer").then((mod) => mod.VideoPlayer),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full aspect-video rounded-2xl bg-black/60 border border-white/10 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
-      </div>
+      <div className="w-full max-w-4xl mx-auto aspect-video max-h-[calc(100dvh-11.5rem)] sm:max-h-[75vh] rounded-2xl bg-[#050610] border border-white/10" />
     ),
   }
 );

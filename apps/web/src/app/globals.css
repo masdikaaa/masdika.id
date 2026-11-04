@@ -2260,3 +2260,7 @@ html.light input[type="range"]::-moz-range-progress {
 }
 
 
+/* Prevent double full-screen loader when InitialPreloader is active */
+body:has(#initial-preloader) .premium-fullscreen-loader {
+  display: none !important;
+}

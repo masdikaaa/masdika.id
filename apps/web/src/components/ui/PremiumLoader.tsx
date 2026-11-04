@@ -1,35 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 
 /**
  * Ultra-lightweight loading spinner using pure CSS animations.
- * Zero Framer Motion dependency = instant render, no JS animation overhead,
- * dramatically lower CPU/RAM usage while spinning.
- * 
- * Uses createPortal into document.body to ensure it renders above all elements
- * (navbar, page content, footer) regardless of parent stacking contexts or scroll position.
+ * Renders and hydrates in-place without createPortal remounting so animations
+ * never restart or stutter during hydration/streaming.
  */
 export function PremiumLoader({ inline = false }: { inline?: boolean }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const content = (
+  return (
     <div
       className={cn(
         "flex flex-col items-center justify-center overflow-hidden",
         inline
           ? "relative py-20 min-h-[300px]"
           : cn(
-              "fixed inset-0 z-[99999] pointer-events-auto",
+              "premium-fullscreen-loader fixed inset-0 z-[99999] pointer-events-auto",
               isDark ? "bg-[#000000]" : "bg-[#f8fafb]"
             )
       )}
@@ -48,10 +38,8 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
           : undefined
       }
     >
-      {/* Main Loader Container — pure CSS, no JS animation frames */}
       <div className={cn("relative z-10 flex flex-col items-center", inline ? "scale-75 md:scale-100" : "")}>
         <div className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
-          {/* Outer glowing ring — CSS spin */}
           <div
             className={cn(
               "absolute inset-0 rounded-full border-2 border-transparent premium-spin",
@@ -60,7 +48,6 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
                 : "border-t-cyan-500 border-r-cyan-500"
             )}
           />
-          {/* Middle reverse glowing ring — CSS spin reverse */}
           <div
             className={cn(
               "absolute inset-3 md:inset-4 rounded-full border-2 border-transparent premium-spin-reverse",
@@ -69,7 +56,6 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
                 : "border-b-cyan-600 border-l-cyan-600"
             )}
           />
-          {/* Inner rotating & pulsing ring — CSS spin + pulse */}
           <div
             className={cn(
               "absolute inset-6 md:inset-8 rounded-full border-2 border-transparent premium-spin-pulse",
@@ -78,7 +64,6 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
                 : "border-t-cyan-400 border-b-cyan-300 bg-gradient-to-br from-cyan-100/60 to-cyan-200/40"
             )}
           />
-          {/* Center dot — CSS pulse */}
           <div
             className={cn(
               "w-3.5 h-3.5 md:w-4 md:h-4 rounded-full premium-pulse",
@@ -89,7 +74,6 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
           />
         </div>
 
-        {/* Text */}
         <div className="mt-8 md:mt-10 flex flex-col items-center">
           <h3
             className={cn(
@@ -115,17 +99,4 @@ export function PremiumLoader({ inline = false }: { inline?: boolean }) {
       </div>
     </div>
   );
-
-  if (inline) {
-    return content;
-  }
-
-  // When rendered in browser, portal to document.body so that it is never trapped
-  // inside any parent container stacking context, overflow, or covered by the footer.
-  if (mounted && typeof document !== "undefined") {
-    return createPortal(content, document.body);
-  }
-
-  // Fallback for SSR / initial mount
-  return content;
 }

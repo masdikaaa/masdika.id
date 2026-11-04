@@ -59,7 +59,7 @@ export default async function BlogPage() {
   const posts = await getPosts();
 
   return (
-    <Suspense fallback={<PremiumLoader />}>
+    <Suspense fallback={null}>
       <BlogContent initialPosts={posts} />
     </Suspense>
   );

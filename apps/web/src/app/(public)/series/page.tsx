@@ -45,7 +45,7 @@ export default async function SeriesPage() {
   const series = await getSeries();
 
   return (
-    <Suspense fallback={<PremiumLoader />}>
+    <Suspense fallback={null}>
       <SeriesClient initialSeries={series} />
     </Suspense>
   );
