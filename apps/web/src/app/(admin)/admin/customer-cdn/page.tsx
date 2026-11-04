@@ -223,7 +223,7 @@ export default function AdminCustomerCdnPage() {
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
             )}
           >
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin text-cyan-500")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin text-cyan-500")} />
             <span>Refresh</span>
           </button>
         </div>

@@ -144,7 +144,7 @@ export default function AdminBlogPage() {
           </p>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-lg font-semibold text-xs flex items-center gap-2">
             <span>Total Articles:</span>
             <span className="font-bold text-white">{totalCount}</span>
           </div>
@@ -155,7 +155,7 @@ export default function AdminBlogPage() {
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
             <span>Refresh</span>
           </button>
           <Link 

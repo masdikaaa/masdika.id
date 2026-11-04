@@ -2264,3 +2264,8 @@ html.light input[type="range"]::-moz-range-progress {
 body:has(#initial-preloader) .premium-fullscreen-loader {
   display: none !important;
 }
+
+/* Spin animation for any Refresh button icon clicked in Admin Panel */
+svg[data-refresh-spin="true"] {
+  animation: spin 0.65s linear infinite !important;
+}

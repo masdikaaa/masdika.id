@@ -249,7 +249,7 @@ export default function AdminChatHistoryPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-lg font-semibold text-xs">
             Total Sessions: {total}
           </div>
           <button
@@ -257,7 +257,7 @@ export default function AdminChatHistoryPage() {
             disabled={loading}
             className="px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
           >
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
             Refresh
           </button>
           {selectedIds.length > 0 && (

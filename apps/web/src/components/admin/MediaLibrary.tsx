@@ -242,7 +242,7 @@ export default function MediaLibrary({
                 title="Refresh media"
                 className={cn("p-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
               >
-                <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+                <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
               </button>
 
               <button 

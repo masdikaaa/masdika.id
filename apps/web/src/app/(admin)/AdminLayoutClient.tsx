@@ -166,6 +166,25 @@ export default function AdminLayout({
     }
   };
 
+  useEffect(() => {
+    const handleRefreshClick = (e: MouseEvent) => {
+      const targetEl = e.target as HTMLElement | null;
+      if (!targetEl) return;
+      const btn = targetEl.closest("button");
+      if (!btn || btn.disabled) return;
+      const svg = btn.querySelector(
+        "svg.lucide-refresh-cw, svg.lucide-rotate-cw, svg.lucide-refresh-ccw, svg.lucide-rotate-ccw"
+      ) as SVGElement | null;
+      if (!svg) return;
+      svg.setAttribute("data-refresh-spin", "true");
+      setTimeout(() => {
+        svg.removeAttribute("data-refresh-spin");
+      }, 700);
+    };
+    document.addEventListener("click", handleRefreshClick, true);
+    return () => document.removeEventListener("click", handleRefreshClick, true);
+  }, []);
+
   const toggleNotifications = () => {
     if (!showNotifications) {
       // Fetch notifications when opening

@@ -948,7 +948,7 @@ export default function VpsManagementPage() {
           </p>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+          <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-lg font-semibold text-xs flex items-center gap-2">
             <span>Proxmox Node:</span>
             <span className="font-bold text-white">{settings.name || "Default Node"}</span>
           </div>
