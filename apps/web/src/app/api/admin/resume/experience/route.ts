@@ -21,10 +21,23 @@ export async function POST(req: Request) {
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
-    const { id, ...createData } = await req.json();
-    const newExp = await prisma.experience.create({ data: createData });
+    const body = await req.json();
+    const { year, role, company, type, description, tags } = body;
+    const count = await prisma.experience.count();
+    const newExp = await prisma.experience.create({
+      data: {
+        year,
+        role,
+        company,
+        type: type || null,
+        description: description || null,
+        tags: tags || null,
+        order: count,
+      },
+    });
     return NextResponse.json(newExp);
   } catch (error) {
+    console.error('Error creating experience:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

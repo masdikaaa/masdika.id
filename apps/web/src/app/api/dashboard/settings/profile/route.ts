@@ -7,28 +7,14 @@ import crypto from 'crypto';
 import { decryptDeterministic } from '@/lib/encryption';
 import { getUploadsDir, deleteLocalFile } from '@/lib/file-utils';
 import { uploadPublicUploadToRustFS, deletePublicUploadFromRustFS } from '@/lib/rustfs';
+import {
+  validateFileUploadSecurity,
+  validateRealImageBuffer,
+} from '@/lib/upload-security';
 
 const ALLOWED_AVATAR_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const ALLOWED_AVATAR_EXTS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif']);
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
-
-/**
- * Validate image file by checking magic bytes (file signature).
- * Prevents uploading malicious files disguised as images.
- */
-function isValidImageMagicBytes(buffer: Buffer): boolean {
-  if (buffer.length < 4) return false;
-  // JPEG: FF D8 FF
-  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return true;
-  // PNG: 89 50 4E 47
-  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return true;
-  // GIF: 47 49 46 38
-  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) return true;
-  // WebP: 52 49 46 46 ... 57 45 42 50
-  if (buffer.length >= 12 && buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46
-      && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return true;
-  return false;
-}
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
@@ -93,29 +79,36 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: 'Ukuran file avatar melebihi batas maksimal 5MB' }, { status: 400 });
       }
 
-      // 2. Enforce strict extension whitelist
-      const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-      if (!ALLOWED_AVATAR_EXTS.has(fileExt)) {
-        return NextResponse.json({ error: 'Format file tidak diizinkan. Hanya file gambar (.jpg, .jpeg, .png, .webp, .gif) yang diperbolehkan.' }, { status: 400 });
+      // 2. Enforce strict extension, magic bytes & anti-webshell validation
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const secCheck = validateFileUploadSecurity({
+        filename: file.name,
+        headBuffer: buffer,
+        tailBuffer: buffer,
+        allowedExtensions: ALLOWED_AVATAR_EXTS,
+      });
+      if (!secCheck.valid) {
+        return NextResponse.json({ error: secCheck.error || 'Format file avatar tidak diizinkan.' }, { status: 400 });
       }
 
-      // 3. Enforce MIME type validation
       if (file.type && !ALLOWED_AVATAR_MIMES.has(file.type.toLowerCase())) {
         return NextResponse.json({ error: 'Tipe konten file tidak valid untuk avatar' }, { status: 400 });
       }
 
-      // 4. Validate binary magic bytes
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      if (!isValidImageMagicBytes(buffer)) {
-        return NextResponse.json({ error: 'Konten file tidak valid atau bukan gambar asli' }, { status: 400 });
+      // 3. Validate real image pixel dimensions & integrity with Sharp
+      const imgValidation = await validateRealImageBuffer(buffer, { maxWidth: 8000, maxHeight: 8000 });
+      if (!imgValidation.valid) {
+        return NextResponse.json({ error: imgValidation.error || 'Konten file bukan gambar asli' }, { status: 400 });
       }
 
-      // 5. Re-encode and sanitize image with Sharp (strips all EXIF, metadata, and any embedded scripts)
+      // 4. Re-encode and sanitize image with Sharp (strips all EXIF, metadata, and any embedded scripts)
       const sharpModule = await import('sharp');
       const sharp = sharpModule.default || sharpModule;
 
-      const optimizedBuffer = await sharp(buffer)
+      const optimizedBuffer = await sharp(buffer, { failOn: 'error' })
+        .rotate()
         .resize(512, 512, { fit: 'cover', withoutEnlargement: true })
         .webp({ quality: 85 })
         .toBuffer();

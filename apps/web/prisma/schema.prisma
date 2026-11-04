@@ -190,34 +190,43 @@ model Subscriber {
 }
 
 model Experience {
-  id        Int      @id @default(autoincrement())
-  year      String
-  role      String
-  company   String
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  year        String
+  role        String
+  company     String
+  type        String?
+  description String?
+  tags        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Education {
-  id        Int      @id @default(autoincrement())
-  year      String
-  degree    String
-  school    String
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  year        String
+  degree      String
+  school      String
+  type        String?
+  description String?
+  tags        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Certification {
-  id        Int      @id @default(autoincrement())
-  title     String
-  org       String
-  date      String
-  icon      String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  title       String
+  org         String
+  date        String
+  icon        String?
+  code        String?
+  domain      String?
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model BlockedUser {

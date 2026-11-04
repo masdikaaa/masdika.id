@@ -55,24 +55,51 @@ app.prepare().then(async () => {
       }
 
       // Intercept large raw file uploads to bypass Next.js 10MB body limit
-      // Works for any route ending with /upload-raw (e.g. /api/admin/secure-media/upload-raw)
+      // Strictly restricted to authenticated Admin Secure Media & Customer CDN routes
       if (req.method === "POST" && normalizedPathname.endsWith("/upload-raw")) {
+        const ALLOWED_RAW_UPLOAD_PATHS = new Set([
+          "/api/admin/secure-media/upload-raw",
+          "/api/user/cdn/upload-raw",
+        ]);
+        if (!ALLOWED_RAW_UPLOAD_PATHS.has(normalizedPathname)) {
+          res.statusCode = 403;
+          res.end(JSON.stringify({ error: "Forbidden upload endpoint" }));
+          return;
+        }
+
         const crypto = require("crypto");
         const fs = require("fs");
         const path = require("path");
         const http = require("http");
+        const { hasForbiddenExtension } = await import("./lib/upload-security");
 
         const targetPath = normalizedPathname.replace(/\/upload-raw$/, "/upload");
 
-        // Auth check - ensure either admin or user session exists before allowing arbitrary disk writes (except for public upload)
-        const isPublicUpload = normalizedPathname.startsWith("/api/public/upload-raw");
+        // Strict Auth Check - require valid authenticated session before touching disk
         const cookieHeader = req.headers.cookie || "";
         const cookies = parseCookie(cookieHeader);
         const sessionToken = cookies["admin_session"] || cookies["user_session"];
 
-        if (!isPublicUpload && (!sessionToken || !verifySessionToken(sessionToken))) {
+        if (!sessionToken || !verifySessionToken(sessionToken)) {
           res.statusCode = 401;
           res.end(JSON.stringify({ error: "Unauthorized" }));
+          return;
+        }
+
+        // Pre-validate original filename before writing any chunk to disk
+        const rawNameBase64 = (req.headers["x-upload-original-name"] as string) || "";
+        let rawName = "";
+        try {
+          rawName = decodeURIComponent(Buffer.from(rawNameBase64, "base64").toString());
+        } catch {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: "Nama file tidak valid." }));
+          return;
+        }
+        const extCheck = hasForbiddenExtension(rawName);
+        if (extCheck.forbidden) {
+          res.statusCode = 415;
+          res.end(JSON.stringify({ error: extCheck.reason || "File berbahaya diblokir." }));
           return;
         }
 
@@ -95,10 +122,10 @@ app.prepare().then(async () => {
           } catch {}
         }
 
-        const ws = fs.createWriteStream(tempPath, { flags: chunkIndex > 0 ? "a" : "w" });
+        const ws = fs.createWriteStream(tempPath, { flags: chunkIndex > 0 ? "a" : "w", mode: 0o600 });
 
-        // Limit upload size to 100MB for public, 10GB for authenticated users/admins
-        const MAX_FILE_SIZE = isPublicUpload ? 100 * 1024 * 1024 : 10 * 1024 * 1024 * 1024;
+        // Limit upload size to 10GB for authenticated users/admins
+        const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024;
         let uploadedBytes = 0;
         let isAborted = false;
 
@@ -128,6 +155,7 @@ app.prepare().then(async () => {
             });
           });
         } catch (err: any) {
+          fs.unlink(tempPath, () => {});
           if (!res.headersSent) {
             res.statusCode = 500;
             res.end(JSON.stringify({ error: "Upload failed" }));
@@ -158,9 +186,14 @@ app.prepare().then(async () => {
         const proxyReq = http.request(options, (proxyRes: any) => {
           res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
           proxyRes.pipe(res);
+          proxyRes.on("end", () => {
+            // Ensure temp buffer is always cleaned up after final processing
+            fs.unlink(tempPath, () => {});
+          });
         });
 
         proxyReq.on("error", (err: any) => {
+          fs.unlink(tempPath, () => {});
           console.error("[Upload Proxy] Error:", err);
           res.statusCode = 500;
           res.end(JSON.stringify({ error: "Internal proxy error" }));

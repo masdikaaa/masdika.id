@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { title, org, date, icon } = body;
+    const { title, org, date, icon, code, domain, description } = body;
 
     const count = await prisma.certification.count();
 
@@ -32,7 +32,10 @@ export async function POST(req: Request) {
         title,
         org,
         date,
-        icon,
+        icon: icon || null,
+        code: code || null,
+        domain: domain || null,
+        description: description || null,
         order: count
       }
     });

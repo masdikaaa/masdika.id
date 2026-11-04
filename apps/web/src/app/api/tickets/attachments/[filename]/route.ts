@@ -32,13 +32,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
       return new NextResponse('Forbidden', { status: 403 });
     }
 
+    const SAFE_INLINE_MIMES = new Set([
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'
+    ]);
+    const canInline = SAFE_INLINE_MIMES.has(attachment.mimeType);
+    const safeName = (attachment.originalName || 'attachment').replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+
     const headers = new Headers();
-    headers.set('Content-Type', attachment.mimeType);
-    headers.set('Content-Disposition', `inline; filename="${attachment.originalName}"`);
+    headers.set('Content-Type', canInline ? attachment.mimeType : 'application/octet-stream');
+    headers.set('Content-Disposition', `${canInline ? 'inline' : 'attachment'}; filename="${safeName}"`);
     headers.set('Cache-Control', 'private, max-age=86400');
     headers.set('Accept-Ranges', 'bytes');
     headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
     headers.set('X-Content-Type-Options', 'nosniff');
+    headers.set('X-Frame-Options', 'DENY');
 
     const rangeHeader = req.headers.get('range');
     const rustStream = await getTicketAttachmentStreamFromRustFS(filename, rangeHeader);

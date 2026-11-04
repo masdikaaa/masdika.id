@@ -89,47 +89,69 @@ const CORE_COMPETENCIES = [
   },
 ];
 
-function getExperienceDetails(role: string, company: string, description?: string) {
-  if (description && description.trim().length > 0) {
-    return {
-      summary: description,
-      tags: ["Production Infrastructure", "System Administration", "Network Operations"],
-    };
-  }
-  const lower = `${role} ${company}`.toLowerCase();
-  if (lower.includes("tehnician") || lower.includes("technician") || lower.includes("smk")) {
-    return {
-      summary:
-        "Managed campus laboratory servers, local area network (LAN/WLAN) infrastructure, hardware troubleshooting, and workstation deployment.",
-      tags: ["LAN/WLAN Routing", "Server Maintenance", "Hardware Diagnostics"],
-    };
-  }
+function getExperienceDetails(item: {
+  role: string;
+  company: string;
+  type?: string | null;
+  description?: string | null;
+  tags?: string | null;
+}) {
+  const parsedTags = item.tags
+    ? item.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : [];
+
+  const lower = `${item.role} ${item.company}`.toLowerCase();
+  const fallbackSummary =
+    lower.includes("tehnician") || lower.includes("technician") || lower.includes("smk")
+      ? "Managed campus laboratory servers, local area network (LAN/WLAN) infrastructure, hardware troubleshooting, and workstation deployment."
+      : "Architected and maintained high-availability Linux servers, cloud deployments, network routing, and automated CI/CD workflows.";
+
+  const fallbackTags =
+    lower.includes("tehnician") || lower.includes("technician") || lower.includes("smk")
+      ? ["LAN/WLAN Routing", "Server Maintenance", "Hardware Diagnostics"]
+      : ["Cloud Infrastructure", "Linux SysAdmin", "DevOps Automation"];
+
   return {
+    type: item.type && item.type.trim().length > 0 ? item.type : "Verified Role",
     summary:
-      "Architected and maintained high-availability Linux servers, cloud deployments, network routing, and automated CI/CD workflows.",
-    tags: ["Cloud Infrastructure", "Linux SysAdmin", "DevOps Automation"],
+      item.description && item.description.trim().length > 0 ? item.description : fallbackSummary,
+    tags: parsedTags.length > 0 ? parsedTags : fallbackTags,
   };
 }
 
-function getEducationDetails(degree: string, school: string, description?: string) {
-  if (description && description.trim().length > 0) {
-    return {
-      summary: description,
-      tags: ["Computer Science", "Systems Engineering"],
-    };
-  }
-  const lower = `${degree} ${school}`.toLowerCase();
-  if (lower.includes("universitas") || lower.includes("university")) {
-    return {
-      summary:
-        "Focused on Information Systems, distributed cloud computing, network architecture, database management, and enterprise software engineering.",
-      tags: ["Information Systems", "Distributed Systems", "Database Architecture"],
-    };
-  }
+function getEducationDetails(item: {
+  degree: string;
+  school: string;
+  type?: string | null;
+  description?: string | null;
+  tags?: string | null;
+}) {
+  const parsedTags = item.tags
+    ? item.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : [];
+
+  const lower = `${item.degree} ${item.school}`.toLowerCase();
+  const fallbackSummary =
+    lower.includes("universitas") || lower.includes("university")
+      ? "Focused on Information Systems, distributed cloud computing, network architecture, database management, and enterprise software engineering."
+      : "Intensive vocational track in Computer & Network Engineering (TKJ), covering Linux server administration, MikroTik routing, and enterprise networking.";
+
+  const fallbackTags =
+    lower.includes("universitas") || lower.includes("university")
+      ? ["Information Systems", "Distributed Systems", "Database Architecture"]
+      : ["Computer & Network Eng.", "MikroTik & Cisco", "Linux Server"];
+
   return {
+    type: item.type && item.type.trim().length > 0 ? item.type : "Academic",
     summary:
-      "Intensive vocational track in Computer & Network Engineering (TKJ), covering Linux server administration, MikroTik routing, and enterprise networking.",
-    tags: ["Computer & Network Eng.", "MikroTik & Cisco", "Linux Server"],
+      item.description && item.description.trim().length > 0 ? item.description : fallbackSummary,
+    tags: parsedTags.length > 0 ? parsedTags : fallbackTags,
   };
 }
 
@@ -479,137 +501,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   </div>
                 ) : (
                   experiences.map((item, i) => {
-                    const details = getExperienceDetails(item.role, item.company, item.description);
-                    const isPresent = String(item.year).toUpperCase().includes("PRESENT");
-                    return (
-                      <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
-                        <div className="relative group">
-                          {/* Timeline Node */}
-                          <span
-                            className={cn(
-                              "absolute -left-[31px] top-6 w-3.5 h-3.5 rounded-full border-2 transition-colors",
-                              isPresent
-                                ? "bg-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
-                                : "bg-[var(--surface)] border-cyan-500 group-hover:bg-cyan-400"
-                            )}
-                          />
-
-                          <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300">
-                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                                <Calendar className="w-3 h-3" />
-                                {item.year}
-                              </span>
-                              <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-                                Verified Role
-                              </span>
-                            </div>
-
-                            <h4 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
-                              {item.role}
-                            </h4>
-
-                            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] mb-3.5">
-                              <Building2 className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
-                              <span>{item.company}</span>
-                            </div>
-
-                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                              {details.summary}
-                            </p>
-
-                            <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
-                              {details.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </FadeIn>
-                    );
-                  })
-                )}
-
-                {/* Balance Experience column when there are fewer experience records than education records */}
-                {experiences.length > 0 && experiences.length < educations.length && (
-                  <FadeIn delay={0.2} direction="up">
-                    <div className="relative group">
-                      <span className="absolute -left-[31px] top-6 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
-                      <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300">
-                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            2022 - PRESENT
-                          </span>
-                          <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-                            Independent Practice
-                          </span>
-                        </div>
-
-                        <h4 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
-                          CLOUD &amp; DEVOPS INFRASTRUCTURE ENGINEER
-                        </h4>
-
-                        <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] mb-3.5">
-                          <Layers className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
-                          <span>Masdika Cloud &amp; Enterprise Clients</span>
-                        </div>
-
-                        <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                          Designing and operating production K3s/Kubernetes clusters, high-performance VPS nodes, carrier-grade BGP routing, and automated CI/CD pipelines for businesses.
-                        </p>
-
-                        <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
-                          {["Kubernetes & K3s", "BGP & MikroTik", "Cloud Architecture"].map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </FadeIn>
-                )}
-              </div>
-            </div>
-
-            {/* Education Column */}
-            <div>
-              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-primary)]">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
-                    <GraduationCap className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
-                      My Education
-                    </h3>
-                    <p className="text-xs font-mono text-[var(--text-muted)]">
-                      Academic Degrees &amp; Technical Training
-                    </p>
-                  </div>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
-                  {educations.length} {educations.length === 1 ? "Record" : "Records"}
-                </span>
-              </div>
-
-              <div className="relative pl-6 border-l border-[var(--border-primary)] space-y-6">
-                {educations.length === 0 ? (
-                  <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)] text-sm">
-                    No education records available.
-                  </div>
-                ) : (
-                  educations.map((item, i) => {
-                    const details = getEducationDetails(item.degree, item.school, item.description);
+                    const details = getExperienceDetails(item);
                     const isPresent = String(item.year).toUpperCase().includes("PRESENT");
                     return (
                       <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
@@ -642,7 +534,104 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                                 {item.year}
                               </span>
                               <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-                                Academic
+                                {details.type}
+                              </span>
+                            </div>
+
+                            <h4 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
+                              {item.role}
+                            </h4>
+
+                            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] mb-3.5">
+                              <Building2 className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                              <span>{item.company}</span>
+                            </div>
+
+                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                              {details.summary}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
+                              {details.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </FadeIn>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Education Column */}
+            <div>
+              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-primary)]">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
+                      My Education
+                    </h3>
+                    <p className="text-xs font-mono text-[var(--text-muted)]">
+                      Academic Degrees &amp; Technical Training
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
+                  {educations.length} {educations.length === 1 ? "Record" : "Records"}
+                </span>
+              </div>
+
+              <div className="relative pl-6 border-l border-[var(--border-primary)] space-y-6">
+                {educations.length === 0 ? (
+                  <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)] text-sm">
+                    No education records available.
+                  </div>
+                ) : (
+                  educations.map((item, i) => {
+                    const details = getEducationDetails(item);
+                    const isPresent = String(item.year).toUpperCase().includes("PRESENT");
+                    return (
+                      <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
+                        <div className="relative group">
+                          {/* Timeline Node */}
+                          <span
+                            className={cn(
+                              "absolute -left-[31px] top-6 w-3.5 h-3.5 rounded-full border-2 transition-colors",
+                              isPresent
+                                ? "bg-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
+                                : "bg-[var(--surface)] border-cyan-500 group-hover:bg-cyan-400"
+                            )}
+                          />
+
+                          <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border",
+                                  isPresent
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                    : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20"
+                                )}
+                              >
+                                {isPresent ? (
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                ) : (
+                                  <Calendar className="w-3 h-3" />
+                                )}
+                                {item.year}
+                              </span>
+                              <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                                {details.type}
                               </span>
                             </div>
 

@@ -4,22 +4,15 @@ import path from 'path';
 import { Readable } from 'stream';
 import { getUploadsDir } from '@/lib/file-utils';
 import { getPublicUploadStreamFromRustFS } from '@/lib/rustfs';
+import { hasForbiddenExtension } from '@/lib/upload-security';
 
-// Explicitly blocked dangerous executable or script extensions
-const FORBIDDEN_EXTENSIONS = new Set([
-  '.php', '.phtml', '.php3', '.php4', '.php5', '.phps',
-  '.sh', '.bash', '.exe', '.bat', '.cmd', '.py', '.pl', '.cgi',
-  '.env', '.config', '.htaccess', '.htpasswd', '.ini',
-  '.html', '.htm', '.xhtml', '.jsp', '.asp', '.aspx'
-]);
-
+// Strict whitelist of allowed extensions served from /uploads
 const mimeTypes: Record<string, string> = {
   '.webp': 'image/webp',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
   '.avif': 'image/avif',
   '.mp4': 'video/mp4',
   '.webm': 'video/webm',
@@ -49,15 +42,17 @@ export async function GET(
     const relativeSubPath = resolvedParams.path.join('/');
     const baseUploadsDir = path.normalize(getUploadsDir());
     const filePath = path.normalize(path.join(baseUploadsDir, ...resolvedParams.path));
+    const filename = path.basename(filePath);
     const ext = path.extname(filePath).toLowerCase();
 
-    // 0. HARD SECURITY GUARD: Block any request targeting script/executable files
-    if (FORBIDDEN_EXTENSIONS.has(ext)) {
-      console.warn(`[Security Alert] Blocked attempt to access forbidden file: ${relativeSubPath}`);
+    // 0. HARD SECURITY GUARD: Strictly require whitelisted extension & reject double-extensions / shells
+    const forbiddenCheck = hasForbiddenExtension(filename);
+    if (forbiddenCheck.forbidden || !mimeTypes[ext]) {
+      console.warn(`[Security Alert] Blocked attempt to access non-whitelisted or forbidden file: ${relativeSubPath}`);
       return new NextResponse('Forbidden', { status: 403 });
     }
 
-    const fallbackContentType = mimeTypes[ext] || 'application/octet-stream';
+    const fallbackContentType = mimeTypes[ext];
     const rangeHeader = request.headers.get('range');
     const securityHeaders: Record<string, string> = {
       'Content-Type': fallbackContentType,
@@ -123,7 +118,7 @@ export async function GET(
     if (rustStream) {
       const headers: Record<string, string> = {
         ...securityHeaders,
-        'Content-Type': rustStream.contentType || fallbackContentType,
+        'Content-Type': fallbackContentType,
         'Content-Length': String(rustStream.contentLength),
       };
       if (rustStream.contentRange) {

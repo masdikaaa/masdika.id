@@ -21,10 +21,23 @@ export async function POST(req: Request) {
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
-    const { id, ...createData } = await req.json();
-    const newEdu = await prisma.education.create({ data: createData });
+    const body = await req.json();
+    const { year, degree, school, type, description, tags } = body;
+    const count = await prisma.education.count();
+    const newEdu = await prisma.education.create({
+      data: {
+        year,
+        degree,
+        school,
+        type: type || null,
+        description: description || null,
+        tags: tags || null,
+        order: count,
+      },
+    });
     return NextResponse.json(newEdu);
   } catch (error) {
+    console.error('Error creating education:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

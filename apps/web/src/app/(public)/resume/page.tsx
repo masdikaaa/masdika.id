@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { ResumeContent } from "./ResumeContent";
 
+export const dynamic = "force-dynamic";
+
 export default async function ResumePage() {
   const [experiences, educations, cvSetting] = await Promise.all([
     prisma.experience.findMany({ orderBy: { order: "asc" } }),

@@ -67,48 +67,82 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Process attachments
     const files = formData.getAll('attachments') as File[];
     const attachmentData = [];
-    
+    const { validateFileUploadSecurity, validateRealImageBuffer } = await import('@/lib/upload-security');
+
     if (files && files.length > 0) {
       if (files.length > 5) {
         return NextResponse.json({ error: 'Maximum of 5 attachments allowed per reply' }, { status: 400 });
       }
 
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-      const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.zip', '.rar', '.csv'];
-      for (const file of files) {
-        if (file instanceof File) {
-          if (file.size > MAX_FILE_SIZE) {
-            return NextResponse.json({ error: `File ${file.name} exceeds the 5MB limit` }, { status: 400 });
-          }
-          const ext = path.extname(file.name).toLowerCase();
-          if (!ALLOWED_EXTENSIONS.includes(ext)) {
-            return NextResponse.json({ error: `File type ${ext} is not allowed.` }, { status: 400 });
-          }
-        }
-      }
+      const ALLOWED_EXT_SET = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip', 'rar', 'csv']);
+      const IMAGE_EXT_SET = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp']);
 
       const storageDir = path.join(process.cwd(), 'storage', 'tickets');
       await fs.mkdir(storageDir, { recursive: true });
 
       for (const file of files) {
-        if (file instanceof File) {
-          const buffer = Buffer.from(await file.arrayBuffer());
-          const ext = path.extname(file.name);
-          const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
+        if (file instanceof File && file.size > 0) {
+          if (file.size > MAX_FILE_SIZE) {
+            return NextResponse.json({ error: `File ${file.name} exceeds the 5MB limit` }, { status: 400 });
+          }
+
+          const rawBuf = Buffer.from(await file.arrayBuffer());
+          const secCheck = validateFileUploadSecurity({
+            filename: file.name,
+            headBuffer: rawBuf,
+            tailBuffer: rawBuf,
+            allowedExtensions: ALLOWED_EXT_SET,
+          });
+
+          if (!secCheck.valid || !secCheck.ext || !secCheck.resolvedMime) {
+            return NextResponse.json(
+              { error: secCheck.error || `File ${file.name} ditolak oleh sistem keamanan.` },
+              { status: 400 }
+            );
+          }
+
+          let finalBuffer: Buffer = rawBuf;
+          let finalExt = `.${secCheck.ext}`;
+          let finalMime = secCheck.resolvedMime;
+
+          // Deep image verification & EXIF/metadata sanitization via Sharp
+          if (IMAGE_EXT_SET.has(secCheck.ext)) {
+            const imgCheck = await validateRealImageBuffer(rawBuf);
+            if (!imgCheck.valid) {
+              return NextResponse.json({ error: imgCheck.error }, { status: 400 });
+            }
+            if (secCheck.ext !== 'gif') {
+              const sharpModule = await import('sharp');
+              const sharp = sharpModule.default || sharpModule;
+              finalBuffer = Buffer.from(
+                await sharp(rawBuf, { failOn: 'error' })
+                  .rotate()
+                  .resize(2048, 2048, { fit: 'inside', withoutEnlargement: true })
+                  .webp({ quality: 85 })
+                  .toBuffer()
+              );
+              finalExt = '.webp';
+              finalMime = 'image/webp';
+            }
+          }
+
+          const safeOriginalName = file.name.replace(/[/\\]/g, '').replace(/[^\w\s.\-()[\]]/g, '_').slice(0, 200) || `attachment${finalExt}`;
+          const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}${finalExt}`;
           const filePath = path.join(storageDir, uniqueFilename);
-          
+
           try {
-            await uploadTicketAttachmentToRustFS(uniqueFilename, buffer, file.type || 'application/octet-stream');
+            await uploadTicketAttachmentToRustFS(uniqueFilename, finalBuffer, finalMime);
           } catch (rustErr) {
             console.error('[Ticket Reply Attachment] RustFS upload error, fallback to local disk:', rustErr);
-            await fs.writeFile(filePath, buffer);
+            await fs.writeFile(filePath, finalBuffer, { mode: 0o600 });
           }
-          
+
           attachmentData.push({
             filename: uniqueFilename,
-            originalName: file.name,
-            mimeType: file.type,
-            size: file.size,
+            originalName: safeOriginalName,
+            mimeType: finalMime,
+            size: finalBuffer.length,
             path: filePath
           });
         }

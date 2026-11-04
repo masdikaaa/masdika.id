@@ -11,10 +11,19 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const data = await req.json();
+    const body = await req.json();
+    const { year, degree, school, type, description, tags, order } = body;
     const updated = await prisma.education.update({
       where: { id: parseInt(id) },
-      data
+      data: {
+        year,
+        degree,
+        school,
+        type: type ?? null,
+        description: description ?? null,
+        tags: tags ?? null,
+        ...(typeof order === 'number' ? { order } : {}),
+      },
     });
     return NextResponse.json(updated);
   } catch (error) {

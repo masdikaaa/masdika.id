@@ -14,22 +14,13 @@ import {
 } from "@/lib/rustfs";
 
 const INLINE_ALLOWED_MIME = new Set([
-  "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+  "image/jpeg", "image/png", "image/gif", "image/webp",
   "image/avif", "image/bmp", "image/tiff",
   "video/mp4", "video/webm", "video/ogg", "video/quicktime",
   "audio/mpeg", "audio/ogg", "audio/wav", "audio/webm", "audio/aac", "audio/flac",
   "application/pdf",
   "text/plain", "text/csv", "text/markdown",
-  "application/json", "application/xml", "text/xml",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/vnd.oasis.opendocument.text",
-  "application/vnd.oasis.opendocument.spreadsheet",
-  "application/vnd.oasis.opendocument.presentation",
+  "application/json",
 ]);
 
 function contentDispositionFilename(name: string, inline: boolean): string {
@@ -128,6 +119,8 @@ export async function GET(
       "Content-Type": streamMime,
       "Content-Disposition": contentDispositionFilename(media.originalName, canInline),
       "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Content-Security-Policy": "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox",
       "Cache-Control": canInline
         ? media.isPublic
           ? "public, max-age=86400, stale-while-revalidate=604800"

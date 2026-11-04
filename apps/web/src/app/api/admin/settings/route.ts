@@ -123,41 +123,55 @@ export async function PUT(req: Request) {
       const oldImagePath = existingSetting?.value || '';
 
       if (profileImage.startsWith('data:image/')) {
-        const matches = profileImage.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const buffer = Buffer.from(matches[2], 'base64');
-          const fileName = `avatar-${Date.now()}.webp`;
-          const uploadDir = getUploadsDir('avatars');
-          
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          
-          const filePath = path.join(uploadDir, fileName);
-          
-          // Optimize image using sharp (dynamic import to fix Turbopack build error)
-          const sharpModule = await import('sharp');
-          const sharp = sharpModule.default || sharpModule;
-          
-          const optimizedBuffer = await sharp(buffer)
-            .resize(800, undefined, {
-              withoutEnlargement: true,
-              fit: 'inside',
-            })
-            .webp({ quality: 80 })
-            .toBuffer();
-          
-          fs.writeFileSync(filePath, optimizedBuffer);
-
-          try {
-            const { uploadPublicUploadToRustFS } = await import('@/lib/rustfs');
-            await uploadPublicUploadToRustFS(`avatars/${fileName}`, optimizedBuffer, 'image/webp');
-          } catch (rustErr) {
-            console.error('[Admin Profile Image] RustFS upload error:', rustErr);
-          }
-          
-          finalImagePath = `/uploads/avatars/${fileName}`;
+        const matches = profileImage.match(/^data:image\/(jpeg|jpg|png|webp|gif);base64,([A-Za-z0-9+/=\s]+)$/i);
+        if (!matches || matches.length !== 3) {
+          return NextResponse.json({ error: 'Format gambar profil tidak didukung (hanya JPG, PNG, WebP, GIF).' }, { status: 400 });
         }
+        const buffer = Buffer.from(matches[2], 'base64');
+        if (buffer.length > 5 * 1024 * 1024) {
+          return NextResponse.json({ error: 'Ukuran gambar profil maksimal 5MB.' }, { status: 400 });
+        }
+
+        const { validateRealImageBuffer } = await import('@/lib/upload-security');
+        const imgCheck = await validateRealImageBuffer(buffer, { maxWidth: 8000, maxHeight: 8000 });
+        if (!imgCheck.valid) {
+          return NextResponse.json({ error: imgCheck.error || 'File gambar profil tidak valid.' }, { status: 400 });
+        }
+
+        const fileName = `avatar-${Date.now()}.webp`;
+        const uploadDir = getUploadsDir('avatars');
+
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const filePath = path.join(uploadDir, fileName);
+
+        // Optimize image using sharp (dynamic import to fix Turbopack build error)
+        const sharpModule = await import('sharp');
+        const sharp = sharpModule.default || sharpModule;
+
+        const optimizedBuffer = await sharp(buffer, { failOn: 'error' })
+          .rotate()
+          .resize(800, undefined, {
+            withoutEnlargement: true,
+            fit: 'inside',
+          })
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        fs.writeFileSync(filePath, optimizedBuffer, { mode: 0o644 });
+
+        try {
+          const { uploadPublicUploadToRustFS } = await import('@/lib/rustfs');
+          await uploadPublicUploadToRustFS(`avatars/${fileName}`, optimizedBuffer, 'image/webp');
+        } catch (rustErr) {
+          console.error('[Admin Profile Image] RustFS upload error:', rustErr);
+        }
+
+        finalImagePath = `/uploads/avatars/${fileName}`;
+      } else if (profileImage !== '' && !profileImage.startsWith('/uploads/') && !profileImage.startsWith('https://')) {
+        return NextResponse.json({ error: 'URL gambar profil tidak valid.' }, { status: 400 });
       }
       if ((profileImage === '' || profileImage.startsWith('data:image/')) && oldImagePath.startsWith('/uploads/')) {
         try {

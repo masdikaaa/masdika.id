@@ -38,23 +38,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
-    // 4. Validate file
-    if (file.size > 5 * 1024 * 1024) { // Max 5MB
+    // 4. Validate file size & strict audio magic bytes before writing to disk
+    if (file.size <= 0 || file.size > 5 * 1024 * 1024) { // Max 5MB
       return NextResponse.json({ error: "Audio file too large. Max 5MB." }, { status: 413 });
     }
 
-    // Groq's SDK requires a read stream, so we write to a temporary file first
     const buffer = Buffer.from(await file.arrayBuffer());
-    
-    // Attempt to guess extension based on mime type
+    const { detectStrictMagicMime, scanBufferForMaliciousContent } = await import("@/lib/upload-security");
+
+    const scan = scanBufferForMaliciousContent(buffer, buffer);
+    if (!scan.safe) {
+      return NextResponse.json({ error: "Invalid audio payload." }, { status: 400 });
+    }
+
+    const detectedMime = detectStrictMagicMime(buffer);
+    const ALLOWED_AUDIO_MAGICS = new Set([
+      "video/webm", "audio/ogg", "video/mp4", "video/quicktime", "audio/x-m4a", "audio/wav", "audio/mpeg", "audio/flac"
+    ]);
+    if (!detectedMime || !ALLOWED_AUDIO_MAGICS.has(detectedMime)) {
+      return NextResponse.json({ error: "Format file suara tidak valid." }, { status: 400 });
+    }
+
     let ext = '.webm';
-    if (file.type.includes('mp4')) ext = '.mp4';
-    else if (file.type.includes('mpeg') || file.type.includes('mp3')) ext = '.mp3';
-    else if (file.type.includes('wav')) ext = '.wav';
-    else if (file.type.includes('ogg')) ext = '.ogg';
-    
+    if (detectedMime === 'video/mp4' || detectedMime === 'video/quicktime' || detectedMime === 'audio/x-m4a') ext = '.mp4';
+    else if (detectedMime === 'audio/mpeg') ext = '.mp3';
+    else if (detectedMime === 'audio/wav') ext = '.wav';
+    else if (detectedMime === 'audio/ogg') ext = '.ogg';
+
     const tempFilePath = path.join(os.tmpdir(), `stt_${uuidv4()}${ext}`);
-    fs.writeFileSync(tempFilePath, buffer);
+    fs.writeFileSync(tempFilePath, buffer, { mode: 0o600 });
 
     try {
       // 5. Send to AI Whisper (auto-detect language — supports 99+ languages)

@@ -12,7 +12,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { title, org, date, icon } = body;
+    const { title, org, date, icon, code, domain, description } = body;
 
     const cert = await prisma.certification.update({
       where: { id: parseInt(id) },
@@ -20,7 +20,10 @@ export async function PUT(
         title,
         org,
         date,
-        icon
+        icon: icon ?? null,
+        code: code ?? null,
+        domain: domain ?? null,
+        description: description ?? null,
       }
     });
 

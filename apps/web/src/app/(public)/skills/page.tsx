@@ -82,7 +82,7 @@ function AwsOriginalIcon({ className }: { className?: string }) {
   );
 }
 
-function getCertMeta(cert: { title?: string; org?: string; description?: string; icon?: string }) {
+function getCertMeta(cert: { title?: string; org?: string; description?: string; icon?: string; domain?: string; code?: string }) {
   const text = `${cert.title || ""} ${cert.org || ""}`.toLowerCase();
 
   if (text.includes("aws") || text.includes("amazon")) {
@@ -90,8 +90,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: null,
       BrandIcon: AwsOriginalIcon,
       iconColor: "",
-      domain: "Cloud Architecture",
-      code: "AWS-SAA",
+      domain: cert.domain || "Cloud Architecture",
+      code: cert.code || "AWS-SAA",
       summary:
         cert.description ||
         "Designing distributed, fault-tolerant, and cost-optimized multi-AZ production architectures on AWS.",
@@ -102,8 +102,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-plain.svg",
       BrandIcon: SiKubernetes,
       iconColor: "text-[#326CE5]",
-      domain: "Container Orchestration",
-      code: "CNCF-CKA",
+      domain: cert.domain || "Container Orchestration",
+      code: cert.code || "CNCF-CKA",
       summary:
         cert.description ||
         "Production cluster lifecycle management, CNI networking, RBAC hardening, and workload troubleshooting.",
@@ -114,8 +114,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/googlecloud/googlecloud-original.svg",
       BrandIcon: SiGooglecloud,
       iconColor: "text-[#4285F4]",
-      domain: "Enterprise Cloud",
-      code: "GCP-PCA",
+      domain: cert.domain || "Enterprise Cloud",
+      code: cert.code || "GCP-PCA",
       summary:
         cert.description ||
         "Architecting scalable Google Cloud infrastructure, hybrid VPC interconnects, and GKE workloads.",
@@ -126,8 +126,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/terraform/terraform-original.svg",
       BrandIcon: SiTerraform,
       iconColor: "text-[#844FBA]",
-      domain: "Infrastructure as Code",
-      code: "HCTA-003",
+      domain: cert.domain || "Infrastructure as Code",
+      code: cert.code || "HCTA-003",
       summary:
         cert.description ||
         "Modular Infrastructure as Code workflows, remote state locking, and automated multi-cloud provisioning.",
@@ -138,8 +138,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: null,
       BrandIcon: SiMikrotik,
       iconColor: "text-slate-800 dark:text-white",
-      domain: "Core Networking",
-      code: "MTCNA / MTCRE",
+      domain: cert.domain || "Core Networking",
+      code: cert.code || "MTCNA / MTCRE",
       summary:
         cert.description ||
         "Carrier-grade RouterOS routing, BGP/OSPF peering, firewall filtering, and high-throughput tunneling.",
@@ -150,8 +150,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redhat/redhat-original.svg",
       BrandIcon: SiRedhat,
       iconColor: "text-[#EE0000]",
-      domain: "Enterprise Linux",
-      code: "RHCSA",
+      domain: cert.domain || "Enterprise Linux",
+      code: cert.code || "RHCSA",
       summary:
         cert.description ||
         "Enterprise Linux systems administration, SELinux security hardening, storage management, and automation.",
@@ -162,8 +162,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg",
       BrandIcon: SiDocker,
       iconColor: "text-[#2496ED]",
-      domain: "Containerization",
-      code: "DCA",
+      domain: cert.domain || "Containerization",
+      code: cert.code || "DCA",
       summary:
         cert.description ||
         "Container image optimization, multi-stage builds, registry security, and runtime orchestration.",
@@ -174,8 +174,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cloudflare/cloudflare-original.svg",
       BrandIcon: SiCloudflare,
       iconColor: "text-[#F38020]",
-      domain: "Edge Security",
-      code: "CF-ZT",
+      domain: cert.domain || "Edge Security",
+      code: cert.code || "CF-ZT",
       summary:
         cert.description ||
         "Global Anycast CDN, Zero Trust network access, L3/L7 DDoS mitigation, and edge WAF rulesets.",
@@ -186,8 +186,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
       logoUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg",
       BrandIcon: SiLinux,
       iconColor: "text-amber-500",
-      domain: "Linux Kernel & OS",
-      code: "LFCS",
+      domain: cert.domain || "Linux Kernel & OS",
+      code: cert.code || "LFCS",
       summary:
         cert.description ||
         "Production Linux server administration, kernel tuning, networking, and systemd service management.",
@@ -199,8 +199,8 @@ function getCertMeta(cert: { title?: string; org?: string; description?: string;
     logoUrl: null,
     BrandIcon: FallbackIcon,
     iconColor: "text-cyan-600 dark:text-cyan-400",
-    domain: "Accreditation",
-    code: "VERIFIED",
+    domain: cert.domain || "Accreditation",
+    code: cert.code || "VERIFIED",
     summary:
       cert.description ||
       "Industry-recognized technical certification validating hands-on cloud and infrastructure engineering proficiency.",
