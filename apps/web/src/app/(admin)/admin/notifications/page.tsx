@@ -104,7 +104,7 @@ export default function AdminNotificationsPage() {
       {/* Header matching Gambar 1 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Admin Notifications
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -202,7 +202,7 @@ export default function AdminNotificationsPage() {
                     <div className="shrink-0 mt-1">
                       {notif.type === 'MESSAGE' ? (
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400'}`}>
-                          <MessageSquare className="w-5 h-5" />
+                          <MessageSquare className="w-4 h-4" />
                         </div>
                       ) : notif.type === 'TICKET' ? (
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400'}`}>
@@ -210,11 +210,11 @@ export default function AdminNotificationsPage() {
                         </div>
                       ) : notif.type === 'COMMUNITY' ? (
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-purple-500/15 border-purple-500/25 text-purple-400'}`}>
-                          <Users className="w-5 h-5" />
+                          <Users className="w-4 h-4" />
                         </div>
                       ) : (
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-indigo-500/15 border-indigo-500/25 text-indigo-400'}`}>
-                          <HardDrive className="w-5 h-5" />
+                          <HardDrive className="w-4 h-4" />
                         </div>
                       )}
                     </div>

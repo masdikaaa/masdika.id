@@ -197,7 +197,7 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                     value={youtubeUrl}
                     onChange={(e) => setYoutubeUrl(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleYoutubeSubmit();
@@ -209,13 +209,13 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                 <div className={cn("flex gap-3 justify-end pt-2 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <button
                     onClick={() => setIsYoutubeModalOpen(false)}
-                    className={cn("px-5 py-2.5 font-semibold rounded-lg transition-colors border text-sm", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                    className={cn("px-3.5 py-2 font-semibold rounded-lg transition-colors border text-sm", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleYoutubeSubmit}
-                    className="px-5 py-2.5 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs"
+                    className="px-3.5 py-2 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs"
                   >
                     Insert Video
                   </button>

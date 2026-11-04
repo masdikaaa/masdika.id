@@ -53,7 +53,7 @@ export default function AdminDashboard() {
       {/* Top Welcome Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200 dark:border-white/[0.06]">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Dashboard Overview</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Dashboard Overview</h1>
           <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Welcome back to your control center</p>
         </div>
       </div>

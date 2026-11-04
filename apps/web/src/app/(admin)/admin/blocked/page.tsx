@@ -118,7 +118,7 @@ export default function AdminBlockedUsersPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Blocked Users & IPs
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -314,7 +314,7 @@ export default function AdminBlockedUsersPage() {
                         className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10" : "text-slate-500 hover:text-emerald-700 hover:bg-emerald-50")}
                         title="Unblock User"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>

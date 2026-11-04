@@ -531,7 +531,7 @@ export default function AdminCustomerVpcsPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Customer VPC Management
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -776,7 +776,7 @@ export default function AdminCustomerVpcsPage() {
         <button
           onClick={() => setActiveTab("vpcs")}
           className={cn(
-            "px-4 py-2.5 text-xs font-semibold rounded-xl flex items-center gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer",
+            "px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer",
             activeTab === "vpcs"
               ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm"
               : isDark
@@ -791,7 +791,7 @@ export default function AdminCustomerVpcsPage() {
         <button
           onClick={() => setActiveTab("peerings")}
           className={cn(
-            "px-4 py-2.5 text-xs font-semibold rounded-xl flex items-center gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer",
+            "px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer",
             activeTab === "peerings"
               ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm"
               : isDark
@@ -806,7 +806,7 @@ export default function AdminCustomerVpcsPage() {
         <button
           onClick={() => setActiveTab("vms")}
           className={cn(
-            "px-4 py-2.5 text-xs font-semibold rounded-xl flex items-center gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer",
+            "px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer",
             activeTab === "vms"
               ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm"
               : isDark
@@ -1346,7 +1346,7 @@ export default function AdminCustomerVpcsPage() {
                   onClick={() => setManageVmsModal(null)}
                   className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
@@ -1458,7 +1458,7 @@ export default function AdminCustomerVpcsPage() {
                   onClick={() => setAttachVmModal(null)}
                   className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
@@ -1661,7 +1661,7 @@ export default function AdminCustomerVpcsPage() {
             >
               <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </div>
                 <div>
                   <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
@@ -1781,7 +1781,7 @@ export default function AdminCustomerVpcsPage() {
                   onClick={() => setCreatePeeringModal(null)}
                   className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
@@ -1923,7 +1923,7 @@ export default function AdminCustomerVpcsPage() {
             >
               <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </div>
                 <div>
                   <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>

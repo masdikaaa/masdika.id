@@ -120,11 +120,11 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 w-full">
       <div className="flex items-center gap-4 mb-2">
         <Link href="/admin/portfolio" className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}>
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
         </Link>
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Add New Project' : 'Edit Project'}</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Add New Project' : 'Edit Project'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Showcase your best work in the portfolio.</p>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             value={formData.title}
             onChange={handleChange}
             placeholder="e.g. Enterprise Kubernetes Cluster" 
-            className={cn("w-full px-5 py-3.5 border rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -152,7 +152,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               value={formData.categoryName}
               onChange={handleChange}
               placeholder="e.g. Cloud Infrastructure" 
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
           <div className="space-y-3">
@@ -161,7 +161,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               <button 
                 type="button"
                 onClick={() => setIsStatusOpen(!isStatusOpen)}
-                className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all flex justify-between items-center", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all flex justify-between items-center", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
               >
                 <span>{formData.status === 'COMPLETED' ? 'Completed' : formData.status === 'IN_PROGRESS' ? 'In Progress' : 'Planned'}</span>
                 <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isStatusOpen ? 'rotate-180' : ''}`} />
@@ -203,7 +203,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             value={formData.techStack}
             onChange={handleChange}
             placeholder="e.g. Next.js, Prisma, TailwindCSS" 
-            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -216,12 +216,12 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               value={formData.image}
               onChange={handleChange}
               placeholder="https://... or click Select Image" 
-              className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("flex-1 px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
             <button
               type="button"
               onClick={() => setIsMediaLibraryOpen(true)}
-              className={cn("px-5 py-3.5 border rounded-xl text-sm font-semibold transition-all whitespace-nowrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100")}
+              className={cn("px-3.5 py-2 border rounded-xl text-sm font-semibold transition-all whitespace-nowrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100")}
             >
               Select Image
             </button>
@@ -241,7 +241,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             value={formData.projectUrl}
             onChange={handleChange}
             placeholder="https://example.com/project" 
-            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
           <p className="text-xs font-medium text-zinc-500">Optional. If filled, a "View Project" button will appear on the portfolio page.</p>
         </div>
@@ -255,7 +255,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               value={formData.client}
               onChange={handleChange}
               placeholder="e.g. FinTech Global Inc." 
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
           <div className="space-y-3">
@@ -266,7 +266,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               value={formData.timeline}
               onChange={handleChange}
               placeholder="e.g. 4 Months" 
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
           <div className="space-y-3">
@@ -277,7 +277,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               value={formData.role}
               onChange={handleChange}
               placeholder="e.g. Lead Cloud Architect" 
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
         </div>
@@ -290,7 +290,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             onChange={handleChange}
             rows={2}
             placeholder="A brief summary of the project..." 
-            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -302,7 +302,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             onChange={handleChange}
             rows={4}
             placeholder="Detailed explanation of the project overview..." 
-            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -314,7 +314,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             onChange={handleChange}
             rows={4}
             placeholder="What challenges did the client face?" 
-            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -326,7 +326,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             onChange={handleChange}
             rows={4}
             placeholder="How did you solve the problem?" 
-            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -339,7 +339,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               onChange={handleChange}
               rows={3}
               placeholder="e.g. The migration transformed our culture..." 
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-y", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-y", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
           <div className="space-y-3">
@@ -350,7 +350,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
               value={formData.testimonialAuthor}
               onChange={handleChange}
               placeholder="e.g. CTO, FinTech Global Inc." 
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
         </div>
@@ -363,7 +363,7 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
             onChange={handleChange}
             rows={5}
             placeholder="98.99% Uptime|Achieved high availability across multi-AZ deployments.&#10;80% Faster Deployments|Reduced deployment time from weeks to hours." 
-            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-y font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
           <p className="text-xs font-medium text-zinc-500">Separate title and description with <code className={cn("px-1.5 py-0.5 rounded font-mono text-xs border", isDark ? "bg-slate-800/60 text-cyan-400 border-slate-700" : "bg-slate-100 text-cyan-700 border-slate-200")}>|</code> character, press Enter for new result.</p>
         </div>
@@ -372,9 +372,9 @@ export default function EditPortfolioPage({ params }: { params: Promise<{ id: st
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-3 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50 w-full md:w-auto"
+            className="flex items-center justify-center gap-2 px-3.5 py-2 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50 w-full md:w-auto"
           >
-            <Save className="w-5 h-5" /> {saving ? "Saving..." : "Save Project"}
+            <Save className="w-3.5 h-3.5" /> {saving ? "Saving..." : "Save Project"}
           </button>
         </div>
       </motion.div>

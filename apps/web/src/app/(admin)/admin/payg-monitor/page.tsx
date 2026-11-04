@@ -121,7 +121,7 @@ export default function PaygMonitorPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-2">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             PAYG Billing Monitor
           </h1>
           <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -171,7 +171,7 @@ export default function PaygMonitorPage() {
               <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight text-cyan-400 truncate")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight text-cyan-400 truncate")}>
             {formatRupiah(totalBurnRate)}<span className="text-xs font-normal text-zinc-400">/hr</span>
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -187,7 +187,7 @@ export default function PaygMonitorPage() {
               <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight text-emerald-400 truncate")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight text-emerald-400 truncate")}>
             {formatRupiah(totalAccumulatedCost)}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-emerald-500" : "text-emerald-700")}>

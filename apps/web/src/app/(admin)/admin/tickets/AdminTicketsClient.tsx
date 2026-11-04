@@ -186,7 +186,7 @@ export default function AdminTicketsClient() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Manage Support Tickets
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -212,7 +212,7 @@ export default function AdminTicketsClient() {
             onClick={() => setIsModalOpen(true)}
             className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
-            <Plus className="w-4 h-4 shrink-0" />
+            <Plus className="w-3.5 h-3.5 shrink-0" />
             <span>Open Ticket</span>
           </button>
         </div>
@@ -466,7 +466,7 @@ export default function AdminTicketsClient() {
                 Delete Tickets
               </h3>
               <button onClick={() => setShowBulkDeleteModal(false)} disabled={isBulkDeleting} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
@@ -509,7 +509,7 @@ export default function AdminTicketsClient() {
                 </h3>
               </div>
               <button onClick={closeModal} className={cn("transition-colors p-2 rounded-xl shrink-0 mt-1 md:mt-0", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             
@@ -530,7 +530,7 @@ export default function AdminTicketsClient() {
                       type="email"
                       value={formData.targetEmail}
                       onChange={e => setFormData({...formData, targetEmail: e.target.value})}
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                       placeholder="customer@email.com"
                     />
                   </div>
@@ -546,7 +546,7 @@ export default function AdminTicketsClient() {
                         ...userServices.map(s => ({ value: s.value, label: s.value }))
                       ]}
                       placeholder="-- Select Service (Optional) --"
-                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}
+                      className={cn("w-full rounded-2xl px-3.5 py-2 text-sm", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}
                     />
                   </div>
                 </div>
@@ -559,7 +559,7 @@ export default function AdminTicketsClient() {
                       type="text"
                       value={formData.subject}
                       onChange={e => setFormData({...formData, subject: e.target.value})}
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                       placeholder="Ticket subject..."
                     />
                   </div>
@@ -575,7 +575,7 @@ export default function AdminTicketsClient() {
                         { value: "CRITICAL", label: "Critical" }
                       ]}
                       placeholder="Priority"
-                      className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}
+                      className={cn("w-full rounded-2xl px-3.5 py-2 text-sm", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}
                     />
                   </div>
                 </div>
@@ -587,7 +587,7 @@ export default function AdminTicketsClient() {
                     rows={5}
                     value={formData.message}
                     onChange={e => setFormData({...formData, message: e.target.value})}
-                    className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-2xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     placeholder="Describe the issue..."
                   />
                 </div>
@@ -598,7 +598,7 @@ export default function AdminTicketsClient() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={cn("flex items-center gap-2 px-5 py-3 border border-dashed hover:border-cyan-500/50 rounded-2xl text-sm hover:text-cyan-400 transition-all w-full justify-center", isDark ? "border-white/[0.08] text-zinc-400 bg-[#0a0a0c]" : "border-slate-200 text-slate-500 bg-slate-50")}
+                    className={cn("flex items-center gap-2 px-3.5 py-2 border border-dashed hover:border-cyan-500/50 rounded-2xl text-sm hover:text-cyan-400 transition-all w-full justify-center", isDark ? "border-white/[0.08] text-zinc-400 bg-[#0a0a0c]" : "border-slate-200 text-slate-500 bg-slate-50")}
                   >
                     <Paperclip className="w-4 h-4" />
                     Attach Files (max 5, 5MB each)
@@ -632,7 +632,7 @@ export default function AdminTicketsClient() {
                     disabled={isSubmitting}
                     className="w-full sm:w-auto px-3.5 py-2 text-xs font-semibold rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                   >
-                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                     Submit Ticket
                   </button>
                 </div>

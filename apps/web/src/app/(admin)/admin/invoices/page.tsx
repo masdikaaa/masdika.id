@@ -333,7 +333,7 @@ export default function AdminInvoicesPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Invoices & Billing
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -906,7 +906,7 @@ export default function AdminInvoicesPage() {
             <div className={cn("p-6 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <button
                 onClick={() => setSelectedInvoiceDetails(null)}
-                className={cn("w-full py-3 font-bold rounded-xl transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:bg-white/5 text-white" : "bg-white border-slate-200 hover:bg-slate-100 text-slate-900")}
+                className={cn("w-full py-2 text-xs font-bold rounded-xl transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:bg-white/5 text-white" : "bg-white border-slate-200 hover:bg-slate-100 text-slate-900")}
               >
                 Close
               </button>

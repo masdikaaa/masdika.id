@@ -130,7 +130,7 @@ export default function AdminSeriesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Series Management
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -156,7 +156,7 @@ export default function AdminSeriesPage() {
             href="/admin/series/edit/new"
             className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Add Series</span>
           </Link>
         </div>
@@ -351,7 +351,7 @@ export default function AdminSeriesPage() {
                   <td className="px-3.5 py-2.5 whitespace-nowrap">
                     <div className="flex items-center gap-4">
                       <div className={cn("w-12 h-12 rounded-xl overflow-hidden border flex items-center justify-center shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
-                        {s.image ? <img referrerPolicy="no-referrer" src={s.image} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <BookOpen className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />}
+                        {s.image ? <img referrerPolicy="no-referrer" src={s.image} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <BookOpen className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />}
                       </div>
                       <Link href={`/admin/series/edit/${s.id}`} className={cn("font-bold line-clamp-1 group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
                         {s.title}
@@ -382,11 +382,11 @@ export default function AdminSeriesPage() {
                       </button>
                       <Link href={`/admin/series/edit/${s.id}`}
                         className={cn("p-2 rounded-lg bg-cyan-500/10 hover:text-white hover:bg-cyan-500/20 transition-colors border border-transparent hover:border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-3.5 h-3.5" />
                       </Link>
                       <button onClick={() => setDeleteId(s.id)}
                         className={cn("p-2 rounded-lg bg-red-500/10 hover:text-white hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/20", isDark ? "text-red-400" : "text-red-700")}>
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

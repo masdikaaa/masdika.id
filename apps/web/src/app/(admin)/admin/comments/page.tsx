@@ -266,7 +266,7 @@ export default function AdminCommentsPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Comments & Discussions
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -573,7 +573,7 @@ export default function AdminCommentsPage() {
                   className={cn("p-2 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
                   title="Delete"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>

@@ -128,7 +128,7 @@ export default function NewsletterPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Newsletter Subscribers</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Newsletter Subscribers</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage registered audience email subscriptions and outbound campaign deliverability.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -139,7 +139,7 @@ export default function NewsletterPage() {
             onClick={() => { setLoading(true); fetchSubscribers(); }}
             className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
         </div>
@@ -289,7 +289,7 @@ export default function NewsletterPage() {
                     <td className="px-3.5 py-2.5 sm:p-6">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-white/5 border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
-                          <Mail className="w-5 h-5" />
+                          <Mail className="w-4 h-4" />
                         </div>
                         <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{sub.email}</span>
                       </div>
@@ -306,7 +306,7 @@ export default function NewsletterPage() {
                         className={cn("p-2 bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/20 disabled:opacity-50", isDark ? "text-red-400" : "text-red-700")}
                         title="Delete Subscriber"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>

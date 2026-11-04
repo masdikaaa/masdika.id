@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-const inputClassDark = 'w-full bg-[#0a0a0c] border border-white/[0.08] rounded-xl px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all';
-const inputClassLight = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition-all';
+const inputClassDark = 'w-full bg-[#0a0a0c] border border-white/[0.08] rounded-xl px-3.5 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all';
+const inputClassLight = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition-all';
 const labelClassDark = 'block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2';
 const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
 
@@ -633,7 +633,7 @@ export default function SettingsPage() {
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-semibold mb-4 tracking-wide", isDark ? "text-cyan-400" : "text-cyan-700")}>
             <Settings className="w-3 h-3" /> Account Management
           </div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             System <span className={cn(isDark ? "bg-gradient-to-r from-cyan-400 to-cyan-500 bg-clip-text text-transparent" : "text-cyan-600")}>Settings</span>
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your profile, website content, SEO, and security.</p>
@@ -746,7 +746,7 @@ export default function SettingsPage() {
 
                       <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                         <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                          {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                          {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                           {saving ? "Saving..." : "Save Profile"}
                         </button>
                       </div>
@@ -789,7 +789,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save Contact Info"}
                     </button>
                   </div>
@@ -833,7 +833,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save Social Links"}
                     </button>
                   </div>
@@ -874,7 +874,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save Content"}
                     </button>
                   </div>
@@ -898,7 +898,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-4">
                       <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:border-slate-700" : "bg-white border-slate-200 text-slate-900 hover:border-slate-300")}>
                         <input type="file" accept="application/pdf" className="hidden" onChange={handleCVUpload} />
-                        <FileText className={cn("w-5 h-5 mr-2", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                        <FileText className={cn("w-4 h-4 mr-2", isDark ? "text-cyan-400" : "text-cyan-700")} />
                         Upload New CV
                       </label>
                       {formData.cv_url && (
@@ -911,7 +911,7 @@ export default function SettingsPage() {
                             className={cn("p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors", isDark ? "text-red-500" : "text-red-700")}
                             title="Delete CV from storage"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       )}
@@ -922,7 +922,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save CV"}
                     </button>
                   </div>
@@ -1014,7 +1014,7 @@ export default function SettingsPage() {
                             className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-[#0a0a0c] hover:bg-slate-800 text-white border-white/[0.08]" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                             title="Delete Favicon"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
@@ -1029,7 +1029,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save SEO Settings"}
                     </button>
                   </div>
@@ -1060,7 +1060,7 @@ export default function SettingsPage() {
                       <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
                         <div>
                           <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                            <Key className={cn("w-5 h-5 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                            <Key className={cn("w-4 h-4 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             Two-Factor Authentication
                           </h3>
                           <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Add an extra layer of security to your account. This setting saves automatically when toggled.</p>
@@ -1117,7 +1117,7 @@ export default function SettingsPage() {
                                   <button
                                     onClick={handleVerify2FA}
                                     disabled={verifyCode.length !== 6 || verifying2FA}
-                                    className="flex-1 py-2.5 px-4 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                                    className="flex-1 py-2 px-3.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                                   >
                                     {verifying2FA ? "Verifying..." : "Verify"}
                                   </button>
@@ -1133,20 +1133,20 @@ export default function SettingsPage() {
                       <h3 className={cn("font-bold text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>Change Password</h3>
                       <div className="space-y-3">
                         <label className={labelClass}>Current Password</label>
-                        <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                        <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                       </div>
                       <div className="space-y-3">
                         <label className={labelClass}>New Password</label>
-                        <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                        <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                       </div>
                       <div className="space-y-3">
                         <label className={labelClass}>Confirm New Password</label>
-                        <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                        <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                       </div>
                       <button
                         onClick={handleUpdatePassword}
                         disabled={passwordSaving}
-                        className={cn("flex items-center justify-center w-full px-6 py-3.5 font-bold rounded-xl transition-colors border mt-2 disabled:opacity-50", isDark ? "text-white border-white/[0.08] bg-[#0c0c0e] hover:bg-slate-800" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
+                        className={cn("flex items-center justify-center w-full px-3.5 py-2 font-bold rounded-xl transition-colors border mt-2 disabled:opacity-50", isDark ? "text-white border-white/[0.08] bg-[#0c0c0e] hover:bg-slate-800" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
                       >
                         {passwordSaving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : "Update Password"}
                       </button>
@@ -1174,7 +1174,7 @@ export default function SettingsPage() {
                     <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Shield className={cn("w-5 h-5 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                          <Shield className={cn("w-4 h-4 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Maintenance Mode
                         </h3>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When enabled, customers will see a maintenance screen instead of their dashboard. You (Admin) will still have full access.</p>
@@ -1203,7 +1203,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save Maintenance Settings"}
                     </button>
                   </div>
@@ -1233,7 +1233,7 @@ export default function SettingsPage() {
                     <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Settings className={cn("w-5 h-5 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                          <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Cloud VPS
                         </h3>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Cloud VPS instances. The frontend will display "Coming Soon".</p>
@@ -1251,7 +1251,7 @@ export default function SettingsPage() {
                     <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Settings className={cn("w-5 h-5 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                          <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Kubernetes (K3s)
                         </h3>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Kubernetes clusters. The frontend will display "Coming Soon".</p>
@@ -1271,7 +1271,7 @@ export default function SettingsPage() {
                     <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Settings className={cn("w-5 h-5 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                          <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable CDN
                         </h3>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot order new CDN plans. The frontend will display "Coming Soon".</p>
@@ -1304,7 +1304,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save Service Settings"}
                     </button>
                   </div>
@@ -1338,7 +1338,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={handleTestRustFS}
                         disabled={testingRustFS}
-                        className={cn("px-4 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                        className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
                       >
                         <RefreshCw className={cn("w-3.5 h-3.5", testingRustFS && "animate-spin")} />
                         <span>{testingRustFS ? "Testing..." : "Test Connection"}</span>
@@ -1472,7 +1472,7 @@ export default function SettingsPage() {
                       disabled={saving}
                       className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
                     >
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
                       {saving ? "Saving..." : "Save RustFS Settings"}
                     </button>
                   </div>
@@ -1728,9 +1728,9 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handleTestTargetRustFS}
                       disabled={testingTarget || migratingBucket}
-                      className={cn("px-5 py-2.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50", isDark ? "bg-slate-800/80 border-slate-700 text-zinc-200 hover:bg-slate-800" : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200")}
+                      className={cn("px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50", isDark ? "bg-slate-800/80 border-slate-700 text-zinc-200 hover:bg-slate-800" : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200")}
                     >
-                      {testingTarget ? <div className="w-4 h-4 border-2 border-t-transparent border-cyan-400 rounded-full animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                      {testingTarget ? <div className="w-4 h-4 border-2 border-t-transparent border-cyan-400 rounded-full animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                       <span>{testingTarget ? "Testing..." : "Test Target Connection"}</span>
                     </button>
 

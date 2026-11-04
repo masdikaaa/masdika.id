@@ -193,7 +193,7 @@ export default function AdminMediaReviewsPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Media Reviews & Comments
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -568,7 +568,7 @@ export default function AdminMediaReviewsPage() {
                       )}
                       title="Delete Comment"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </motion.div>
@@ -733,7 +733,7 @@ export default function AdminMediaReviewsPage() {
                       )}
                       title="Delete Rating"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </motion.div>

@@ -388,7 +388,7 @@ export default function AdminVouchersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage promo codes, global campaigns, and claimable reward promotions.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -399,7 +399,7 @@ export default function AdminVouchersPage() {
             onClick={() => { fetchVouchers(); fetchPromos(); }}
             className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
         </div>
@@ -514,7 +514,7 @@ export default function AdminVouchersPage() {
                   disabled={isBulkVoucherDeleting}
                   className={cn("font-bold px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors w-full sm:w-auto disabled:opacity-50 border", isDark ? "bg-red-500/20 border-red-500/30 hover:bg-red-500/30 hover:text-red-300 text-red-400" : "bg-red-50 border-red-200 hover:bg-red-100 hover:text-red-800 text-red-700")}
                 >
-                  {isBulkVoucherDeleting ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  {isBulkVoucherDeleting ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                   Delete Selected ({selectedVoucherIds.length})
                 </button>
               )}
@@ -522,7 +522,7 @@ export default function AdminVouchersPage() {
                 onClick={() => { setEditingVoucherId(null); setNewVoucher({ code: "", description: "", discountPercent: 10, maxUses: 0, validUntil: "" }); setIsModalOpen(true); }}
                 className="px-4 py-2 text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
                 New Voucher
               </button>
             </div>
@@ -605,7 +605,7 @@ export default function AdminVouchersPage() {
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button onClick={() => setDeletingVoucherId(v.id)} className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-colors">
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>
@@ -647,7 +647,7 @@ export default function AdminVouchersPage() {
                   disabled={isBulkPromoDeleting}
                   className={cn("font-bold px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors w-full sm:w-auto disabled:opacity-50 border", isDark ? "bg-red-500/20 border-red-500/30 hover:bg-red-500/30 hover:text-red-300 text-red-400" : "bg-red-50 border-red-200 hover:bg-red-100 hover:text-red-800 text-red-700")}
                 >
-                  {isBulkPromoDeleting ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  {isBulkPromoDeleting ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                   Delete Selected ({selectedPromoIds.length})
                 </button>
               )}
@@ -659,7 +659,7 @@ export default function AdminVouchersPage() {
                 }}
                 className="px-4 py-2 text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
                 New Promo
               </button>
             </div>
@@ -748,7 +748,7 @@ export default function AdminVouchersPage() {
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button onClick={() => setDeletingPromoId(p.id)} className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-colors">
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>
@@ -775,7 +775,7 @@ export default function AdminVouchersPage() {
             <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>{editingVoucherId ? "Edit Voucher" : "Create Voucher"}</h2>
               <button onClick={closeVoucherModal} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <form onSubmit={handleSaveVoucher} className="p-6 space-y-4">
@@ -787,11 +787,11 @@ export default function AdminVouchersPage() {
                     required
                     value={newVoucher.code}
                     onChange={e => setNewVoucher({ ...newVoucher, code: e.target.value.toUpperCase() })}
-                    className={cn("flex-1 border rounded-xl px-4 py-2.5 uppercase focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("flex-1 border rounded-xl px-3.5 py-2 uppercase focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     placeholder="e.g. SUMMER50"
                   />
                   <button type="button" onClick={generateRandomCode} className={cn("p-2.5 rounded-xl border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:bg-white/5" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100")}>
-                    <RefreshCw className="w-5 h-5" />
+                    <RefreshCw className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -802,7 +802,7 @@ export default function AdminVouchersPage() {
                   rows={2}
                   value={newVoucher.description}
                   onChange={e => setNewVoucher({ ...newVoucher, description: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Deskripsi singkat voucher..."
                 />
               </div>
@@ -815,7 +815,7 @@ export default function AdminVouchersPage() {
                     required min="1" max="100"
                     value={newVoucher.discountPercent}
                     onChange={e => setNewVoucher({ ...newVoucher, discountPercent: parseInt(e.target.value) || 0 })}
-                    className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
                 <div>
@@ -825,7 +825,7 @@ export default function AdminVouchersPage() {
                     min="0"
                     value={newVoucher.maxUses}
                     onChange={e => setNewVoucher({ ...newVoucher, maxUses: parseInt(e.target.value) || 0 })}
-                    className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
               </div>
@@ -836,7 +836,7 @@ export default function AdminVouchersPage() {
                   type="date"
                   value={newVoucher.validUntil}
                   onChange={e => setNewVoucher({ ...newVoucher, validUntil: e.target.value })}
-                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
 
@@ -857,7 +857,7 @@ export default function AdminVouchersPage() {
             <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>{editingPromoId ? "Edit Promo" : "Create Promo"}</h2>
               <button onClick={() => setIsPromoModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <form onSubmit={handleSavePromo} className="p-6 space-y-4">
@@ -868,7 +868,7 @@ export default function AdminVouchersPage() {
                   required
                   value={newPromo.title}
                   onChange={e => setNewPromo({ ...newPromo, title: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="e.g. Diskon Kemerdekaan"
                 />
               </div>
@@ -880,7 +880,7 @@ export default function AdminVouchersPage() {
                   rows={2}
                   value={newPromo.description}
                   onChange={e => setNewPromo({ ...newPromo, description: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Deskripsi singkat promo..."
                 />
               </div>
@@ -891,7 +891,7 @@ export default function AdminVouchersPage() {
                   <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <img referrerPolicy="no-referrer" src={newPromo.image} alt="Promo" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     <button type="button" onClick={() => setShowRemoveImageModal(true)} className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-rose-500 rounded-lg transition-colors text-white">
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : (
@@ -909,7 +909,7 @@ export default function AdminVouchersPage() {
                   type="url"
                   value={newPromo.link}
                   onChange={e => setNewPromo({ ...newPromo, link: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="https://..."
                 />
               </div>
@@ -946,7 +946,7 @@ export default function AdminVouchersPage() {
                       required={newPromo.isReward}
                       value={newPromo.rewardAmount}
                       onChange={e => setNewPromo({ ...newPromo, rewardAmount: parseInt(e.target.value) || 0 })}
-                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
@@ -956,7 +956,7 @@ export default function AdminVouchersPage() {
                       min="0"
                       value={newPromo.maxClaims}
                       onChange={e => setNewPromo({ ...newPromo, maxClaims: parseInt(e.target.value) || 0 })}
-                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -965,7 +965,7 @@ export default function AdminVouchersPage() {
                       type="date"
                       value={newPromo.validUntil}
                       onChange={e => setNewPromo({ ...newPromo, validUntil: e.target.value })}
-                      className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                      className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                     />
                   </div>
                 </div>

@@ -102,9 +102,9 @@ function ImageViewer({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="relative w-full flex flex-col" style={{ height: "75vh" }}>
       <div className={cn("absolute top-3 right-3 z-10 flex items-center gap-1 backdrop-blur-sm rounded-lg px-2 py-1", isDark ? "bg-black/60" : "bg-white/80 border border-slate-200")}>
-        <button onClick={() => setScale((s) => clampScale(s - 0.25))} className={cn("hover:text-cyan-400 px-2 py-1 text-lg font-bold transition-colors", isDark ? "text-white" : "text-slate-900")}>−</button>
+        <button onClick={() => setScale((s) => clampScale(s - 0.25))} className={cn("hover:text-cyan-400 px-2 py-1 text-xs sm:text-sm font-semibold transition-colors", isDark ? "text-white" : "text-slate-900")}>−</button>
         <span className={cn("text-xs w-12 text-center tabular-nums", isDark ? "text-zinc-300" : "text-slate-600")}>{Math.round(scale * 100)}%</span>
-        <button onClick={() => setScale((s) => clampScale(s + 0.25))} className={cn("hover:text-cyan-400 px-2 py-1 text-lg font-bold transition-colors", isDark ? "text-white" : "text-slate-900")}>+</button>
+        <button onClick={() => setScale((s) => clampScale(s + 0.25))} className={cn("hover:text-cyan-400 px-2 py-1 text-xs sm:text-sm font-semibold transition-colors", isDark ? "text-white" : "text-slate-900")}>+</button>
         <button onClick={reset} className={cn("hover:text-white text-xs px-2 py-1 border-l transition-colors ml-1", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>Reset</button>
       </div>
       <div
@@ -167,7 +167,7 @@ function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClos
                 </button>
               )}
               <button onClick={onClose} className={cn("hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -647,14 +647,14 @@ export default function AdminMediaLibrary() {
         <div className={cn("absolute inset-0 z-50 flex items-center justify-center backdrop-blur-sm border-4 border-dashed border-cyan-500 rounded-2xl m-6 transition-all pointer-events-none", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
           <div className={cn("text-center p-8 rounded-2xl border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-2xl" : "bg-white border-slate-200")}>
             <UploadCloud className={cn("w-16 h-16 mx-auto mb-4 animate-bounce", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-[#0F3B4A]")}>Drop file to upload</h2>
+            <h2 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-[#0F3B4A]")}>Drop file to upload</h2>
           </div>
         </div>
       )}
       
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Secure Media Library</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Secure Media Library</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage folders, upload encrypted files, and generate secure links.</p>
         </div>
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
@@ -663,7 +663,7 @@ export default function AdminMediaLibrary() {
             <input type="text" placeholder="Search files or folders..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={cn("w-full border rounded-xl py-2.5 pl-10 pr-9 text-sm focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
             {searchQuery && (
               <button type="button" onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-0.5 cursor-pointer">
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -673,22 +673,22 @@ export default function AdminMediaLibrary() {
             <button onClick={() => setViewMode("list")} className={`p-2.5 transition-colors ${viewMode === "list" ? "bg-cyan-500 text-slate-900" : isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"}`}><ListIcon className="w-4 h-4" /></button>
           </div>
 
-          <button onClick={toggleSelectAll} className={cn("border px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}>
+          <button onClick={toggleSelectAll} className={cn("border px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}>
             <CheckCircle2 className={`w-4 h-4 ${selectedIds.length === media.length && media.length > 0 ? 'text-cyan-400' : 'text-zinc-400'}`} /> Select All
           </button>
 
           {selectedIds.length > 0 && (
             <>
-              <button onClick={() => { setShowMoveModal(true); setMoveDest(currentFolder); }} className={cn("bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all border border-cyan-400/20", isDark ? "text-white" : "text-slate-900")}>
+              <button onClick={() => { setShowMoveModal(true); setMoveDest(currentFolder); }} className={cn("bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 px-3.5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all border border-cyan-400/20", isDark ? "text-white" : "text-slate-900")}>
                 <MoveRight className="w-4 h-4 shrink-0" /> Move ({selectedIds.length})
               </button>
-              <button onClick={() => setShowDeleteAllModal(true)} className={cn("bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all", isDark ? "text-red-400" : "text-red-700")}>
-                <Trash2 className="w-4 h-4 shrink-0" /> Delete ({selectedIds.length})
+              <button onClick={() => setShowDeleteAllModal(true)} className={cn("bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-3.5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all", isDark ? "text-red-400" : "text-red-700")}>
+                <Trash2 className="w-3.5 h-3.5 shrink-0" /> Delete ({selectedIds.length})
               </button>
             </>
           )}
 
-          <button onClick={() => setShowCreateFolder(true)} className={cn("border px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shrink-0 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}>
+          <button onClick={() => setShowCreateFolder(true)} className={cn("border px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shrink-0 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50")}>
             <FolderPlus className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} /> New Folder
           </button>
 
@@ -929,7 +929,7 @@ export default function AdminMediaLibrary() {
                               {item.isFolder && (
                                 <button onClick={(e) => { e.stopPropagation(); handleTogglePin(item); }} className={cn("p-1.5 rounded-lg transition-colors", item.isPinned ? (isDark ? "text-cyan-400" : "text-slate-800") : (isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"))} title={item.isPinned ? "Unpin folder" : "Pin folder"}><Pin className={`w-4 h-4 ${item.isPinned ? "fill-current" : ""}`} /></button>
                               )}
-                              <button onClick={(e) => { e.stopPropagation(); setShowRenameModal(item); setRenameValue(item.originalName); }} className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}><Edit2 className="w-4 h-4" /></button>
+                              <button onClick={(e) => { e.stopPropagation(); setShowRenameModal(item); setRenameValue(item.originalName); }} className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}><Edit2 className="w-3.5 h-3.5" /></button>
                               <button onClick={(e) => { e.stopPropagation(); setShowMoveModal(item); setMoveDest(currentFolder); }} className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}><MoveRight className="w-4 h-4" /></button>
                               {!item.isFolder && (
                                 <>
@@ -942,7 +942,7 @@ export default function AdminMediaLibrary() {
                                   )}
                                 </>
                               )}
-                              <button onClick={() => setDeleteId(item.id)} className={cn("p-1.5 rounded-lg hover:bg-red-500/10 hover:text-red-300", isDark ? "text-red-400" : "text-red-700")}><Trash2 className="w-4 h-4" /></button>
+                              <button onClick={() => setDeleteId(item.id)} className={cn("p-1.5 rounded-lg hover:bg-red-500/10 hover:text-red-300", isDark ? "text-red-400" : "text-red-700")}><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </td>
                         </tr>
@@ -969,10 +969,10 @@ export default function AdminMediaLibrary() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("border p-4 sm:p-5 rounded-2xl w-full max-w-sm relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <h3 className={cn("text-sm sm:text-base font-bold mb-6 border-b pb-4", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>Create Folder</h3>
             <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Folder Name *</label>
-            <input autoFocus type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="e.g. Assets" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold mb-6 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
+            <input autoFocus type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="e.g. Assets" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold mb-6 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
             <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-              <button onClick={() => setShowCreateFolder(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-              <button onClick={handleCreateFolder} className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Create</button>
+              <button onClick={() => setShowCreateFolder(false)} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={handleCreateFolder} className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Create</button>
             </div>
           </motion.div>
         </div>
@@ -983,10 +983,10 @@ export default function AdminMediaLibrary() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("border p-4 sm:p-5 rounded-2xl w-full max-w-sm relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <h3 className={cn("text-sm sm:text-base font-bold mb-6 border-b pb-4", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>Rename</h3>
             <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>New Name *</label>
-            <input autoFocus type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className={cn("w-full border rounded-xl px-5 py-3.5 font-bold mb-6 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
+            <input autoFocus type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className={cn("w-full border rounded-xl px-3.5 py-2 font-bold mb-6 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
             <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-              <button onClick={() => setShowRenameModal(null)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-              <button onClick={handleRename} className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Rename</button>
+              <button onClick={() => setShowRenameModal(null)} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={handleRename} className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Rename</button>
             </div>
           </motion.div>
         </div>
@@ -997,10 +997,10 @@ export default function AdminMediaLibrary() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("border p-4 sm:p-5 rounded-2xl w-full max-w-sm relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <h3 className={cn("text-sm sm:text-base font-bold mb-6 border-b pb-4", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>Move Items</h3>
             <label className={cn("text-xs font-bold uppercase tracking-widest block mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Destination Path *</label>
-            <input autoFocus type="text" value={moveDest} onChange={e => setMoveDest(e.target.value)} placeholder="e.g. /images" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold mb-6 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
+            <input autoFocus type="text" value={moveDest} onChange={e => setMoveDest(e.target.value)} placeholder="e.g. /images" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold mb-6 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")} />
             <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-              <button onClick={() => setShowMoveModal(null)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-              <button onClick={handleMove} className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Move</button>
+              <button onClick={() => setShowMoveModal(null)} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={handleMove} className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Move</button>
             </div>
           </motion.div>
         </div>
@@ -1081,7 +1081,7 @@ export default function AdminMediaLibrary() {
                   { value: "permanent", label: "Permanent" }
                 ]}
                 placeholder="Link Expiration"
-                className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                className={cn("w-full rounded-xl px-3.5 py-2 text-sm", isDark ? "border-white/10" : "border-slate-200")}
               />
             </div>
 
@@ -1097,8 +1097,8 @@ export default function AdminMediaLibrary() {
             )}
 
             <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/10" : "border-slate-200")}>
-              <button onClick={() => { setShowUploadModal(false); setSelectedFiles([]); if (fileInputRef.current) fileInputRef.current.value = ""; }} disabled={uploading} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-              <button onClick={handleUpload} disabled={uploading} className="px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+              <button onClick={() => { setShowUploadModal(false); setSelectedFiles([]); if (fileInputRef.current) fileInputRef.current.value = ""; }} disabled={uploading} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={handleUpload} disabled={uploading} className="px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
                 {uploading ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <UploadCloud className="w-4 h-4" />} Upload
               </button>
             </div>

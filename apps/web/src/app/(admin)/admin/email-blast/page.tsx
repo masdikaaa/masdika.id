@@ -1077,7 +1077,7 @@ export default function EmailBlastPage() {
       {/* Top Header matching Gambar 1 */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-2">
         <div className="min-w-0">
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Newsletter & Email Blast
           </h1>
           <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1198,7 +1198,7 @@ export default function EmailBlastPage() {
       <div className={cn("rounded-2xl border overflow-hidden shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
         
         {/* Action Bar Header */}
-        <div className={cn("px-3 sm:px-4 py-2.5 sm:py-3 border-b flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+        <div className={cn("px-3 sm:px-3.5 py-2 sm:py-3 border-b flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
           <div className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto scrollbar-none">
             <button
               type="button"
@@ -1210,7 +1210,7 @@ export default function EmailBlastPage() {
               className="flex flex-col items-center gap-1 text-zinc-300 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
               title="Save current email as new template"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-3.5 h-3.5" />
               <span className="text-[10px]">Save</span>
             </button>
             <button
@@ -1269,7 +1269,7 @@ export default function EmailBlastPage() {
         <div className={cn("divide-y text-xs sm:text-sm border-b", isDark ? "divide-slate-800/80 border-white/[0.08] bg-[#0c0c0e]" : "divide-slate-200 border-slate-200 bg-slate-50/70")}>
           
           {/* FROM ROW */}
-          <div className="flex items-center px-4 py-2.5 gap-3">
+          <div className="flex items-center px-3.5 py-2 gap-3">
             <span className={cn("w-16 sm:w-20 font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>From</span>
             <div className="flex-1 flex items-center gap-2">
               {isEditingSender ? (
@@ -1293,7 +1293,7 @@ export default function EmailBlastPage() {
                     onClick={() => setIsEditingSender(false)}
                     className="p-1 text-emerald-400 hover:text-emerald-300"
                   >
-                    <Check className="w-4 h-4" />
+                    <Check className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
@@ -1313,7 +1313,7 @@ export default function EmailBlastPage() {
           </div>
 
           {/* TO ROW */}
-          <div className="flex flex-col sm:flex-row sm:items-center px-4 py-2.5 gap-2 sm:gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center px-3.5 py-2 gap-2 sm:gap-3">
             <span className={cn("w-16 sm:w-20 font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>To</span>
             <div className="flex-1 flex flex-wrap items-center gap-2">
               {/* Target Type Selector Pills */}
@@ -1403,7 +1403,7 @@ export default function EmailBlastPage() {
           </div>
 
           {/* SUBJECT ROW */}
-          <div className="flex flex-col sm:flex-row sm:items-center px-4 py-2.5 gap-2 sm:gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center px-3.5 py-2 gap-2 sm:gap-3">
             <span className={cn("w-16 sm:w-20 font-semibold shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>Subject</span>
             <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2">
               <input
@@ -1450,7 +1450,7 @@ export default function EmailBlastPage() {
               title="Clear formatting"
               className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
 
             <span className="w-px h-4 bg-slate-700 mx-1" />
@@ -1637,7 +1637,7 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Bottom Action Bar matching Gambar 1 */}
-        <div className={cn("px-3 sm:px-5 py-2.5 sm:py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+        <div className={cn("px-3 sm:px-3.5 py-2 sm:py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Primary Cyan Send Button */}
             <button
@@ -1697,7 +1697,7 @@ export default function EmailBlastPage() {
                 onClick={() => setShowRecipientModal(false)}
                 className="text-zinc-400 hover:text-white p-1 rounded-lg"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -1865,7 +1865,7 @@ export default function EmailBlastPage() {
                   onClick={() => setShowPreviewModal(false)}
                   className="p-1 rounded-lg text-zinc-400 hover:text-white"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -1969,7 +1969,7 @@ export default function EmailBlastPage() {
                 className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 -mr-1"
                 title="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -2241,7 +2241,7 @@ export default function EmailBlastPage() {
                 className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
                 title="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -2323,7 +2323,7 @@ export default function EmailBlastPage() {
                 className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
                 title="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -2509,7 +2509,7 @@ export default function EmailBlastPage() {
                 onClick={() => setShowSmtpModal(false)}
                 className="p-1 rounded-lg text-zinc-400 hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 

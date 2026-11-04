@@ -189,7 +189,7 @@ export default function AdminResumePage() {
     >
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Resume Data</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Resume Data</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your professional experience, education, and certifications.</p>
         </div>
       </div>
@@ -199,19 +199,19 @@ export default function AdminResumePage() {
         <div className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-none scrollbar-hide w-full sm:w-auto pb-1">
         <button
           onClick={() => setActiveTab('experience')}
-          className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "experience" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
+          className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "experience" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
         >
           <Briefcase className="w-4 h-4 shrink-0" /> Experience
         </button>
         <button
           onClick={() => setActiveTab('education')}
-          className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "education" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
+          className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "education" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
         >
           <BookOpen className="w-4 h-4 shrink-0" /> Education
         </button>
         <button
           onClick={() => setActiveTab('certification')}
-          className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "certification" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
+          className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap", activeTab === "certification" ? (isDark ? "bg-cyan-500 text-slate-900" : "bg-white text-cyan-700 border border-slate-200") : (isDark ? "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"))}
         >
           <Award className="w-4 h-4 shrink-0" /> Certifications
         </button>
@@ -219,17 +219,17 @@ export default function AdminResumePage() {
         <div className="shrink-0 w-full sm:w-auto flex justify-end">
           {activeTab === 'experience' && (
             <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className="font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
-              <Plus className="w-4 h-4" /> Add Experience
+              <Plus className="w-3.5 h-3.5" /> Add Experience
             </button>
           )}
           {activeTab === 'education' && (
             <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className="font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
-              <Plus className="w-4 h-4" /> Add Education
+              <Plus className="w-3.5 h-3.5" /> Add Education
             </button>
           )}
           {activeTab === 'certification' && (
             <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className="font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
-              <Plus className="w-4 h-4" /> Add Certification
+              <Plus className="w-3.5 h-3.5" /> Add Certification
             </button>
           )}
         </div>
@@ -251,20 +251,20 @@ export default function AdminResumePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Year *</label>
-                      <input required value={expFormData.year} onChange={e => setExpFormData({...expFormData, year: e.target.value})} placeholder="e.g., 2020 - 2022" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={expFormData.year} onChange={e => setExpFormData({...expFormData, year: e.target.value})} placeholder="e.g., 2020 - 2022" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Role *</label>
-                      <input required value={expFormData.role} onChange={e => setExpFormData({...expFormData, role: e.target.value})} placeholder="e.g., Frontend Developer" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={expFormData.role} onChange={e => setExpFormData({...expFormData, role: e.target.value})} placeholder="e.g., Frontend Developer" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Company *</label>
-                      <input required value={expFormData.company} onChange={e => setExpFormData({...expFormData, company: e.target.value})} placeholder="e.g., Google" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={expFormData.company} onChange={e => setExpFormData({...expFormData, company: e.target.value})} placeholder="e.g., Google" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                   </div>
                   <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowExpForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" onClick={() => setShowExpForm(false)} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-3.5 py-2 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
@@ -283,8 +283,8 @@ export default function AdminResumePage() {
                       </div>
                     </div>
                     <div className="flex gap-2 self-end md:self-auto">
-                      <button onClick={() => { setExpFormData(exp); setShowExpForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteTarget({ type: 'experience', id: exp.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => { setExpFormData(exp); setShowExpForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setDeleteTarget({ type: 'experience', id: exp.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </Reorder.Item>
                 ))}
@@ -304,20 +304,20 @@ export default function AdminResumePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Year *</label>
-                      <input required value={eduFormData.year} onChange={e => setEduFormData({...eduFormData, year: e.target.value})} placeholder="e.g., 2020 - 2024" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={eduFormData.year} onChange={e => setEduFormData({...eduFormData, year: e.target.value})} placeholder="e.g., 2020 - 2024" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Degree *</label>
-                      <input required value={eduFormData.degree} onChange={e => setEduFormData({...eduFormData, degree: e.target.value})} placeholder="e.g., B.S. Computer Science" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={eduFormData.degree} onChange={e => setEduFormData({...eduFormData, degree: e.target.value})} placeholder="e.g., B.S. Computer Science" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>School *</label>
-                      <input required value={eduFormData.school} onChange={e => setEduFormData({...eduFormData, school: e.target.value})} placeholder="e.g., Harvard University" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={eduFormData.school} onChange={e => setEduFormData({...eduFormData, school: e.target.value})} placeholder="e.g., Harvard University" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                   </div>
                   <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowEduForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" onClick={() => setShowEduForm(false)} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-3.5 py-2 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
@@ -336,8 +336,8 @@ export default function AdminResumePage() {
                       </div>
                     </div>
                     <div className="flex gap-2 self-end md:self-auto">
-                      <button onClick={() => { setEduFormData(edu); setShowEduForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteTarget({ type: 'education', id: edu.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => { setEduFormData(edu); setShowEduForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setDeleteTarget({ type: 'education', id: edu.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </Reorder.Item>
                 ))}
@@ -357,24 +357,24 @@ export default function AdminResumePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Title *</label>
-                      <input required value={certFormData.title} onChange={e => setCertFormData({...certFormData, title: e.target.value})} placeholder="e.g., AWS Certified Solutions Architect" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={certFormData.title} onChange={e => setCertFormData({...certFormData, title: e.target.value})} placeholder="e.g., AWS Certified Solutions Architect" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Organization *</label>
-                      <input required value={certFormData.org} onChange={e => setCertFormData({...certFormData, org: e.target.value})} placeholder="e.g., Amazon Web Services" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={certFormData.org} onChange={e => setCertFormData({...certFormData, org: e.target.value})} placeholder="e.g., Amazon Web Services" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Date *</label>
-                      <input required value={certFormData.date} onChange={e => setCertFormData({...certFormData, date: e.target.value})} placeholder="e.g., 2024" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={certFormData.date} onChange={e => setCertFormData({...certFormData, date: e.target.value})} placeholder="e.g., 2024" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Icon Name (Lucide)</label>
-                      <input value={certFormData.icon} onChange={e => setCertFormData({...certFormData, icon: e.target.value})} placeholder="e.g., Award, Shield, CheckCircle" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input value={certFormData.icon} onChange={e => setCertFormData({...certFormData, icon: e.target.value})} placeholder="e.g., Award, Shield, CheckCircle" className={cn("w-full border rounded-xl px-3.5 py-2 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                   </div>
                   <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowCertForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" onClick={() => setShowCertForm(false)} className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-3.5 py-2 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
@@ -393,8 +393,8 @@ export default function AdminResumePage() {
                       </div>
                     </div>
                     <div className="flex gap-2 self-end md:self-auto">
-                      <button onClick={() => { setCertFormData(cert); setShowCertForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteTarget({ type: 'certification', id: cert.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => { setCertFormData(cert); setShowCertForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setDeleteTarget({ type: 'certification', id: cert.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </Reorder.Item>
                 ))}

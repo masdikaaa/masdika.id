@@ -74,7 +74,7 @@ export default function AdminApiHubPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor API key usage, short URLs, and active developers in real-time.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ export default function AdminApiHubPage() {
             onClick={() => { setLoading(true); fetchKeys(); }}
             className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
         </div>
@@ -221,7 +221,7 @@ export default function AdminApiHubPage() {
                     </td>
                     <td className="px-3.5 py-2.5 text-right">
                       <button onClick={() => setDeleteId(user.id)} className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors", isDark ? "text-red-400" : "text-red-700")}>
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>

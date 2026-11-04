@@ -419,7 +419,7 @@ export default function AdminResourceFindingPage() {
         <div>
           <h1
             className={cn(
-              "text-xl sm:text-xl sm:text-2xl font-bold tracking-tight",
+              "text-xl sm:text-2xl font-bold tracking-tight",
               isDark ? "text-white" : "text-slate-900"
             )}
           >
@@ -714,7 +714,7 @@ export default function AdminResourceFindingPage() {
                 setCurrentPage(1);
               }}
               className={cn(
-                "w-full pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none transition-colors",
+                "w-full pl-9 pr-3.5 py-2 rounded-xl text-xs sm:text-sm border outline-none transition-colors",
                 isDark
                   ? "bg-black/30 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500/50"
                   : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:bg-white"
@@ -1824,7 +1824,7 @@ export default function AdminResourceFindingPage() {
             <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/5 pb-4">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-lg sm:text-lg sm:text-sm sm:text-base font-bold tracking-tight">
+                  <h2 className="text-lg sm:text-sm sm:text-base font-bold tracking-tight">
                     {inspectVps.hostname}
                   </h2>
                   {inspectVps.vmid && (
@@ -1844,7 +1844,7 @@ export default function AdminResourceFindingPage() {
                 onClick={() => setInspectVps(null)}
                 className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -2063,7 +2063,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => setInspectVps(null)}
                 className={cn(
-                  "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all",
+                  "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all",
                   isDark ? "bg-white/10 hover:bg-white/20 border-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800"
                 )}
               >
@@ -2120,7 +2120,7 @@ export default function AdminResourceFindingPage() {
                 onClick={() => setSuspendModalVps(null)}
                 disabled={actionLoading}
                 className={cn(
-                  "w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all text-center justify-center",
+                  "w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all text-center justify-center",
                   isDark ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
                 )}
               >
@@ -2129,7 +2129,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => handleVpsAction(suspendModalVps.id, "suspend", suspendReason)}
                 disabled={actionLoading}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Suspend</span>
@@ -2175,7 +2175,7 @@ export default function AdminResourceFindingPage() {
                   isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
                 )}
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -2339,7 +2339,7 @@ export default function AdminResourceFindingPage() {
                     }}
                     disabled={actionLoading}
                     className={cn(
-                      "w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-sm",
+                      "w-full sm:w-auto px-3.5 py-2 sm:py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-sm",
                       "bg-emerald-600 hover:bg-emerald-500"
                     )}
                   >
@@ -2364,7 +2364,7 @@ export default function AdminResourceFindingPage() {
                     }}
                     disabled={actionLoading}
                     className={cn(
-                      "w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 border shadow-sm",
+                      "w-full sm:w-auto px-3.5 py-2 sm:py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 border shadow-sm",
                       isDark
                         ? "bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border-rose-500/30"
                         : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
@@ -2462,7 +2462,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => setThrottleModalVps(null)}
                 disabled={actionLoading}
-                className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors text-center justify-center", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("w-full sm:w-auto px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-sm transition-colors text-center justify-center", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -2477,7 +2477,7 @@ export default function AdminResourceFindingPage() {
                   handleVpsAction(throttleModalVps.id, "throttle", undefined, rateNum);
                 }}
                 disabled={actionLoading}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Apply Rate Limit</span>

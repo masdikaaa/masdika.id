@@ -265,11 +265,11 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/admin/blog" className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}>
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Article' : 'Edit Article'}</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Article' : 'Edit Article'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Write and publish your thoughts.</p>
         </div>
       </div>
@@ -286,23 +286,23 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         <button
           onClick={() => handleSave(false)}
           disabled={saving}
-          className={cn("flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 font-medium text-sm rounded-lg transition-all border disabled:opacity-50 whitespace-nowrap", isDark ? "text-slate-200 border-white/10 hover:bg-white/10" : "text-slate-700 border-slate-200 hover:bg-slate-100")}
+          className={cn("flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-2 font-medium text-sm rounded-lg transition-all border disabled:opacity-50 whitespace-nowrap", isDark ? "text-slate-200 border-white/10 hover:bg-white/10" : "text-slate-700 border-slate-200 hover:bg-slate-100")}
         >
-          <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Draft"}
+          <Save className="w-3.5 h-3.5" /> {saving ? "Saving..." : "Save Draft"}
         </button>
         <button
           onClick={() => handleSave(true)}
           disabled={saving}
-          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50 whitespace-nowrap"
+          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3.5 py-2 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50 whitespace-nowrap"
         >
-          <Send className="w-4 h-4" /> {saving ? "Publishing..." : "Publish"}
+          <Send className="w-3.5 h-3.5" /> {saving ? "Publishing..." : "Publish"}
         </button>
       </motion.div>
 
       {/* Editor Card */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className={cn("rounded-2xl p-4 sm:p-4 sm:p-5 space-y-8 border min-w-0 max-w-full", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+        className={cn("rounded-2xl p-4 sm:p-5 space-y-8 border min-w-0 max-w-full", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
         {/* Featured Image */}
         <div className="space-y-3">
@@ -313,13 +313,13 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                 <button 
                   onClick={() => { setMediaLibraryMode('featured'); setShowMediaLibrary(true); }}
-                  className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-xl transition-all shadow-sm"
+                  className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-xl transition-all shadow-sm"
                 >
                   Change Image
                 </button>
                 <button 
                   onClick={() => setFormData(prev => ({ ...prev, image: "" }))}
-                  className={cn("px-5 py-2.5 bg-red-500/20 hover:bg-red-500/40 font-bold rounded-xl transition-all", isDark ? "text-red-400" : "text-red-700")}
+                  className={cn("px-3.5 py-2 bg-red-500/20 hover:bg-red-500/40 font-bold rounded-xl transition-all", isDark ? "text-red-400" : "text-red-700")}
                 >
                   Remove
                 </button>
@@ -348,12 +348,12 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g. Next.js 14 Server Actions Guide" 
-              className={cn("w-full px-5 py-3.5 border rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-3.5 py-2 border rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
           <div className="space-y-3">
             <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Link2 className="w-4 h-4" /> Permalink / Slug</label>
-            <div className={cn("flex items-center px-5 py-3.5 border rounded-xl transition-all focus-within:border-cyan-500", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
+            <div className={cn("flex items-center px-3.5 py-2 border rounded-xl transition-all focus-within:border-cyan-500", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
               <span className="text-zinc-500 mr-1 whitespace-nowrap overflow-hidden font-medium">/blog/</span>
               <input 
                 type="text" 
@@ -393,7 +393,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                   className={cn("p-3.5 bg-red-500/10 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-all", isDark ? "text-red-400" : "text-red-700")}
                   title="Delete this category"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               )}
               <button
@@ -401,7 +401,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                 className={cn("p-3.5 bg-cyan-500/10 rounded-xl border border-cyan-500/20 hover:bg-cyan-500/20 transition-all", isDark ? "text-cyan-400" : "text-cyan-700")}
                 title="Add new category"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
             {showNewCategory && (
@@ -412,10 +412,10 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                   placeholder="New category name..."
-                  className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("flex-1 px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
                   autoFocus
                 />
-                <button onClick={handleAddCategory} className={cn("px-4 py-2.5 bg-cyan-400 font-bold rounded-xl text-xs hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
+                <button onClick={handleAddCategory} className={cn("px-3.5 py-2 bg-cyan-400 font-bold rounded-xl text-xs hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
                   Add
                 </button>
               </motion.div>
@@ -461,7 +461,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                   className={cn("absolute right-2 top-2 p-1.5 bg-cyan-500/10 rounded-lg hover:bg-cyan-500/20 transition-all", isDark ? "text-cyan-400" : "text-cyan-700")}
                   title="Create new tag"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
               
@@ -473,10 +473,10 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => setNewTagName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                     placeholder="New tag name..."
-                    className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("flex-1 px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
                     autoFocus
                   />
-                  <button onClick={handleAddTag} className={cn("px-4 py-2.5 bg-cyan-400 font-bold rounded-xl text-xs hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
+                  <button onClick={handleAddTag} className={cn("px-3.5 py-2 bg-cyan-400 font-bold rounded-xl text-xs hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
                     Add
                   </button>
                 </motion.div>
@@ -496,7 +496,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
             onChange={handleChange}
             rows={2}
             placeholder="A brief summary of what this article is about..." 
-            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-3.5 py-2 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 

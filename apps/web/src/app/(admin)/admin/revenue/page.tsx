@@ -91,7 +91,7 @@ export default function AdminRevenuePage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Revenue Monitoring
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Track financial performance, realized subscriptions, and cashflow in real-time.</p>
@@ -104,7 +104,7 @@ export default function AdminRevenuePage() {
             onClick={fetchRevenueData}
             className={cn("px-3.5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
         </div>
@@ -227,34 +227,34 @@ export default function AdminRevenuePage() {
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
             <thead className={cn("text-xs uppercase", isDark ? "bg-[#0a0a0c] text-slate-400 border-b border-white/[0.08] font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
               <tr>
-                <th className="px-4 py-3 rounded-l-lg font-semibold whitespace-nowrap">Date</th>
-                <th className="px-4 py-3 font-semibold whitespace-nowrap">Invoice ID</th>
-                <th className="px-4 py-3 font-semibold whitespace-nowrap">Customer</th>
-                <th className="px-4 py-3 font-semibold whitespace-nowrap">Type</th>
-                <th className="px-4 py-3 rounded-r-lg font-semibold text-right whitespace-nowrap">Amount</th>
+                <th className="px-3.5 py-2 rounded-l-lg font-semibold whitespace-nowrap">Date</th>
+                <th className="px-3.5 py-2 font-semibold whitespace-nowrap">Invoice ID</th>
+                <th className="px-3.5 py-2 font-semibold whitespace-nowrap">Customer</th>
+                <th className="px-3.5 py-2 font-semibold whitespace-nowrap">Type</th>
+                <th className="px-3.5 py-2 rounded-r-lg font-semibold text-right whitespace-nowrap">Amount</th>
               </tr>
             </thead>
             <tbody>
               {data.recentInvoices.map((inv: any, i: number) => (
                 <tr key={i} className={cn("border-b transition-colors", isDark ? "border-white/[0.08] hover:bg-white/5" : "border-slate-200 hover:bg-slate-50/80")}>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-3.5 py-2 whitespace-nowrap">
                     {format(new Date(inv.paidAt), 'dd MMM yyyy, HH:mm')}
                   </td>
-                  <td className={cn("px-4 py-3 font-mono text-xs whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                  <td className={cn("px-3.5 py-2 font-mono text-xs whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
                     {inv.invoiceNumber}
                   </td>
-                  <td className={cn("px-4 py-3 min-w-[200px]", isDark ? "text-zinc-300" : "text-slate-600")}>
+                  <td className={cn("px-3.5 py-2 min-w-[200px]", isDark ? "text-zinc-300" : "text-slate-600")}>
                     <div className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{inv.user?.name || "Unknown"}</div>
                     <div className="text-xs text-zinc-500">{inv.user?.email || "-"}</div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-3.5 py-2 whitespace-nowrap">
                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                       inv.type === 'TOP_UP' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-500/20 text-cyan-400'
                     }`}>
                       {inv.type === 'TOP_UP' ? 'Top-Up' : 'Service'}
                     </span>
                   </td>
-                  <td className={cn("px-4 py-3 text-right font-bold whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                  <td className={cn("px-3.5 py-2 text-right font-bold whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
                     {formatRupiah(inv.amount)}
                   </td>
                 </tr>

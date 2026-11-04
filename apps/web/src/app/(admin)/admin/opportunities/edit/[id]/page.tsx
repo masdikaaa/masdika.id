@@ -159,11 +159,11 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Link href="/admin/opportunities" className={cn("p-2 hover:bg-white/10 rounded-xl hover:text-white transition-all border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}>
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Item' : 'Edit Item'}</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Item' : 'Edit Item'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Fill in the details for your event, webinar, or job vacancy.</p>
         </div>
       </div>
@@ -171,9 +171,9 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
         <button 
           onClick={handleSubmit}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs rounded-lg shadow-sm transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs rounded-lg shadow-sm transition-all disabled:opacity-50"
         >
-          {saving ? 'Saving...' : <><Save className="w-4 h-4" /> Save</>}
+          {saving ? 'Saving...' : <><Save className="w-3.5 h-3.5" /> Save</>}
         </button>
       </div>
 
@@ -188,7 +188,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Enter title"
                   required
                 />
@@ -200,7 +200,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className={cn("w-full flex-1 min-h-[150px] md:min-h-[300px] border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full flex-1 min-h-[150px] md:min-h-[300px] border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Enter description..."
                 ></textarea>
               </div>
@@ -250,7 +250,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                   name="link"
                   value={formData.link}
                   onChange={handleChange}
-                  className={cn("w-full border rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl pl-9 pr-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="https://..."
                 />
               </div>
@@ -303,7 +303,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                     value={formData.image}
                     onChange={e => setFormData(prev => ({ ...prev, image: e.target.value }))}
                     placeholder="https://example.com/image.jpg"
-                    className={cn("w-full border rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-colors text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl pl-9 pr-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 {formData.image && (
@@ -331,7 +331,7 @@ export default function EditOpportunityPage({ params }: { params: Promise<{ id: 
                       </label>
                       <button type="button" onClick={() => setShowRemoveModal(true)}
                         className="px-4 py-2 bg-red-500/20 hover:bg-red-500/40 text-red-200 rounded-lg text-sm font-medium transition-colors backdrop-blur-md border border-red-500/30 flex items-center gap-2">
-                        <Trash2 className="w-4 h-4" /> Remove
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
                       </button>
                     </div>
                   </div>

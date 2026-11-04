@@ -118,7 +118,7 @@ export default function AdminCloudflaredPage() {
       {/* Header matching Gambar 1 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Cloudflared Tunnels
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -333,7 +333,7 @@ export default function AdminCloudflaredPage() {
                              className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 rounded-lg transition-colors", isDark ? "text-red-400" : "text-red-700")} 
                              title="Delete Domain"
                            >
-                             <Trash2 className="w-4 h-4" />
+                             <Trash2 className="w-3.5 h-3.5" />
                            </button>
                         </td>
                       </tr>
@@ -385,7 +385,7 @@ export default function AdminCloudflaredPage() {
                         <td className="px-3.5 py-2.5 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 shrink-0 bg-cyan-500/10 rounded-xl flex items-center justify-center">
-                              <Network className="w-5 h-5 text-cyan-400" />
+                              <Network className="w-4 h-4 text-cyan-400" />
                             </div>
                             <div>
                               <span className={cn("font-bold block", isDark ? "text-white" : "text-slate-900")}>{t.name}</span>
@@ -442,7 +442,7 @@ export default function AdminCloudflaredPage() {
                              className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 rounded-lg transition-colors", isDark ? "text-red-400" : "text-red-700")} 
                              title="Delete Tunnel"
                            >
-                             <Trash2 className="w-4 h-4" />
+                             <Trash2 className="w-3.5 h-3.5" />
                            </button>
                         </td>
                       </tr>

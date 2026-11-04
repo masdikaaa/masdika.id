@@ -115,7 +115,7 @@ export default function AdminOpportunitiesPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Events & Jobs</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Events & Jobs</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage events, webinars, job vacancies, and community opportunities.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -126,11 +126,11 @@ export default function AdminOpportunitiesPage() {
             onClick={() => { setLoading(true); fetchOpportunities(); }}
             className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
           <Link href="/admin/opportunities/edit/new" className="inline-flex items-center gap-2 px-4 py-2 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
-            <Plus className="w-4 h-4" /> New Item
+            <Plus className="w-3.5 h-3.5" /> New Item
           </Link>
         </div>
       </div>
@@ -303,10 +303,10 @@ export default function AdminOpportunitiesPage() {
                           </a>
                         )}
                         <Link href={`/admin/opportunities/edit/${item.id}`} className={cn("p-2 rounded-lg transition-colors", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-white" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 hover:text-cyan-800")} title="Edit">
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-3.5 h-3.5" />
                         </Link>
                         <button onClick={() => setDeleteId(item.id)} className={cn("p-2 rounded-lg transition-colors", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-white" : "bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800")} title="Delete">
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>

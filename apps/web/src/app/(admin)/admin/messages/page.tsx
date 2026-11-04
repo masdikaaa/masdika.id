@@ -199,7 +199,7 @@ export default function AdminMessagesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Messages & Inquiries
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -397,7 +397,7 @@ export default function AdminMessagesPage() {
                     <div className="min-w-0">
                       <div className="flex items-start gap-3 mb-1">
                         {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse mt-2 shrink-0" />}
-                        <h3 className={cn("text-lg sm:text-sm sm:text-base font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
+                        <h3 className={cn("text-sm sm:text-base font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <span className={cn("font-medium truncate max-w-full", isDark ? "text-cyan-400" : "text-cyan-700")}>{msg.name}</span>
@@ -427,7 +427,7 @@ export default function AdminMessagesPage() {
                     onClick={() => setDeleteId(msg.id)}
                     className={cn("flex-1 md:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 font-medium transition-colors border border-red-500/20 text-xs", isDark ? "text-red-400" : "text-red-700")}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete</span>
                   </button>
                 </div>

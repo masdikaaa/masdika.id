@@ -241,7 +241,7 @@ export default function AdminChatHistoryPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Chat History
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -265,7 +265,7 @@ export default function AdminChatHistoryPage() {
               onClick={() => setShowBulkDelete(true)}
               className="flex items-center gap-2 px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 font-bold rounded-lg transition-all border border-red-500/20 text-red-400 text-sm"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
               <span>Delete ({selectedIds.length})</span>
             </button>
           )}
@@ -412,12 +412,12 @@ export default function AdminChatHistoryPage() {
               ) : (
                 sessions.map((s) => (
                   <tr key={s.id} className={cn("border-b transition-colors", isDark ? "border-white/[0.08] hover:bg-white/5" : "border-slate-200 hover:bg-slate-50/80")}>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-3.5 py-2 whitespace-nowrap">
                       <button onClick={() => toggleSelect(s.id)} className={cn("w-5 h-5 border rounded flex items-center justify-center transition-colors", selectedIds.includes(s.id) ? "bg-cyan-500 border-cyan-500 text-slate-950" : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600")}>
                         {selectedIds.includes(s.id) && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                       </button>
                     </td>
-                    <td className="px-4 py-3 min-w-[220px]">
+                    <td className="px-3.5 py-2 min-w-[220px]">
                       <div className="flex items-center gap-3">
                         <img referrerPolicy="no-referrer"                           src={`/api/avatar?email=${encodeURIComponent(s.email)}&name=${encodeURIComponent(s.name)}`}
                           alt={s.name}
@@ -430,12 +430,12 @@ export default function AdminChatHistoryPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-500 hidden lg:table-cell whitespace-nowrap">{s.ipAddress}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{getStatusBadge(s.status, s.endedBy)}</td>
-                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                    <td className="px-3.5 py-2 font-mono text-xs text-zinc-500 hidden lg:table-cell whitespace-nowrap">{s.ipAddress}</td>
+                    <td className="px-3.5 py-2 whitespace-nowrap">{getStatusBadge(s.status, s.endedBy)}</td>
+                    <td className="px-3.5 py-2 text-center whitespace-nowrap">
                       <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>{s.messageCount}</span>
                     </td>
-                    <td className="px-4 py-3 text-center hidden sm:table-cell whitespace-nowrap">
+                    <td className="px-3.5 py-2 text-center hidden sm:table-cell whitespace-nowrap">
                       {s.injectionCount > 0 ? (
                         <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 border border-red-500/20 whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}>
                           ⚠ {s.injectionCount}
@@ -444,11 +444,11 @@ export default function AdminChatHistoryPage() {
                         <span className="text-zinc-600">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell whitespace-nowrap">
+                    <td className="px-3.5 py-2 hidden md:table-cell whitespace-nowrap">
                       <div className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>{new Date(s.createdAt).toLocaleDateString('id-ID')}</div>
                       <div className="text-[10px] text-zinc-600">{new Date(s.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <td className="px-3.5 py-2 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => handleViewDetail(s.id)}
@@ -469,7 +469,7 @@ export default function AdminChatHistoryPage() {
                           className={cn("p-2 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
                           title="Delete Session"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -548,7 +548,7 @@ export default function AdminChatHistoryPage() {
                     onClick={() => setDetailSession(null)}
                     className={cn("w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/20 hover:text-red-400 transition-all border flex-shrink-0", isDark ? "text-slate-400 border-white/[0.08] hover:border-red-500/20" : "text-slate-500 border-slate-200 hover:border-red-500/20")}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -577,7 +577,7 @@ export default function AdminChatHistoryPage() {
                             <span>Output Blocked</span>
                           </div>
                         )}
-                        <div className={cn("relative max-w-[85%] sm:max-w-[75%] px-4 py-3 text-sm", msg.role === "user" ? (msg.isInjectionAttempt ? "bg-red-950/80 border-red-500/30 text-white rounded-2xl rounded-tr-sm border" : "bg-gradient-to-br from-cyan-600 to-cyan-600 border-cyan-400/20 text-white rounded-2xl rounded-tr-sm border") : (isDark ? "bg-[#0c0c0e] border border-white/[0.08] text-gray-200 rounded-2xl rounded-tl-sm " + (msg.isOutputBlocked ? "border-orange-500/30" : "") : "bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-sm" + (msg.isOutputBlocked ? "border-orange-500" : "")))}>
+                        <div className={cn("relative max-w-[85%] sm:max-w-[75%] px-3.5 py-2 text-sm", msg.role === "user" ? (msg.isInjectionAttempt ? "bg-red-950/80 border-red-500/30 text-white rounded-2xl rounded-tr-sm border" : "bg-gradient-to-br from-cyan-600 to-cyan-600 border-cyan-400/20 text-white rounded-2xl rounded-tr-sm border") : (isDark ? "bg-[#0c0c0e] border border-white/[0.08] text-gray-200 rounded-2xl rounded-tl-sm " + (msg.isOutputBlocked ? "border-orange-500/30" : "") : "bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-sm" + (msg.isOutputBlocked ? "border-orange-500" : "")))}>
                           <p className="break-words whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                         </div>
                         <span className="text-[10px] text-zinc-500 mt-1.5 px-1 font-medium">
@@ -624,7 +624,7 @@ export default function AdminChatHistoryPage() {
           <div className={cn("relative border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className={cn("p-5 border-b flex items-center gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                <Shield className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-600")} />
+                <Shield className={cn("w-4 h-4", isDark ? "text-red-400" : "text-red-600")} />
               </div>
               <div>
                 <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-900")}>Ban IP Address</h3>

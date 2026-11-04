@@ -164,7 +164,7 @@ export default function VpcRoutersPage() {
       {/* Header matching Gambar 1 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             VPC Routers
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -191,7 +191,7 @@ export default function VpcRoutersPage() {
             onClick={openAddModal}
             className="px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             Add Router
           </button>
         </div>
@@ -321,7 +321,7 @@ export default function VpcRoutersPage() {
                           className={cn("p-2 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -339,14 +339,14 @@ export default function VpcRoutersPage() {
           <div className={cn("border rounded-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
             <div className={cn("p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <h3 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                <Network className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 {showEditModal ? "Edit VPC Router" : "Add VPC Router"}
               </h3>
               <button
                 onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
                 className={cn("p-2 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:bg-white/5 hover:text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900")}
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -358,7 +358,7 @@ export default function VpcRoutersPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Primary Mikrotik"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -369,7 +369,7 @@ export default function VpcRoutersPage() {
                   value={formData.host}
                   onChange={(e) => setFormData({ ...formData, host: e.target.value })}
                   placeholder="e.g. 192.168.1.1"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -379,7 +379,7 @@ export default function VpcRoutersPage() {
                   type="number"
                   value={formData.apiPort}
                   onChange={(e) => setFormData({ ...formData, apiPort: parseInt(e.target.value) })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -401,7 +401,7 @@ export default function VpcRoutersPage() {
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -413,7 +413,7 @@ export default function VpcRoutersPage() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder={showEditModal ? "(Leave empty to keep)" : ""}
-                    className={cn("w-full border rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-cyan-500 transition-colors [&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 pr-10 text-sm focus:outline-none focus:border-cyan-500 transition-colors [&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                   <button
                     type="button"
@@ -440,7 +440,7 @@ export default function VpcRoutersPage() {
                   value={formData.interfaceName}
                   onChange={(e) => setFormData({ ...formData, interfaceName: e.target.value })}
                   placeholder="e.g. bridge-vpc"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -451,7 +451,7 @@ export default function VpcRoutersPage() {
                   value={formData.proxmoxBridge}
                   onChange={(e) => setFormData({ ...formData, proxmoxBridge: e.target.value })}
                   placeholder="e.g. vmbr2"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -462,7 +462,7 @@ export default function VpcRoutersPage() {
                   value={formData.wanInterface}
                   onChange={(e) => setFormData({ ...formData, wanInterface: e.target.value })}
                   placeholder="e.g. ether1 or pppoe-out1"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
                 <p className="text-xs text-zinc-500">Used for VPC NAT Gateway (Internet Access)</p>
               </div>

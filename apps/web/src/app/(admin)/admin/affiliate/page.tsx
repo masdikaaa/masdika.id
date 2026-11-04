@@ -89,7 +89,7 @@ export default function AdminAffiliatePage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Affiliate System
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -342,7 +342,7 @@ export default function AdminAffiliatePage() {
                             className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50", isDark ? "text-red-400" : "text-red-700")}
                             title="Reject & Refund"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setConfirmAction({ id: req.id, action: 'APPROVE' })}
@@ -350,7 +350,7 @@ export default function AdminAffiliatePage() {
                             className={cn("p-2 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors disabled:opacity-50", isDark ? "text-emerald-400" : "text-emerald-700")}
                             title="Mark as Paid"
                           >
-                            <Check className="w-4 h-4" />
+                            <Check className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       )}

@@ -198,7 +198,7 @@ export default function AdminCustomerCdnPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6 w-full">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Customer File CDN
           </h1>
           <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -770,7 +770,7 @@ export default function AdminCustomerCdnPage() {
                   onClick={() => setPreviewItem(null)}
                   className="p-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 

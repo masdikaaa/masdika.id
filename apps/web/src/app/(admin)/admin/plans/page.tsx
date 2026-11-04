@@ -254,7 +254,7 @@ export default function AdminPlansPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Subscription Plans
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -280,7 +280,7 @@ export default function AdminPlansPage() {
             onClick={openAddModal}
             className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Add New Plan</span>
           </button>
         </div>
@@ -455,14 +455,14 @@ export default function AdminPlansPage() {
                         className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}
                         title="Edit Plan"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setDeleteConfirmId(plan.id)}
                         className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400" : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600")}
                         title="Delete/Disable Plan"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>
@@ -486,7 +486,7 @@ export default function AdminPlansPage() {
                 {editingPlan ? "Edit Plan" : "Create New Plan"}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -500,7 +500,7 @@ export default function AdminPlansPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder="e.g., Starter, Pro, Enterprise"
-                    className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div className="space-y-2">
@@ -523,7 +523,7 @@ export default function AdminPlansPage() {
                       { value: "BMKG_EARTHQUAKE", label: "BMKG Earthquake API" }
                     ]}
                     placeholder="Select Target Service..."
-                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full rounded-xl px-3.5 py-2 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
               </div>
@@ -534,7 +534,7 @@ export default function AdminPlansPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   placeholder="e.g., Perfect for small businesses."
-                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -623,14 +623,14 @@ export default function AdminPlansPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                  className={cn("px-3.5 py-2 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                  className="px-3.5 py-2 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {isSubmitting ? (
                     <>
@@ -639,7 +639,7 @@ export default function AdminPlansPage() {
                     </>
                   ) : (
                     <>
-                      <Check className="w-4 h-4" />
+                      <Check className="w-3.5 h-3.5" />
                       {editingPlan ? "Save Changes" : "Create Plan"}
                     </>
                   )}

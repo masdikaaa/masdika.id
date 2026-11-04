@@ -184,7 +184,7 @@ export default function K3sManagement() {
                       className={cn("p-2 bg-red-500/10 hover:bg-red-500 hover:text-white rounded-xl transition-colors disabled:opacity-50", isDark ? "text-red-400" : "text-red-700")}
                       title="Delete Cluster Record"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </td>
                 </tr>

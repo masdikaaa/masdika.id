@@ -207,7 +207,7 @@ export default function MenuOrderPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-6 sm:mb-8">
-        <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+        <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
           Menu Order Configuration
         </h1>
         <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Drag to reorder dropdown items. Toggle the "New" badge on each item.</p>
@@ -215,7 +215,7 @@ export default function MenuOrderPage() {
 
       <div className="space-y-6 sm:space-y-8">
         <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <h2 className={cn("text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Compass className="w-5 h-5" />
             </div>
@@ -225,7 +225,7 @@ export default function MenuOrderPage() {
         </div>
 
         <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <h2 className={cn("text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Code className="w-5 h-5" />
             </div>
@@ -235,7 +235,7 @@ export default function MenuOrderPage() {
         </div>
 
         <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <h2 className={cn("text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Briefcase className="w-5 h-5" />
             </div>
@@ -251,7 +251,7 @@ export default function MenuOrderPage() {
           </button>
           <button onClick={handleSave} disabled={saving}
             className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
-            <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save All Changes'}
+            <Save className="w-3.5 h-3.5" /> {saving ? 'Saving...' : 'Save All Changes'}
           </button>
         </div>
       </div>

@@ -202,7 +202,7 @@ export default function LoginLogsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Security & Login Logs
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -440,7 +440,7 @@ export default function LoginLogsPage() {
                           className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 hover: rounded-lg transition-colors border border-red-500/20 group relative", isDark ? "text-red-400" : "text-red-700")}
                           title="Delete Log"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                           <span className={cn("absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none", isDark ? "bg-black/80 text-white" : "bg-white text-slate-900 border border-slate-200")}>Delete Log</span>
                         </button>
                       </div>

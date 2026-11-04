@@ -1274,7 +1274,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                                 <span className="text-[10px] sm:text-[11px] text-zinc-500">{d.time}</span>
                               </div>
                             </td>
-                          <td className="py-2.5 px-4 leading-relaxed font-normal">
+                          <td className="py-2 px-3.5 leading-relaxed font-normal">
                             {formatLogDescription(log.description)}
                           </td>
                           <td className="py-2.5 px-3 text-center whitespace-nowrap">
@@ -1389,7 +1389,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
               <button 
                 onClick={() => setSuspendModalOpen(false)}
                 disabled={isSuspending}
-                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("px-3.5 py-2 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -1478,7 +1478,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn("w-full max-w-4xl max-h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
             {/* Header */}
-            <div className={cn("px-6 py-3.5 border-b flex items-center justify-between", isDark ? "bg-[#0c1f38] border-white/[0.08]" : "bg-[#0284c7] text-white border-sky-600")}>
+            <div className={cn("px-3.5 py-2 border-b flex items-center justify-between", isDark ? "bg-[#0c1f38] border-white/[0.08]" : "bg-[#0284c7] text-white border-sky-600")}>
               <h3 className="font-bold text-base text-white flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Viewing Email Message
@@ -1517,7 +1517,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
 
             {/* Footer */}
-            <div className={cn("px-6 py-3.5 border-t flex justify-end gap-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("px-3.5 py-2 border-t flex justify-end gap-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <button
                 type="button"
                 onClick={() => setViewingEmail(null)}

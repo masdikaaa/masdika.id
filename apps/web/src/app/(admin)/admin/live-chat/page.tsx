@@ -158,13 +158,13 @@ export default function AdminLiveChat() {
     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col h-full space-y-6 pb-6">
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 shrink-0">
         <div>
-          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Live Chat</h1>
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Live Chat</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage active chat sessions and manually reply to users.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={toggleStatus}
-            className={cn("flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all border", status === "ONLINE" ? (isDark ? "bg-gradient-to-r from-cyan-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200"))}
+            className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border", status === "ONLINE" ? (isDark ? "bg-gradient-to-r from-cyan-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/50" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200"))}
           >
             <Power size={16} />
             {status === 'ONLINE' ? 'Admin is ONLINE' : 'Admin is OFFLINE'}
@@ -280,7 +280,7 @@ export default function AdminLiveChat() {
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder={status === 'ONLINE' ? 'Type your manual reply here...' : 'Go ONLINE to take over chat...'}
                     disabled={status === 'OFFLINE'}
-                    className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("flex-1 border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                   <button
                     onClick={handleSend}

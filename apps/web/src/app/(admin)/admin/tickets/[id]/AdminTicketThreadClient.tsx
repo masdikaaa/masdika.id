@@ -338,7 +338,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 </div>
                 
                 <div className={cn(
-                  "px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-2xl relative group max-w-full min-w-0 text-left",
+                  "px-3.5 py-2 sm:px-5 sm:py-3.5 rounded-2xl sm:rounded-2xl relative group max-w-full min-w-0 text-left",
                   isAdmin 
                     ? "bg-cyan-600 text-white rounded-tr-sm border border-cyan-500/30"
                     : isDark 
@@ -663,7 +663,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 Merge Ticket
               </h3>
               <button onClick={() => setShowMergeModal(false)} className={cn("transition-colors p-2 rounded-xl", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             
@@ -678,7 +678,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   type="text"
                   value={mergeTarget}
                   onChange={e => setMergeTarget(e.target.value)}
-                  className={cn("w-full border rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-purple-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="e.g. TKT-123456"
                 />
               </div>
@@ -714,7 +714,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 Delete Ticket
               </h3>
               <button onClick={() => setShowDeleteModal(false)} disabled={isDeleting} className={cn("transition-colors p-2 rounded-xl", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <div className="p-6 space-y-5">
@@ -742,7 +742,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   disabled={isDeleting}
                   className="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   {isDeleting ? 'Deleting...' : 'Delete Permanently'}
                 </button>
               </div>
@@ -768,11 +768,11 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   <ZoomOut className="w-5 h-5" />
                 </button>
                 <a href={lightboxImage} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 rounded-xl transition-colors">
-                  <Download className="w-5 h-5" />
+                  <Download className="w-3.5 h-3.5" />
                 </a>
               </div>
               <button onClick={() => setLightboxImage(null)} className="p-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-xl transition-colors">
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <div className="flex-1 flex items-center justify-center overflow-auto p-4 custom-scrollbar" onClick={() => setLightboxImage(null)}>
