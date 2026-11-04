@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 function MarkdownContent({ content }: { content: string }) {
   const parts = content.split(/```/);
   return (
-    <div className="w-full max-w-none font-sans break-words prose dark:prose-invert text-slate-700 dark:text-zinc-300">
+    <div className="w-full max-w-none font-sans break-words prose dark:prose-invert text-slate-600 dark:text-zinc-400">
       {parts.map((part, index) => {
         if (index % 2 === 1) {
           const match = part.match(/^([^\n]*)\n([\s\S]*)$/);

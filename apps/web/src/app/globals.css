@@ -646,6 +646,7 @@ html.light .mdxeditor-toolbar {
   color: #0891b2 !important;
 }
 
+html.dark .prose :not(pre)>code,
 .prose-invert :not(pre)>code {
   background-color: rgba(34, 211, 238, 0.1) !important;
   color: #22d3ee !important;
@@ -658,6 +659,7 @@ html.light .mdxeditor-toolbar {
   content: none !important;
 }
 
+html.dark .prose pre code,
 .prose-invert pre code {
   background-color: transparent !important;
   color: #fde047 !important;
@@ -791,13 +793,15 @@ button[aria-label="Check List"],
 .prose h1,
 .prose h2,
 .prose h3,
+.prose h4,
 .prose strong {
   color: #0f172a !important;
 }
 .prose p,
 .prose ul,
-.prose ol {
-  color: #334155 !important;
+.prose ol,
+.prose li {
+  color: #475569 !important;
 }
 .prose a {
   color: #0891b2 !important;
@@ -806,17 +810,29 @@ button[aria-label="Check List"],
 }
 
 /* Dark Mode Typography Colors */
+html.dark .prose h1,
+html.dark .prose h2,
+html.dark .prose h3,
+html.dark .prose h4,
+html.dark .prose strong,
 .prose-invert h1,
 .prose-invert h2,
 .prose-invert h3,
+.prose-invert h4,
 .prose-invert strong {
   color: #ffffff !important;
 }
+html.dark .prose p,
+html.dark .prose ul,
+html.dark .prose ol,
+html.dark .prose li,
 .prose-invert p,
 .prose-invert ul,
-.prose-invert ol {
-  color: #d4d4d8 !important;
+.prose-invert ol,
+.prose-invert li {
+  color: #a1a1aa !important;
 }
+html.dark .prose a,
 .prose-invert a {
   color: #22d3ee !important;
   text-decoration: underline !important;
@@ -1067,6 +1083,7 @@ html.light .portfolio-content a {
   margin: 2rem 0 !important;
 }
 
+html.dark .prose table,
 .prose-invert table,
 .mdx-custom-theme table {
   width: 100% !important;
@@ -1100,6 +1117,7 @@ html.light .portfolio-content a {
   border-right: none !important;
 }
 
+html.dark .prose thead th,
 .prose-invert thead th,
 .mdx-custom-theme thead th {
   background-color: rgba(6, 182, 212, 0.1) !important;
@@ -1120,6 +1138,7 @@ html.light .portfolio-content a {
   border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
+html.dark .prose thead th:not(:last-child),
 .prose-invert thead th:not(:last-child),
 .mdx-custom-theme thead th:not(:last-child) {
   border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -1137,6 +1156,7 @@ html.light .portfolio-content a {
   background-color: rgba(0, 0, 0, 0.02) !important;
 }
 
+html.dark .prose tbody tr:hover,
 .prose-invert tbody tr:hover,
 .mdx-custom-theme tbody tr:hover {
   background-color: rgba(34, 211, 238, 0.05) !important;
@@ -1148,6 +1168,7 @@ html.light .portfolio-content a {
   font-weight: 500 !important;
 }
 
+html.dark .prose tbody td,
 .prose-invert tbody td,
 .mdx-custom-theme tbody td {
   padding: 1rem 1.5rem !important;
@@ -1159,11 +1180,13 @@ html.light .portfolio-content a {
   border-right: none !important;
 }
 
+html.dark .prose tbody td:not(:last-child),
 .prose-invert tbody td:not(:last-child),
 .mdx-custom-theme tbody td:not(:last-child) {
   border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
+html.dark .prose tbody tr:last-child td,
 .prose-invert tbody tr:last-child td,
 .mdx-custom-theme tbody tr:last-child td {
   border-bottom: none !important;
