@@ -133,7 +133,7 @@ export default function CategoriesPage() {
         </Link>
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Blog Categories</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Blog Categories</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your article categories.</p>
         </div>
       </div>
@@ -142,9 +142,9 @@ export default function CategoriesPage() {
       {/* Add New Category */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className={cn("rounded-2xl p-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+        className={cn("rounded-2xl p-6 border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
-        <h2 className={cn("text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Tag className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} /> Add New Category</h2>
+        <h2 className={cn("text-sm sm:text-base font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Tag className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} /> Add New Category</h2>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -155,7 +155,7 @@ export default function CategoriesPage() {
             }}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Category Name"
-            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
           />
           <input
             type="text"
@@ -163,11 +163,11 @@ export default function CategoriesPage() {
             onChange={(e) => setNewSlug(generateSlug(e.target.value))}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Custom Slug (optional)"
-            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+            className={cn("flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
           />
           <button
             onClick={handleCreate}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all w-full sm:w-auto"
           >
             <Plus className="w-5 h-5" /> Add
           </button>
@@ -177,11 +177,11 @@ export default function CategoriesPage() {
       {/* Categories List */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-        className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+        className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
         {categories.length === 0 ? (
           <div className="p-16 text-center">
-            <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <Tag className="w-8 h-8 text-zinc-500" />
             </div>
             <h2 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No Categories</h2>
@@ -209,7 +209,7 @@ export default function CategoriesPage() {
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cat.id)}
                       autoFocus
                       placeholder="Name"
-                      className={cn("flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900")}
+                      className={cn("flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900")}
                     />
                     <input
                       type="text"
@@ -217,7 +217,7 @@ export default function CategoriesPage() {
                       onChange={(e) => setEditingSlug(generateSlug(e.target.value))}
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cat.id)}
                       placeholder="Slug"
-                      className={cn("flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900")}
+                      className={cn("flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-900")}
                     />
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       <button onClick={() => handleUpdate(cat.id)} className={cn("p-2.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 transition-colors flex-1 sm:flex-none flex justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -231,14 +231,14 @@ export default function CategoriesPage() {
                 ) : (
                   <>
                     <div className="flex items-center gap-4 flex-1 min-w-0 mr-4">
-                      <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                         <Tag className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       </div>
                       <div className="min-w-0">
                         <span className={cn("font-bold block truncate transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700")}>{cat.name}</span>
                         <span className="text-xs text-zinc-500 block truncate">/{cat.slug}</span>
                       </div>
-                      <span className={cn("hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border ml-auto mr-4 whitespace-nowrap", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
+                      <span className={cn("hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border ml-auto mr-4 whitespace-nowrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
                         {cat._count.posts} articles
                       </span>
                     </div>

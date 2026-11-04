@@ -153,14 +153,14 @@ export default function AdminMessagesPage() {
               <p className={cn("leading-relaxed italic relative z-10 text-base", isDark ? "text-zinc-200" : "text-slate-700")}>"{commentText}"</p>
             </div>
             <div className="flex items-center gap-2 text-xs text-zinc-500">
-               <span className={cn("px-2 py-1 rounded font-mono border", isDark ? "bg-[#060b14] border-slate-800 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
+               <span className={cn("px-2 py-1 rounded font-mono border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
             </div>
           </div>
         );
       }
     }
     return (
-      <div className={cn("p-4 sm:p-5 rounded-2xl border leading-relaxed text-sm whitespace-pre-wrap", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
+      <div className={cn("p-4 sm:p-5 rounded-2xl border leading-relaxed text-sm whitespace-pre-wrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
         {content}
       </div>
     );
@@ -199,7 +199,7 @@ export default function AdminMessagesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Messages & Inquiries
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -209,7 +209,7 @@ export default function AdminMessagesPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
             <span>Total Messages:</span>
-            <span className="font-extrabold text-white">{totalCount}</span>
+            <span className="font-bold text-white">{totalCount}</span>
           </div>
           <button
             onClick={() => { setLoading(true); fetchMessages(); }}
@@ -224,7 +224,7 @@ export default function AdminMessagesPage() {
           {unreadCount > 0 && (
             <button 
               onClick={handleMarkAllAsRead}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+              className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Mark All Read</span>
@@ -235,7 +235,7 @@ export default function AdminMessagesPage() {
 
       {/* Stat Cards Grid (GAMBAR 1 Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL MESSAGES</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -243,12 +243,12 @@ export default function AdminMessagesPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Total Received</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>UNREAD INQUIRIES</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -256,12 +256,12 @@ export default function AdminMessagesPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{unreadCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{unreadCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Needs Review</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>READ MESSAGES</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -269,12 +269,12 @@ export default function AdminMessagesPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{readCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{readCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Reviewed</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>SYSTEM ALERTS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -282,15 +282,15 @@ export default function AdminMessagesPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{systemCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{systemCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Automated</span>
           </div>
         </div>
       </div>
 
       {/* Filter and Controls Bar (GAMBAR 1 Style) */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {[
             { key: 'all', label: 'All Messages', count: totalCount },
             { key: 'unread', label: 'Unread', count: unreadCount },
@@ -307,7 +307,7 @@ export default function AdminMessagesPage() {
               )}
             >
               <span>{tab.label}</span>
-              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", statusFilter === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", statusFilter === tab.key ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
                 {tab.count}
               </span>
             </button>
@@ -318,13 +318,13 @@ export default function AdminMessagesPage() {
           {messages.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs transition-all border", isDark ? "bg-[#060b14] text-white border-slate-800 hover:border-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs transition-all border", isDark ? "bg-[#0a0a0c] text-white border-white/[0.08] hover:border-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white")}
             >
               <div className={cn(
                 "w-4 h-4 border rounded flex items-center justify-center transition-colors",
                 selectedIds.length === messages.length && messages.length > 0
                   ? "bg-cyan-500 border-cyan-500 text-slate-950"
-                  : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"
+                  : isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"
               )}>
                 {selectedIds.length === messages.length && messages.length > 0 && <CheckCircle className="w-3 h-3 text-slate-950" />}
               </div>
@@ -349,7 +349,7 @@ export default function AdminMessagesPage() {
               placeholder="Search sender, email, subject..." 
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
             />
           </div>
         </div>
@@ -357,11 +357,11 @@ export default function AdminMessagesPage() {
 
       <div className="grid gap-4">
         {filteredMessages.length === 0 ? (
-          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-            <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border transition-transform duration-500 group-hover:scale-105", isDark ? "bg-[#060b14] border-slate-800 text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-400")}>
+          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border transition-transform duration-500 group-hover:scale-105", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-400")}>
               <MailOpen className="w-10 h-10" />
             </div>
-            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Messages Found</h3>
+            <h3 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Messages Found</h3>
             <p className={cn("text-sm max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>There are no inquiries matching your current filters.</p>
           </div>
         ) : (
@@ -374,8 +374,8 @@ export default function AdminMessagesPage() {
               className={cn(
                 "rounded-2xl p-5 sm:p-6 border transition-all",
                 msg.isRead 
-                  ? (isDark ? "bg-[#0b1322] border-slate-800/80 shadow-sm" : "bg-white border-slate-200 shadow-sm")
-                  : (isDark ? "bg-[#0b1322] border-cyan-500/40 shadow-md ring-1 ring-cyan-500/20" : "bg-cyan-50/40 border-cyan-300 shadow-sm")
+                  ? (isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm")
+                  : (isDark ? "bg-[#0c0c0e] border-cyan-500/40 shadow-md ring-1 ring-cyan-500/20" : "bg-cyan-50/40 border-cyan-300 shadow-sm")
               )}
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
@@ -386,7 +386,7 @@ export default function AdminMessagesPage() {
                       "w-5 h-5 border rounded flex items-center justify-center transition-colors",
                       selectedIds.includes(msg.id)
                         ? "bg-cyan-500 border-cyan-500 text-slate-950"
-                        : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
+                        : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
                     )}
                   >
                     {selectedIds.includes(msg.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-950" />}
@@ -397,7 +397,7 @@ export default function AdminMessagesPage() {
                     <div className="min-w-0">
                       <div className="flex items-start gap-3 mb-1">
                         {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse mt-2 shrink-0" />}
-                        <h3 className={cn("text-lg sm:text-xl font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
+                        <h3 className={cn("text-lg sm:text-sm sm:text-base font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <span className={cn("font-medium truncate max-w-full", isDark ? "text-cyan-400" : "text-cyan-700")}>{msg.name}</span>

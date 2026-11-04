@@ -97,14 +97,14 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className={cn("border rounded-2xl w-full max-w-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-        <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+      <div className={cn("border rounded-2xl w-full max-w-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+        <div className={cn("flex items-center justify-between p-6 border-b shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
           <div className="flex items-center gap-3">
             <div className={cn("w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Server className="w-5 h-5" />
             </div>
             <div>
-              <h2 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Import Existing VPS</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Import Existing VPS</h2>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Assign an existing Proxmox VM to a client.</p>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
               <div>
                 <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Select User (Client)</label>
                 {loadingUsers ? (
-                  <div className={cn("h-[48px] animate-pulse rounded-xl", isDark ? "bg-[#060b14]" : "bg-slate-100")} />
+                  <div className={cn("h-[48px] animate-pulse rounded-xl", isDark ? "bg-[#0a0a0c]" : "bg-slate-100")} />
                 ) : (
                   <Select
                     value={formData.userId}
@@ -129,7 +129,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                       ...users.map(u => ({ value: u.id, label: `${u.name} (${u.email})` }))
                     ]}
                     placeholder="-- Choose User --"
-                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 )}
               </div>
@@ -142,7 +142,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                   value={formData.hostname}
                   onChange={(e) => setFormData({ ...formData, hostname: e.target.value })}
                   placeholder="server.example.com"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -153,7 +153,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                   required
                   value={formData.node}
                   onChange={(e) => setFormData({ ...formData, node: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -165,7 +165,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                   value={formData.vmid}
                   onChange={(e) => setFormData({ ...formData, vmid: e.target.value })}
                   placeholder="e.g. 104"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -176,7 +176,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                   required
                   value={formData.osTemplate}
                   onChange={(e) => setFormData({ ...formData, osTemplate: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -187,7 +187,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                   value={formData.ipAddress}
                   onChange={(e) => setFormData({ ...formData, ipAddress: e.target.value })}
                   placeholder="e.g. 103.x.x.x"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -202,12 +202,12 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                     { value: "ANNUALLY", label: "Annually (Fixed)" }
                   ]}
                   placeholder="Select Billing Cycle..."
-                  className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                  className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                 />
               </div>
             </div>
 
-            <div className={cn("border-t pt-5 mt-5", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("border-t pt-5 mt-5", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <h3 className={cn("text-sm font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Hardware Specs</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -218,7 +218,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                     required
                     value={formData.cpuCores}
                     onChange={(e) => setFormData({ ...formData, cpuCores: Number(e.target.value) })}
-                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
                 <div>
@@ -229,7 +229,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                     required
                     value={formData.ramGb}
                     onChange={(e) => setFormData({ ...formData, ramGb: Number(e.target.value) })}
-                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
                 <div>
@@ -240,7 +240,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                     required
                     value={formData.diskGb}
                     onChange={(e) => setFormData({ ...formData, diskGb: Number(e.target.value) })}
-                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
                 <div>
@@ -253,7 +253,7 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
                       { value: "HDD", label: "HDD" }
                     ]}
                     placeholder="Disk Type"
-                    className={cn("w-full rounded-xl px-3 py-2 text-xs", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full rounded-xl px-3 py-2 text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
               </div>
@@ -261,11 +261,11 @@ export default function ImportVpsModal({ isOpen, onClose, onSuccess }: ImportVps
           </form>
         </div>
 
-        <div className={cn("p-6 border-t shrink-0 flex justify-end gap-3 rounded-b-2xl", isDark ? "border-slate-800" : "border-slate-200")}>
+        <div className={cn("p-6 border-t shrink-0 flex justify-end gap-3 rounded-b-2xl", isDark ? "border-white/[0.08]" : "border-slate-200")}>
           <button
             type="button"
             onClick={onClose}
-            className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-slate-800 text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+            className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
           >
             Cancel
           </button>

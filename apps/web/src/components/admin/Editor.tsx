@@ -178,14 +178,14 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className={cn("w-full max-w-md rounded-2xl p-6 border shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                className={cn("w-full max-w-md rounded-2xl p-6 border shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={cn("p-3 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <div className={cn("p-3 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                     <FaYoutube className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-700")} />
                   </div>
                   <div>
-                    <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Insert YouTube Video</h3>
+                    <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Insert YouTube Video</h3>
                     <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Paste your YouTube link below.</p>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                     value={youtubeUrl}
                     onChange={(e) => setYoutubeUrl(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleYoutubeSubmit();
@@ -206,16 +206,16 @@ export default function Editor({ markdown, onChange, onOpenMedia }: EditorProps)
                   />
                 </div>
                 
-                <div className={cn("flex gap-3 justify-end pt-2 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+                <div className={cn("flex gap-3 justify-end pt-2 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <button
                     onClick={() => setIsYoutubeModalOpen(false)}
-                    className={cn("px-5 py-2.5 font-semibold rounded-lg transition-colors border text-sm", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                    className={cn("px-5 py-2.5 font-semibold rounded-lg transition-colors border text-sm", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleYoutubeSubmit}
-                    className="px-5 py-2.5 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm"
+                    className="px-5 py-2.5 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs"
                   >
                     Insert Video
                   </button>

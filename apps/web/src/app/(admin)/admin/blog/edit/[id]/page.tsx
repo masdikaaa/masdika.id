@@ -269,7 +269,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           </Link>
           <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Article' : 'Edit Article'}</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Article' : 'Edit Article'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Write and publish your thoughts.</p>
         </div>
       </div>
@@ -302,13 +302,13 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
       {/* Editor Card */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-8 border min-w-0 max-w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+        className={cn("rounded-2xl p-4 sm:p-4 sm:p-5 space-y-8 border min-w-0 max-w-full", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
       >
         {/* Featured Image */}
         <div className="space-y-3">
           <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><ImageIcon className="w-4 h-4" /> Featured Image</label>
           {formData.image ? (
-            <div className={cn("relative aspect-[21/9] w-full rounded-2xl overflow-hidden border group bg-black/40", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("relative aspect-[21/9] w-full rounded-2xl overflow-hidden border group bg-black/40", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <img referrerPolicy="no-referrer" src={formData.image} alt="Featured" className="w-full h-full object-cover" loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                 <button 
@@ -328,9 +328,9 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           ) : (
             <button
               onClick={() => { setMediaLibraryMode('featured'); setShowMediaLibrary(true); }}
-              className={cn("w-full aspect-[21/9] rounded-2xl border-2 border-dashed hover:border-cyan-500/50 hover:bg-cyan-500/5 flex flex-col items-center justify-center gap-4 hover:text-cyan-400 transition-all group", isDark ? "border-slate-800 bg-[#060b14] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}
+              className={cn("w-full aspect-[21/9] rounded-2xl border-2 border-dashed hover:border-cyan-500/50 hover:bg-cyan-500/5 flex flex-col items-center justify-center gap-4 hover:text-cyan-400 transition-all group", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}
             >
-              <div className={cn("w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border", isDark ? "border-slate-800" : "border-slate-200")}>
+              <div className={cn("w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                 <ImagePlus className="w-6 h-6" />
               </div>
               <span className="font-bold text-sm">Upload or Select Featured Image</span>
@@ -348,12 +348,12 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g. Next.js 14 Server Actions Guide" 
-              className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+              className={cn("w-full px-5 py-3.5 border rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
             />
           </div>
           <div className="space-y-3">
             <label className={cn("text-xs font-bold uppercase tracking-widest flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Link2 className="w-4 h-4" /> Permalink / Slug</label>
-            <div className={cn("flex items-center px-5 py-3.5 border rounded-xl transition-all focus-within:border-cyan-500", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
+            <div className={cn("flex items-center px-5 py-3.5 border rounded-xl transition-all focus-within:border-cyan-500", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
               <span className="text-zinc-500 mr-1 whitespace-nowrap overflow-hidden font-medium">/blog/</span>
               <input 
                 type="text" 
@@ -381,7 +381,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                     ...categories.map(cat => ({ value: cat.name, label: cat.name }))
                   ]}
                   placeholder="Select Category..."
-                  className={cn("w-full rounded-xl px-5 py-3 text-sm", isDark ? "border-white/10" : "border-slate-200")}
+                  className={cn("w-full rounded-xl px-3.5 py-2 text-xs", isDark ? "border-white/10" : "border-slate-200")}
                 />
               </div>
               {formData.categoryName && (
@@ -412,10 +412,10 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                   placeholder="New category name..."
-                  className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#060b14] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
                   autoFocus
                 />
-                <button onClick={handleAddCategory} className={cn("px-4 py-2.5 bg-cyan-400 font-bold rounded-xl text-sm hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
+                <button onClick={handleAddCategory} className={cn("px-4 py-2.5 bg-cyan-400 font-bold rounded-xl text-xs hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
                   Add
                 </button>
               </motion.div>
@@ -425,7 +425,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           <div className="space-y-2">
             <label className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Tags</label>
             <div className="flex flex-col gap-2">
-              <div className={cn("flex flex-wrap gap-2 p-2 pr-12 min-h-[52px] max-h-32 overflow-y-auto border rounded-xl focus-within:border-cyan-500 transition-all relative", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
+              <div className={cn("flex flex-wrap gap-2 p-2 pr-12 min-h-[52px] max-h-32 overflow-y-auto border rounded-xl focus-within:border-cyan-500 transition-all relative", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
                 {tags.map(tag => (
                   <div
                     key={tag.id}
@@ -473,10 +473,10 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => setNewTagName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                     placeholder="New tag name..."
-                    className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#060b14] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("flex-1 px-4 py-2.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-slate-700 text-white placeholder:text-zinc-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400")}
                     autoFocus
                   />
-                  <button onClick={handleAddTag} className={cn("px-4 py-2.5 bg-cyan-400 font-bold rounded-xl text-sm hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
+                  <button onClick={handleAddTag} className={cn("px-4 py-2.5 bg-cyan-400 font-bold rounded-xl text-xs hover:bg-cyan-300 text-slate-950 transition-colors shadow-sm")}>
                     Add
                   </button>
                 </motion.div>
@@ -496,7 +496,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
             onChange={handleChange}
             rows={2}
             placeholder="A brief summary of what this article is about..." 
-            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
+            className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} 
           />
         </div>
 
@@ -514,7 +514,7 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
           </div>
 
           {preview ? (
-            <div className={cn("border rounded-xl p-5", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("border rounded-xl p-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <MarkdownPreview content={formData.content} />
             </div>
           ) : (
@@ -574,9 +574,9 @@ function renderMarkdown(md: string): string {
     // Images
     .replace(/!\[(.*?)\]\((.*?)\)/g, '<img referrerPolicy="no-referrer" src="$2" alt="$1" class="rounded-lg my-3 max-w-full border border-white/10" loading="lazy" decoding="async" />')
     // Headers
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-cyan-500 font-bold mt-4 mb-2">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-cyan-500 font-bold mt-6 mb-2">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-cyan-500 font-bold mt-6 mb-3">$1</h1>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-cyan-500 font-bold mt-4 mb-2">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-sm sm:text-base font-bold text-cyan-500 font-bold mt-6 mb-2">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-xl sm:text-2xl font-bold text-cyan-500 font-bold mt-6 mb-3">$1</h1>')
     // Bold
     .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-500 font-bold">$1</strong>')
     // Italic
@@ -599,7 +599,7 @@ function MarkdownPreview({ content }: { content: string }) {
   const parts = content.split(/```/);
 
   return (
-    <div className={cn("w-full min-h-[400px] px-5 py-4 border rounded-b-xl prose prose-sm max-w-none overflow-y-auto font-sans", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300 prose-invert" : "bg-slate-50 border-slate-200 text-slate-700")}>
+    <div className={cn("w-full min-h-[400px] px-5 py-4 border rounded-b-xl prose prose-sm max-w-none overflow-y-auto font-sans", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300 prose-invert" : "bg-slate-50 border-slate-200 text-slate-700")}>
       {parts.map((part, index) => {
         if (index % 2 === 1) {
           // This is a code block

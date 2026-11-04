@@ -940,7 +940,7 @@ export default function VpsManagementPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Proxmox VPS Management
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -950,7 +950,7 @@ export default function VpsManagementPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
             <span>Proxmox Node:</span>
-            <span className="font-extrabold text-white">{settings.name || "Default Node"}</span>
+            <span className="font-bold text-white">{settings.name || "Default Node"}</span>
           </div>
           <button
             onClick={() => {
@@ -975,8 +975,8 @@ export default function VpsManagementPage() {
       </div>
 
       {/* Tabs (GAMBAR 1 Filter Bar Style) */}
-      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {[
             { id: "settings", label: "Proxmox Settings", icon: Settings },
             { id: "pools", label: "IP Pools", icon: Network },
@@ -1006,8 +1006,8 @@ export default function VpsManagementPage() {
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-          <h2 className={cn("text-xl font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Proxmox Server Configuration</h2>
+        <div className={cn("p-4 sm:p-5 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
+          <h2 className={cn("text-sm sm:text-base font-bold mb-6", isDark ? "text-white" : "text-slate-900")}>Proxmox Server Configuration</h2>
 
           {loadingSettings ? (
             <div className="flex justify-center items-center h-64">
@@ -1016,8 +1016,8 @@ export default function VpsManagementPage() {
           ) : (
             <form onSubmit={handleSaveSettings} className="space-y-6">
               {/* API Configuration */}
-              <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                <h3 className={cn("text-lg font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
+              <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                <h3 className={cn("text-sm font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
                   <Server className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> API Configuration
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
@@ -1029,7 +1029,7 @@ export default function VpsManagementPage() {
                       value={settings.name || ""}
                       onChange={(e) => setSettings({ ...settings, name: e.target.value })}
                       placeholder="e.g., Main Proxmox Node"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                   </div>
                   <div>
@@ -1040,7 +1040,7 @@ export default function VpsManagementPage() {
                       value={settings.host || ""}
                       onChange={(e) => setSettings({ ...settings, host: e.target.value })}
                       placeholder="e.g., https://proxmox.masdika.id:8006"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                   </div>
                   <div>
@@ -1051,7 +1051,7 @@ export default function VpsManagementPage() {
                       value={settings.tokenId || ""}
                       onChange={(e) => setSettings({ ...settings, tokenId: e.target.value })}
                       placeholder="e.g., root@pam!compute"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                   </div>
                   <div>
@@ -1062,15 +1062,15 @@ export default function VpsManagementPage() {
                       value={settings.tokenSecret || ""}
                       onChange={(e) => setSettings({ ...settings, tokenSecret: e.target.value })}
                       placeholder="e.g., e7f01eb6-..."
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Network & DNS */}
-              <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                <h3 className={cn("text-lg font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
+              <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                <h3 className={cn("text-sm font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
                   <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} /> Network & DNS Configuration
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
@@ -1082,7 +1082,7 @@ export default function VpsManagementPage() {
                       value={settings.networkBridge || "vmbr0"}
                       onChange={(e) => setSettings({ ...settings, networkBridge: e.target.value })}
                       placeholder="e.g., vmbr0"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">This network bridge will be used for VPC / Internal VPS instances.</p>
                   </div>
@@ -1094,7 +1094,7 @@ export default function VpsManagementPage() {
                       value={settings.publicNetworkBridge || "vmbr1"}
                       onChange={(e) => setSettings({ ...settings, publicNetworkBridge: e.target.value })}
                       placeholder="e.g., vmbr1"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">This network bridge will be used specifically for Public IPs on net0.</p>
                   </div>
@@ -1105,7 +1105,7 @@ export default function VpsManagementPage() {
                       value={settings.primaryDns || ""}
                       onChange={(e) => setSettings({ ...settings, primaryDns: e.target.value })}
                       placeholder="e.g., 8.8.8.8"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">Primary DNS server for new VPS instances.</p>
                   </div>
@@ -1116,7 +1116,7 @@ export default function VpsManagementPage() {
                       value={settings.secondaryDns || ""}
                       onChange={(e) => setSettings({ ...settings, secondaryDns: e.target.value })}
                       placeholder="e.g., 1.1.1.1"
-                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                     <p className="text-xs text-zinc-500 mt-1">Secondary DNS server for new VPS instances.</p>
                   </div>
@@ -1124,8 +1124,8 @@ export default function VpsManagementPage() {
               </div>
 
               {/* Storage */}
-              <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                <h3 className={cn("text-lg font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
+              <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                <h3 className={cn("text-sm font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
                   <HardDrive className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-600")} /> Storage Configuration
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
@@ -1148,7 +1148,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select backup storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1157,7 +1157,7 @@ export default function VpsManagementPage() {
                           value={settings.backupStorage || ""}
                           onChange={(e) => setSettings({ ...settings, backupStorage: e.target.value })}
                           placeholder="e.g., backup, pbs-backup"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     )}
@@ -1182,7 +1182,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select main storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1191,7 +1191,7 @@ export default function VpsManagementPage() {
                           value={settings.mainDiskStorage || ""}
                           onChange={(e) => setSettings({ ...settings, mainDiskStorage: e.target.value })}
                           placeholder="e.g., local-lvm, p-net"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     )}
@@ -1216,7 +1216,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select SSD storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1225,7 +1225,7 @@ export default function VpsManagementPage() {
                           value={settings.mainDiskStorageSsd || ""}
                           onChange={(e) => setSettings({ ...settings, mainDiskStorageSsd: e.target.value })}
                           placeholder="e.g., local-lvm, ssd-pool"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     )}
@@ -1250,7 +1250,7 @@ export default function VpsManagementPage() {
                           }))
                         ]}
                         placeholder="Select add-on storage..."
-                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}
+                        className={cn("w-full rounded-2xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}
                       />
                     ) : (
                       <div className="flex gap-2">
@@ -1259,7 +1259,7 @@ export default function VpsManagementPage() {
                           value={settings.addonDiskStorages || ""}
                           onChange={(e) => setSettings({ ...settings, addonDiskStorages: e.target.value })}
                           placeholder="e.g., local-lvm, p-net"
-                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                          className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     )}
@@ -1286,7 +1286,7 @@ export default function VpsManagementPage() {
                 <button
                   type="submit"
                   disabled={savingSettings}
-                  className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                  className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {savingSettings ? "Saving..." : "Save Configuration"}
                 </button>
@@ -1301,7 +1301,7 @@ export default function VpsManagementPage() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>IP Pool Management</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>IP Pool Management</h2>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Manage IPv4/IPv6 blocks for VPS provisioning. The gateway IP will not be assigned to clients.</p>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
@@ -1323,7 +1323,7 @@ export default function VpsManagementPage() {
           </div>
 
           {showAddPool && (
-            <form onSubmit={handleAddPool} className={cn("p-6 md:p-8 rounded-2xl border space-y-6 shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+            <form onSubmit={handleAddPool} className={cn("p-4 sm:p-5 rounded-2xl border space-y-6 shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
 
               {/* IP Version Selector */}
               <div>
@@ -1343,36 +1343,36 @@ export default function VpsManagementPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Network (Subnet/CIDR)</label>
-                  <input type="text" required value={newPool.network} onChange={e => setNewPool({ ...newPool, network: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.0/24" : "2001:db8:1234:5678::/64"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                  <input type="text" required value={newPool.network} onChange={e => setNewPool({ ...newPool, network: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.0/24" : "2001:db8:1234:5678::/64"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Gateway IP</label>
-                  <input type="text" required value={newPool.gateway} onChange={e => setNewPool({ ...newPool, gateway: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.1" : "2001:db8:1234:5678::1"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                  <input type="text" required value={newPool.gateway} onChange={e => setNewPool({ ...newPool, gateway: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.1" : "2001:db8:1234:5678::1"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                 </div>
 
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Start IP</label>
-                  <input type="text" required value={newPool.startIp} onChange={e => setNewPool({ ...newPool, startIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.2" : "2001:db8:1234:5678::2"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                  <input type="text" required value={newPool.startIp} onChange={e => setNewPool({ ...newPool, startIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.2" : "2001:db8:1234:5678::2"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>End IP</label>
-                  <input type="text" required value={newPool.endIp} onChange={e => setNewPool({ ...newPool, endIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.254" : "2001:db8:1234:5678::ffff"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                  <input type="text" required value={newPool.endIp} onChange={e => setNewPool({ ...newPool, endIp: e.target.value })} placeholder={newPool.version === 4 ? "192.168.100.254" : "2001:db8:1234:5678::ffff"} className={cn("w-full border rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                 </div>
               </div>
 
               <div className="flex justify-end pt-2">
-                <button type="submit" className="px-8 py-3 rounded-2xl font-bold transition-all text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+                <button type="submit" className="px-8 py-3 rounded-2xl font-bold transition-all text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
                   Save Pool
                 </button>
               </div>
             </form>
           )}
 
-          <div className={cn("rounded-xl border overflow-x-auto", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
+          <div className={cn("rounded-xl border overflow-x-auto", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}>
             <table className={cn("w-full text-left text-sm min-w-[600px]", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <thead className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+              <thead className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
                 <tr>
-                  <th className="px-6 py-4 w-10">
+                  <th className="px-3.5 py-2.5 w-10">
                     <button
                       onClick={toggleSelectAllPools}
                       className={cn(
@@ -1385,11 +1385,11 @@ export default function VpsManagementPage() {
                       <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                     </button>
                   </th>
-                  <th className={cn("px-6 py-4 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Network</th>
-                  <th className={cn("px-6 py-4 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Gateway</th>
-                  <th className={cn("px-6 py-4 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Range</th>
-                  <th className={cn("px-6 py-4 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Type</th>
-                  <th className={cn("px-6 py-4 font-semibold text-right", isDark ? "text-slate-300" : "text-slate-700")}>Actions</th>
+                  <th className={cn("px-3.5 py-2.5 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Network</th>
+                  <th className={cn("px-3.5 py-2.5 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Gateway</th>
+                  <th className={cn("px-3.5 py-2.5 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Range</th>
+                  <th className={cn("px-3.5 py-2.5 font-semibold", isDark ? "text-slate-300" : "text-slate-700")}>Type</th>
+                  <th className={cn("px-3.5 py-2.5 font-semibold text-right", isDark ? "text-slate-300" : "text-slate-700")}>Actions</th>
                 </tr>
               </thead>
               <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -1406,7 +1406,7 @@ export default function VpsManagementPage() {
                 ) : (
                   pools.slice((poolCurrentPage - 1) * poolsPerPage, poolCurrentPage * poolsPerPage).map(pool => (
                     <tr key={pool.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         <button
                           onClick={() => toggleSelectPool(pool.id)}
                           className={cn(
@@ -1419,13 +1419,13 @@ export default function VpsManagementPage() {
                           <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                         </button>
                       </td>
-                      <td className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-slate-900")}>{pool.network}</td>
-                      <td className={cn("px-6 py-4", isDark ? "text-red-400" : "text-red-700")}>{pool.gateway}</td>
-                      <td className="px-6 py-4">
+                      <td className={cn("px-3.5 py-2.5 font-medium", isDark ? "text-white" : "text-slate-900")}>{pool.network}</td>
+                      <td className={cn("px-3.5 py-2.5", isDark ? "text-red-400" : "text-red-700")}>{pool.gateway}</td>
+                      <td className="px-3.5 py-2.5">
                         {pool.version === 4 ? `${pool.startIp} - ${pool.endIp}` : <span className="text-zinc-500 italic">Subnet block (No range)</span>}
                       </td>
-                      <td className="px-6 py-4"><span className="px-2 py-1 bg-white/10 rounded-md text-xs">{pool.version === 4 ? 'IPv4' : 'IPv6'}</span></td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3.5 py-2.5"><span className="px-2 py-1 bg-white/10 rounded-md text-xs">{pool.version === 4 ? 'IPv4' : 'IPv6'}</span></td>
+                      <td className="px-3.5 py-2.5 text-right">
                         <button onClick={() => setShowDeletePoolModal(pool.id)} className={cn("p-2 hover:bg-red-400/10 rounded-lg", isDark ? "text-red-400" : "text-red-700")}><Trash2 className="w-4 h-4" /></button>
                       </td>
                     </tr>
@@ -1465,13 +1465,13 @@ export default function VpsManagementPage() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>OS Templates</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>OS Templates</h2>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Templates are synced directly from Proxmox (VMs with template=1).</p>
             </div>
             <button
               onClick={syncTemplates}
               disabled={syncingTemplates}
-              className="px-4 py-2 sm:py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+              className="px-4 py-2 sm:py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
             >
               <RefreshCw className={cn("w-4 h-4", syncingTemplates && "animate-spin")} />
               {syncingTemplates ? "Syncing..." : "Sync from Proxmox"}
@@ -1544,9 +1544,9 @@ export default function VpsManagementPage() {
                   const selectedTpl = templates.find(t => t.id === selectedAdminTemplate);
                   if (!selectedTpl) return null;
                   return (
-                    <div className={cn("p-6 md:p-8 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-6 mt-8 w-full group transition-all duration-300", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("p-4 sm:p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-6 mt-8 w-full group transition-all duration-300", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full">
-                        <div className={cn("p-4 md:p-5 rounded-2xl border group-hover:scale-105 transition-transform", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                        <div className={cn("p-4 md:p-5 rounded-2xl border group-hover:scale-105 transition-transform", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
                           {getOsIconUrl(selectedTpl.name.split('-')[0], isDark) ? (
                             <img referrerPolicy="no-referrer" src={getOsIconUrl(selectedTpl.name.split('-')[0], isDark)!} alt={selectedTpl.name} className="w-10 h-10 md:w-12 md:h-12 object-contain" loading="lazy" decoding="async" />
                           ) : (
@@ -1554,9 +1554,9 @@ export default function VpsManagementPage() {
                           )}
                         </div>
                         <div className="flex-1 w-full">
-                          <h3 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{selectedTpl.name}</h3>
+                          <h3 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>{selectedTpl.name}</h3>
                           <div className="flex flex-wrap items-center gap-3">
-                            <span className={cn("text-sm font-medium px-3 py-1 rounded-full border", isDark ? "text-zinc-400 border-slate-800 bg-[#0b1322]" : "text-slate-500 border-slate-200 bg-white")}>OS Type: {selectedTpl.osType}</span>
+                            <span className={cn("text-sm font-medium px-3 py-1 rounded-full border", isDark ? "text-zinc-400 border-white/[0.08] bg-[#0c0c0e]" : "text-slate-500 border-slate-200 bg-white")}>OS Type: {selectedTpl.osType}</span>
                             <span className={cn("text-sm font-medium px-3 py-1 rounded-full border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>Bootable Image</span>
                           </div>
                         </div>
@@ -1564,7 +1564,7 @@ export default function VpsManagementPage() {
                       <div className="w-full md:w-auto mt-4 md:mt-0 flex shrink-0">
                         <div className={cn("px-6 py-4 bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 font-bold rounded-xl border border-emerald-500/30 text-center w-full", isDark ? "text-emerald-400" : "text-emerald-700")}>
                           <div className="text-[11px] uppercase tracking-wider opacity-80 mb-1 font-semibold">Proxmox VMID</div>
-                          <div className="text-3xl md:text-4xl font-black tabular-nums tracking-tighter">{selectedTpl.vmid}</div>
+                          <div className="text-xl sm:text-2xl md:text-xl sm:text-2xl font-bold tabular-nums tracking-tighter">{selectedTpl.vmid}</div>
                         </div>
                       </div>
                     </div>
@@ -1578,9 +1578,9 @@ export default function VpsManagementPage() {
 
       {/* Pricing Tab */}
       {activeTab === "pricing" && (
-        <div className={cn("p-6 rounded-2xl border max-w-3xl", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 rounded-2xl border max-w-3xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="mb-6">
-            <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Resource Pricing (Pay-As-You-Go)</h2>
+            <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Resource Pricing (Pay-As-You-Go)</h2>
             <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Set the hourly rate in Rupiah for each resource type.</p>
           </div>
 
@@ -1592,7 +1592,7 @@ export default function VpsManagementPage() {
             <form onSubmit={handleSavePricing}>
               <div className="grid gap-4 mb-6">
                 {pricing.map((item, idx) => (
-                  <div key={item.id} className={cn("flex items-center justify-between p-4 rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <div key={item.id} className={cn("flex items-center justify-between p-4 rounded-xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                     <div>
                       <h3 className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{item.name}</h3>
                       <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>Per {item.unit} / hour</p>
@@ -1609,7 +1609,7 @@ export default function VpsManagementPage() {
                           newPricing[idx].pricePerHour = Number(e.target.value);
                           setPricing(newPricing);
                         }}
-                        className={cn("w-28 border rounded-lg px-3 py-1.5 text-right focus:border-cyan-500 focus:outline-none transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                        className={cn("w-28 border rounded-lg px-3 py-1.5 text-right focus:border-cyan-500 focus:outline-none transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                       />
                     </div>
                   </div>
@@ -1619,7 +1619,7 @@ export default function VpsManagementPage() {
                 <button
                   type="submit"
                   disabled={savingPricing}
-                  className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                  className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {savingPricing ? "Saving..." : "Save Pricing"}
                 </button>
@@ -1631,10 +1631,10 @@ export default function VpsManagementPage() {
 
       {/* Bandwidth Speed Tab */}
       {activeTab === "bandwidth" && (
-        <div className={cn("p-5 sm:p-6 md:p-8 rounded-2xl border w-full shadow-sm space-y-6", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-5 sm:p-4 sm:p-5 rounded-2xl border w-full shadow-sm space-y-6", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className={cn("text-lg sm:text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+              <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Gauge className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 Network Bandwidth Speed Management
               </h2>
@@ -1665,19 +1665,19 @@ export default function VpsManagementPage() {
             <div className="space-y-6">
               {/* Stats & Pricing Banner */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200")}>
                   <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Base Free Tier</span>
                   <div className="flex items-baseline gap-1.5 my-1">
-                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-emerald-400" : "text-emerald-600")}>100</span>
+                    <span className={cn("text-2xl font-bold font-mono", isDark ? "text-emerald-400" : "text-emerald-600")}>100</span>
                     <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Mbps (Free)</span>
                   </div>
                   <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Standard default for each VPS</p>
                 </div>
 
-                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200")}>
                   <div className="flex items-center justify-between gap-1 mb-1">
                     <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Rate per 50 Mbps Step</span>
-                    <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded border", isDark ? "border-slate-800 text-zinc-500 bg-white/5" : "border-slate-200 text-slate-500 bg-white")}>/ 50M</span>
+                    <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded border", isDark ? "border-white/[0.08] text-zinc-500 bg-white/5" : "border-slate-200 text-slate-500 bg-white")}>/ 50M</span>
                   </div>
                   <div className="flex items-center gap-1.5 my-0.5">
                     <span className={cn("text-sm font-bold font-mono", isDark ? "text-zinc-400" : "text-slate-400")}>Rp</span>
@@ -1689,9 +1689,9 @@ export default function VpsManagementPage() {
                       onChange={(e) => setNewBandwidthRateInput(e.target.value)}
                       title="Change rate per 50 Mbps step"
                       className={cn(
-                        "w-20 px-2 py-0.5 rounded-lg border font-mono font-black text-xl outline-none transition-all",
+                        "w-20 px-2 py-0.5 rounded-lg border font-mono font-bold text-xl outline-none transition-all",
                         isDark
-                          ? "bg-[#0b1322] border-slate-700 text-cyan-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20"
+                          ? "bg-[#0c0c0e] border-slate-700 text-cyan-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20"
                           : "bg-white border-slate-300 text-cyan-700 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600/20"
                       )}
                     />
@@ -1702,10 +1702,10 @@ export default function VpsManagementPage() {
                   </p>
                 </div>
 
-                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200")}>
                   <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Max Slider Cap</span>
                   <div className="flex items-baseline gap-1.5 my-1">
-                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-white" : "text-slate-900")}>
+                    <span className={cn("text-2xl font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
                       {Math.max(...bandwidthOptions)}
                     </span>
                     <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Mbps</span>
@@ -1713,10 +1713,10 @@ export default function VpsManagementPage() {
                   <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Maximum limit on customer slider</p>
                 </div>
 
-                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+                <div className={cn("p-4 rounded-xl border flex flex-col justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200")}>
                   <span className={cn("text-xs font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Total Active Tiers</span>
                   <div className="flex items-baseline gap-1.5 my-1">
-                    <span className={cn("text-2xl font-black font-mono", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    <span className={cn("text-2xl font-bold font-mono", isDark ? "text-cyan-400" : "text-cyan-700")}>
                       {bandwidthOptions.length}
                     </span>
                     <span className={cn("text-xs font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Speed Tiers</span>
@@ -1726,7 +1726,7 @@ export default function VpsManagementPage() {
               </div>
 
               {/* Add New Speed Tier */}
-              <div className={cn("p-4 sm:p-5 rounded-2xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+              <div className={cn("p-4 sm:p-5 rounded-2xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200")}>
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Plus className="w-4 h-4 shrink-0" />
                   Add Bandwidth Speed Tier
@@ -1750,7 +1750,7 @@ export default function VpsManagementPage() {
                       className={cn(
                         "w-full pl-3.5 pr-16 py-2.5 rounded-xl border outline-none font-mono text-sm transition-all",
                         isDark
-                          ? "bg-[#0b1322] border-slate-700 text-white placeholder:text-zinc-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                          ? "bg-[#0c0c0e] border-slate-700 text-white placeholder:text-zinc-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                           : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/15"
                       )}
                     />
@@ -1778,7 +1778,7 @@ export default function VpsManagementPage() {
                 </div>
 
                 {/* Quick Add Presets */}
-                <div className={cn("flex flex-col sm:flex-row sm:items-start gap-2 pt-2 border-t border-dashed", isDark ? "border-slate-800" : "border-slate-200")}>
+                <div className={cn("flex flex-col sm:flex-row sm:items-start gap-2 pt-2 border-t border-dashed", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <span className={cn("text-xs font-semibold shrink-0 pt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Quick Presets:</span>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {[150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000].map((preset) => {
@@ -1793,7 +1793,7 @@ export default function VpsManagementPage() {
                             "px-2.5 py-1 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1 shrink-0",
                             alreadyHas
                               ? isDark ? "bg-white/5 border-white/5 text-zinc-600 cursor-not-allowed" : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
-                              : isDark ? "bg-[#0b1322] border-slate-700 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/10 cursor-pointer" : "bg-white border-slate-300 text-cyan-800 hover:border-cyan-600 hover:bg-cyan-50 cursor-pointer shadow-xs"
+                              : isDark ? "bg-[#0c0c0e] border-slate-700 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/10 cursor-pointer" : "bg-white border-slate-300 text-cyan-800 hover:border-cyan-600 hover:bg-cyan-50 cursor-pointer shadow-xs"
                           )}
                         >
                           <span>+{preset}M</span>
@@ -1831,14 +1831,14 @@ export default function VpsManagementPage() {
                         className={cn(
                           "p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 relative group shadow-xs",
                           isBase
-                            ? isDark ? "bg-[#060b14] border-emerald-500/30" : "bg-emerald-50/50 border-emerald-300/80"
-                            : isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40" : "bg-white border-slate-200 hover:border-cyan-500/60"
+                            ? isDark ? "bg-[#0a0a0c] border-emerald-500/30" : "bg-emerald-50/50 border-emerald-300/80"
+                            : isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/40" : "bg-white border-slate-200 hover:border-cyan-500/60"
                         )}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className={cn("text-xl font-black font-mono", isBase ? (isDark ? "text-emerald-400" : "text-emerald-700") : (isDark ? "text-white" : "text-slate-900"))}>
+                              <span className={cn("text-xl font-bold font-mono", isBase ? (isDark ? "text-emerald-400" : "text-emerald-700") : (isDark ? "text-white" : "text-slate-900"))}>
                                 {speed} Mbps
                               </span>
                               {isBase && (
@@ -1858,7 +1858,7 @@ export default function VpsManagementPage() {
                               onClick={() => setShowDeleteBandwidthModal(speed)}
                               className={cn(
                                 "p-1.5 rounded-lg border transition-all cursor-pointer opacity-80 group-hover:opacity-100",
-                                isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-zinc-400 hover:text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-slate-400 hover:text-red-600"
+                                isDark ? "border-white/[0.08] hover:border-red-500/50 hover:bg-red-500/10 text-zinc-400 hover:text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-slate-400 hover:text-red-600"
                               )}
                               title={`Remove ${speed} Mbps tier`}
                             >
@@ -1867,7 +1867,7 @@ export default function VpsManagementPage() {
                           )}
                         </div>
 
-                        <div className={cn("pt-2.5 border-t text-xs flex items-center justify-between", isDark ? "border-slate-800/80" : "border-slate-100")}>
+                        <div className={cn("pt-2.5 border-t text-xs flex items-center justify-between", isDark ? "border-white/[0.08]" : "border-slate-100")}>
                           <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Customer Price</span>
                           <span className={cn("font-bold font-mono", isBase ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-cyan-400" : "text-cyan-700"))}>
                             {isBase ? "FREE" : `+Rp ${monthlyPrice.toLocaleString("id-ID")}/mo (~+Rp ${hourlyPrice}/hr)`}
@@ -1880,7 +1880,7 @@ export default function VpsManagementPage() {
               </div>
 
               {/* Live Customer Preview */}
-              <div className={cn("p-4 sm:p-5 rounded-2xl border space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50/80 border-slate-200")}>
+              <div className={cn("p-4 sm:p-5 rounded-2xl border space-y-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200")}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <div className="flex items-center gap-2">
                     <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -1891,7 +1891,7 @@ export default function VpsManagementPage() {
                   <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Automatically synced with configuration above</span>
                 </div>
 
-                <div className={cn("p-3.5 sm:p-4 rounded-xl border space-y-3", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-xs")}>
+                <div className={cn("p-3.5 sm:p-4 rounded-xl border space-y-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-medium gap-1">
                     <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Network Bandwidth (Speed Limit)</span>
                     <span className={cn("font-mono font-bold text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>Available: {bandwidthOptions.join(", ")} Mbps</span>
@@ -1926,10 +1926,10 @@ export default function VpsManagementPage() {
 
       {/* Fixed Plans Tab */}
       {activeTab === "plans" && (
-        <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Fixed Monthly Plans</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Fixed Monthly Plans</h2>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Pre-configured VPS plans with monthly pricing.</p>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
@@ -1953,7 +1953,7 @@ export default function VpsManagementPage() {
             </div>
           </div>
 
-          <div className={cn("flex p-1 rounded-xl w-full sm:w-fit border mb-6", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+          <div className={cn("flex p-1 rounded-xl w-full sm:w-fit border mb-6", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
             <button
               onClick={() => {
                 setPlanFilterDiskType("HDD");
@@ -1981,40 +1981,40 @@ export default function VpsManagementPage() {
           </div>
 
           {showAddPlan && (
-            <div className={cn("mb-8 p-6 border rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-              <h3 className={cn("text-lg font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{newPlan.id ? 'Edit Plan' : 'Add New Plan'}</h3>
+            <div className={cn("mb-8 p-6 border rounded-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+              <h3 className={cn("text-sm font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{newPlan.id ? 'Edit Plan' : 'Add New Plan'}</h3>
               <form onSubmit={handleSavePlan} className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Plan Name</label>
-                  <input type="text" required value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} placeholder="e.g. Standard" />
+                  <input type="text" required value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} placeholder="e.g. Standard" />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Monthly Price (Rp)</label>
-                  <input type="number" required min="0" value={newPlan.monthlyPrice} onChange={e => setNewPlan({ ...newPlan, monthlyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="0" value={newPlan.monthlyPrice} onChange={e => setNewPlan({ ...newPlan, monthlyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>3 Months Price (Rp)</label>
-                  <input type="number" required min="0" value={newPlan.quarterlyPrice} onChange={e => setNewPlan({ ...newPlan, quarterlyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="0" value={newPlan.quarterlyPrice} onChange={e => setNewPlan({ ...newPlan, quarterlyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>6 Months Price (Rp)</label>
-                  <input type="number" required min="0" value={newPlan.semiAnnuallyPrice} onChange={e => setNewPlan({ ...newPlan, semiAnnuallyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="0" value={newPlan.semiAnnuallyPrice} onChange={e => setNewPlan({ ...newPlan, semiAnnuallyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>12 Months Price (Rp)</label>
-                  <input type="number" required min="0" value={newPlan.annuallyPrice} onChange={e => setNewPlan({ ...newPlan, annuallyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="0" value={newPlan.annuallyPrice} onChange={e => setNewPlan({ ...newPlan, annuallyPrice: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>vCPU Cores</label>
-                  <input type="number" required min="1" value={newPlan.cpuCores} onChange={e => setNewPlan({ ...newPlan, cpuCores: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="1" value={newPlan.cpuCores} onChange={e => setNewPlan({ ...newPlan, cpuCores: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>RAM (GB)</label>
-                  <input type="number" required min="1" value={newPlan.ramGb} onChange={e => setNewPlan({ ...newPlan, ramGb: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="1" value={newPlan.ramGb} onChange={e => setNewPlan({ ...newPlan, ramGb: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Disk (GB)</label>
-                  <input type="number" required min="1" value={newPlan.diskGb} onChange={e => setNewPlan({ ...newPlan, diskGb: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
+                  <input type="number" required min="1" value={newPlan.diskGb} onChange={e => setNewPlan({ ...newPlan, diskGb: Number(e.target.value) })} className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500")} />
                 </div>
                 <div>
                   <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Disk Type</label>
@@ -2025,7 +2025,7 @@ export default function VpsManagementPage() {
                       { value: "HDD", label: "HDD" },
                       { value: "SSD", label: "SSD" }
                     ]}
-                    className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
+                    className={cn("w-full border rounded-lg px-3 py-2 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
                   />
                 </div>
                 <div className="flex items-center gap-4 mt-6">
@@ -2040,7 +2040,7 @@ export default function VpsManagementPage() {
                 </div>
                 <div className="md:col-span-2 flex justify-end gap-3 mt-4">
                   <button type="button" onClick={() => setShowAddPlan(false)} className={cn("px-4 py-2 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>
-                  <button type="submit" className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Save Plan</button>
+                  <button type="submit" className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">Save Plan</button>
                 </div>
               </form>
             </div>
@@ -2053,7 +2053,7 @@ export default function VpsManagementPage() {
           ) : (
             <div className="grid gap-4">
               {filteredPlans.length > 0 && (
-                <div className={cn("flex items-center gap-3 p-4 rounded-xl border mb-2", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("flex items-center gap-3 p-4 rounded-xl border mb-2", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <button
                     onClick={toggleSelectAllPlans}
                     className={cn(
@@ -2075,7 +2075,7 @@ export default function VpsManagementPage() {
                 className="grid gap-4"
               >
                 {filteredPlans.slice((planCurrentPage - 1) * plansPerPage, planCurrentPage * plansPerPage).map((plan) => (
-                  <Reorder.Item key={plan.id} value={plan} className={cn("flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl border gap-4 transition-colors cursor-grab active:cursor-grabbing", isDark ? "bg-[#060b14] border-slate-800 hover:border-cyan-500/40" : "bg-slate-50 border-slate-200 hover:border-cyan-500/40")}>
+                  <Reorder.Item key={plan.id} value={plan} className={cn("flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl border gap-4 transition-colors cursor-grab active:cursor-grabbing", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/40" : "bg-slate-50 border-slate-200 hover:border-cyan-500/40")}>
                     <div className="flex items-start gap-4">
                       <div className="mt-1 text-zinc-500 hover:text-white transition-colors cursor-grab active:cursor-grabbing">
                         <GripVertical className="w-5 h-5" />
@@ -2118,7 +2118,7 @@ export default function VpsManagementPage() {
               {filteredPlans.length === 0 && <div className="text-zinc-500 text-center py-6">No fixed plans configured for {planFilterDiskType} yet.</div>}
 
               {filteredPlans.length > plansPerPage && (
-                <div className={cn("px-6 py-4 border-t mt-4 flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-200")}>
+                <div className={cn("px-6 py-4 border-t mt-4 flex items-center justify-between", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
                     Showing {((planCurrentPage - 1) * plansPerPage) + 1} to {Math.min(planCurrentPage * plansPerPage, filteredPlans.length)} of {filteredPlans.length} plans
                   </span>
@@ -2147,10 +2147,10 @@ export default function VpsManagementPage() {
 
       {/* Services and K3s Nodes Tabs */}
       {(activeTab === "services" || activeTab === "k3s") && (
-        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 sm:p-5 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-slate-900")}>
+              <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
                 {activeTab === "services" ? "User VPS Services" : "Managed K3s Nodes"}
               </h2>
               <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -2175,7 +2175,7 @@ export default function VpsManagementPage() {
                   placeholder="Search hostname or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={cn("w-full border focus:border-cyan-500 rounded-2xl py-3.5 pl-10 pr-4 outline-none transition-all h-[48px]", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border focus:border-cyan-500 rounded-2xl py-3.5 pl-10 pr-4 outline-none transition-all h-[48px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
             </div>
@@ -2186,11 +2186,11 @@ export default function VpsManagementPage() {
               <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
             </div>
           ) : (
-            <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
+            <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
-                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                    <th className="p-4 w-10">
+                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <th className="px-3.5 py-2.5 w-10">
                       <button
                         onClick={toggleSelectAllVps}
                         className={cn(
@@ -2203,14 +2203,14 @@ export default function VpsManagementPage() {
                         <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                       </button>
                     </th>
-                    <th className="p-4 font-semibold whitespace-nowrap">VMID / Node</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Hostname</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">OS</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Client</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">IP Address</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Status</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Current Cost</th>
-                    <th className="p-4 font-semibold text-right whitespace-nowrap">Actions</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">VMID / Node</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Hostname</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">OS</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Client</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">IP Address</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Status</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Current Cost</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -2220,7 +2220,7 @@ export default function VpsManagementPage() {
                     .slice((vpsCurrentPage - 1) * vpsPerPage, vpsCurrentPage * vpsPerPage)
                     .map((vps) => (
                       <tr key={vps.id} className={`${isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"} transition-colors ${actionLoading === vps.id ? 'opacity-50 animate-pulse' : ''}`}>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           <button
                             onClick={() => toggleSelectVps(vps.id)}
                             className={cn(
@@ -2233,11 +2233,11 @@ export default function VpsManagementPage() {
                             <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                           </button>
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           <div className={cn("font-mono text-sm", isDark ? "text-white" : "text-slate-900")}>{vps.vmid || 'N/A'}</div>
                           <div className="text-xs text-zinc-500">{vps.node}</div>
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           <div className={cn("font-medium whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>{vps.hostname}</div>
                           <div className="text-xs text-zinc-500 mt-1.5 flex flex-wrap items-center gap-2">
                             <div className="flex items-center gap-1.5 shrink-0">
@@ -2252,7 +2252,7 @@ export default function VpsManagementPage() {
                             )}
                           </div>
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           {vps.osTemplate ? (
                             <div className="flex items-center gap-2.5" title={vps.osTemplate}>
                               {getOsIconUrl(vps.osTemplate, isDark) ? (
@@ -2268,11 +2268,11 @@ export default function VpsManagementPage() {
                             <span className="text-zinc-600 text-xs italic">Unknown</span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           <div className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{vps.user.name}</div>
                           <div className="text-xs text-zinc-500">{vps.user.email}</div>
                         </td>
-                        <td className="p-4 text-sm font-mono max-w-[250px] truncate">
+                        <td className="px-3.5 py-2.5 text-sm font-mono max-w-[250px] truncate">
                           {vps.assignedIps?.length ? (
                             <div className="flex flex-col gap-1.5">
                               {vps.assignedIps.map((ip, idx) => (
@@ -2301,7 +2301,7 @@ export default function VpsManagementPage() {
                             <span className="text-zinc-500">Unassigned</span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           {actionLoading === vps.id ? (
                             <div className="flex items-center gap-2 mb-1">
                               <RefreshCw className={cn("w-4 h-4 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
@@ -2329,7 +2329,7 @@ export default function VpsManagementPage() {
                             </>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           {actionLoading !== vps.id && (
                             <div className="flex flex-col">
                               <div className={cn("text-xs font-medium whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>Rp {(vps.hourlyRate || 0).toLocaleString('id-ID')}/hr</div>
@@ -2337,7 +2337,7 @@ export default function VpsManagementPage() {
                             </div>
                           )}
                         </td>
-                        <td className="p-4 align-middle">
+                        <td className="px-3.5 py-2.5 align-middle">
                           <div className="flex items-center justify-end gap-2">
                             {actionLoading === vps.id ? (
                               <div className={cn("px-3 py-1 bg-white/10 rounded-lg text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Please wait</div>
@@ -2414,10 +2414,10 @@ export default function VpsManagementPage() {
 
       {/* Reserved IPs Tab */}
       {activeTab === "reserved-ips" && (
-        <div className={cn("p-6 md:p-8 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 sm:p-5 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h2 className={cn("text-2xl font-extrabold mb-2", isDark ? "text-white" : "text-slate-900")}>Reserved IPs Management</h2>
+              <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Reserved IPs Management</h2>
               <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Monitor and edit reserved IPs allocated to users.</p>
             </div>
             <div className="relative w-full md:w-64">
@@ -2427,7 +2427,7 @@ export default function VpsManagementPage() {
                 placeholder="Search IP or user..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={cn("w-full border focus:border-cyan-500 rounded-2xl py-3.5 pl-10 pr-4 outline-none transition-all h-[48px]", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full border focus:border-cyan-500 rounded-2xl py-3.5 pl-10 pr-4 outline-none transition-all h-[48px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
           </div>
@@ -2437,16 +2437,16 @@ export default function VpsManagementPage() {
               <RefreshCw className={cn("w-10 h-10 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
             </div>
           ) : (
-            <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-white")}>
+            <div className={cn("overflow-x-auto rounded-2xl border", isDark ? "border-white/[0.08] bg-[#0c0c0e]" : "border-slate-200 bg-white")}>
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
-                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                    <th className="p-4 font-semibold whitespace-nowrap">IP Address</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Client</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">IP Pool</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Status</th>
-                    <th className="p-4 font-semibold whitespace-nowrap">Service</th>
-                    <th className="p-4 font-semibold whitespace-nowrap text-right">Actions</th>
+                  <tr className={cn("text-xs font-semibold uppercase tracking-wider border-b", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">IP Address</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Client</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">IP Pool</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Status</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap">Service</th>
+                    <th className="px-3.5 py-2.5 font-semibold whitespace-nowrap text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -2460,7 +2460,7 @@ export default function VpsManagementPage() {
                     .slice((reservedIpCurrentPage - 1) * reservedIpsPerPage, reservedIpCurrentPage * reservedIpsPerPage)
                     .map((ip) => (
                       <tr key={ip.id} className={`${isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"} transition-colors ${reservedIpActionLoading === ip.id ? 'opacity-50 animate-pulse' : ''}`}>
-                        <td className={cn("p-4 font-mono text-sm", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <td className={cn("px-3.5 py-2.5 font-mono text-sm", isDark ? "text-cyan-400" : "text-cyan-700")}>
                           {editingReservedIpId === ip.id ? (
                             <div>
                               <div>{ip.ipAddress} <span className={cn("text-xs text-zinc-500 border rounded px-1 ml-1", isDark ? "border-zinc-700 bg-zinc-800" : "border-slate-200 bg-slate-100")}>Local</span></div>
@@ -2469,7 +2469,7 @@ export default function VpsManagementPage() {
                                   type="text"
                                   value={editingReservedIpValue}
                                   onChange={(e) => setEditingReservedIpValue(e.target.value)}
-                                  className={cn("border rounded-lg px-2 py-1.5 text-sm focus:outline-none transition-colors w-40", isDark ? "bg-[#0b1322] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
+                                  className={cn("border rounded-lg px-2 py-1.5 text-sm focus:outline-none transition-colors w-40", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
                                   placeholder="e.g. 10.0.0.5"
                                 />
                                 <button
@@ -2523,29 +2523,29 @@ export default function VpsManagementPage() {
                             </div>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           <div className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{ip.user.name}</div>
                           <div className="text-xs text-zinc-500">{ip.user.email}</div>
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           <div className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{ip.ipPool.network}</div>
                           <div className="text-xs text-zinc-500">GW: {ip.ipPool.gateway}</div>
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           {ip.isAttached ? (
                             <span className={cn("text-xs px-2 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>Attached</span>
                           ) : (
                             <span className={cn("text-xs px-2 py-1 bg-zinc-500/10 border border-zinc-500/20 rounded-full font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Unattached</span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="px-3.5 py-2.5">
                           {ip.isAttached && ip.vps ? (
                             <div className={cn("text-sm truncate max-w-[150px]", isDark ? "text-zinc-300" : "text-slate-600")} title={ip.vps.hostname}>{ip.vps.hostname}</div>
                           ) : (
                             <span className="text-zinc-600">-</span>
                           )}
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="px-3.5 py-2.5 text-right">
                           {reservedIpActionLoading !== ip.id && (
                             <div className="flex items-center justify-end gap-2">
                               <button
@@ -2610,11 +2610,11 @@ export default function VpsManagementPage() {
       )}      {/* Suspend VPS Modal */}
       {showSuspendModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border w-full max-w-md rounded-2xl p-4 sm:p-5 relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <button onClick={() => setShowSuspendModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className="flex items-center gap-3 mb-4 text-orange-500">
               <AlertTriangle className="w-8 h-8" />
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Suspend VPS</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Suspend VPS</h2>
             </div>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>You are about to suspend <strong>{showSuspendModal.hostname}</strong> belonging to {showSuspendModal.user.email}. This will power off the VM.</p>
             <div className="mb-6">
@@ -2623,11 +2623,11 @@ export default function VpsManagementPage() {
                 value={suspendReason}
                 onChange={(e) => setSuspendReason(e.target.value)}
                 placeholder="e.g. Overdue payment, Abuse detected..."
-                className={cn("w-full border rounded-xl px-4 py-3 focus:border-orange-500 outline-none min-h-[100px] transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full border rounded-xl px-4 py-3 focus:border-orange-500 outline-none min-h-[100px] transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowSuspendModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => setShowSuspendModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
               <button onClick={() => handleVpsAction(showSuspendModal.id, "suspend", suspendReason)} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors shadow-sm">Confirm Suspend</button>
             </div>
           </div>
@@ -2681,18 +2681,18 @@ export default function VpsManagementPage() {
       {/* Delete Pool Modal */}
       {showDeletePoolModal !== null && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border w-full max-w-md rounded-2xl p-4 sm:p-5 relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <button onClick={() => setShowDeletePoolModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-400" : "text-red-600")}>
               <Trash2 className="w-8 h-8" />
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Delete IP Pool</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Delete IP Pool</h2>
             </div>
             <div className={cn("border rounded-xl p-4 mb-6", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
               <p className={cn("text-sm font-medium mb-1", isDark ? "text-red-400" : "text-red-700")}>WARNING</p>
               <p className={cn("text-xs", isDark ? "text-red-300/80" : "text-red-800/80")}>Are you sure you want to delete this IP pool? All available IPs from this pool will be removed from the system. Assigned IPs will remain on the VPS but their pool association will be lost.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeletePoolModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => setShowDeletePoolModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
               <button onClick={() => handleDeletePool(showDeletePoolModal)} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors shadow-sm">Delete</button>
             </div>
           </div>
@@ -2702,18 +2702,18 @@ export default function VpsManagementPage() {
       {/* Bulk Delete Pool Modal */}
       {showBulkDeletePoolModal.length > 0 && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border w-full max-w-md rounded-2xl p-4 sm:p-5 relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-400" : "text-red-600")}>
               <Trash2 className="w-8 h-8" />
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Bulk Delete IP Pools</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Bulk Delete IP Pools</h2>
             </div>
             <div className={cn("border rounded-xl p-4 mb-6", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
               <p className={cn("text-sm font-medium mb-1", isDark ? "text-red-400" : "text-red-700")}>WARNING</p>
               <p className={cn("text-xs", isDark ? "text-red-300/80" : "text-red-800/80")}>You are about to delete <strong>{showBulkDeletePoolModal.length} selected IP pools</strong>. All available IPs from these pools will be removed from the system.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => setShowBulkDeletePoolModal([])} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
               <button onClick={handleBulkDeletePools} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors shadow-sm">Delete All</button>
             </div>
           </div>
@@ -2723,18 +2723,18 @@ export default function VpsManagementPage() {
       {/* Delete Plan Modal */}
       {showDeletePlanModal !== null && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border w-full max-w-md rounded-2xl p-4 sm:p-5 relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <button onClick={() => setShowDeletePlanModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-red-400" : "text-red-600")}>
               <Trash2 className="w-8 h-8" />
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Delete Fixed Plan</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Delete Fixed Plan</h2>
             </div>
             <div className={cn("border rounded-xl p-4 mb-6", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
               <p className={cn("text-sm font-medium mb-1", isDark ? "text-red-400" : "text-red-700")}>WARNING</p>
               <p className={cn("text-xs", isDark ? "text-red-300/80" : "text-red-800/80")}>Are you sure you want to delete this plan? This action cannot be undone.</p>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeletePlanModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => setShowDeletePlanModal(null)} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
               <button onClick={() => handleDeletePlan(showDeletePlanModal)} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors shadow-sm">Delete</button>
             </div>
           </div>
@@ -2744,13 +2744,13 @@ export default function VpsManagementPage() {
       {/* IP Management Modal */}
       {showIpModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-3xl rounded-3xl relative flex flex-col max-h-[90vh]", isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
-            <div className={cn("p-6 border-b", isDark ? "border-slate-800" : "border-slate-200")}>
+          <div className={cn("border w-full max-w-3xl rounded-2xl relative flex flex-col max-h-[90vh]", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
+            <div className={cn("p-6 border-b", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <button onClick={() => setShowIpModal(null)} className={cn("absolute top-6 right-6 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
               <div className="flex items-center gap-3">
                 <Globe className={cn("w-8 h-8", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 <div>
-                  <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>IP Management</h2>
+                  <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>IP Management</h2>
                   <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Manage IP Addresses for {showIpModal.hostname}</p>
                 </div>
               </div>
@@ -2775,7 +2775,7 @@ export default function VpsManagementPage() {
                           "px-3 py-1 rounded-lg text-xs font-semibold transition-colors",
                           ipVersionFilter === v
                             ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                            : (isDark ? "bg-[#060b14] text-zinc-400 border border-slate-800 hover:bg-white/5" : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100")
+                            : (isDark ? "bg-[#0a0a0c] text-zinc-400 border border-white/[0.08] hover:bg-white/5" : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100")
                         )}
                       >
                         {v === "all" ? "All" : v.toUpperCase()}
@@ -2791,12 +2791,12 @@ export default function VpsManagementPage() {
                       value={ipFilter}
                       onChange={(e) => setIpFilter(e.target.value)}
                       placeholder="Search IP..."
-                      className={cn("w-full border rounded-xl py-2 pl-9 pr-3 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl py-2 pl-9 pr-3 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
 
                   {/* IP List */}
-                  <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")} style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")} style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {(() => {
                       const filtered = availableIps.filter(ip => {
                         if (ipVersionFilter === "ipv4" && ip.version !== 4) return false;
@@ -2838,7 +2838,7 @@ export default function VpsManagementPage() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>Assigned IPs <span className={cn("font-normal", isDark ? "text-cyan-400" : "text-cyan-600")}>({assignedIps.length})</span></h3>
                   </div>
-                  <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")} style={{ maxHeight: '380px', overflowY: 'auto' }}>
+                  <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")} style={{ maxHeight: '380px', overflowY: 'auto' }}>
                     {assignedIps.length > 0 ? (
                       <ul className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                         {assignedIps.map(ip => (
@@ -2851,7 +2851,7 @@ export default function VpsManagementPage() {
                                   value={editingPublicIpValue}
                                   onChange={(e) => setEditingPublicIpValue(e.target.value)}
                                   placeholder="e.g. 103.x.x.x (Optional)"
-                                  className={cn("w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none transition-colors", isDark ? "bg-[#0b1322] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
+                                  className={cn("w-full sm:flex-1 border rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
                                 />
                                 <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                   <button
@@ -2924,8 +2924,8 @@ export default function VpsManagementPage() {
               </div>
             </div>
 
-            <div className={cn("p-6 border-t flex justify-end", isDark ? "border-slate-800" : "border-slate-200")}>
-              <button onClick={() => setShowIpModal(null)} className={cn("px-6 py-2.5 rounded-xl font-medium transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Close</button>
+            <div className={cn("p-6 border-t flex justify-end", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <button onClick={() => setShowIpModal(null)} className={cn("px-6 py-2.5 rounded-xl font-medium transition-colors border", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Close</button>
             </div>
           </div>
         </div>
@@ -2934,11 +2934,11 @@ export default function VpsManagementPage() {
       {/* Reset Password Modal */}
       {showResetPasswordModal && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border w-full max-w-md rounded-3xl p-6 relative shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border w-full max-w-md rounded-2xl p-4 sm:p-5 relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}><XCircle className="w-6 h-6" /></button>
             <div className={cn("flex items-center gap-3 mb-4", isDark ? "text-cyan-400" : "text-cyan-600")}>
               <Key className="w-8 h-8" />
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Reset Password</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Reset Password</h2>
             </div>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Set a new root password for <strong>{showResetPasswordModal.hostname}</strong>. The VM will need to be rebooted for changes to apply.</p>
             <div className="mb-4">
@@ -2948,7 +2948,7 @@ export default function VpsManagementPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new strong password"
-                className={cn("w-full border rounded-xl px-4 py-3 focus:border-cyan-500 outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full border rounded-xl px-4 py-3 focus:border-cyan-500 outline-none transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
             <div className="mb-6">
@@ -2958,7 +2958,7 @@ export default function VpsManagementPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Retype your new password"
-                className={cn("w-full border rounded-xl px-4 py-3 focus:border-cyan-500 outline-none transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full border rounded-xl px-4 py-3 focus:border-cyan-500 outline-none transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
               {confirmPassword && newPassword !== confirmPassword && (
                 <p className={cn("text-xs mt-2", isDark ? "text-red-400" : "text-red-600")}>Passwords do not match.</p>
@@ -2968,7 +2968,7 @@ export default function VpsManagementPage() {
               )}
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+              <button onClick={() => { setShowResetPasswordModal(null); setNewPassword(""); setConfirmPassword(""); }} className={cn("px-5 py-2.5 rounded-xl transition-colors border", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
               <button
                 onClick={() => handleResetPassword(showResetPasswordModal.id, newPassword)}
                 disabled={actionLoading === showResetPasswordModal.id || !newPassword || newPassword.length < 8 || newPassword !== confirmPassword}

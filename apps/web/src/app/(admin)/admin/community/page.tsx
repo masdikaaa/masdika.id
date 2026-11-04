@@ -243,7 +243,7 @@ export default function AdminCommunityPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Community Groups</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Community Groups</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage WhatsApp and Telegram community groups, member links, and public directory status.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -262,14 +262,14 @@ export default function AdminCommunityPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Groups</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {groups.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -277,14 +277,14 @@ export default function AdminCommunityPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Published</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <CheckCircle className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {groups.filter(g => g.isPublished).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -292,14 +292,14 @@ export default function AdminCommunityPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Pending Review</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Loader2 className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {groups.filter(g => !g.isPublished).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -307,14 +307,14 @@ export default function AdminCommunityPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>WhatsApp Links</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <FaWhatsapp className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {groups.filter(g => (g.link || '').includes('wa.me') || (g.link || '').includes('whatsapp.com')).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -325,13 +325,13 @@ export default function AdminCommunityPage() {
 
       {/* GAMBAR 1 Filter Bar */}
       {groups.length > 0 && (
-        <div className={cn("p-4 rounded-2xl border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("p-4 rounded-2xl border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center gap-2">
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 bg-[#060b14] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-white/[0.08] bg-[#0a0a0c] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
             >
-              <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === groups.length ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"}`}>
+              <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === groups.length ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"}`}>
                 {selectedIds.length === groups.length && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
               </div>
               <span>{selectedIds.length === groups.length ? 'Deselect All' : 'Select All'}</span>
@@ -354,33 +354,33 @@ export default function AdminCommunityPage() {
 
       <div className="grid gap-6">
         {groups.length === 0 ? (
-          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("rounded-2xl p-16 text-center border relative overflow-hidden group", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className={cn("absolute top-0 left-1/4 w-96 h-96 blur-[100px] rounded-full pointer-events-none", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")} />
-            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border group-hover:scale-110 transition-transform duration-500", isDark ? "bg-slate-900/50 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <Users className={cn("w-12 h-12 opacity-80", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
-            <h2 className={cn("text-2xl font-extrabold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Groups Yet</h2>
+            <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-3", isDark ? "text-white" : "text-[#0F3B4A]")}>No Groups Yet</h2>
             <p className={cn("font-medium max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>When someone submits a WhatsApp group, it will appear here for you to review and publish.</p>
           </div>
         ) : (
-          <div className={cn("rounded-2xl overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("rounded-2xl overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <tr>
-                    <th className="px-6 py-4 w-12 text-center">
+                    <th className="px-3.5 py-2.5 w-12 text-center">
                       <button 
                         onClick={toggleSelectAll} 
-                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${selectedIds.length === groups.length && groups.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}
+                        className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${selectedIds.length === groups.length && groups.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}
                       >
                         {selectedIds.length === groups.length && groups.length > 0 && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                       </button>
                     </th>
-                    <th className="px-6 py-4 font-semibold">Group</th>
-                    <th className="px-6 py-4 font-semibold">Link</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold">Date</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Group</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Link</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Status</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Date</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -392,14 +392,14 @@ export default function AdminCommunityPage() {
                       transition={{ delay: index * 0.02 }}
                       className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}
                     >
-                      <td className="px-6 py-4 text-center">
-                        <button onClick={() => toggleSelect(group.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${selectedIds.includes(group.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
+                      <td className="px-3.5 py-2.5 text-center">
+                        <button onClick={() => toggleSelect(group.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${selectedIds.includes(group.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
                           {selectedIds.includes(group.id) && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                         </button>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         <div className="flex items-center gap-3">
-                          <div className={cn("w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                          <div className={cn("w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                             {group.image ? (
                               <img referrerPolicy="no-referrer" src={group.image} alt={group.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             ) : (
@@ -409,7 +409,7 @@ export default function AdminCommunityPage() {
                           <span className={cn("font-medium line-clamp-1", isDark ? "text-white" : "text-slate-900")}>{group.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         <a 
                           href={group.link} 
                           target="_blank" 
@@ -419,7 +419,7 @@ export default function AdminCommunityPage() {
                           Open Link <ExternalLink className="w-3 h-3" />
                         </a>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         {group.isPublished ? (
                           <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border", isDark ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-green-50 text-green-700 border-green-200")}>
                             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -432,10 +432,10 @@ export default function AdminCommunityPage() {
                           </span>
                         )}
                       </td>
-                      <td className={cn("px-6 py-4", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <td className={cn("px-3.5 py-2.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                         {new Date(group.createdAt).toLocaleDateString('en-US')}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3.5 py-2.5 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => setEditGroup(group)}
@@ -511,11 +511,11 @@ export default function AdminCommunityPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className={cn("border rounded-2xl w-full max-w-lg overflow-hidden relative z-10 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+            className={cn("border rounded-2xl w-full max-w-lg overflow-hidden relative z-10 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-cyan-500"></div>
-            <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <div className={cn("p-6 border-b flex items-center justify-between", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <h2 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Edit2 className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 Edit Group
               </h2>
@@ -524,14 +524,14 @@ export default function AdminCommunityPage() {
               </button>
             </div>
             
-            <form onSubmit={handleEditSubmit} className="p-6 md:p-8 space-y-6">
+            <form onSubmit={handleEditSubmit} className="p-4 sm:p-5 space-y-6">
               <div className="space-y-2">
                 <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Group Name</label>
                 <input 
                   type="text" 
                   value={editGroup.name}
                   onChange={e => setEditGroup({...editGroup, name: e.target.value})}
-                  className={cn("w-full border rounded-xl px-5 py-3.5 font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-5 py-3.5 font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   required
                 />
               </div>
@@ -544,7 +544,7 @@ export default function AdminCommunityPage() {
                     type="url" 
                     value={editGroup.link}
                     onChange={e => setEditGroup({...editGroup, link: e.target.value})}
-                    className={cn("w-full border rounded-xl pl-12 pr-5 py-3.5 font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl pl-12 pr-5 py-3.5 font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     required
                   />
                 </div>
@@ -553,7 +553,7 @@ export default function AdminCommunityPage() {
               <div>
                 <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Group Image (Optional)</label>
                 {editGroup.image ? (
-                  <div className={cn("relative group rounded-xl overflow-hidden border w-32 h-32", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("relative group rounded-xl overflow-hidden border w-32 h-32", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <img referrerPolicy="no-referrer" src={editGroup.image} alt="Group" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                       <label className={cn("cursor-pointer px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition-colors backdrop-blur-md border flex items-center gap-1.5", isDark ? "text-white border-white/20" : "text-slate-900 border-slate-200")}>
@@ -588,10 +588,10 @@ export default function AdminCommunityPage() {
               </div>
 
               <div className={cn("pt-4 border-t flex justify-end gap-3 mt-4", isDark ? "border-white/10" : "border-slate-200")}>
-                <button type="button" onClick={() => setEditGroup(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
+                <button type="button" onClick={() => setEditGroup(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
                   Cancel
                 </button>
-                <button type="submit" disabled={saving || uploading} className="flex items-center justify-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50">
+                <button type="submit" disabled={saving || uploading} className="flex items-center justify-center gap-2 px-5 py-2.5 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50">
                   {saving ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <Save className="w-4 h-4" />} 
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>

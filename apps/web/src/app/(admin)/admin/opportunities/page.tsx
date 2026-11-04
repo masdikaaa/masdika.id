@@ -115,7 +115,7 @@ export default function AdminOpportunitiesPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Events & Jobs</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Events & Jobs</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage events, webinars, job vacancies, and community opportunities.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function AdminOpportunitiesPage() {
             <RefreshCw className="w-4 h-4" />
             Refresh
           </button>
-          <Link href="/admin/opportunities/edit/new" className="inline-flex items-center gap-2 px-4 py-2 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
+          <Link href="/admin/opportunities/edit/new" className="inline-flex items-center gap-2 px-4 py-2 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
             <Plus className="w-4 h-4" /> New Item
           </Link>
         </div>
@@ -137,14 +137,14 @@ export default function AdminOpportunitiesPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Opportunities</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Briefcase className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {opportunities.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -152,14 +152,14 @@ export default function AdminOpportunitiesPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Published</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <CheckCircle className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {opportunities.filter(o => o.status === 'PUBLISHED').length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -167,14 +167,14 @@ export default function AdminOpportunitiesPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Drafts & Closed</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {opportunities.filter(o => o.status !== 'PUBLISHED').length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -182,14 +182,14 @@ export default function AdminOpportunitiesPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Categories</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <FolderTree className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {uniqueTypes.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -199,7 +199,7 @@ export default function AdminOpportunitiesPage() {
       </div>
 
       {/* GAMBAR 1 Filter Bar */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -208,7 +208,7 @@ export default function AdminOpportunitiesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search title or type..." 
-              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
           
@@ -221,7 +221,7 @@ export default function AdminOpportunitiesPage() {
                 ...uniqueTypes.map((type: any) => ({ value: type, label: type }))
               ]}
               placeholder="All Types"
-              className={cn("w-full rounded-xl px-4 py-2 text-xs md:text-sm", isDark ? "border-slate-800 bg-[#060b14] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
+              className={cn("w-full rounded-xl px-4 py-2 text-xs md:text-sm", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
             />
           </div>
         </div>
@@ -229,9 +229,9 @@ export default function AdminOpportunitiesPage() {
           {filteredOpportunities.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 bg-[#060b14] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-white/[0.08] bg-[#0a0a0c] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
             >
-              <div className={`w-4 h-4 border rounded flex items-center justify-center ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"}`}>
+              <div className={`w-4 h-4 border rounded flex items-center justify-center ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"}`}>
                 {selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
               </div>
               <span>{selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'Deselect All' : 'Select All'}</span>
@@ -249,21 +249,21 @@ export default function AdminOpportunitiesPage() {
         </div>
       </div>
 
-      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
-                <th className="px-6 py-4 font-semibold w-12">
-                  <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-[#060b14]" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
+                <th className="px-3.5 py-2.5 font-semibold w-12">
+                  <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-[#0a0a0c]" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
                     {selectedIds.length === filteredOpportunities.length && filteredOpportunities.length > 0 && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                   </button>
                 </th>
-                <th className="px-6 py-4 font-semibold">Title</th>
-                <th className="px-6 py-4 font-semibold">Type</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold">Date</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                <th className="px-3.5 py-2.5 font-semibold">Title</th>
+                <th className="px-3.5 py-2.5 font-semibold">Type</th>
+                <th className="px-3.5 py-2.5 font-semibold">Status</th>
+                <th className="px-3.5 py-2.5 font-semibold">Date</th>
+                <th className="px-3.5 py-2.5 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -278,24 +278,24 @@ export default function AdminOpportunitiesPage() {
               ) : (
                 filteredOpportunities.map((item) => (
                   <tr key={item.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                    <td className="px-6 py-4">
-                      <button onClick={() => toggleSelect(item.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(item.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-[#060b14]" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
+                    <td className="px-3.5 py-2.5">
+                      <button onClick={() => toggleSelect(item.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(item.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-[#0a0a0c]" : "border-slate-300 hover:border-cyan-600 bg-white"}`}>
                         {selectedIds.includes(item.id) && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                       </button>
                     </td>
-                    <td className={cn("px-6 py-4 font-medium transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{item.title}</td>
-                    <td className="px-6 py-4">
+                    <td className={cn("px-3.5 py-2.5 font-medium transition-colors", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{item.title}</td>
+                    <td className="px-3.5 py-2.5">
                       <span className={cn("px-3 py-1 rounded-full text-xs font-medium border", isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" : "bg-slate-100 text-slate-600 border-slate-200")}>
                         {item.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <span className={cn("px-3 py-1 rounded-full text-xs font-medium border ", item.status === 'PUBLISHED' ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200") : (isDark ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : "bg-yellow-50 text-yellow-700 border-yellow-200"))}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{new Date(item.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-3.5 py-2.5">{new Date(item.createdAt).toLocaleDateString()}</td>
+                    <td className="px-3.5 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-3">
                         {item.link && (
                           <a href={item.link} target="_blank" rel="noopener noreferrer" className={cn("p-2 rounded-lg hover:text-white hover:bg-white/10 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")} title="External Link">

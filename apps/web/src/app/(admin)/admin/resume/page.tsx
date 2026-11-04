@@ -189,7 +189,7 @@ export default function AdminResumePage() {
     >
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Resume Data</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Resume Data</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your professional experience, education, and certifications.</p>
         </div>
       </div>
@@ -218,17 +218,17 @@ export default function AdminResumePage() {
         </div>
         <div className="shrink-0 w-full sm:w-auto flex justify-end">
           {activeTab === 'experience' && (
-            <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className="font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+            <button onClick={() => { setExpFormData({ id: null, year: '', role: '', company: '' }); setShowExpForm(true); }} className="font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
               <Plus className="w-4 h-4" /> Add Experience
             </button>
           )}
           {activeTab === 'education' && (
-            <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className="font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+            <button onClick={() => { setEduFormData({ id: null, year: '', degree: '', school: '' }); setShowEduForm(true); }} className="font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
               <Plus className="w-4 h-4" /> Add Education
             </button>
           )}
           {activeTab === 'certification' && (
-            <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className="font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+            <button onClick={() => { setCertFormData({ id: null, title: '', org: '', date: '', icon: '' }); setShowCertForm(true); }} className="font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
               <Plus className="w-4 h-4" /> Add Certification
             </button>
           )}
@@ -245,46 +245,46 @@ export default function AdminResumePage() {
 
 
               {showExpForm && (
-                <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("border rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")} onSubmit={saveExperience}>
+                <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("border rounded-2xl p-4 sm:p-5 mb-8 relative overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")} onSubmit={saveExperience}>
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-cyan-500"></div>
-                  <h3 className={cn("text-xl font-extrabold mb-6 pb-4 border-b", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>{expFormData.id ? 'Edit' : 'Add'} Experience</h3>
+                  <h3 className={cn("text-sm sm:text-base font-bold mb-6 pb-4 border-b", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>{expFormData.id ? 'Edit' : 'Add'} Experience</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Year *</label>
-                      <input required value={expFormData.year} onChange={e => setExpFormData({...expFormData, year: e.target.value})} placeholder="e.g., 2020 - 2022" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={expFormData.year} onChange={e => setExpFormData({...expFormData, year: e.target.value})} placeholder="e.g., 2020 - 2022" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Role *</label>
-                      <input required value={expFormData.role} onChange={e => setExpFormData({...expFormData, role: e.target.value})} placeholder="e.g., Frontend Developer" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={expFormData.role} onChange={e => setExpFormData({...expFormData, role: e.target.value})} placeholder="e.g., Frontend Developer" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Company *</label>
-                      <input required value={expFormData.company} onChange={e => setExpFormData({...expFormData, company: e.target.value})} placeholder="e.g., Google" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={expFormData.company} onChange={e => setExpFormData({...expFormData, company: e.target.value})} placeholder="e.g., Google" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                   </div>
-                  <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowExpForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                  <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button type="button" onClick={() => setShowExpForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
 
               <Reorder.Group axis="y" values={experiences} onReorder={(newOrder) => handleReorder('experience', newOrder)} className="space-y-4">
                 {experiences.map(exp => (
-                  <Reorder.Item key={exp.id} value={exp} className={cn("border rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-grab active:cursor-grabbing group", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
+                  <Reorder.Item key={exp.id} value={exp} className={cn("border rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-grab active:cursor-grabbing group", isDark ? "bg-[#0c0c0e] border-white/[0.08] hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
                     <div className="flex items-start md:items-center gap-4">
                       <div className={cn("transition-colors mt-1 md:mt-0", isDark ? "text-zinc-500 hover:text-cyan-400" : "text-slate-400 hover:text-cyan-600")}>
                         <GripVertical className="w-6 h-6" />
                       </div>
                       <div>
                         <div className={cn("inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border mb-2", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>{exp.year}</div>
-                        <h4 className={cn("text-xl font-extrabold mb-1", isDark ? "text-white" : "text-slate-900")}>{exp.role}</h4>
+                        <h4 className={cn("text-sm sm:text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>{exp.role}</h4>
                         <div className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Briefcase className="w-4 h-4" /> {exp.company}</div>
                       </div>
                     </div>
                     <div className="flex gap-2 self-end md:self-auto">
-                      <button onClick={() => { setExpFormData(exp); setShowExpForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-slate-800 text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#060b14]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteTarget({ type: 'experience', id: exp.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-slate-800 text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => { setExpFormData(exp); setShowExpForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteTarget({ type: 'experience', id: exp.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </Reorder.Item>
                 ))}
@@ -298,46 +298,46 @@ export default function AdminResumePage() {
 
 
               {showEduForm && (
-                <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("border rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")} onSubmit={saveEducation}>
+                <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("border rounded-2xl p-4 sm:p-5 mb-8 relative overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")} onSubmit={saveEducation}>
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-cyan-500"></div>
-                  <h3 className={cn("text-xl font-extrabold mb-6 pb-4 border-b", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>{eduFormData.id ? 'Edit' : 'Add'} Education</h3>
+                  <h3 className={cn("text-sm sm:text-base font-bold mb-6 pb-4 border-b", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>{eduFormData.id ? 'Edit' : 'Add'} Education</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Year *</label>
-                      <input required value={eduFormData.year} onChange={e => setEduFormData({...eduFormData, year: e.target.value})} placeholder="e.g., 2020 - 2024" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={eduFormData.year} onChange={e => setEduFormData({...eduFormData, year: e.target.value})} placeholder="e.g., 2020 - 2024" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Degree *</label>
-                      <input required value={eduFormData.degree} onChange={e => setEduFormData({...eduFormData, degree: e.target.value})} placeholder="e.g., B.S. Computer Science" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={eduFormData.degree} onChange={e => setEduFormData({...eduFormData, degree: e.target.value})} placeholder="e.g., B.S. Computer Science" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>School *</label>
-                      <input required value={eduFormData.school} onChange={e => setEduFormData({...eduFormData, school: e.target.value})} placeholder="e.g., Harvard University" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={eduFormData.school} onChange={e => setEduFormData({...eduFormData, school: e.target.value})} placeholder="e.g., Harvard University" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                   </div>
-                  <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowEduForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                  <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button type="button" onClick={() => setShowEduForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
 
               <Reorder.Group axis="y" values={educations} onReorder={(newOrder) => handleReorder('education', newOrder)} className="space-y-4">
                 {educations.map(edu => (
-                  <Reorder.Item key={edu.id} value={edu} className={cn("border rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-grab active:cursor-grabbing group", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
+                  <Reorder.Item key={edu.id} value={edu} className={cn("border rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-grab active:cursor-grabbing group", isDark ? "bg-[#0c0c0e] border-white/[0.08] hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
                     <div className="flex items-start md:items-center gap-4">
                       <div className={cn("transition-colors mt-1 md:mt-0", isDark ? "text-zinc-500 hover:text-cyan-400" : "text-slate-400 hover:text-cyan-600")}>
                         <GripVertical className="w-6 h-6" />
                       </div>
                       <div>
                         <div className={cn("inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border mb-2", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>{edu.year}</div>
-                        <h4 className={cn("text-xl font-extrabold mb-1", isDark ? "text-white" : "text-slate-900")}>{edu.degree}</h4>
+                        <h4 className={cn("text-sm sm:text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>{edu.degree}</h4>
                         <div className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><BookOpen className="w-4 h-4" /> {edu.school}</div>
                       </div>
                     </div>
                     <div className="flex gap-2 self-end md:self-auto">
-                      <button onClick={() => { setEduFormData(edu); setShowEduForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-slate-800 text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#060b14]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteTarget({ type: 'education', id: edu.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-slate-800 text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => { setEduFormData(edu); setShowEduForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteTarget({ type: 'education', id: edu.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </Reorder.Item>
                 ))}
@@ -351,50 +351,50 @@ export default function AdminResumePage() {
 
 
               {showCertForm && (
-                <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("border rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")} onSubmit={saveCertification}>
+                <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={cn("border rounded-2xl p-4 sm:p-5 mb-8 relative overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")} onSubmit={saveCertification}>
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-cyan-500"></div>
-                  <h3 className={cn("text-xl font-extrabold mb-6 pb-4 border-b", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>{certFormData.id ? 'Edit' : 'Add'} Certification</h3>
+                  <h3 className={cn("text-sm sm:text-base font-bold mb-6 pb-4 border-b", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>{certFormData.id ? 'Edit' : 'Add'} Certification</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Title *</label>
-                      <input required value={certFormData.title} onChange={e => setCertFormData({...certFormData, title: e.target.value})} placeholder="e.g., AWS Certified Solutions Architect" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={certFormData.title} onChange={e => setCertFormData({...certFormData, title: e.target.value})} placeholder="e.g., AWS Certified Solutions Architect" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Organization *</label>
-                      <input required value={certFormData.org} onChange={e => setCertFormData({...certFormData, org: e.target.value})} placeholder="e.g., Amazon Web Services" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={certFormData.org} onChange={e => setCertFormData({...certFormData, org: e.target.value})} placeholder="e.g., Amazon Web Services" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Date *</label>
-                      <input required value={certFormData.date} onChange={e => setCertFormData({...certFormData, date: e.target.value})} placeholder="e.g., 2024" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input required value={certFormData.date} onChange={e => setCertFormData({...certFormData, date: e.target.value})} placeholder="e.g., 2024" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                     <div className="space-y-2">
                       <label className={cn("block text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-400" : "text-slate-500")}>Icon Name (Lucide)</label>
-                      <input value={certFormData.icon} onChange={e => setCertFormData({...certFormData, icon: e.target.value})} placeholder="e.g., Award, Shield, CheckCircle" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      <input value={certFormData.icon} onChange={e => setCertFormData({...certFormData, icon: e.target.value})} placeholder="e.g., Award, Shield, CheckCircle" className={cn("w-full border rounded-xl px-5 py-3.5 font-bold outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     </div>
                   </div>
-                  <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button type="button" onClick={() => setShowCertForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
+                  <div className={cn("flex justify-end gap-3 pt-2 border-t mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button type="button" onClick={() => setShowCertForm(false)} className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">{isSubmitting ? <div className={cn("w-4 h-4 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/30" : "border-slate-200")} /> : <CheckCircle className="w-4 h-4" />} {isSubmitting ? 'Saving...' : 'Save Changes'}</button>
                   </div>
                 </motion.form>
               )}
 
               <Reorder.Group axis="y" values={certifications} onReorder={(newOrder) => handleReorder('certification', newOrder)} className="space-y-4">
                 {certifications.map(cert => (
-                  <Reorder.Item key={cert.id} value={cert} className={cn("border rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-grab active:cursor-grabbing group", isDark ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
+                  <Reorder.Item key={cert.id} value={cert} className={cn("border rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-grab active:cursor-grabbing group", isDark ? "bg-[#0c0c0e] border-white/[0.08] hover:border-slate-700 shadow-md" : "bg-white border-slate-200 hover:border-slate-300 shadow-sm")}>
                     <div className="flex items-start md:items-center gap-4">
                       <div className={cn("transition-colors mt-1 md:mt-0", isDark ? "text-zinc-500 hover:text-cyan-400" : "text-slate-400 hover:text-cyan-600")}>
                         <GripVertical className="w-6 h-6" />
                       </div>
                       <div>
                         <div className={cn("inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border mb-2", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>{cert.date}</div>
-                        <h4 className={cn("text-xl font-extrabold mb-1", isDark ? "text-white" : "text-slate-900")}>{cert.title}</h4>
+                        <h4 className={cn("text-sm sm:text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>{cert.title}</h4>
                         <div className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Award className="w-4 h-4" /> {cert.org}</div>
                       </div>
                     </div>
                     <div className="flex gap-2 self-end md:self-auto">
-                      <button onClick={() => { setCertFormData(cert); setShowCertForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-slate-800 text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#060b14]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteTarget({ type: 'certification', id: cert.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-slate-800 text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => { setCertFormData(cert); setShowCertForm(true); }} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-cyan-400 hover:border-slate-700 hover:bg-[#0a0a0c]" : "border-slate-200 text-slate-500 hover:text-cyan-700 hover:border-slate-300 hover:bg-slate-50")}><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteTarget({ type: 'certification', id: cert.id })} className={cn("p-2.5 border rounded-xl transition-all", isDark ? "border-white/[0.08] text-zinc-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10" : "border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50")}><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </Reorder.Item>
                 ))}

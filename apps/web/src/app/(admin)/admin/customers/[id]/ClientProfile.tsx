@@ -83,7 +83,7 @@ const PaginatedTable = ({ data, columns, renderRow, emptyMessage, itemsPerPage =
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className={cn("text-xs uppercase tracking-wider border-b font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <tr className={cn("text-xs uppercase tracking-wider border-b font-semibold", isDark ? "bg-slate-900/60 text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               {columns.map((c: any, i: number) => (
                 <th key={i} className={`p-4 font-semibold ${c.align === 'right' ? 'text-right' : ''}`}>{c.label}</th>
               ))}
@@ -95,7 +95,7 @@ const PaginatedTable = ({ data, columns, renderRow, emptyMessage, itemsPerPage =
         </table>
       </div>
       {totalPages > 1 && (
-        <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
@@ -609,7 +609,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
   if (!user) {
     return (
       <div className="text-center py-20">
-        <h2 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>User Not Found</h2>
+        <h2 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>User Not Found</h2>
         <button onClick={() => router.push('/admin/customers')} className={cn("hover:underline", isDark ? "text-cyan-400" : "text-cyan-700")}>Back to Customers</button>
       </div>
     );
@@ -629,7 +629,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
           </button>
           
           <div className="relative">
-            <div className={cn("w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
+            <div className={cn("w-11 h-11 sm:w-14 sm:h-14 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
               <img referrerPolicy="no-referrer" 
                 src={user.image || `/api/avatar?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || 'User')}`} 
                 alt="Profile" 
@@ -648,7 +648,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
           </div>
           
           <div className="min-w-0 flex-1">
-            <h1 className={cn("text-base sm:text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-base sm:text-xl md:text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <span className="truncate">{user.name}</span>
               {user.isSuspended && <span className={cn("text-[10px] bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20 font-bold shrink-0", isDark ? "text-red-400" : "text-red-700")}>SUSPENDED</span>}
             </h1>
@@ -660,7 +660,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 pl-11 sm:pl-0">
-          <div className={cn("px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border text-xs sm:text-sm shrink-0", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+          <div className={cn("px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border text-xs sm:text-sm shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
             <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Balance:</span> <span className={cn("font-bold ml-1", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(user.balance)}</span>
           </div>
           <button
@@ -677,8 +677,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
       </div>
 
       {/* Tabs */}
-      <div className={cn("p-2 sm:p-4 rounded-2xl border flex items-center justify-between gap-4 w-full overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border w-full overflow-x-auto scrollbar-none", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-2 sm:p-4 rounded-2xl border flex items-center justify-between gap-4 w-full overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border w-full overflow-x-auto scrollbar-none", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {[
             { key: 'summary', label: 'Summary', icon: User },
             { key: 'services', label: 'Services', icon: Server },
@@ -712,7 +712,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         {/* SUMMARY TAB */}
         {activeTab === 'summary' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className={cn("p-6 rounded-2xl border md:col-span-2", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <div className={cn("p-6 rounded-2xl border md:col-span-2", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-slate-900")}>Client Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                 <div>
@@ -724,7 +724,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   <p className={cn("text-sm font-medium break-all", isDark ? "text-zinc-200" : "text-slate-900")}>{user.email}</p>
                 </div>
                 
-                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <h4 className={cn("text-sm font-bold uppercase tracking-widest mb-4", isDark ? "text-cyan-400" : "text-cyan-700")}>Billing Information</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
@@ -762,7 +762,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   </div>
                 </div>
 
-                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-slate-800/80" : "border-slate-200")}>
+                <div className={cn("sm:col-span-2 border-t pt-4 mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-8">
                     <div>
                       <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Registered On</p>
@@ -786,7 +786,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
             
             <div className="space-y-6">
-              <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
                 <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-slate-900")}>Quick Stats</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
@@ -805,9 +805,9 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
         {/* SERVICES TAB */}
         {activeTab === 'services' && (
-          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
 
-            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
               <h3 className={cn("font-semibold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} /> All Products & Services</h3>
             </div>
             <PaginatedTable
@@ -822,9 +822,9 @@ export default function ClientProfile({ userId }: { userId: string }) {
               ]}
               renderRow={(svc: any, idx: number) => (
                 <tr key={`${svc.type}-${svc.id}-${idx}`} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                  <td className="p-4">
+                  <td className="px-3.5 py-2.5">
                     <div className="flex items-center gap-3 min-w-[180px]">
-                      <div className={cn("p-2 rounded-lg border flex-shrink-0", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <div className={cn("p-2 rounded-lg border flex-shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                         {svc.icon}
                       </div>
                       <div className="min-w-0">
@@ -833,8 +833,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
                       </div>
                     </div>
                   </td>
-                  <td className={cn("p-4 text-sm min-w-[220px]", isDark ? "text-zinc-400" : "text-slate-500")}>{svc.detail}</td>
-                  <td className="p-4 min-w-[120px]">
+                  <td className={cn("px-3.5 py-2.5 text-sm min-w-[220px]", isDark ? "text-zinc-400" : "text-slate-500")}>{svc.detail}</td>
+                  <td className="px-3.5 py-2.5 min-w-[120px]">
                     <StatusBadge status={svc.status} />
                     {svc.status === 'SUSPENDED' && (
                       <div className={cn("text-[10px] mt-1 max-w-[150px] truncate", isDark ? "text-zinc-500" : "text-slate-500")} title={svc.suspendReason || 'Suspended by system'}>
@@ -842,14 +842,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
                       </div>
                     )}
                   </td>
-                  <td className="p-4 text-right">
+                  <td className="px-3.5 py-2.5 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => {
                           setEditTarget(svc);
                           setEditModalOpen(true);
                         }}
-                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border whitespace-nowrap flex items-center gap-1.5", isDark ? "bg-[#060b14] border-slate-800 hover:bg-white/5 text-zinc-300" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}
+                        className={cn("px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border whitespace-nowrap flex items-center gap-1.5", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:bg-white/5 text-zinc-300" : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700")}
                       >
                         <Edit3 className="w-3.5 h-3.5" /> Edit
                       </button>
@@ -885,7 +885,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
         {/* INVOICES TAB */}
         {activeTab === 'invoices' && (
-          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <PaginatedTable
               data={user.invoices}
               emptyMessage="No invoices found for this customer."
@@ -898,10 +898,10 @@ export default function ClientProfile({ userId }: { userId: string }) {
               ]}
               renderRow={(inv: any) => (
                 <tr key={inv.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                  <td className={cn("p-4 text-sm font-medium break-all max-w-[120px] sm:max-w-none", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatInvoiceNumber(inv.invoiceNumber)}</td>
-                  <td className={cn("p-4 text-sm whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(inv.createdAt).toLocaleDateString()}</td>
-                  <td className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-900")}>{formatRupiah(inv.amount)}</td>
-                  <td className="p-4 text-right">
+                  <td className={cn("px-3.5 py-2.5 text-sm font-medium break-all max-w-[120px] sm:max-w-none", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatInvoiceNumber(inv.invoiceNumber)}</td>
+                  <td className={cn("px-3.5 py-2.5 text-sm whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(inv.createdAt).toLocaleDateString()}</td>
+                  <td className={cn("px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-900")}>{formatRupiah(inv.amount)}</td>
+                  <td className="px-3.5 py-2.5 text-right">
                     <StatusBadge status={inv.status} />
                   </td>
                 </tr>
@@ -930,7 +930,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                           value: i + 1,
                           label: String(i + 1)
                         }))}
-                        className={cn("!h-8 !py-0 !px-2 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                        className={cn("!h-8 !py-0 !px-2 text-xs rounded-lg", isDark ? "!bg-[#0a0a0c] !border-white/[0.08] hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
                       />
                     </div>
                   </div>
@@ -947,11 +947,11 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
 
             {/* Table matching WHMCS Image 1 */}
-            <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
                       <th className="py-3 px-3 sm:px-4 w-24 sm:w-40 font-semibold whitespace-nowrap">Date</th>
                       <th className="py-3 px-3 sm:px-4 font-semibold">Subject</th>
                       <th className="py-3 px-2 sm:px-4 w-20 sm:w-24 text-center sm:text-right font-semibold">Actions</th>
@@ -1004,7 +1004,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                                   title="View Message"
                                   className={cn(
                                     "w-7 h-7 sm:w-8 sm:h-8 rounded-lg border transition-all flex items-center justify-center cursor-pointer shrink-0",
-                                    isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700 shadow-xs"
+                                    isDark ? "border-white/[0.08] hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700 shadow-xs"
                                   )}
                                 >
                                   <Eye className="w-3.5 h-3.5" />
@@ -1015,7 +1015,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                                   title="Delete Email Log"
                                   className={cn(
                                     "w-7 h-7 sm:w-8 sm:h-8 rounded-lg border transition-all flex items-center justify-center cursor-pointer shrink-0",
-                                    isDark ? "border-slate-800 hover:border-red-500/50 hover:bg-red-500/10 text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-red-600 shadow-xs"
+                                    isDark ? "border-white/[0.08] hover:border-red-500/50 hover:bg-red-500/10 text-red-400" : "border-slate-200 hover:border-red-300 hover:bg-red-50 text-red-600 shadow-xs"
                                   )}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1032,14 +1032,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
               {/* Pagination matching WHMCS Image 1 */}
               {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
-                <div className={cn("p-3 px-4 border-t flex items-center justify-between", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                <div className={cn("p-3 px-4 border-t flex items-center justify-between", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
                   <button
                     type="button"
                     disabled={emailCurrentPage === 1}
                     onClick={() => setEmailCurrentPage(p => Math.max(1, p - 1))}
                     className={cn(
                       "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
                     )}
                   >
                     « Previous Page
@@ -1053,7 +1053,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     onClick={() => setEmailCurrentPage(p => Math.min(Math.ceil(emailLogs.length / emailsPerPage), p + 1))}
                     className={cn(
                       "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
                     )}
                   >
                     Next Page »
@@ -1068,7 +1068,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         {activeTab === 'logs' && (
           <div className="space-y-4">
             {/* WHMCS Search / Filter Card */}
-            <div className={cn("p-5 rounded-2xl border overflow-hidden w-full max-w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+            <div className={cn("p-5 rounded-2xl border overflow-hidden w-full max-w-full", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 w-full min-w-0">
                 {/* Left Column */}
                 <div className="space-y-3 w-full min-w-0">
@@ -1084,7 +1084,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                           "[appearance:none] [-webkit-appearance:none]",
                           "[&::-webkit-date-and-time-value]:h-full [&::-webkit-date-and-time-value]:flex [&::-webkit-date-and-time-value]:items-center [&::-webkit-date-and-time-value]:justify-start [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:m-0 [&::-webkit-date-and-time-value]:p-0",
                           "[&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-300 text-slate-800 [color-scheme:light]"
+                          isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-300 text-slate-800 [color-scheme:light]"
                         )}
                       />
                       <Calendar className={cn("w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none z-10", isDark ? "text-zinc-500" : "text-slate-400")} />
@@ -1100,7 +1100,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         options={distinctLogUsernames.map(u => ({ value: u, label: u }))}
                         className={cn(
                           "!h-9 !py-0 !px-3 text-xs rounded-xl transition-all",
-                          isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-slate-50 !border-slate-300 hover:!border-slate-400 !text-slate-800"
+                          isDark ? "!bg-[#0a0a0c] !border-white/[0.08] hover:!border-slate-700 !text-white" : "!bg-slate-50 !border-slate-300 hover:!border-slate-400 !text-slate-800"
                         )}
                       />
                     </div>
@@ -1119,7 +1119,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         placeholder="Search description, order, payment..."
                         className={cn(
                           "w-full min-w-0 max-w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 box-border",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
+                          isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
                     </div>
@@ -1135,7 +1135,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         placeholder="e.g. 103.147..."
                         className={cn(
                           "w-full min-w-0 max-w-full h-9 px-3 text-xs rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono box-border",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
+                          isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400"
                         )}
                       />
                     </div>
@@ -1164,7 +1164,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   }}
                   className={cn(
                     "px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer",
-                    isDark ? "border-slate-800 text-zinc-400 hover:text-white hover:bg-white/5" : "border-slate-300 text-slate-600 hover:bg-slate-100"
+                    isDark ? "border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/5" : "border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   Reset Filter
@@ -1194,7 +1194,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         { value: 50, label: "50" },
                         { value: 100, label: "100" },
                       ]}
-                      className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                      className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#0a0a0c] !border-white/[0.08] hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
                     />
                   </div>
                 </div>
@@ -1212,7 +1212,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                         value: i + 1,
                         label: String(i + 1)
                       }))}
-                      className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#060b14] !border-slate-800 hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
+                      className={cn("!h-8 !py-0 !px-2.5 text-xs rounded-lg", isDark ? "!bg-[#0a0a0c] !border-white/[0.08] hover:!border-slate-700 !text-white" : "!bg-white !border-slate-200 !text-slate-900")}
                     />
                   </div>
                   <button
@@ -1227,11 +1227,11 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
 
             {/* WHMCS Table Container */}
-            <div className={cn("rounded-2xl border overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+            <div className={cn("rounded-2xl border overflow-hidden shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <tr className={cn("text-xs uppercase tracking-wider font-semibold border-b", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
                       <th className="py-3 px-3 sm:px-4 font-semibold w-24 sm:w-44 whitespace-nowrap">Date</th>
                       <th className="py-3 px-3 sm:px-4 font-semibold">Description</th>
                       <th className="py-3 px-2 sm:px-3 font-semibold w-24 sm:w-28 text-center whitespace-nowrap">Username</th>
@@ -1264,7 +1264,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                             key={log.id || idx}
                             className={cn(
                               "transition-colors",
-                              idx % 2 === 1 ? (isDark ? "bg-[#060b14]/50" : "bg-slate-50/70") : "",
+                              idx % 2 === 1 ? (isDark ? "bg-[#0a0a0c]/50" : "bg-slate-50/70") : "",
                               isDark ? "hover:bg-slate-800/40 text-zinc-300" : "hover:bg-slate-100/70 text-slate-800"
                             )}
                           >
@@ -1300,14 +1300,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
               {/* Bottom Pagination */}
               {logPagination.totalPages > 1 && (
-                <div className={cn("p-4 border-t flex flex-wrap items-center justify-center gap-2", isDark ? "border-slate-800/80 bg-[#060b14]/50" : "border-slate-200 bg-slate-50")}>
+                <div className={cn("p-4 border-t flex flex-wrap items-center justify-center gap-2", isDark ? "border-white/[0.08] bg-[#0a0a0c]/50" : "border-slate-200 bg-slate-50")}>
                   <button
                     type="button"
                     disabled={logPagination.currentPage === 1}
                     onClick={() => fetchActivityLogs(Math.max(1, logPagination.currentPage - 1))}
                     className={cn(
                       "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
                     )}
                   >
                     « Previous Page
@@ -1343,7 +1343,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     onClick={() => fetchActivityLogs(Math.min(logPagination.totalPages, logPagination.currentPage + 1))}
                     className={cn(
                       "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0b1322] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
+                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
                     )}
                   >
                     Next Page »
@@ -1366,8 +1366,8 @@ export default function ClientProfile({ userId }: { userId: string }) {
       {/* Suspend Modal */}
       {suspendModalOpen && suspendTarget && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800 shadow-2xl" : "bg-white border-slate-200 shadow-2xl")}>
-            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-slate-800" : "border-slate-200")}>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-2xl" : "bg-white border-slate-200 shadow-2xl")}>
+            <div className={cn("p-5 border-b flex justify-between items-center", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <h3 className={cn("font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
                 Suspend {suspendTarget.label}
@@ -1382,14 +1382,14 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 value={suspendReason}
                 onChange={(e) => setSuspendReason(e.target.value)}
                 placeholder="e.g. Overdue payment, Terms violation..."
-                className={cn("w-full border rounded-xl p-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all min-h-[100px]", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                className={cn("w-full border rounded-xl p-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all min-h-[100px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
               />
             </div>
-            <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 border-t flex justify-end gap-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <button 
                 onClick={() => setSuspendModalOpen(false)}
                 disabled={isSuspending}
-                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>
@@ -1476,9 +1476,9 @@ export default function ClientProfile({ userId }: { userId: string }) {
       {/* Viewing Email Message Modal (matching WHMCS Image 3) */}
       {viewingEmail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-4xl max-h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+          <div className={cn("w-full max-w-4xl max-h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
             {/* Header */}
-            <div className={cn("px-6 py-3.5 border-b flex items-center justify-between", isDark ? "bg-[#0c1f38] border-slate-800" : "bg-[#0284c7] text-white border-sky-600")}>
+            <div className={cn("px-6 py-3.5 border-b flex items-center justify-between", isDark ? "bg-[#0c1f38] border-white/[0.08]" : "bg-[#0284c7] text-white border-sky-600")}>
               <h3 className="font-bold text-base text-white flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Viewing Email Message
@@ -1493,7 +1493,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
             </div>
 
             {/* Email Metadata Details */}
-            <div className={cn("px-6 py-4 border-b text-xs space-y-1.5", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+            <div className={cn("px-6 py-4 border-b text-xs space-y-1.5", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
               <div className="flex items-center gap-2 font-bold text-sm">
                 <Mail className="w-4 h-4 text-cyan-500 shrink-0" />
                 <span className={isDark ? "text-white" : "text-slate-900"}>{viewingEmail.subject}</span>
@@ -1512,12 +1512,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
                 title="Email Message Preview"
                 srcDoc={formatEmailPreviewHtml(viewingEmail.body)}
                 sandbox="allow-same-origin allow-popups"
-                className={cn("w-full flex-1 rounded-xl border shadow-inner min-h-[440px]", isDark ? "bg-[#030712] border-slate-800" : "bg-white border-slate-300")}
+                className={cn("w-full flex-1 rounded-xl border shadow-inner min-h-[440px]", isDark ? "bg-[#030712] border-white/[0.08]" : "bg-white border-slate-300")}
               />
             </div>
 
             {/* Footer */}
-            <div className={cn("px-6 py-3.5 border-t flex justify-end gap-3", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("px-6 py-3.5 border-t flex justify-end gap-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <button
                 type="button"
                 onClick={() => setViewingEmail(null)}

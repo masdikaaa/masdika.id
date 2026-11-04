@@ -410,7 +410,7 @@ export default function AdminAnnouncementsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             News & Announcements
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -420,7 +420,7 @@ export default function AdminAnnouncementsPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
             <span>Total Items:</span>
-            <span className="font-extrabold text-white">{totalCount}</span>
+            <span className="font-bold text-white">{totalCount}</span>
           </div>
           <button
             onClick={() => {
@@ -438,7 +438,7 @@ export default function AdminAnnouncementsPage() {
           </button>
           <button 
             onClick={() => openModal()} 
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+            className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>{activeTab === 'banner' ? 'Create Banner' : 'Create News'}</span>
@@ -448,7 +448,7 @@ export default function AdminAnnouncementsPage() {
 
       {/* Stat Cards Grid (GAMBAR 1 Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL NEWS & PROMOS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -456,12 +456,12 @@ export default function AdminAnnouncementsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{newsCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{newsCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Broadcasts</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>DASHBOARD BANNERS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -469,12 +469,12 @@ export default function AdminAnnouncementsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{bannersCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{bannersCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Hero visuals</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ACTIVE & VISIBLE</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -482,12 +482,12 @@ export default function AdminAnnouncementsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Currently shown</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>MAINTENANCE ALERTS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
@@ -495,15 +495,15 @@ export default function AdminAnnouncementsPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{maintenanceCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{maintenanceCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Notices</span>
           </div>
         </div>
       </div>
 
       {/* Filter and Control Bar (GAMBAR 1 Style) */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {[
             { key: 'berita', label: 'News & Promos', count: newsCount },
             { key: 'banner', label: 'Dashboard Banners', count: bannersCount },
@@ -519,7 +519,7 @@ export default function AdminAnnouncementsPage() {
               )}
             >
               <span>{tab.label}</span>
-              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === tab.key ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
                 {tab.count}
               </span>
             </button>
@@ -545,19 +545,19 @@ export default function AdminAnnouncementsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={activeTab === 'banner' ? "Search banners..." : "Search news..."}
-              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
             />
           </div>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                <th className="px-6 py-4 w-12 text-center">
+              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <th className="px-3.5 py-2.5 w-12 text-center">
                   <div className="flex items-center">
                     {(() => {
                       const allSelected = paginatedAnnouncements.length > 0 && paginatedAnnouncements.every(a => selectedIds.includes(a.id));
@@ -572,13 +572,13 @@ export default function AdminAnnouncementsPage() {
                     })()}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Title</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider">Title</th>
                 {activeTab === 'berita' && (
-                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Type</th>
+                  <th className="px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider">Type</th>
                 )}
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-right">Actions</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider">Status</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider">Date</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -592,7 +592,7 @@ export default function AdminAnnouncementsPage() {
                 <tr>
                   <td colSpan={activeTab === 'berita' ? 6 : 5} className="px-6 py-16">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                      <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
                         <AlertCircle className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
                       </div>
                       <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No {activeTab === 'banner' ? 'Banners' : 'News'}</h3>
@@ -603,7 +603,7 @@ export default function AdminAnnouncementsPage() {
               ) : (
                 paginatedAnnouncements.map((announcement) => (
                   <tr key={announcement.id} className={cn("transition-colors group", selectedIds.includes(announcement.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))}>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <div className="flex items-center">
                         {(() => {
                           const isChecked = selectedIds.includes(announcement.id);
@@ -618,7 +618,7 @@ export default function AdminAnnouncementsPage() {
                         })()}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <div className={cn("font-semibold transition-colors", isDark ? "text-zinc-200 group-hover:text-white" : "text-slate-900 group-hover:text-cyan-700")}>{announcement.title}</div>
                       {activeTab === 'berita' && (
                         <div className={cn("text-xs truncate max-w-xs", isDark ? "text-zinc-400" : "text-slate-600")}>{announcement.content.replace(/<[^>]+>/g, '').substring(0, 50)}...</div>
@@ -628,14 +628,14 @@ export default function AdminAnnouncementsPage() {
                       )}
                     </td>
                     {activeTab === 'berita' && (
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3.5 py-2.5 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {getTypeIcon(announcement.type)}
                           <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>{announcement.type}</span>
                         </div>
                       </td>
                     )}
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <button
                         onClick={() => handleToggleAnnouncement(announcement.id, announcement.isActive)}
                         className={cn("px-3 py-1 text-[10px] font-bold rounded-full border transition-colors", announcement.isActive ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100") : (isDark ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20 hover:bg-zinc-500/20" : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"))}
@@ -643,10 +643,10 @@ export default function AdminAnnouncementsPage() {
                         {announcement.isActive ? 'Active' : 'Disabled'}
                       </button>
                     </td>
-                    <td className={cn("px-6 py-4 whitespace-nowrap text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <td className={cn("px-3.5 py-2.5 whitespace-nowrap text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
                       {new Date(announcement.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => openModal(announcement)}
@@ -671,7 +671,7 @@ export default function AdminAnnouncementsPage() {
           </table>
         </div>
         {totalPages > 1 && (
-          <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
+          <div className={cn("p-4 border-t", isDark ? "bg-[#0a0a0c]/50 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
@@ -721,10 +721,10 @@ export default function AdminAnnouncementsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={cn("relative w-full max-w-3xl border rounded-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+            className={cn("relative w-full max-w-3xl border rounded-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
           >
-            <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+            <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
                 {editingId
                   ? (activeTab === 'banner' ? 'Edit Banner' : 'Edit Announcement')
                   : (activeTab === 'banner' ? 'Create Banner' : 'Create Announcement')}
@@ -747,7 +747,7 @@ export default function AdminAnnouncementsPage() {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder={activeTab === 'banner' ? "E.g. Banner Lebaran 2026" : "E.g. Diskon 50% Hosting"}
-                    className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
 
@@ -765,7 +765,7 @@ export default function AdminAnnouncementsPage() {
                             { value: "WARNING", label: "Warning" }
                           ]}
                           placeholder="Type"
-                          className={cn("w-full rounded-xl px-4 py-2.5 text-sm", isDark ? "border-slate-800 bg-[#060b14] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
+                          className={cn("w-full rounded-xl px-3.5 py-2 text-xs", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
                         />
                       </div>
 
@@ -795,13 +795,13 @@ export default function AdminAnnouncementsPage() {
                           onChange={(e) => setStructuredData({ ...structuredData, rawHtml: e.target.value })}
                           rows={6}
                           style={{ colorScheme: 'dark' }}
-                          className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all font-mono resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                          className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all font-mono resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     ) : (
                       <>
                         {formData.type === 'MAINTENANCE' ? (
-                          <div className={cn("space-y-4 border p-4 rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                          <div className={cn("space-y-4 border p-4 rounded-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                             <div className="space-y-1.5">
                               <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Maintenance Description <span className={cn("", isDark ? "text-red-400" : "text-red-700")}>*</span></label>
                               <textarea
@@ -811,7 +811,7 @@ export default function AdminAnnouncementsPage() {
                                 placeholder="E.g. Kami informasikan bahwa tim NOC akan melaksanakan upgrade network..."
                                 rows={3}
                                 style={{ colorScheme: 'dark' }}
-                                className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                                className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                               />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -822,7 +822,7 @@ export default function AdminAnnouncementsPage() {
                                   required
                                   value={structuredData.maintenanceStart || ''}
                                   onChange={(e) => setStructuredData({ ...structuredData, maintenanceStart: e.target.value })}
-                                  className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                                  className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                                 />
                               </div>
                               <div className="space-y-1.5">
@@ -832,7 +832,7 @@ export default function AdminAnnouncementsPage() {
                                   required
                                   value={structuredData.maintenanceEnd || ''}
                                   onChange={(e) => setStructuredData({ ...structuredData, maintenanceEnd: e.target.value })}
-                                  className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                                  className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                                 />
                               </div>
                             </div>
@@ -844,7 +844,7 @@ export default function AdminAnnouncementsPage() {
                                 value={structuredData.maintenanceImpact || ''}
                                 onChange={(e) => setStructuredData({ ...structuredData, maintenanceImpact: e.target.value })}
                                 placeholder="E.g. Jaringan mungkin terputus selama 15-30 menit"
-                                className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                                className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                               />
                             </div>
                           </div>
@@ -858,7 +858,7 @@ export default function AdminAnnouncementsPage() {
                               placeholder="Enter your announcement text here..."
                               rows={5}
                               style={{ colorScheme: 'dark' }}
-                              className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                              className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                             />
                             <p className={cn("text-xs mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Paragraphs will be automatically formatted.</p>
                           </div>
@@ -874,7 +874,7 @@ export default function AdminAnnouncementsPage() {
                       <div className="space-y-1.5">
                         <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Image (Optional)</label>
                         {formData.imageUrl ? (
-                          <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border group", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                          <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border group", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
                             <img referrerPolicy="no-referrer" src={formData.imageUrl} alt="Banner Preview" className="w-full h-full object-contain" loading="lazy" decoding="async" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <button
@@ -888,7 +888,7 @@ export default function AdminAnnouncementsPage() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed ${isUploading ? 'border-cyan-500/50 bg-cyan-500/5' : isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-white/5 bg-[#060b14]" : "border-slate-300 hover:border-cyan-600 hover:bg-slate-50 bg-slate-50"} rounded-xl cursor-pointer transition-all group`}>
+                            <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed ${isUploading ? 'border-cyan-500/50 bg-cyan-500/5' : isDark ? "border-white/[0.08] hover:border-cyan-500/50 hover:bg-white/5 bg-[#0a0a0c]" : "border-slate-300 hover:border-cyan-600 hover:bg-slate-50 bg-slate-50"} rounded-xl cursor-pointer transition-all group`}>
                               {isUploading ? (
                                 <>
                                   <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-2"></div>
@@ -920,7 +920,7 @@ export default function AdminAnnouncementsPage() {
                               value={formData.imageUrl}
                               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                               placeholder="https://..."
-                              className={cn("w-full border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                              className={cn("w-full border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                             />
                           </div>
                         )}
@@ -933,7 +933,7 @@ export default function AdminAnnouncementsPage() {
                           value={formData.actionUrl}
                           onChange={(e) => setFormData({ ...formData, actionUrl: e.target.value })}
                           placeholder="e.g. /dashboard/checkout"
-                          className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                          className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                         />
                       </div>
                     </div>
@@ -958,11 +958,11 @@ export default function AdminAnnouncementsPage() {
 
               </div>
 
-              <div className={cn("p-4 sm:p-6 border-t flex flex-col sm:flex-row items-center justify-end gap-3 shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+              <div className={cn("p-4 sm:p-6 border-t flex flex-col sm:flex-row items-center justify-end gap-3 shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 bg-[#060b14] text-slate-300 hover:bg-slate-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50")}
+                  className={cn("w-full sm:w-auto px-4 py-2.5 rounded-lg border font-medium text-xs transition-colors", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-slate-300 hover:bg-slate-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50")}
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -970,7 +970,7 @@ export default function AdminAnnouncementsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 min-w-[120px] justify-center"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 min-w-[120px] justify-center"
                 >
                   {isSubmitting ? (
                     <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />

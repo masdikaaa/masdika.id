@@ -74,7 +74,7 @@ export default function AdminApiHubPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor API key usage, short URLs, and active developers in real-time.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -93,14 +93,14 @@ export default function AdminApiHubPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Keys</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Key className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {users.reduce((acc: number, curr: any) => acc + (curr.keyCount || 0), 0)}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -108,14 +108,14 @@ export default function AdminApiHubPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Requests</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Server className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {users.reduce((acc: number, curr: any) => acc + curr.totalUsage, 0).toLocaleString()}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -123,14 +123,14 @@ export default function AdminApiHubPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Users</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <UserIcon className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {users.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -138,14 +138,14 @@ export default function AdminApiHubPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Short Links</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <LinkIcon className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {users.reduce((acc: number, curr: any) => acc + (curr.shortLinkCount || 0), 0)}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -154,16 +154,16 @@ export default function AdminApiHubPage() {
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                <th className="p-4">User</th>
-                <th className="p-4">Key Details</th>
-                <th className="p-4">Usage Count</th>
-                <th className="p-4">Last Used</th>
-                <th className="p-4 text-right">Actions</th>
+              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <th className="px-3.5 py-2.5">User</th>
+                <th className="px-3.5 py-2.5">Key Details</th>
+                <th className="px-3.5 py-2.5">Usage Count</th>
+                <th className="px-3.5 py-2.5">Last Used</th>
+                <th className="px-3.5 py-2.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -182,13 +182,13 @@ export default function AdminApiHubPage() {
               ) : (
                 paginatedUsers.map(user => (
                   <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4">
+                    <td className="px-3.5 py-2.5">
                       <div className="flex flex-col">
                         <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{user.name || "Unknown"}</span>
                         <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</span>
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="px-3.5 py-2.5">
                       <div className="flex flex-col gap-1">
                         {user.keyCount > 0 ? (
                           <>
@@ -207,19 +207,19 @@ export default function AdminApiHubPage() {
                         )}
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="px-3.5 py-2.5">
                       <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-lg font-bold", isDark ? "bg-cyan-500/10 text-cyan-400" : "bg-cyan-50 text-cyan-700")}>
                         <Activity className="w-3 h-3" />
                         {user.totalUsage.toLocaleString()}
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="px-3.5 py-2.5">
                       <div className={cn("flex items-center gap-2 text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
                         <Clock className="w-4 h-4" />
                         {user.lastUsed ? new Date(user.lastUsed).toLocaleString() : "Never"}
                       </div>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="px-3.5 py-2.5 text-right">
                       <button onClick={() => setDeleteId(user.id)} className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors", isDark ? "text-red-400" : "text-red-700")}>
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -231,7 +231,7 @@ export default function AdminApiHubPage() {
           </table>
         </div>
         {users.length > 0 && (
-          <div className={cn("p-4 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+          <div className={cn("p-4 border-t", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}

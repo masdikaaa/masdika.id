@@ -1077,7 +1077,7 @@ export default function EmailBlastPage() {
       {/* Top Header matching Gambar 1 */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-2">
         <div className="min-w-0">
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Newsletter & Email Blast
           </h1>
           <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1133,14 +1133,14 @@ export default function EmailBlastPage() {
 
       {/* Stat Cards matching Gambar 1 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Subscribers</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {recipientsData.totalCustomers}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -1148,14 +1148,14 @@ export default function EmailBlastPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Service Clients</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Server className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {recipientsData.vpsCustomers}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -1163,14 +1163,14 @@ export default function EmailBlastPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Audience Reach</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {getRecipientCount()}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -1178,14 +1178,14 @@ export default function EmailBlastPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3 sm:p-4 md:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Deliverability</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             100%
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -1195,10 +1195,10 @@ export default function EmailBlastPage() {
       </div>
 
       {/* Main Campaign Composer Container matching Gambar 1 styling */}
-      <div className={cn("rounded-2xl border overflow-hidden shadow-md", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+      <div className={cn("rounded-2xl border overflow-hidden shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
         
         {/* Action Bar Header */}
-        <div className={cn("px-3 sm:px-4 py-2.5 sm:py-3 border-b flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+        <div className={cn("px-3 sm:px-4 py-2.5 sm:py-3 border-b flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
           <div className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto scrollbar-none">
             <button
               type="button"
@@ -1266,7 +1266,7 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Fields: From, To, Subject */}
-        <div className={cn("divide-y text-xs sm:text-sm border-b", isDark ? "divide-slate-800/80 border-slate-800/80 bg-[#0b1322]" : "divide-slate-200 border-slate-200 bg-slate-50/70")}>
+        <div className={cn("divide-y text-xs sm:text-sm border-b", isDark ? "divide-slate-800/80 border-white/[0.08] bg-[#0c0c0e]" : "divide-slate-200 border-slate-200 bg-slate-50/70")}>
           
           {/* FROM ROW */}
           <div className="flex items-center px-4 py-2.5 gap-3">
@@ -1279,14 +1279,14 @@ export default function EmailBlastPage() {
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
                     placeholder="Sender Name"
-                    className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
+                    className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
                   />
                   <input
                     type="email"
                     value={senderEmail}
                     onChange={(e) => setSenderEmail(e.target.value)}
                     placeholder="info@masdika.id"
-                    className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1 font-mono", isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
+                    className={cn("px-3 py-1.5 rounded-lg border text-xs outline-none flex-1 font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-800")}
                   />
                   <button
                     type="button"
@@ -1325,7 +1325,7 @@ export default function EmailBlastPage() {
                     "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap",
                     targetType === "all"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
-                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   All Customers ({recipientsData.totalCustomers})
@@ -1337,7 +1337,7 @@ export default function EmailBlastPage() {
                     "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap",
                     targetType === "vps"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
-                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   Active VPS ({recipientsData.vpsCustomers})
@@ -1352,7 +1352,7 @@ export default function EmailBlastPage() {
                     "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap",
                     targetType === "selected"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
-                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   <span>Select Specific ({selectedUserIds.length})</span>
@@ -1365,7 +1365,7 @@ export default function EmailBlastPage() {
                     "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap",
                     targetType === "custom"
                       ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 font-bold shadow-xs"
-                      : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"
                   )}
                 >
                   Custom List
@@ -1382,7 +1382,7 @@ export default function EmailBlastPage() {
                     placeholder="Enter recipient emails separated by comma or newlines (e.g. client1@domain.com, client2@domain.com)..."
                     className={cn(
                       "w-full p-2.5 rounded-xl border text-xs font-mono outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -1395,7 +1395,7 @@ export default function EmailBlastPage() {
                 type="button"
                 onClick={() => setShowRecipientModal(true)}
                 title="Select Customers from Directory"
-                className={cn("p-1.5 rounded-lg border transition-all cursor-pointer", isDark ? "border-slate-800 hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-300 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700")}
+                className={cn("p-1.5 rounded-lg border transition-all cursor-pointer", isDark ? "border-white/[0.08] hover:border-cyan-500/50 hover:bg-cyan-500/10 text-cyan-400" : "border-slate-300 hover:border-cyan-500 hover:bg-cyan-50 text-cyan-700")}
               >
                 <Users className="w-4 h-4" />
               </button>
@@ -1415,7 +1415,7 @@ export default function EmailBlastPage() {
                 className={cn(
                   "flex-1 px-3 py-1.5 rounded-xl border text-sm font-medium outline-none transition-all",
                   isDark
-                    ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20"
+                    ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20"
                     : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600/20"
                 )}
               />
@@ -1441,7 +1441,7 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Roundcube Rich Toolbar matching Image 4 */}
-        <div className={cn("px-4 py-2 border-b flex flex-wrap items-center justify-between gap-2 select-none", isDark ? "bg-[#0e1828] border-slate-800" : "bg-[#f1f5f9] border-slate-200")}>
+        <div className={cn("px-4 py-2 border-b flex flex-wrap items-center justify-between gap-2 select-none", isDark ? "bg-[#0e1828] border-white/[0.08]" : "bg-[#f1f5f9] border-slate-200")}>
           <div className="flex flex-wrap items-center gap-1 text-xs">
             {/* Clear Format */}
             <button
@@ -1515,7 +1515,7 @@ export default function EmailBlastPage() {
             <select
               title="Font Family"
               onChange={(e) => applyFormat("fontName", e.target.value)}
-              className={cn("px-2 py-1 rounded text-xs outline-none border cursor-pointer", isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-800")}
+              className={cn("px-2 py-1 rounded text-xs outline-none border cursor-pointer", isDark ? "bg-[#0c0c0e] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-800")}
             >
               <option value="Verdana">Verdana</option>
               <option value="Arial">Arial</option>
@@ -1530,7 +1530,7 @@ export default function EmailBlastPage() {
             <select
               title="Font Size"
               onChange={(e) => applyFormat("fontSize", e.target.value)}
-              className={cn("px-2 py-1 rounded text-xs outline-none border cursor-pointer", isDark ? "bg-[#0b1322] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-800")}
+              className={cn("px-2 py-1 rounded text-xs outline-none border cursor-pointer", isDark ? "bg-[#0c0c0e] border-slate-700 text-white" : "bg-white border-slate-300 text-slate-800")}
             >
               <option value="2">10pt</option>
               <option value="3">12pt</option>
@@ -1601,7 +1601,7 @@ export default function EmailBlastPage() {
                 "flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer shadow-xs",
                 sourceMode
                   ? "bg-amber-500 text-slate-950 border-amber-400"
-                  : isDark ? "bg-[#0b1322] border-slate-700 text-cyan-400 hover:bg-white/5" : "bg-white border-slate-300 text-cyan-700 hover:bg-slate-100"
+                  : isDark ? "bg-[#0c0c0e] border-slate-700 text-cyan-400 hover:bg-white/5" : "bg-white border-slate-300 text-cyan-700 hover:bg-slate-100"
               )}
             >
               <Code2 className="w-3.5 h-3.5" />
@@ -1611,7 +1611,7 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Editor Workspace Canvas */}
-        <div className={cn("min-h-[480px] flex flex-col relative", isDark ? "bg-[#060b14]" : "bg-white")}>
+        <div className={cn("min-h-[480px] flex flex-col relative", isDark ? "bg-[#0a0a0c]" : "bg-white")}>
           {sourceMode ? (
             /* Raw HTML/CSS Code Editor */
             <textarea
@@ -1620,7 +1620,7 @@ export default function EmailBlastPage() {
               placeholder="Paste raw responsive HTML and inline CSS code here..."
               className={cn(
                 "w-full flex-1 p-4 font-mono text-xs border-none outline-none resize-y min-h-[500px] leading-relaxed",
-                isDark ? "bg-[#060b14] text-zinc-200 placeholder:text-zinc-600" : "bg-slate-50 text-slate-900 placeholder:text-slate-400"
+                isDark ? "bg-[#0a0a0c] text-zinc-200 placeholder:text-zinc-600" : "bg-slate-50 text-slate-900 placeholder:text-slate-400"
               )}
             />
           ) : (
@@ -1637,7 +1637,7 @@ export default function EmailBlastPage() {
         </div>
 
         {/* Bottom Action Bar matching Gambar 1 */}
-        <div className={cn("px-3 sm:px-5 py-2.5 sm:py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+        <div className={cn("px-3 sm:px-5 py-2.5 sm:py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Primary Cyan Send Button */}
             <button
@@ -1686,8 +1686,8 @@ export default function EmailBlastPage() {
       {/* MODAL 1: Client Selection Modal */}
       {showRecipientModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-2xl max-h-[85vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-            <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-200")}>
+          <div className={cn("w-full max-w-2xl max-h-[85vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
+            <div className={cn("p-4 border-b flex items-center justify-between", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <div>
                 <h3 className={cn("font-bold text-base", isDark ? "text-white" : "text-slate-900")}>Select Specific Customers</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Pick which customers should receive this promotional email.</p>
@@ -1711,7 +1711,7 @@ export default function EmailBlastPage() {
                   onChange={(e) => setRecipientSearch(e.target.value)}
                   className={cn(
                     "w-full pl-9 pr-4 py-2 rounded-xl border text-xs outline-none transition-colors",
-                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                   )}
                 />
               </div>
@@ -1749,7 +1749,7 @@ export default function EmailBlastPage() {
                             isChecked
                               ? "bg-cyan-500 border border-cyan-400 text-slate-950"
                               : isDark
-                              ? "border border-slate-700 bg-[#060b14] group-hover:border-slate-500"
+                              ? "border border-slate-700 bg-[#0a0a0c] group-hover:border-slate-500"
                               : "border border-slate-300 bg-white group-hover:border-slate-400"
                           )}
                         >
@@ -1757,7 +1757,7 @@ export default function EmailBlastPage() {
                         </div>
 
                         {/* Customer Profile Photo Avatar matching Customer Menu (Gambar 3) */}
-                        <div className={cn("w-9 h-9 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                        <div className={cn("w-9 h-9 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                           <img
                             referrerPolicy="no-referrer"
                             src={avatarUrl}
@@ -1793,7 +1793,7 @@ export default function EmailBlastPage() {
               )}
             </div>
 
-            <div className={cn("p-4 border-t flex items-center justify-between", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 border-t flex items-center justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <button
                 type="button"
                 onClick={() => {
@@ -1825,8 +1825,8 @@ export default function EmailBlastPage() {
       {/* MODAL 2: Fullscreen / Responsive Preview Modal */}
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-5xl h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
-            <div className={cn("px-3 sm:px-6 py-2.5 sm:py-3 border-b flex items-center justify-between gap-2", isDark ? "bg-[#060b14] border-slate-800/80" : "bg-slate-100 border-slate-200")}>
+          <div className={cn("w-full max-w-5xl h-[92vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
+            <div className={cn("px-3 sm:px-6 py-2.5 sm:py-3 border-b flex items-center justify-between gap-2", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                 <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0" />
                 <h3 className={cn("font-bold text-xs sm:text-sm shrink-0", isDark ? "text-white" : "text-slate-900")}>Email Preview</h3>
@@ -1874,7 +1874,7 @@ export default function EmailBlastPage() {
               <div
                 className={cn(
                   "rounded-xl shadow-2xl overflow-hidden transition-all border",
-                  isDark ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-300",
+                  isDark ? "bg-[#0f172a] border-white/[0.08]" : "bg-white border-slate-300",
                   previewDevice === "desktop" ? "w-[650px] min-h-[500px]" : "w-[375px] min-h-[600px]"
                 )}
               >
@@ -1893,7 +1893,7 @@ export default function EmailBlastPage() {
       {/* MODAL 3: Send Test Email Modal */}
       {showTestModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-md rounded-2xl border p-6 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+          <div className={cn("w-full max-w-md rounded-2xl border p-4 sm:p-5 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-6 h-6 text-cyan-400" />
               <div>
@@ -1911,8 +1911,8 @@ export default function EmailBlastPage() {
                   onChange={(e) => setTestEmailAddress(e.target.value)}
                   placeholder="admin@yourdomain.com"
                   className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition-colors",
-                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                   )}
                 />
               </div>
@@ -1948,10 +1948,10 @@ export default function EmailBlastPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn(
             "w-full max-w-2xl rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
-            isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900"
           )}>
             {/* Header: Clean & uncluttered on mobile */}
-            <div className="flex items-start justify-between pb-3.5 border-b border-slate-800/80 mb-3 shrink-0 gap-3">
+            <div className="flex items-start justify-between pb-3.5 border-b border-white/[0.08] mb-3 shrink-0 gap-3">
               <div className="flex items-start gap-2.5 min-w-0">
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
                   <MessageSquare className="w-4 h-4" />
@@ -2048,7 +2048,7 @@ export default function EmailBlastPage() {
                       className={cn(
                         "w-full pl-8 pr-8 py-2 rounded-xl border text-xs outline-none transition-colors",
                         isDark
-                          ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500"
+                          ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500"
                           : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                       )}
                     />
@@ -2100,7 +2100,7 @@ export default function EmailBlastPage() {
 
                 if (combined.length === 0) {
                   return (
-                    <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-800 space-y-2">
+                    <div className="text-center py-10 px-4 rounded-xl border border-dashed border-white/[0.08] space-y-2">
                       <MessageSquare className="w-8 h-8 text-zinc-600 mx-auto opacity-50" />
                       <p className="text-xs text-zinc-400 font-medium">No templates found</p>
                       {templateTab === "saved" && (
@@ -2128,7 +2128,7 @@ export default function EmailBlastPage() {
                     className={cn(
                       "p-3.5 sm:p-4 rounded-xl border transition-all flex flex-col gap-2.5 group",
                       isDark
-                        ? "bg-[#060b14]/70 border-slate-800 hover:border-cyan-500/40 hover:bg-[#060b14]"
+                        ? "bg-[#0a0a0c]/70 border-white/[0.08] hover:border-cyan-500/40 hover:bg-[#0a0a0c]"
                         : "bg-slate-50 border-slate-200 hover:border-cyan-400 hover:bg-white"
                     )}
                   >
@@ -2193,7 +2193,7 @@ export default function EmailBlastPage() {
             </div>
 
             {/* Footer */}
-            <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 mt-2 shrink-0">
+            <div className="pt-3 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 mt-2 shrink-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span>Stored locally in your browser.</span>
                 {deletedSystemTemplateIds.length > 0 && (
@@ -2223,9 +2223,9 @@ export default function EmailBlastPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn(
             "w-full max-w-md rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden flex flex-col",
-            isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900"
           )}>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
                   <Bookmark className="w-4 h-4" />
@@ -2256,7 +2256,7 @@ export default function EmailBlastPage() {
                   placeholder="e.g. VPS Upgrade & Promo Announcement"
                   className={cn(
                     "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
-                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                   )}
                 />
               </div>
@@ -2270,7 +2270,7 @@ export default function EmailBlastPage() {
                   placeholder="Default subject for this template"
                   className={cn(
                     "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
-                    isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                   )}
                 />
               </div>
@@ -2280,7 +2280,7 @@ export default function EmailBlastPage() {
                 This template will appear in the <strong className="text-white">Templates</strong> library and can be loaded with one click.
               </div>
 
-              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-white/[0.08] flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowSaveTemplateModal(false)}
@@ -2305,9 +2305,9 @@ export default function EmailBlastPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
           <div className={cn(
             "w-full max-w-lg rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col",
-            isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900"
           )}>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
                   <PenTool className="w-4 h-4" />
@@ -2337,7 +2337,7 @@ export default function EmailBlastPage() {
                     onChange={(e) => setSignatureData(prev => ({ ...prev, name: e.target.value }))}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2349,7 +2349,7 @@ export default function EmailBlastPage() {
                     onChange={(e) => setSignatureData(prev => ({ ...prev, title: e.target.value }))}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2364,7 +2364,7 @@ export default function EmailBlastPage() {
                     onChange={(e) => setSignatureData(prev => ({ ...prev, company: e.target.value }))}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2376,7 +2376,7 @@ export default function EmailBlastPage() {
                     onChange={(e) => setSignatureData(prev => ({ ...prev, website: e.target.value }))}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2391,7 +2391,7 @@ export default function EmailBlastPage() {
                     onChange={(e) => setSignatureData(prev => ({ ...prev, email: e.target.value }))}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors font-mono",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2403,7 +2403,7 @@ export default function EmailBlastPage() {
                     onChange={(e) => setSignatureData(prev => ({ ...prev, phone: e.target.value }))}
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2436,7 +2436,7 @@ export default function EmailBlastPage() {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-end gap-2 shrink-0 mt-3">
+            <div className="pt-4 border-t border-white/[0.08] flex items-center justify-end gap-2 shrink-0 mt-3">
               <button
                 type="button"
                 onClick={() => setShowSignatureModal(false)}
@@ -2490,9 +2490,9 @@ export default function EmailBlastPage() {
       {/* MODAL 5: SMTP Server Configuration Modal */}
       {showSmtpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("w-full max-w-xl rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("w-full max-w-xl rounded-2xl border p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80 mb-4 shrink-0">
+            <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08] mb-4 shrink-0">
               <div className="flex items-center gap-3">
                 <div className={cn("w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
                   <Server className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
@@ -2535,7 +2535,7 @@ export default function EmailBlastPage() {
                     placeholder="mail.masdika.id or smtp.gmail.com"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2552,7 +2552,7 @@ export default function EmailBlastPage() {
                     placeholder="465"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2569,7 +2569,7 @@ export default function EmailBlastPage() {
                       "px-3 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer",
                       smtpConfig.secure
                         ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold"
-                        : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                        : isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
                     )}
                   >
                     <span>SSL / TLS (Port 465)</span>
@@ -2581,7 +2581,7 @@ export default function EmailBlastPage() {
                       "px-3 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer",
                       !smtpConfig.secure
                         ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold"
-                        : isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                        : isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
                     )}
                   >
                     <span>STARTTLS (Port 587)</span>
@@ -2601,7 +2601,7 @@ export default function EmailBlastPage() {
                     placeholder="info@masdika.id"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2620,7 +2620,7 @@ export default function EmailBlastPage() {
                       placeholder={smtpConfig.hasPassword ? "•••••••• (Leave blank to keep unchanged)" : "Email password"}
                       className={cn(
                         "w-full px-3.5 py-2 pr-10 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
-                        isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                       )}
                     />
                     <button
@@ -2645,7 +2645,7 @@ export default function EmailBlastPage() {
                     placeholder="Masdika.ID"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2658,7 +2658,7 @@ export default function EmailBlastPage() {
                     placeholder="info@masdika.id"
                     className={cn(
                       "w-full px-3.5 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors font-mono",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-600"
                     )}
                   />
                 </div>
@@ -2680,7 +2680,7 @@ export default function EmailBlastPage() {
               </div>
 
               {/* Modal Actions */}
-              <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <div className="pt-4 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
                 <button
                   type="button"
                   disabled={testingSmtp || (!smtpConfig.host || !smtpConfig.user)}

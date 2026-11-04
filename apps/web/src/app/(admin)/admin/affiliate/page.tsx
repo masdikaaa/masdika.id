@@ -89,7 +89,7 @@ export default function AdminAffiliatePage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Affiliate System
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -105,7 +105,7 @@ export default function AdminAffiliatePage() {
             onClick={fetchWithdrawals}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
@@ -122,7 +122,7 @@ export default function AdminAffiliatePage() {
         {/* Total Requests */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -136,7 +136,7 @@ export default function AdminAffiliatePage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {totalRequests}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Submissions</span>
@@ -146,7 +146,7 @@ export default function AdminAffiliatePage() {
         {/* Pending Review */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -160,7 +160,7 @@ export default function AdminAffiliatePage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {pendingCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Awaiting Action</span>
@@ -170,7 +170,7 @@ export default function AdminAffiliatePage() {
         {/* Paid Requests */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -184,7 +184,7 @@ export default function AdminAffiliatePage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {paidCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Approved</span>
@@ -194,7 +194,7 @@ export default function AdminAffiliatePage() {
         {/* Total Paid Volume */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -208,7 +208,7 @@ export default function AdminAffiliatePage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-2xl font-extrabold truncate", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-lg sm:text-xl font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
               {formatRupiah(totalPaidAmount)}
             </span>
           </div>
@@ -218,12 +218,12 @@ export default function AdminAffiliatePage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Status Tab switch */}
         <div className={cn(
           "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
-          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+          isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200"
         )}>
           {[
             { id: "ALL", label: "All Requests", count: totalRequests },
@@ -247,7 +247,7 @@ export default function AdminAffiliatePage() {
               <span className={cn(
                 "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
                 statusFilter === tab.id
-                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  ? "bg-slate-950/20 text-slate-950 font-bold"
                   : isDark
                     ? "bg-white/10 text-zinc-300"
                     : "bg-slate-200 text-slate-700"
@@ -269,7 +269,7 @@ export default function AdminAffiliatePage() {
             className={cn(
               "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
               isDark
-                ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
             )}
           />
@@ -277,17 +277,17 @@ export default function AdminAffiliatePage() {
       </div>
 
       {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto relative z-10">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase font-semibold border-b", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase font-semibold border-b", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">User</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4">Bank Details</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-3.5 py-2.5">Date</th>
+                <th className="px-3.5 py-2.5">User</th>
+                <th className="px-3.5 py-2.5">Amount</th>
+                <th className="px-3.5 py-2.5">Bank Details</th>
+                <th className="px-3.5 py-2.5">Status</th>
+                <th className="px-3.5 py-2.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -313,27 +313,27 @@ export default function AdminAffiliatePage() {
               ) : (
                 filteredWithdrawals.map((req) => (
                   <tr key={req.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-zinc-500" />
                         {new Date(req.createdAt).toLocaleString('en-US')}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <div className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{req.user?.name}</div>
                       <div className="text-xs">{req.user?.email}</div>
                     </td>
-                    <td className={cn("px-6 py-4 font-bold", isDark ? "text-white" : "text-slate-900")}>
+                    <td className={cn("px-3.5 py-2.5 font-bold", isDark ? "text-white" : "text-slate-900")}>
                       {formatRupiah(req.amount)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <div className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{req.bankName} - {req.accountNumber}</div>
                       <div className="text-xs">A/N: {req.accountName}</div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <StatusBadge status={req.status} />
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-3.5 py-2.5 text-right">
                       {req.status === 'PENDING' && (
                         <div className="flex justify-end gap-2">
                           <button

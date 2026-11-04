@@ -180,21 +180,21 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
         </Link>
         <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Series' : 'Edit Series'}</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>{isNew ? 'Create New Series' : 'Edit Series'}</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage series details and episodes.</p>
         </div>
       </div>
       </div>
 
       {/* Series Form */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <h2 className={cn("text-xl font-extrabold border-b pb-4 flex items-center gap-2", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}><BookOpen className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} /> Series Information</h2>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn("rounded-2xl p-4 sm:p-4 sm:p-5 space-y-6 border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <h2 className={cn("text-sm sm:text-base font-bold border-b pb-4 flex items-center gap-2", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}><BookOpen className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} /> Series Information</h2>
 
         <div className="space-y-3">
           <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Series Title *</label>
           <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
             placeholder="e.g. Learn Kubernetes from Scratch"
-            className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+            className={cn("w-full px-5 py-3.5 border rounded-xl text-lg font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -205,14 +205,14 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
               onChange={val => setForm(f => ({ ...f, level: val }))}
               options={LEVELS.map(l => ({ value: l, label: l }))}
               placeholder="Select Level..."
-              className={cn("w-full rounded-xl px-5 py-3.5 text-sm", isDark ? "border-slate-800" : "border-slate-200")}
+              className={cn("w-full rounded-xl px-5 py-3.5 text-sm", isDark ? "border-white/[0.08]" : "border-slate-200")}
             />
           </div>
           <div className="space-y-3">
             <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Tags (comma separated)</label>
             <input type="text" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
               placeholder="e.g. devops, kubernetes, cloud"
-              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+              className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
           </div>
         </div>
 
@@ -220,7 +220,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Description</label>
           <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             rows={3} placeholder="Brief description of this series..."
-            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+            className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
         </div>
 
         <div className="space-y-3">
@@ -228,20 +228,20 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-col sm:flex-row gap-3">
             <input type="text" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
               placeholder="https://... or select from media library"
-              className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+              className={cn("flex-1 px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
             <button type="button" onClick={() => { setMediaTarget('series'); setShowMediaLibrary(true); }}
-              className={cn("px-5 py-3.5 border rounded-xl flex items-center justify-center gap-2 text-sm font-semibold whitespace-nowrap transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white hover:bg-slate-800/60" : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100")}>
+              className={cn("px-5 py-3.5 border rounded-xl flex items-center justify-center gap-2 text-sm font-semibold whitespace-nowrap transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100")}>
               Select Image
             </button>
           </div>
           {form.image && (
-            <div className={cn("mt-4 aspect-video w-full max-w-sm rounded-2xl overflow-hidden border group", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("mt-4 aspect-video w-full max-w-sm rounded-2xl overflow-hidden border group", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <img referrerPolicy="no-referrer" src={form.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
             </div>
           )}
         </div>
 
-        <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+        <div className={cn("flex flex-col sm:flex-row gap-6 sm:gap-0 sm:items-center justify-between pt-6 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
           <label className={cn(
             "flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-colors select-none",
             isDark ? "bg-cyan-500/5 border-cyan-500/10 hover:bg-cyan-500/10" : "bg-cyan-50/50 border-cyan-200/60 hover:bg-cyan-50"
@@ -272,7 +272,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           </label>
 
           <button onClick={handleSaveSeries} disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
+            className="flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
             <Save className="w-5 h-5" /> {saving ? 'Saving...' : 'Save Series'}
           </button>
         </div>
@@ -280,9 +280,9 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
 
       {/* Episodes Section */}
       {!isNew && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className={cn("flex flex-row items-center justify-between gap-3 border-b pb-4", isDark ? "border-slate-800" : "border-slate-200")}>
-            <h2 className={cn("text-lg sm:text-xl font-extrabold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Play className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} /> Episodes ({epTotal})</h2>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={cn("rounded-2xl p-4 sm:p-4 sm:p-5 space-y-6 border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("flex flex-row items-center justify-between gap-3 border-b pb-4", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+            <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}><Play className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} /> Episodes ({epTotal})</h2>
             <button onClick={openNewEpisode}
               className={cn("flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 font-bold rounded-xl transition-all text-xs sm:text-sm whitespace-nowrap shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Plus className="w-4 h-4 shrink-0" /> Add Episode
@@ -292,14 +292,14 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-col gap-3">
             {episodes.length === 0 ? (
               <div className="text-center py-12">
-                <div className={cn("w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-4", isDark ? "border-slate-800 bg-slate-900/50" : "border-slate-200 bg-slate-50")}>
+                <div className={cn("w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-4", isDark ? "border-white/[0.08] bg-slate-900/50" : "border-slate-200 bg-slate-50")}>
                   <Play className="w-8 h-8 text-zinc-500" />
                 </div>
                 <h3 className={cn("font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No episodes yet</h3>
                 <p className="text-zinc-500 text-sm max-w-sm mx-auto">Click "Add Episode" to create the first episode for this series.</p>
               </div>
             ) : episodes.map((ep, i) => (
-              <div key={ep.id} className={cn("flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl border transition-colors group", isDark ? "bg-[#060b14] border-slate-800 hover:bg-white/5" : "bg-slate-50 border-slate-200 hover:bg-slate-100/80")}>
+              <div key={ep.id} className={cn("flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl border transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:bg-white/5" : "bg-slate-50 border-slate-200 hover:bg-slate-100/80")}>
                 <div className="flex items-center gap-2.5 sm:gap-4 w-full sm:w-auto sm:flex-1 min-w-0">
                   <div className="flex flex-col gap-0.5 shrink-0">
                     <button onClick={() => handleReorder(ep.id, 'up')} disabled={i === 0} className="p-0.5 text-zinc-600 hover:text-white disabled:opacity-20 transition-colors">
@@ -309,7 +309,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border flex items-center justify-center text-cyan-400 font-bold text-xs sm:text-sm shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border flex items-center justify-center text-cyan-400 font-bold text-xs sm:text-sm shrink-0 group-hover:border-cyan-500/30 transition-colors", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     {i + 1}
                   </div>
                   {ep.image && (
@@ -318,7 +318,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                       src={ep.image}
                       alt=""
                       onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      className={cn("w-14 h-10 sm:w-20 sm:h-12 rounded-lg object-cover border shrink-0", isDark ? "border-slate-800" : "border-slate-200")}
+                      className={cn("w-14 h-10 sm:w-20 sm:h-12 rounded-lg object-cover border shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}
                       loading="lazy"
                       decoding="async"
                     />
@@ -347,7 +347,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                   </div>
                 </div>
                 
-                <div className={cn("flex items-center justify-between sm:justify-end gap-2 pt-2.5 sm:pt-0 border-t sm:border-t-0 w-full sm:w-auto shrink-0", isDark ? "border-slate-800/80" : "border-slate-200/80")}>
+                <div className={cn("flex items-center justify-between sm:justify-end gap-2 pt-2.5 sm:pt-0 border-t sm:border-t-0 w-full sm:w-auto shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200/80")}>
                   <button
                     type="button"
                     onClick={() => handleToggleEpisodePublish(ep)}
@@ -383,7 +383,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {epTotalPages > 1 && (
-            <div className={cn("flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-4 mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-4 mt-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Showing <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{episodes.length}</span> of <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{epTotal}</span> episodes
               </div>
@@ -391,7 +391,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 <button
                   onClick={() => setEpPage(p => Math.max(1, p - 1))}
                   disabled={epPage === 1}
-                  className={cn("px-3 py-1.5 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-slate-800 text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
+                  className={cn("px-3 py-1.5 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
                 >
                   Previous
                 </button>
@@ -401,7 +401,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 <button
                   onClick={() => setEpPage(p => Math.min(epTotalPages, p + 1))}
                   disabled={epPage === epTotalPages}
-                  className={cn("px-3 py-1.5 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-slate-800 text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
+                  className={cn("px-3 py-1.5 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
                 >
                   Next
                 </button>
@@ -415,9 +415,9 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
       {editingEp !== null && (
         <div className="fixed inset-0 z-[100] flex items-start justify-center p-3 sm:p-4 pt-8 sm:pt-16 overflow-y-auto">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingEp(null)} />
-          <div className={cn("relative z-10 w-full max-w-4xl border rounded-2xl shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h3 className={cn("text-lg sm:text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingEp.id ? 'Edit Episode' : 'Add New Episode'}</h3>
+          <div className={cn("relative z-10 w-full max-w-4xl border rounded-2xl shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <div className={cn("p-4 sm:p-6 border-b flex items-center justify-between", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <h3 className={cn("text-lg sm:text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>{editingEp.id ? 'Edit Episode' : 'Add New Episode'}</h3>
               <button onClick={() => setEditingEp(null)} className={cn("hover:text-white text-2xl leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>×</button>
             </div>
 
@@ -426,14 +426,14 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Episode Title *</label>
                 <input type="text" value={epForm.title} onChange={e => setEpForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Episode 1 - Introduction to Kubernetes"
-                  className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                  className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
               </div>
 
               <div className="space-y-3">
                 <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Excerpt / Short Summary</label>
                 <textarea value={epForm.excerpt} onChange={e => setEpForm(f => ({ ...f, excerpt: e.target.value }))}
                   rows={2} placeholder="Brief overview of this episode..."
-                  className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                  className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -443,7 +443,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                     <Play className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 /70", isDark ? "text-cyan-500" : "text-cyan-700")} />
                     <input type="url" value={epForm.videoUrl} onChange={e => setEpForm(f => ({ ...f, videoUrl: e.target.value }))}
                       placeholder="https://youtube.com/watch?v=..."
-                      className={cn("w-full pl-11 pr-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      className={cn("w-full pl-11 pr-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -451,9 +451,9 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                   <div className="flex gap-2.5 sm:gap-3">
                     <input type="text" value={epForm.image} onChange={e => setEpForm(f => ({ ...f, image: e.target.value }))}
                       placeholder="https://..."
-                      className={cn("flex-1 min-w-0 px-4 sm:px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                      className={cn("flex-1 min-w-0 px-4 sm:px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                     <button type="button" onClick={() => { setMediaTarget(0); setShowMediaLibrary(true); }}
-                      className={cn("px-4 sm:px-5 py-3.5 border rounded-xl font-semibold transition-all shrink-0", isDark ? "bg-[#060b14] border-slate-800 text-white hover:bg-slate-800/60" : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100")}>
+                      className={cn("px-4 sm:px-5 py-3.5 border rounded-xl font-semibold transition-all shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:bg-slate-800/60" : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100")}>
                       Select
                     </button>
                   </div>
@@ -462,7 +462,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
 
               <div className="space-y-3">
                 <label className={cn("text-xs font-bold uppercase tracking-widest block", isDark ? "text-zinc-400" : "text-slate-500")}>Episode Content</label>
-                <div className={cn("rounded-xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("rounded-xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <Editor
                     markdown={epForm.content ?? ''}
                     onChange={val => setEpForm(f => ({ ...f, content: val }))}
@@ -491,7 +491,7 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 </div>
               )}
 
-              <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between pt-6 border-t mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
+              <div className={cn("flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between pt-6 border-t mt-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                 <label className={cn(
                   "flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-colors select-none",
                   isDark ? "bg-cyan-500/5 border-cyan-500/10 hover:bg-cyan-500/10" : "bg-cyan-50/50 border-cyan-200/60 hover:bg-cyan-50"
@@ -522,11 +522,11 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
                 </label>
 
                 <div className="flex gap-3 justify-end">
-                  <button type="button" onClick={() => setEditingEp(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
+                  <button type="button" onClick={() => setEditingEp(null)} className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
                     Cancel
                   </button>
                   <button type="button" onClick={handleSaveEpisode} disabled={epSaving}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg shadow-sm disabled:opacity-50 transition-all">
+                    className="flex items-center gap-2 px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs rounded-lg shadow-sm disabled:opacity-50 transition-all">
                     <Save className="w-4 h-4" /> {epSaving ? 'Saving...' : 'Save Episode'}
                   </button>
                 </div>

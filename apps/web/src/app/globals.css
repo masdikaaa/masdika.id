@@ -2230,3 +2230,33 @@ html.light input[type="range"]::-moz-range-progress {
   animation: page-fade-in 0.25s ease-out both;
 }
 
+/* ===== Unified Admin Panel Typography & Compact Component Scale ===== */
+.admin-panel {
+  font-family: var(--font-sans), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.admin-panel h1:not(.prose h1):not(.prose-invert h1) {
+  font-family: var(--font-sans), sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.admin-panel h2:not(.prose h2):not(.prose-invert h2),
+.admin-panel h3:not(.prose h3):not(.prose-invert h3) {
+  font-family: var(--font-sans), sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.admin-panel table {
+  font-size: 0.75rem;
+}
+
+.admin-panel thead th {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+

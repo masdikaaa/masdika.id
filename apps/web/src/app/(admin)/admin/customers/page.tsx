@@ -277,7 +277,7 @@ export default function AdminCustomersPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Customers & Users
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -310,7 +310,7 @@ export default function AdminCustomersPage() {
         {/* Total Customers */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -324,7 +324,7 @@ export default function AdminCustomersPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {users.length}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Registered</span>
@@ -334,7 +334,7 @@ export default function AdminCustomersPage() {
         {/* Active Users */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -348,7 +348,7 @@ export default function AdminCustomersPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {activeCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Good Standing</span>
@@ -358,7 +358,7 @@ export default function AdminCustomersPage() {
         {/* Suspended Users */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -372,7 +372,7 @@ export default function AdminCustomersPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {suspendedCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-red-400" : "text-red-600")}>Restricted</span>
@@ -382,7 +382,7 @@ export default function AdminCustomersPage() {
         {/* Total Saldo */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -396,7 +396,7 @@ export default function AdminCustomersPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-2xl font-extrabold truncate", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-lg sm:text-xl font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
               {formatRupiah(totalBalance)}
             </span>
           </div>
@@ -406,12 +406,12 @@ export default function AdminCustomersPage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Status Tab switch */}
         <div className={cn(
           "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
-          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+          isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200"
         )}>
           {[
             { id: "all", label: "All Users", count: users.length },
@@ -438,7 +438,7 @@ export default function AdminCustomersPage() {
               <span className={cn(
                 "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
                 statusFilter === tab.id
-                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  ? "bg-slate-950/20 text-slate-950 font-bold"
                   : isDark
                     ? "bg-white/10 text-zinc-300"
                     : "bg-slate-200 text-slate-700"
@@ -475,7 +475,7 @@ export default function AdminCustomersPage() {
               className={cn(
                 "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
                 isDark
-                  ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                   : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
               )}
             />
@@ -484,26 +484,26 @@ export default function AdminCustomersPage() {
       </div>
 
       {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
-              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 border-slate-200 text-slate-500")}>
-                <th className="p-4 w-12 text-center">
+              <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 border-slate-200 text-slate-500")}>
+                <th className="px-3.5 py-2.5 w-12 text-center">
                   <button
                     onClick={() => setSelectedUsers(selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 ? [] : filteredUsers.map(u => u.id))}
                     className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                       selectedUsers.length === filteredUsers.length && filteredUsers.length > 0
                         ? 'bg-cyan-500 border-cyan-500'
-                        : isDark ? 'border-slate-700 bg-[#060b14] hover:border-cyan-400' : 'border-zinc-300 bg-white hover:border-cyan-600'
+                        : isDark ? 'border-slate-700 bg-[#0a0a0c] hover:border-cyan-400' : 'border-zinc-300 bg-white hover:border-cyan-600'
                     }`}
                   >
                     {selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
                   </button>
                 </th>
-                <th className="p-4 whitespace-nowrap">User Details</th>
-                <th className="p-4 whitespace-nowrap">ID</th>
-                <th className="p-4 text-center whitespace-nowrap">Status</th>
+                <th className="px-3.5 py-2.5 whitespace-nowrap">User Details</th>
+                <th className="px-3.5 py-2.5 whitespace-nowrap">ID</th>
+                <th className="px-3.5 py-2.5 text-center whitespace-nowrap">Status</th>
                 <th 
                   onClick={() => setSortBy(sortBy === "last_seen" ? "newest" : "last_seen")}
                   className="p-4 text-center whitespace-nowrap cursor-pointer hover:text-cyan-400 select-none transition-colors"
@@ -514,8 +514,8 @@ export default function AdminCustomersPage() {
                     {sortBy === "last_seen" && <span className="text-cyan-400 text-xs">▼</span>}
                   </div>
                 </th>
-                <th className="p-4 text-center whitespace-nowrap">Balance</th>
-                <th className="p-4 text-right whitespace-nowrap">Actions</th>
+                <th className="px-3.5 py-2.5 text-center whitespace-nowrap">Balance</th>
+                <th className="px-3.5 py-2.5 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -539,22 +539,22 @@ export default function AdminCustomersPage() {
               ) : (
                 paginatedUsers.map((u) => (
                   <tr key={u.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedUsers.includes(u.id) ? (isDark ? 'bg-cyan-500/10' : 'bg-cyan-50') : '')}>
-                    <td className="p-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <button
                         onClick={() => setSelectedUsers(prev => prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id])}
                         className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                           selectedUsers.includes(u.id)
                             ? 'bg-cyan-500 border-cyan-500'
-                            : isDark ? 'border-slate-700 bg-[#060b14] group-hover:border-cyan-400' : 'border-zinc-300 bg-white group-hover:border-cyan-600'
+                            : isDark ? 'border-slate-700 bg-[#0a0a0c] group-hover:border-cyan-400' : 'border-zinc-300 bg-white group-hover:border-cyan-600'
                         }`}
                       >
                         {selectedUsers.includes(u.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
                       </button>
                     </td>
-                    <td className="p-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+                          <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                             <img referrerPolicy="no-referrer" 
                               src={u.image || `/api/avatar?email=${encodeURIComponent(u.email || '')}&name=${encodeURIComponent(u.name || 'User')}`} 
                               alt={u.name || "User"}
@@ -579,8 +579,8 @@ export default function AdminCustomersPage() {
                         </div>
                       </div>
                     </td>
-                    <td className={cn("p-4 font-mono text-xs whitespace-nowrap", isDark ? "text-zinc-500" : "text-slate-500")}>{u.id}</td>
-                    <td className="p-4 text-center">
+                    <td className={cn("px-3.5 py-2.5 font-mono text-xs whitespace-nowrap", isDark ? "text-zinc-500" : "text-slate-500")}>{u.id}</td>
+                    <td className="px-3.5 py-2.5 text-center">
                       {u.isSuspended ? (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 border border-red-500/20", isDark ? "text-red-400" : "text-red-700")}>
                           <Ban className="w-3.5 h-3.5" /> Suspended
@@ -591,14 +591,14 @@ export default function AdminCustomersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-center whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 text-center whitespace-nowrap">
                       <LastSeenBadge date={u.lastActive} isDark={isDark} />
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="px-3.5 py-2.5 text-center">
                       <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(u.balance || 0)}</div>
                       <button onClick={() => { setEditBalanceUser(u); setNewBalance(u.balance?.toString() || "0"); }} className={cn("text-xs hover:underline mt-1", isDark ? "text-cyan-400" : "text-cyan-700")}>Edit Balance</button>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="px-3.5 py-2.5 text-right">
                          <div className="flex items-center justify-end gap-2">
                            <button 
                              onClick={() => fetchReferrals(u)}
@@ -630,7 +630,7 @@ export default function AdminCustomersPage() {
             </tbody>
           </table>
         </div>
-        <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
@@ -660,8 +660,8 @@ export default function AdminCustomersPage() {
       {editBalanceUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isUpdatingBalance && setEditBalanceUser(null)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <h2 className={cn("text-xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Edit Balance</h2>
+          <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <h2 className={cn("text-sm sm:text-base font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>Edit Balance</h2>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{editBalanceUser.name}</span></p>
             <div className="mb-6">
               <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>New Balance (Rp)</label>
@@ -673,7 +673,7 @@ export default function AdminCustomersPage() {
                   const rawValue = e.target.value.replace(/\D/g, '');
                   setNewBalance(rawValue);
                 }}
-                className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 font-bold", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+                className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 font-bold", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
               />
             </div>
             <div className="flex justify-end gap-3">
@@ -699,8 +699,8 @@ export default function AdminCustomersPage() {
       {suspendUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isSuspending && setSuspendUser(null)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <h2 className={cn("text-xl font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{suspendUser.isSuspended ? "Unsuspend User" : "Suspend User"}</h2>
+          <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <h2 className={cn("text-sm sm:text-base font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{suspendUser.isSuspended ? "Unsuspend User" : "Suspend User"}</h2>
             <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{suspendUser.name}</span></p>
             
             {!suspendUser.isSuspended ? (
@@ -710,7 +710,7 @@ export default function AdminCustomersPage() {
                   value={suspendReason}
                   onChange={(e) => setSuspendReason(e.target.value)}
                   placeholder="e.g. Abuse of File CDN..."
-                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 text-sm h-24 resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 text-sm h-24 resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
                 />
               </div>
             ) : (
@@ -750,11 +750,11 @@ export default function AdminCustomersPage() {
       {/* View Referrals Modal */}
       {referralsUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={cn("border rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             {/* Header */}
-            <div className={cn("p-4 sm:p-6 border-b flex items-start justify-between gap-3 shrink-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 sm:p-6 border-b flex items-start justify-between gap-3 shrink-0", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <div className="min-w-0">
-                <h3 className={cn("text-lg sm:text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <h3 className={cn("text-lg sm:text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   <Gift className={cn("w-5 h-5 shrink-0", isDark ? "text-purple-400" : "text-purple-700")} />
                   <span className="truncate">Referrals for {referralsUser.name || 'Unnamed'}</span>
                 </h3>
@@ -775,15 +775,15 @@ export default function AdminCustomersPage() {
               ) : referralsData ? (
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <p className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Referrals</p>
-                      <p className={cn("text-xl sm:text-2xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>{referralsData.totalReferrals}</p>
+                      <p className={cn("text-xl sm:text-lg sm:text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{referralsData.totalReferrals}</p>
                     </div>
-                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <p className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Total Earned</p>
                       <p className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-emerald-400" : "text-emerald-700")}>{formatRupiah(referralsData.totalEarned)}</p>
                     </div>
-                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("border p-4 rounded-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <p className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Current Balance</p>
                       <p className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(referralsData.affiliateBalance)}</p>
                     </div>
@@ -792,7 +792,7 @@ export default function AdminCustomersPage() {
                   <div>
                     <h4 className={cn("text-base sm:text-lg font-semibold mb-3", isDark ? "text-white" : "text-slate-900")}>Referred Users ({referralsData.referredUsers?.length || 0})</h4>
                     {referralsData.referredUsers?.length > 0 ? (
-                      <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                      <div className={cn("border rounded-xl overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                         <div className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                           {referralsData.referredUsers.map((ru: any) => (
                             <div key={ru.id} className={cn("p-3 sm:p-4 flex items-center justify-between gap-3", isDark ? "hover:bg-white/5" : "hover:bg-slate-100/60")}>
@@ -806,7 +806,7 @@ export default function AdminCustomersPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className={cn("p-8 text-center border rounded-xl", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
+                      <div className={cn("p-8 text-center border rounded-xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
                         <Users className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
                         <p className={cn("text-sm", isDark ? "text-zinc-500" : "text-slate-500")}>This user hasn't referred anyone yet.</p>
                       </div>
@@ -819,7 +819,7 @@ export default function AdminCustomersPage() {
             </div>
 
             {/* Footer */}
-            <div className={cn("p-4 sm:p-6 border-t shrink-0", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 sm:p-6 border-t shrink-0", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <p className={cn("text-xs text-center sm:text-left", isDark ? "text-zinc-500" : "text-slate-500")}>
                   Resetting will wipe earnings, balance, and detach all referred users.

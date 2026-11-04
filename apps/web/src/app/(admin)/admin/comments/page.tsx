@@ -266,7 +266,7 @@ export default function AdminCommentsPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Comments & Discussions
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -282,7 +282,7 @@ export default function AdminCommentsPage() {
             onClick={fetchComments}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
@@ -299,7 +299,7 @@ export default function AdminCommentsPage() {
         {/* Total Comments */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -313,7 +313,7 @@ export default function AdminCommentsPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {comments.length}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Submitted</span>
@@ -323,7 +323,7 @@ export default function AdminCommentsPage() {
         {/* Verified Comments */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -337,7 +337,7 @@ export default function AdminCommentsPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {totalVerified}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Live on Blog</span>
@@ -347,7 +347,7 @@ export default function AdminCommentsPage() {
         {/* Pending Approval */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -361,7 +361,7 @@ export default function AdminCommentsPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {totalPending}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Needs Review</span>
@@ -371,7 +371,7 @@ export default function AdminCommentsPage() {
         {/* Blocked Users */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -385,7 +385,7 @@ export default function AdminCommentsPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {totalBlocked}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-red-400" : "text-red-600")}>Restricted</span>
@@ -396,12 +396,12 @@ export default function AdminCommentsPage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Status Tab switch */}
         <div className={cn(
           "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
-          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+          isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200"
         )}>
           {[
             { id: "all", label: "All Comments", count: comments.length },
@@ -425,7 +425,7 @@ export default function AdminCommentsPage() {
               <span className={cn(
                 "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
                 filterTab === tab.id
-                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  ? "bg-slate-950/20 text-slate-950 font-bold"
                   : isDark
                     ? "bg-white/10 text-zinc-300"
                     : "bg-slate-200 text-slate-700"
@@ -441,7 +441,7 @@ export default function AdminCommentsPage() {
           {comments.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-4 py-2 font-bold rounded-xl transition-all border text-xs cursor-pointer", isDark ? "text-white border-slate-800 bg-[#060b14] hover:bg-white/5" : "text-slate-900 border-slate-200 bg-slate-50 hover:bg-slate-100")}
+              className={cn("flex items-center gap-2 px-4 py-2 font-bold rounded-xl transition-all border text-xs cursor-pointer", isDark ? "text-white border-white/[0.08] bg-[#0a0a0c] hover:bg-white/5" : "text-slate-900 border-slate-200 bg-slate-50 hover:bg-slate-100")}
             >
               <div className={`w-4 h-4 border rounded flex items-center justify-center ${selectedIds.length === comments.length && comments.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-slate-700" : "border-slate-300"}`}>
                 {selectedIds.length === comments.length && comments.length > 0 && <CheckCircle className="w-3 h-3 text-slate-900" />}
@@ -470,7 +470,7 @@ export default function AdminCommentsPage() {
               className={cn(
                 "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
                 isDark
-                  ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                   : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
               )}
             />
@@ -480,15 +480,15 @@ export default function AdminCommentsPage() {
 
       <div className="space-y-4 w-full">
         {loading ? (
-          <div className={cn("rounded-2xl p-12 text-center border relative overflow-hidden", isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
+          <div className={cn("rounded-2xl p-12 text-center border relative overflow-hidden", isDark ? "border-white/[0.08] bg-[#0c0c0e] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
             <AdminLoader className="min-h-[200px]" />
           </div>
         ) : (
           <>
             {filteredComments.map((comment) => (
-              <div key={comment.id} className={cn("border p-6 rounded-2xl relative overflow-hidden group flex gap-4 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+              <div key={comment.id} className={cn("border p-6 rounded-2xl relative overflow-hidden group flex gap-4 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="pt-2 shrink-0">
-              <button onClick={() => toggleSelect(comment.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(comment.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
+              <button onClick={() => toggleSelect(comment.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(comment.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-cyan-600"}`}>
                 {selectedIds.includes(comment.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
               </button>
             </div>
@@ -510,7 +510,7 @@ export default function AdminCommentsPage() {
                     {comment.ipAddress && (
                       <>
                         <span>•</span>
-                        <span className={cn("font-mono px-1.5 py-0.5 rounded border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>{comment.ipAddress}</span>
+                        <span className={cn("font-mono px-1.5 py-0.5 rounded border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>{comment.ipAddress}</span>
                       </>
                     )}
                   </div>
@@ -520,7 +520,7 @@ export default function AdminCommentsPage() {
                 {!comment.isAdmin && (
                   <>
                     {!comment.isVerified && (
-                      <div className={cn("flex gap-2 mr-2 border-r pr-2", isDark ? "border-slate-800" : "border-slate-200")}>
+                      <div className={cn("flex gap-2 mr-2 border-r pr-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                         <button 
                           onClick={() => setApproveId(comment.id)}
                           disabled={approving === comment.id}
@@ -543,7 +543,7 @@ export default function AdminCommentsPage() {
                       <button 
                         onClick={() => handleUnblock(comment)}
                         disabled={unblocking === comment.id}
-                        className={cn("p-2 rounded-lg transition-colors mr-2 pr-4 border-r", unblocking === comment.id ? "opacity-50" : "", isDark ? "text-green-500 hover:bg-green-500/10 border-slate-800" : "text-green-600 hover:bg-green-50 border-slate-200")}
+                        className={cn("p-2 rounded-lg transition-colors mr-2 pr-4 border-r", unblocking === comment.id ? "opacity-50" : "", isDark ? "text-green-500 hover:bg-green-500/10 border-white/[0.08]" : "text-green-600 hover:bg-green-50 border-slate-200")}
                         title="Unblock User"
                       >
                         <ShieldCheck className="w-4 h-4" />
@@ -551,7 +551,7 @@ export default function AdminCommentsPage() {
                     ) : (
                       <button 
                         onClick={() => openBlockModal(comment)}
-                        className={cn("p-2 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors mr-2 border-r pr-4", isDark ? "text-zinc-400 border-slate-800" : "text-slate-500 border-slate-200")}
+                        className={cn("p-2 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors mr-2 border-r pr-4", isDark ? "text-zinc-400 border-white/[0.08]" : "text-slate-500 border-slate-200")}
                         title="Block User (IP & Email)"
                       >
                         <ShieldBan className="w-4 h-4" />
@@ -579,7 +579,7 @@ export default function AdminCommentsPage() {
             </div>
 
             {comment.blogPost && (
-              <div className={cn("mb-4 inline-flex items-center flex-wrap gap-2 text-xs px-3 py-1.5 rounded-lg border max-w-full", isDark ? "bg-[#060b14] text-zinc-400 border-slate-800" : "bg-slate-50 text-slate-600 border-slate-200")}>
+              <div className={cn("mb-4 inline-flex items-center flex-wrap gap-2 text-xs px-3 py-1.5 rounded-lg border max-w-full", isDark ? "bg-[#0a0a0c] text-zinc-400 border-white/[0.08]" : "bg-slate-50 text-slate-600 border-slate-200")}>
                 <span className="whitespace-nowrap">On post:</span> 
                 <Link href={`/blog/${comment.blogPost.slug}`} target="_blank" className={cn("hover:text-cyan-300 font-medium flex items-center gap-1 truncate max-w-full", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <span className="truncate">{comment.blogPost.title}</span>
@@ -589,12 +589,12 @@ export default function AdminCommentsPage() {
             )}
 
             {comment.parentId && comment.parent && (
-              <div className={cn("mb-4 pl-4 border-l-2 text-xs text-zinc-500 italic", isDark ? "border-slate-800" : "border-slate-200")}>
+              <div className={cn("mb-4 pl-4 border-l-2 text-xs text-zinc-500 italic", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                 In reply to {comment.parent.name}: "{comment.parent.content.substring(0, 50)}..."
               </div>
             )}
 
-            <div className={cn("relative p-5 mt-2 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("relative p-5 mt-2 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <MessageCircle className={cn("absolute top-4 left-4 w-10 h-10 /10", isDark ? "text-cyan-500" : "text-cyan-700")} />
               <p className={cn("leading-relaxed whitespace-pre-wrap relative z-10 pl-2 text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>
                 {renderCommentContent(comment.content)}
@@ -602,19 +602,19 @@ export default function AdminCommentsPage() {
             </div>
 
             {replyingTo === comment.id && (
-              <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} onSubmit={(e) => handleReplySubmit(e, comment.id)} className={cn("mt-6 pt-6 border-t relative", isDark ? "border-slate-800" : "border-slate-200")}>
+              <motion.form initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} onSubmit={(e) => handleReplySubmit(e, comment.id)} className={cn("mt-6 pt-6 border-t relative", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                 <textarea 
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   placeholder="Type your reply as Admin..."
                   required
-                  className={cn("w-full border rounded-xl px-5 py-4 font-medium focus:outline-none focus:border-cyan-500 transition-all resize-y min-h-[120px] mb-4 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-5 py-4 font-medium focus:outline-none focus:border-cyan-500 transition-all resize-y min-h-[120px] mb-4 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 ></textarea>
                 <div className="flex justify-end gap-3">
                   <button 
                     type="button" 
                     onClick={() => setReplyingTo(null)}
-                    className={cn("px-4 py-2 rounded-lg border font-medium text-xs transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                    className={cn("px-4 py-2 rounded-lg border font-medium text-xs transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
@@ -634,7 +634,7 @@ export default function AdminCommentsPage() {
         ))}
 
         {filteredComments.length === 0 && (
-          <div className={cn("rounded-2xl p-12 text-center border relative overflow-hidden", isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
+          <div className={cn("rounded-2xl p-12 text-center border relative overflow-hidden", isDark ? "border-white/[0.08] bg-[#0c0c0e] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
             <MessageCircle className={cn("w-12 h-12 mx-auto mb-3", isDark ? "text-zinc-600" : "text-slate-300")} />
             <p className={cn("font-semibold text-base mb-1", isDark ? "text-white" : "text-slate-900")}>No comments found</p>
             <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
@@ -649,7 +649,7 @@ export default function AdminCommentsPage() {
       {/* Block Confirmation Modal */}
       {blockModalOpen && userToBlock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
-          <div className={cn("border rounded-2xl p-6 w-full max-w-md relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("border rounded-2xl p-6 w-full max-w-md relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
             
             <div className="flex items-center gap-4 mb-6">
@@ -657,12 +657,12 @@ export default function AdminCommentsPage() {
                 <ShieldAlert className={cn("w-6 h-6", isDark ? "text-red-500" : "text-red-700")} />
               </div>
               <div>
-                <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Block User</h3>
+                <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Block User</h3>
                 <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>This action will blacklist them.</p>
               </div>
             </div>
             
-            <div className={cn("rounded-xl p-4 border mb-6 space-y-3", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("rounded-xl p-4 border mb-6 space-y-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <div>
                 <div className="text-xs text-zinc-500 mb-1">Email to block:</div>
                 <div className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>{userToBlock.email}</div>
@@ -682,7 +682,7 @@ export default function AdminCommentsPage() {
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setBlockModalOpen(false)}
-                className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-colors", isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
+                className={cn("px-3.5 py-2 rounded-xl text-xs font-medium transition-colors", isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
                 disabled={blocking}
               >
                 Cancel
@@ -690,7 +690,7 @@ export default function AdminCommentsPage() {
               <button 
                 onClick={confirmBlock}
                 disabled={blocking}
-                className={cn("px-6 py-2 rounded-xl text-sm font-bold bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
+                className={cn("px-6 py-2 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}
               >
                 {blocking ? (
                   <>

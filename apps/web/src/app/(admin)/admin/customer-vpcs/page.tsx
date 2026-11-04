@@ -531,7 +531,7 @@ export default function AdminCustomerVpcsPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Customer VPC Management
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -546,7 +546,7 @@ export default function AdminCustomerVpcsPage() {
             className={cn(
               "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border cursor-pointer",
               isDark
-                ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white"
+                ? "border-white/[0.08] bg-[#0c0c0e] hover:bg-white/5 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm"
             )}
           >
@@ -580,7 +580,7 @@ export default function AdminCustomerVpcsPage() {
         <div
           className={cn(
             "p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group",
-            isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <div className="flex items-center justify-between">
@@ -603,7 +603,7 @@ export default function AdminCustomerVpcsPage() {
         <div
           className={cn(
             "p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group",
-            isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <div className="flex items-center justify-between">
@@ -626,7 +626,7 @@ export default function AdminCustomerVpcsPage() {
         <div
           className={cn(
             "p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group",
-            isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <div className="flex items-center justify-between">
@@ -649,7 +649,7 @@ export default function AdminCustomerVpcsPage() {
         <div
           className={cn(
             "p-4 sm:p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group",
-            isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200 shadow-sm"
+            isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <div className="flex items-center justify-between">
@@ -673,7 +673,7 @@ export default function AdminCustomerVpcsPage() {
       <div
         className={cn(
           "p-4 md:p-5 rounded-2xl border space-y-4",
-          isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
         )}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -706,7 +706,7 @@ export default function AdminCustomerVpcsPage() {
                 className={cn(
                   "w-full pl-9 pr-3 py-2 text-xs rounded-xl border focus:outline-none transition-colors",
                   isDark
-                    ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500"
+                    ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500"
                     : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500"
                 )}
               />
@@ -720,7 +720,7 @@ export default function AdminCustomerVpcsPage() {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             className={cn(
-              "px-4 py-3 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-3",
+              "px-3.5 py-2 rounded-xl text-xs border flex flex-col md:flex-row items-start md:items-center justify-between gap-3",
               isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-900"
             )}
           >
@@ -772,7 +772,7 @@ export default function AdminCustomerVpcsPage() {
       </div>
 
       {/* Tabs Bar */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/[0.08] pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab("vpcs")}
           className={cn(
@@ -826,11 +826,11 @@ export default function AdminCustomerVpcsPage() {
         </div>
       ) : activeTab === "vpcs" ? (
         /* ================= TAB 1: VPC NETWORKS ================= */
-        <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[850px]">
               <thead>
-                <tr className={cn("border-b text-xs font-semibold whitespace-nowrap", isDark ? "border-slate-800 bg-[#060b14] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
+                <tr className={cn("border-b text-xs font-semibold whitespace-nowrap", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
                   {selectedCustomerId === "all" && <th className="py-3.5 px-4">Customer Account</th>}
                   <th className="py-3.5 px-4">VPC Network</th>
                   <th className="py-3.5 px-4">CIDR Subnet</th>
@@ -867,7 +867,7 @@ export default function AdminCustomerVpcsPage() {
                         {selectedCustomerId === "all" && (
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-2.5">
-                              <div className={cn("w-8 h-8 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                              <div className={cn("w-8 h-8 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                                 <img
                                   referrerPolicy="no-referrer"
                                   src={vpc.user?.avatar || `/api/avatar?email=${encodeURIComponent(vpc.user?.email || '')}&name=${encodeURIComponent(vpc.user?.name || 'Customer')}`}
@@ -1041,11 +1041,11 @@ export default function AdminCustomerVpcsPage() {
         </div>
       ) : activeTab === "peerings" ? (
         /* ================= TAB 2: VPC PEERINGS ================= */
-        <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
-                <tr className={cn("border-b text-xs font-semibold whitespace-nowrap", isDark ? "border-slate-800 bg-[#060b14] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
+                <tr className={cn("border-b text-xs font-semibold whitespace-nowrap", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
                   {selectedCustomerId === "all" && <th className="py-3.5 px-4">Customer Account</th>}
                   <th className="py-3.5 px-4">VPC A (Origin)</th>
                   <th className="py-3.5 px-4 text-center">Inter-Connect</th>
@@ -1079,7 +1079,7 @@ export default function AdminCustomerVpcsPage() {
                       {selectedCustomerId === "all" && (
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                            <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                               <img
                                 referrerPolicy="no-referrer"
                                 src={peering.vpcA?.user?.avatar || `/api/avatar?email=${encodeURIComponent(peering.vpcA?.user?.email || '')}&name=${encodeURIComponent(peering.vpcA?.user?.name || 'Customer')}`}
@@ -1181,11 +1181,11 @@ export default function AdminCustomerVpcsPage() {
         </div>
       ) : (
         /* ================= TAB 3: ATTACHED VMS OVERVIEW ================= */
-        <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
-                <tr className={cn("border-b text-xs font-semibold whitespace-nowrap", isDark ? "border-slate-800 bg-[#060b14] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
+                <tr className={cn("border-b text-xs font-semibold whitespace-nowrap", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
                   {selectedCustomerId === "all" && <th className="py-3.5 px-4">Customer Account</th>}
                   <th className="py-3.5 px-4">Virtual Machine</th>
                   <th className="py-3.5 px-4">Assigned VPC IP</th>
@@ -1218,7 +1218,7 @@ export default function AdminCustomerVpcsPage() {
                       {selectedCustomerId === "all" && (
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-slate-800" : "border-slate-200")}>
+                            <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0 bg-slate-800", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                               <img
                                 referrerPolicy="no-referrer"
                                 src={customer?.avatar || `/api/avatar?email=${encodeURIComponent(customer?.email || '')}&name=${encodeURIComponent(customer?.name || 'Customer')}`}
@@ -1323,17 +1323,17 @@ export default function AdminCustomerVpcsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               className={cn(
-                "border rounded-3xl p-6 w-full max-w-2xl shadow-2xl relative overflow-hidden",
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+                "border rounded-2xl p-4 sm:p-5 w-full max-w-2xl shadow-2xl relative overflow-hidden",
+                isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
               )}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     <Unplug className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                    <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
                       Manage Attached VMs
                     </h3>
                     <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1352,7 +1352,7 @@ export default function AdminCustomerVpcsPage() {
 
               <div className="py-4">
                 {manageVmsModal.vpsServices?.length === 0 ? (
-                  <div className={cn("py-10 text-center rounded-2xl border border-dashed", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                  <div className={cn("py-10 text-center rounded-2xl border border-dashed", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
                     <Server className="w-8 h-8 text-zinc-500 mx-auto mb-2 opacity-50" />
                     <p className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
                       No VMs Attached to this VPC
@@ -1362,10 +1362,10 @@ export default function AdminCustomerVpcsPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className={cn("rounded-xl border overflow-hidden", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-white")}>
+                  <div className={cn("rounded-xl border overflow-hidden", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-white")}>
                     <table className="w-full text-left text-xs">
                       <thead>
-                        <tr className={cn("border-b font-semibold", isDark ? "border-slate-800 text-zinc-400" : "border-slate-200 text-slate-500")}>
+                        <tr className={cn("border-b font-semibold", isDark ? "border-white/[0.08] text-zinc-400" : "border-slate-200 text-slate-500")}>
                           <th className="py-2.5 px-3">Hostname</th>
                           <th className="py-2.5 px-3">VMID</th>
                           <th className="py-2.5 px-3">VPC IP Address</th>
@@ -1406,7 +1406,7 @@ export default function AdminCustomerVpcsPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                 <button
                   onClick={() => openAttachVm(manageVmsModal)}
                   className="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
@@ -1416,7 +1416,7 @@ export default function AdminCustomerVpcsPage() {
 
                 <button
                   onClick={() => setManageVmsModal(null)}
-                  className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+                  className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-white/[0.08] bg-[#0c0c0e] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
                 >
                   Close
                 </button>
@@ -1435,17 +1435,17 @@ export default function AdminCustomerVpcsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               className={cn(
-                "border rounded-3xl p-6 w-full max-w-lg shadow-2xl relative overflow-hidden",
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+                "border rounded-2xl p-4 sm:p-5 w-full max-w-lg shadow-2xl relative overflow-hidden",
+                isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
               )}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <Plug className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                    <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
                       Attach VM to Customer VPC
                     </h3>
                     <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1464,7 +1464,7 @@ export default function AdminCustomerVpcsPage() {
 
               <div className="py-4 space-y-4 text-xs">
                 {/* Customer info note */}
-                <div className={cn("p-3 rounded-xl border flex items-center gap-2.5", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                <div className={cn("p-3 rounded-xl border flex items-center gap-2.5", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
                   <User className="w-4 h-4 text-cyan-400 shrink-0" />
                   <div>
                     Attaching VM for customer: <span className="font-semibold text-cyan-400">{attachVmModal.user?.name}</span> ({attachVmModal.user?.email})
@@ -1492,7 +1492,7 @@ export default function AdminCustomerVpcsPage() {
                       onChange={(e) => setAttachForm({ ...attachForm, vpsId: e.target.value })}
                       className={cn(
                         "w-full px-3 py-2.5 rounded-xl border focus:outline-none transition-colors text-xs",
-                        isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
                       )}
                     >
                       <option value="">-- Choose Virtual Machine --</option>
@@ -1517,7 +1517,7 @@ export default function AdminCustomerVpcsPage() {
                     onChange={(e) => setAttachForm({ ...attachForm, privateIpAddress: e.target.value })}
                     className={cn(
                       "w-full px-3 py-2.5 font-mono text-xs rounded-xl border focus:outline-none transition-colors",
-                      isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
                     )}
                   />
                   <p className={cn("text-[10px] mt-1", isDark ? "text-zinc-500" : "text-slate-400")}>
@@ -1526,7 +1526,7 @@ export default function AdminCustomerVpcsPage() {
                 </div>
 
                 {/* Force DB Only Toggle */}
-                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div>
                     <div className={cn("font-semibold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>
                       Database Only Attachment
@@ -1544,11 +1544,11 @@ export default function AdminCustomerVpcsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setAttachVmModal(null)}
-                  className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+                  className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-white/[0.08] bg-[#0c0c0e] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
                 >
                   Cancel
                 </button>
@@ -1576,16 +1576,16 @@ export default function AdminCustomerVpcsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               className={cn(
-                "border rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden",
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+                "border rounded-2xl p-4 sm:p-5 w-full max-w-md shadow-2xl relative overflow-hidden",
+                isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
               )}
             >
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
                   <Unplug className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
                     Detach Virtual Machine
                   </h3>
                   <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1600,7 +1600,7 @@ export default function AdminCustomerVpcsPage() {
                 </p>
 
                 {/* Force DB Only Checkbox */}
-                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div>
                     <div className={cn("font-semibold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>
                       Detach in Database Only
@@ -1623,7 +1623,7 @@ export default function AdminCustomerVpcsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setDetachVmModal(null)}
@@ -1655,16 +1655,16 @@ export default function AdminCustomerVpcsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               className={cn(
-                "border rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden",
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+                "border rounded-2xl p-4 sm:p-5 w-full max-w-md shadow-2xl relative overflow-hidden",
+                isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
               )}
             >
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
                   <Trash2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
                     Delete Customer VPC
                   </h3>
                   <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1703,7 +1703,7 @@ export default function AdminCustomerVpcsPage() {
                 )}
 
                 {/* Force DB Only Toggle */}
-                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div>
                     <div className={cn("font-semibold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>
                       Delete from Database Only
@@ -1726,7 +1726,7 @@ export default function AdminCustomerVpcsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setDeleteVpcModal(null)}
@@ -1758,17 +1758,17 @@ export default function AdminCustomerVpcsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               className={cn(
-                "border rounded-3xl p-6 w-full max-w-lg shadow-2xl relative overflow-hidden",
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+                "border rounded-2xl p-4 sm:p-5 w-full max-w-lg shadow-2xl relative overflow-hidden",
+                isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
               )}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
                     <ArrowRightLeft className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                    <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
                       Create VPC Peering Connection
                     </h3>
                     <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1807,7 +1807,7 @@ export default function AdminCustomerVpcsPage() {
                           onChange={(e) => setCreatePeeringModal({ ...createPeeringModal, vpcAId: e.target.value })}
                           className={cn(
                             "w-full px-3 py-2 rounded-xl border focus:outline-none transition-colors text-xs",
-                            isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
+                            isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
                           )}
                         >
                           <option value="">-- Select VPC A --</option>
@@ -1829,7 +1829,7 @@ export default function AdminCustomerVpcsPage() {
                           onChange={(e) => setCreatePeeringModal({ ...createPeeringModal, vpcBId: e.target.value })}
                           className={cn(
                             "w-full px-3 py-2 rounded-xl border focus:outline-none transition-colors text-xs",
-                            isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
+                            isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
                           )}
                         >
                           <option value="">-- Select VPC B --</option>
@@ -1854,13 +1854,13 @@ export default function AdminCustomerVpcsPage() {
                         onChange={(e) => setCreatePeeringModal({ ...createPeeringModal, description: e.target.value })}
                         className={cn(
                           "w-full px-3 py-2 text-xs rounded-xl border focus:outline-none transition-colors",
-                          isDark ? "bg-[#060b14] border-slate-800 text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
+                          isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-300 text-slate-900 focus:border-cyan-500"
                         )}
                       />
                     </div>
 
                     {/* Force DB Only Toggle */}
-                    <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <div>
                         <div className={cn("font-semibold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>
                           Database Only Peering
@@ -1885,11 +1885,11 @@ export default function AdminCustomerVpcsPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setCreatePeeringModal(null)}
-                  className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+                  className={cn("px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer", isDark ? "border-white/[0.08] bg-[#0c0c0e] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
                 >
                   Cancel
                 </button>
@@ -1917,16 +1917,16 @@ export default function AdminCustomerVpcsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               className={cn(
-                "border rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden",
-                isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200"
+                "border rounded-2xl p-4 sm:p-5 w-full max-w-md shadow-2xl relative overflow-hidden",
+                isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
               )}
             >
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
                   <Trash2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
                     Remove VPC Peering
                   </h3>
                   <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1941,7 +1941,7 @@ export default function AdminCustomerVpcsPage() {
                 </p>
 
                 {/* Force DB Only Toggle */}
-                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-3 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div>
                     <div className={cn("font-semibold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>
                       Unpeer from Database Only
@@ -1964,7 +1964,7 @@ export default function AdminCustomerVpcsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setUnpeerModal(null)}

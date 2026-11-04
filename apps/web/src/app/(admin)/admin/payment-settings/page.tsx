@@ -109,9 +109,9 @@ export default function AdminPaymentSettingsPage() {
 
     return (
       <div className="mb-8 last:mb-0">
-        <div className={cn("flex items-center justify-between mb-4 border-b pb-2.5", isDark ? "border-slate-800" : "border-slate-200")}>
+        <div className={cn("flex items-center justify-between mb-4 border-b pb-2.5", isDark ? "border-white/[0.08]" : "border-slate-200")}>
           <div className="flex items-center gap-2.5">
-            <h3 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h3 className={cn("text-base sm:text-sm font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {title}
             </h3>
             <span className={cn(
@@ -134,7 +134,7 @@ export default function AdminPaymentSettingsPage() {
                 "flex flex-col justify-between p-4 rounded-xl border transition-all duration-200",
                 pm.isActive 
                   ? (isDark ? "bg-[#070d18] border-cyan-500/40 hover:border-cyan-500/60 shadow-sm shadow-cyan-950/20" : "bg-white border-cyan-500/50 hover:border-cyan-500 shadow-sm") 
-                  : (isDark ? "bg-[#060b14]/50 border-slate-800/80 opacity-60 hover:opacity-85" : "bg-slate-50/80 border-slate-200 opacity-60 hover:opacity-85")
+                  : (isDark ? "bg-[#0a0a0c]/50 border-white/[0.08] opacity-60 hover:opacity-85" : "bg-slate-50/80 border-slate-200 opacity-60 hover:opacity-85")
               )}
             >
               {/* Top row: Logo, Name & Toggle */}
@@ -221,7 +221,7 @@ export default function AdminPaymentSettingsPage() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <div className={cn(
                     "relative flex items-center rounded-lg border overflow-hidden transition-colors focus-within:border-cyan-500",
-                    isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                   )}>
                     <span className={cn(
                       "pl-2 pr-1 text-[11px] font-bold select-none",
@@ -261,7 +261,7 @@ export default function AdminPaymentSettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Payment Settings</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Payment Settings</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Enable, disable, and configure fees for payment methods across the platform.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -280,14 +280,14 @@ export default function AdminPaymentSettingsPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Gateways</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <CreditCard className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {paymentMethods.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -295,14 +295,14 @@ export default function AdminPaymentSettingsPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Methods</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {paymentMethods.filter(p => p.isActive).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -310,14 +310,14 @@ export default function AdminPaymentSettingsPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Virtual Accounts</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {paymentMethods.filter(p => p.type === 'VIRTUAL_ACCOUNT').length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -325,14 +325,14 @@ export default function AdminPaymentSettingsPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>E-Wallets & QRIS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Wallet className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {paymentMethods.filter(p => p.type === 'EWALLET' || p.type === 'QRIS').length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -341,7 +341,7 @@ export default function AdminPaymentSettingsPage() {
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {loading ? (
           <AdminLoader className="min-h-[300px] py-20" />
         ) : (

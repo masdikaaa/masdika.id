@@ -219,7 +219,7 @@ export default function AdminTestimonialsPage() {
       {/* Top Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Testimonials Management</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Testimonials Management</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage verified client reviews, star ratings, and feedback display.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ export default function AdminTestimonialsPage() {
             <RefreshCw className="w-4 h-4" />
             Refresh
           </button>
-          <button onClick={openAddModal} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
+          <button onClick={openAddModal} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all">
             <Plus className="w-4 h-4" /> Add Testimonial
           </button>
         </div>
@@ -241,14 +241,14 @@ export default function AdminTestimonialsPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Reviews</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <MessageSquare className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {testimonials.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -256,14 +256,14 @@ export default function AdminTestimonialsPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>5-Star Reviews</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Star className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {testimonials.filter(t => t.rating === 5).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -271,14 +271,14 @@ export default function AdminTestimonialsPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Average Score</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Star className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {testimonials.length > 0 ? (testimonials.reduce((acc, t) => acc + (t.rating || 5), 0) / testimonials.length).toFixed(1) : "5.0"} <span className="text-sm font-normal text-zinc-500">/ 5.0</span>
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -286,14 +286,14 @@ export default function AdminTestimonialsPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Verified Clients</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <UserCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {testimonials.filter(t => !!t.image).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -303,7 +303,7 @@ export default function AdminTestimonialsPage() {
       </div>
 
       {/* GAMBAR 1 Filter Bar */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           <input 
@@ -311,16 +311,16 @@ export default function AdminTestimonialsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search user, role, or review text..." 
-            className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+            className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm border rounded-xl focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
           />
         </div>
         <div className="flex items-center gap-3 self-end md:self-auto">
           {filteredTestimonials.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-slate-800 bg-[#060b14] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-50")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold text-xs rounded-xl transition-all border whitespace-nowrap", isDark ? "text-white border-white/[0.08] bg-[#0a0a0c] hover:bg-slate-800/60" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-50")}
             >
-              <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"}`}>
+              <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"}`}>
                 {selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
               </div>
               <span>{selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 ? 'Deselect All' : 'Select All'}</span>
@@ -338,22 +338,22 @@ export default function AdminTestimonialsPage() {
         </div>
       </div>
 
-      <motion.div variants={itemVariants} className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <motion.div variants={itemVariants} className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
-                <th className="px-6 py-4 font-semibold w-12 whitespace-nowrap">
-                  <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-[#060b14]" : "bg-slate-100 border-slate-200 hover:border-cyan-600"}`}>
+                <th className="px-3.5 py-2.5 font-semibold w-12 whitespace-nowrap">
+                  <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "border-slate-700 hover:border-cyan-400 bg-[#0a0a0c]" : "bg-slate-100 border-slate-200 hover:border-cyan-600"}`}>
                     {selectedIds.length === filteredTestimonials.length && filteredTestimonials.length > 0 && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                   </button>
                 </th>
-                <th className="px-6 py-4 font-bold whitespace-nowrap">Name</th>
-                <th className="px-6 py-4 font-bold whitespace-nowrap">Role</th>
-                <th className="px-6 py-4 font-bold whitespace-nowrap">Text</th>
-                <th className="px-6 py-4 font-bold whitespace-nowrap">Rating</th>
-                <th className="px-6 py-4 font-bold whitespace-nowrap">Date Added</th>
-                <th className="px-6 py-4 font-bold text-right whitespace-nowrap">Actions</th>
+                <th className="px-3.5 py-2.5 font-bold whitespace-nowrap">Name</th>
+                <th className="px-3.5 py-2.5 font-bold whitespace-nowrap">Role</th>
+                <th className="px-3.5 py-2.5 font-bold whitespace-nowrap">Text</th>
+                <th className="px-3.5 py-2.5 font-bold whitespace-nowrap">Rating</th>
+                <th className="px-3.5 py-2.5 font-bold whitespace-nowrap">Date Added</th>
+                <th className="px-3.5 py-2.5 font-bold text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -378,14 +378,14 @@ export default function AdminTestimonialsPage() {
               ) : (
                 filteredTestimonials.map((t) => (
                   <tr key={t.id} className={cn("transition-colors group", selectedIds.includes(t.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button onClick={() => toggleSelect(t.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(t.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "bg-[#060b14] border-slate-700 hover:border-cyan-400" : "bg-white border-slate-300 hover:border-cyan-600"}`}>
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
+                      <button onClick={() => toggleSelect(t.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(t.id) ? 'bg-cyan-500 border-cyan-500 text-slate-950' : isDark ? "bg-[#0a0a0c] border-slate-700 hover:border-cyan-400" : "bg-white border-slate-300 hover:border-cyan-600"}`}>
                         {selectedIds.includes(t.id) && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
                       </button>
                     </td>
-                    <td className={cn("px-6 py-4 font-bold group-hover:text-cyan-400 transition-colors whitespace-nowrap flex items-center gap-3", isDark ? "text-white" : "text-slate-900")}>
+                    <td className={cn("px-3.5 py-2.5 font-bold group-hover:text-cyan-400 transition-colors whitespace-nowrap flex items-center gap-3", isDark ? "text-white" : "text-slate-900")}>
                       {t.image ? (
-                        <div className={cn("w-8 h-8 rounded-full overflow-hidden border flex-shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+                        <div className={cn("w-8 h-8 rounded-full overflow-hidden border flex-shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                           <img referrerPolicy="no-referrer" src={t.image} alt={t.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
                       ) : (
@@ -395,17 +395,17 @@ export default function AdminTestimonialsPage() {
                       )}
                       {t.name}
                     </td>
-                    <td className="px-6 py-4 font-medium whitespace-nowrap">{t.role}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5 font-medium whitespace-nowrap">{t.role}</td>
+                    <td className="px-3.5 py-2.5">
                        <span className="truncate block max-w-xs">{t.text}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <span className={cn("inline-flex items-center gap-1.5 bg-yellow-400/10 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border border-yellow-400/20", isDark ? "text-yellow-400" : "text-yellow-700")}>
                         {t.rating} / 5
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-medium whitespace-nowrap">{new Date(t.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 font-medium whitespace-nowrap">{new Date(t.createdAt).toLocaleDateString()}</td>
+                    <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openEditModal(t)} className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "bg-cyan-500/10 hover:bg-cyan-500 hover:text-white text-cyan-400" : "bg-cyan-50 hover:bg-cyan-500 hover:text-white text-cyan-700")} title="Edit">
                           <Pencil className="w-4 h-4" />
@@ -462,7 +462,7 @@ export default function AdminTestimonialsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className={cn("border rounded-2xl p-6 md:p-8 w-full max-w-lg relative shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+              className={cn("border rounded-2xl p-4 sm:p-5 w-full max-w-lg relative shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
             >
               <button
                 onClick={() => setShowAddModal(false)}
@@ -471,7 +471,7 @@ export default function AdminTestimonialsPage() {
                 <X className="w-5 h-5" />
               </button>
 
-              <h2 className={cn("text-2xl font-extrabold mb-6 border-b pb-4", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>{editId ? "Edit Testimonial" : "Add Testimonial"}</h2>
+              <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-6 border-b pb-4", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>{editId ? "Edit Testimonial" : "Add Testimonial"}</h2>
 
               <form onSubmit={handleAddSubmit} className="space-y-4">
                 <div className="space-y-3">
@@ -481,7 +481,7 @@ export default function AdminTestimonialsPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div className="space-y-3">
@@ -490,7 +490,7 @@ export default function AdminTestimonialsPage() {
                   <div className="flex flex-col gap-3">
                     {/* Display existing image or placeholder */}
                     <div className="flex items-center gap-4">
-                       <div className={cn("w-16 h-16 rounded-full border bg-black/40 overflow-hidden flex items-center justify-center shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+                       <div className={cn("w-16 h-16 rounded-full border bg-black/40 overflow-hidden flex items-center justify-center shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                          {formData.image ? (
                            <img referrerPolicy="no-referrer" src={formData.image} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                          ) : (
@@ -502,7 +502,7 @@ export default function AdminTestimonialsPage() {
                            type="button"
                            onClick={() => fileInputRef.current?.click()}
                            disabled={uploadingImage}
-                           className={cn("flex-1 border text-sm font-medium py-2 px-3 rounded-xl transition-colors", isDark ? "bg-[#060b14] hover:bg-slate-800 border-slate-800 text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900")}
+                           className={cn("flex-1 border text-sm font-medium py-2 px-3 rounded-xl transition-colors", isDark ? "bg-[#0a0a0c] hover:bg-slate-800 border-white/[0.08] text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900")}
                          >
                            {uploadingImage ? 'Uploading...' : 'Upload File'}
                          </button>
@@ -533,7 +533,7 @@ export default function AdminTestimonialsPage() {
                       value={formData.image}
                       onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                       placeholder="Or enter image URL here..."
-                      className={cn("w-full px-4 py-2.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                      className={cn("w-full px-4 py-2.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     />
                   </div>
                 </div>
@@ -545,7 +545,7 @@ export default function AdminTestimonialsPage() {
                     required
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div className="space-y-3">
@@ -555,7 +555,7 @@ export default function AdminTestimonialsPage() {
                     rows={4}
                     value={formData.text}
                     onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                    className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full px-5 py-3.5 border rounded-xl font-medium focus:outline-none focus:border-cyan-500 transition-all resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   ></textarea>
                 </div>
                 <div className="space-y-3">
@@ -567,22 +567,22 @@ export default function AdminTestimonialsPage() {
                     required
                     value={formData.rating}
                     onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) || 5 })}
-                    className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full px-5 py-3.5 border rounded-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 
-                <div className={cn("pt-6 flex justify-end gap-3 border-t mt-6", isDark ? "border-slate-800" : "border-slate-200")}>
+                <div className={cn("pt-6 flex justify-end gap-3 border-t mt-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                    className={cn("px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm transition-all disabled:opacity-50"
                   >
                     <CheckCircle className="w-4 h-4" />
                     {isSubmitting ? (editId ? "Updating..." : "Adding...") : (editId ? "Update Testimonial" : "Add Testimonial")}

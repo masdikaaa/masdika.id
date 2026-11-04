@@ -388,7 +388,7 @@ export default function AdminVouchersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Vouchers & Promos</h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Manage promo codes, global campaigns, and claimable reward promotions.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -407,14 +407,14 @@ export default function AdminVouchersPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Vouchers</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Ticket className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {vouchers.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -422,14 +422,14 @@ export default function AdminVouchersPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total Promos</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {promos.length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -437,14 +437,14 @@ export default function AdminVouchersPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Active Vouchers</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Percent className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {vouchers.filter(v => v.isActive).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -452,14 +452,14 @@ export default function AdminVouchersPage() {
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Reward Offers</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Tag className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {promos.filter(p => p.isReward).length}
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -469,8 +469,8 @@ export default function AdminVouchersPage() {
       </div>
 
       {/* GAMBAR 1 Filter Bar */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           <button
             onClick={() => setActiveTab("vouchers")}
             className={cn(
@@ -504,7 +504,7 @@ export default function AdminVouchersPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Voucher Codes</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Voucher Codes</h2>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Create and manage discount codes for user transactions.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -528,19 +528,19 @@ export default function AdminVouchersPage() {
             </div>
           </div>
 
-          <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="overflow-x-auto">
               <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <tr className="whitespace-nowrap">
-                    <th className="px-6 py-4 w-10">
+                    <th className="px-3.5 py-2.5 w-10">
                       <div className="flex items-center">
                         {(() => {
                           const isChecked = paginatedVouchers.length > 0 && selectedVoucherIds.length === paginatedVouchers.length;
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={toggleSelectAllVouchers} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -548,25 +548,25 @@ export default function AdminVouchersPage() {
                         })()}
                       </div>
                     </th>
-                    <th className="px-6 py-4 font-semibold">Code</th>
-                    <th className="px-6 py-4 font-semibold">Discount</th>
-                    <th className="px-6 py-4 font-semibold">Usage Limit</th>
-                    <th className="px-6 py-4 font-semibold">Valid Until</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Code</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Discount</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Usage Limit</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Valid Until</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Status</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y whitespace-nowrap", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                   {paginatedVouchers.map(v => (
                     <tr key={v.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedVoucherIds.includes(v.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : "")}>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         <div className="flex items-center">
                           {(() => {
                             const isChecked = selectedVoucherIds.includes(v.id);
                             return (
                               <label className="relative flex items-center justify-center cursor-pointer group">
                                 <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelectVoucher(v.id)} />
-                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
+                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"))}>
                                   {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                                 </div>
                               </label>
@@ -574,15 +574,15 @@ export default function AdminVouchersPage() {
                           })()}
                         </div>
                       </td>
-                      <td className={cn("px-6 py-4 font-bold", isDark ? "text-white" : "text-slate-900")}>{v.code}</td>
-                      <td className={cn("px-6 py-4 font-medium", isDark ? "text-emerald-400" : "text-emerald-700")}>{v.discountPercent}%</td>
-                      <td className="px-6 py-4">
+                      <td className={cn("px-3.5 py-2.5 font-bold", isDark ? "text-white" : "text-slate-900")}>{v.code}</td>
+                      <td className={cn("px-3.5 py-2.5 font-medium", isDark ? "text-emerald-400" : "text-emerald-700")}>{v.discountPercent}%</td>
+                      <td className="px-3.5 py-2.5">
                         {v.currentUses} / {v.maxUses === 0 ? "∞" : v.maxUses}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         {v.validUntil ? new Date(v.validUntil).toLocaleDateString() : "Never expires"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         {v.maxUses > 0 && v.currentUses >= v.maxUses ? (
                           <span className={cn("px-3 py-1 rounded-full text-xs font-semibold bg-zinc-500/20 cursor-not-allowed", isDark ? "text-zinc-400" : "text-slate-500")}>
                             Fully Claimed
@@ -599,9 +599,9 @@ export default function AdminVouchersPage() {
                           </button>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3.5 py-2.5 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => handleEditVoucher(v)} className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}>
+                          <button onClick={() => handleEditVoucher(v)} className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}>
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button onClick={() => setDeletingVoucherId(v.id)} className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-colors">
@@ -623,7 +623,7 @@ export default function AdminVouchersPage() {
             </div>
 
             {totalPages > 1 && (
-              <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+              <div className={cn("p-4 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -637,7 +637,7 @@ export default function AdminVouchersPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>Promos</h2>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Promos</h2>
               <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Manage promotional announcements and offers.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -665,19 +665,19 @@ export default function AdminVouchersPage() {
             </div>
           </div>
 
-          <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl overflow-hidden shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             <div className="overflow-x-auto">
               <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <thead className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
                   <tr className="whitespace-nowrap">
-                    <th className="px-6 py-4 w-10">
+                    <th className="px-3.5 py-2.5 w-10">
                       <div className="flex items-center">
                         {(() => {
                           const isChecked = paginatedPromos.length > 0 && selectedPromoIds.length === paginatedPromos.length;
                           return (
                             <label className="relative flex items-center justify-center cursor-pointer group">
                               <input type="checkbox" className="sr-only" checked={isChecked} onChange={toggleSelectAllPromos} />
-                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
+                              <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"))}>
                                 {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                             </label>
@@ -685,25 +685,25 @@ export default function AdminVouchersPage() {
                         })()}
                       </div>
                     </th>
-                    <th className="px-6 py-4 font-semibold">Image</th>
-                    <th className="px-6 py-4 font-semibold">Title</th>
-                    <th className="px-6 py-4 font-semibold">Link</th>
-                    <th className="px-6 py-4 font-semibold">Claims</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Image</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Title</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Link</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Claims</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Status</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y whitespace-nowrap", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
                   {paginatedPromos.map(p => (
                     <tr key={p.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedPromoIds.includes(p.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : "")}>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         <div className="flex items-center">
                           {(() => {
                             const isChecked = selectedPromoIds.includes(p.id);
                             return (
                               <label className="relative flex items-center justify-center cursor-pointer group">
                                 <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleSelectPromo(p.id)} />
-                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
+                                <div className={cn("w-5 h-5 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"))}>
                                   {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                                 </div>
                               </label>
@@ -711,21 +711,21 @@ export default function AdminVouchersPage() {
                           })()}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        {p.image ? <img referrerPolicy="no-referrer" src={p.image} alt={p.title} className={cn("w-12 h-12 object-cover rounded-lg border", isDark ? "border-slate-800" : "border-slate-200")} loading="lazy" decoding="async" /> : <div className={cn("w-12 h-12 rounded-lg border flex items-center justify-center text-xs", isDark ? "border-slate-800" : "border-slate-200")}>No img</div>}
+                      <td className="px-3.5 py-2.5">
+                        {p.image ? <img referrerPolicy="no-referrer" src={p.image} alt={p.title} className={cn("w-12 h-12 object-cover rounded-lg border", isDark ? "border-white/[0.08]" : "border-slate-200")} loading="lazy" decoding="async" /> : <div className={cn("w-12 h-12 rounded-lg border flex items-center justify-center text-xs", isDark ? "border-white/[0.08]" : "border-slate-200")}>No img</div>}
                       </td>
-                      <td className={cn("px-6 py-4 font-bold max-w-[200px] truncate", isDark ? "text-white" : "text-slate-900")}>{p.title}</td>
-                      <td className="px-6 py-4 truncate max-w-[150px]">
+                      <td className={cn("px-3.5 py-2.5 font-bold max-w-[200px] truncate", isDark ? "text-white" : "text-slate-900")}>{p.title}</td>
+                      <td className="px-3.5 py-2.5 truncate max-w-[150px]">
                         {p.link ? <a href={p.link} target="_blank" rel="noopener noreferrer" className={cn("hover:underline", isDark ? "text-cyan-400" : "text-cyan-700")}>{p.link}</a> : "-"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         {p.isReward ? (
                           <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>
                             {p.currentClaims} / {p.maxClaims === 0 ? "∞" : p.maxClaims}
                           </span>
                         ) : "-"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         {p.isReward && p.maxClaims > 0 && p.currentClaims >= p.maxClaims ? (
                           <span className={cn("px-3 py-1 rounded-full text-xs font-semibold bg-zinc-500/20 cursor-not-allowed", isDark ? "text-zinc-400" : "text-slate-500")}>
                             Fully Claimed
@@ -742,9 +742,9 @@ export default function AdminVouchersPage() {
                           </button>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3.5 py-2.5 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => handleEditPromo(p)} className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}>
+                          <button onClick={() => handleEditPromo(p)} className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}>
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button onClick={() => setDeletingPromoId(p.id)} className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-colors">
@@ -771,9 +771,9 @@ export default function AdminVouchersPage() {
       {/* Voucher Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingVoucherId ? "Edit Voucher" : "Create Voucher"}</h2>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>{editingVoucherId ? "Edit Voucher" : "Create Voucher"}</h2>
               <button onClick={closeVoucherModal} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
@@ -787,10 +787,10 @@ export default function AdminVouchersPage() {
                     required
                     value={newVoucher.code}
                     onChange={e => setNewVoucher({ ...newVoucher, code: e.target.value.toUpperCase() })}
-                    className={cn("flex-1 border rounded-xl px-4 py-2.5 uppercase focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("flex-1 border rounded-xl px-4 py-2.5 uppercase focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                     placeholder="e.g. SUMMER50"
                   />
-                  <button type="button" onClick={generateRandomCode} className={cn("p-2.5 rounded-xl border transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300 hover:bg-white/5" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100")}>
+                  <button type="button" onClick={generateRandomCode} className={cn("p-2.5 rounded-xl border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:bg-white/5" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100")}>
                     <RefreshCw className="w-5 h-5" />
                   </button>
                 </div>
@@ -802,7 +802,7 @@ export default function AdminVouchersPage() {
                   rows={2}
                   value={newVoucher.description}
                   onChange={e => setNewVoucher({ ...newVoucher, description: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Deskripsi singkat voucher..."
                 />
               </div>
@@ -815,7 +815,7 @@ export default function AdminVouchersPage() {
                     required min="1" max="100"
                     value={newVoucher.discountPercent}
                     onChange={e => setNewVoucher({ ...newVoucher, discountPercent: parseInt(e.target.value) || 0 })}
-                    className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
                 <div>
@@ -825,7 +825,7 @@ export default function AdminVouchersPage() {
                     min="0"
                     value={newVoucher.maxUses}
                     onChange={e => setNewVoucher({ ...newVoucher, maxUses: parseInt(e.target.value) || 0 })}
-                    className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
               </div>
@@ -836,7 +836,7 @@ export default function AdminVouchersPage() {
                   type="date"
                   value={newVoucher.validUntil}
                   onChange={e => setNewVoucher({ ...newVoucher, validUntil: e.target.value })}
-                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                  className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                 />
               </div>
 
@@ -853,9 +853,9 @@ export default function AdminVouchersPage() {
       {/* Promo Modal */}
       {isPromoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden my-8 shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{editingPromoId ? "Edit Promo" : "Create Promo"}</h2>
+          <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden my-8 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <div className={cn("flex justify-between items-center p-6 border-b", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>{editingPromoId ? "Edit Promo" : "Create Promo"}</h2>
               <button onClick={() => setIsPromoModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
                 <X className="w-5 h-5" />
               </button>
@@ -868,7 +868,7 @@ export default function AdminVouchersPage() {
                   required
                   value={newPromo.title}
                   onChange={e => setNewPromo({ ...newPromo, title: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="e.g. Diskon Kemerdekaan"
                 />
               </div>
@@ -880,7 +880,7 @@ export default function AdminVouchersPage() {
                   rows={2}
                   value={newPromo.description}
                   onChange={e => setNewPromo({ ...newPromo, description: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="Deskripsi singkat promo..."
                 />
               </div>
@@ -888,14 +888,14 @@ export default function AdminVouchersPage() {
               <div>
                 <label className={cn("block text-sm font-medium mb-1", isDark ? "text-zinc-300" : "text-slate-600")}>Image (Optional)</label>
                 {newPromo.image ? (
-                  <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("relative w-full h-32 rounded-xl overflow-hidden border", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <img referrerPolicy="no-referrer" src={newPromo.image} alt="Promo" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     <button type="button" onClick={() => setShowRemoveImageModal(true)} className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-rose-500 rounded-lg transition-colors text-white">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <label className={cn("flex flex-col items-center justify-center w-full h-24 border-2 border-dashed hover:border-cyan-500/50 rounded-xl cursor-pointer transition-colors group", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                  <label className={cn("flex flex-col items-center justify-center w-full h-24 border-2 border-dashed hover:border-cyan-500/50 rounded-xl cursor-pointer transition-colors group", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
                     <span className={cn("text-sm font-medium group-hover:text-cyan-400", isDark ? "text-zinc-400" : "text-slate-500")}>Click to upload image</span>
                     <span className={cn("text-[10px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>Recommended: Ratio 2:1 (Max 5MB)</span>
                     <input type="file" accept="image/*" className="hidden" onChange={handlePromoUpload} />
@@ -909,12 +909,12 @@ export default function AdminVouchersPage() {
                   type="url"
                   value={newPromo.link}
                   onChange={e => setNewPromo({ ...newPromo, link: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="https://..."
                 />
               </div>
 
-              <div className={cn("border-t pt-4 mt-2", isDark ? "border-slate-800" : "border-slate-200")}>
+              <div className={cn("border-t pt-4 mt-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                 <label className="flex items-center gap-3 cursor-pointer group w-fit">
                   {(() => {
                     const isChecked = newPromo.isReward;
@@ -926,7 +926,7 @@ export default function AdminVouchersPage() {
                           checked={isChecked}
                           onChange={e => setNewPromo({ ...newPromo, isReward: e.target.checked })}
                         />
-                        <div className={cn("w-5 h-5 flex-shrink-0 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"))}>
+                        <div className={cn("w-5 h-5 flex-shrink-0 rounded-md border transition-all flex items-center justify-center group-hover:border-cyan-400", isChecked ? "bg-cyan-500 border-cyan-500" : (isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"))}>
                           {isChecked && <CheckCircle className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                         </div>
                       </>
@@ -946,7 +946,7 @@ export default function AdminVouchersPage() {
                       required={newPromo.isReward}
                       value={newPromo.rewardAmount}
                       onChange={e => setNewPromo({ ...newPromo, rewardAmount: parseInt(e.target.value) || 0 })}
-                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div>
@@ -956,7 +956,7 @@ export default function AdminVouchersPage() {
                       min="0"
                       value={newPromo.maxClaims}
                       onChange={e => setNewPromo({ ...newPromo, maxClaims: parseInt(e.target.value) || 0 })}
-                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -965,7 +965,7 @@ export default function AdminVouchersPage() {
                       type="date"
                       value={newPromo.validUntil}
                       onChange={e => setNewPromo({ ...newPromo, validUntil: e.target.value })}
-                      className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#060b14] border-slate-800 text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
+                      className={cn("block w-full min-w-0 max-w-full box-border border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all [appearance:none] [-webkit-appearance:none] [&::-webkit-date-and-time-value]:text-left", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white [color-scheme:dark]" : "bg-slate-50 border-slate-200 text-slate-900 [color-scheme:light]")}
                     />
                   </div>
                 </div>

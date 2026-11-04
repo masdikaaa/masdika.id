@@ -198,7 +198,7 @@ export default function AdminCustomerCdnPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6 w-full">
         <div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Customer File CDN
           </h1>
           <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -217,7 +217,7 @@ export default function AdminCustomerCdnPage() {
             onClick={fetchFiles}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
@@ -234,7 +234,7 @@ export default function AdminCustomerCdnPage() {
         {/* Total Customer Files */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -248,7 +248,7 @@ export default function AdminCustomerCdnPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {stats.totalFiles}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Uploaded</span>
@@ -258,7 +258,7 @@ export default function AdminCustomerCdnPage() {
         {/* Customer Storage Used */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -272,7 +272,7 @@ export default function AdminCustomerCdnPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {formatBytes(stats.totalStorageBytes)}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Disk Total</span>
@@ -282,7 +282,7 @@ export default function AdminCustomerCdnPage() {
         {/* Active Customers */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -296,7 +296,7 @@ export default function AdminCustomerCdnPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {stats.totalCustomers}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Users Storing</span>
@@ -306,7 +306,7 @@ export default function AdminCustomerCdnPage() {
         {/* File Visibility */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -320,7 +320,7 @@ export default function AdminCustomerCdnPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {stats.publicFiles}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>
@@ -333,7 +333,7 @@ export default function AdminCustomerCdnPage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
           {/* Customer select filter */}
@@ -419,7 +419,7 @@ export default function AdminCustomerCdnPage() {
 
           <div className={cn(
             "flex items-center p-1 rounded-xl border shrink-0",
-            isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200"
           )}>
             <button
               onClick={() => setViewMode("grid")}
@@ -454,11 +454,11 @@ export default function AdminCustomerCdnPage() {
         <AdminLoader className="min-h-[300px] py-16" />
       ) : paginatedFiles.length === 0 ? (
         <div className={cn(
-          "rounded-3xl border p-16 text-center w-full",
-          isDark ? "border-slate-800 bg-[#0b1322] shadow-md" : "border-slate-200 bg-white shadow-sm"
+          "rounded-2xl border p-16 text-center w-full",
+          isDark ? "border-white/[0.08] bg-[#0c0c0e] shadow-md" : "border-slate-200 bg-white shadow-sm"
         )}>
           <UploadCloud className={cn("w-14 h-14 mx-auto mb-4 opacity-50", isDark ? "text-cyan-400" : "text-cyan-600")} />
-          <h3 className={cn("text-lg font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
+          <h3 className={cn("text-sm font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
             No Customer Files Found
           </h3>
           <p className={cn("text-xs max-w-md mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -483,7 +483,7 @@ export default function AdminCustomerCdnPage() {
                 className={cn(
                   "rounded-2xl border p-4 transition-all flex flex-col justify-between group",
                   isDark
-                    ? "bg-[#0b1322] border-slate-800/80 hover:border-slate-700 shadow-md"
+                    ? "bg-[#0c0c0e] border-white/[0.08] hover:border-slate-700 shadow-md"
                     : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
                 )}
               >
@@ -535,7 +535,7 @@ export default function AdminCustomerCdnPage() {
                     "flex items-center gap-2 p-2 rounded-xl border mb-3",
                     isDark ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-200"
                   )}>
-                    <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("w-7 h-7 rounded-full overflow-hidden border shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                       <img
                         referrerPolicy="no-referrer"
                         src={file.customerAvatar || `/api/avatar?email=${encodeURIComponent(file.customerEmail)}&name=${encodeURIComponent(file.customerName)}&v=4`}
@@ -604,13 +604,13 @@ export default function AdminCustomerCdnPage() {
         /* ── TABLE VIEW ─────────────────────────────────────────────────────── */
         <div className={cn(
           "rounded-2xl border overflow-hidden w-full shadow-md",
-          isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200"
         )}>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className={cn(
                 "border-b uppercase font-bold tracking-wider",
-                isDark ? "bg-black/30 border-slate-800 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                isDark ? "bg-black/30 border-white/[0.08] text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
               )}>
                 <tr>
                   <th className="py-3 px-4">File Name</th>
@@ -653,7 +653,7 @@ export default function AdminCustomerCdnPage() {
 
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <div className={cn("w-6 h-6 rounded-full overflow-hidden border shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+                          <div className={cn("w-6 h-6 rounded-full overflow-hidden border shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                             <img
                               referrerPolicy="no-referrer"
                               src={file.customerAvatar || `/api/avatar?email=${encodeURIComponent(file.customerEmail)}&name=${encodeURIComponent(file.customerName)}&v=4`}
@@ -755,7 +755,7 @@ export default function AdminCustomerCdnPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className={cn(
                 "relative w-full max-w-4xl max-h-[90vh] rounded-2xl border overflow-hidden flex flex-col shadow-2xl",
-                isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+                isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900"
               )}
             >
               {/* Modal Header */}

@@ -79,7 +79,7 @@ export default function K3sManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className={cn("text-xl font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>Managed K3s Clusters</h2>
+          <h2 className={cn("text-sm sm:text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>Managed K3s Clusters</h2>
           <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor and manage all client Kubernetes clusters.</p>
         </div>
         <div className="flex gap-2">
@@ -102,50 +102,50 @@ export default function K3sManagement() {
         </div>
       </div>
 
-      <div className={cn("border rounded-2xl overflow-hidden relative shadow-sm", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                <th className="p-4 w-10">
+              <tr className={cn("border-b text-xs uppercase font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                <th className="px-3.5 py-2.5 w-10">
                   <button
                     onClick={toggleSelectAll}
                     className={cn(
                       "w-5 h-5 rounded flex items-center justify-center transition-colors",
                       selectedClusters.length > 0
                         ? "bg-cyan-500 text-slate-950"
-                        : (isDark ? "bg-[#060b14] border border-slate-700 text-transparent hover:border-cyan-400" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
+                        : (isDark ? "bg-[#0a0a0c] border border-slate-700 text-transparent hover:border-cyan-400" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                     )}
                   >
                     <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                   </button>
                 </th>
-                <th className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>
+                <th className={cn("px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>
                   <div className="pl-[52px]">ID / Name</div>
                 </th>
-                <th className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Client</th>
-                <th className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Status</th>
-                <th className={cn("p-4 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Nodes</th>
-                <th className={cn("p-4 text-sm font-semibold text-right whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Actions</th>
+                <th className={cn("px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Client</th>
+                <th className={cn("px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Status</th>
+                <th className={cn("px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Nodes</th>
+                <th className={cn("px-3.5 py-2.5 text-sm font-semibold text-right whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
               {clusters.map((cluster) => (
                 <tr key={cluster.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                  <td className="p-4">
+                  <td className="px-3.5 py-2.5">
                     <button
                       onClick={() => toggleSelect(cluster.id)}
                       className={cn(
                         "w-5 h-5 rounded flex items-center justify-center transition-colors",
                         selectedClusters.includes(cluster.id)
                           ? "bg-cyan-500 text-slate-950"
-                          : (isDark ? "bg-[#060b14] border border-slate-700 text-transparent hover:border-cyan-400" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
+                          : (isDark ? "bg-[#0a0a0c] border border-slate-700 text-transparent hover:border-cyan-400" : "bg-white border border-slate-300 text-transparent hover:border-cyan-500")
                       )}
                     >
                       <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                     </button>
                   </td>
-                  <td className="p-4">
+                  <td className="px-3.5 py-2.5">
                     <div className="flex items-center gap-3">
                       <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                         <SiKubernetes className={cn("w-6 h-6", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -160,11 +160,11 @@ export default function K3sManagement() {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td className="px-3.5 py-2.5">
                     <div className={cn("text-sm font-medium whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>{cluster.user.name}</div>
                     <div className="text-xs text-zinc-500 whitespace-nowrap">{cluster.user.email}</div>
                   </td>
-                  <td className="p-4">
+                  <td className="px-3.5 py-2.5">
                     <span className={cn(
                       "px-2.5 py-1 text-xs font-bold rounded-lg border",
                       cluster.status === "RUNNING" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
@@ -174,10 +174,10 @@ export default function K3sManagement() {
                       {cluster.status}
                     </span>
                   </td>
-                  <td className="p-4">
+                  <td className="px-3.5 py-2.5">
                     <div className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{cluster.nodes?.length || 0} Node(s)</div>
                   </td>
-                  <td className="p-4 text-right">
+                  <td className="px-3.5 py-2.5 text-right">
                     <button
                       onClick={() => setShowDeleteModal([cluster.id])}
                       disabled={deletingId === cluster.id}

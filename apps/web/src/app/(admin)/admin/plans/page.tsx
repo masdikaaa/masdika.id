@@ -254,7 +254,7 @@ export default function AdminPlansPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Subscription Plans
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -264,7 +264,7 @@ export default function AdminPlansPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
             <span>Total Plans:</span>
-            <span className="font-extrabold text-white">{totalCount}</span>
+            <span className="font-bold text-white">{totalCount}</span>
           </div>
           <button
             onClick={() => { setLoading(true); fetchPlans(); }}
@@ -278,7 +278,7 @@ export default function AdminPlansPage() {
           </button>
           <button
             onClick={openAddModal}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+            className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Plan</span>
@@ -288,7 +288,7 @@ export default function AdminPlansPage() {
 
       {/* Stat Cards Grid (GAMBAR 1 Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL PLANS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -296,12 +296,12 @@ export default function AdminPlansPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Configured</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ACTIVE PLANS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -309,12 +309,12 @@ export default function AdminPlansPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Purchasable</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>SERVICES COVERED</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -322,12 +322,12 @@ export default function AdminPlansPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{servicesCovered}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{servicesCovered}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Modules</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>POPULAR HIGHLIGHTS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
@@ -335,15 +335,15 @@ export default function AdminPlansPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{popularCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{popularCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Featured</span>
           </div>
         </div>
       </div>
 
       {/* Filter and Control Bar (GAMBAR 1 Style) */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {["ALL", "CDN", "SHORTENER", "PASTEBIN", "LINK_BIO"].map((srv) => {
             const count = srv === "ALL" ? plans.length : plans.filter(p => p.service === srv).length;
             return (
@@ -358,7 +358,7 @@ export default function AdminPlansPage() {
                 )}
               >
                 <span>{srv === "ALL" ? "All Services" : srv.replace('_', ' ')}</span>
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === srv ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === srv ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
                   {count}
                 </span>
               </button>
@@ -380,10 +380,10 @@ export default function AdminPlansPage() {
       </div>
 
       {/* Table Container */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th scope="col" className="px-6 py-4 font-semibold w-12 text-center">
                   <button onClick={toggleSelectAll} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.length === paginatedPlans.length && paginatedPlans.length > 0 ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
@@ -414,31 +414,31 @@ export default function AdminPlansPage() {
               ) : (
                 paginatedPlans.map((plan) => (
                   <tr key={plan.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedIds.includes(plan.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : "")}>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-3.5 py-2.5 text-center">
                       <button onClick={() => toggleSelect(plan.id)} className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${selectedIds.includes(plan.id) ? 'bg-cyan-500 border-cyan-500' : isDark ? "border-zinc-500 hover:border-cyan-400" : "border-slate-300 hover:border-cyan-600"}`}>
                         {selectedIds.includes(plan.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap min-w-[200px]">
                       <div className={cn("font-bold text-base", isDark ? "text-white" : "text-slate-900")}>{plan.name}</div>
                       {plan.description && <div className={cn("text-xs mt-1 truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{plan.description}</div>}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {getServiceIcon(plan.service)}
                         <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{plan.service.replace('_', ' ')}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{formatRupiah(plan.price)} <span className="text-[10px] text-zinc-500 font-normal">/mo</span></div>
                       {plan.hourlyPrice > 0 && <div className={cn("text-xs mt-0.5", isDark ? "text-purple-400" : "text-purple-700")}>{formatRupiah(plan.hourlyPrice)} <span className="text-[10px] opacity-70">/hr (PAYG)</span></div>}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={cn("p-2 rounded border text-[10px] font-mono max-w-[200px] overflow-hidden whitespace-nowrap overflow-ellipsis", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
+                      <div className={cn("p-2 rounded border text-[10px] font-mono max-w-[200px] overflow-hidden whitespace-nowrap overflow-ellipsis", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
                         {plan.limits}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 text-center whitespace-nowrap">
                       {plan.isActive ? (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
                           <Check className="w-3 br-3" /> Active
@@ -449,10 +449,10 @@ export default function AdminPlansPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 text-right space-x-2 whitespace-nowrap">
                       <button
                         onClick={() => openEditModal(plan)}
-                        className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#060b14] border-slate-800 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}
+                        className={cn("p-2 rounded-lg transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}
                         title="Edit Plan"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -471,7 +471,7 @@ export default function AdminPlansPage() {
             </tbody>
           </table>
         </div>
-        <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
@@ -479,10 +479,10 @@ export default function AdminPlansPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             
-            <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 backdrop-blur z-10", isDark ? "bg-[#0b1322]/95 border-slate-800" : "bg-white/95 border-slate-200")}>
-              <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+            <div className={cn("flex justify-between items-center p-6 border-b sticky top-0 backdrop-blur z-10", isDark ? "bg-[#0c0c0e]/95 border-white/[0.08]" : "bg-white/95 border-slate-200")}>
+              <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
                 {editingPlan ? "Edit Plan" : "Create New Plan"}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className={cn("transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900")}>
@@ -500,7 +500,7 @@ export default function AdminPlansPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder="e.g., Starter, Pro, Enterprise"
-                    className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                 </div>
                 <div className="space-y-2">
@@ -523,7 +523,7 @@ export default function AdminPlansPage() {
                       { value: "BMKG_EARTHQUAKE", label: "BMKG Earthquake API" }
                     ]}
                     placeholder="Select Target Service..."
-                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                    className={cn("w-full rounded-xl px-4 py-3 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                   />
                 </div>
               </div>
@@ -534,7 +534,7 @@ export default function AdminPlansPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   placeholder="e.g., Perfect for small businesses."
-                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -548,7 +548,7 @@ export default function AdminPlansPage() {
                       min="0"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
-                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-cyan-500 font-bold transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-cyan-500 font-bold transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                 </div>
@@ -562,7 +562,7 @@ export default function AdminPlansPage() {
                       min="0"
                       value={formData.hourlyPrice}
                       onChange={(e) => setFormData({...formData, hourlyPrice: Number(e.target.value)})}
-                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-purple-500 font-bold transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                      className={cn("w-full border rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-purple-500 font-bold transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                     />
                   </div>
                 </div>
@@ -586,7 +586,7 @@ export default function AdminPlansPage() {
                           newFields[idx].value = e.target.value;
                           setLimitFields(newFields);
                         }}
-                        className={cn("w-2/3 border rounded-lg px-3 py-2 font-mono text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                        className={cn("w-2/3 border rounded-lg px-3 py-2 font-mono text-xs focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                       />
                     </div>
                   ))}
@@ -619,18 +619,18 @@ export default function AdminPlansPage() {
                     />
                   </label>
                 </div>
-              <div className={cn("flex justify-end gap-3 pt-6 border-t", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("flex justify-end gap-3 pt-6 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                  className={cn("px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                  className="px-5 py-2.5 rounded-lg font-semibold text-xs disabled:opacity-50 transition-all flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                 >
                   {isSubmitting ? (
                     <>
@@ -653,12 +653,12 @@ export default function AdminPlansPage() {
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setDeleteConfirmId(null)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
               </div>
-              <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete Plan?</h3>
+              <h3 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete Plan?</h3>
               <p className={cn("mb-8", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Are you sure you want to delete this plan? This action will <strong className={cn(isDark ? "text-white" : "text-slate-900")}>forcefully delete</strong> all active subscriptions associated with it. This cannot be undone!
               </p>
@@ -693,12 +693,12 @@ export default function AdminPlansPage() {
       {isBulkDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isDeleting && setIsBulkDeleteModalOpen(false)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
             <div className="flex flex-col items-center text-center">
               <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                 <ShieldAlert className={cn("w-8 h-8", isDark ? "text-red-500" : "text-red-700")} />
               </div>
-              <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete {selectedIds.length} Plans?</h3>
+              <h3 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Delete {selectedIds.length} Plans?</h3>
               <p className={cn("mb-8", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Are you sure you want to delete {selectedIds.length} selected plans? This action will <strong className={cn(isDark ? "text-white" : "text-slate-900")}>forcefully delete</strong> all active subscriptions associated with them. This cannot be undone!
               </p>

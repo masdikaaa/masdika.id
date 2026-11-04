@@ -419,7 +419,7 @@ export default function AdminResourceFindingPage() {
         <div>
           <h1
             className={cn(
-              "text-2xl sm:text-3xl font-extrabold tracking-tight",
+              "text-xl sm:text-xl sm:text-2xl font-bold tracking-tight",
               isDark ? "text-white" : "text-slate-900"
             )}
           >
@@ -447,7 +447,7 @@ export default function AdminResourceFindingPage() {
             className={cn(
               "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all active:scale-95 disabled:opacity-50",
               isDark
-                ? "bg-[#0b1322] hover:bg-white/5 border-white/10 text-white"
+                ? "bg-[#0c0c0e] hover:bg-white/5 border-white/10 text-white"
                 : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800"
             )}
             title="Refresh now"
@@ -460,7 +460,7 @@ export default function AdminResourceFindingPage() {
           <Link
             href="/admin/vps"
             className={cn(
-              "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all",
+              "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-semibold transition-all",
               isDark
                 ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
                 : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
@@ -485,7 +485,7 @@ export default function AdminResourceFindingPage() {
                 ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
-              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              ? "bg-[#0c0c0e] border-white/10 hover:border-cyan-500/30"
               : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
@@ -509,7 +509,7 @@ export default function AdminResourceFindingPage() {
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {summary.criticalCount}
             </span>
             {summary.criticalCount > 0 && (
@@ -534,7 +534,7 @@ export default function AdminResourceFindingPage() {
                 ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
-              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              ? "bg-[#0c0c0e] border-white/10 hover:border-cyan-500/30"
               : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
@@ -552,7 +552,7 @@ export default function AdminResourceFindingPage() {
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {summary.highCpuCount}
             </span>
             <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-400")}>/ {summary.runningCount} online</span>
@@ -572,7 +572,7 @@ export default function AdminResourceFindingPage() {
                 ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
-              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              ? "bg-[#0c0c0e] border-white/10 hover:border-cyan-500/30"
               : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
@@ -590,7 +590,7 @@ export default function AdminResourceFindingPage() {
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {summary.highRamCount}
             </span>
             <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-400")}>/ {summary.runningCount} online</span>
@@ -610,7 +610,7 @@ export default function AdminResourceFindingPage() {
                 ? "border-cyan-500/60 ring-2 ring-cyan-500/30 bg-cyan-500/[0.04]"
                 : "border-cyan-400 ring-2 ring-cyan-500/20 bg-cyan-50/40"
               : isDark
-              ? "bg-[#0b1322] border-white/10 hover:border-cyan-500/30"
+              ? "bg-[#0c0c0e] border-white/10 hover:border-cyan-500/30"
               : "bg-white border-slate-200 hover:border-cyan-300"
           )}
         >
@@ -628,7 +628,7 @@ export default function AdminResourceFindingPage() {
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
               {formatBytes(summary.totalBandwidth)}
             </span>
           </div>
@@ -648,7 +648,7 @@ export default function AdminResourceFindingPage() {
       </div>
 
       {/* Filter Tabs & Search / Sort Bar */}
-      <div className={cn("p-4 rounded-2xl border space-y-4 relative z-20", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border space-y-4 relative z-20", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
         {/* Quick Filter Tabs - Mobile Horizontal Touch Scroll */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-none">
           {[
@@ -751,7 +751,7 @@ export default function AdminResourceFindingPage() {
       {/* MOBILE CARDS VIEW (block lg:hidden) - Zero horizontal clutter on phones! */}
       <div className="block lg:hidden space-y-3">
         {paginatedVps.length === 0 ? (
-          <div className={cn("p-10 rounded-2xl border text-center", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200")}>
+          <div className={cn("p-10 rounded-2xl border text-center", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
             <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
             <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>No VPS matches this filter</p>
             <p className="text-xs text-zinc-500 mt-1">All customer VPS instances are within normal bounds.</p>
@@ -773,7 +773,7 @@ export default function AdminResourceFindingPage() {
                       ? "bg-rose-500/[0.04] border-rose-500/30"
                       : "bg-rose-50/60 border-rose-200"
                     : isDark
-                    ? "bg-[#0b1322] border-white/10"
+                    ? "bg-[#0c0c0e] border-white/10"
                     : "bg-white border-slate-200"
                 )}
               >
@@ -1216,7 +1216,7 @@ export default function AdminResourceFindingPage() {
           <div
             className={cn(
               "p-4 rounded-2xl border flex flex-col items-center justify-center gap-3",
-              isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200"
+              isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200"
             )}
           >
             <div className={cn("text-xs text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1234,7 +1234,7 @@ export default function AdminResourceFindingPage() {
       </div>
 
       {/* DESKTOP FULL-SPACE DATA TABLE (hidden lg:block) */}
-      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden", isDark ? "bg-[#0b1322] border-white/10" : "bg-white border-slate-200")}>
+      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
@@ -1435,7 +1435,7 @@ export default function AdminResourceFindingPage() {
                           <div className="flex items-baseline justify-between h-5">
                             <span
                               className={cn(
-                                "font-extrabold text-sm font-mono leading-none",
+                                "font-bold text-sm font-mono leading-none",
                                 vps.cpuPercent >= 80
                                   ? "text-rose-500"
                                   : vps.cpuPercent >= 60
@@ -1469,7 +1469,7 @@ export default function AdminResourceFindingPage() {
                           <div className="flex items-baseline justify-between h-5">
                             <span
                               className={cn(
-                                "font-extrabold text-sm font-mono leading-none",
+                                "font-bold text-sm font-mono leading-none",
                                 vps.memPercent >= 90
                                   ? "text-rose-500"
                                   : vps.memPercent >= 75
@@ -1503,7 +1503,7 @@ export default function AdminResourceFindingPage() {
                           <div className="flex items-baseline justify-between h-5">
                             <span
                               className={cn(
-                                "font-extrabold text-sm font-mono leading-none",
+                                "font-bold text-sm font-mono leading-none",
                                 vps.diskPercent >= 90
                                   ? "text-rose-500"
                                   : isDark
@@ -1816,15 +1816,15 @@ export default function AdminResourceFindingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
             className={cn(
-              "w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl sm:rounded-3xl border p-4 sm:p-7 space-y-5 sm:space-y-6 transition-colors my-auto shadow-2xl",
-              isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+              "w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl sm:rounded-2xl border p-4 sm:p-7 space-y-5 sm:space-y-6 transition-colors my-auto shadow-2xl",
+              isDark ? "bg-[#0c0c0e] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/5 pb-4">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-lg sm:text-2xl font-extrabold tracking-tight">
+                  <h2 className="text-lg sm:text-lg sm:text-sm sm:text-base font-bold tracking-tight">
                     {inspectVps.hostname}
                   </h2>
                   {inspectVps.vmid && (
@@ -1932,7 +1932,7 @@ export default function AdminResourceFindingPage() {
             ) : (
               <div className="space-y-6">
                 {/* CPU Chart */}
-                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Cpu className="w-4 h-4 text-cyan-500" />
@@ -1967,7 +1967,7 @@ export default function AdminResourceFindingPage() {
                 </div>
 
                 {/* Memory (RAM) Chart */}
-                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Activity className="w-4 h-4 text-cyan-500" />
@@ -2002,7 +2002,7 @@ export default function AdminResourceFindingPage() {
                 </div>
 
                 {/* Network Throughput Chart (Download vs Upload) */}
-                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 sm:p-5 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Network className="w-4 h-4 text-cyan-500" />
@@ -2079,8 +2079,8 @@ export default function AdminResourceFindingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
             className={cn(
-              "w-full max-w-md rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-5 transition-colors my-auto max-h-[92vh] overflow-y-auto shadow-2xl",
-              isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+              "w-full max-w-md rounded-2xl sm:rounded-2xl border p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-5 transition-colors my-auto max-h-[92vh] overflow-y-auto shadow-2xl",
+              isDark ? "bg-[#0c0c0e] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
             <div className="flex items-center gap-3">
@@ -2088,7 +2088,7 @@ export default function AdminResourceFindingPage() {
                 <Ban className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold">Suspend Customer VPS</h3>
+                <h3 className="text-base sm:text-sm font-bold">Suspend Customer VPS</h3>
                 <p className="text-xs text-zinc-400">VMID #{suspendModalVps.vmid} ({suspendModalVps.hostname})</p>
               </div>
             </div>
@@ -2144,8 +2144,8 @@ export default function AdminResourceFindingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
             className={cn(
-              "w-full max-w-lg rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-5 transition-colors my-auto max-h-[92vh] overflow-y-auto shadow-2xl",
-              isDark ? "bg-[#0b1322] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+              "w-full max-w-lg rounded-2xl sm:rounded-2xl border p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-5 transition-colors my-auto max-h-[92vh] overflow-y-auto shadow-2xl",
+              isDark ? "bg-[#0c0c0e] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
             )}
           >
             {/* Modal Header */}
@@ -2162,7 +2162,7 @@ export default function AdminResourceFindingPage() {
                   <Gauge className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-base sm:text-lg font-bold truncate">Bandwidth Rate Limiting</h3>
+                  <h3 className="text-base sm:text-sm font-bold truncate">Bandwidth Rate Limiting</h3>
                   <p className={cn("text-xs truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
                     VMID #{throttleModalVps.vmid} ({throttleModalVps.hostname})
                   </p>
@@ -2462,7 +2462,7 @@ export default function AdminResourceFindingPage() {
               <button
                 onClick={() => setThrottleModalVps(null)}
                 disabled={actionLoading}
-                className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors text-center justify-center", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("w-full sm:w-auto px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors text-center justify-center", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
               >
                 Cancel
               </button>

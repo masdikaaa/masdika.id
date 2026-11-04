@@ -118,7 +118,7 @@ export default function AdminCloudflaredPage() {
       {/* Header matching Gambar 1 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Cloudflared Tunnels
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -128,17 +128,17 @@ export default function AdminCloudflaredPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-xl font-medium text-xs flex items-center gap-2">
             <span>Total Domains:</span>
-            <span className="font-extrabold text-white">{data.domains.length}</span>
+            <span className="font-bold text-white">{data.domains.length}</span>
           </div>
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-xl font-medium text-xs flex items-center gap-2">
             <span>Total Tunnels:</span>
-            <span className="font-extrabold text-white">{data.tunnels.length}</span>
+            <span className="font-bold text-white">{data.tunnels.length}</span>
           </div>
           <button
             onClick={fetchData}
             className={cn(
               "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border",
-              isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+              isDark ? "border-white/[0.08] bg-[#0c0c0e] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
             <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
@@ -149,7 +149,7 @@ export default function AdminCloudflaredPage() {
 
       {/* Stat Cards Grid (GAMBAR 1 Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL DOMAINS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -157,12 +157,12 @@ export default function AdminCloudflaredPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{data.domains.length}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{data.domains.length}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Registered</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>ACTIVE DOMAINS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -170,12 +170,12 @@ export default function AdminCloudflaredPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeDomainsCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeDomainsCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Live on Edge</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL TUNNELS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -183,12 +183,12 @@ export default function AdminCloudflaredPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{data.tunnels.length}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{data.tunnels.length}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Configured</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>HEALTHY TUNNELS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -196,15 +196,15 @@ export default function AdminCloudflaredPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeTunnelsCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{activeTunnelsCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Connected</span>
           </div>
         </div>
       </div>
 
       {/* Filter and Tab Bar (GAMBAR 1 Style) */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           <button
             onClick={() => setActiveTab('domains')}
             className={cn(
@@ -216,7 +216,7 @@ export default function AdminCloudflaredPage() {
           >
             <Globe className="w-3.5 h-3.5" />
             <span>Domains</span>
-            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'domains' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'domains' ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
               {data.domains.length}
             </span>
           </button>
@@ -231,7 +231,7 @@ export default function AdminCloudflaredPage() {
           >
             <Server className="w-3.5 h-3.5" />
             <span>Tunnels</span>
-            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'tunnels' ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+            <span className={cn("px-1.5 py-0.5 rounded-full text-[10px]", activeTab === 'tunnels' ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
               {data.tunnels.length}
             </span>
           </button>
@@ -249,24 +249,24 @@ export default function AdminCloudflaredPage() {
                 if (activeTab === 'domains') setCurrentDomainPage(1);
                 else setCurrentTunnelPage(1);
               }}
-              className={cn("w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+              className={cn("w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
         </div>
       </div>
 
-      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         {activeTab === 'domains' && (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
-                  <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                    <th className="p-4 whitespace-nowrap font-medium">Domain</th>
-                    <th className="p-4 whitespace-nowrap font-medium">Owner</th>
-                    <th className="p-4 whitespace-nowrap font-medium">Zone ID</th>
-                    <th className="p-4 text-center whitespace-nowrap font-medium">Status</th>
-                    <th className="p-4 text-right whitespace-nowrap font-medium">Actions</th>
+                  <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Domain</th>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Owner</th>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Zone ID</th>
+                    <th className="px-3.5 py-2.5 text-center whitespace-nowrap font-medium">Status</th>
+                    <th className="px-3.5 py-2.5 text-right whitespace-nowrap font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -283,14 +283,14 @@ export default function AdminCloudflaredPage() {
                         <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-4", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                           <Globe className={cn("w-10 h-10 opacity-50", isDark ? "text-cyan-400" : "text-cyan-700")} />
                         </div>
-                        <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Domains Found</h3>
+                        <h3 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Domains Found</h3>
                         <p className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>There are no domains matching your criteria.</p>
                       </div>
                     </td></tr>
                   ) : (
                     paginatedDomains.map((d) => (
-                      <tr key={d.id} className="hover:bg-white/5 transition-colors group border-b border-slate-800/80">
-                        <td className="p-4 whitespace-nowrap">
+                      <tr key={d.id} className="hover:bg-white/5 transition-colors group border-b border-white/[0.08]">
+                        <td className="px-3.5 py-2.5 whitespace-nowrap">
                           <div className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>
                             {d.domain}
                           </div>
@@ -298,7 +298,7 @@ export default function AdminCloudflaredPage() {
                             Added {new Date(d.createdAt).toLocaleDateString()}
                           </p>
                         </td>
-                        <td className="p-4 whitespace-nowrap">
+                        <td className="px-3.5 py-2.5 whitespace-nowrap">
                           {d.user ? (
                             <Link href={`/admin/customers/${d.userId}`} className="flex items-center gap-2 hover:opacity-80">
                               <div className={cn("w-8 h-8 rounded-full overflow-hidden border shrink-0 flex items-center justify-center text-xs font-bold", isDark ? "border-white/10 bg-white/10 text-white" : "border-slate-200 bg-slate-200 text-slate-800")}>
@@ -313,10 +313,10 @@ export default function AdminCloudflaredPage() {
                             <span className="text-sm text-red-500">Orphaned</span>
                           )}
                         </td>
-                        <td className={cn("p-4 font-mono text-xs whitespace-nowrap", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        <td className={cn("px-3.5 py-2.5 font-mono text-xs whitespace-nowrap", isDark ? "text-zinc-500" : "text-slate-500")}>
                           {d.cfZoneId}
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="px-3.5 py-2.5 text-center">
                           {d.status === 'ACTIVE' || d.status === 'active' ? (
                             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
                               <CheckCircle className="w-3.5 h-3.5" /> Active
@@ -327,7 +327,7 @@ export default function AdminCloudflaredPage() {
                             </span>
                           )}
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="px-3.5 py-2.5 text-right">
                            <button 
                              onClick={() => setDeleteDomainId(d.id)} 
                              className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 rounded-lg transition-colors", isDark ? "text-red-400" : "text-red-700")} 
@@ -342,7 +342,7 @@ export default function AdminCloudflaredPage() {
                 </tbody>
               </table>
             </div>
-            <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 border-t", isDark ? "bg-[#0a0a0c]/50 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <Pagination currentPage={currentDomainPage} totalPages={totalDomainPages} onPageChange={setCurrentDomainPage} />
             </div>
           </>
@@ -353,12 +353,12 @@ export default function AdminCloudflaredPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
-                  <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
-                    <th className="p-4 whitespace-nowrap font-medium">Tunnel Name</th>
-                    <th className="p-4 whitespace-nowrap font-medium">Owner</th>
-                    <th className="p-4 whitespace-nowrap font-medium">Status</th>
-                    <th className="p-4 whitespace-nowrap text-center font-medium">Connector</th>
-                    <th className="p-4 text-right whitespace-nowrap font-medium">Actions</th>
+                  <tr className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Tunnel Name</th>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Owner</th>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Status</th>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap text-center font-medium">Connector</th>
+                    <th className="px-3.5 py-2.5 text-right whitespace-nowrap font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -375,14 +375,14 @@ export default function AdminCloudflaredPage() {
                         <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-4", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                           <Server className={cn("w-10 h-10 opacity-50", isDark ? "text-cyan-400" : "text-cyan-700")} />
                         </div>
-                        <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Tunnels Found</h3>
+                        <h3 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Tunnels Found</h3>
                         <p className={cn(isDark ? "text-zinc-500" : "text-slate-500")}>There are no tunnels matching your criteria.</p>
                       </div>
                     </td></tr>
                   ) : (
                     paginatedTunnels.map((t) => (
-                      <tr key={t.id} className="hover:bg-white/5 transition-colors group border-b border-slate-800/80">
-                        <td className="p-4 whitespace-nowrap">
+                      <tr key={t.id} className="hover:bg-white/5 transition-colors group border-b border-white/[0.08]">
+                        <td className="px-3.5 py-2.5 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 shrink-0 bg-cyan-500/10 rounded-xl flex items-center justify-center">
                               <Network className="w-5 h-5 text-cyan-400" />
@@ -395,7 +395,7 @@ export default function AdminCloudflaredPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 whitespace-nowrap">
+                        <td className="px-3.5 py-2.5 whitespace-nowrap">
                           {t.user ? (
                             <Link href={`/admin/customers/${t.userId}`} className="flex items-center gap-2 hover:opacity-80">
                               <div className={cn("w-8 h-8 rounded-full overflow-hidden border shrink-0 flex items-center justify-center text-xs font-bold", isDark ? "border-white/10 bg-white/10 text-white" : "border-slate-200 bg-slate-200 text-slate-800")}>
@@ -410,7 +410,7 @@ export default function AdminCloudflaredPage() {
                             <span className="text-sm text-red-500">Orphaned</span>
                           )}
                         </td>
-                        <td className="p-4 whitespace-nowrap">
+                        <td className="px-3.5 py-2.5 whitespace-nowrap">
                           {t.cfStatus === 'active' || t.cfStatus === 'healthy' ? (
                             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
                               <CheckCircle className="w-3.5 h-3.5" /> Active
@@ -425,7 +425,7 @@ export default function AdminCloudflaredPage() {
                             </span>
                           )}
                         </td>
-                        <td className="p-4 text-center whitespace-nowrap">
+                        <td className="px-3.5 py-2.5 text-center whitespace-nowrap">
                           {t.connectors > 0 ? (
                             <span className={cn("inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/20", isDark ? "text-cyan-400" : "text-cyan-700")}>
                               {t.connectors}
@@ -436,7 +436,7 @@ export default function AdminCloudflaredPage() {
                             </span>
                           )}
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="px-3.5 py-2.5 text-right">
                            <button 
                              onClick={() => setDeleteTunnelId(t.id)} 
                              className={cn("p-2 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 rounded-lg transition-colors", isDark ? "text-red-400" : "text-red-700")} 
@@ -451,7 +451,7 @@ export default function AdminCloudflaredPage() {
                 </tbody>
               </table>
             </div>
-            <div className={cn("p-4 border-t", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-4 border-t", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <Pagination currentPage={currentTunnelPage} totalPages={totalTunnelPages} onPageChange={setCurrentTunnelPage} />
             </div>
           </>

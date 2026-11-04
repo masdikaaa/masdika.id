@@ -121,7 +121,7 @@ export default function PaygMonitorPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-2">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             PAYG Billing Monitor
           </h1>
           <p className={cn("text-xs sm:text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -148,14 +148,14 @@ export default function PaygMonitorPage() {
       {/* Stat Cards - 5 Cards including Running Burn & Accumulated Cost */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
         {/* Card 1: PAYG Customers */}
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Customers</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             {customers.length}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -164,14 +164,14 @@ export default function PaygMonitorPage() {
         </div>
 
         {/* Card 2: Running Burn Rate */}
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Hourly Burn Rate</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-cyan-400 truncate")}>
+          <div className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight text-cyan-400 truncate")}>
             {formatRupiah(totalBurnRate)}<span className="text-xs font-normal text-zinc-400">/hr</span>
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -180,14 +180,14 @@ export default function PaygMonitorPage() {
         </div>
 
         {/* Card 3: Total Accumulated Cost (Unbilled Cycle) */}
-        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Accumulated</span>
             <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600")}>
               <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-emerald-400 truncate")}>
+          <div className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight text-emerald-400 truncate")}>
             {formatRupiah(totalAccumulatedCost)}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-emerald-500" : "text-emerald-700")}>
@@ -198,7 +198,7 @@ export default function PaygMonitorPage() {
         {/* Card 4: Saldo Cukup (Sufficient) */}
         <div 
           onClick={() => { setStatusFilter(statusFilter === 'SUFFICIENT' ? 'ALL' : 'SUFFICIENT'); setCustomerPage(1); }}
-          className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-emerald-500/40" : "bg-white border-slate-200 shadow-sm hover:border-emerald-500/40")}
+          className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md hover:border-emerald-500/40" : "bg-white border-slate-200 shadow-sm hover:border-emerald-500/40")}
         >
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Healthy Balance</span>
@@ -206,7 +206,7 @@ export default function PaygMonitorPage() {
               <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-400")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight text-emerald-400")}>
             {sufficientCount}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-emerald-500 truncate")}>
@@ -217,7 +217,7 @@ export default function PaygMonitorPage() {
         {/* Card 5: Saldo Kritis / Menipis */}
         <div 
           onClick={() => { setStatusFilter(statusFilter === 'LOW' ? 'ALL' : 'LOW'); setCustomerPage(1); }}
-          className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md hover:border-amber-500/40" : "bg-white border-slate-200 shadow-sm hover:border-amber-500/40")}
+          className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors cursor-pointer group", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md hover:border-amber-500/40" : "bg-white border-slate-200 shadow-sm hover:border-amber-500/40")}
         >
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Needs Top-up</span>
@@ -225,7 +225,7 @@ export default function PaygMonitorPage() {
               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-400")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight text-amber-400")}>
             {lowCount + exhaustedCount}
           </div>
           <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-amber-500 truncate")}>
@@ -235,7 +235,7 @@ export default function PaygMonitorPage() {
       </div>
 
       {/* Billing Deduction Frequency & Automation Settings */}
-      <div className={cn("border rounded-2xl p-4 sm:p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl p-4 sm:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3">
             <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -266,7 +266,7 @@ export default function PaygMonitorPage() {
                   { value: "minutely", label: "Minutely (Fast Testing)" }
                 ]}
                 placeholder="Select frequency..."
-                className={cn("w-full rounded-xl px-3.5 py-2 text-xs sm:text-sm", isDark ? "border-slate-800 bg-[#060b14] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
+                className={cn("w-full rounded-xl px-3.5 py-2 text-xs sm:text-sm", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-white" : "border-slate-200 bg-slate-50 text-slate-900")}
               />
             </div>
             <button
@@ -282,10 +282,10 @@ export default function PaygMonitorPage() {
       </div>
 
       {/* Full-width Active PAYG Customers Card */}
-      <div className={cn("border rounded-2xl p-4 sm:p-6 w-full", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl p-4 sm:p-6 w-full", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5">
           <div>
-            <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+            <h2 className={cn("text-base sm:text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <Activity className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
               Active PAYG Customers ({filteredCustomers.length})
             </h2>
@@ -299,7 +299,7 @@ export default function PaygMonitorPage() {
               placeholder="Search name or email..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCustomerPage(1); }}
-              className={cn("w-full border rounded-xl pl-3.5 pr-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+              className={cn("w-full border rounded-xl pl-3.5 pr-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
             />
           </div>
         </div>
@@ -322,7 +322,7 @@ export default function PaygMonitorPage() {
                 "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all border flex items-center gap-1.5 cursor-pointer",
                 statusFilter === tab.key
                   ? (isDark ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-sm" : "bg-cyan-50 border-cyan-400 text-cyan-800 shadow-sm")
-                  : (isDark ? "bg-[#060b14] border-slate-800/80 text-zinc-400 hover:text-white hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900")
+                  : (isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white hover:border-slate-700" : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900")
               )}
             >
               <span>{tab.label}</span>
@@ -347,7 +347,7 @@ export default function PaygMonitorPage() {
           <div className={cn(
             "flex flex-col items-center justify-center text-center py-12 px-4 rounded-2xl border transition-all my-2",
             isDark 
-              ? "bg-[#060b14]/60 border-slate-800/80 text-zinc-400" 
+              ? "bg-[#0a0a0c]/60 border-white/[0.08] text-zinc-400" 
               : "bg-slate-50/70 border-slate-200 text-slate-500"
           )}>
             <div className={cn(
@@ -386,7 +386,7 @@ export default function PaygMonitorPage() {
         ) : (
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full text-left text-xs sm:text-sm">
-              <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
+              <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#0a0a0c] text-slate-400 border-b border-white/[0.08] font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
                 <tr>
                   <th className="py-3 px-3 sm:px-4 rounded-l-lg font-semibold w-[26%]">
                     <div>Customer</div>
@@ -424,7 +424,7 @@ export default function PaygMonitorPage() {
                       <td className="py-3 sm:py-4 px-3 sm:px-4">
                         <div className="flex items-center gap-2.5 sm:gap-3">
                           <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0", expandedCustomerId === cust.id ? "rotate-180 text-cyan-400" : "group-hover:text-zinc-300")} />
-                          <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                          <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                             <img referrerPolicy="no-referrer" 
                               src={cust.image || `/api/avatar?email=${encodeURIComponent(cust.email || '')}&name=${encodeURIComponent(cust.name || 'User')}`} 
                               alt={cust.name} 
@@ -437,7 +437,7 @@ export default function PaygMonitorPage() {
                           </div>
                         </div>
                       </td>
-                      <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-extrabold text-xs sm:text-sm whitespace-nowrap", cust.balance <= 0 ? "text-rose-400" : cust.balanceStatus === 'LOW' ? "text-amber-400" : (isDark ? "text-slate-100" : "text-slate-900"))}>
+                      <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-bold text-xs sm:text-sm whitespace-nowrap", cust.balance <= 0 ? "text-rose-400" : cust.balanceStatus === 'LOW' ? "text-amber-400" : (isDark ? "text-slate-100" : "text-slate-900"))}>
                         {formatRupiah(cust.balance)}
                       </td>
                       <td className={cn("py-3 sm:py-4 px-3 sm:px-4 text-right font-semibold text-xs sm:text-sm whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -486,9 +486,9 @@ export default function PaygMonitorPage() {
                       </td>
                     </tr>
                     {expandedCustomerId === cust.id && (
-                      <tr className={cn(isDark ? "bg-[#060b14]/50" : "bg-slate-50/70")}>
-                        <td colSpan={6} className={cn("p-3 sm:p-5 border-b", isDark ? "border-slate-800/80" : "border-slate-200")}>
-                          <div className={cn("border rounded-xl p-3.5 sm:p-5 w-full", isDark ? "bg-[#0b1322] border-slate-800 shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
+                      <tr className={cn(isDark ? "bg-[#0a0a0c]/50" : "bg-slate-50/70")}>
+                        <td colSpan={6} className={cn("p-3 sm:p-5 border-b", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                          <div className={cn("border rounded-xl p-3.5 sm:p-5 w-full", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
                             
                             {/* Sufficiency Health Banner */}
                             {cust.balanceStatus === 'SUFFICIENT' && (
@@ -533,7 +533,7 @@ export default function PaygMonitorPage() {
                             </div>
                             <div className="overflow-x-auto scrollbar-none">
                               <table className="w-full text-left text-xs">
-                                <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#060b14] text-slate-400 border-b border-slate-800 font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
+                                <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#0a0a0c] text-slate-400 border-b border-white/[0.08] font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
                                   <tr>
                                     <th className="py-2.5 px-3 rounded-l-lg font-medium w-[32%]">Service</th>
                                     <th className="py-2.5 px-3 font-medium w-[14%]">Type</th>
@@ -578,7 +578,7 @@ export default function PaygMonitorPage() {
                               </table>
                             </div>
                             {cust.services.length > servicesPerPage && (
-                              <div className={cn("flex items-center justify-between mt-3 pt-3 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+                              <div className={cn("flex items-center justify-between mt-3 pt-3 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                                 <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
                                   Showing {((servicePageMap[cust.id] || 1) - 1) * servicesPerPage + 1} to {Math.min((servicePageMap[cust.id] || 1) * servicesPerPage, cust.services.length)} of {cust.services.length} services
                                 </p>
@@ -586,14 +586,14 @@ export default function PaygMonitorPage() {
                                   <button
                                     onClick={() => setServicePageMap(prev => ({ ...prev, [cust.id]: Math.max(1, (prev[cust.id] || 1) - 1) }))}
                                     disabled={(servicePageMap[cust.id] || 1) === 1}
-                                    className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#060b14] border-slate-800 text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
+                                    className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
                                   >
                                     Prev
                                   </button>
                                   <button
                                     onClick={() => setServicePageMap(prev => ({ ...prev, [cust.id]: Math.min(Math.ceil(cust.services.length / servicesPerPage), (prev[cust.id] || 1) + 1) }))}
                                     disabled={(servicePageMap[cust.id] || 1) >= Math.ceil(cust.services.length / servicesPerPage)}
-                                    className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#060b14] border-slate-800 text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
+                                    className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
                                   >
                                     Next
                                   </button>
@@ -609,7 +609,7 @@ export default function PaygMonitorPage() {
               </tbody>
             </table>
             {filteredCustomers.length > customersPerPage && (
-              <div className={cn("p-4 border-t", isDark ? "bg-[#060b14]/50 border-slate-800" : "bg-slate-50 border-slate-200")}>
+              <div className={cn("p-4 border-t", isDark ? "bg-[#0a0a0c]/50 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                 <Pagination 
                   currentPage={customerPage} 
                   totalPages={Math.ceil(filteredCustomers.length / customersPerPage)} 

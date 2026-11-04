@@ -79,26 +79,26 @@ export function VisitorChart() {
   return (
     <div className="w-full h-full flex flex-col relative z-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-3">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Activity className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            <h2 className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Visitor Traffic</h2>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
+            <h2 className={cn("text-sm font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Visitor Traffic</h2>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{formatCompact(currentTotal)}</span>
-            <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>total in period</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{formatCompact(currentTotal)}</span>
+            <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>total in period</span>
           </div>
         </div>
 
         {/* Range Toggles */}
-        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+        <div className={cn("flex backdrop-blur-md rounded-xl p-1 border overflow-x-auto max-w-full", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setRange(r.value)}
-              className={`px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${range === r.value
-                  ? "bg-cyan-400 text-slate-950 font-bold"
+              className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${range === r.value
+                  ? "bg-cyan-400 text-slate-950 font-semibold"
                   : cn(isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-white")
                 }`}
             >
@@ -111,7 +111,7 @@ export function VisitorChart() {
       {/* Chart */}
       <div className="flex-1 w-full relative min-h-[200px]">
         {loading ? (
-          <div className={cn("absolute inset-0 flex items-center justify-center backdrop-blur-sm z-10 rounded-xl", isDark ? "bg-[#060b14]/50" : "bg-white/50")}>
+          <div className={cn("absolute inset-0 flex items-center justify-center backdrop-blur-sm z-10 rounded-xl", isDark ? "bg-[#0a0a0c]/50" : "bg-white/50")}>
             <div className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
           </div>
         ) : null}
@@ -155,7 +155,7 @@ export function VisitorChart() {
               <Tooltip content={({ active, payload, label }: any) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className={cn("backdrop-blur-md border p-4 rounded-xl", isDark ? "bg-[#0b1322]/95 border-slate-800 shadow-xl" : "bg-white/95 border-slate-200 shadow-lg")}>
+                    <div className={cn("backdrop-blur-md border p-4 rounded-xl", isDark ? "bg-[#0c0c0e]/95 border-white/[0.08] shadow-xl" : "bg-white/95 border-slate-200 shadow-lg")}>
                       <p className={cn("text-xs mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>{formatXAxis(label)}</p>
                       <p className={cn("font-bold text-lg flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         {formatCompact(payload[0].value)} <span className="text-zinc-500 text-xs font-normal">Visitors</span>

@@ -45,42 +45,42 @@ export function OnlineUsersWidget() {
   const displayedUsers = onlineUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className={cn("backdrop-blur-xl rounded-3xl border p-6 relative overflow-hidden group hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-      <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-[50px] pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-500", isDark ? "bg-emerald-500/5 border-emerald-500/10" : "bg-emerald-50 border-emerald-200")} />
+    <div className={cn("backdrop-blur-xl rounded-2xl border p-4 sm:p-5 relative overflow-hidden group hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 w-40 h-40 rounded-full blur-[50px] pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-500", isDark ? "bg-emerald-500/5 border-emerald-500/10" : "bg-emerald-50 border-emerald-200")} />
       
-      <div className="relative z-10 flex items-center justify-between mb-6">
+      <div className="relative z-10 flex items-center justify-between mb-4">
         <div>
-          <h2 className={cn("text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-            <Wifi className="w-4 h-4 text-emerald-500 animate-pulse" />
+          <h2 className={cn("text-sm font-bold tracking-tight flex items-center gap-1.5", isDark ? "text-white" : "text-slate-900")}>
+            <Wifi className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
             Online Users
           </h2>
-          <div className={cn("text-[10px] mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Active in the last 5 minutes</div>
+          <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Active in the last 5 minutes</div>
         </div>
-        <div className={cn("px-3 py-1 rounded-full text-xs font-bold border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+        <div className={cn("px-2.5 py-0.5 rounded-full text-[11px] font-bold border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
           {onlineUsers.length} Online
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col gap-3 min-h-[200px]">
+      <div className="relative z-10 flex flex-col gap-2 min-h-[160px]">
         {onlineUsers.length === 0 ? (
-          <div className={cn("text-sm text-center py-10", isDark ? "text-zinc-500" : "text-slate-500")}>No users online right now</div>
+          <div className={cn("text-xs text-center py-8", isDark ? "text-zinc-500" : "text-slate-500")}>No users online right now</div>
         ) : (
-          <div className="flex flex-col gap-2 flex-1">
+          <div className="flex flex-col gap-1.5 flex-1">
             {displayedUsers.map((user) => (
-              <div key={user.id} className={cn("flex items-center gap-3 p-2 rounded-xl transition-colors border", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-100")}>
+              <div key={user.id} className={cn("flex items-center gap-2.5 p-2 rounded-xl transition-colors border", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-100")}>
                 <div className="relative">
                   {user.image ? (
-                    <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+                    <img src={user.image} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
                   ) : (
-                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs", isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600")}>
+                    <div className={cn("w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px]", isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600")}>
                       {user.name?.substring(0, 2).toUpperCase() || 'US'}
                     </div>
                   )}
-                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0c0c0e]"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0c0c0e]"></div>
                 </div>
                 <div className="flex flex-col truncate">
-                  <span className={cn("text-sm font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>{user.name}</span>
-                  <div className="flex items-center gap-2">
+                  <span className={cn("text-xs font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>{user.name}</span>
+                  <div className="flex items-center gap-1.5">
                     <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
                     <span className={cn("text-[9px] px-1.5 rounded-full border", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
                       {getRelativeTime(user.lastActive)}
@@ -94,7 +94,7 @@ export function OnlineUsersWidget() {
       </div>
 
       {totalPages > 1 && (
-        <div className={cn("relative z-10 flex items-center justify-between mt-4 pt-4 border-t", isDark ? "border-slate-800/80" : "border-slate-200")}>
+        <div className={cn("relative z-10 flex items-center justify-between mt-4 pt-4 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
           <div className={cn("text-[10px]", isDark ? "text-zinc-500" : "text-slate-500")}>
             Page {currentPage} of {totalPages}
           </div>

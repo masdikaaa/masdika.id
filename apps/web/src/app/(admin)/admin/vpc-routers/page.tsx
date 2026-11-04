@@ -164,7 +164,7 @@ export default function VpcRoutersPage() {
       {/* Header matching Gambar 1 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             VPC Routers
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -175,13 +175,13 @@ export default function VpcRoutersPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-2 rounded-xl font-medium text-xs flex items-center gap-2">
             <span>Total Routers:</span>
-            <span className="font-extrabold text-white">{routers.length}</span>
+            <span className="font-bold text-white">{routers.length}</span>
           </div>
           <button
             onClick={() => { setLoading(true); fetchRouters(); }}
             className={cn(
               "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border",
-              isDark ? "border-slate-800 bg-[#0b1322] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+              isDark ? "border-white/[0.08] bg-[#0c0c0e] hover:bg-white/5 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
             <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
@@ -199,7 +199,7 @@ export default function VpcRoutersPage() {
 
       {/* Stat Cards Grid (GAMBAR 1 Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL ROUTERS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -207,12 +207,12 @@ export default function VpcRoutersPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{routers.length}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{routers.length}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Active Mikrotiks</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>SSL ENCRYPTED</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -220,12 +220,12 @@ export default function VpcRoutersPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{sslCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{sslCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>API-SSL Ports</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>PROXMOX BRIDGES</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -233,12 +233,12 @@ export default function VpcRoutersPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{bridgeCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{bridgeCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Isolated Bridges</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>WAN GATEWAYS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -246,23 +246,23 @@ export default function VpcRoutersPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{wanCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{wanCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Internet Egress</span>
           </div>
         </div>
       </div>
 
       {/* Table Container */}
-      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("rounded-2xl border overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("border-b text-xs uppercase tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
-                <th className="px-6 py-4 font-medium">Name</th>
-                <th className="px-6 py-4 font-medium">Host</th>
-                <th className="px-6 py-4 font-medium">Interface / Bridge</th>
-                <th className="px-6 py-4 font-medium">API Port</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th className="px-3.5 py-2.5 font-medium">Name</th>
+                <th className="px-3.5 py-2.5 font-medium">Host</th>
+                <th className="px-3.5 py-2.5 font-medium">Interface / Bridge</th>
+                <th className="px-3.5 py-2.5 font-medium">API Port</th>
+                <th className="px-3.5 py-2.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y text-sm", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -279,24 +279,24 @@ export default function VpcRoutersPage() {
                       <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                         <Network className="w-8 h-8" />
                       </div>
-                      <h3 className={cn("text-lg font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No VPC Routers Found</h3>
+                      <h3 className={cn("text-sm font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>No VPC Routers Found</h3>
                       <p className="text-zinc-500 text-xs max-w-sm">Add a router configuration to start provisioning VPC networks.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 routers.map((router) => (
-                  <tr key={router.id} className={cn("transition-colors border-b", isDark ? "border-slate-800/80 hover:bg-white/5" : "border-slate-200 hover:bg-slate-50")}>
-                    <td className="px-6 py-4">
+                  <tr key={router.id} className={cn("transition-colors border-b", isDark ? "border-white/[0.08] hover:bg-white/5" : "border-slate-200 hover:bg-slate-50")}>
+                    <td className="px-3.5 py-2.5">
                       <div className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{router.name}</div>
                     </td>
-                    <td className={cn("px-6 py-4 font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-600")}>{router.host}</td>
-                    <td className="px-6 py-4">
+                    <td className={cn("px-3.5 py-2.5 font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-600")}>{router.host}</td>
+                    <td className="px-3.5 py-2.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={cn("px-2.5 py-1 rounded-md text-xs border whitespace-nowrap", isDark ? "bg-[#060b14] border-slate-800 text-white" : "bg-slate-100 border-slate-300 text-slate-700")}>
+                        <span className={cn("px-2.5 py-1 rounded-md text-xs border whitespace-nowrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-100 border-slate-300 text-slate-700")}>
                           <span className={cn("mr-1 font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>BR:</span>{router.proxmoxBridge}
                         </span>
-                        <span className={cn("px-2.5 py-1 rounded-md text-xs border whitespace-nowrap", isDark ? "bg-[#060b14] border-slate-800 text-zinc-300" : "bg-slate-100 border-slate-300 text-slate-700")}>
+                        <span className={cn("px-2.5 py-1 rounded-md text-xs border whitespace-nowrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-100 border-slate-300 text-slate-700")}>
                           <span className={cn("mr-1 font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>TR:</span>{router.interfaceName}
                         </span>
                         <span className={cn("px-2.5 py-1 rounded-md text-xs border whitespace-nowrap", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -304,10 +304,10 @@ export default function VpcRoutersPage() {
                         </span>
                       </div>
                     </td>
-                    <td className={cn("px-6 py-4 font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-600")}>
+                    <td className={cn("px-3.5 py-2.5 font-mono text-xs", isDark ? "text-zinc-300" : "text-slate-600")}>
                       {router.apiPort} {router.useSsl ? <span className="text-emerald-400 text-xs ml-1 font-sans font-bold">(SSL)</span> : ""}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2.5">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditModal(router)}
@@ -336,9 +336,9 @@ export default function VpcRoutersPage() {
       {/* Add / Edit Modal */}
       {(showAddModal || showEditModal) && (
         <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200", isDark ? "bg-black/60" : "bg-slate-900/40")}>
-          <div className={cn("border rounded-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0b1322] border-slate-800 text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
-            <div className={cn("p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
-              <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("border rounded-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
+            <div className={cn("p-6 border-b flex items-center justify-between shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <h3 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                 <Network className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 {showEditModal ? "Edit VPC Router" : "Add VPC Router"}
               </h3>
@@ -358,7 +358,7 @@ export default function VpcRoutersPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Primary Mikrotik"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -369,7 +369,7 @@ export default function VpcRoutersPage() {
                   value={formData.host}
                   onChange={(e) => setFormData({ ...formData, host: e.target.value })}
                   placeholder="e.g. 192.168.1.1"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -379,7 +379,7 @@ export default function VpcRoutersPage() {
                   type="number"
                   value={formData.apiPort}
                   onChange={(e) => setFormData({ ...formData, apiPort: parseInt(e.target.value) })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -389,7 +389,7 @@ export default function VpcRoutersPage() {
                     type="checkbox"
                     checked={formData.useSsl}
                     onChange={(e) => setFormData({ ...formData, useSsl: e.target.checked })}
-                    className={cn("w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500/20", isDark ? "bg-[#060b14] border-slate-800 focus:ring-offset-[#0b1322]" : "bg-white border-slate-200")}
+                    className={cn("w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500/20", isDark ? "bg-[#0a0a0c] border-white/[0.08] focus:ring-offset-[#0b1322]" : "bg-white border-slate-200")}
                   />
                   <span className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Use SSL (api-ssl)</span>
                 </label>
@@ -401,7 +401,7 @@ export default function VpcRoutersPage() {
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -413,7 +413,7 @@ export default function VpcRoutersPage() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder={showEditModal ? "(Leave empty to keep)" : ""}
-                    className={cn("w-full border rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-cyan-500 transition-colors [&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:border-cyan-500 transition-colors [&::-ms-reveal]:hidden [&::-webkit-reveal]:hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                   <button
                     type="button"
@@ -440,7 +440,7 @@ export default function VpcRoutersPage() {
                   value={formData.interfaceName}
                   onChange={(e) => setFormData({ ...formData, interfaceName: e.target.value })}
                   placeholder="e.g. bridge-vpc"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -451,7 +451,7 @@ export default function VpcRoutersPage() {
                   value={formData.proxmoxBridge}
                   onChange={(e) => setFormData({ ...formData, proxmoxBridge: e.target.value })}
                   placeholder="e.g. vmbr2"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -462,20 +462,20 @@ export default function VpcRoutersPage() {
                   value={formData.wanInterface}
                   onChange={(e) => setFormData({ ...formData, wanInterface: e.target.value })}
                   placeholder="e.g. ether1 or pppoe-out1"
-                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
                 <p className="text-xs text-zinc-500">Used for VPC NAT Gateway (Internet Access)</p>
               </div>
             </div>
 
-            <div className={cn("p-6 border-t flex items-center justify-end gap-3 shrink-0", isDark ? "border-slate-800" : "border-slate-200")}>
+            <div className={cn("p-6 border-t flex items-center justify-end gap-3 shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <button
                 type="button"
                 onClick={() => {
                   setShowAddModal(false);
                   setShowEditModal(null);
                 }}
-                className={cn("px-4 py-2 rounded-lg text-sm font-medium border transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                className={cn("px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
                 disabled={saving}
               >
                 Cancel
@@ -484,7 +484,7 @@ export default function VpcRoutersPage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
+                className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 {showEditModal ? "Update" : "Add Router"}

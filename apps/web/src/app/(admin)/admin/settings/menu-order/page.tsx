@@ -151,7 +151,7 @@ export default function MenuOrderPage() {
             <Reorder.Item
               key={key}
               value={key}
-              className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}
+              className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border cursor-grab active:cursor-grabbing active:scale-[1.01] transition-colors select-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}
             >
               <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
                 <GripVertical className="w-5 h-5 text-zinc-500 shrink-0" />
@@ -207,15 +207,15 @@ export default function MenuOrderPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-6 sm:mb-8">
-        <h1 className={cn("text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+        <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
           Menu Order Configuration
         </h1>
         <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Drag to reorder dropdown items. Toggle the "New" badge on each item.</p>
       </div>
 
       <div className="space-y-6 sm:space-y-8">
-        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Compass className="w-5 h-5" />
             </div>
@@ -224,8 +224,8 @@ export default function MenuOrderPage() {
           {renderList(order, badges, setOrder, 'explore')}
         </div>
 
-        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Code className="w-5 h-5" />
             </div>
@@ -234,8 +234,8 @@ export default function MenuOrderPage() {
           {renderList(devOrder, devBadges, setDevOrder, 'dev')}
         </div>
 
-        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <h2 className={cn("text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <h2 className={cn("text-lg sm:text-sm sm:text-base font-bold mb-4 sm:mb-6 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <div className={cn("w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Briefcase className="w-5 h-5" />
             </div>
@@ -244,13 +244,13 @@ export default function MenuOrderPage() {
           {renderList(companyOrder, companyBadges, setCompanyOrder, 'company')}
         </div>
 
-        <div className={cn("rounded-2xl border p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("rounded-2xl border p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <button onClick={handleReset}
-            className={cn("flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors", isDark ? "border-slate-800 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
+            className={cn("flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors", isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100")}>
             <RotateCcw className="w-4 h-4" /> Reset to Default
           </button>
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
+            className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm disabled:opacity-50 transition-all">
             <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save All Changes'}
           </button>
         </div>

@@ -136,7 +136,7 @@ export default function AdminBlogPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Blog Management
           </h1>
           <p className={cn("text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -146,7 +146,7 @@ export default function AdminBlogPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
             <span>Total Articles:</span>
-            <span className="font-extrabold text-white">{totalCount}</span>
+            <span className="font-bold text-white">{totalCount}</span>
           </div>
           <button
             onClick={() => { setLoading(true); fetchArticles(); }}
@@ -160,14 +160,14 @@ export default function AdminBlogPage() {
           </button>
           <Link 
             href="/admin/blog/categories" 
-            className={cn("px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
+            className={cn("px-3.5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-2 border", isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700")}
           >
             <Tag className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />
             <span>Categories</span>
           </Link>
           <Link 
             href="/admin/blog/edit/new" 
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+            className="px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center justify-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>New Article</span>
@@ -177,7 +177,7 @@ export default function AdminBlogPage() {
 
       {/* Stat Cards Grid (GAMBAR 1 Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>TOTAL ARTICLES</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -185,12 +185,12 @@ export default function AdminBlogPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{totalCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Entries</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>PUBLISHED</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -198,12 +198,12 @@ export default function AdminBlogPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{publishedCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{publishedCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Live Online</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>DRAFTS</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
@@ -211,12 +211,12 @@ export default function AdminBlogPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{draftCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{draftCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>In Progress</span>
           </div>
         </div>
 
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>CATEGORIES</span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
@@ -224,15 +224,15 @@ export default function AdminBlogPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{categoriesCount}</span>
+            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>{categoriesCount}</span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>Topics</span>
           </div>
         </div>
       </div>
 
       {/* Filter and Control Bar (GAMBAR 1 Style) */}
-      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
           {[
             { key: 'all', label: 'All Articles', count: totalCount },
             { key: 'published', label: 'Published', count: publishedCount },
@@ -249,7 +249,7 @@ export default function AdminBlogPage() {
               )}
             >
               <span>{tab.label}</span>
-              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", statusFilter === tab.key ? "bg-slate-950/20 text-slate-950 font-extrabold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", statusFilter === tab.key ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
                 {tab.count}
               </span>
             </button>
@@ -260,13 +260,13 @@ export default function AdminBlogPage() {
           {filteredArticles.length > 0 && (
             <button 
               onClick={toggleSelectAll}
-              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs transition-all border", isDark ? "bg-[#060b14] text-white border-slate-800 hover:border-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white")}
+              className={cn("flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs transition-all border", isDark ? "bg-[#0a0a0c] text-white border-white/[0.08] hover:border-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white")}
             >
               <div className={cn(
                 "w-4 h-4 border rounded flex items-center justify-center transition-colors",
                 selectedIds.length === filteredArticles.length && filteredArticles.length > 0
                   ? "bg-cyan-500 border-cyan-500 text-slate-950"
-                  : isDark ? "border-slate-700 bg-[#060b14]" : "border-slate-300 bg-white"
+                  : isDark ? "border-slate-700 bg-[#0a0a0c]" : "border-slate-300 bg-white"
               )}>
                 {selectedIds.length === filteredArticles.length && filteredArticles.length > 0 && <Check className="w-3 h-3 text-slate-950 font-bold" strokeWidth={3} />}
               </div>
@@ -291,19 +291,19 @@ export default function AdminBlogPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search title, category..." 
-              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+              className={cn("w-full pl-9 pr-4 py-2 text-xs md:text-sm rounded-xl border focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
             />
           </div>
         </div>
       </div>
 
       {/* Table Container */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#060b14] border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
+            <thead className={cn("text-xs uppercase border-b tracking-wider font-semibold", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500")}>
               <tr>
-                <th className="p-4 w-12">
+                <th className="px-3.5 py-2.5 w-12">
                   <button 
                     type="button"
                     onClick={(e) => {
@@ -314,17 +314,17 @@ export default function AdminBlogPage() {
                       "w-5 h-5 border rounded flex items-center justify-center transition-colors",
                       selectedIds.length === filteredArticles.length && filteredArticles.length > 0
                         ? "bg-cyan-500 border-cyan-500 text-slate-950"
-                        : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
+                        : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
                     )}
                   >
                     {selectedIds.length === filteredArticles.length && filteredArticles.length > 0 && <Check className="w-3.5 h-3.5 text-slate-950 font-bold" strokeWidth={3} />}
                   </button>
                 </th>
-                <th className="p-4 whitespace-nowrap font-medium">Article Title</th>
-                <th className="p-4 whitespace-nowrap font-medium">Category</th>
-                <th className="p-4 whitespace-nowrap font-medium">Status</th>
-                <th className="p-4 whitespace-nowrap font-medium">Date</th>
-                <th className="p-4 text-right whitespace-nowrap font-medium">Actions</th>
+                <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Article Title</th>
+                <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Category</th>
+                <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Status</th>
+                <th className="px-3.5 py-2.5 whitespace-nowrap font-medium">Date</th>
+                <th className="px-3.5 py-2.5 text-right whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
@@ -338,10 +338,10 @@ export default function AdminBlogPage() {
                 <tr>
                   <td colSpan={6} className="px-6 py-16">
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border transition-transform duration-500", isDark ? "bg-[#060b14] border-slate-800 text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-400")}>
+                      <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border transition-transform duration-500", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-400")}>
                         <Search className="w-10 h-10" />
                       </div>
-                      <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No articles found</h3>
+                      <h3 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No articles found</h3>
                       <p className="text-zinc-500 text-sm max-w-sm">We couldn't find any articles matching your search criteria. Try adjusting your filters or create a new one.</p>
                       {search && (
                         <button onClick={() => setSearch('')} className={cn("mt-4 text-sm hover:text-cyan-300 font-medium transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -354,28 +354,28 @@ export default function AdminBlogPage() {
               ) : (
                 paginatedArticles.map((article) => (
                   <tr key={article.id} className={cn("transition-colors group", selectedIds.includes(article.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"))}>
-                    <td className="p-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <button 
                         onClick={() => toggleSelect(article.id)} 
                         className={cn(
                           "w-5 h-5 border rounded flex items-center justify-center transition-colors",
                           selectedIds.includes(article.id)
                             ? "bg-cyan-500 border-cyan-500 text-slate-950"
-                            : isDark ? "border-slate-700 bg-[#060b14] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
+                            : isDark ? "border-slate-700 bg-[#0a0a0c] hover:border-cyan-400" : "border-slate-300 bg-white hover:border-slate-400"
                         )}
                       >
                         {selectedIds.includes(article.id) && <Check className="w-3.5 h-3.5 text-slate-950 font-bold" strokeWidth={3} />}
                       </button>
                     </td>
-                    <td className={cn("p-4 font-bold transition-colors whitespace-nowrap", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700")}>
+                    <td className={cn("px-3.5 py-2.5 font-bold transition-colors whitespace-nowrap", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700")}>
                       <Link href={`/admin/blog/edit/${article.id}`}>{article.title}</Link>
                     </td>
-                    <td className="p-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-zinc-500/10 border border-zinc-500/20", isDark ? "text-zinc-400" : "text-slate-500")}>
                         {article.category?.name || 'Uncategorized'}
                       </span>
                     </td>
-                    <td className="p-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       {article.published ? (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
                           <CheckCircle className="w-3 h-3" /> Published
@@ -386,8 +386,8 @@ export default function AdminBlogPage() {
                         </span>
                       )}
                     </td>
-                    <td className={cn("p-4 whitespace-nowrap font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{new Date(article.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                    <td className="p-4 text-right whitespace-nowrap">
+                    <td className={cn("px-3.5 py-2.5 whitespace-nowrap font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>{new Date(article.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                    <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <Link href={`/blog/${article.slug}`} target="_blank" className={cn("p-2 rounded-lg transition-colors border border-transparent", isDark ? "hover:text-white hover:bg-white/10 hover:border-white/10 text-zinc-400" : "hover:text-slate-900 hover:bg-slate-100 hover:border-slate-200 text-slate-500")} title="View Public">
                           <ExternalLink className="w-4 h-4" />
@@ -406,7 +406,7 @@ export default function AdminBlogPage() {
             </tbody>
           </table>
         </div>
-        <div className={cn("p-4 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>

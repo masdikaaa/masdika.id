@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
-const inputClassDark = 'w-full bg-[#060b14] border border-slate-800 rounded-xl px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all';
+const inputClassDark = 'w-full bg-[#0a0a0c] border border-white/[0.08] rounded-xl px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all';
 const inputClassLight = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition-all';
 const labelClassDark = 'block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2';
 const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
@@ -628,12 +628,12 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 md:space-y-8 pb-10 w-full relative z-10">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-2xl border p-6 md:p-8", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-2xl border p-4 sm:p-5", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="relative z-10">
           <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-semibold mb-4 tracking-wide", isDark ? "text-cyan-400" : "text-cyan-700")}>
             <Settings className="w-3 h-3" /> Account Management
           </div>
-          <h1 className={cn("text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             System <span className={cn(isDark ? "bg-gradient-to-r from-cyan-400 to-cyan-500 bg-clip-text text-transparent" : "text-cyan-600")}>Settings</span>
           </h1>
           <p className={cn("text-sm max-w-md", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your profile, website content, SEO, and security.</p>
@@ -643,7 +643,7 @@ export default function SettingsPage() {
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Navigation Sidebar */}
         <div className="w-full md:w-60 shrink-0 sticky top-0 md:top-4 z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
-          <div className={cn("border rounded-2xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("border rounded-2xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -674,7 +674,7 @@ export default function SettingsPage() {
                 {/* Profile Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
 
 
@@ -696,7 +696,7 @@ export default function SettingsPage() {
                           {profilePreview ? (
                             <img referrerPolicy="no-referrer" src={profilePreview} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                           ) : (
-                            <span className={cn("text-5xl font-black", isDark ? "text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 to-cyan-600" : "text-cyan-600")}>
+                            <span className={cn("text-2xl sm:text-xl sm:text-2xl font-bold", isDark ? "text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 to-cyan-600" : "text-cyan-600")}>
                               {formData.name ? formData.name.charAt(0).toUpperCase() : 'M'}
                             </span>
                           )}
@@ -744,8 +744,8 @@ export default function SettingsPage() {
                         <textarea rows={4} name="bio" value={formData.bio} onChange={handleChange} className={cn(inputClass, "resize-none")} />
                       </div>
 
-                      <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                        <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                      <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                        <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                           {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                           {saving ? "Saving..." : "Save Profile"}
                         </button>
@@ -761,9 +761,9 @@ export default function SettingsPage() {
                 {/* Contact Information Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <Phone className="w-6 h-6" />
                     </div>
@@ -787,8 +787,8 @@ export default function SettingsPage() {
                       <input type="text" name="contact_location" value={formData.contact_location} onChange={handleChange} placeholder="Surabaya, Indonesia" className={inputClass} />
                     </div>
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save Contact Info"}
                     </button>
@@ -797,9 +797,9 @@ export default function SettingsPage() {
                 {/* Social Links Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <Share2 className="w-6 h-6" />
                     </div>
@@ -831,8 +831,8 @@ export default function SettingsPage() {
                       <input type="url" name="social_github" value={formData.social_github} onChange={handleChange} placeholder="https://github.com/..." className={inputClass} />
                     </div>
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save Social Links"}
                     </button>
@@ -846,9 +846,9 @@ export default function SettingsPage() {
                 {/* Website Content Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <Layout className="w-6 h-6" />
                     </div>
@@ -872,8 +872,8 @@ export default function SettingsPage() {
                       <input type="text" name="hero_typing_text" value={formData.hero_typing_text} onChange={handleChange} placeholder="Cloud Engineer, DevOps Expert, SysAdmin Pro, Backend Dev" className={inputClass} />
                     </div>
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save Content"}
                     </button>
@@ -882,9 +882,9 @@ export default function SettingsPage() {
                 {/* Resume / CV Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <FileText className="w-6 h-6" />
                     </div>
@@ -896,7 +896,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-4 relative z-10">
                     <div className="flex items-center gap-4">
-                      <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-[#060b14] border-slate-800 text-white hover:border-slate-700" : "bg-white border-slate-200 text-slate-900 hover:border-slate-300")}>
+                      <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:border-slate-700" : "bg-white border-slate-200 text-slate-900 hover:border-slate-300")}>
                         <input type="file" accept="application/pdf" className="hidden" onChange={handleCVUpload} />
                         <FileText className={cn("w-5 h-5 mr-2", isDark ? "text-cyan-400" : "text-cyan-700")} />
                         Upload New CV
@@ -920,8 +920,8 @@ export default function SettingsPage() {
                       {formData.cv_url ? `Current CV path: ${formData.cv_url}` : "No CV uploaded yet."}
                     </p>
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save CV"}
                     </button>
@@ -937,9 +937,9 @@ export default function SettingsPage() {
                 {/* SEO & Favicon Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <Search className="w-6 h-6" />
                     </div>
@@ -951,7 +951,7 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-1 gap-6 relative z-10">
                     <div className="space-y-4">
-                      <h3 className={cn("text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>Page Meta Descriptions</h3>
+                      <h3 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>Page Meta Descriptions</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className={labelClass}>Home Page</label>
@@ -996,14 +996,14 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className={cn("space-y-4 pt-6 mt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("space-y-4 pt-6 mt-6 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                       <label className={labelClass}>Favicon (.ico only)</label>
                       <div className="flex items-center gap-6">
-                        <div className={cn("w-16 h-16 rounded-xl border flex items-center justify-center overflow-hidden relative", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                        <div className={cn("w-16 h-16 rounded-xl border flex items-center justify-center overflow-hidden relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                           <img referrerPolicy="no-referrer" src={`/favicon.ico?v=${faviconKey}`} alt="Favicon" className="w-8 h-8" onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgY3Vyc29yPSJwb2ludGVyIj48cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik00IDE2bDQuNTg2LTQuNTg2YTIgMiAwIDAxMi44MjggMEwxNiAxNm0tMi0ybDEuNTg2LTEuNTg2YTIgMiAwIDAxMi44MjggMEwyMCAxNG0tNi02aC4wMSIgLz48L3N2Zz4=' }} />
                         </div>
                         <div className="flex items-center gap-4">
-                          <label className={cn("flex flex-col items-center justify-center px-6 py-2 border hover:border-cyan-500/50 rounded-xl cursor-pointer transition-all", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
+                          <label className={cn("flex flex-col items-center justify-center px-6 py-2 border hover:border-cyan-500/50 rounded-xl cursor-pointer transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
                             <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Upload .ico</span>
                             <span className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>Recommended: 32x32px</span>
                             <input type="file" accept=".ico" className="hidden" onChange={handleFaviconUpload} />
@@ -1011,7 +1011,7 @@ export default function SettingsPage() {
                           <button
                             onClick={() => setShowDeleteFaviconModal(true)}
                             disabled={isDeletingFavicon}
-                            className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-[#060b14] hover:bg-slate-800 text-white border-slate-800" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
+                            className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-[#0a0a0c] hover:bg-slate-800 text-white border-white/[0.08]" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
                             title="Delete Favicon"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -1027,8 +1027,8 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save SEO Settings"}
                     </button>
@@ -1042,7 +1042,7 @@ export default function SettingsPage() {
                 {/* Security Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
 
                   <div className="flex items-center gap-4 border-b border-cyan-500/10 pb-6 relative z-10">
@@ -1057,13 +1057,13 @@ export default function SettingsPage() {
 
                   <div className="space-y-8 relative z-10">
                     <div className="flex flex-col gap-4">
-                      <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-[#060b14] border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
+                      <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
                         <div>
                           <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                             <Key className={cn("w-5 h-5 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                             Two-Factor Authentication
                           </h3>
-                          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Add an extra layer of security to your account. This setting saves automatically when toggled.</p>
+                          <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Add an extra layer of security to your account. This setting saves automatically when toggled.</p>
                         </div>
 
                         <button
@@ -1083,7 +1083,7 @@ export default function SettingsPage() {
                             exit={{ opacity: 0, height: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className={cn("p-8 rounded-2xl border flex flex-col items-center gap-6 text-center", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                            <div className={cn("p-8 rounded-2xl border flex flex-col items-center gap-6 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                               <p className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-600")}>1. Scan this QR Code with your Authenticator app</p>
                               <div className="p-4 bg-white rounded-2xl">
                                 <img referrerPolicy="no-referrer" src={setup2FAData.url} alt="2FA QR Code" className="w-48 h-48" loading="lazy" decoding="async" />
@@ -1104,20 +1104,20 @@ export default function SettingsPage() {
                                   value={verifyCode}
                                   onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
                                   placeholder="123456"
-                                  className={cn("w-full px-5 py-4 border rounded-xl text-center tracking-[0.5em] text-2xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}
+                                  className={cn("w-full px-5 py-4 border rounded-xl text-center tracking-[0.5em] text-2xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                                 />
 
                                 <div className="flex gap-3">
                                   <button
                                     onClick={() => setSetup2FAData(null)}
-                                    className={cn("flex-1 py-3.5 font-bold rounded-xl transition-colors border", isDark ? "text-slate-300 border-slate-800 bg-[#060b14] hover:bg-slate-800" : "text-slate-700 border-slate-200 bg-white hover:bg-slate-50")}
+                                    className={cn("flex-1 py-3.5 font-bold rounded-xl transition-colors border", isDark ? "text-slate-300 border-white/[0.08] bg-[#0a0a0c] hover:bg-slate-800" : "text-slate-700 border-slate-200 bg-white hover:bg-slate-50")}
                                   >
                                     Cancel
                                   </button>
                                   <button
                                     onClick={handleVerify2FA}
                                     disabled={verifyCode.length !== 6 || verifying2FA}
-                                    className="flex-1 py-2.5 px-4 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                                    className="flex-1 py-2.5 px-4 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
                                   >
                                     {verifying2FA ? "Verifying..." : "Verify"}
                                   </button>
@@ -1129,24 +1129,24 @@ export default function SettingsPage() {
                       </AnimatePresence>
                     </div>
 
-                    <div className={cn("space-y-6 w-full p-6 rounded-2xl border", isDark ? "border-slate-800 bg-[#060b14]" : "border-slate-200 bg-slate-50")}>
+                    <div className={cn("space-y-6 w-full p-6 rounded-2xl border", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
                       <h3 className={cn("font-bold text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>Change Password</h3>
                       <div className="space-y-3">
                         <label className={labelClass}>Current Password</label>
-                        <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                        <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                       </div>
                       <div className="space-y-3">
                         <label className={labelClass}>New Password</label>
-                        <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                        <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                       </div>
                       <div className="space-y-3">
                         <label className={labelClass}>Confirm New Password</label>
-                        <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0b1322] border-slate-800 text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
+                        <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="••••••••" className={cn("w-full px-5 py-3.5 border rounded-xl focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400")} />
                       </div>
                       <button
                         onClick={handleUpdatePassword}
                         disabled={passwordSaving}
-                        className={cn("flex items-center justify-center w-full px-6 py-3.5 font-bold rounded-xl transition-colors border mt-2 disabled:opacity-50", isDark ? "text-white border-slate-800 bg-[#0b1322] hover:bg-slate-800" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
+                        className={cn("flex items-center justify-center w-full px-6 py-3.5 font-bold rounded-xl transition-colors border mt-2 disabled:opacity-50", isDark ? "text-white border-white/[0.08] bg-[#0c0c0e] hover:bg-slate-800" : "text-slate-900 border-slate-200 bg-white hover:bg-slate-100")}
                       >
                         {passwordSaving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : "Update Password"}
                       </button>
@@ -1158,15 +1158,15 @@ export default function SettingsPage() {
                 {/* System Maintenance Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <Shield className="w-6 h-6" />
                     </div>
                     <div>
                       <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>System Maintenance</h2>
-                      <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Put the customer panel in maintenance mode. Admins can still access the dashboard.</p>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Put the customer panel in maintenance mode. Admins can still access the dashboard.</p>
                     </div>
                   </div>
 
@@ -1177,7 +1177,7 @@ export default function SettingsPage() {
                           <Shield className={cn("w-5 h-5 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Maintenance Mode
                         </h3>
-                        <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>When enabled, customers will see a maintenance screen instead of their dashboard. You (Admin) will still have full access.</p>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When enabled, customers will see a maintenance screen instead of their dashboard. You (Admin) will still have full access.</p>
                       </div>
 
                       <button
@@ -1201,8 +1201,8 @@ export default function SettingsPage() {
                       />
                     </div>
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save Maintenance Settings"}
                     </button>
@@ -1217,15 +1217,15 @@ export default function SettingsPage() {
                 {/* Service Management */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
                       <Settings className="w-6 h-6" />
                     </div>
                     <div>
                       <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Service Management</h2>
-                      <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>Enable or disable specific services. Disabled services will show as "Coming Soon".</p>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Enable or disable specific services. Disabled services will show as "Coming Soon".</p>
                     </div>
                   </div>
 
@@ -1236,7 +1236,7 @@ export default function SettingsPage() {
                           <Settings className={cn("w-5 h-5 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Cloud VPS
                         </h3>
-                        <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Cloud VPS instances. The frontend will display "Coming Soon".</p>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Cloud VPS instances. The frontend will display "Coming Soon".</p>
                       </div>
 
                       <button
@@ -1254,7 +1254,7 @@ export default function SettingsPage() {
                           <Settings className={cn("w-5 h-5 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Kubernetes (K3s)
                         </h3>
-                        <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Kubernetes clusters. The frontend will display "Coming Soon".</p>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Kubernetes clusters. The frontend will display "Coming Soon".</p>
                       </div>
 
                       <button
@@ -1274,7 +1274,7 @@ export default function SettingsPage() {
                           <Settings className={cn("w-5 h-5 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable CDN
                         </h3>
-                        <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot order new CDN plans. The frontend will display "Coming Soon".</p>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot order new CDN plans. The frontend will display "Coming Soon".</p>
                       </div>
 
                       <button
@@ -1286,7 +1286,7 @@ export default function SettingsPage() {
                       </button>
                     </div>
 
-                    <div className={cn("space-y-3 mt-6 pt-6 border-t", isDark ? "border-slate-800" : "border-slate-200")}>
+                    <div className={cn("space-y-3 mt-6 pt-6 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                       <label className={labelClass}>Global PPN (Tax Rate %)</label>
                       <p className={cn("text-sm mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Set the global tax rate (e.g. 11 for 11%). This tax is applied when customers Top Up their balance.</p>
                       <input
@@ -1302,8 +1302,8 @@ export default function SettingsPage() {
                     </div>
 
                   </div>
-                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-slate-800" : "border-slate-200")}>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
+                  <div className={cn("pt-6 mt-6 border-t flex", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button onClick={handleSave} disabled={saving} className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950">
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save Service Settings"}
                     </button>
@@ -1319,16 +1319,16 @@ export default function SettingsPage() {
                 {/* RustFS Configuration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 relative z-10", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className="flex items-center gap-4">
                       <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                         <HardDrive className="w-7 h-7" />
                       </div>
                       <div>
                         <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS S3 Object Storage</h2>
-                        <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Distributed S3-compatible high-performance object storage for File CDN & videos.
                         </p>
                       </div>
@@ -1358,7 +1358,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-6 relative z-20">
                     {/* Toggle Enable RustFS */}
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border transition-colors", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable RustFS Storage</h3>
                         <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1463,14 +1463,14 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className={cn("pt-6 border-t flex items-center justify-between flex-wrap gap-4", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("pt-6 border-t flex items-center justify-between flex-wrap gap-4", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
                       Changes take effect immediately across all uploads and streaming routes.
                     </p>
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
+                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
                     >
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-5 h-5" />}
                       {saving ? "Saving..." : "Save RustFS Settings"}
@@ -1483,15 +1483,15 @@ export default function SettingsPage() {
                 {/* Cross-Server & Bucket Migration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6", isDark ? "border-slate-800" : "border-slate-200")}>
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <div className="flex items-center gap-4">
                       <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                         <ArrowLeftRight className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Cross-Server & Bucket Migration</h3>
+                        <h3 className={cn("text-sm sm:text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Cross-Server & Bucket Migration</h3>
                         <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Seamlessly transfer all media & videos between RustFS servers or buckets at any time.
                         </p>
@@ -1500,7 +1500,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Current Active Source Pill */}
-                  <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                  <div className={cn("p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                     <div className="space-y-1.5">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block">Current Source Server & Active Buckets</span>
                       <p className={cn("font-mono text-xs font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
@@ -1639,7 +1639,7 @@ export default function SettingsPage() {
                           updateActiveConfigAfterTransfer 
                             ? "bg-cyan-400 border-cyan-400 text-slate-950" 
                             : isDark 
-                              ? "bg-[#060b14] border-slate-700 group-hover:border-cyan-500/50" 
+                              ? "bg-[#0a0a0c] border-slate-700 group-hover:border-cyan-500/50" 
                               : "bg-white border-slate-300 group-hover:border-cyan-600"
                         )}
                       >
@@ -1662,7 +1662,7 @@ export default function SettingsPage() {
                           deleteSourceAfterTransfer 
                             ? "bg-cyan-400 border-cyan-400 text-slate-950" 
                             : isDark 
-                              ? "bg-[#060b14] border-slate-700 group-hover:border-cyan-500/50" 
+                              ? "bg-[#0a0a0c] border-slate-700 group-hover:border-cyan-500/50" 
                               : "bg-white border-slate-300 group-hover:border-cyan-600"
                         )}
                       >
@@ -1676,42 +1676,42 @@ export default function SettingsPage() {
 
                   {/* Migration Report */}
                   {bucketMigrationResult && (
-                    <div className={cn("p-5 rounded-xl border space-y-4", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                    <div className={cn("p-5 rounded-xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400">Migration Report Across All 3 Buckets</h4>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-white/5 border-white/5" : "bg-white border-slate-200")}>
                           <span className="text-xs text-zinc-400 block">Total Files</span>
-                          <span className="text-lg font-extrabold text-white">{bucketMigrationResult.total || 0}</span>
+                          <span className="text-sm font-bold text-white">{bucketMigrationResult.total || 0}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")}>
                           <span className="text-xs text-emerald-400 block">Transferred</span>
-                          <span className="text-lg font-extrabold text-emerald-400">{bucketMigrationResult.migrated || 0}</span>
+                          <span className="text-sm font-bold text-emerald-400">{bucketMigrationResult.migrated || 0}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
                           <span className="text-xs text-cyan-400 block">Already in Target</span>
-                          <span className="text-lg font-extrabold text-cyan-400">{bucketMigrationResult.skipped || 0}</span>
+                          <span className="text-sm font-bold text-cyan-400">{bucketMigrationResult.skipped || 0}</span>
                         </div>
                         <div className={cn("p-3 rounded-lg border", isDark ? "bg-red-500/10 border-red-500/20" : "bg-red-50 border-red-200")}>
                           <span className="text-xs text-red-400 block">Errors</span>
-                          <span className="text-lg font-extrabold text-red-400">{bucketMigrationResult.errors || 0}</span>
+                          <span className="text-sm font-bold text-red-400">{bucketMigrationResult.errors || 0}</span>
                         </div>
                       </div>
 
                       {bucketMigrationResult.categories && (
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
-                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200")}>
+                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-white border-slate-200")}>
                             <span className="font-semibold text-cyan-400 block mb-1">1. File CDN ({targetConfig.cdnBucket || 'masdika-cdn'})</span>
                             <span className="text-zinc-400">
                               {bucketMigrationResult.categories.cdn?.migrated || 0} transferred • {bucketMigrationResult.categories.cdn?.skipped || 0} skipped
                             </span>
                           </div>
-                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200")}>
+                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-white border-slate-200")}>
                             <span className="font-semibold text-purple-400 block mb-1">2. Website Media ({targetConfig.mediaBucket || 'masdika-media'})</span>
                             <span className="text-zinc-400">
                               {bucketMigrationResult.categories.media?.migrated || 0} transferred • {bucketMigrationResult.categories.media?.skipped || 0} skipped
                             </span>
                           </div>
-                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-slate-800" : "bg-white border-slate-200")}>
+                          <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-white border-slate-200")}>
                             <span className="font-semibold text-blue-400 block mb-1">3. Ticket Attachments ({targetConfig.ticketBucket || 'masdika-ticket'})</span>
                             <span className="text-zinc-400">
                               {bucketMigrationResult.categories.ticket?.migrated || 0} transferred • {bucketMigrationResult.categories.ticket?.skipped || 0} skipped
@@ -1728,7 +1728,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handleTestTargetRustFS}
                       disabled={testingTarget || migratingBucket}
-                      className={cn("px-5 py-2.5 rounded-lg text-sm font-semibold border transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50", isDark ? "bg-slate-800/80 border-slate-700 text-zinc-200 hover:bg-slate-800" : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200")}
+                      className={cn("px-5 py-2.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50", isDark ? "bg-slate-800/80 border-slate-700 text-zinc-200 hover:bg-slate-800" : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200")}
                     >
                       {testingTarget ? <div className="w-4 h-4 border-2 border-t-transparent border-cyan-400 rounded-full animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                       <span>{testingTarget ? "Testing..." : "Test Target Connection"}</span>
@@ -1738,7 +1738,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handleMigrateBucket}
                       disabled={migratingBucket || testingTarget}
-                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
+                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
                     >
                       {migratingBucket ? (
                         <div className="w-4 h-4 border-2 border-slate-950/20 border-t-slate-950 rounded-full animate-spin" />

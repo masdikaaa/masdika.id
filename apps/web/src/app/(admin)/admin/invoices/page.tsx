@@ -333,7 +333,7 @@ export default function AdminInvoicesPage() {
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 w-full">
         <div className="flex-1 min-w-0">
-          <h1 className={cn("text-2xl md:text-3xl font-extrabold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          <h1 className={cn("text-xl sm:text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
             Invoices & Billing
           </h1>
           <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -349,7 +349,7 @@ export default function AdminInvoicesPage() {
             onClick={fetchInvoices}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
@@ -366,7 +366,7 @@ export default function AdminInvoicesPage() {
         {/* Total Invoices */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -380,7 +380,7 @@ export default function AdminInvoicesPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {invoices.length}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Orders</span>
@@ -390,7 +390,7 @@ export default function AdminInvoicesPage() {
         {/* Paid Invoices */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -404,7 +404,7 @@ export default function AdminInvoicesPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {totalPaidCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Settled</span>
@@ -414,7 +414,7 @@ export default function AdminInvoicesPage() {
         {/* Pending Invoices */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -428,7 +428,7 @@ export default function AdminInvoicesPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
               {totalPendingCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Awaiting Pay</span>
@@ -438,7 +438,7 @@ export default function AdminInvoicesPage() {
         {/* Total Paid Volume */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -452,7 +452,7 @@ export default function AdminInvoicesPage() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-2xl font-extrabold truncate", isDark ? "text-white" : "text-slate-900")}>
+            <span className={cn("text-lg sm:text-xl font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
               {formatRupiah(totalPaidVolume)}
             </span>
           </div>
@@ -462,12 +462,12 @@ export default function AdminInvoicesPage() {
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm"
+        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Status Tab switch */}
         <div className={cn(
           "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
-          isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-100 border-slate-200"
+          isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200"
         )}>
           {[
             { id: "all", label: "All Invoices", count: invoices.length },
@@ -494,7 +494,7 @@ export default function AdminInvoicesPage() {
               <span className={cn(
                 "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
                 statusTab === tab.id
-                  ? "bg-slate-950/20 text-slate-950 font-extrabold"
+                  ? "bg-slate-950/20 text-slate-950 font-bold"
                   : isDark
                     ? "bg-white/10 text-zinc-300"
                     : "bg-slate-200 text-slate-700"
@@ -531,7 +531,7 @@ export default function AdminInvoicesPage() {
               className={cn(
                 "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
                 isDark
-                  ? "bg-[#060b14] border-slate-800 text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                   : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
               )}
             />
@@ -540,10 +540,10 @@ export default function AdminInvoicesPage() {
       </div>
 
       {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0b1322] border-slate-800/80 shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-[#060b14] text-slate-400 border-slate-800" : "bg-slate-50 text-slate-500 border-slate-200")}>
+            <thead className={cn("text-xs uppercase border-b font-semibold", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
               <tr>
                 <th scope="col" className="px-6 py-4 w-12 text-center">
                   <button
@@ -551,7 +551,7 @@ export default function AdminInvoicesPage() {
                     className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                       filteredInvoices.length > 0 && selectedInvoices.length === filteredInvoices.length
                         ? 'bg-cyan-500 border-cyan-500'
-                        : isDark ? 'border-slate-700 bg-[#060b14] hover:border-cyan-400' : 'border-zinc-300 bg-white hover:border-cyan-600'
+                        : isDark ? 'border-slate-700 bg-[#0a0a0c] hover:border-cyan-400' : 'border-zinc-300 bg-white hover:border-cyan-600'
                     }`}
                   >
                     {filteredInvoices.length > 0 && selectedInvoices.length === filteredInvoices.length && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
@@ -589,29 +589,29 @@ export default function AdminInvoicesPage() {
               ) : (
                 paginatedInvoices.map((invoice) => (
                   <tr key={invoice.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80", selectedInvoices.includes(invoice.id) ? (isDark ? "bg-cyan-500/10" : "bg-cyan-50") : "")}>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap text-center">
                       <button
                         onClick={() => toggleSelect(invoice.id)}
                         className={`w-5 h-5 border rounded flex items-center justify-center transition-colors mx-auto ${
                           selectedInvoices.includes(invoice.id)
                             ? 'bg-cyan-500 border-cyan-500'
-                            : isDark ? 'border-slate-700 bg-[#060b14] group-hover:border-cyan-400' : 'border-zinc-300 bg-white group-hover:border-cyan-600'
+                            : isDark ? 'border-slate-700 bg-[#0a0a0c] group-hover:border-cyan-400' : 'border-zinc-300 bg-white group-hover:border-cyan-600'
                         }`}
                       >
                         {selectedInvoices.includes(invoice.id) && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Receipt className={cn("w-4 h-4", isDark ? "text-emerald-500" : "text-emerald-700")} />
                         <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{invoice.invoiceNumber || invoice.merchantOrderId}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{invoice.user?.name}</div>
                       <div className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>{invoice.user?.email}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       {invoice.type === 'TOP_UP' ? (
                         <div className="flex flex-col gap-0.5">
                           <div className="flex items-center gap-2">
@@ -696,26 +696,26 @@ export default function AdminInvoicesPage() {
                         </div>
                       )}
                     </td>
-                    <td className={cn("px-6 py-4 font-medium whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
+                    <td className={cn("px-3.5 py-2.5 font-medium whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>
                       {formatRupiah(invoice.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <CreditCard className={cn("w-4 h-4", isDark ? "text-zinc-400" : "text-slate-500")} />
                         <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>{invoice.paymentMethod || '-'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       {getStatusBadge(invoice.status)}
                     </td>
-                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                       {new Date(invoice.createdAt).toLocaleDateString('id-ID', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'
                       })}
                     </td>
-                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         {invoice.status === 'PENDING' && (
                           <button
@@ -740,7 +740,7 @@ export default function AdminInvoicesPage() {
             </tbody>
           </table>
         </div>
-        <div className={cn("p-4 border-t", isDark ? "bg-[#0b1322] border-slate-800/80" : "bg-white border-slate-200")}>
+        <div className={cn("p-4 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
@@ -748,14 +748,14 @@ export default function AdminInvoicesPage() {
       {/* Invoice Details Modal */}
       {selectedInvoiceDetails && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className={cn("w-full max-w-2xl rounded-3xl border flex flex-col max-h-[90vh] shadow-2xl overflow-hidden", isDark ? "bg-[#0b1322] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className={cn("p-6 border-b flex justify-between items-center", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+          <div className={cn("w-full max-w-2xl rounded-2xl border flex flex-col max-h-[90vh] shadow-2xl overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
+            <div className={cn("p-6 border-b flex justify-between items-center", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
               <div>
-                <h3 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                <h3 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   <Receipt className={cn("w-5 h-5", isDark ? "text-cyan-500" : "text-cyan-700")} />
                   Invoice Details
                 </h3>
-                <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>{selectedInvoiceDetails.invoiceNumber || selectedInvoiceDetails.merchantOrderId}</p>
+                <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>{selectedInvoiceDetails.invoiceNumber || selectedInvoiceDetails.merchantOrderId}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -777,11 +777,11 @@ export default function AdminInvoicesPage() {
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
               {/* Status & Amount */}
               <div className="grid grid-cols-2 gap-4">
-                <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className={cn("text-sm mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Status</div>
                   <div>{getStatusBadge(selectedInvoiceDetails.status)}</div>
                 </div>
-                <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className={cn("text-sm mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Total Amount</div>
                   <div className={cn("text-xl font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(selectedInvoiceDetails.amount)}</div>
                 </div>
@@ -790,7 +790,7 @@ export default function AdminInvoicesPage() {
               {/* Customer Info */}
               <div className="space-y-3">
                 <h4 className={cn("text-sm font-semibold uppercase tracking-wider", isDark ? "text-white" : "text-slate-900")}>Customer Information</h4>
-                <div className={cn("p-4 rounded-2xl border space-y-2 text-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 rounded-2xl border space-y-2 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex justify-between">
                     <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Name</span>
                     <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{selectedInvoiceDetails.user?.name || '-'}</span>
@@ -805,7 +805,7 @@ export default function AdminInvoicesPage() {
               {/* Payment Info */}
               <div className="space-y-3">
                 <h4 className={cn("text-sm font-semibold uppercase tracking-wider", isDark ? "text-white" : "text-slate-900")}>Payment Details</h4>
-                <div className={cn("p-4 rounded-2xl border space-y-2 text-sm", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className={cn("p-4 rounded-2xl border space-y-2 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex justify-between">
                     <span className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Method</span>
                     <span className={cn(isDark ? "text-white" : "text-slate-900")}>{selectedInvoiceDetails.paymentMethod || '-'}</span>
@@ -834,8 +834,8 @@ export default function AdminInvoicesPage() {
               {/* Items Details */}
               <div className="space-y-3">
                 <h4 className={cn("text-sm font-semibold uppercase tracking-wider", isDark ? "text-white" : "text-slate-900")}>Order Items</h4>
-                <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#060b14] border-slate-800" : "bg-white border-slate-200")}>
-                  <div className={cn("flex justify-between font-medium mb-2 pb-2 border-b text-sm", isDark ? "text-white border-slate-800" : "text-slate-900 border-slate-200")}>
+                <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
+                  <div className={cn("flex justify-between font-medium mb-2 pb-2 border-b text-sm", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200")}>
                     <span>Description</span>
                   </div>
                   <div className="space-y-1 text-sm pt-2">
@@ -864,7 +864,7 @@ export default function AdminInvoicesPage() {
                                if (!hasAddedDetails && !hasNewDetails) return null;
                                
                                return (
-                                 <div className={cn("text-xs mt-2 space-y-1 font-mono p-3 rounded-lg border", isDark ? "text-zinc-400 bg-[#0b1322] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>
+                                 <div className={cn("text-xs mt-2 space-y-1 font-mono p-3 rounded-lg border", isDark ? "text-zinc-400 bg-[#0c0c0e] border-white/[0.08]" : "text-slate-500 bg-slate-50 border-slate-200")}>
                                    {addedCpu > 0 ? <div>- CPU: +{addedCpu} Cores</div> : (d.newCpu && !hasAddedDetails) ? <div>- CPU: {d.newCpu} Cores</div> : null}
                                    {addedRam > 0 ? <div>- RAM: +{addedRam} GB</div> : (d.newRam && !hasAddedDetails) ? <div>- RAM: {d.newRam} GB</div> : null}
                                    {addedDisk > 0 ? <div>- Disk: +{addedDisk} GB</div> : (d.newDisk && !hasAddedDetails) ? <div>- Disk: {d.newDisk} GB</div> : null}
@@ -877,7 +877,7 @@ export default function AdminInvoicesPage() {
                                const hasDetails = d.type === 'PAYG_MONTHLY_USAGE' || d.newCpu || d.cpu || d.newRam || d.ram || d.newDisk || d.disk || d.newBackup !== undefined || d.ipv4Count > 0 || d.ipv6Count > 0;
                                if (!hasDetails) return null;
                                return (
-                                 <div className={cn("text-xs mt-2 space-y-1 font-mono p-3 rounded-lg border", isDark ? "text-zinc-400 bg-[#0b1322] border-slate-800" : "text-slate-500 bg-slate-50 border-slate-200")}>
+                                 <div className={cn("text-xs mt-2 space-y-1 font-mono p-3 rounded-lg border", isDark ? "text-zinc-400 bg-[#0c0c0e] border-white/[0.08]" : "text-slate-500 bg-slate-50 border-slate-200")}>
                                    {d.type === 'PAYG_MONTHLY_USAGE' && <div>- Monthly Usage Bill</div>}
                                    {(d.newCpu || d.cpu) && <div>- CPU: {d.newCpu || d.cpu} Cores</div>}
                                    {(d.newRam || d.ram) && <div>- RAM: {d.newRam || d.ram} GB</div>}
@@ -903,10 +903,10 @@ export default function AdminInvoicesPage() {
               
             </div>
             
-            <div className={cn("p-6 border-t", isDark ? "bg-[#0b1322] border-slate-800" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("p-6 border-t", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <button
                 onClick={() => setSelectedInvoiceDetails(null)}
-                className={cn("w-full py-3 font-bold rounded-xl transition-colors border", isDark ? "bg-[#060b14] border-slate-800 hover:bg-white/5 text-white" : "bg-white border-slate-200 hover:bg-slate-100 text-slate-900")}
+                className={cn("w-full py-3 font-bold rounded-xl transition-colors border", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:bg-white/5 text-white" : "bg-white border-slate-200 hover:bg-slate-100 text-slate-900")}
               >
                 Close
               </button>
