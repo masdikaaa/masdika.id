@@ -472,7 +472,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
         />
 
         {/* ── 8. FINAL CTA SECTION ──────────────────────────────────────── */}
-        <section className="py-16 lg:py-24">
+        <section className="pt-16 lg:pt-24 pb-0">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden max-w-5xl mx-auto">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 

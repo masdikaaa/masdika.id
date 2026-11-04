@@ -261,7 +261,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         </section>
 
         {/* ── 2. COMMUNITY GROUPS DIRECTORY ─────────────────────────────── */}
-        <section id="community-groups" className="scroll-mt-24 mb-20 lg:mb-28">
+        <section id="community-groups" className="scroll-mt-24 mb-16 lg:mb-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
@@ -532,7 +532,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         </section>
 
         {/* ── 3. SUBMIT GROUP SECTION (Design-system Compliant Card) ────── */}
-        <section id="submit-group" className="scroll-mt-24 mb-12">
+        <section id="submit-group" className="scroll-mt-24 mb-0">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 overflow-hidden shadow-xl">
             {/* Soft Ambient Accent */}
             <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-bl from-cyan-500/10 via-sky-500/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />

@@ -210,7 +210,7 @@ export default function ContactPage() {
       </section>
 
       {/* ── 2. CONTACT SECTION (Interactive Form & Direct Channels) ─────── */}
-      <section id="contact-form" className="py-12 sm:py-16 pb-20 sm:pb-28">
+      <section id="contact-form" className="pt-12 sm:pt-16 pb-0">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className={cn(
             "w-full rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 lg:p-14 relative overflow-hidden border transition-all duration-300",

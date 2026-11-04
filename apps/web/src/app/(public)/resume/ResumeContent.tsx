@@ -90,7 +90,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
         </section>
 
         {/* ── 1. ABOUT ME (BENTO GRID) ─────────────────────────────────── */}
-        <section className="mb-24 relative z-10">
+        <section className="mb-16 lg:mb-24 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
 
             {/* Main Content Box */}
@@ -188,7 +188,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
         </section>
 
         {/* ── 2. TECH STACK & SKILLS ──────────────────────────────────── */}
-        <section className="mb-24 relative z-10">
+        <section className="mb-16 lg:mb-24 relative z-10">
           <div className="mb-12 text-center">
             <span className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-600 dark:text-cyan-400 mb-3 block">
               My Skills
@@ -292,7 +292,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
         </section>
 
         {/* ── 4. CALL TO ACTION (Identik Patokan Events) ──────────────────────── */}
-        <section className="pt-16 pb-12">
+        <section className="pt-16 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">

@@ -196,7 +196,7 @@ export default function LookingGlassPage() {
         </section>
 
         {/* ── 1. DIAGNOSTICS & TELEMETRY SUITE ──────────────────── */}
-        <section id="lg-tools" className="scroll-mt-28 pt-8 sm:pt-12 mb-20">
+        <section id="lg-tools" className="scroll-mt-28 pt-8 sm:pt-12 mb-0">
           
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">

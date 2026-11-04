@@ -170,7 +170,7 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
         </section>
 
         {/* ── 3. RECRUITER / HIRING PARTNER CTA ───────────────────────── */}
-        <section className="pt-8 pb-12">
+        <section className="pt-8 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
             <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">

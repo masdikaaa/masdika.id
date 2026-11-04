@@ -288,7 +288,7 @@ export default function ShortenerPage() {
         </section>
 
         {/* ── 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) ────────── */}
-        <section className="mb-20 lg:mb-28">
+        <section className="mb-16 lg:mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* Left: Dedicated High-Contrast Code Terminal */}
@@ -563,7 +563,7 @@ export default function ShortenerPage() {
         </section>
 
         {/* ── 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) ────────── */}
-        <section className="mb-20 lg:mb-28">
+        <section className="mb-16 lg:mb-24">
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               ENTERPRISE CAPABILITIES
@@ -615,7 +615,7 @@ export default function ShortenerPage() {
 
         {/* ── 4. PRICING PLANS SECTION (Consistent Native Theme Cards) ────────── */}
         {plans && plans.length > 0 && (
-          <section id="pricing" className="mb-20 lg:mb-28 pt-10">
+          <section id="pricing" className="mb-16 lg:mb-24 pt-10">
             <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
                 TRANSPARENT PRICING
@@ -715,7 +715,7 @@ export default function ShortenerPage() {
         )}
 
         {/* ── 5. THREE-STEP WORKFLOW ────────── */}
-        <section className="mb-20 lg:mb-28">
+        <section className="mb-16 lg:mb-24">
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               DEPLOYMENT PROCESS
