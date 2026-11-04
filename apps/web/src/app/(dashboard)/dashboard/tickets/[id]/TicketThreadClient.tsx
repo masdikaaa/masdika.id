@@ -300,7 +300,7 @@ export default function TicketThreadClient({ ticketId }: { ticketId: string }) {
                   <span className={cn("text-[10px] sm:text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>{new Date(msg.createdAt).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
                 </div>
                 
-                <div className={`px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-2xl relative group max-w-full min-w-0 ${
+                <div className={`px-3.5 py-2 sm:px-5 sm:py-3.5 rounded-2xl relative group max-w-full min-w-0 ${
                   isAdmin 
                     ? isDark ? 'bg-[#0a0a0c] border border-white/[0.08] text-zinc-200 rounded-tl-sm' : 'bg-white border border-slate-200/90 text-slate-800 rounded-tl-sm shadow-2xs'
                     : 'bg-cyan-600 text-white rounded-tr-sm border border-cyan-500/30'

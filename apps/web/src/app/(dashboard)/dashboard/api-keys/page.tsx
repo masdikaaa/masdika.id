@@ -235,7 +235,7 @@ export default function DashboardApiKeys() {
             <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
               You need an active subscription to any API service (like File CDN or URL Shortener) to generate and manage API keys.
             </p>
-            <Link href="/dashboard/checkout" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold py-2.5 px-5 rounded-xl text-xs sm:text-sm transition-all">
+            <Link href="/dashboard/checkout" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-xs transition-all">
               View Plans
             </Link>
           </div>
@@ -259,7 +259,7 @@ export default function DashboardApiKeys() {
                   placeholder="Key Alias (e.g. Production Key)" 
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  className={cn("flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-slate-50/80 border-slate-200/90 text-slate-800 focus:border-cyan-400 focus:ring-cyan-400/20")}
+                  className={cn("flex-1 border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 transition-all", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500 focus:ring-cyan-500/20" : "bg-slate-50/80 border-slate-200/90 text-slate-800 focus:border-cyan-400 focus:ring-cyan-400/20")}
                 />
                 <div className="w-full sm:w-fit sm:min-w-[220px] shrink-0 relative z-50">
                   <Select
@@ -274,13 +274,13 @@ export default function DashboardApiKeys() {
                       };
                     })}
                     placeholder="Select Service"
-                    className="py-3 px-4 rounded-xl min-w-[220px]"
+                    className="px-3.5 py-2 rounded-xl min-w-[220px]"
                   />
                 </div>
                 <button 
                   onClick={generateKey}
                   disabled={generating || keys.some(k => (k.service || '').toLowerCase() === selectedService.toLowerCase())}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 whitespace-nowrap transition-all bg-cyan-400 hover:bg-cyan-300 text-slate-950 disabled:opacity-50 disabled:pointer-events-none"
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs flex items-center justify-center gap-2 whitespace-nowrap transition-all bg-cyan-400 hover:bg-cyan-300 text-slate-950 disabled:opacity-50 disabled:pointer-events-none"
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Generate Key

@@ -95,7 +95,7 @@ export default function BlockedScreen({
                 {isSuspended ? "Access Denied" : "System Status"}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold mb-4 text-white tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold mb-4 text-white tracking-tight leading-tight">
               {blockTitle}
             </h1>
           </motion.div>
@@ -118,11 +118,11 @@ export default function BlockedScreen({
               Need assistance? Our support team is ready to help.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="mailto:me@masdika.id" className="group flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-semibold rounded-xl transition-all w-full sm:w-auto justify-center hover:scale-105 active:scale-95">
+              <a href="mailto:me@masdika.id" className="group flex items-center gap-2 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-semibold rounded-xl transition-all w-full sm:w-auto justify-center hover:scale-105 active:scale-95">
                 <Mail className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
                 Email Support
               </a>
-              <a href="https://wa.me/6282331623374" className="group flex items-center gap-2 px-6 py-3 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] hover:text-white text-sm font-semibold rounded-xl transition-all w-full sm:w-auto justify-center hover:scale-105 active:scale-95 shadow-lg shadow-[#25D366]/10">
+              <a href="https://wa.me/6282331623374" className="group flex items-center gap-2 px-3.5 py-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] hover:text-white text-xs font-semibold rounded-xl transition-all w-full sm:w-auto justify-center hover:scale-105 active:scale-95 shadow-lg shadow-[#25D366]/10">
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp
               </a>

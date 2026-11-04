@@ -228,7 +228,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                       <button
                         onClick={() => handleSave(vps.id)}
                         disabled={loading[vps.id]}
-                        className="px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
+                        className="px-3.5 py-2 text-xs sm:text-xs font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
                       >
                         {loading[vps.id] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Save Schedule

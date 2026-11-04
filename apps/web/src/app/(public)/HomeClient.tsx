@@ -22,6 +22,10 @@ import {
   Clock,
   Link2,
   Building2,
+  Quote,
+  BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   SiKubernetes,
@@ -482,24 +486,48 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-x-10 lg:gap-y-6 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-x-8 lg:gap-y-6 items-stretch">
 
-            {/* Row 1, Left: 4+ Years Card */}
+            {/* Row 1, Left: 4+ Years Metric Card */}
             <FadeIn direction="right" duration={0.7} className="lg:col-span-4 flex">
-              <div className="w-full h-full rounded-2xl p-8 lg:p-10 flex flex-col items-center justify-center text-center border border-[var(--border-primary)] bg-[var(--surface)]">
-                <p className="text-6xl lg:text-7xl font-black text-[var(--text-primary)] mb-2 leading-none">4+</p>
-                <p className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-                  Years of<br />Experience
-                </p>
+              <div className="group relative w-full h-full rounded-2xl p-6 sm:p-7 flex flex-col justify-between border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 transition-all duration-300 overflow-hidden">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Track Record
+                  </span>
+                  <span className="text-[11px] font-mono font-semibold text-[var(--text-muted)]">
+                    EST. 2022
+                  </span>
+                </div>
+
+                <div className="my-5 flex items-baseline gap-3">
+                  <p className="text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none">
+                    4<span className={iconAccent}>+</span>
+                  </p>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
+                      Years of Experience
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Cloud &amp; DevOps Engineering
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-3.5 border-t border-[var(--border-primary)] flex items-center justify-between text-xs">
+                  <span className="text-[var(--text-secondary)] font-medium">Production SLA</span>
+                  <span className={cn("font-mono font-bold", iconAccent)}>99.98% Uptime</span>
+                </div>
               </div>
             </FadeIn>
 
             {/* Row 1, Right: About Me Heading & Lead */}
-            <FadeIn direction="left" delay={0.1} duration={0.7} className="lg:col-span-8 flex flex-col justify-center">
+            <FadeIn direction="left" delay={0.1} duration={0.7} className="lg:col-span-8 flex flex-col justify-center lg:pl-4">
               <span className={cn("text-xs font-semibold uppercase tracking-widest mb-3 block", iconAccent)}>
                 About Me
               </span>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-5 leading-[1.15]">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-4 leading-[1.15]">
                 Boost business with Modern Cloud
               </h2>
               <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl">
@@ -507,43 +535,52 @@ export function HomeClient({
               </p>
             </FadeIn>
 
-            {/* Row 2, Left: Infrastructure Card (aligned horizontally with Architecture & Automation) */}
-            <FadeIn direction="up" delay={0.15} duration={0.7} className="lg:col-span-4 flex">
-              <div className="w-full h-full rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border", iconBoxStyle)}>
-                      <Server className={cn("w-4 h-4", iconAccent)} />
+            {/* Row 2: 3 Equal-Height Aligned Pillar Cards (4 + 4 + 4 cols) */}
+            {[
+              {
+                icon: Server,
+                title: "Infrastructure",
+                badge: "50+ Deployments",
+                desc: "Provisioning and operating high-availability bare-metal servers, hybrid networks, and multi-cloud clusters.",
+                delay: 0.15,
+              },
+              {
+                icon: Layout,
+                title: "Architecture",
+                badge: "High Availability",
+                desc: "Designing resilient, fault-tolerant, and cost-effective cloud topologies tailored to mission-critical workloads.",
+                delay: 0.2,
+              },
+              {
+                icon: Code,
+                title: "Automation",
+                badge: "Zero-Touch CI/CD",
+                desc: "Implementing reproducible Infrastructure as Code and automated delivery pipelines for rapid, safe releases.",
+                delay: 0.25,
+              },
+            ].map((card, i) => (
+              <FadeIn key={card.title + i} direction="up" delay={card.delay} duration={0.7} className="lg:col-span-4 flex">
+                <div className="group relative w-full h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 flex flex-col">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-colors", iconBoxStyle)}>
+                      <card.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", iconAccent)} />
                     </div>
-                    <h3 className="font-bold text-[var(--text-primary)]">Infrastructure</h3>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+                      {card.badge}
+                    </span>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                    50+ Deployments
-                  </span>
-                </div>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                  Provisioning and operating high-availability production servers and multi-cloud clusters.
-                </p>
-              </div>
-            </FadeIn>
 
-            {/* Row 2, Right: Architecture & Automation Cards */}
-            <FadeIn direction="up" delay={0.2} duration={0.7} className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-stretch">
-              {[
-                { icon: Layout, title: "Architecture", desc: "Designing resilient, scalable, and cost-effective cloud architectures tailored to your needs." },
-                { icon: Code, title: "Automation", desc: "Implementing robust CI/CD pipelines and infrastructure as code for rapid deployments." },
-              ].map((card, i) => (
-                <div key={i} className="w-full h-full rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border", iconBoxStyle)}>
-                      <card.icon className={cn("w-4 h-4", iconAccent)} />
-                    </div>
-                    <h3 className="font-bold text-[var(--text-primary)]">{card.title}</h3>
-                  </div>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{card.desc}</p>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-2">
+                    {card.title}
+                  </h3>
+
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed flex-grow">
+                    {card.desc}
+                  </p>
                 </div>
-              ))}
-            </FadeIn>
+              </FadeIn>
+            ))}
           </div>
         </div>
       </section>
@@ -911,22 +948,50 @@ export function HomeClient({
       {/* ── 7. TESTIMONIALS ─────────────────────────────────────────── */}
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
-        <div className="max-w-[1400px] mx-auto relative z-10">
-          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16 px-4">
-            <span className={cn("text-xs font-semibold uppercase tracking-widest mb-4 block", iconAccent)}>
-              Feedback
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
-              What Clients Say
-            </h2>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <FadeIn direction="down" className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-16">
+            <div>
+              <span className={cn("text-xs font-semibold uppercase tracking-widest mb-3 block", iconAccent)}>
+                Feedback
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
+                What Clients Say
+              </h2>
+            </div>
+
+            {/* Interactive Carousel Controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                aria-label="Previous testimonial"
+                onClick={() => {
+                  if (scrollRef.current) {
+                    scrollRef.current.scrollBy({ left: -380, behavior: "smooth" });
+                  }
+                }}
+                className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[var(--text-secondary)] hover:text-cyan-500 dark:hover:text-cyan-400 flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next testimonial"
+                onClick={() => {
+                  if (scrollRef.current) {
+                    scrollRef.current.scrollBy({ left: 380, behavior: "smooth" });
+                  }
+                }}
+                className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[var(--text-secondary)] hover:text-cyan-500 dark:hover:text-cyan-400 flex items-center justify-center transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </FadeIn>
 
-          <div className="relative w-full overflow-hidden flex">
-            <div className="absolute top-0 left-0 w-16 h-full z-10 pointer-events-none bg-gradient-to-r from-[var(--background)] to-transparent" />
-
+          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
             <div
               ref={scrollRef}
-              className={`flex gap-5 px-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+              className={`flex gap-5 py-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={handleMouseUpOrLeave}
               onTouchStart={() => setIsPaused(true)}
@@ -935,54 +1000,72 @@ export function HomeClient({
               onMouseUp={handleMouseUpOrLeave}
               onMouseMove={handleMouseMove}
             >
-              {[...testimonials, ...testimonials].map((testi, idx) => (
-                <div
-                  key={idx}
-                  className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] w-[85vw] sm:w-[400px] min-w-[85vw] sm:min-w-[400px] flex-shrink-0 flex flex-col"
-                >
-                  <div className="flex gap-1 mb-5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={cn(
-                          "w-4 h-4",
-                          i < (testi.rating || 5)
-                            ? "text-amber-400 fill-amber-400"
-                            : "text-[var(--border-primary)] fill-transparent"
+              {[...testimonials, ...testimonials].map((testi, idx) => {
+                const ratingVal = Number(testi.rating || 5).toFixed(1);
+                return (
+                  <div
+                    key={idx}
+                    className="group relative p-5 sm:p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 w-[84vw] sm:w-[370px] min-w-[84vw] sm:min-w-[370px] flex-shrink-0 flex flex-col justify-between"
+                  >
+                    {/* Top Header: Quote Icon + Verified Tag & Compact Rating Badge */}
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 transition-colors", iconBoxStyle)}>
+                          <Quote className={cn("w-4 h-4", iconAccent)} />
+                        </div>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          Verified Client
+                        </span>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold shrink-0">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span>{ratingVal}</span>
+                      </div>
+                    </div>
+
+                    {/* Review Body */}
+                    <p className="text-sm sm:text-[15px] text-[var(--text-secondary)] mb-6 leading-relaxed flex-1">
+                      &ldquo;{testi.text}&rdquo;
+                    </p>
+
+                    {/* Client Identity Footer */}
+                    <div className="flex items-center justify-between gap-3 pt-4 mt-auto border-t border-[var(--border-primary)]">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {testi.image ? (
+                          <div className="w-10 h-10 rounded-full overflow-hidden border border-cyan-500/30 ring-2 ring-cyan-500/10 shrink-0">
+                            <img
+                              referrerPolicy="no-referrer"
+                              src={testi.image}
+                              alt={testi.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                        ) : (
+                          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border", iconBoxStyle)}>
+                            {testi.name?.[0] || "C"}
+                          </div>
                         )}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-base text-[var(--text-secondary)] mb-6 leading-relaxed flex-1">
-                    &ldquo;{testi.text}&rdquo;
-                  </p>
-                  <div className="flex items-center gap-3 pt-5 mt-auto border-t border-[var(--border-subtle)]">
-                    {testi.image ? (
-                      <div className="w-9 h-9 rounded-full overflow-hidden border border-[var(--border-primary)] shrink-0">
-                        <img
-                          referrerPolicy="no-referrer"
-                          src={testi.image}
-                          alt={testi.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-bold text-sm text-[var(--text-primary)] truncate">
+                              {testi.name}
+                            </p>
+                            <BadgeCheck className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                          </div>
+                          <p className="text-xs font-mono text-[var(--text-muted)] truncate">
+                            {testi.role}
+                          </p>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-cyan-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                        {testi.name[0]}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-semibold text-sm text-[var(--text-primary)]">{testi.name}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{testi.role}</p>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-
-            <div className="absolute top-0 right-0 w-16 h-full z-10 pointer-events-none bg-gradient-to-l from-[var(--background)] to-transparent" />
           </div>
         </div>
       </section>
@@ -1022,7 +1105,7 @@ export function HomeClient({
                 <FadeIn key={post.id || index} delay={index * 0.1} direction="up" className="h-full">
                   <div className="group relative rounded-xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 focus-within:ring-2 focus-within:ring-cyan-500 transition-colors flex flex-col h-full">
                     <Link href={`/blog/${post.slug || "#"}`} className="flex flex-col h-full focus:outline-none">
-                      <div className="relative h-48 w-full overflow-hidden shrink-0">
+                      <div className="relative aspect-video w-full overflow-hidden shrink-0 border-b border-[var(--border-primary)]">
                         <Image
                           referrerPolicy="no-referrer"
                           src={post.image || "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop"}

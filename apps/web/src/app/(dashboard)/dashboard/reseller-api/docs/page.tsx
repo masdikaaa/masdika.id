@@ -40,7 +40,7 @@ const MethodBadge = ({ method }: { method: string }) => {
 /* ─── Code Block ─── */
 const CodeBlock = ({ isDark, title, children, raw }: { isDark: boolean; title: string; children: React.ReactNode; raw?: string }) => (
   <div className={cn("rounded-xl border overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-    <div className={cn("flex items-center justify-between px-4 py-2.5 border-b", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
+    <div className={cn("flex items-center justify-between px-3.5 py-2 border-b", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
       <span className={cn("text-[10px] font-bold uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>{title}</span>
       {raw && <CopyBtn text={raw} isDark={isDark} small />}
     </div>
@@ -80,7 +80,7 @@ const EndpointSection = ({ isDark, id, title, method, endpoint, description, par
 
           {/* Endpoint */}
           <div className="mb-6">
-            <div className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl border font-mono text-sm overflow-x-auto", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+            <div className={cn("flex items-center gap-2 px-3.5 py-2 rounded-xl border font-mono text-xs overflow-x-auto", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
               <span className={cn("font-black text-xs",
                 method === "GET" ? "text-blue-400" :
                 method === "POST" ? "text-emerald-400" :
@@ -99,17 +99,17 @@ const EndpointSection = ({ isDark, id, title, method, endpoint, description, par
                 <table className="w-full min-w-[500px] text-sm text-left">
                   <thead className={cn("text-[10px] uppercase tracking-wider border-b", isDark ? "bg-[#111115] border-white/[0.08] text-zinc-500" : "bg-slate-50/80 border-slate-200/90 text-slate-400")}>
                     <tr>
-                      <th className="px-4 py-2.5 font-bold">Parameter</th>
-                      <th className="px-4 py-2.5 font-bold">Type</th>
-                      <th className="px-4 py-2.5 font-bold">Description</th>
+                      <th className="px-3.5 py-2 font-bold">Parameter</th>
+                      <th className="px-3.5 py-2 font-bold">Type</th>
+                      <th className="px-3.5 py-2 font-bold">Description</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-white/[0.08]" : "divide-slate-200/90")}>
                     {parameters.map((p: any, i: number) => (
                       <tr key={i} className={isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80"}>
-                        <td className={cn("px-4 py-2.5 font-mono text-[12px] font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{p.name}</td>
-                        <td className={cn("px-4 py-2.5 text-[12px]", isDark ? "text-zinc-500" : "text-slate-400")}>{p.type}</td>
-                        <td className={cn("px-4 py-2.5 text-[12px]", isDark ? "text-zinc-400" : "text-slate-600")}>{p.description}</td>
+                        <td className={cn("px-3.5 py-2 font-mono text-[12px] font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>{p.name}</td>
+                        <td className={cn("px-3.5 py-2 text-[12px]", isDark ? "text-zinc-500" : "text-slate-400")}>{p.type}</td>
+                        <td className={cn("px-3.5 py-2 text-[12px]", isDark ? "text-zinc-400" : "text-slate-600")}>{p.description}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -298,7 +298,7 @@ export default function ResellerApiDocsPage() {
             </div>
             <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
               <h4 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3", isDark ? "text-zinc-500" : "text-slate-400")}>Base URL</h4>
-              <div className={cn("px-4 py-3 rounded-xl border font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-white border-slate-200/90 text-slate-700 shadow-2xs")}>
+              <div className={cn("px-3.5 py-2 rounded-xl border font-mono text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-white border-slate-200/90 text-slate-700 shadow-2xs")}>
                 https://www.masdika.id/api/v1
               </div>
             </div>
@@ -323,7 +323,7 @@ export default function ResellerApiDocsPage() {
             </div>
             <div className={cn("p-6 md:p-8 lg:p-10 border-t xl:border-t-0 xl:border-l flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
               <h4 className={cn("text-[11px] font-bold uppercase tracking-widest mb-3", isDark ? "text-zinc-500" : "text-slate-400")}>Header Format</h4>
-              <div className={cn("px-4 py-3 rounded-xl border font-mono text-[13px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-white border-slate-200/90 text-slate-700 shadow-2xs")}>
+              <div className={cn("px-3.5 py-2 rounded-xl border font-mono text-[13px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-white border-slate-200/90 text-slate-700 shadow-2xs")}>
                 <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-600")}>Authorization:</span> Bearer masdika_YOUR_SECRET_KEY
               </div>
             </div>

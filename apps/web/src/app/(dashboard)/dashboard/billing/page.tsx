@@ -175,7 +175,7 @@ export default function CustomerBillingPage() {
         <div className="w-full sm:w-auto shrink-0">
           <Link 
             href="/dashboard/checkout"
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             Order New Service
@@ -382,7 +382,7 @@ export default function CustomerBillingPage() {
            
            <Link
              href="/dashboard/topup"
-             className="w-full px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
+             className="w-full px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
            >
              <Plus className="w-4 h-4" />
              Top Up Balance
@@ -441,12 +441,12 @@ export default function CustomerBillingPage() {
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-600")}>
             <thead className={cn("text-xs uppercase tracking-widest font-bold border-b", isDark ? "bg-[#111115] text-zinc-400 border-white/[0.08]" : "bg-slate-50/80 text-slate-500 border-slate-200/90")}>
               <tr>
-                <th className="px-6 py-4 whitespace-nowrap">Invoice Number</th>
-                <th className="px-6 py-4 whitespace-nowrap">Description</th>
-                <th className="px-6 py-4 whitespace-nowrap">Amount</th>
-                <th className="px-6 py-4 whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 whitespace-nowrap">Date</th>
-                <th className="px-6 py-4"></th>
+                <th className="px-3.5 py-2 whitespace-nowrap">Invoice Number</th>
+                <th className="px-3.5 py-2 whitespace-nowrap">Description</th>
+                <th className="px-3.5 py-2 whitespace-nowrap">Amount</th>
+                <th className="px-3.5 py-2 whitespace-nowrap">Status</th>
+                <th className="px-3.5 py-2 whitespace-nowrap">Date</th>
+                <th className="px-3.5 py-2"></th>
               </tr>
             </thead>
             <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
@@ -460,7 +460,7 @@ export default function CustomerBillingPage() {
               ) : (
                 filteredInvoices.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((invoice) => (
                   <tr key={invoice.id} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-colors border", isDark ? "bg-white/[0.03] border-white/[0.08] group-hover:bg-cyan-500/10 group-hover:text-cyan-400" : "bg-slate-100 border-slate-200/90 group-hover:bg-slate-200 group-hover:text-slate-900")}>
                           <Receipt className="w-4 h-4" />
@@ -468,7 +468,7 @@ export default function CustomerBillingPage() {
                         <span className={cn("font-mono text-xs px-2.5 py-1 rounded-lg border", isDark ? "bg-[#111115] text-white border-white/[0.08]" : "bg-slate-50/80 text-slate-900 border-slate-200/90")}>{invoice.invoiceNumber || invoice.merchantOrderId}</span>
                       </div>
                     </td>
-                    <td className={cn("px-6 py-4 whitespace-nowrap font-medium", isDark ? "text-white" : "text-slate-900")}>
+                    <td className={cn("px-3.5 py-2 whitespace-nowrap font-medium", isDark ? "text-white" : "text-slate-900")}>
                       {invoice.type === 'TOP_UP' ? (
                         <div className="flex items-center gap-2">
                           <ArrowUpCircle className="w-4 h-4 text-cyan-400" />
@@ -551,10 +551,10 @@ export default function CustomerBillingPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-bold whitespace-nowrap">
+                    <td className="px-3.5 py-2 font-bold whitespace-nowrap">
                       {formatRupiah(invoice.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3.5 py-2 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <StatusBadge status={invoice.status} />
                         {invoice.status === 'PENDING' && invoice.type === 'TOP_UP' && invoice.paymentUrl && (
@@ -569,10 +569,10 @@ export default function CustomerBillingPage() {
                         )}
                       </div>
                     </td>
-                    <td className={cn("px-6 py-4 whitespace-nowrap font-medium text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    <td className={cn("px-3.5 py-2 whitespace-nowrap font-medium text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
                       {new Date(invoice.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                    <td className="px-3.5 py-2 text-right whitespace-nowrap">
                       <Link
                         href={`/invoice/${invoice.invoiceNumber || invoice.merchantOrderId}`}
                         target="_blank"

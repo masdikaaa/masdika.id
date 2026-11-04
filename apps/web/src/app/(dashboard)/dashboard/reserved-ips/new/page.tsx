@@ -99,7 +99,7 @@ export default function ReserveNewIpPage() {
         <Link 
           href="/dashboard/reserved-ips" 
           className={cn(
-            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border shadow-2xs",
+            "inline-flex items-center gap-2 text-xs sm:text-xs font-medium px-3.5 py-2 rounded-xl transition-all border shadow-2xs",
             isDark 
               ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
               : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90"
@@ -200,7 +200,7 @@ export default function ReserveNewIpPage() {
             <button
               onClick={handleReserve}
               disabled={isReserving || availableIps.length === 0}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs transition-all inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
             >
               {isReserving ? (
                 <>

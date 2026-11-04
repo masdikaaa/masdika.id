@@ -1005,7 +1005,7 @@ function CheckoutContent() {
                   onClick={handleCheckout}
                   disabled={isProcessing || !selectedPlanId || !selectedPaymentMethod || !isTermsAccepted}
                   className={cn(
-                    "w-full py-3 px-5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all",
+                    "w-full px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all",
                     !isProcessing && selectedPlanId && selectedPaymentMethod && isTermsAccepted
                       ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer shadow-xs"
                       : isDark

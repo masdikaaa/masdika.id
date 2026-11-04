@@ -218,12 +218,12 @@ export default function ResellerApiPage() {
               <table className="w-full text-sm text-left min-w-[800px]">
                 <thead className={cn("text-[10px] uppercase tracking-wider font-bold border-b", isDark ? "text-zinc-500 border-white/[0.08] bg-[#111115]" : "text-slate-500 border-slate-200/90 bg-slate-50/80")}>
                   <tr>
-                    <th className="px-6 py-4 whitespace-nowrap">ID</th>
-                    <th className="px-6 py-4 whitespace-nowrap">Hostname</th>
-                    <th className="px-6 py-4 whitespace-nowrap">Type</th>
-                    <th className="px-6 py-4 whitespace-nowrap">Information</th>
-                    <th className="px-6 py-4 whitespace-nowrap">Status</th>
-                    <th className="px-6 py-4 whitespace-nowrap text-right">Action</th>
+                    <th className="px-3.5 py-2 whitespace-nowrap">ID</th>
+                    <th className="px-3.5 py-2 whitespace-nowrap">Hostname</th>
+                    <th className="px-3.5 py-2 whitespace-nowrap">Type</th>
+                    <th className="px-3.5 py-2 whitespace-nowrap">Information</th>
+                    <th className="px-3.5 py-2 whitespace-nowrap">Status</th>
+                    <th className="px-3.5 py-2 whitespace-nowrap text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-white/[0.08]" : "divide-slate-200/90")}>
@@ -232,8 +232,8 @@ export default function ResellerApiPage() {
                     
                     return (
                       <tr key={vps.id} className={cn("group transition-colors", isDark ? "text-zinc-300 hover:bg-white/[0.02]" : "text-slate-600 hover:bg-slate-50/80")}>
-                        <td className="px-6 py-4 font-medium">{vps.id}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-3.5 py-2 font-medium">{vps.id}</td>
+                        <td className="px-3.5 py-2">
                           <div className="flex items-center gap-3">
                             <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                               <Server className="w-4 h-4 text-cyan-500" />
@@ -246,19 +246,19 @@ export default function ResellerApiPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3.5 py-2">
                           <span className={cn("px-2 py-1 text-[10px] font-bold rounded-md flex items-center gap-1.5 w-fit border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-100 text-cyan-700 border-slate-200/90")}>
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> API INSTANCE
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3.5 py-2">
                           <div className="flex items-center gap-4 text-xs">
                             <span className="flex items-center gap-1"><Cpu className="w-3.5 h-3.5" /> {vps.cpuCores} Core</span>
                             <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> {vps.ramGb} GB</span>
                             <span className="flex items-center gap-1"><HardDrive className="w-3.5 h-3.5" /> {vps.diskGb} GB</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3.5 py-2">
                           <div className={cn("px-2.5 py-1 text-xs font-semibold rounded-full border w-fit flex items-center gap-1.5", 
                             vps.status === 'PROVISIONING' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
                             isRunning ? "bg-green-500/10 text-green-500 border-green-500/20" : 
@@ -268,7 +268,7 @@ export default function ResellerApiPage() {
                             {vps.status === 'PROVISIONING' ? 'PROVISIONING' : isRunning ? 'RUNNING' : 'STOPPED'}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-3.5 py-2 text-right">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Link href={`/dashboard/vps/${vps.id}`} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl transition-colors border", isDark ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-white" : "bg-white border-slate-200/90 hover:bg-slate-50 text-slate-700")}>
                               <Settings className="w-3.5 h-3.5" />
@@ -306,7 +306,7 @@ export default function ResellerApiPage() {
               <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 You need to generate an API key to start using the Masdika Developer API endpoints.
               </p>
-              <button onClick={handleGenerateKey} disabled={generating || balance < 50000} className="inline-block font-bold text-xs sm:text-sm py-2.5 px-5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <button onClick={handleGenerateKey} disabled={generating || balance < 50000} className="inline-block font-bold text-xs sm:text-xs px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 Generate Key Now
               </button>
             </div>
@@ -368,13 +368,13 @@ export default function ResellerApiPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => { setShowDeleteModal(false); setKeyToDelete(null); }}
-                className={cn("px-5 py-2.5 rounded-xl font-medium transition-colors text-sm", isDark ? "hover:bg-white/[0.06] text-zinc-300" : "hover:bg-slate-100 text-slate-700")}
+                className={cn("px-3.5 py-2 rounded-xl font-medium transition-colors text-xs", isDark ? "hover:bg-white/[0.06] text-zinc-300" : "hover:bg-slate-100 text-slate-700")}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors text-sm"
+                className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors text-xs"
               >
                 Yes, Revoke Key
               </button>

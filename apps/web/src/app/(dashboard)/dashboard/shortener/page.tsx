@@ -199,7 +199,7 @@ export default function DashboardShortenerPage() {
             <button
               onClick={handleBulkDelete}
               disabled={isBulkDeleting}
-              className="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+              className="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold px-3.5 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-xs"
             >
               {isBulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
               <span className="hidden md:inline">Delete Selected ({selectedIds.length})</span>
@@ -208,7 +208,7 @@ export default function DashboardShortenerPage() {
           )}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden md:inline">Create New Link</span>
@@ -227,7 +227,7 @@ export default function DashboardShortenerPage() {
             <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
               You need an active URL Shortener subscription to start creating, managing, and tracking your shortened links.
             </p>
-            <Link href="/dashboard/checkout?service=SHORTENER" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold py-2.5 px-5 rounded-xl text-xs sm:text-sm transition-all shadow-sm">
+            <Link href="/dashboard/checkout?service=SHORTENER" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-xs transition-all shadow-sm">
               View Plans
             </Link>
           </div>
@@ -266,7 +266,7 @@ export default function DashboardShortenerPage() {
                     </p>
                     <button
                       onClick={() => setShowCreateModal(true)}
-                      className={cn("inline-flex items-center gap-2 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-all border", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-cyan-600")}
+                      className={cn("inline-flex items-center gap-2 font-bold text-xs sm:text-xs px-3.5 py-2 rounded-xl transition-all border", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-cyan-600")}
                     >
                       <Plus className="w-4 h-4" />
                       Create Short Link
@@ -473,7 +473,7 @@ export default function DashboardShortenerPage() {
                     placeholder="https://example.com/very-long-url"
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
-                    className={cn("w-full rounded-xl px-4 py-3 text-xs sm:text-sm transition-all focus:outline-none focus:ring-1 border", isDark ? "bg-[#111115] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500" : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500")}
+                    className={cn("w-full rounded-xl px-3.5 py-2 text-xs sm:text-xs transition-all focus:outline-none focus:ring-1 border", isDark ? "bg-[#111115] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500" : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500")}
                   />
                 </div>
 
@@ -481,14 +481,14 @@ export default function DashboardShortenerPage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className={cn("flex-1 py-2.5 px-4 rounded-xl border font-medium text-xs sm:text-sm transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300 hover:bg-white/[0.06]" : "bg-slate-50/80 border-slate-200/90 text-slate-700 hover:bg-slate-100")}
+                    className={cn("flex-1 px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300 hover:bg-white/[0.06]" : "bg-slate-50/80 border-slate-200/90 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isCreating}
-                    className="flex-1 py-2.5 px-4 rounded-xl text-slate-950 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm"
+                    className="flex-1 px-3.5 py-2 rounded-xl text-slate-950 font-bold text-xs sm:text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-sm"
                   >
                     {isCreating ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

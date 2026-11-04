@@ -622,7 +622,7 @@ export default function K3sDetailPage() {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-                  className={cn("px-4 py-2.5 rounded-xl border font-semibold text-sm transition-colors", isDark ? "border-white/[0.08] bg-white/[0.02] text-zinc-300 hover:bg-white/[0.06]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
+                  className={cn("px-3.5 py-2 rounded-xl border font-semibold text-xs transition-colors", isDark ? "border-white/[0.08] bg-white/[0.02] text-zinc-300 hover:bg-white/[0.06]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </button>
@@ -632,7 +632,7 @@ export default function K3sDetailPage() {
                     confirmModal.onConfirm();
                   }}
                   className={cn(
-                    "px-5 py-2.5 font-bold text-sm rounded-xl shadow-2xs transition-all",
+                    "px-3.5 py-2 font-bold text-xs rounded-xl shadow-2xs transition-all",
                     confirmModal.actionType === "danger" ? "bg-red-500 hover:bg-red-600 text-white" :
                       confirmModal.actionType === "warning" ? "bg-amber-500 hover:bg-amber-600 text-white" :
                         "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
@@ -725,7 +725,7 @@ export default function K3sDetailPage() {
               <div className="flex justify-end mt-8">
                 <button
                   onClick={() => setIsGuideModalOpen(false)}
-                  className={cn("px-5 py-2.5 font-bold rounded-xl transition-colors border shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white border-white/[0.08]" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200/90")}
+                  className={cn("px-3.5 py-2 font-bold rounded-xl transition-colors border shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white border-white/[0.08]" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200/90")}
                 >
                   Close Guide
                 </button>
@@ -755,7 +755,7 @@ export default function K3sDetailPage() {
                   </p>
                   <button
                     onClick={() => router.push("/dashboard/billing")}
-                    className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 font-bold rounded-xl transition-all shadow-2xs text-slate-950 text-xs sm:text-sm"
+                    className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 font-bold rounded-xl transition-all shadow-2xs text-slate-950 text-xs sm:text-xs"
                   >
                     Lihat Tagihan
                   </button>
@@ -771,7 +771,7 @@ export default function K3sDetailPage() {
                   <Link 
                     href="/dashboard/k3s" 
                     className={cn(
-                      "inline-flex items-center gap-2 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition-all border",
+                      "inline-flex items-center gap-2 text-xs sm:text-xs font-semibold px-3.5 py-2 rounded-xl transition-all border",
                       isDark 
                         ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08]" 
                         : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
@@ -843,7 +843,7 @@ export default function K3sDetailPage() {
                     {/* macOS-style Terminal Box (Crisp dark console in both Light & Dark modes) */}
                     <div className="developer-terminal w-full max-w-4xl mx-auto border rounded-2xl shadow-xl overflow-hidden border-white/[0.08] bg-[#0a0a0c]" style={{ backgroundColor: '#0a0a0c' }}>
                       {/* Terminal header bar */}
-                      <div className="developer-terminal-header flex items-center gap-2 px-4 py-3 bg-[#111115] border-b border-white/[0.08] select-none" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
+                      <div className="developer-terminal-header flex items-center gap-2 px-3.5 py-2 bg-[#111115] border-b border-white/[0.08] select-none" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
                         <div className="flex gap-1.5">
                           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
@@ -914,7 +914,7 @@ export default function K3sDetailPage() {
                       </div>
 
                       {/* Footer */}
-                      <div className="developer-terminal-footer flex items-center justify-between px-4 py-2.5 border-t border-white/[0.08] bg-[#111115]" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
+                      <div className="developer-terminal-footer flex items-center justify-between px-3.5 py-2 border-t border-white/[0.08] bg-[#111115]" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
                         <span className="terminal-muted text-xs font-mono text-slate-300 font-medium" style={{ color: '#94a3b8' }}>
                           {installLogs.length} entries
                         </span>
@@ -939,7 +939,7 @@ export default function K3sDetailPage() {
                 <Link 
                   href="/dashboard/k3s" 
                   className={cn(
-                    "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border",
+                    "inline-flex items-center gap-2 text-xs sm:text-xs font-medium px-3.5 py-2 rounded-xl transition-all border",
                     isDark 
                       ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08]" 
                       : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
@@ -1045,14 +1045,14 @@ export default function K3sDetailPage() {
                   })()}
                   <button
                     onClick={() => setIsGuideModalOpen(true)}
-                    className={cn("flex items-center justify-center gap-2 px-3.5 py-2.5 border font-semibold rounded-xl text-xs sm:text-sm transition-all flex-1 sm:flex-none", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-white" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}
+                    className={cn("flex items-center justify-center gap-2 px-3.5 py-2.5 border font-semibold rounded-xl text-xs sm:text-xs transition-all flex-1 sm:flex-none", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-white" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}
                   >
                     <Terminal className="w-4 h-4 text-cyan-500" />
                     How to Connect
                   </button>
                   <button
                     onClick={handleDownloadKubeconfig}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-2xs flex-1 sm:flex-none"
+                    className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-2xs flex-1 sm:flex-none"
                   >
                     <Download className="w-4 h-4" />
                     Kubeconfig
@@ -1385,7 +1385,7 @@ export default function K3sDetailPage() {
                         </div>
                       )}
                       {isSuspended ? (
-                        <span className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm border shrink-0 ml-auto sm:ml-0 cursor-not-allowed", isDark ? "bg-white/[0.02] text-zinc-500 border-white/[0.08]" : "bg-slate-100 text-slate-400 border-slate-200/90")}>
+                        <span className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-xs border shrink-0 ml-auto sm:ml-0 cursor-not-allowed", isDark ? "bg-white/[0.02] text-zinc-500 border-white/[0.08]" : "bg-slate-100 text-slate-400 border-slate-200/90")}>
                           + Add Worker Node
                         </span>
                       ) : (
@@ -1809,9 +1809,9 @@ export default function K3sDetailPage() {
                               type="text" 
                               value={editClusterName} 
                               onChange={(e) => setEditClusterName(e.target.value)} 
-                              className={cn("flex-1 w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all min-w-0 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")} 
+                              className={cn("flex-1 w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all min-w-0 text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")} 
                             />
-                            <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className="px-5 py-2.5 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 font-bold rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 shrink-0 text-xs sm:text-sm">
+                            <button onClick={handleSaveName} disabled={isSavingName || isSuspended} className="px-3.5 py-2 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 font-bold rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 shrink-0 text-xs sm:text-xs">
                               {isSavingName && <RefreshCw className="w-4 h-4 animate-spin shrink-0" />}
                               Save
                             </button>
@@ -1819,7 +1819,7 @@ export default function K3sDetailPage() {
                         </div>
                         <div>
                           <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Kubernetes Version</label>
-                          <input type="text" value={cluster.version} disabled className={cn("w-full border rounded-xl px-4 py-2.5 cursor-not-allowed font-mono text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-500" : "bg-slate-100 border-slate-200/90 text-slate-500")} />
+                          <input type="text" value={cluster.version} disabled className={cn("w-full border rounded-xl px-3.5 py-2 cursor-not-allowed font-mono text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-500" : "bg-slate-100 border-slate-200/90 text-slate-500")} />
                           <p className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>Upgrading the Kubernetes version is managed by the system administrator.</p>
                         </div>
                       </div>
@@ -1847,7 +1847,7 @@ export default function K3sDetailPage() {
                               />
                             </div>
                           </div>
-                          <button onClick={handleReinstallCluster} disabled={isReinstalling || isSuspended} className={cn("px-5 py-2.5 w-full sm:w-auto justify-center disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2 border shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white border-white/[0.08]" : "bg-white hover:bg-slate-100 text-slate-900 border-slate-300")}>
+                          <button onClick={handleReinstallCluster} disabled={isReinstalling || isSuspended} className={cn("px-3.5 py-2 w-full sm:w-auto justify-center disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2 border shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white border-white/[0.08]" : "bg-white hover:bg-slate-100 text-slate-900 border-slate-300")}>
                             {isReinstalling ? <RefreshCw className="w-4 h-4 animate-spin shrink-0" /> : <RefreshCw className="w-4 h-4 shrink-0" />}
                             {isReinstalling ? "Reinstalling..." : "Reinstall Cluster"}
                           </button>
@@ -1858,7 +1858,7 @@ export default function K3sDetailPage() {
                             <h3 className="text-red-500 dark:text-red-400 font-bold text-sm">Delete Cluster</h3>
                             <p className={cn("text-xs mt-1.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>Completely destroy this cluster and all its nodes. All data will be permanently wiped and IP addresses released. Final usage will be billed for Pay-As-You-Go instances.</p>
                           </div>
-                          <button onClick={handleTerminateCluster} disabled={isTerminating} className="px-5 py-2.5 w-full sm:w-auto justify-center bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 border border-red-500/20 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2">
+                          <button onClick={handleTerminateCluster} disabled={isTerminating} className="px-3.5 py-2 w-full sm:w-auto justify-center bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 border border-red-500/20 text-xs sm:text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2">
                             {isTerminating ? <RefreshCw className="w-4 h-4 animate-spin shrink-0" /> : <Trash2 className="w-4 h-4 shrink-0" />}
                             {isTerminating ? "Deleting..." : "Delete Cluster"}
                           </button>
@@ -1874,7 +1874,7 @@ export default function K3sDetailPage() {
                         <div className={cn("p-4 sm:p-5 border rounded-2xl hover:border-cyan-500/30 transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                           <h3 className={cn("font-bold text-sm group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>Rotate Certificates</h3>
                           <p className={cn("text-xs mt-1.5 mb-5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>Rotate all K3s control plane certificates. You will need to download a new kubeconfig file.</p>
-                          <button onClick={handleRotateCertificates} disabled={isRotating || isSuspended} className={cn("w-full px-4 py-2.5 border disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-cyan-500/10 border-white/[0.08] text-white" : "bg-white hover:bg-cyan-50 text-slate-900 border-slate-300")}>
+                          <button onClick={handleRotateCertificates} disabled={isRotating || isSuspended} className={cn("w-full px-3.5 py-2 border disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-2xs", isDark ? "bg-white/[0.04] hover:bg-cyan-500/10 border-white/[0.08] text-white" : "bg-white hover:bg-cyan-50 text-slate-900 border-slate-300")}>
                             <RefreshCw className={cn("w-4 h-4 text-cyan-400", isRotating && "animate-spin")} />
                             {isRotating ? "Rotating..." : "Rotate Now"}
                           </button>
@@ -1902,7 +1902,7 @@ export default function K3sDetailPage() {
 
                   <div className="developer-terminal border rounded-2xl shadow-xl overflow-hidden border-white/[0.08] bg-[#0a0a0c]" style={{ backgroundColor: '#0a0a0c' }}>
                     {/* Terminal header bar */}
-                    <div className="developer-terminal-header flex items-center gap-2 px-4 py-3 bg-[#111115] border-b border-white/[0.08] select-none" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
+                    <div className="developer-terminal-header flex items-center gap-2 px-3.5 py-2 bg-[#111115] border-b border-white/[0.08] select-none" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
                       <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                         <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
@@ -1980,7 +1980,7 @@ export default function K3sDetailPage() {
                     </div>
 
                     {/* Footer */}
-                    <div className="developer-terminal-footer flex items-center justify-between px-4 py-2.5 border-t border-white/[0.08] bg-[#111115]" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
+                    <div className="developer-terminal-footer flex items-center justify-between px-3.5 py-2 border-t border-white/[0.08] bg-[#111115]" style={{ backgroundColor: '#111115', borderColor: 'rgba(255,255,255,0.08)' }}>
                       <span className="terminal-muted text-xs font-mono text-zinc-400 font-medium" style={{ color: '#a1a1aa' }}>
                         {installLogs.length} entries
                       </span>
@@ -2029,7 +2029,7 @@ export default function K3sDetailPage() {
                     value={editRoleModal.currentRole}
                     onChange={(e) => setEditRoleModal(prev => ({ ...prev, currentRole: e.target.value }))}
                     placeholder="e.g. worker, database, ingress"
-                    className={cn("w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
                   />
                   <p className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
                     Tip: Leave empty to clear the node role.
@@ -2041,14 +2041,14 @@ export default function K3sDetailPage() {
                 <button
                   onClick={() => setEditRoleModal(prev => ({ ...prev, isOpen: false }))}
                   disabled={editRoleModal.isUpdating}
-                  className={cn("flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors border disabled:opacity-50", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] text-white border-white/[0.08]" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200/90")}
+                  className={cn("flex-1 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors border disabled:opacity-50", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] text-white border-white/[0.08]" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200/90")}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleUpdateRole(editRoleModal.currentRole)}
                   disabled={editRoleModal.isUpdating || !editRoleModal.currentRole}
-                  className="flex-1 px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-xl text-sm transition-all shadow-2xs disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-2xs disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {editRoleModal.isUpdating ? (
                     <><div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" /> Updating...</>

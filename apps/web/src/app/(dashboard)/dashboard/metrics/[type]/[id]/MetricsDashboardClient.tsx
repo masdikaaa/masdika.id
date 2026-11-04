@@ -160,7 +160,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
         <Link 
           href="/dashboard/alerts" 
           className={cn(
-            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border",
+            "inline-flex items-center gap-2 text-xs sm:text-xs font-medium px-3.5 py-2 rounded-xl transition-all border",
             isDark 
               ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
               : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"

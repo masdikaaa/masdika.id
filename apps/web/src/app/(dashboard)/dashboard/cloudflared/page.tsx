@@ -183,7 +183,7 @@ const ConnectorInstructions = ({ isDark,
         <button 
           onClick={onRefreshToken}
           disabled={isRefreshingToken}
-          className="px-5 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all flex items-center gap-2 shadow-sm"
+          className="px-3.5 py-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs rounded-lg transition-all flex items-center gap-2 shadow-sm"
         >
           <RefreshCw className={cn("w-4 h-4", isRefreshingToken && "animate-spin")} />
           {isRefreshingToken ? "Refreshing..." : "Refresh token"}
@@ -659,7 +659,7 @@ export default function CloudflaredPage() {
         <div className={cn("flex gap-1 border-b overflow-x-auto custom-scrollbar", isDark ? "border-white/10" : "border-slate-200")}>
           {(["overview", "routes"] as TunnelTab[]).map(t => (
             <button key={t} onClick={() => setActiveTunnelTab(t)}
-              className={cn("px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all border-b-2",
+              className={cn("px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition-all border-b-2",
                 activeTunnelTab === t ? "text-cyan-400 border-cyan-400 bg-cyan-500/5" : "text-zinc-400 border-transparent hover:text-white hover:bg-white/5")}>
               {t === "overview" ? "Overview" : "Public Hostname Routes"}
             </button>
@@ -746,7 +746,7 @@ export default function CloudflaredPage() {
                   <Server className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-zinc-600" : "text-slate-900")} />
                   <h3 className={cn("text-lg font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Connectors Found</h3>
                   <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You haven't installed any connectors for this tunnel yet.</p>
-                  <button onClick={() => setShowAddConnector(true)} className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-2xs cursor-pointer">Add a connector</button>
+                  <button onClick={() => setShowAddConnector(true)} className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-2xs cursor-pointer">Add a connector</button>
                 </div>
               ) : (
                 <div className={cn("rounded-2xl overflow-hidden mt-6 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
@@ -805,7 +805,7 @@ export default function CloudflaredPage() {
                 <Globe className={cn("w-12 h-12 mx-auto mb-4", isDark ? "text-zinc-600" : "text-slate-900")} />
                 <h3 className={cn("text-lg font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Routes Configured</h3>
                 <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>This tunnel has no public hostname routes.</p>
-                <button onClick={() => { setShowCreateTunnel(true); setViewingTunnel(null); setCurrentStep(3); }} className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-2xs cursor-pointer">Add a route</button>
+                <button onClick={() => { setShowCreateTunnel(true); setViewingTunnel(null); setCurrentStep(3); }} className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-2xs cursor-pointer">Add a route</button>
               </div>
             ) : (
               <div className={cn("rounded-2xl overflow-hidden mt-6 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
@@ -926,14 +926,14 @@ export default function CloudflaredPage() {
       {/* Tabs */}
       <div className={cn("flex items-center gap-1 border rounded-xl p-1", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
         <button onClick={() => setActiveTab("domains")}
-          className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
+          className={cn("flex-1 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
             activeTab === "domains" ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-white text-cyan-700 border border-cyan-200 shadow-2xs") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50")
           )}>
           <Globe className="w-4 h-4" /> Domains
           <span className="text-xs bg-white/5 px-2 py-0.5 rounded-full">{domains.length}</span>
         </button>
         <button onClick={() => setActiveTab("tunnels")}
-          className={cn("flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
+          className={cn("flex-1 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
             activeTab === "tunnels" ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-white text-cyan-700 border border-cyan-200 shadow-2xs") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50")
           )}>
           <Network className="w-4 h-4" /> Tunnels
@@ -965,7 +965,7 @@ export default function CloudflaredPage() {
                 <h4 className={cn("text-[13px] font-bold", isDark ? "text-cyan-400" : "text-slate-800")}>Point your domain&apos;s nameservers to:</h4>
                 <div className="space-y-2">
                   {newlyAddedDomain.nameServers.map((ns, i) => (
-                    <div key={i} className={cn("flex items-center justify-between border rounded-lg px-4 py-3 font-mono text-[13px]", isDark ? "bg-black/40 border-cyan-500/20" : "bg-slate-50 border-slate-200")}>
+                    <div key={i} className={cn("flex items-center justify-between border rounded-lg px-3.5 py-2 font-mono text-[13px]", isDark ? "bg-black/40 border-cyan-500/20" : "bg-slate-50 border-slate-200")}>
                       <span className={cn(isDark ? "text-cyan-400" : "text-cyan-700 font-semibold")}>{ns}</span>
                       <button onClick={() => copyToClipboard(ns)} className={cn("p-1.5 rounded-md transition-colors border", isDark ? "border-cyan-500/20 hover:bg-cyan-500/10 text-cyan-500 hover:text-cyan-400" : "border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900")}>
                         <Copy className="w-3.5 h-3.5" />
@@ -992,7 +992,7 @@ export default function CloudflaredPage() {
                   }
                   setShowAddDomain(!showAddDomain);
                 }}
-                className={cn("flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm")}>
+                className={cn("flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm")}>
                 <Plus className="w-4 h-4" /> Add Domain
               </button>
             )}
@@ -1012,7 +1012,7 @@ export default function CloudflaredPage() {
                     className={cn("w-full border rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
                 </div>
                 <button onClick={handleAddDomain} disabled={!newDomainName.trim() || addDomainLoading}
-                  className="px-5 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+                  className="px-3.5 py-2 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
                   {addDomainLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   {addDomainLoading ? "Adding..." : "Add"}
                 </button>
@@ -1040,7 +1040,7 @@ export default function CloudflaredPage() {
                   }
                   setShowAddDomain(true);
                 }}
-                className={cn("px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all inline-flex items-center gap-2 cursor-pointer", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs")}>
+                className={cn("px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all inline-flex items-center gap-2 cursor-pointer", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs")}>
                 <Plus className="w-4 h-4" /> Add First Domain
               </button>
             </div>
@@ -1148,13 +1148,13 @@ export default function CloudflaredPage() {
                     }
                     resetCreateForm(); setShowCreateTunnel(true);
                   }}
-                  className={cn("flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm")}>
+                  className={cn("flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm")}>
                   <Plus className="w-4 h-4" /> Create Tunnel
                 </button>
               )}
               {showCreateTunnel && (
                 <button onClick={() => { resetCreateForm(); setShowCreateTunnel(false); }}
-                  className={cn("flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm")}>
+                  className={cn("flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg transition-all border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm")}>
                   Back to List
                 </button>
               )}
@@ -1188,7 +1188,7 @@ export default function CloudflaredPage() {
                         }
                         resetCreateForm(); setShowCreateTunnel(true);
                       }}
-                      className={cn("px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all inline-flex items-center gap-2 cursor-pointer", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs")}>
+                      className={cn("px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all inline-flex items-center gap-2 cursor-pointer", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs")}>
                       <Plus className="w-4 h-4" /> Create Tunnel
                     </button>
                   )}
@@ -1312,11 +1312,11 @@ export default function CloudflaredPage() {
                     <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-500")}>Tunnel name</label>
                     <input type="text" value={tunnelName} onChange={(e) => setTunnelName(e.target.value)}
                       placeholder="e.g. My-Local-Network"
-                      className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
+                      className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
                   </div>
                   <div className="flex justify-end pt-4">
                     <button onClick={handleSaveTunnel} disabled={!tunnelName || isSubmitting}
-                      className="px-5 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+                      className="px-3.5 py-2 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
                       {isSubmitting ? (
                         <>
                           <RefreshCw className="w-4 h-4 animate-spin" /> {isEditMode ? "Updating..." : "Creating..."}
@@ -1349,8 +1349,8 @@ export default function CloudflaredPage() {
                     />
                   </div>
                   <div className={cn("flex justify-between pt-4 border-t", isDark ? "border-white/5" : "border-slate-200")}>
-                    <button onClick={() => setCurrentStep(1)} className={cn("px-6 py-3 font-semibold rounded-xl transition-all", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700")}>Back</button>
-                    <button onClick={() => setCurrentStep(3)} className={cn("px-6 py-3 bg-[#00B4D8] hover:bg-[#00cceb] font-bold rounded-xl transition-all shadow-sm flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                    <button onClick={() => setCurrentStep(1)} className={cn("px-3.5 py-2 font-semibold rounded-xl transition-all", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700")}>Back</button>
+                    <button onClick={() => setCurrentStep(3)} className={cn("px-3.5 py-2 bg-[#00B4D8] hover:bg-[#00cceb] font-bold rounded-xl transition-all shadow-sm flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                       Next: Route Tunnel <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -1377,7 +1377,7 @@ export default function CloudflaredPage() {
                         <div className="space-y-3">
                           <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-500")}>Subdomain <span className={cn("text-xs font-normal", isDark ? "text-zinc-500" : "text-slate-500")}>(Optional)</span></label>
                           <input type="text" value={subdomain} onChange={(e) => setSubdomain(e.target.value)} placeholder="www"
-                            className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
+                            className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
                         </div>
                         <div className="space-y-3">
                           <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-500")}>Domain *</label>
@@ -1390,7 +1390,7 @@ export default function CloudflaredPage() {
                                 ...domains.filter(d => d.status !== "active").map(d => ({ value: d.id, label: `${d.domain} (NS pending)`, disabled: true }))
                               ]}
                               placeholder="Select domain..."
-                              className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                              className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
                             />
                           </div>
                         </div>
@@ -1404,7 +1404,7 @@ export default function CloudflaredPage() {
                     <div className="space-y-3">
                       <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-500")}>Path <span className={cn("text-xs font-normal", isDark ? "text-zinc-500" : "text-slate-500")}>(Optional)</span></label>
                       <input type="text" value={path} onChange={(e) => setPath(e.target.value)} placeholder="e.g. /api"
-                        className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
+                        className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all", isDark ? "bg-black/40 border-white/10 text-white placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 shadow-sm")} />
                     </div>
 
                     {/* Service Settings */}
@@ -1422,7 +1422,7 @@ export default function CloudflaredPage() {
                                 { value: "https", label: "HTTPS" }
                               ]}
                               placeholder="Select Type..."
-                              className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer uppercase", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
+                              className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer uppercase", isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900 shadow-sm")}
                             />
                           </div>
                         </div>
@@ -1434,7 +1434,7 @@ export default function CloudflaredPage() {
                             </div>
                             <input type="text" value={serviceUrl} onChange={(e) => setServiceUrl(e.target.value)}
                               placeholder="localhost:8080"
-                              className={cn("w-full bg-transparent px-4 py-3 text-sm focus:outline-none font-mono", isDark ? "text-white placeholder:text-zinc-600" : "text-slate-900 placeholder:text-slate-400")} />
+                              className={cn("w-full bg-transparent px-3.5 py-2 text-xs focus:outline-none font-mono", isDark ? "text-white placeholder:text-zinc-600" : "text-slate-900 placeholder:text-slate-400")} />
                           </div>
                         </div>
                       </div>
@@ -1493,11 +1493,11 @@ export default function CloudflaredPage() {
                       } else {
                         setCurrentStep(2);
                       }
-                    }} className={cn("px-4 py-2.5 font-medium text-sm rounded-xl transition-all border cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>
+                    }} className={cn("px-3.5 py-2 font-medium text-xs rounded-xl transition-all border cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>
                       {isEditMode ? "Cancel" : "Back"}
                     </button>
                     <button onClick={handleSaveRoute} disabled={isSubmitting}
-                      className="px-5 py-2.5 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
+                      className="px-3.5 py-2 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm">
                       {isSubmitting ? "Saving..." : (isEditModeRoute ? "Save" : "Add Route")} 
                       {!isEditModeRoute && !isSubmitting && <Plus className="w-4 h-4" />}
                       {isEditModeRoute && !isSubmitting && <Save className="w-4 h-4" />}
@@ -1515,17 +1515,17 @@ export default function CloudflaredPage() {
                         <table className="w-full text-left border-collapse text-sm">
                           <thead>
                             <tr className={cn("border-b", isDark ? "border-white/5 bg-black/40 text-zinc-400" : "border-slate-200 bg-slate-100 text-slate-500")}>
-                              <th className="py-3 px-4 font-medium">Public Hostname</th>
-                              <th className="py-3 px-4 font-medium">Local Service</th>
+                              <th className="px-3.5 py-2 font-medium">Public Hostname</th>
+                              <th className="px-3.5 py-2 font-medium">Local Service</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
                             {existingIngress.map((rule, i) => (
                               <tr key={i} className={cn("transition-colors", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50")}>
-                                <td className="py-3 px-4 text-cyan-400 font-mono">
+                                <td className="px-3.5 py-2 text-cyan-400 font-mono">
                                   {rule.hostname}{rule.path || ""}
                                 </td>
-                                <td className={cn("py-3 px-4 font-mono", isDark ? "text-zinc-300" : "text-slate-500")}>
+                                <td className={cn("px-3.5 py-2 font-mono", isDark ? "text-zinc-300" : "text-slate-500")}>
                                   {rule.service}
                                 </td>
                               </tr>

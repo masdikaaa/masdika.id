@@ -192,7 +192,7 @@ export default function ReservedIpsPage() {
           {ips.length > 0 && (
             <button
               onClick={toggleSelectAll}
-              className={cn("border font-medium text-xs sm:text-sm px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-all", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-600 shadow-2xs")}
+              className={cn("border font-medium text-xs sm:text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-all", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-600 shadow-2xs")}
             >
               <div className={cn("w-4 h-4 rounded-[4px] flex items-center justify-center transition-all", selectedIps.length === ips.length && ips.length > 0
                 ? "bg-cyan-400 text-slate-950"
@@ -206,7 +206,7 @@ export default function ReservedIpsPage() {
           {selectedIps.length > 0 && (
             <button
               onClick={() => setShowBulkReleaseModal(true)}
-              className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium text-xs sm:text-sm px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-all hover:border-red-500/40"
+              className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-medium text-xs sm:text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-all hover:border-red-500/40"
             >
               <Trash2 className="w-4 h-4" />
               Release ({selectedIps.length})
@@ -214,7 +214,7 @@ export default function ReservedIpsPage() {
           )}
           <Link
             href="/dashboard/reserved-ips/new"
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-2xs inline-flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs transition-all shadow-2xs inline-flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Reserve New IP
@@ -233,7 +233,7 @@ export default function ReservedIpsPage() {
           </p>
           <Link
             href="/dashboard/reserved-ips/new"
-            className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-2xs inline-flex items-center justify-center gap-2"
+            className="px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs transition-all shadow-2xs inline-flex items-center justify-center gap-2"
           >
             Reserve Your First IP
           </Link>
@@ -398,7 +398,7 @@ export default function ReservedIpsPage() {
                   label: `${vps.hostname || vps.name} (IP: ${vps.assignedIps?.[0]?.publicIp || vps.assignedIps?.[0]?.ipAddress || vps.vpcIp || 'None'})`
                 }))}
                 placeholder="-- Choose a VPS --"
-                className="w-full py-3 px-4 text-sm rounded-xl"
+                className="w-full px-3.5 py-2 text-xs rounded-xl"
               />
             </div>
 
@@ -415,7 +415,7 @@ export default function ReservedIpsPage() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowAttachModal(false)}
-                className={cn("px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
+                className={cn("px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
                 disabled={isAttaching}
               >
                 Cancel
@@ -423,7 +423,7 @@ export default function ReservedIpsPage() {
               <button
                 onClick={handleAttach}
                 disabled={!selectedVpsId || isAttaching}
-                className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs rounded-xl transition-all shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isAttaching ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />}
                 Attach IP

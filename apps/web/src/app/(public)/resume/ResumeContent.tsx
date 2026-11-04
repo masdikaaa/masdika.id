@@ -1,16 +1,32 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Briefcase, GraduationCap, Link2, Megaphone, Lock, ArrowRight, Download, Cloud, Database, Activity } from "lucide-react";
+import {
+  Briefcase,
+  GraduationCap,
+  Server,
+  Terminal,
+  ArrowRight,
+  Download,
+  Cloud,
+  Database,
+  Activity,
+  ShieldCheck,
+  Cpu,
+  Network,
+  CheckCircle2,
+  Building2,
+  Calendar,
+  Award,
+  Layers,
+} from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { TiltCard } from "@/components/animations/TiltCard";
 import { TechStackMarquee } from "@/components/ui/TechStackMarquee";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
+import { SectionOrnaments } from "@/components/ui/PremiumBackground";
 
 interface ResumeContentProps {
   experiences: any[];
@@ -18,12 +34,111 @@ interface ResumeContentProps {
   cvUrl: string | null;
 }
 
+const CORE_COMPETENCIES = [
+  {
+    icon: Network,
+    badge: "L2/L3 Networking",
+    title: "Datacenter & Network Engineering",
+    description:
+      "Designing carrier-grade routing topologies, secure tunnel interconnects, and high-throughput packet forwarding.",
+    skills: [
+      "MikroTik RouterOS & Juniper Switching",
+      "BGP, OSPF, VLAN & Failover Routing",
+      "OpenVPN, WireGuard & Zero-Trust Tunnels",
+      "L3/L7 Firewalling & DDoS Mitigation",
+    ],
+  },
+  {
+    icon: Cloud,
+    badge: "Container Platform",
+    title: "Cloud & Kubernetes Orchestration",
+    description:
+      "Operating production-ready container clusters with automated scaling, self-healing workloads, and edge ingress.",
+    skills: [
+      "Kubernetes (K8s) & Managed K3s Clusters",
+      "Docker, Containerd & Registry Management",
+      "Helm Charts & ArgoCD GitOps Delivery",
+      "Cloudflare Anycast CDN & Edge WAF",
+    ],
+  },
+  {
+    icon: Server,
+    badge: "Bare-Metal & Virtualization",
+    title: "Linux Systems & Virtualization",
+    description:
+      "Provisioning enterprise bare-metal rack servers, hypervisors, and hardened Linux production environments.",
+    skills: [
+      "Debian, Ubuntu Server, RHEL & AlmaLinux",
+      "Proxmox VE, KVM & Bare-Metal Dell/Xeon",
+      "Nginx, Traefik & Caddy Auto-TLS Ingress",
+      "Automated Snapshot & Disaster Recovery",
+    ],
+  },
+  {
+    icon: Activity,
+    badge: "SRE & Telemetry",
+    title: "Databases, CI/CD & Observability",
+    description:
+      "Ensuring 99.98% service reliability through full-stack metrics, log aggregation, and zero-downtime pipelines.",
+    skills: [
+      "PostgreSQL, MySQL & Redis High Availability",
+      "GitHub Actions, GitLab CI & Terraform IaC",
+      "Prometheus, Grafana & Real-Time Alerting",
+      "ELK Stack, Loki & Distributed Tracing",
+    ],
+  },
+];
+
+function getExperienceDetails(role: string, company: string, description?: string) {
+  if (description && description.trim().length > 0) {
+    return {
+      summary: description,
+      tags: ["Production Infrastructure", "System Administration", "Network Operations"],
+    };
+  }
+  const lower = `${role} ${company}`.toLowerCase();
+  if (lower.includes("tehnician") || lower.includes("technician") || lower.includes("smk")) {
+    return {
+      summary:
+        "Managed campus laboratory servers, local area network (LAN/WLAN) infrastructure, hardware troubleshooting, and workstation deployment.",
+      tags: ["LAN/WLAN Routing", "Server Maintenance", "Hardware Diagnostics"],
+    };
+  }
+  return {
+    summary:
+      "Architected and maintained high-availability Linux servers, cloud deployments, network routing, and automated CI/CD workflows.",
+    tags: ["Cloud Infrastructure", "Linux SysAdmin", "DevOps Automation"],
+  };
+}
+
+function getEducationDetails(degree: string, school: string, description?: string) {
+  if (description && description.trim().length > 0) {
+    return {
+      summary: description,
+      tags: ["Computer Science", "Systems Engineering"],
+    };
+  }
+  const lower = `${degree} ${school}`.toLowerCase();
+  if (lower.includes("universitas") || lower.includes("university")) {
+    return {
+      summary:
+        "Focused on Information Systems, distributed cloud computing, network architecture, database management, and enterprise software engineering.",
+      tags: ["Information Systems", "Distributed Systems", "Database Architecture"],
+    };
+  }
+  return {
+    summary:
+      "Intensive vocational track in Computer & Network Engineering (TKJ), covering Linux server administration, MikroTik routing, and enterprise networking.",
+    tags: ["Computer & Network Eng.", "MikroTik & Cisco", "Linux Server"],
+  };
+}
+
 export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentProps) {
   return (
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO (Identik Patokan Events & design.md) ────────── */}
+        {/* ── 0. HERO ────────────────────────────────────────────────── */}
         <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
@@ -70,7 +185,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
               </div>
             </div>
 
-            {/* Right – Hero Avatar (about.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
+            {/* Right – Hero Avatar */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/about.webp"
@@ -89,108 +204,219 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
           </div>
         </section>
 
-        {/* ── 1. ABOUT ME (BENTO GRID) ─────────────────────────────────── */}
-        <section className="mb-16 lg:mb-24 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+        {/* ── 1. ENGINEERING PROFILE (REFINED BENTO GRID) ────────────── */}
+        <section className="py-16 lg:py-24 relative z-10">
+          <SectionOrnaments variant="sides" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch relative z-10">
 
-            {/* Main Content Box */}
-            <div
-              className="md:col-span-2 lg:col-span-3 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-7 sm:p-10 lg:p-12 hover:border-cyan-500/40 transition-colors shadow-sm flex flex-col justify-between"
-            >
-              <div className="relative z-10">
-                <span className="text-xs font-bold tracking-[0.22em] text-cyan-600 dark:text-cyan-400 uppercase mb-4 block">
-                  About Me
-                </span>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-6">
-                  Boost Business Strategic Solutions with Us
-                </h2>
-                <p className="text-base sm:text-lg leading-relaxed max-w-3xl text-[var(--text-secondary)] mb-8">
-                  Cloud consulting experts provide expert advice and guidance to businesses to help them improve their performance, efficiency, and organizational scaling. With a robust background in multi-cloud deployments, we ensure your infrastructure is secure, scalable, and highly available.
-                </p>
-              </div>
+            {/* Row 1, Left (8 cols): Main Engineering Bio */}
+            <FadeIn direction="up" duration={0.6} className="lg:col-span-8 flex">
+              <div className="w-full h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10 hover:border-cyan-500/40 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                    <span className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
+                      <Terminal className="w-3.5 h-3.5" />
+                      Engineering Profile
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Sidoarjo, ID • Available for Projects
+                    </span>
+                  </div>
 
-              {cvUrl && (
-                <div className="relative z-10 pt-2">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    href={cvUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    leftIcon={<Download className="w-4 h-4" />}
-                  >
-                    Download CV
-                  </Button>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                    Architecting Resilient Cloud &amp; Bare-Metal Infrastructure
+                  </h2>
+
+                  <p className="text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] mb-6">
+                    I design, provision, and operate mission-critical infrastructure across bare-metal datacenters, enterprise routing networks (MikroTik &amp; Juniper), and multi-cloud Kubernetes clusters. My work focuses on eliminating single points of failure, automating delivery pipelines, and maintaining strict production uptime.
+                  </p>
                 </div>
-              )}
-            </div>
 
-            {/* Years of Experience Box */}
-            <div
-              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col items-center justify-center text-center hover:border-cyan-500/40 transition-colors shadow-sm"
-            >
-              <div className="text-6xl sm:text-7xl font-black text-[var(--text-primary)] mb-2 tracking-tight">
-                4+
-              </div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--text-muted)] leading-relaxed">
-                Years Of<br />Experience
-              </p>
-            </div>
+                <div className="pt-5 border-t border-[var(--border-primary)] flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      "Bare-Metal & BGP",
+                      "Kubernetes (K8s / K3s)",
+                      "Terraform & GitOps",
+                      "Zero-Downtime Ops",
+                    ].map((chip) => (
+                      <span
+                        key={chip}
+                        className="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
 
-            {/* Business Box */}
-            <div
-              className="md:col-span-1 lg:col-span-2 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-colors shadow-sm"
-            >
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
-                  <Link2 className="w-6 h-6" />
+                  {cvUrl && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      href={cvUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      leftIcon={<Download className="w-3.5 h-3.5" />}
+                    >
+                      Download CV
+                    </Button>
+                  )}
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Business</h3>
               </div>
-              <p className="text-sm sm:text-base leading-relaxed text-[var(--text-secondary)]">
-                Each one showcases my approach to solving complex architectural challenges effectively and efficiently, delivering solid business value.
-              </p>
-            </div>
+            </FadeIn>
 
-            {/* Partners Box */}
-            <div
-              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-colors shadow-sm"
-            >
-              <div className="flex items-center gap-4 mb-5">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
-                  <Megaphone className="w-6 h-6" />
+            {/* Row 1, Right (4 cols): Key Metrics & Track Record Card */}
+            <FadeIn direction="up" delay={0.1} duration={0.6} className="lg:col-span-4 flex">
+              <div className="w-full h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 hover:border-cyan-500/40 transition-all duration-300 flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+                    Production Metrics
+                  </span>
+                  <span className="text-[11px] font-mono font-semibold text-[var(--text-muted)]">
+                    EST. 2020
+                  </span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Partners</h3>
-              </div>
-              <p className="text-sm sm:text-base leading-relaxed text-[var(--text-secondary)]">
-                Cloud consulting consultants provide expert advice and strategic guidance.
-              </p>
-            </div>
 
-            {/* Cloud Deployments Box */}
-            <div
-              className="md:col-span-1 lg:col-span-1 relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex items-center justify-between gap-4 hover:border-cyan-500/40 transition-colors shadow-sm"
-            >
-              <div>
-                <div className="text-4xl sm:text-5xl font-black text-[var(--text-primary)] mb-1 tracking-tight">
-                  200+
+                <div className="my-6 flex items-baseline gap-3.5">
+                  <div className="text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none">
+                    4<span className="text-cyan-500 dark:text-cyan-400">+</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
+                      Years of Experience
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Cloud, Network &amp; SysAdmin
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] leading-snug">
-                  Cloud<br />Deployments
-                </p>
+
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--border-primary)]">
+                  <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]">
+                    <p className="text-lg sm:text-xl font-black font-mono text-[var(--text-primary)]">
+                      200<span className="text-cyan-500 dark:text-cyan-400">+</span>
+                    </p>
+                    <p className="text-[11px] font-mono text-[var(--text-muted)] mt-0.5">
+                      Cloud Deployments
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]">
+                    <p className="text-lg sm:text-xl font-black font-mono text-emerald-500 dark:text-emerald-400">
+                      99.98%
+                    </p>
+                    <p className="text-[11px] font-mono text-[var(--text-muted)] mt-0.5">
+                      Production Uptime
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="w-14 h-14 rounded-full border border-dashed border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                <Lock className="w-6 h-6" />
-              </div>
-            </div>
+            </FadeIn>
+
+            {/* Row 2: 3 Equal-Height Pillar Cards (4 + 4 + 4 cols) */}
+            {[
+              {
+                icon: Server,
+                title: "Bare-Metal & Core Routing",
+                badge: "Datacenter Ops",
+                desc: "Provisioning rackmount Xeon servers, enterprise RAID storage, and carrier-grade MikroTik & Juniper BGP routing.",
+                delay: 0.15,
+              },
+              {
+                icon: Cpu,
+                title: "Kubernetes & Cloud Native",
+                badge: "High Availability",
+                desc: "Designing fault-tolerant K8s & K3s clusters, containerized microservices, and multi-region failover topologies.",
+                delay: 0.2,
+              },
+              {
+                icon: ShieldCheck,
+                title: "DevSecOps & Automation",
+                badge: "Zero-Touch CI/CD",
+                desc: "Automating infrastructure as code with Terraform & Ansible, hardened with Cloudflare Zero Trust and L3/L7 WAF.",
+                delay: 0.25,
+              },
+            ].map((pillar) => (
+              <FadeIn key={pillar.title} direction="up" delay={pillar.delay} duration={0.6} className="lg:col-span-4 flex">
+                <div className="group w-full h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 sm:p-6 hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-0.5 flex flex-col">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                      <pillar.icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+                      {pillar.badge}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-2">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-[var(--text-secondary)] flex-1">
+                    {pillar.desc}
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
 
           </div>
         </section>
 
-        {/* ── 2. TECH STACK & SKILLS ──────────────────────────────────── */}
-        <section className="mb-16 lg:mb-24 relative z-10">
+        {/* ── 2. CORE COMPETENCIES & ARCHITECTURE PILLARS (NEW SECTION) ─ */}
+        <section className="py-16 lg:py-24 relative z-10">
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              Technical Depth
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Core Engineering Competencies
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
+              End-to-end infrastructure capabilities spanning physical datacenter networking, container orchestration, and automated SRE operations.
+            </p>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-stretch">
+            {CORE_COMPETENCIES.map((comp, idx) => (
+              <FadeIn key={comp.title} delay={idx * 0.08} direction="up" className="flex">
+                <div className="group w-full h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-7 hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-3 mb-5">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                        <comp.icon className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" />
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+                        {comp.badge}
+                      </span>
+                    </div>
+
+                    <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-2">
+                      {comp.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
+                      {comp.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-[var(--border-primary)] grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {comp.skills.map((sk) => (
+                      <div key={sk} className="flex items-center gap-2 text-xs font-medium text-[var(--text-secondary)]">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                        <span className="truncate">{sk}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 3. TECH STACK & SKILLS ──────────────────────────────────── */}
+        <section className="py-16 lg:py-24 relative z-10">
           <div className="mb-12 text-center">
-            <span className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-600 dark:text-cyan-400 mb-3 block">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               My Skills
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--text-primary)]">
@@ -212,78 +438,242 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
           </div>
         </section>
 
-        {/* ── 3. EXPERIENCE & EDUCATION SECTION ───────────────────────── */}
-        <section className="relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        {/* ── 4. EXPERIENCE & EDUCATION TIMELINE ──────────────────────── */}
+        <section className="py-16 lg:py-24 relative z-10">
+          <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              Career &amp; Academic Background
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--text-primary)] leading-[1.15]">
+              Experience &amp; Education
+            </h2>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start">
 
             {/* Experience Column */}
             <div>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
-                  <Briefcase className="w-6 h-6" />
+              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-primary)]">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
+                      My Experience
+                    </h3>
+                    <p className="text-xs font-mono text-[var(--text-muted)]">
+                      Professional &amp; Infrastructure Roles
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-                  My Experience
-                </h2>
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
+                  {experiences.length} {experiences.length === 1 ? "Role" : "Roles"}
+                </span>
               </div>
 
-              <div className="space-y-5">
+              <div className="relative pl-6 border-l border-[var(--border-primary)] space-y-6">
                 {experiences.length === 0 ? (
                   <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)] text-sm">
                     No experience records available.
                   </div>
                 ) : (
-                  experiences.map((item, i) => (
-                    <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
-                      <TiltCard intensity={6} className="relative rounded-2xl p-6 sm:p-7 border border-[var(--border-primary)] border-l-4 border-l-cyan-500 bg-[var(--surface)] hover:border-cyan-500/40 transition-colors shadow-sm group">
-                        <Badge variant="brand" size="sm" dot dotColor="bg-cyan-500" className="font-semibold uppercase tracking-wider mb-3">
-                          {item.year}
-                        </Badge>
-                        <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 leading-snug">
-                          {item.role}
-                        </h3>
-                        <p className="text-sm sm:text-base font-medium text-[var(--text-secondary)]">
-                          {item.company}
+                  experiences.map((item, i) => {
+                    const details = getExperienceDetails(item.role, item.company, item.description);
+                    const isPresent = String(item.year).toUpperCase().includes("PRESENT");
+                    return (
+                      <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
+                        <div className="relative group">
+                          {/* Timeline Node */}
+                          <span
+                            className={cn(
+                              "absolute -left-[31px] top-6 w-3.5 h-3.5 rounded-full border-2 transition-colors",
+                              isPresent
+                                ? "bg-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
+                                : "bg-[var(--surface)] border-cyan-500 group-hover:bg-cyan-400"
+                            )}
+                          />
+
+                          <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                                <Calendar className="w-3 h-3" />
+                                {item.year}
+                              </span>
+                              <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                                Verified Role
+                              </span>
+                            </div>
+
+                            <h4 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
+                              {item.role}
+                            </h4>
+
+                            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] mb-3.5">
+                              <Building2 className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                              <span>{item.company}</span>
+                            </div>
+
+                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                              {details.summary}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
+                              {details.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </FadeIn>
+                    );
+                  })
+                )}
+
+                {/* Balance Experience column when there are fewer experience records than education records */}
+                {experiences.length > 0 && experiences.length < educations.length && (
+                  <FadeIn delay={0.2} direction="up">
+                    <div className="relative group">
+                      <span className="absolute -left-[31px] top-6 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
+                      <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            2022 - PRESENT
+                          </span>
+                          <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                            Independent Practice
+                          </span>
+                        </div>
+
+                        <h4 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
+                          CLOUD &amp; DEVOPS INFRASTRUCTURE ENGINEER
+                        </h4>
+
+                        <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] mb-3.5">
+                          <Layers className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                          <span>Masdika Cloud &amp; Enterprise Clients</span>
+                        </div>
+
+                        <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                          Designing and operating production K3s/Kubernetes clusters, high-performance VPS nodes, carrier-grade BGP routing, and automated CI/CD pipelines for businesses.
                         </p>
-                      </TiltCard>
-                    </FadeIn>
-                  ))
+
+                        <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
+                          {["Kubernetes & K3s", "BGP & MikroTik", "Cloud Architecture"].map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </FadeIn>
                 )}
               </div>
             </div>
 
             {/* Education Column */}
             <div>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
-                  <GraduationCap className="w-6 h-6" />
+              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-primary)]">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
+                      My Education
+                    </h3>
+                    <p className="text-xs font-mono text-[var(--text-muted)]">
+                      Academic Degrees &amp; Technical Training
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-                  My Education
-                </h2>
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
+                  {educations.length} {educations.length === 1 ? "Record" : "Records"}
+                </span>
               </div>
 
-              <div className="space-y-5">
+              <div className="relative pl-6 border-l border-[var(--border-primary)] space-y-6">
                 {educations.length === 0 ? (
                   <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-muted)] text-sm">
                     No education records available.
                   </div>
                 ) : (
-                  educations.map((item, i) => (
-                    <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
-                      <TiltCard intensity={6} className="relative rounded-2xl p-6 sm:p-7 border border-[var(--border-primary)] border-l-4 border-l-cyan-500 bg-[var(--surface)] hover:border-cyan-500/40 transition-colors shadow-sm group">
-                        <Badge variant="brand" size="sm" dot dotColor="bg-cyan-500" className="font-semibold uppercase tracking-wider mb-3">
-                          {item.year}
-                        </Badge>
-                        <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-1 leading-snug">
-                          {item.degree}
-                        </h3>
-                        <p className="text-sm sm:text-base font-medium text-[var(--text-secondary)]">
-                          {item.school}
-                        </p>
-                      </TiltCard>
-                    </FadeIn>
-                  ))
+                  educations.map((item, i) => {
+                    const details = getEducationDetails(item.degree, item.school, item.description);
+                    const isPresent = String(item.year).toUpperCase().includes("PRESENT");
+                    return (
+                      <FadeIn delay={i * 0.1} direction="up" key={item.id || i}>
+                        <div className="relative group">
+                          {/* Timeline Node */}
+                          <span
+                            className={cn(
+                              "absolute -left-[31px] top-6 w-3.5 h-3.5 rounded-full border-2 transition-colors",
+                              isPresent
+                                ? "bg-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
+                                : "bg-[var(--surface)] border-cyan-500 group-hover:bg-cyan-400"
+                            )}
+                          />
+
+                          <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border",
+                                  isPresent
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                    : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20"
+                                )}
+                              >
+                                {isPresent ? (
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                ) : (
+                                  <Calendar className="w-3 h-3" />
+                                )}
+                                {item.year}
+                              </span>
+                              <span className="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                                Academic
+                              </span>
+                            </div>
+
+                            <h4 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
+                              {item.degree}
+                            </h4>
+
+                            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] mb-3.5">
+                              <Award className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                              <span>{item.school}</span>
+                            </div>
+
+                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                              {details.summary}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
+                              {details.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </FadeIn>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -291,7 +681,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
           </div>
         </section>
 
-        {/* ── 4. CALL TO ACTION (Identik Patokan Events) ──────────────────────── */}
+        {/* ── 5. CALL TO ACTION ──────────────────────────────────────── */}
         <section className="pt-16 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />

@@ -190,7 +190,7 @@ export default function CustomerCdnReviewsPage() {
         <Link 
           href="/dashboard/cdn" 
           className={cn(
-            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border",
+            "inline-flex items-center gap-2 text-xs sm:text-xs font-medium px-3.5 py-2 rounded-xl transition-all border",
             isDark 
               ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
               : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
@@ -221,14 +221,14 @@ export default function CustomerCdnReviewsPage() {
         </div>
 
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
-          <div className={cn("px-3.5 py-2 rounded-xl border font-semibold text-xs sm:text-sm text-center", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+          <div className={cn("px-3.5 py-2 rounded-xl border font-semibold text-xs sm:text-xs text-center", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
             Total Reviews: {stats.totalComments + stats.totalRatings}
           </div>
           <button
             onClick={fetchData}
             disabled={loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-xs font-semibold transition-all cursor-pointer",
               isDark
                 ? "border-white/[0.08] bg-[#111115] hover:bg-white/[0.06] text-zinc-300 hover:text-white"
                 : "border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-2xs"

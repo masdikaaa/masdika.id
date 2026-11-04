@@ -832,19 +832,29 @@ export function AIChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={cn("fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-32px)] sm:w-96 h-[560px] max-h-[85vh] sm:max-h-[90vh] backdrop-blur-md border rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-black/60" : "bg-white border-slate-200")}
+            className={cn(
+              "fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-32px)] sm:w-[370px] max-h-[85vh] sm:max-h-[88vh] backdrop-blur-xl border rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden",
+              isRegistered ? "h-[520px]" : "h-auto",
+              isDark
+                ? "bg-[var(--surface)]/95 border-[var(--border-primary)] shadow-[0_24px_60px_rgba(0,0,0,0.75)]"
+                : "bg-white/95 border-slate-200 shadow-slate-900/15"
+            )}
           >
             {/* Header */}
-            <div className={cn("flex items-center justify-between p-4 border-b", isDark ? "border-[var(--border-primary)] bg-[var(--surface-secondary)]" : "border-slate-200 bg-white")}>
+            <div className={cn("flex items-center justify-between px-4 py-3.5 border-b", isDark ? "border-[var(--border-primary)] bg-[var(--surface-secondary)]/80" : "border-slate-200 bg-slate-50/80")}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#0F3B4A] border-[1.5px] border-cyan-400 flex items-center justify-center text-cyan-400 shadow-[2px_2px_0_#22d3ee]">
-                  <Bot size={18} strokeWidth={2.5} />
+                <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                  <Bot size={18} strokeWidth={2} />
                 </div>
-                <div>
-                  <h3 className={cn("font-semibold text-sm", isDark ? "text-white" : "text-slate-900")}>AI Assistant</h3>
-                  <p className="text-xs text-cyan-400 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                    {isRegistered ? `${sessionInfo?.name}` : 'Online'}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className={cn("font-bold text-xs sm:text-sm tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+                      Masdika AI Assistant
+                    </h3>
+                  </div>
+                  <p className={cn("text-[11px] font-medium flex items-center gap-1.5 mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                    {isRegistered ? `${sessionInfo?.name}` : 'Online • Cloud & Support'}
                   </p>
                 </div>
               </div>
@@ -856,9 +866,9 @@ export function AIChat() {
                       onClick={() => setShowConfirmEnd(true)}
                       title="End chat session"
                       aria-label="End chat session"
-                      className="text-gray-400 hover:text-cyan-400 transition-colors p-1"
+                      className="text-gray-400 hover:text-cyan-400 transition-colors p-1.5 rounded-lg hover:bg-white/5"
                     >
-                      <LogOut size={17} aria-hidden="true" />
+                      <LogOut size={15} aria-hidden="true" />
                     </button>
 
                     {/* Clear Chat Button */}
@@ -867,9 +877,9 @@ export function AIChat() {
                         onClick={() => setShowConfirmClear(!showConfirmClear)}
                         title="Clear chat"
                         aria-label="Clear chat"
-                        className="text-gray-400 hover:text-red-400 transition-colors p-1"
+                        className="text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-white/5"
                       >
-                        <Trash2 size={17} aria-hidden="true" />
+                        <Trash2 size={15} aria-hidden="true" />
                       </button>
                     )}
                   </>
@@ -877,9 +887,9 @@ export function AIChat() {
                 <button
                   onClick={() => setIsOpen(false)}
                   aria-label="Close chat"
-                  className="text-gray-400 hover:text-white transition-colors p-1"
+                  className={cn("transition-colors p-1.5 rounded-lg", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-400 hover:text-slate-700 hover:bg-slate-200/60")}
                 >
-                  <X size={20} aria-hidden="true" />
+                  <X size={17} aria-hidden="true" />
                 </button>
 
                 {/* Confirm Clear Popover */}
@@ -919,9 +929,9 @@ export function AIChat() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
-                  className="flex-1 overflow-y-auto p-3 sm:p-4 flex flex-col hide-scrollbar"
+                  className="overflow-y-auto p-4 sm:p-5 flex flex-col hide-scrollbar"
                 >
-                  <div className="my-auto shrink-0 py-1">
+                  <div className="shrink-0">
                     
                     <AnimatePresence mode="wait">
                       {requiresVerification ? (
@@ -933,16 +943,27 @@ export function AIChat() {
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
                         >
-                      <div className="text-center mb-4">
-                        <div className={cn("w-12 h-12 mx-auto mb-2 rounded-full border-2 border-cyan-400 flex items-center justify-center text-cyan-400", isDark ? "bg-[#0F3B4A]" : "bg-cyan-50")}>
-                          <Mail size={24} strokeWidth={2} />
+                      <div className="mb-4">
+                        <div className="flex items-center gap-3 mb-2.5">
+                          <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                            <Mail size={18} strokeWidth={2} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-500 dark:text-cyan-400 block">
+                              Security Check
+                            </span>
+                            <h3 className={cn("font-bold text-base tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                              Verify Your Email
+                            </h3>
+                          </div>
                         </div>
-                        <h3 className={cn("font-bold text-lg tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>Verify Email</h3>
-                        <p className={cn("text-sm leading-relaxed px-2", isDark ? "text-gray-400" : "text-slate-500")}>We sent a 6-digit code to <strong>{regEmail}</strong>. Enter it below to start chatting.</p>
+                        <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          We sent a 6-digit verification code to <strong className={isDark ? "text-zinc-200" : "text-slate-700"}>{regEmail}</strong>.
+                        </p>
                       </div>
 
-                      <div className="space-y-4">
-                        <div className="flex justify-center gap-2">
+                      <div className="space-y-3.5">
+                        <div className="flex justify-between gap-1.5 sm:gap-2">
                           {otpValues.map((digit, idx) => (
                             <input
                               key={idx}
@@ -953,18 +974,18 @@ export function AIChat() {
                               value={digit}
                               onChange={(e) => handleOtpChange(idx, e.target.value)}
                               onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                              className={cn("w-10 h-12 sm:w-12 sm:h-14 border rounded-lg text-center text-xl font-bold text-cyan-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[var(--surface-secondary)] border-cyan-500/20" : "bg-white border-slate-200")}
+                              className={cn("w-full h-11 border rounded-xl text-center text-base font-bold text-cyan-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200 text-cyan-600")}
                             />
                           ))}
                         </div>
 
                         <div className="text-center">
                           {otpTimeLeft > 0 ? (
-                            <p className="text-xs text-gray-400">
-                              Code expires in <span className="text-cyan-400 font-mono">{formatOtpTime(otpTimeLeft)}</span>
+                            <p className="text-[11px] text-zinc-400">
+                              Code expires in <span className="text-cyan-400 font-mono font-semibold">{formatOtpTime(otpTimeLeft)}</span>
                             </p>
                           ) : (
-                            <p className="text-xs text-red-400">
+                            <p className="text-[11px] text-red-400">
                               Verification code expired. Please request a new one.
                             </p>
                           )}
@@ -973,7 +994,7 @@ export function AIChat() {
                         <button
                           onClick={handleVerify}
                           disabled={isVerifying || verificationOtp.length !== 6}
-                          className="relative w-full h-[46px] cursor-pointer bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden"
+                          className="relative w-full h-10 cursor-pointer bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden"
                         >
                           <AnimatePresence>
                             {isVerifying ? (
@@ -985,7 +1006,7 @@ export function AIChat() {
                                 transition={{ duration: 0.2 }}
                                 className="absolute inset-0 flex items-center justify-center gap-2"
                               >
-                                <Loader2 size={18} className="animate-spin" />
+                                <Loader2 size={15} className="animate-spin" />
                                 <span>Verifying...</span>
                               </motion.div>
                             ) : (
@@ -997,8 +1018,8 @@ export function AIChat() {
                                 transition={{ duration: 0.2 }}
                                 className="absolute inset-0 flex items-center justify-center gap-2"
                               >
-                                <CheckCircle size={18} />
-                                <span>Verify Code</span>
+                                <CheckCircle size={15} />
+                                <span>Verify & Start Session</span>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1007,7 +1028,7 @@ export function AIChat() {
                         <button
                           onClick={() => setRequiresVerification(false)}
                           disabled={isVerifying}
-                          className="w-full py-2 text-xs text-gray-400 hover:text-white transition-colors"
+                          className="w-full py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
                         >
                           Change Email / Go Back
                         </button>
@@ -1022,67 +1043,84 @@ export function AIChat() {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="text-center mb-4">
-                        <div className={cn("w-12 h-12 mx-auto mb-2 rounded-full border-2 border-cyan-400 flex items-center justify-center text-cyan-400", isDark ? "bg-[#0F3B4A]" : "bg-cyan-50")}>
-                          <Bot size={24} strokeWidth={2} />
+                      <div className={cn("p-3.5 rounded-xl border mb-4", isDark ? "bg-[var(--surface-secondary)]/70 border-[var(--border-primary)]" : "bg-slate-50 border-slate-200/80")}>
+                        <div className="flex items-start gap-3">
+                          <div className={cn("w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 mt-0.5", isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+                            <Headset size={17} strokeWidth={2} />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className={cn("font-bold text-xs sm:text-sm leading-snug mb-1", isDark ? "text-white" : "text-slate-900")}>
+                              Start a Support or Architecture Chat
+                            </h4>
+                            <p className={cn("text-[11px] leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              Ask about Cloud VPS, Managed K3s, DevOps consulting, or connect with an engineer.
+                            </p>
+                          </div>
                         </div>
-                        <h3 className={cn("font-bold text-lg tracking-tight mb-1", isDark ? "text-white" : "text-slate-900")}>Start Conversation</h3>
-                        <p className={cn("text-sm leading-relaxed px-2", isDark ? "text-gray-400" : "text-slate-500")}>Please fill in your details below to start a chat session with the AI Assistant</p>
                       </div>
 
                       <div className="space-y-2.5">
                         {/* Name */}
                         <div>
+                          <label className={cn("block text-[11px] font-semibold mb-1", isDark ? "text-zinc-300" : "text-slate-700")}>
+                            Full Name
+                          </label>
                           <div className="relative">
-                            <UserCircle size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                            <UserCircle size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                             <input
                               type="text"
                               value={regName}
                               onChange={(e) => { setRegName(e.target.value); if (regErrors.name) setRegErrors(p => ({...p, name: undefined})); }}
-                              placeholder="Full Name"
+                              placeholder="e.g. Budi Santoso"
                               maxLength={100}
-                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.name ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
+                              className={cn("w-full border rounded-xl py-2 pl-9 pr-3 text-xs sm:text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-zinc-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.name ? 'border-red-500/50' : (isDark ? 'border-[var(--border-primary)]' : 'border-slate-200'))}
                             />
                           </div>
-                          {regErrors.name && <p className="text-xs text-red-400 mt-1 pl-1">{regErrors.name}</p>}
+                          {regErrors.name && <p className="text-[11px] text-red-400 mt-1 pl-1">{regErrors.name}</p>}
                         </div>
 
                         {/* Email */}
                         <div>
+                          <label className={cn("block text-[11px] font-semibold mb-1", isDark ? "text-zinc-300" : "text-slate-700")}>
+                            Work or Active Email
+                          </label>
                           <div className="relative">
-                            <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                            <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                             <input
                               type="email"
                               value={regEmail}
                               onChange={(e) => { setRegEmail(e.target.value); if (regErrors.email) setRegErrors(p => ({...p, email: undefined})); }}
-                              placeholder="Active Email"
+                              placeholder="name@company.com"
                               maxLength={254}
-                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.email ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
+                              className={cn("w-full border rounded-xl py-2 pl-9 pr-3 text-xs sm:text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-zinc-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.email ? 'border-red-500/50' : (isDark ? 'border-[var(--border-primary)]' : 'border-slate-200'))}
                             />
                           </div>
-                          {regErrors.email && <p className="text-xs text-red-400 mt-1 pl-1">{regErrors.email}</p>}
+                          {regErrors.email && <p className="text-[11px] text-red-400 mt-1 pl-1">{regErrors.email}</p>}
                         </div>
 
                         {/* Phone */}
                         <div>
+                          <label className={cn("block text-[11px] font-semibold mb-1", isDark ? "text-zinc-300" : "text-slate-700")}>
+                            WhatsApp Number
+                          </label>
                           <div className="relative">
-                            <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                            <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                             <input
                               type="tel"
                               value={regPhone}
                               onChange={(e) => { setRegPhone(e.target.value); if (regErrors.phone) setRegErrors(p => ({...p, phone: undefined})); }}
-                              placeholder="WhatsApp No. (08xx)"
+                              placeholder="0812xxxxxxxx"
                               maxLength={15}
-                              className={cn("w-full border rounded-lg py-2.5 pl-10 pr-3 text-base focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-gray-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.phone ? 'border-red-500/50' : (isDark ? 'border-cyan-500/20' : 'border-slate-200'))}
+                              className={cn("w-full border rounded-xl py-2 pl-9 pr-3 text-xs sm:text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all focus:outline-none", isDark ? "bg-[var(--surface-secondary)] text-white placeholder-zinc-500" : "bg-white text-slate-900 placeholder-slate-400", regErrors.phone ? 'border-red-500/50' : (isDark ? 'border-[var(--border-primary)]' : 'border-slate-200'))}
                             />
                           </div>
-                          {regErrors.phone && <p className="text-xs text-red-400 mt-1 pl-1">{regErrors.phone}</p>}
+                          {regErrors.phone && <p className="text-[11px] text-red-400 mt-1 pl-1">{regErrors.phone}</p>}
                         </div>
 
                         <button
                           onClick={handleRegister}
                           disabled={isRegistering}
-                          className="relative w-full h-[46px] cursor-pointer bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden mt-1"
+                          className="relative w-full h-10 cursor-pointer bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center overflow-hidden mt-2 shadow-[0_8px_20px_rgba(34,211,238,0.2)]"
                         >
                           <AnimatePresence>
                             {isRegistering ? (
@@ -1094,8 +1132,8 @@ export function AIChat() {
                                 transition={{ duration: 0.2 }}
                                 className="absolute inset-0 flex items-center justify-center gap-2"
                               >
-                                <Loader2 size={18} className="animate-spin" />
-                                <span>Starting...</span>
+                                <Loader2 size={15} className="animate-spin" />
+                                <span>Connecting...</span>
                               </motion.div>
                             ) : (
                               <motion.div
@@ -1106,8 +1144,8 @@ export function AIChat() {
                                 transition={{ duration: 0.2 }}
                                 className="absolute inset-0 flex items-center justify-center gap-2"
                               >
-                                <Send size={16} />
-                                Start Chat
+                                <Send size={14} />
+                                <span>Start Conversation</span>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1117,8 +1155,8 @@ export function AIChat() {
                   )}
                   </AnimatePresence>
                   
-                  <p className={cn("text-[11px] text-center mt-3 leading-relaxed px-2", isDark ? "text-gray-500" : "text-slate-400")}>
-                    By starting the chat, you agree that a transcript of the conversation will be sent to your email when the session ends.
+                  <p className={cn("text-[10px] text-center mt-3.5 pt-3 border-t leading-relaxed", isDark ? "text-zinc-500 border-[var(--border-primary)]" : "text-slate-400 border-slate-100")}>
+                    A copy of the chat transcript will be sent to your email when the session ends.
                   </p>
                 </div>
               </motion.div>
@@ -1252,17 +1290,28 @@ export function AIChat() {
 
       {/* Floating Toggle Button */}
       <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
-        {/* Ping Animation Ring */}
-        {!isOpen && (
-          <span className="absolute inset-0 rounded-full border-2 border-cyan-400 animate-ping opacity-50"></span>
-        )}
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close AI chat" : "Open AI chat"}
           aria-expanded={isOpen}
-          className={cn("relative w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-[2.5px] sm:border-[3px] shadow-[3px_3px_0_#22d3ee] sm:shadow-[4px_4px_0_#22d3ee] transition-colors cursor-pointer", isDark ? "bg-[#0F3B4A] text-cyan-400 border-cyan-400 hover:bg-[#164e63]" : "bg-white text-cyan-500 border-cyan-500 hover:bg-slate-50")}
+          className={cn(
+            "group relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95",
+            isDark
+              ? "bg-[#0a0a0c]/95 border-cyan-500/40 text-cyan-400 shadow-[0_8px_30px_rgba(6,182,212,0.22)] hover:border-cyan-400 hover:bg-[#111827]"
+              : "bg-white border-cyan-500/40 text-cyan-600 shadow-lg shadow-cyan-500/15 hover:border-cyan-500 hover:bg-cyan-50/50"
+          )}
         >
-          {isOpen ? <X className="w-5 h-5 sm:w-7 sm:h-7 stroke-[3]" aria-hidden="true" /> : <Bot className="w-5 h-5 sm:w-7 sm:h-7 stroke-[2.5]" aria-hidden="true" />}
+          {!isOpen && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-[#0a0a0c]"></span>
+            </span>
+          )}
+          {isOpen ? (
+            <X className="w-5 h-5 sm:w-5 sm:h-5 stroke-[2.2]" aria-hidden="true" />
+          ) : (
+            <Bot className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" aria-hidden="true" />
+          )}
         </button>
       </div>
     </div>

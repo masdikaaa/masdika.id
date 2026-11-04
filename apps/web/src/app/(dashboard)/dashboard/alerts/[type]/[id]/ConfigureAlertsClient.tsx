@@ -80,7 +80,7 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
         <Link
           href="/dashboard/alerts"
           className={cn(
-            "inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition-all border",
+            "inline-flex items-center gap-2 text-xs sm:text-xs font-medium px-3.5 py-2 rounded-xl transition-all border",
             isDark 
               ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
               : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
@@ -185,7 +185,7 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
                               newRules[index].notifyEmails = e.target.value;
                               setAlertRules(newRules);
                             }}
-                            className={cn("w-full border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-white border-slate-200/90 text-slate-900 placeholder:text-slate-400")}
+                            className={cn("w-full border rounded-xl px-3.5 py-2.5 text-xs sm:text-xs focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-white border-slate-200/90 text-slate-900 placeholder:text-slate-400")}
                           />
                           <p className={cn("text-xs mt-2", isDark ? "text-white/40" : "text-slate-400")}>
                             Separate multiple emails with commas. <strong className="text-cyan-400 font-medium">Required if active.</strong>
@@ -200,14 +200,14 @@ export default function ConfigureAlertsClient({ type, id, resourceName, initialR
               <div className={cn("mt-6 pt-5 border-t flex flex-wrap justify-end gap-3", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                 <Link
                   href="/dashboard/alerts"
-                  className={cn("px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors inline-flex items-center", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300 hover:bg-white/[0.06]" : "bg-slate-50/80 border-slate-200/90 text-slate-700 hover:bg-slate-100")}
+                  className={cn("px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors inline-flex items-center", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300 hover:bg-white/[0.06]" : "bg-slate-50/80 border-slate-200/90 text-slate-700 hover:bg-slate-100")}
                 >
                   Cancel
                 </Link>
                 <button
                   onClick={handleSaveAlerts}
                   disabled={isSavingAlerts}
-                  className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSavingAlerts ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   {isSavingAlerts ? "Saving..." : "Save Configuration"}

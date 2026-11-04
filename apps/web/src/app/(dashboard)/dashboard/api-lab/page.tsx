@@ -272,7 +272,7 @@ export default function ApiLabPage() {
           <AlertCircle className="w-12 h-12 text-yellow-500/50 mx-auto mb-4" />
           <h3 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No APIs Found</h3>
           <p className={cn("text-xs sm:text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-600")}>You haven't generated any API keys for your ordered services yet.</p>
-          <Link href="/dashboard/api-keys" className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-colors inline-block">
+          <Link href="/dashboard/api-keys" className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold transition-colors inline-block">
             Generate API Key
           </Link>
         </div>
@@ -379,7 +379,7 @@ export default function ApiLabPage() {
 
                 {/* Endpoint Area */}
                 <div className={cn("rounded-2xl overflow-hidden border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                  <div className={cn("px-5 py-3 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                  <div className={cn("px-3.5 py-2 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <div className="flex items-center gap-3">
                       <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -410,7 +410,7 @@ export default function ApiLabPage() {
                     <button
                       onClick={handleSend}
                       disabled={loading || !apiKey}
-                      className="shrink-0 px-6 py-2.5 lg:py-0 h-full min-h-[48px] rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 text-slate-950"
+                      className="shrink-0 px-3.5 py-2 lg:py-0 h-full min-h-[48px] rounded-xl font-bold text-xs sm:text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-cyan-400 hover:bg-cyan-300 text-slate-950"
                     >
                       {loading ? (
                         <>
@@ -475,7 +475,7 @@ export default function ApiLabPage() {
                       </div>
                     ) : (
                       <div className={cn("rounded-2xl overflow-hidden border mt-6", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                        <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <div className={cn("px-3.5 py-2 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                           <div className="flex gap-2 w-16">
                             <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                             <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
@@ -499,7 +499,7 @@ export default function ApiLabPage() {
 
                 {method === "GET" && activeService === "CDN" && (
                   <div className={cn("rounded-2xl overflow-hidden border mt-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                    <div className={cn("px-3.5 py-2 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                       <span className={cn("text-xs font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>Query Parameter</span>
                     </div>
                     <div className="p-5 flex flex-col gap-2">
@@ -522,7 +522,7 @@ export default function ApiLabPage() {
 
                 {/* Response Area */}
                 <div className={cn("rounded-2xl overflow-hidden border mt-6 relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                  <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                  <div className={cn("px-3.5 py-2 flex items-center justify-between border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                     <div className="flex items-center gap-3">
                       <Terminal className="w-4 h-4 text-cyan-500" />
                       <span className={cn("text-xs font-mono tracking-wider", isDark ? "text-zinc-300" : "text-slate-600")}>Response</span>

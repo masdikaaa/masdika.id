@@ -325,7 +325,7 @@ export default function DashboardOverview() {
         >
           <div
             className={cn(
-              "px-5 py-3.5 border-b flex justify-between items-center shrink-0",
+              "px-3.5 py-2 border-b flex justify-between items-center shrink-0",
               isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
             )}
           >
@@ -461,7 +461,7 @@ export default function DashboardOverview() {
           {newsList.length > 2 && (
             <div
               className={cn(
-                "px-4 py-2.5 border-t shrink-0",
+                "px-3.5 py-2 border-t shrink-0",
                 isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/60"
               )}
             >
@@ -1039,7 +1039,7 @@ export default function DashboardOverview() {
         >
           <div
             className={cn(
-              "px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3",
+              "px-3.5 py-2 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3",
               isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
             )}
           >
@@ -1281,7 +1281,7 @@ export default function DashboardOverview() {
           {vpsList.length > 4 && (
             <div
               className={cn(
-                "px-5 py-3 border-t",
+                "px-3.5 py-2 border-t",
                 isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
               )}
             >
@@ -1306,7 +1306,7 @@ export default function DashboardOverview() {
         >
           <div
             className={cn(
-              "px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3",
+              "px-3.5 py-2 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3",
               isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
             )}
           >
@@ -1430,7 +1430,7 @@ export default function DashboardOverview() {
           {k3sList.length > 3 && (
             <div
               className={cn(
-                "px-5 py-3 border-t",
+                "px-3.5 py-2 border-t",
                 isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
               )}
             >

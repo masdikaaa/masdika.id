@@ -84,7 +84,7 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
     <button
       onClick={handleClaim}
       disabled={loading}
-      className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 group shadow-sm text-sm"
+      className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold px-3.5 py-2 rounded-lg transition-all flex items-center justify-center gap-2 group shadow-sm text-xs"
     >
       {loading ? (
         <Loader2 className="w-4 h-4 animate-spin" />

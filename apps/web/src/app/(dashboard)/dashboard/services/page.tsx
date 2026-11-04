@@ -216,7 +216,7 @@ export default function MyServicesPage() {
         <div className="w-full sm:w-auto shrink-0">
           <Link
             href="/dashboard/checkout"
-            className="w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-2xs flex items-center justify-center gap-2 text-slate-950"
+            className="w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all shadow-2xs flex items-center justify-center gap-2 text-slate-950"
           >
             <Box className="w-4 h-4" />
             Order New Service
@@ -234,7 +234,7 @@ export default function MyServicesPage() {
             <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>You haven't subscribed to any Masdika services yet. Explore our high-performance infrastructure.</p>
             <Link
               href="/dashboard/checkout"
-              className="font-bold text-slate-950 px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-2xs inline-flex items-center justify-center gap-2 text-xs sm:text-sm"
+              className="font-bold text-slate-950 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-2xs inline-flex items-center justify-center gap-2 text-xs sm:text-xs"
             >
               Browse Services
             </Link>
@@ -350,7 +350,7 @@ export default function MyServicesPage() {
                       {vps.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/vps/${vps.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center transition-all text-slate-950"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Instance
                         </Link>
@@ -427,7 +427,7 @@ export default function MyServicesPage() {
                       {k3s.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/k3s/${k3s.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center transition-all text-slate-950"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Cluster
                         </Link>
@@ -564,7 +564,7 @@ export default function MyServicesPage() {
                               sub.plan.service === 'SHORTENER' ? '/dashboard/shortener' :
                                   '/dashboard'
                             }
-                            className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
+                            className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                           >
                             Manage
                           </Link>
@@ -617,7 +617,7 @@ export default function MyServicesPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setTerminateModal(null)}
-                className={cn("px-4 py-2.5 rounded-xl border transition-colors text-xs sm:text-sm font-medium", isDark ? "text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]" : "text-slate-600 border-slate-200/90 hover:bg-slate-100")}
+                className={cn("px-3.5 py-2 rounded-xl border transition-colors text-xs sm:text-xs font-medium", isDark ? "text-zinc-400 border-white/[0.08] hover:bg-white/[0.04]" : "text-slate-600 border-slate-200/90 hover:bg-slate-100")}
                 disabled={terminateLoading}
               >
                 Cancel
@@ -625,7 +625,7 @@ export default function MyServicesPage() {
               <button
                 onClick={handleTerminate}
                 disabled={terminateLoading}
-                className="px-5 py-2.5 rounded-xl font-bold transition-all bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 flex items-center gap-2 text-xs sm:text-sm"
+                className="px-3.5 py-2 rounded-xl font-bold transition-all bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 flex items-center gap-2 text-xs sm:text-xs"
               >
                 {terminateLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                 Yes, Terminate

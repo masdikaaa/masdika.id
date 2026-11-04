@@ -31,8 +31,8 @@ const COUNTRY_OPTIONS = [
   { value: "OTHER", label: "Other" },
 ];
 
-const inputClassDark = 'w-full max-w-full min-w-0 box-border bg-[#111115] border border-white/[0.08] rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all';
-const inputClassLight = 'w-full max-w-full min-w-0 box-border bg-slate-50/80 border border-slate-200/90 rounded-xl px-4 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all';
+const inputClassDark = 'w-full max-w-full min-w-0 box-border bg-[#111115] border border-white/[0.08] rounded-xl px-3.5 py-2 sm:px-4 sm:py-3 text-xs sm:text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all';
+const inputClassLight = 'w-full max-w-full min-w-0 box-border bg-slate-50/80 border border-slate-200/90 rounded-xl px-3.5 py-2 sm:px-4 sm:py-3 text-xs sm:text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all';
 const labelClassDark = 'block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-2';
 const labelClassLight = 'block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2';
 
@@ -691,11 +691,11 @@ export default function SettingsPage() {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-2.5 justify-center sm:justify-start">
-                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer", isDark ? "bg-[#111115] hover:bg-white/[0.06] text-zinc-200 border-white/[0.08]" : "bg-slate-50/80 hover:bg-slate-100 text-slate-700 border-slate-200/90")}>
+                        <button onClick={() => fileInputRef.current?.click()} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-xs font-medium transition-all flex items-center gap-2 border cursor-pointer", isDark ? "bg-[#111115] hover:bg-white/[0.06] text-zinc-200 border-white/[0.08]" : "bg-slate-50/80 hover:bg-slate-100 text-slate-700 border-slate-200/90")}>
                           <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Upload Photo
                         </button>
                         {imagePreview && (
-                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border cursor-pointer", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
+                          <button onClick={() => setShowDeleteImageModal(true)} className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-xs font-medium transition-all border cursor-pointer", isDark ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400" : "bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-600")}>
                             Remove
                           </button>
                         )}
@@ -832,7 +832,7 @@ export default function SettingsPage() {
                     <button
                       onClick={saveProfile}
                       disabled={isSavingProfile}
-                      className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-2xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-2xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
                     >
                       {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       Save Changes
@@ -927,7 +927,7 @@ export default function SettingsPage() {
                       <button
                         type="submit"
                         disabled={isPasswordLoading}
-                        className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-2xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs transition-all flex items-center justify-center gap-2 text-slate-950 disabled:opacity-50 shadow-2xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 w-full sm:w-auto cursor-pointer"
                       >
                         {isPasswordLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
                         Update Password
@@ -1179,11 +1179,11 @@ export default function SettingsPage() {
                           <table className="w-full text-left text-xs border-collapse">
                             <thead>
                               <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#111115] text-zinc-400 border-white/[0.08]" : "bg-slate-50/80 text-slate-500 border-slate-200/90")}>
-                                <th className="py-3 px-4 whitespace-nowrap">Device & Browser</th>
-                                <th className="py-3 px-4 w-36 whitespace-nowrap">IP Address</th>
-                                <th className="py-3 px-4 w-32 whitespace-nowrap">Login Time</th>
-                                <th className="py-3 px-4">Details / Method</th>
-                                <th className="py-3 px-4 text-right whitespace-nowrap">Status & Actions</th>
+                                <th className="px-3.5 py-2 whitespace-nowrap">Device & Browser</th>
+                                <th className="px-3.5 py-2 w-36 whitespace-nowrap">IP Address</th>
+                                <th className="px-3.5 py-2 w-32 whitespace-nowrap">Login Time</th>
+                                <th className="px-3.5 py-2">Details / Method</th>
+                                <th className="px-3.5 py-2 text-right whitespace-nowrap">Status & Actions</th>
                               </tr>
                             </thead>
                             <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
@@ -1191,7 +1191,7 @@ export default function SettingsPage() {
                                 const dt = formatDateTime(log.createdAt);
                                 return (
                                   <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
-                                    <td className="py-3 px-4 align-middle">
+                                    <td className="px-3.5 py-2 align-middle">
                                       <div className="flex items-center gap-2.5">
                                         <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                                           <BrowserIcon browser={log.browser || log.deviceLabel} device={log.device} className="w-4 h-4 shrink-0" />
@@ -1209,22 +1209,22 @@ export default function SettingsPage() {
                                         </div>
                                       </div>
                                     </td>
-                                    <td className="py-3 px-4 font-mono text-xs align-middle whitespace-nowrap">
+                                    <td className="px-3.5 py-2 font-mono text-xs align-middle whitespace-nowrap">
                                       <span className={isDark ? "text-zinc-300" : "text-slate-700"}>{log.ipAddress}</span>
                                     </td>
-                                    <td className="py-3 px-4 font-mono text-[11px] align-middle whitespace-nowrap">
+                                    <td className="px-3.5 py-2 font-mono text-[11px] align-middle whitespace-nowrap">
                                       <div className="flex flex-col leading-tight">
                                         <span className={isDark ? "text-zinc-200" : "text-slate-800"}>{dt.date}</span>
                                         <span className={cn("text-[10px]", isDark ? "text-zinc-500" : "text-slate-400")}>{dt.time}</span>
                                       </div>
                                     </td>
-                                    <td className="py-3 px-4 align-middle text-xs">
+                                    <td className="px-3.5 py-2 align-middle text-xs">
                                       <div className="flex flex-col">
                                         <span className={cn("font-medium text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>{log.method}</span>
                                         <span className="text-[10px] opacity-75">{log.description}</span>
                                       </div>
                                     </td>
-                                    <td className="py-3 px-4 text-right align-middle whitespace-nowrap">
+                                    <td className="px-3.5 py-2 text-right align-middle whitespace-nowrap">
                                       <div className="flex items-center justify-end gap-1.5">
                                         {log.status === 'SUCCESS' ? (
                                           <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -1470,8 +1470,8 @@ export default function SettingsPage() {
               <div className="space-y-4 relative z-10">
                 <OtpInput value={otpCode} onChange={setOtpCode} />
                 <div className="flex gap-2.5 sm:gap-3 pt-2">
-                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs transition-all disabled:opacity-50 cursor-pointer">
+                  <button onClick={() => setShowOtpModal(false)} className={cn("flex-1 px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-xs font-bold shadow-2xs transition-all disabled:opacity-50 cursor-pointer">
                     {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
                   </button>
                 </div>
@@ -1503,8 +1503,8 @@ export default function SettingsPage() {
                     <input type="email" required value={newEmailInput} onChange={(e) => setNewEmailInput(e.target.value)} className={inputClass} placeholder="new@example.com" />
                   </div>
                   <div className="flex gap-2.5 sm:gap-3 pt-2">
-                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
+                    <button type="button" onClick={() => setShowEmailModal(false)} className={cn("flex-1 px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                    <button type="submit" disabled={isEmailLoading || !newEmailInput} className="flex-1 flex justify-center items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-xs font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Continue'}
                     </button>
                   </div>
@@ -1514,8 +1514,8 @@ export default function SettingsPage() {
                   <p className={cn("text-xs sm:text-sm text-center -mt-2 mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>We've sent a code to <strong className={isDark ? "text-white" : "text-slate-900"}>{email}</strong>. Enter it to confirm changing to <strong className="text-cyan-400">{newEmailInput}</strong>.</p>
                   <OtpInput value={emailOtpCode} onChange={setEmailOtpCode} />
                   <div className="flex gap-2.5 sm:gap-3">
-                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Back</button>
-                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
+                    <button onClick={() => { setEmailOtpStep(false); setEmailOtpCode(''); }} className={cn("flex-1 px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Back</button>
+                    <button onClick={handleVerifyEmailOtp} disabled={isEmailLoading || emailOtpCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-xs font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify & Save'}
                     </button>
                   </div>
@@ -1553,8 +1553,8 @@ export default function SettingsPage() {
                   <OtpInput value={twoFactorCode} onChange={setTwoFactorCode} />
                 </div>
                 <div className="flex gap-2.5 sm:gap-3 pt-2">
-                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-4 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
-                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
+                  <button onClick={() => setShowTwoFactorModal(false)} className={cn("flex-1 px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}>Cancel</button>
+                  <button onClick={handleVerify2FA} disabled={is2FALoading || twoFactorCode.length < 6} className="flex-1 flex justify-center items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-xs font-bold shadow-2xs disabled:opacity-50 transition-all cursor-pointer">
                     {is2FALoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enable 2FA'}
                   </button>
                 </div>

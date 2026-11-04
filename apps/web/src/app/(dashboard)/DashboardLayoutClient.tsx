@@ -225,8 +225,27 @@ export default function DashboardLayoutClient({
     }
   };
 
+  useEffect(() => {
+    const handleRefreshClick = (e: MouseEvent) => {
+      const targetEl = e.target as HTMLElement | null;
+      if (!targetEl) return;
+      const btn = targetEl.closest("button");
+      if (!btn || btn.disabled) return;
+      const svg = btn.querySelector(
+        "svg.lucide-refresh-cw, svg.lucide-rotate-cw, svg.lucide-refresh-ccw, svg.lucide-rotate-ccw"
+      ) as SVGElement | null;
+      if (!svg) return;
+      svg.setAttribute("data-refresh-spin", "true");
+      setTimeout(() => {
+        svg.removeAttribute("data-refresh-spin");
+      }, 700);
+    };
+    document.addEventListener("click", handleRefreshClick, true);
+    return () => document.removeEventListener("click", handleRefreshClick, true);
+  }, []);
+
   return (
-    <div className={cn("flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30", isDark ? "bg-[#000000] text-white" : "bg-[#f8fafb] text-slate-900")}>
+    <div className={cn("admin-panel font-sans flex h-[100dvh] relative overflow-hidden selection:bg-cyan-500/30 text-xs sm:text-[13px]", isDark ? "bg-[#000000] text-zinc-100" : "bg-[#f8fafb] text-slate-900")}>
 
       {/* Clean atmospheric cyan background matching frontend */}
       <div 
@@ -248,7 +267,7 @@ export default function DashboardLayoutClient({
         <button
           type="button"
           aria-label="Close navigation menu"
-          className="fixed inset-0 z-[90] bg-black/60 lg:hidden cursor-default"
+          className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm lg:hidden cursor-default"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -257,12 +276,12 @@ export default function DashboardLayoutClient({
       <aside
         aria-label="Customer navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-[100] w-64 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 flex flex-col border-r",
+          "fixed inset-y-0 left-0 z-[100] w-64 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 flex flex-col h-full border-r",
           isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200 shadow-sm",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className={cn("h-16 flex items-center px-6 border-b", isDark ? "border-white/10" : "border-slate-200")}>
+        <div className={cn("h-16 flex items-center px-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
               <img
                 src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
@@ -272,7 +291,7 @@ export default function DashboardLayoutClient({
             </Link>
         </div>
 
-        <div className="p-4 space-y-6 overflow-y-auto flex-1 pb-[72px] custom-scrollbar">
+        <div className="p-3.5 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
           {Object.entries(
             SIDEBAR_LINKS.reduce((acc, link) => {
               if (!acc[link.group]) acc[link.group] = [];
@@ -281,8 +300,8 @@ export default function DashboardLayoutClient({
             }, {} as Record<string, typeof SIDEBAR_LINKS>)
           ).map(([groupName, links]) => (
             <div key={groupName}>
-              <h3 className={cn("px-3 mb-2 text-xs font-bold uppercase tracking-wider", isDark ? "text-slate-500" : "text-slate-400")}>{groupName}</h3>
-              <div className="space-y-1">
+              <h3 className={cn("px-3 mb-1.5 text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>{groupName}</h3>
+              <div className="space-y-0.5">
                 {links.map((link) => {
                   const isActive = pathname === link.href;
                   return (
@@ -291,16 +310,16 @@ export default function DashboardLayoutClient({
                       href={link.href}
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
-                        isActive ? "bg-cyan-400 text-slate-950 shadow-sm font-bold" : cn("transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
+                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all group",
+                        isActive ? "bg-cyan-400 text-slate-950 shadow-2xs font-semibold" : cn("transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
                       )}
                     >
-                      <link.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", 
+                      <link.icon className={cn("w-4 h-4 shrink-0 transition-transform group-hover:scale-105", 
                         isActive 
                           ? "text-slate-950" 
-                          : (isDark ? "text-cyan-500/60 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")
+                          : (isDark ? "text-cyan-400/75 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")
                       )} />
-                      <span className="relative z-10">{link.name}</span>
+                      <span className="relative z-10 truncate">{link.name}</span>
                     </Link>
                   );
                 })}
@@ -309,16 +328,16 @@ export default function DashboardLayoutClient({
           ))}
         </div>
 
-        <div className={cn("absolute bottom-0 left-0 w-full h-[72px] flex items-center px-4 border-t z-10", isDark ? "border-white/10 bg-[#0c0c0e]" : "border-slate-200 bg-white")}>
+        <div className={cn("shrink-0 w-full h-14 flex items-center px-3.5 border-t z-10 mt-auto", isDark ? "border-white/10 bg-[#0c0c0e]" : "border-slate-200 bg-white")}>
           <button
             onClick={() => {
               setSidebarOpen(false);
               handleLogout();
             }}
             aria-label="Sign out"
-            className={cn("flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium transition-colors", isDark ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-red-600 hover:bg-red-50")}
+            className={cn("flex items-center gap-2.5 px-3 py-2 w-full rounded-lg text-xs font-medium transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-red-600 hover:bg-red-50")}
           >
-            <LogOut className="w-5 h-5" aria-hidden="true" />
+            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
             Sign Out
           </button>
         </div>

@@ -414,7 +414,7 @@ export default function MyVpsPage() {
 
           <Link
             href="/dashboard/checkout?service=vps"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-xs sm:text-sm font-bold rounded-xl transition-all shadow-2xs shrink-0 text-slate-950"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-xs sm:text-xs font-bold rounded-xl transition-all shadow-2xs shrink-0 text-slate-950"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span className="hidden sm:inline">Deploy Instance</span>
@@ -462,7 +462,7 @@ export default function MyVpsPage() {
           {/* Unified Table Filter & Bulk Actions Bar */}
           <div
             className={cn(
-              "border-b px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3",
+              "border-b px-4 sm:px-3.5 py-2 flex flex-wrap items-center justify-between gap-3",
               isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/60"
             )}
           >
@@ -1395,7 +1395,7 @@ export default function MyVpsPage() {
           {totalPages > 1 && (
             <div
               className={cn(
-                "px-5 py-3 border-t",
+                "px-3.5 py-2 border-t",
                 isDark ? "border-white/[0.06] bg-white/[0.01]" : "border-slate-100 bg-slate-50/50"
               )}
             >

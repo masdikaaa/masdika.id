@@ -16,7 +16,7 @@ import { Select } from "@/components/ui/Select";
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 const getInputClass = (isDark: boolean) => cn(
-  'w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all',
+  'w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 transition-all',
   isDark ? 'bg-[#111115] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-cyan-500/20' : 'bg-slate-50/80 border-slate-200/90 text-slate-800 placeholder-slate-400 focus:border-cyan-600 focus:ring-cyan-600/20'
 );
 
@@ -195,7 +195,7 @@ export default function TicketsNewClient() {
               onChange={(val: string) => setFormData({ ...formData, service: val })}
               placeholder="-- Select a Service --"
               options={userServices.length > 0 ? userServices.map(s => ({ value: s.value, label: s.value })) : [{ value: '', label: 'No Available Services', disabled: true }]}
-              className="py-3 px-4 rounded-xl w-full"
+              className="px-3.5 py-2 rounded-xl w-full"
             />
           </div>
           <div>
@@ -210,7 +210,7 @@ export default function TicketsNewClient() {
                 { value: 'HIGH', label: 'High' },
                 { value: 'CRITICAL', label: 'Critical' }
               ]}
-              className="py-3 px-4 rounded-xl w-full"
+              className="px-3.5 py-2 rounded-xl w-full"
             />
           </div>
         </div>
@@ -294,7 +294,7 @@ export default function TicketsNewClient() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className={cn("flex items-center gap-2 px-5 py-4 border border-dashed rounded-xl text-sm transition-all w-full justify-center", isDark ? "bg-[#111115] border-white/[0.12] hover:border-cyan-500/50 text-zinc-400 hover:text-cyan-400" : "bg-slate-50/80 border-slate-300 hover:border-cyan-500/50 text-slate-500 hover:text-cyan-600")}
+            className={cn("flex items-center gap-2 px-3.5 py-2 border border-dashed rounded-xl text-xs transition-all w-full justify-center", isDark ? "bg-[#111115] border-white/[0.12] hover:border-cyan-500/50 text-zinc-400 hover:text-cyan-400" : "bg-slate-50/80 border-slate-300 hover:border-cyan-500/50 text-slate-500 hover:text-cyan-600")}
           >
             <Paperclip className="w-5 h-5" />
             Click to attach files
@@ -321,7 +321,7 @@ export default function TicketsNewClient() {
           <Link
             href="/dashboard/tickets"
             className={cn(
-              "px-4 py-2.5 text-xs sm:text-sm font-medium rounded-xl transition-colors whitespace-nowrap",
+              "px-3.5 py-2 text-xs sm:text-xs font-medium rounded-xl transition-colors whitespace-nowrap",
               isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
             )}
           >
@@ -330,7 +330,7 @@ export default function TicketsNewClient() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap bg-cyan-400 hover:bg-cyan-300 text-slate-950"
+            className="px-3.5 py-2 text-xs sm:text-xs font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap bg-cyan-400 hover:bg-cyan-300 text-slate-950"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Submit Ticket

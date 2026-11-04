@@ -232,7 +232,7 @@ export default function FirewallsDashboardPage() {
               setShowFirewallModal(true);
             }}
             disabled={!selectedVpsId}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
           >
             <Plus className="w-4 h-4" /> Add Rule
           </button>
@@ -253,7 +253,7 @@ export default function FirewallsDashboardPage() {
             <div className="w-full sm:w-1/2 md:w-1/3">
               <label className={cn("block text-xs sm:text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-700")}>Select Instance</label>
               {loadingVps ? (
-                <div className={cn("w-full border rounded-xl px-4 py-3 text-sm flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-500" : "bg-slate-50/80 border-slate-200/90 text-slate-500")}>
+                <div className={cn("w-full border rounded-xl px-3.5 py-2 text-xs flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-500" : "bg-slate-50/80 border-slate-200/90 text-slate-500")}>
                   <RefreshCw className="w-4 h-4 animate-spin" /> Loading instances...
                 </div>
               ) : (
@@ -265,7 +265,7 @@ export default function FirewallsDashboardPage() {
                     label: `${vps.hostname} (${vps.assignedIps?.[0]?.publicIp || vps.assignedIps?.[0]?.ipAddress || 'No IP'})`
                   }))}
                   placeholder={vpsList.length === 0 ? "No VPS instances found" : "Select a VPS Instance"}
-                  className={cn("w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
                 />
               )}
             </div>
@@ -277,7 +277,7 @@ export default function FirewallsDashboardPage() {
                 setShowFirewallModal(true);
               }}
               disabled={!selectedVpsId}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
             >
               <Plus className="w-4 h-4" /> Add Rule
             </button>
@@ -303,7 +303,7 @@ export default function FirewallsDashboardPage() {
                 return (
                 <div className="flex flex-col">
                   {selectedRules.length > 0 && (
-                    <div className={cn("px-4 py-2.5 border flex flex-wrap items-center justify-between gap-4 mb-3 rounded-xl", isDark ? "border-white/[0.08] bg-white/[0.02]" : "border-slate-200/90 bg-slate-50/80")}>
+                    <div className={cn("px-3.5 py-2 border flex flex-wrap items-center justify-between gap-4 mb-3 rounded-xl", isDark ? "border-white/[0.08] bg-white/[0.02]" : "border-slate-200/90 bg-slate-50/80")}>
                       <div className="flex items-center gap-1.5 md:gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
                         <span className={cn("text-xs font-bold px-2 py-1 rounded-md mr-2", isDark ? "text-cyan-400 bg-cyan-500/10" : "text-cyan-700 bg-cyan-100")}>{selectedRules.length} selected</span>
                         <button onClick={handleBulkDelete} disabled={bulkLoading} className={cn("p-1.5 md:px-3 md:py-1.5 rounded-lg transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 border", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200")}>
@@ -335,12 +335,12 @@ export default function FirewallsDashboardPage() {
                             <CheckCircle className={cn("w-3.5 h-3.5", firewallRules.length > 0 && selectedRules.length === firewallRules.length ? (isDark ? "text-slate-950" : "text-white") : "text-transparent")} />
                           </button>
                         </th>
-                        <th className="px-4 py-3 font-medium">Type</th>
-                      <th className="px-4 py-3 font-medium">Protocol</th>
-                      <th className="px-4 py-3 font-medium">Port Range</th>
-                      <th className="px-4 py-3 font-medium">Source IP</th>
-                      <th className="px-4 py-3 font-medium">Description</th>
-                      <th className="px-4 py-3 font-medium rounded-tr-xl text-right">Actions</th>
+                        <th className="px-3.5 py-2 font-medium">Type</th>
+                      <th className="px-3.5 py-2 font-medium">Protocol</th>
+                      <th className="px-3.5 py-2 font-medium">Port Range</th>
+                      <th className="px-3.5 py-2 font-medium">Source IP</th>
+                      <th className="px-3.5 py-2 font-medium">Description</th>
+                      <th className="px-3.5 py-2 font-medium rounded-tr-xl text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
@@ -474,7 +474,7 @@ export default function FirewallsDashboardPage() {
                       { value: "out", label: "Outbound (Outgoing Traffic)" }
                     ]}
                     placeholder="Select Direction"
-                    className={cn("w-full border rounded-xl px-4 py-3 text-sm hover:border-cyan-500/50 focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs hover:border-cyan-500/50 focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
                   />
                 </div>
 
@@ -490,7 +490,7 @@ export default function FirewallsDashboardPage() {
                       { value: "", label: "ALL" }
                     ]}
                     placeholder="Select Protocol"
-                    className={cn("w-full border rounded-xl px-4 py-3 text-sm hover:border-cyan-500/50 focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs hover:border-cyan-500/50 focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
                   />
                 </div>
 
@@ -501,7 +501,7 @@ export default function FirewallsDashboardPage() {
                     value={rulePort}
                     onChange={(e) => setRulePort(e.target.value)}
                     placeholder="e.g. 22, 80, 443, 8000:9000 (leave blank for ALL)"
-                    className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
                   />
                 </div>
 
@@ -512,7 +512,7 @@ export default function FirewallsDashboardPage() {
                     value={ruleSource}
                     onChange={(e) => setRuleSource(e.target.value)}
                     placeholder="e.g. 192.168.1.1 or 10.0.0.0/24 (leave blank for 0.0.0.0/0)"
-                    className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
                   />
                 </div>
 
@@ -523,7 +523,7 @@ export default function FirewallsDashboardPage() {
                     value={ruleComment}
                     onChange={(e) => setRuleComment(e.target.value)}
                     placeholder="e.g. Allow SSH from Home"
-                    className={cn("w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900")}
                   />
                 </div>
 
@@ -531,14 +531,14 @@ export default function FirewallsDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setShowFirewallModal(false)}
-                    className={cn("px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-colors border", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
+                    className={cn("px-3.5 py-2 rounded-xl text-xs sm:text-xs font-medium transition-colors border", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/[0.04]" : "border-slate-200/90 text-slate-700 hover:bg-slate-100")}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingRule}
-                    className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
+                    className="px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
                   >
                     {isSavingRule ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                     {isSavingRule ? 'Saving...' : 'Save Rule'}

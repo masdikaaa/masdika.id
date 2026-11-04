@@ -87,7 +87,7 @@ export default function ApiStatsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-          <div className={cn("w-full sm:w-auto flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-medium", isDark ? "bg-white/[0.02] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-700")}>
+          <div className={cn("w-full sm:w-auto flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-xs font-medium", isDark ? "bg-white/[0.02] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-700")}>
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             Live Metrics Active
           </div>

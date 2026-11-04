@@ -136,10 +136,10 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
             You don't have any active Cloud VPS or K3s clusters running. Deploy a service to start monitoring and configuring alerts.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/dashboard/checkout?service=vps" className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-sm inline-flex items-center gap-2">
+            <Link href="/dashboard/checkout?service=vps" className="px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs transition-all shadow-sm inline-flex items-center gap-2">
               Deploy VPS
             </Link>
-            <Link href="/dashboard/k3s" className={cn("px-5 py-2.5 rounded-xl border font-medium text-xs sm:text-sm transition-all inline-flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-white" : "bg-slate-50/80 border-slate-200/90 hover:bg-slate-100 text-slate-700")}>
+            <Link href="/dashboard/k3s" className={cn("px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-all inline-flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-white" : "bg-slate-50/80 border-slate-200/90 hover:bg-slate-100 text-slate-700")}>
               Deploy K3s
             </Link>
           </div>
@@ -156,9 +156,9 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
             <table className="w-full text-left border-collapse min-w-max">
               <thead>
                 <tr className={cn("border-b text-xs font-semibold uppercase tracking-wider", isDark ? "border-white/[0.08] bg-white/[0.02] text-zinc-400" : "border-slate-200/90 bg-slate-50/80 text-slate-500")}>
-                  <th className="py-3.5 px-4 sm:px-6 font-medium w-72">Resource Name</th>
-                  <th className="py-3.5 px-4 font-medium w-40">Type</th>
-                  <th className="py-3.5 px-4 font-medium">Active Alerts</th>
+                  <th className="px-3.5 py-2 sm:px-6 font-medium w-72">Resource Name</th>
+                  <th className="px-3.5 py-2 font-medium w-40">Type</th>
+                  <th className="px-3.5 py-2 font-medium">Active Alerts</th>
                   <th className="py-3.5 pl-4 pr-4 sm:pr-6 font-medium text-right">Action</th>
                 </tr>
               </thead>
@@ -170,7 +170,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
                 ) : (
                   paginatedList.map((item) => (
                     <tr key={`${item.type}-${item.id}`} className={cn("transition-colors group", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
-                      <td className="py-3.5 px-4 sm:px-6 align-middle">
+                      <td className="px-3.5 py-2 sm:px-6 align-middle">
                         <div className="flex items-center gap-3.5">
                           <div className={cn("w-10 h-10 shrink-0 rounded-xl flex items-center justify-center p-2 border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                             {item.type === 'vps' ? (
@@ -185,7 +185,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 align-middle">
+                      <td className="px-3.5 py-2 align-middle">
                         <div className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full border inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 uppercase tracking-wider", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                           {item.type === 'k3s' ? (
                             <>
@@ -200,20 +200,20 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
                           )}
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 align-middle">
+                      <td className="px-3.5 py-2 align-middle">
                         {renderActiveAlertsBadges(item.rules)}
                       </td>
                       <td className="py-3.5 pl-4 pr-4 sm:pr-6 align-middle text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link 
                             href={`/dashboard/metrics/${item.type}/${item.id}`}
-                            className={cn("inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-xl transition-colors border shadow-2xs", isDark ? "bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border-teal-500/20" : "bg-white hover:bg-slate-50 text-teal-700 border-slate-200/90")}
+                            className={cn("inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-xs font-medium rounded-xl transition-colors border shadow-2xs", isDark ? "bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border-teal-500/20" : "bg-white hover:bg-slate-50 text-teal-700 border-slate-200/90")}
                           >
                             <Activity className="w-4 h-4" /> Metrics
                           </Link>
                           <Link 
                             href={`/dashboard/alerts/${item.type}/${item.id}`}
-                            className={cn("inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-xl transition-colors border shadow-2xs", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-white hover:bg-slate-50 text-cyan-700 border-slate-200/90")}
+                            className={cn("inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-xs font-medium rounded-xl transition-colors border shadow-2xs", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-white hover:bg-slate-50 text-cyan-700 border-slate-200/90")}
                           >
                             <Settings className="w-4 h-4" /> Manage
                           </Link>

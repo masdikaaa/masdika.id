@@ -145,7 +145,7 @@ export default function TicketsClient() {
               {!searchQuery && (
                 <Link
                   href="/dashboard/tickets/new"
-                  className="mt-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 text-slate-950"
+                  className="mt-2 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs flex items-center gap-2 transition-all bg-cyan-400 hover:bg-cyan-300 text-slate-950"
                 >
                   <Plus className="w-4 h-4" /> Open a Ticket
                 </Link>
@@ -155,10 +155,10 @@ export default function TicketsClient() {
             <table className="w-full min-w-[600px] text-left">
               <thead className={cn("border-b", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                 <tr className={cn("text-[10px] uppercase tracking-widest font-black", isDark ? "text-zinc-500" : "text-slate-500")}>
-                  <th className="px-6 py-4">Ticket ID & Subject</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Last Updated</th>
-                  <th className="px-6 py-4 w-10"></th>
+                  <th className="px-3.5 py-2">Ticket ID & Subject</th>
+                  <th className="px-3.5 py-2">Status</th>
+                  <th className="px-3.5 py-2">Last Updated</th>
+                  <th className="px-3.5 py-2 w-10"></th>
                 </tr>
               </thead>
               <tbody className={cn("divide-y", isDark ? "divide-white/[0.08]" : "divide-slate-200/90")}>
@@ -171,22 +171,22 @@ export default function TicketsClient() {
                     className={cn("transition-colors group cursor-pointer", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}
                     onClick={() => router.push(`/dashboard/tickets/${t.ticketId.toLowerCase()}`)}
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2">
                       <div className="flex flex-col">
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1 border px-2 py-0.5 rounded-lg w-fit", isDark ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" : "text-cyan-700 bg-cyan-50 border-cyan-200")}>#{t.ticketId}</span>
                         <span className={cn("text-sm font-bold transition-colors mt-1", isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-600")}>{t.subject}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2">
                       <StatusBadge status={t.status} />
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3.5 py-2">
                       <div className={cn("flex items-center gap-2 text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
                         <Clock className={cn("w-3.5 h-3.5", isDark ? "text-zinc-500" : "text-slate-400")} />
                         {new Date(t.updatedAt).toLocaleString('id-ID')}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-3.5 py-2 text-right">
                       <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center transition-all border", isDark ? "bg-white/[0.02] border-white/[0.08] group-hover:bg-cyan-500/20 group-hover:text-cyan-400" : "bg-slate-50/80 border-slate-200/90 group-hover:bg-cyan-500/10 group-hover:text-cyan-700")}>
                         <ChevronRight className={cn("w-4 h-4 transition-colors", isDark ? "text-zinc-500 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")} />
                       </div>
