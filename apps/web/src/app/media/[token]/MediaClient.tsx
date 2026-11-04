@@ -500,14 +500,14 @@ export default function MediaClient({
 
       {/* ── Expiry banner ─────────────────────────────────────────────────────── */}
       {hasExpiry && (
-        <div className={cn("shrink-0 border-b px-4 py-2.5 flex items-center justify-center gap-2 text-xs transition-colors", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
+        <div className={cn("shrink-0 border-b px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-center transition-colors", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
           <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           <span>This link will expire on <strong>{formatExpiry(media.expiresAt!)}</strong></span>
         </div>
       )}
 
       {/* ── Media Player Showcase ────────────────────────────────────────────── */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
         {/* VIDEO (Video.js Player with Cyberpunk Theme) */}
         {type === "video" && (
           <div className="w-full">

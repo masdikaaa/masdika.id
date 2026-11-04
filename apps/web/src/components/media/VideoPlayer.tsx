@@ -21,6 +21,7 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
   const playerRef = useRef<Player | null>(null);
   const [playbackError, setPlaybackError] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [isPortrait, setIsPortrait] = useState(false);
 
   useEffect(() => {
     // Ensure container element exists
@@ -28,6 +29,7 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
 
     setPlaybackError(false);
     setErrorDetails(null);
+    setIsPortrait(false);
 
     // Create video element dynamically for clean disposal and hot reloading in React 19
     const videoElement = document.createElement("video-js");
@@ -60,7 +62,8 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
         autoplay: false,
         controls: true,
         responsive: true,
-        fluid: true,
+        fluid: false,
+        fill: true,
         preload: "metadata",
         poster: poster || undefined,
         playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
@@ -94,6 +97,18 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
       }
     );
 
+    const checkDimensions = () => {
+      const vw = player.videoWidth();
+      const vh = player.videoHeight();
+      if (vw && vh) {
+        setIsPortrait(vh > vw);
+      }
+    };
+
+    player.on("loadedmetadata", checkDimensions);
+    player.on("loadeddata", checkDimensions);
+    player.on("resize", checkDimensions);
+
     player.on("error", () => {
       const err = player.error();
       console.warn("Video.js playback error:", err);
@@ -121,7 +136,10 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
   return (
     <div
       className={cn(
-        "relative w-full rounded-2xl overflow-hidden transition-all group",
+        "relative rounded-2xl overflow-hidden transition-all duration-300 group mx-auto",
+        isPortrait
+          ? "w-full max-w-[350px] sm:max-w-[390px] lg:max-w-[420px] is-portrait-video"
+          : "w-full",
         isDark
           ? "border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.7)] bg-[#050610]"
           : "border border-slate-200 shadow-[0_10px_35px_rgba(0,0,0,0.12)] bg-black"
@@ -129,8 +147,8 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
     >
       {/* Title watermark on top-left overlay */}
       {title && (
-        <div className="absolute top-4 left-4 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-xs font-medium text-zinc-200 truncate max-w-sm">
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-[calc(100%-1.5rem)]">
+          <div className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs font-medium text-zinc-200 truncate">
             {title}
           </div>
         </div>
@@ -153,18 +171,18 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
               href={src}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-sm"
+              className="px-4 py-2 rounded-lg bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-semibold text-xs flex items-center gap-2 transition-all shadow-sm"
             >
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3.5 h-3.5" />
               Buka di Pemutar Bawaan
             </a>
             {downloadUrl && (
               <a
                 href={downloadUrl}
                 download
-                className="px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium text-xs sm:text-sm border border-white/15 flex items-center gap-2 transition-all"
+                className="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium text-xs border border-white/15 flex items-center gap-2 transition-all"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
                 Unduh Video Asli
               </a>
             )}
@@ -173,7 +191,15 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
       )}
 
       {/* Video.js container */}
-      <div ref={videoRef} className="w-full aspect-video" />
+      <div
+        ref={videoRef}
+        className={cn(
+          "w-full relative overflow-hidden",
+          isPortrait
+            ? "aspect-[9/16] max-h-[calc(100dvh-11.5rem)] sm:max-h-[75vh]"
+            : "aspect-video max-h-[calc(100dvh-11.5rem)] sm:max-h-[75vh]"
+        )}
+      />
 
       {/* Custom Theme Styles for Masdika Dark & Cyan Glow */}
       <style jsx global>{`
@@ -181,6 +207,14 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
           font-family: inherit;
           color: #f1f5f9;
           background-color: #03040b;
+          width: 100% !important;
+          height: 100% !important;
+        }
+
+        .vjs-theme-masdika .vjs-tech {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: contain !important;
         }
 
         /* Big Play Button Exactly in Center */
@@ -544,6 +578,55 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
           background: #06b6d4;
           color: #011627;
           font-weight: bold;
+        }
+
+        /* Responsive adjustments for Portrait Videos & Mobile Screens */
+        .is-portrait-video .vjs-theme-masdika .vjs-big-play-button {
+          width: 60px !important;
+          height: 60px !important;
+          line-height: 60px !important;
+          font-size: 30px !important;
+        }
+
+        .is-portrait-video .vjs-theme-masdika .vjs-control-bar {
+          height: 42px !important;
+          padding: 0 6px !important;
+        }
+
+        .is-portrait-video .vjs-theme-masdika .vjs-button,
+        .is-portrait-video .vjs-theme-masdika .vjs-playback-rate,
+        .is-portrait-video .vjs-theme-masdika .vjs-playback-rate .vjs-button,
+        .is-portrait-video .vjs-theme-masdika .vjs-picture-in-picture-control,
+        .is-portrait-video .vjs-theme-masdika .vjs-fullscreen-control {
+          height: 42px !important;
+          width: 30px !important;
+        }
+
+        .is-portrait-video .vjs-theme-masdika .vjs-button > .vjs-icon-placeholder:before,
+        .is-portrait-video .vjs-theme-masdika .vjs-playback-rate .vjs-playback-rate-value,
+        .is-portrait-video .vjs-theme-masdika .vjs-time-control {
+          line-height: 42px !important;
+        }
+
+        .is-portrait-video .vjs-theme-masdika .vjs-picture-in-picture-control,
+        .is-portrait-video .vjs-theme-masdika .vjs-time-divider,
+        .is-portrait-video .vjs-theme-masdika .vjs-duration {
+          display: none !important;
+        }
+
+        @media (max-width: 640px) {
+          .vjs-theme-masdika .vjs-big-play-button {
+            width: 56px !important;
+            height: 56px !important;
+            line-height: 56px !important;
+            font-size: 28px !important;
+          }
+          .vjs-theme-masdika .vjs-volume-bar {
+            display: none !important;
+          }
+          .vjs-theme-masdika .vjs-picture-in-picture-control {
+            display: none !important;
+          }
         }
       `}</style>
     </div>
