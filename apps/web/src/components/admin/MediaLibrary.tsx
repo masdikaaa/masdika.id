@@ -186,37 +186,43 @@ export default function MediaLibrary({
 
   return (
     <AnimatePresence>
-      <div key="media-lib-backdrop" className={cn("fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
+      <div key="media-lib-backdrop" className={cn("fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm", isDark ? "bg-black/80" : "bg-slate-900/40")}>
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className={cn("w-full max-w-5xl h-[85vh] rounded-3xl border flex flex-col overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
+          className={cn("w-full max-w-5xl h-[88vh] sm:h-[85vh] rounded-2xl sm:rounded-3xl border flex flex-col overflow-hidden shadow-2xl", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}
         >
           {/* Header */}
-          <div className={cn("flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6 border-b shrink-0", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-slate-50")}>
-            <div className="flex items-center gap-3">
-              <h2 className={cn("text-xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <ImageIcon className="w-5 h-5 text-cyan-400" />
-                {title}
-              </h2>
-              {media.length > 0 && (
-                <span className={cn("text-xs px-2.5 py-0.5 rounded-full font-medium", isDark ? "bg-white/10 text-slate-300" : "bg-slate-200 text-slate-700")}>
-                  {media.length} {media.length === 1 ? 'file' : 'files'}
-                </span>
-              )}
+          <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 sm:p-6 border-b shrink-0", isDark ? "border-slate-800 bg-[#0b1322]" : "border-slate-200 bg-slate-50")}>
+            <div className="flex items-center justify-between w-full sm:w-auto gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <h2 className={cn("text-lg sm:text-xl font-bold flex items-center gap-2 truncate", isDark ? "text-white" : "text-slate-900")}>
+                  <ImageIcon className="w-5 h-5 text-cyan-400 shrink-0" />
+                  <span className="truncate">{title}</span>
+                </h2>
+                {media.length > 0 && (
+                  <span className={cn("text-xs px-2.5 py-0.5 rounded-full font-medium shrink-0", isDark ? "bg-white/10 text-slate-300" : "bg-slate-200 text-slate-700")}>
+                    {media.length} {media.length === 1 ? 'file' : 'files'}
+                  </span>
+                )}
+              </div>
+
+              <button onClick={onClose} className={cn("sm:hidden transition-colors p-1.5 rounded-xl shrink-0", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="relative">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial min-w-0">
                 <Search className={cn("w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2", isSearching ? "text-cyan-400 animate-pulse" : "text-zinc-400")} />
                 <input
                   type="text"
-                  placeholder="Search images (Elasticsearch)..."
+                  placeholder="Search images..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={cn(
-                    "pl-9 pr-7 py-1.5 text-sm rounded-xl border transition-colors outline-none w-36 sm:w-56",
+                    "pl-9 pr-7 py-2 sm:py-1.5 text-sm rounded-xl border transition-colors outline-none w-full sm:w-56",
                     isDark ? "bg-white/5 border-white/10 text-white placeholder-zinc-500 focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500"
                   )}
                 />
@@ -234,7 +240,7 @@ export default function MediaLibrary({
                 onClick={() => fetchMedia(searchQuery)}
                 disabled={loading}
                 title="Refresh media"
-                className={cn("p-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
+                className={cn("p-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50 shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200")}
               >
                 <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
               </button>
@@ -242,14 +248,14 @@ export default function MediaLibrary({
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className={cn("flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-xl transition-all border disabled:opacity-50", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}
+                className={cn("flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all border disabled:opacity-50 shrink-0 whitespace-nowrap", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}
               >
-                <Upload className="w-4 h-4" />
+                <Upload className="w-4 h-4 shrink-0" />
                 {uploading ? "Uploading..." : "Upload New"}
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
               
-              <button onClick={onClose} className={cn("transition-colors p-2 rounded-xl shrink-0", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
+              <button onClick={onClose} className={cn("hidden sm:flex transition-colors p-2 rounded-xl shrink-0", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -257,7 +263,7 @@ export default function MediaLibrary({
 
           {/* Body */}
           <div 
-            className="flex-1 overflow-hidden flex flex-col md:flex-row relative"
+            className="flex-1 overflow-hidden flex flex-col md:flex-row relative min-h-0"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -270,7 +276,7 @@ export default function MediaLibrary({
               </div>
             )}
             {/* Grid */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 min-h-0">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="w-8 h-8 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
@@ -293,7 +299,7 @@ export default function MediaLibrary({
                   </div>
                 )
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                   {media.map((file) => (
                     <div 
                       key={file.url || file.name}
@@ -302,7 +308,7 @@ export default function MediaLibrary({
                     >
                       <img referrerPolicy="no-referrer" src={file.url} alt={file.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       {(selectedFile?.url === file.url || selectedFile?.name === file.name) && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
+                        <div className="absolute top-2 right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center shadow-md">
                           <Check className="w-3.5 h-3.5 text-white" />
                         </div>
                       )}
@@ -314,35 +320,49 @@ export default function MediaLibrary({
 
             {/* Sidebar (Details) */}
             {selectedFile && (
-              <div className={cn("w-full md:w-80 border-t md:border-t-0 md:border-l p-6 flex flex-col", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
-                <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-4", isDark ? "text-white" : "text-slate-900")}>Attachment Details</h3>
+              <div className={cn("w-full md:w-80 border-t md:border-t-0 md:border-l p-4 sm:p-5 md:p-6 flex flex-col shrink-0 max-h-[48vh] md:max-h-none overflow-y-auto", isDark ? "bg-[#060b14] border-slate-800" : "bg-slate-50 border-slate-200")}>
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider", isDark ? "text-white" : "text-slate-900")}>Attachment Details</h3>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(null)}
+                    className={cn("md:hidden p-1 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-700 hover:bg-slate-200")}
+                    title="Close details"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
                 
-                <div className={cn("aspect-video rounded-lg overflow-hidden border mb-4 flex items-center justify-center", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
-                  <img referrerPolicy="no-referrer" src={selectedFile.url} alt={selectedFile.name} className="max-w-full max-h-full object-contain" loading="lazy" decoding="async" />
+                <div className="flex flex-row md:flex-col gap-3.5 md:gap-0 items-center md:items-stretch md:flex-1">
+                  <div className={cn("w-24 h-20 sm:w-28 sm:h-20 md:w-full md:h-auto md:aspect-video shrink-0 rounded-lg overflow-hidden border md:mb-4 flex items-center justify-center", isDark ? "bg-[#0b1322] border-slate-800" : "bg-white border-slate-200")}>
+                    <img referrerPolicy="no-referrer" src={selectedFile.url} alt={selectedFile.name} className="max-w-full max-h-full object-contain" loading="lazy" decoding="async" />
+                  </div>
+
+                  <div className="space-y-1.5 md:space-y-3 flex-1 min-w-0">
+                    <div>
+                      <label className={cn("text-[11px] md:text-xs block", isDark ? "text-zinc-500" : "text-slate-500")}>File name</label>
+                      <p className={cn("text-xs sm:text-sm font-medium truncate md:whitespace-normal md:break-all", isDark ? "text-white" : "text-slate-900")} title={selectedFile.name}>{selectedFile.name}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 md:block md:space-y-3">
+                      <div>
+                        <label className={cn("text-[11px] md:text-xs block", isDark ? "text-zinc-500" : "text-slate-500")}>File size</label>
+                        <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                      </div>
+                      <div>
+                        <label className={cn("text-[11px] md:text-xs block", isDark ? "text-zinc-500" : "text-slate-500")}>Uploaded on</label>
+                        <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(selectedFile.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-3 flex-1">
-                  <div>
-                    <label className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>File name</label>
-                    <p className={cn("text-sm font-medium break-all", isDark ? "text-white" : "text-slate-900")}>{selectedFile.name}</p>
-                  </div>
-                  <div>
-                    <label className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>File size</label>
-                    <p className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{(selectedFile.size / 1024).toFixed(1)} KB</p>
-                  </div>
-                  <div>
-                    <label className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Uploaded on</label>
-                    <p className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(selectedFile.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-
-                <div className="mt-6 space-y-3">
+                <div className="mt-3.5 md:mt-6 flex flex-row md:flex-col gap-2.5 md:gap-3">
                   <button 
                     onClick={() => {
                       onSelect(selectedFile.url, selectedFile.name);
                       onClose();
                     }}
-                    className="w-full py-2.5 font-semibold rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-sm shadow-sm"
+                    className="flex-1 md:w-full py-2.5 px-4 font-semibold rounded-xl md:rounded-lg transition-colors bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm shadow-sm"
                   >
                     Select Image
                   </button>
@@ -351,9 +371,12 @@ export default function MediaLibrary({
                       e.stopPropagation();
                       confirmDelete(selectedFile.name);
                     }}
-                    className={cn("w-full py-2.5 font-medium rounded-xl transition-colors flex items-center justify-center gap-2", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400" : "bg-red-50 hover:bg-red-100 text-red-700")}
+                    className={cn("px-3.5 md:w-full py-2.5 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm shrink-0", isDark ? "bg-red-500/10 hover:bg-red-500/20 text-red-400" : "bg-red-50 hover:bg-red-100 text-red-700")}
+                    title="Delete Permanently"
                   >
-                    <Trash2 className="w-4 h-4" /> Delete Permanently
+                    <Trash2 className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline md:inline">Delete Permanently</span>
+                    <span className="sm:hidden">Delete</span>
                   </button>
                 </div>
               </div>

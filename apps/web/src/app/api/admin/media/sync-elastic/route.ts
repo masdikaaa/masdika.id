@@ -32,7 +32,7 @@ export async function POST() {
 
     // 2. Local uploads
     try {
-      const subFolders = ['blog', 'media', 'banners', 'jobs', 'projects', ''];
+      const subFolders = ['blog', 'series', 'media', 'banners', 'jobs', 'projects', 'avatars', 'community', 'promo', ''];
       for (const sub of subFolders) {
         const dir = sub ? getUploadsDir(sub) : getUploadsDir();
         if (!fs.existsSync(dir)) continue;
