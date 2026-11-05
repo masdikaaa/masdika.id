@@ -1339,23 +1339,23 @@ export function HomeClient({
       {/* ── 9. CTA ──────────────────────────────────────────────────── */}
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-8 sm:p-10 md:p-12 lg:p-14 shadow-sm transition-all duration-300">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-8 sm:p-10 md:p-12 lg:p-14 xl:p-16 shadow-sm transition-all duration-300">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
 
             {/* Left Content */}
-            <div className="max-w-xl text-left relative z-10">
+            <div className="max-w-xl lg:max-w-2xl text-left relative z-10">
               <div className="mb-4 inline-block">
                 <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
                   LET&apos;S BUILD TOGETHER
                 </Badge>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-[var(--text-primary)] mb-3 sm:mb-4 leading-[1.15] tracking-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-3 sm:mb-4 leading-[1.15] tracking-tight">
                 Ready to Scale Your<br />Infrastructure?
               </h2>
 
-              <p className="text-sm sm:text-base text-[var(--text-secondary)] mb-8 max-w-lg leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg text-[var(--text-secondary)] mb-8 max-w-xl leading-relaxed">
                 Elevate your digital presence with enterprise-grade cloud architectures, zero-downtime migrations, and bulletproof security.
               </p>
 
@@ -1380,14 +1380,14 @@ export function HomeClient({
               </div>
             </div>
 
-            {/* Right Hero Image (Desktop: Absolute grounded to bottom-right, keeping card sleek) */}
-            <div className="hidden md:block absolute right-4 lg:right-10 bottom-0 pointer-events-none select-none z-10">
+            {/* Right Hero Image (Desktop: Grounded at bottom-right of 1400px card) */}
+            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 bottom-0 pointer-events-none select-none z-10">
               <Image
                 src="/hero-card.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1374}
-                className="w-[280px] lg:w-[320px] xl:w-[340px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]"
+                className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]"
                 priority={false}
               />
             </div>
