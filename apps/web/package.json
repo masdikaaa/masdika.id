@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--no-deprecation tsx watch src/server.ts",
     "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096 --no-deprecation\" next build",
+    "analyze": "cross-env ANALYZE=true NODE_OPTIONS=\"--max-old-space-size=4096 --no-deprecation\" next build --webpack",
     "start": "tsx src/server.ts",
     "worker": "tsx scripts/worker.ts",
     "vnc-proxy": "tsx scripts/vnc-proxy.ts",
@@ -18,8 +19,8 @@
     "@elastic/elasticsearch": "^8.19.2",
     "@kubernetes/client-node": "^1.4.0",
     "@marsidev/react-turnstile": "^1.5.4",
-    "@opentelemetry/semantic-conventions": "^1.44.0",
     "@mdxeditor/editor": "^4.0.2",
+    "@opentelemetry/semantic-conventions": "^1.44.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@tailwindcss/typography": "^0.5.20",
@@ -72,6 +73,7 @@
     "ws": "^8.21.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.4.5",
     "@tailwindcss/postcss": "^4",
     "@types/elastic-apm-node": "^1.0.1",
     "@types/node": "^20",

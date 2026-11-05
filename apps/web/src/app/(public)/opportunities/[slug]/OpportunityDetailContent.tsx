@@ -7,7 +7,7 @@ import { ImageZoom } from "@/components/ui/ImageZoom";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { Opportunity } from "@prisma/client";
+import type { Opportunity } from "@prisma/client";
 
 export function OpportunityDetailContent({ opportunity }: { opportunity: Opportunity }) {
   const { theme } = useTheme();

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Calendar, CalendarDays, Briefcase, Video, Inbox, ArrowRight, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Opportunity } from "@prisma/client";
+import type { Opportunity } from "@prisma/client";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 

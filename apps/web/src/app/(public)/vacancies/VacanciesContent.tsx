@@ -18,7 +18,7 @@ import { OpportunityGrid } from "@/components/ui/OpportunityGrid";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
-import { Opportunity } from "@prisma/client";
+import type { Opportunity } from "@prisma/client";
 
 const item = {
   hidden: { opacity: 0, y: 20 },
