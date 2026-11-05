@@ -1,0 +1,45 @@
+# ==============================================================================
+# KEDA HELMCHART CONTROLLER (K3s Declarative Operator Installation)
+# K3s Helm Controller akan otomatis mengunduh chart KEDA dan memasang:
+# 1. keda-operator (controller manager untuk ScaledObject)
+# 2. keda-metrics-apiserver (adapter metrik eksternal RPS & Kafka)
+# 3. KEDA Custom Resource Definitions (CRDs)
+# ==============================================================================
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: keda
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: keda
+    app.kubernetes.io/part-of: masdika
+spec:
+  chart: keda
+  repo: https://kedacore.github.io/charts
+  targetNamespace: keda
+  createNamespace: true
+  valuesContent: |-
+    crds:
+      install: true
+    resources:
+      operator:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+      metricServer:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+      webhooks:
+        requests:
+          cpu: 20m
+          memory: 32Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
