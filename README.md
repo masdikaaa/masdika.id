@@ -698,6 +698,232 @@ npm run dev
 
 ---
 
+## 🚀 Panduan Deployment Server Baru dari Nol (Fresh OS to 100% Production Runbook)
+
+Panduan ini dirancang untuk tim DevOps / SRE jika server fisik / VPS (`192.168.79.4`) mengalami bencana, dilakukan *reinstall OS* (misal: Ubuntu 24.04 / 26.04 LTS), atau saat menyiapkan server produksi baru dari titik 0 hingga seluruh ekosistem Masdika berjalan 100% di produksi.
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│               RUNBOOK DEPLOYMENT SERVER BARU DARI NOL (0 -> 100)            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Langkah 1: Inisialisasi OS Host & Dependensi Dasar                          │
+│  Langkah 2: Proteksi Storage Host Sejak Awal (setup-storage-guard.sh)       │
+│  Langkah 3: Instalasi K3s Lightweight Kubernetes                             │
+│  Langkah 4: Setup Kredensial Kubeconfig & Akses Non-Root                    │
+│  Langkah 5: Deployment Fondasi Klaster (Namespace, ConfigMap & Secret)       │
+│  Langkah 6: Deployment Keamanan & Policy Zero-Trust (mTLS, Kyverno, CNI)    │
+│  Langkah 7: Deployment Data Tier (PostgreSQL, Redis, PgBouncer, Backup DR)  │
+│  Langkah 8: Migrasi Database Prisma / Restore Data Disaster Recovery        │
+│  Langkah 9: Deployment Observabilitas & Monitoring (Elastic, Vector, Loki)  │
+│  Langkah 10: Deployment Workload Aplikasi (App, Worker, VNC-Proxy, Ingress) │
+│  Langkah 11: Verifikasi Menyeluruh & Smoke Test (100% Production Ready)     │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Langkah 1: Inisialisasi OS Host & Dependensi Dasar
+Login sebagai root ke server baru (`ssh root@192.168.79.4`):
+```bash
+# 1. Update repositori paket & upgrade kernel/distro
+apt update && apt upgrade -y
+
+# 2. Pasang perkakas esensial sistem
+apt install -y curl wget git jq unzip htop net-tools ca-certificates gnupg lsb-release
+```
+
+---
+
+### Langkah 2: Proteksi Storage Host Sejak Detik Pertama (`setup-storage-guard.sh`)
+> [!IMPORTANT]
+> **Krusial (Standard SRE)**: Langkah ini dilakukan **SEBELUM atau SESAAT SETELAH** K3s diinstal. Tujuannya agar K3s langsung berjalan dengan batas *Garbage Collection* aman (High: 60% / Low: 45%) sejak detik pertama dan tidak pernah membiarkan image menumpuk hingga 85%.
+
+```bash
+# 1. Clone repositori Masdika ke direktori kerja
+git clone https://github.com/masdikaaa/masdika.id.git /home/andika/masdika.id
+cd /home/andika/masdika.id
+
+# 2. Beri izin eksekusi dan jalankan skrip storage guard
+chmod +x scripts/setup-storage-guard.sh
+sudo ./scripts/setup-storage-guard.sh
+```
+*Skrip ini secara otomatis:*
+* Membuat `/etc/rancher/k3s/config.yaml` dengan parameter `image-gc-high-threshold=60`, `image-gc-low-threshold=45`, dan limit log container 10MB/3 rotasi.
+* Membuat `/etc/systemd/journald.conf.d/00-limits.conf` (hard-cap log sistem 500 MB & auto-vacuum 7 hari).
+* Memasang cron harian otomatis di `/etc/cron.daily/masdika-cleanup`.
+
+---
+
+### Langkah 3: Instalasi K3s Lightweight Kubernetes
+Jalankan installer resmi K3s (K3s akan secara otomatis membaca konfigurasi `/etc/rancher/k3s/config.yaml` yang telah dipasang di Langkah 2):
+```bash
+curl -sfL https://get.k3s.io | sh -
+
+# Verifikasi service k3s aktif dan sehat
+systemctl status k3s --no-pager
+```
+
+---
+
+### Langkah 4: Setup Kubeconfig & Akses Non-Root
+Agar perintah `kubectl` dapat dijalankan oleh user biasa tanpa harus menggunakan `sudo`:
+```bash
+mkdir -p /home/andika/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml /home/andika/.kube/config
+sudo chown -R andika:andika /home/andika/.kube
+chmod 600 /home/andika/.kube/config
+
+# Tambahkan KUBECONFIG ke environment user
+echo "export KUBECONFIG=/home/andika/.kube/config" >> /home/andika/.bashrc
+source /home/andika/.bashrc
+
+# Verifikasi node klaster aktif
+kubectl get nodes -o wide
+```
+
+---
+
+### Langkah 5: Deployment Fondasi Klaster (Namespace, ConfigMap & Secret)
+```bash
+cd /home/andika/masdika.id
+
+# 1. Terapkan Namespace terisolasi 'masdika'
+kubectl apply -f k8s/base/namespace.yaml
+
+# 2. Terapkan ConfigMap variabel lingkungan global
+kubectl apply -f k8s/base/configmap.yaml
+
+# 3. Terapkan Secret Kredensial Produksi:
+# Opsi A (GitOps Sealed Secret jika Bitnami Controller aktif):
+# kubectl apply -f k8s/base/masdika-secret.sealed.yaml
+
+# Opsi B (Manual dari file .env produksi di server):
+kubectl create secret generic masdika-secret \
+  -n masdika \
+  --from-env-file=.env
+```
+
+---
+
+### Langkah 6: Deployment Keamanan & Policy Zero-Trust
+```bash
+# 1. Terapkan sertifikat CA Cloudflare Origin Pull (mTLS) di Traefik Ingress
+kubectl apply -f k8s/security/cloudflare-origin-pull.yaml
+
+# 2. Terapkan isolasi jaringan CNI Zero-Trust (NetworkPolicy database & pooler)
+kubectl apply -f k8s/security/networkpolicy.yaml
+
+# 3. Terapkan Admission Controller Kyverno, Falco runtime sensor, dan Trivy Operator
+kubectl apply -f k8s/security/kyverno-policies.yaml
+kubectl apply -f k8s/security/falco.yaml
+kubectl apply -f k8s/security/trivy-operator.yaml
+```
+
+---
+
+### Langkah 7: Deployment Data Tier (Database, Cache & Connection Pooling)
+```bash
+# 1. Terapkan PersistentVolumeClaim (PVC)
+kubectl apply -f k8s/app/pvc.yaml
+
+# 2. Deploy PostgreSQL Database Relasional Utama
+kubectl apply -f k8s/databases/postgres.yaml
+
+# 3. Deploy Redis In-Memory Cache
+kubectl apply -f k8s/databases/redis.yaml
+
+# 4. Deploy PgBouncer Connection Pooler (Mode Transaksi)
+kubectl apply -f k8s/databases/pgbouncer.yaml
+
+# 5. Deploy CronJob Otomatis Backup DR ke RustFS S3
+kubectl apply -f k8s/databases/backup-cronjob.yaml
+
+# Tunggu hingga database pod Ready
+kubectl rollout status deployment/masdika-db -n masdika --timeout=120s
+kubectl rollout status deployment/masdika-redis -n masdika --timeout=60s
+kubectl rollout status deployment/masdika-pgbouncer -n masdika --timeout=60s
+```
+
+---
+
+### Langkah 8: Migrasi Database Prisma / Restore Data (Disaster Recovery)
+```bash
+# Skenario A: Inisialisasi Skema Baru (Fresh Deployment)
+npx prisma migrate deploy
+
+# Skenario B: Pemulihan Bencana dari Backup Terenkripsi RustFS S3 (Disaster Recovery)
+# 1. Unduh file dump terenkripsi terbaru dari bucket S3 masdika-database:
+# rclone copy rustfs:masdika-database/backup/latest.sql.gz.gpg /tmp/
+# 2. Dekripsi GPG AES-256 dan stream langsung ke database pod:
+# gpg --batch --yes --decrypt --passphrase "$GPG_BACKUP_PASSPHRASE" /tmp/latest.sql.gz.gpg | gunzip | kubectl exec -i -n masdika deployment/masdika-db -- psql -U masdika -d masdika
+```
+
+---
+
+### Langkah 9: Deployment Observabilitas & Monitoring Stack
+```bash
+# Terapkan seluruh komponen monitoring (Prometheus, Grafana, Vector, Loki, Beats)
+kubectl apply -f k8s/monitoring/pvc.yaml
+kubectl apply -f k8s/monitoring/alertmanager.yaml
+kubectl apply -f k8s/monitoring/prometheus.yaml
+kubectl apply -f k8s/monitoring/alert-rules.yaml
+kubectl apply -f k8s/monitoring/dashboards.yaml
+kubectl apply -f k8s/monitoring/grafana.yaml
+kubectl apply -f k8s/monitoring/vector.yaml
+kubectl apply -f k8s/monitoring/loki.yaml
+kubectl apply -f k8s/monitoring/promtail.yaml
+kubectl apply -f k8s/monitoring/filebeat.yaml
+kubectl apply -f k8s/monitoring/metricbeat.yaml
+kubectl apply -f k8s/monitoring/node-exporter.yaml
+kubectl apply -f k8s/monitoring/heartbeat.yaml
+kubectl apply -f k8s/monitoring/ingress.yaml
+```
+
+---
+
+### Langkah 10: Deployment Workload Aplikasi Masdika
+```bash
+# 1. Terapkan Service & Ingress Routing
+kubectl apply -f k8s/app/service.yaml
+kubectl apply -f k8s/app/ingress.yaml
+
+# 2. Terapkan PodDisruptionBudget & Autoscaling HPA
+kubectl apply -f k8s/app/pdb.yaml
+kubectl apply -f k8s/app/hpa.yaml
+
+# 3. Terapkan Deployment Aplikasi (Next.js 16 Web, Worker, VNC-Proxy)
+kubectl apply -f k8s/app/deployment.yaml
+
+# Tunggu hingga seluruh pod aplikasi ter-rollout sempurna
+kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
+kubectl rollout status deployment/masdika-worker -n masdika --timeout=120s
+kubectl rollout status deployment/masdika-vnc-proxy -n masdika --timeout=120s
+```
+
+---
+
+### Langkah 11: Verifikasi Menyeluruh & Smoke Test (100% Production Ready)
+```bash
+# 1. Periksa seluruh status pod di namespace 'masdika' (harus Running / Completed)
+kubectl get pods -n masdika -o wide
+
+# 2. Periksa status routing Ingress Traefik
+kubectl get ingress -n masdika
+
+# 3. Verifikasi proteksi storage Kubelet GC aktif di log K3s
+journalctl -u k3s -b --no-pager | grep -i "image-gc"
+
+# 4. Periksa kapasitas penyimpanan host
+df -h /
+
+# 5. Uji respons endpoint HTTPS publik melalui Cloudflare
+curl -I -k https://masdika.id/
+```
+
+Platform Masdika kini telah **100% beroperasi penuh** dari kondisi bare metal / fresh OS dengan seluruh fondasi SRE, keamanan mTLS, dan proteksi storage anti-penuh aktif!
+
+---
+
 ## 🛠️ Cheatsheet Operasional SRE & DevOps (Server: 192.168.79.4)
 
 ### 1. Manajemen Secret & GitOps (Bitnami Sealed Secrets)

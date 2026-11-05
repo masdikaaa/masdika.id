@@ -123,3 +123,4 @@ log_info "Pemeriksaan Kubelet arguments di K3s:"
 if command -v journalctl >/dev/null 2>&1; then
     journalctl -u k3s -b --no-pager | grep -i "image-gc" | tail -n 1 || true
 fi
+
