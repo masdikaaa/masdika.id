@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic';
 /**
  * GET: Mengambil status koneksi Kafka, daftar topik, dan metadata broker
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (auth.error || !auth.user) {
+      return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: auth.status || 401 });
     }
 
     const client = getKafkaClient();
@@ -58,8 +58,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (auth.error || !auth.user) {
+      return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: auth.status || 401 });
     }
 
     const body = await req.json().catch(() => ({}));
