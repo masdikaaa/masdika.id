@@ -1380,47 +1380,28 @@ export function HomeClient({
               </div>
             </div>
 
-            {/* Right Hero Image (Desktop: Grounded at bottom-right of 1400px card with smooth gradient fade) */}
+            {/* Right Hero Image (Desktop: Grounded at bottom-right of 1400px card) */}
             <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 bottom-0 pointer-events-none select-none z-10">
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 76%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)",
-                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 76%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)",
-                }}
-              >
-                <Image
-                  src="/hero-card-1.webp"
-                  alt="Ready to Scale Infrastructure - Masdika"
-                  width={1145}
-                  height={1215}
-                  className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
-                  priority={false}
-                />
-                {/* Soft grounded bottom gradient fade matching card surface */}
-                <div className="absolute bottom-0 inset-x-0 h-10 sm:h-14 bg-gradient-to-t from-[var(--surface)] via-[var(--surface)]/40 to-transparent pointer-events-none z-20" />
-              </div>
+              <Image
+                src="/hero-card-1.webp"
+                alt="Ready to Scale Infrastructure - Masdika"
+                width={1145}
+                height={1110}
+                className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                priority={false}
+              />
             </div>
 
-            {/* Mobile Hero (Centered at bottom with smooth gradient fade) */}
-            <div className="block md:hidden mt-6 -mb-6 flex justify-center pointer-events-none select-none">
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 76%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)",
-                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 76%, rgba(0,0,0,0.4) 90%, rgba(0,0,0,0) 100%)",
-                }}
-              >
-                <Image
-                  src="/hero-card-1.webp"
-                  alt="Ready to Scale Infrastructure - Masdika"
-                  width={1145}
-                  height={1215}
-                  className="w-48 sm:w-56 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
-                  priority={false}
-                />
-                <div className="absolute bottom-0 inset-x-0 h-8 sm:h-10 bg-gradient-to-t from-[var(--surface)] via-[var(--surface)]/40 to-transparent pointer-events-none z-20" />
-              </div>
+            {/* Mobile Hero (Centered at bottom) */}
+            <div className="block md:hidden mt-6 -mb-8 flex justify-center pointer-events-none select-none">
+              <Image
+                src="/hero-card-1.webp"
+                alt="Ready to Scale Infrastructure - Masdika"
+                width={1145}
+                height={1110}
+                className="w-48 sm:w-56 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                priority={false}
+              />
             </div>
           </FadeIn>
         </div>
