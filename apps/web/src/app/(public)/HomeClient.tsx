@@ -1193,7 +1193,7 @@ export function HomeClient({
             >
               {[...testimonials, ...testimonials].map((testi, idx) => {
                 const ratingVal = Number(testi.rating || 5).toFixed(1);
-                const isLongText = (testi.text || "").length > 130;
+                const isLongText = (testi.text || "").length > 200;
                 const isExpanded = expandedTestimonials.has(idx);
 
                 return (
@@ -1238,7 +1238,7 @@ export function HomeClient({
                           }}
                           className="mt-2 text-xs font-semibold text-cyan-500 hover:text-cyan-400 dark:text-cyan-400 inline-flex items-center gap-1 transition-colors self-start cursor-pointer select-none group/btn"
                         >
-                          <span>{isExpanded ? "Sembunyikan" : "Selengkapnya"}</span>
+                          <span>{isExpanded ? "Show less" : "Read more"}</span>
                           <ChevronDown
                             className={cn(
                               "w-3.5 h-3.5 transition-transform duration-200 text-cyan-500 group-hover/btn:translate-y-0.5",
