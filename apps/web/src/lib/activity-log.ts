@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { publishAuditEvent } from '@/lib/kafka';
 
 export interface LogClientActivityParams {
   userId: number;
@@ -22,6 +23,19 @@ export async function logClientActivity({
 }: LogClientActivityParams) {
   try {
     if (!userId || !description) return null;
+
+    // 1. Stream ke Apache Kafka Event Bus secara asinkron (non-blocking)
+    publishAuditEvent({
+      userId,
+      description,
+      username,
+      ipAddress,
+      category,
+      metadata: {
+        ...(typeof metadata === 'object' ? metadata : { raw: metadata }),
+        persist: false, // Sudah disimpan langsung ke database di bawah untuk respons instan
+      },
+    }).catch(() => {});
 
     const metaString = typeof metadata === 'object' ? JSON.stringify(metadata) : metadata || null;
 

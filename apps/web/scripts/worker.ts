@@ -10,6 +10,7 @@ async function start() {
   const { VpsProvisioningService } = await import("@/lib/vps-provisioning");
   const { reinstallK3sCluster } = await import("@/lib/k3s-reinstall");
   const { prisma } = await import("@/lib/prisma");
+  const { startKafkaConsumer, stopKafkaConsumer } = await import("@/lib/kafka-consumer");
 
   // --- Health Check Server ---
   const port = process.env.WORKER_PORT || 8080;
@@ -30,9 +31,12 @@ async function start() {
   let isShuttingDown = false;
   let isCurrentlyProcessing = false;
 
-  const handleShutdown = (signal: string) => {
+  const handleShutdown = async (signal: string) => {
     console.log(`[Worker] Received ${signal}. Preparing graceful shutdown...`);
     isShuttingDown = true;
+    try {
+      await stopKafkaConsumer();
+    } catch {}
     if (!isCurrentlyProcessing) {
       console.log(`[Worker] Idle. Exiting immediately on ${signal}.`);
       process.exit(0);
@@ -43,6 +47,15 @@ async function start() {
 
   process.on("SIGTERM", () => handleShutdown("SIGTERM"));
   process.on("SIGINT", () => handleShutdown("SIGINT"));
+
+  // 🚀 Start background Kafka event consumer
+  startKafkaConsumer().then(consumer => {
+    if (consumer) {
+      console.log("> [Worker] Kafka background event consumer active and listening");
+    }
+  }).catch(err => {
+    console.warn("> [Worker] Kafka consumer initialization warning:", err?.message || err);
+  });
 
   // Auto-recover any jobs left in PROCESSING by previous container crash / restart
   await JobQueueService.recoverStaleJobs(5).then(count => {

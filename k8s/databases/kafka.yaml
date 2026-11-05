@@ -153,3 +153,4 @@ spec:
       port: 9093
       targetPort: 9093
       protocol: TCP
+

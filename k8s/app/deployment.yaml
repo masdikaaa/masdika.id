@@ -56,6 +56,13 @@ spec:
                 sleep 3
               done
               echo "Elasticsearch is online and accepting connections!"
+
+              echo "Checking Kafka connection (masdika-kafka:9092)..."
+              until nc -z -w 3 masdika-kafka 9092; do
+                echo "Kafka is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "Kafka is online and accepting connections!"
       imagePullSecrets:
         - name: dockerhub-secret
       containers:
@@ -208,6 +215,13 @@ spec:
                 sleep 3
               done
               echo "Elasticsearch is online and accepting connections!"
+
+              echo "Checking Kafka connection (masdika-kafka:9092)..."
+              until nc -z -w 3 masdika-kafka 9092; do
+                echo "Kafka is not ready yet. Retrying in 2 seconds..."
+                sleep 2
+              done
+              echo "Kafka is online and accepting connections!"
       imagePullSecrets:
         - name: dockerhub-secret
       containers:
