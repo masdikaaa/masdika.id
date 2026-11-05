@@ -545,7 +545,7 @@ export default function SkillsPage() {
                 label: "SLA-Driven Execution",
                 tag: "Reliability",
                 desc: "Laser focus on delivering measurable production uptime, cost optimization, and deployment velocity.",
-                metric: "99.98% Target SLA",
+                metric: "98.99% Target SLA",
                 icon: Target,
               },
             ].map((trait, idx) => (

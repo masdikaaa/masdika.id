@@ -79,7 +79,7 @@ const CORE_COMPETENCIES = [
     badge: "SRE & Telemetry",
     title: "Databases, CI/CD & Observability",
     description:
-      "Ensuring 99.98% service reliability through full-stack metrics, log aggregation, and zero-downtime pipelines.",
+      "Ensuring 98.99% service reliability through full-stack metrics, log aggregation, and zero-downtime pipelines.",
     skills: [
       "PostgreSQL, MySQL & Redis High Availability",
       "GitHub Actions, GitLab CI & Terraform IaC",
@@ -302,7 +302,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   </div>
                   <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]">
                     <p className="text-lg sm:text-xl font-black font-mono text-emerald-500 dark:text-emerald-400">
-                      99.98%
+                      98.99%
                     </p>
                     <p className="text-[11px] font-mono text-[var(--text-muted)] mt-0.5">
                       Production Uptime

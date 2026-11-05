@@ -550,7 +550,7 @@ export function HomeClient({
 
                 <div className="pt-3.5 border-t border-[var(--border-primary)] flex items-center justify-between text-xs">
                   <span className="text-[var(--text-secondary)] font-medium">Production SLA</span>
-                  <span className={cn("font-mono font-bold", iconAccent)}>99.98% Uptime</span>
+                  <span className={cn("font-mono font-bold", iconAccent)}>98.99% Uptime</span>
                 </div>
               </div>
             </FadeIn>
