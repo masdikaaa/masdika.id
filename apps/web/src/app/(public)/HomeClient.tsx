@@ -535,14 +535,14 @@ export function HomeClient({
                 </div>
 
                 <div className="my-5 flex items-center gap-4">
-                  <p className="inline-flex items-center text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none shrink-0">
+                  <div className="flex items-center text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none shrink-0">
                     4<span className={iconAccent}>+</span>
-                  </p>
-                  <div className="flex flex-col justify-center">
-                    <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] leading-tight">
+                  </div>
+                  <div className="flex flex-col justify-center border-l border-[var(--border-primary)] pl-3.5">
+                    <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] leading-snug">
                       Years of Experience
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-1 leading-tight">
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5 leading-snug font-mono">
                       Cloud &amp; DevOps Engineering
                     </p>
                   </div>
@@ -555,17 +555,49 @@ export function HomeClient({
               </div>
             </FadeIn>
 
-            {/* Row 1, Right: About Me Heading & Lead */}
-            <FadeIn direction="left" delay={0.1} duration={0.7} className="lg:col-span-8 flex flex-col justify-center lg:pl-4">
-              <span className={cn("text-xs font-semibold uppercase tracking-widest mb-3 block", iconAccent)}>
-                About Me
-              </span>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] mb-4 leading-[1.15]">
-                Boost business with Modern Cloud
-              </h2>
-              <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl">
-                As a dedicated DevOps and Cloud Engineer, I specialize in automating workflows, managing multi-cloud deployments, and scaling organizational infrastructure. I ensure your environments are secure, efficient, and highly available.
-              </p>
+            {/* Row 1, Right: About Me Bento Card */}
+            <FadeIn direction="left" delay={0.1} duration={0.7} className="lg:col-span-8 flex">
+              <div className="group relative w-full h-full rounded-2xl p-6 sm:p-7 flex flex-col justify-between border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 transition-all duration-300 overflow-hidden">
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-cyan-600 dark:text-cyan-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+                      About Me
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[var(--text-muted)]">
+                      <Terminal className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
+                      Cloud &amp; DevOps Specialist
+                    </span>
+                  </div>
+
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--text-primary)] mb-3 leading-[1.2] tracking-tight">
+                    Boost business with Modern Cloud
+                  </h2>
+
+                  <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+                    As a dedicated DevOps and Cloud Engineer, I specialize in automating workflows, managing multi-cloud deployments, and scaling organizational infrastructure. I ensure your environments are secure, efficient, and highly available.
+                  </p>
+                </div>
+
+                <div className="pt-3.5 mt-5 border-t border-[var(--border-primary)] flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {["Bare-Metal & BGP", "Kubernetes (K3s)", "CI/CD & GitOps", "Terraform IaC"].map((chip) => (
+                      <span
+                        key={chip}
+                        className="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                  <Link
+                    href="/resume"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                  >
+                    View Resume <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
             </FadeIn>
 
             {/* Row 2: 3 Equal-Height Aligned Pillar Cards (4 + 4 + 4 cols) */}
