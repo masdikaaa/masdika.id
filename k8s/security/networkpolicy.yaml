@@ -229,6 +229,9 @@ spec:
         - podSelector:
             matchLabels:
               app: masdika-kafka
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: keda
       ports:
         - protocol: TCP
           port: 9092
