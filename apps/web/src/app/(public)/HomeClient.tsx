@@ -1340,7 +1340,7 @@ export function HomeClient({
       <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-8 sm:p-10 md:p-12 lg:p-14 xl:p-16 shadow-sm transition-all duration-300">
+          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-6 sm:p-8 md:p-12 lg:p-14 xl:p-16 shadow-sm transition-all duration-300">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
 
             {/* Left Content */}
@@ -1381,7 +1381,7 @@ export function HomeClient({
             </div>
 
             {/* Right Hero Image (Desktop: Lowered downwards so card border cleanly clips pants, showing only jacket) */}
-            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-12 lg:-bottom-16 xl:-bottom-20 pointer-events-none select-none z-10">
+            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-6 lg:-bottom-8 xl:-bottom-10 pointer-events-none select-none z-10">
               <Image
                 src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
@@ -1392,14 +1392,14 @@ export function HomeClient({
               />
             </div>
 
-            {/* Mobile Hero (Centered at bottom and lowered) */}
-            <div className="block md:hidden mt-6 -mb-16 flex justify-center pointer-events-none select-none">
+            {/* Mobile Hero (Centered at bottom, sitting on card border with pants cleanly clipped) */}
+            <div className="block md:hidden mt-6 -mb-6 sm:-mb-8 flex justify-center pointer-events-none select-none">
               <Image
                 src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1060}
-                className="w-48 sm:w-56 h-auto object-contain object-bottom translate-y-8 sm:translate-y-10 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                className="w-52 sm:w-60 h-auto object-contain object-bottom translate-y-3 sm:translate-y-4 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
