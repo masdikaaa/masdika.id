@@ -9,16 +9,31 @@ import { cn } from "@/lib/utils";
  */
 export function InitialPreloader() {
   const [fading, setFading] = useState(false);
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return sessionStorage.getItem("masdika-initial-loaded") === "true";
+      } catch {}
+    }
+    return false;
+  });
 
   useEffect(() => {
+    try {
+      if (sessionStorage.getItem("masdika-initial-loaded") === "true") {
+        setHidden(true);
+        return;
+      }
+      sessionStorage.setItem("masdika-initial-loaded", "true");
+    } catch {}
+
     let hideTimer: ReturnType<typeof setTimeout>;
     const fadeTimer = setTimeout(() => {
       setFading(true);
       hideTimer = setTimeout(() => {
         setHidden(true);
-      }, 250);
-    }, 300);
+      }, 200);
+    }, 200);
 
     return () => {
       clearTimeout(fadeTimer);

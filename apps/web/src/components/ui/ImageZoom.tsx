@@ -13,9 +13,13 @@ interface ImageZoomProps {
    */
   variant?: "default" | "hero";
   hintText?: string;
+  /**
+   * Set priority for LCP images above the fold (defaults to true)
+   */
+  priority?: boolean;
 }
 
-export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoomProps) {
+export function ImageZoom({ src, alt, variant = "default", hintText, priority = true }: ImageZoomProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -104,10 +108,14 @@ export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoom
           onClick={() => setIsOpen(true)}
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-transparent to-cyan-500/20 z-10 pointer-events-none" />
-          <img referrerPolicy="no-referrer"             src={src}
+          <img referrerPolicy="no-referrer"
+            src={src}
             alt={alt}
             className="w-full h-auto object-cover transition-all duration-700 relative z-0"
-          loading="lazy" decoding="async" />
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding="async"
+          />
           {hintText && <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500 z-10" />}
           <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 z-20 ${hintText ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
             <div className={`bg-black/50 backdrop-blur-md ${hintText ? 'py-2 px-4 sm:py-3 sm:px-5 border border-white/10 group-hover:border-white/30 group-hover:bg-black/60 shadow-xl' : 'p-3 sm:p-4'} rounded-full text-white flex items-center gap-1.5 sm:gap-2 transition-all`}>
@@ -130,10 +138,14 @@ export function ImageZoom({ src, alt, variant = "default", hintText }: ImageZoom
         className="w-full rounded-3xl overflow-hidden mb-10 border border-[var(--border-primary)] relative cursor-zoom-in group bg-[var(--surface)]"
         onClick={() => setIsOpen(true)}
       >
-        <img referrerPolicy="no-referrer"           src={src}
+        <img referrerPolicy="no-referrer"
+          src={src}
           alt={alt}
           className="w-full h-auto max-h-[400px] sm:max-h-[500px] object-cover group-hover:scale-105 transition-transform duration-500"
-        loading="lazy" decoding="async" />
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          decoding="async"
+        />
         {hintText && <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />}
         <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${hintText ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
           <div className={`bg-black/50 backdrop-blur-md ${hintText ? 'py-1.5 px-3 sm:py-2.5 sm:px-5 border border-white/10 group-hover:border-white/30 group-hover:bg-black/60 shadow-xl' : 'p-2.5 sm:p-3'} rounded-full text-white flex items-center gap-1.5 sm:gap-2 transition-all`}>

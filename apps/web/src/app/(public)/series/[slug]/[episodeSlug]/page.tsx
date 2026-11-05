@@ -292,7 +292,8 @@ export default async function EpisodePage({
                 src={episode.image}
                 alt={episode.title}
                 className="w-full h-full object-cover"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
                 decoding="async"
               />
             </div>

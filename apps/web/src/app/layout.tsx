@@ -102,6 +102,48 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Preconnect & DNS-Prefetch for high-frequency external endpoints */}
+        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+        <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="anonymous" />
+        {/* Speculation Rules API: Native Chromium 0ms instant page navigation */}
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              prerender: [
+                {
+                  source: "document",
+                  where: {
+                    and: [
+                      { href_matches: "/*" },
+                      { not: { href_matches: "/admin/*" } },
+                      { not: { href_matches: "/dashboard/*" } },
+                      { not: { href_matches: "/api/*" } },
+                      { not: { href_matches: "/login" } },
+                      { not: { href_matches: "/register" } },
+                      { not: { selector_matches: "[data-no-prerender]" } },
+                    ],
+                  },
+                  eagerness: "moderate",
+                },
+              ],
+              prefetch: [
+                {
+                  source: "document",
+                  where: {
+                    and: [
+                      { href_matches: "/*" },
+                      { not: { href_matches: "/admin/*" } },
+                      { not: { href_matches: "/dashboard/*" } },
+                      { not: { href_matches: "/api/*" } },
+                    ],
+                  },
+                  eagerness: "conservative",
+                },
+              ],
+            }),
+          }}
+        />
         {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{

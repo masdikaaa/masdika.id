@@ -1,0 +1,71 @@
+# ==============================================================================
+# KEDA SCALEDOBJECT (Intelligent Event-Driven Autoscaler for masdika-app)
+# Mengatur auto-scaling otomatis berdasarkan beban riil:
+# 1. Prometheus / Traefik Request Per Second (RPS)
+# 2. Kafka Topic Consumer Lag (audit-logs worker)
+# 3. CPU & Memory utilization fallback
+# ==============================================================================
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: masdika-app-scaledobject
+  namespace: masdika
+  labels:
+    app: masdika-app
+    app.kubernetes.io/part-of: masdika
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: masdika-app
+  minReplicaCount: 2 # Minimal 2 pod aktif (High Availability & Zero-Downtime)
+  maxReplicaCount: 8 # Maksimal 8 pod saat traffic lonjakan tinggi
+  cooldownPeriod: 300 # Stabil 5 menit sebelum scale down agar tidak flapping
+  pollingInterval: 15 # Evaluasi metrik setiap 15 detik
+
+  advanced:
+    restoreToOriginalReplicaCount: false
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 15
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 60
+
+  triggers:
+    # ── 1. Scale berdasarkan CPU Utilization ──
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "75"
+
+    # ── 2. Scale berdasarkan Memory RAM ──
+    - type: memory
+      metricType: Utilization
+      metadata:
+        value: "80"
+
+    # ── 3. Scale berdasarkan Real-time HTTP Request Rate (Prometheus Traefik RPS) ──
+    - type: prometheus
+      metadata:
+        serverAddress: http://masdika-prometheus.masdika.svc.cluster.local:9090
+        metricName: traefik_http_rps
+        query: sum(rate(traefik_entrypoint_requests_total{entrypoint="websecure"}[1m]))
+        threshold: "120" # Jika RPS mencapai > 120 req/s, langsung tambah pod
+
+    # ── 4. Scale berdasarkan Kafka Lag (Audit Logs) ──
+    - type: kafka
+      metadata:
+        bootstrapServers: masdika-kafka.masdika.svc.cluster.local:9092
+        consumerGroup: masdika-audit-worker
+        topic: masdika.audit-logs
+        lagThreshold: "100" # Jika antrean event audit log > 100, scale-up worker/app
+

@@ -34,6 +34,22 @@ spec:
     burst: 50
 ---
 # ==============================================================================
+# 9b. AUTH & SENSITIVE ENDPOINTS STRICT RATE LIMITING
+# Membatasi upaya brute force, credential stuffing, dan spam pada endpoint sensitif.
+# Maksimal 10 request/menit dengan burst 5 per IP pengunjung.
+# ==============================================================================
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-auth-ratelimit
+  namespace: masdika
+spec:
+  rateLimit:
+    average: 10
+    burst: 5
+    period: 1m
+---
+# ==============================================================================
 # 10. TRAEFIK INGRESS
 # Mengatur routing HTTP & WebSocket langsung dari port 80 Traefik K3s.
 # Traefik secara otomatis mendengarkan port 80 & 443 di host OS K3s.
@@ -63,6 +79,67 @@ spec:
           # 2. Aplikasi Web Utama (Next.js)
           - path: /
             pathType: Prefix
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+---
+# ==============================================================================
+# 10b. TRAEFIK INGRESS KHUSUS ENDPOINT AUTH & SENSITIF (Priority High)
+# Mengarahkan endpoint auth ke middleware rate limit ketat sebelum masuk ke Next.js.
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: masdika-auth-ingress
+  namespace: masdika
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.priority: "100"
+    traefik.ingress.kubernetes.io/router.middlewares: masdika-masdika-headers@kubernetescrd,masdika-masdika-buffering@kubernetescrd,masdika-masdika-auth-ratelimit@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /api/login
+            pathType: Exact
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+          - path: /api/register
+            pathType: Exact
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+          - path: /api/forgot-password
+            pathType: Exact
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+          - path: /api/reset-password
+            pathType: Exact
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+          - path: /api/verify-comment
+            pathType: Exact
+            backend:
+              service:
+                name: masdika-app
+                port:
+                  number: 3000
+          - path: /api/subscribe
+            pathType: Exact
             backend:
               service:
                 name: masdika-app

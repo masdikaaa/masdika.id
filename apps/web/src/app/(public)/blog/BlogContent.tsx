@@ -599,7 +599,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                             alt={heroPost.title}
                             fill
                             sizes="(max-width: 1024px) 100vw, 42vw"
-                            preload={true}
+                            priority={true}
                             className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
                           />
                         ) : (

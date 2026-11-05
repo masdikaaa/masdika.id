@@ -1,0 +1,60 @@
+# ==============================================================================
+# CROWDSEC SECURITY SUITE (Collaborative Cyber Defense & Anti-Botnet/Hacker)
+# 1. Mendeteksi upaya brute-force, web vulnerability scan (/.env, phpmyadmin, dsb).
+# 2. Mengunduh daftar blokir IP hacker global secara otomatis dari komunitas CrowdSec.
+# 3. Traefik Bouncer otomatis mem-blokir penyerang dengan HTTP 403 di Ingress level.
+# ==============================================================================
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: crowdsec
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: crowdsec
+    security.kubernetes.io/tier: intrusion-prevention
+spec:
+  chart: crowdsec
+  repo: https://crowdsecurity.github.io/helm-charts
+  targetNamespace: crowdsec
+  createNamespace: true
+  valuesContent: |-
+    container_runtime: containerd
+    agent:
+      acquisition:
+        - namespace: masdika
+          podName: traefik-*
+          program: traefik
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi
+    lapi:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 96Mi
+        limits:
+          cpu: 500m
+          memory: 384Mi
+      env:
+        - name: ENROLL_INSTANCE_NAME
+          value: "masdika-k3s-cluster"
+---
+# ==============================================================================
+# TRAEFIK BOUNCER FORWARD-AUTH MIDDLEWARE
+# Mengecek IP pengunjung ke CrowdSec Local API (LAPI) sebelum diteruskan ke Next.js.
+# Jika IP ada dalam daftar penyerang/botnet, Traefik langsung memutus koneksi (403).
+# ==============================================================================
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: masdika-crowdsec-bouncer
+  namespace: masdika
+spec:
+  forwardAuth:
+    address: http://crowdsec-traefik-bouncer.crowdsec.svc.cluster.local:8080/api/v1/forwardAuth
+    trustForwardHeader: true
+

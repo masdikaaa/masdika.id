@@ -72,8 +72,7 @@ export function HeroAvatarFrame({
           alt={imageAlt}
           width={imageWidth}
           height={imageHeight}
-          preload={priority}
-          fetchPriority={priority ? "high" : "auto"}
+          priority={priority}
           sizes={
             isPortrait
               ? "(max-width: 640px) 340px, (max-width: 1024px) 420px, 500px"
