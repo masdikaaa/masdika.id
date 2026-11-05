@@ -1380,26 +1380,26 @@ export function HomeClient({
               </div>
             </div>
 
-            {/* Right Hero Image (Desktop: Grounded at bottom-right of 1400px card) */}
-            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 bottom-0 pointer-events-none select-none z-10">
+            {/* Right Hero Image (Desktop: Lowered downwards so card border cleanly clips pants, showing only jacket) */}
+            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-12 lg:-bottom-16 xl:-bottom-20 pointer-events-none select-none z-10">
               <Image
                 src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
-                height={1110}
+                height={1060}
                 className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
 
-            {/* Mobile Hero (Centered at bottom) */}
-            <div className="block md:hidden mt-6 -mb-8 flex justify-center pointer-events-none select-none">
+            {/* Mobile Hero (Centered at bottom and lowered) */}
+            <div className="block md:hidden mt-6 -mb-16 flex justify-center pointer-events-none select-none">
               <Image
                 src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
-                height={1110}
-                className="w-48 sm:w-56 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                height={1060}
+                className="w-48 sm:w-56 h-auto object-contain object-bottom translate-y-8 sm:translate-y-10 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
