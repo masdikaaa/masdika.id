@@ -1380,26 +1380,26 @@ export function HomeClient({
               </div>
             </div>
 
-            {/* Right Hero Image (Desktop: Sitting cleanly at bottom of card with full jacket visible and zero pants) */}
-            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 bottom-0 pointer-events-none select-none z-10">
+            {/* Right Hero Image (Desktop: Attached directly to bottom card border) */}
+            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-1 lg:-bottom-1.5 pointer-events-none select-none z-10">
               <Image
                 src="/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
-                width={1215}
-                height={1295}
+                width={1178}
+                height={1265}
                 className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
 
-            {/* Mobile Hero (Centered at bottom, sitting on card border with full jacket visible and zero pants) */}
+            {/* Mobile Hero (Centered at bottom, attached directly to bottom card border) */}
             <div className="block md:hidden mt-6 -mb-6 sm:-mb-8 flex justify-center pointer-events-none select-none">
               <Image
                 src="/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
-                width={1215}
-                height={1295}
-                className="w-52 sm:w-60 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                width={1178}
+                height={1265}
+                className="w-52 sm:w-60 h-auto object-contain object-bottom translate-y-1 sm:translate-y-1.5 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
