@@ -243,11 +243,38 @@ export function HomeClient({
   }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeftPos, setScrollLeftPos] = useState(0);
   const [expandedTestimonials, setExpandedTestimonials] = useState<Set<number>>(new Set());
+
+  const handleManualScroll = (direction: "left" | "right") => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    setIsPaused(true);
+    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
+    pauseTimeoutRef.current = setTimeout(() => {
+      setIsPaused(false);
+    }, 3000);
+
+    const scrollAmount = 390;
+    const halfWidth = container.scrollWidth / 2;
+
+    if (direction === "left") {
+      if (container.scrollLeft <= 20) {
+        container.scrollLeft += halfWidth;
+      }
+      container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+    } else {
+      if (container.scrollLeft >= halfWidth - 20) {
+        container.scrollLeft -= halfWidth;
+      }
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   const toggleTestimonial = (index: number) => {
     setExpandedTestimonials((prev) => {
@@ -1155,24 +1182,16 @@ export function HomeClient({
               <button
                 type="button"
                 aria-label="Previous testimonial"
-                onClick={() => {
-                  if (scrollRef.current) {
-                    scrollRef.current.scrollBy({ left: -380, behavior: "smooth" });
-                  }
-                }}
-                className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[var(--text-secondary)] hover:text-cyan-500 dark:hover:text-cyan-400 flex items-center justify-center transition-colors"
+                onClick={() => handleManualScroll("left")}
+                className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[var(--text-secondary)] hover:text-cyan-500 dark:hover:text-cyan-400 flex items-center justify-center transition-all cursor-pointer active:scale-95"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 aria-label="Next testimonial"
-                onClick={() => {
-                  if (scrollRef.current) {
-                    scrollRef.current.scrollBy({ left: 380, behavior: "smooth" });
-                  }
-                }}
-                className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[var(--text-secondary)] hover:text-cyan-500 dark:hover:text-cyan-400 flex items-center justify-center transition-colors"
+                onClick={() => handleManualScroll("right")}
+                className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[var(--text-secondary)] hover:text-cyan-500 dark:hover:text-cyan-400 flex items-center justify-center transition-all cursor-pointer active:scale-95"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
