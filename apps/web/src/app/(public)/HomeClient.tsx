@@ -1381,7 +1381,7 @@ export function HomeClient({
             </div>
 
             {/* Right Hero Image (Desktop: Lowered downwards so card border cleanly clips pants, showing only jacket) */}
-            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-6 lg:-bottom-8 xl:-bottom-10 pointer-events-none select-none z-10">
+            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-12 lg:-bottom-16 xl:-bottom-20 pointer-events-none select-none z-10">
               <Image
                 src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
@@ -1392,14 +1392,14 @@ export function HomeClient({
               />
             </div>
 
-            {/* Mobile Hero (Centered at bottom, sitting on card border with pants cleanly clipped) */}
+            {/* Mobile Hero (Centered at bottom, framed identical to desktop so pants are completely hidden) */}
             <div className="block md:hidden mt-6 -mb-6 sm:-mb-8 flex justify-center pointer-events-none select-none">
               <Image
                 src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1060}
-                className="w-52 sm:w-60 h-auto object-contain object-bottom translate-y-3 sm:translate-y-4 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                className="w-52 sm:w-60 h-auto object-contain object-bottom translate-y-7 sm:translate-y-9 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
