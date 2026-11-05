@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { ensureResumeDataSyncedToDb } from '@/lib/resume-data-sync';
 
 export async function GET(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
+    await ensureResumeDataSyncedToDb();
     const educations = await prisma.education.findMany({
       orderBy: { order: 'asc' }
     });

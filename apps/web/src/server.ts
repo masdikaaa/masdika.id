@@ -229,7 +229,11 @@ app.prepare().then(async () => {
     console.log(`> Ready on http://${hostname}:${port}`);
     console.log(`> WebSocket VNC Proxy ready on ws://${hostname}:${port}/api/ws/vnc`);
 
-    // ⚡ Pre-warm public caches in background so initial page visits are instantaneous
+    // ⚡ Pre-warm public caches & ensure resume DB records are populated in background
+    import("./lib/resume-data-sync").then(({ ensureResumeDataSyncedToDb }) => {
+      ensureResumeDataSyncedToDb().catch(() => {});
+    }).catch(() => {});
+
     import("./lib/cache").then(({ warmupPublicCache }) => {
       warmupPublicCache().catch((err) => {
         console.warn('> [Cache Warmup] Background warmup note:', err?.message || err);

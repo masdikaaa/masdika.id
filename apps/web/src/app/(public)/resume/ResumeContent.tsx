@@ -103,22 +103,10 @@ function getExperienceDetails(item: {
         .filter(Boolean)
     : [];
 
-  const lower = `${item.role} ${item.company}`.toLowerCase();
-  const fallbackSummary =
-    lower.includes("tehnician") || lower.includes("technician") || lower.includes("smk")
-      ? "Managed campus laboratory servers, local area network (LAN/WLAN) infrastructure, hardware troubleshooting, and workstation deployment."
-      : "Architected and maintained high-availability Linux servers, cloud deployments, network routing, and automated CI/CD workflows.";
-
-  const fallbackTags =
-    lower.includes("tehnician") || lower.includes("technician") || lower.includes("smk")
-      ? ["LAN/WLAN Routing", "Server Maintenance", "Hardware Diagnostics"]
-      : ["Cloud Infrastructure", "Linux SysAdmin", "DevOps Automation"];
-
   return {
     type: item.type && item.type.trim().length > 0 ? item.type : "Verified Role",
-    summary:
-      item.description && item.description.trim().length > 0 ? item.description : fallbackSummary,
-    tags: parsedTags.length > 0 ? parsedTags : fallbackTags,
+    summary: item.description && item.description.trim().length > 0 ? item.description : "",
+    tags: parsedTags,
   };
 }
 
@@ -136,22 +124,10 @@ function getEducationDetails(item: {
         .filter(Boolean)
     : [];
 
-  const lower = `${item.degree} ${item.school}`.toLowerCase();
-  const fallbackSummary =
-    lower.includes("universitas") || lower.includes("university")
-      ? "Focused on Information Systems, distributed cloud computing, network architecture, database management, and enterprise software engineering."
-      : "Intensive vocational track in Computer & Network Engineering (TKJ), covering Linux server administration, MikroTik routing, and enterprise networking.";
-
-  const fallbackTags =
-    lower.includes("universitas") || lower.includes("university")
-      ? ["Information Systems", "Distributed Systems", "Database Architecture"]
-      : ["Computer & Network Eng.", "MikroTik & Cisco", "Linux Server"];
-
   return {
     type: item.type && item.type.trim().length > 0 ? item.type : "Academic",
-    summary:
-      item.description && item.description.trim().length > 0 ? item.description : fallbackSummary,
-    tags: parsedTags.length > 0 ? parsedTags : fallbackTags,
+    summary: item.description && item.description.trim().length > 0 ? item.description : "",
+    tags: parsedTags,
   };
 }
 
@@ -547,20 +523,24 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                               <span>{item.company}</span>
                             </div>
 
-                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                              {details.summary}
-                            </p>
+                            {details.summary && (
+                              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                                {details.summary}
+                              </p>
+                            )}
 
-                            <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
-                              {details.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                            {details.tags.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
+                                {details.tags.map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </FadeIn>
@@ -644,20 +624,24 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                               <span>{item.school}</span>
                             </div>
 
-                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                              {details.summary}
-                            </p>
+                            {details.summary && (
+                              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                                {details.summary}
+                              </p>
+                            )}
 
-                            <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
-                              {details.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                            {details.tags.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-3.5 border-t border-[var(--border-primary)]">
+                                {details.tags.map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </FadeIn>
