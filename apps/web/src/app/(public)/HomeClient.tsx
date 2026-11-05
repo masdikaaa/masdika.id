@@ -1383,7 +1383,7 @@ export function HomeClient({
             {/* Right Hero Image (Desktop: Grounded at bottom-right of 1400px card) */}
             <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 bottom-0 pointer-events-none select-none z-10">
               <Image
-                src="/hero-card.webp"
+                src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1374}
@@ -1395,7 +1395,7 @@ export function HomeClient({
             {/* Mobile Hero (Centered at bottom) */}
             <div className="block md:hidden mt-6 -mb-8 flex justify-center pointer-events-none select-none">
               <Image
-                src="/hero-card.webp"
+                src="/hero-card-1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1374}
