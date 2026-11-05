@@ -1199,7 +1199,7 @@ export function HomeClient({
                 return (
                   <div
                     key={idx}
-                    className="group relative p-5 sm:p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 w-[84vw] sm:w-[370px] min-w-[84vw] sm:min-w-[370px] flex-shrink-0 flex flex-col justify-between min-h-[250px] sm:min-h-[260px]"
+                    className="group relative p-5 sm:p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 w-[84vw] sm:w-[370px] min-w-[84vw] sm:min-w-[370px] flex-shrink-0 flex flex-col justify-between min-h-[280px] sm:min-h-[290px]"
                   >
                     {/* Top Header: Quote Icon + Verified Tag & Compact Rating Badge */}
                     <div className="flex items-center justify-between gap-3 mb-4">
@@ -1223,7 +1223,7 @@ export function HomeClient({
                     <div className="mb-6 flex-1 flex flex-col justify-start">
                       <p className={cn(
                         "text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed transition-all duration-200",
-                        !isExpanded && isLongText && "line-clamp-4"
+                        !isExpanded && isLongText && "line-clamp-3"
                       )}>
                         &ldquo;{testi.text}&rdquo;
                       </p>
