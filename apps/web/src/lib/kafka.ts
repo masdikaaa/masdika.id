@@ -27,31 +27,54 @@ const globalForKafka = globalThis as unknown as {
   kafkaClient: Kafka | null;
   kafkaProducer: Producer | null;
   isConnectingProducer: boolean;
+  lastConnectionAttemptFailed: number;
 };
 
+// -----------------------------------------------------------------------------
+// ENVIRONMENT DETECTION: SAFE FOR LOCAL DEV, ACTIVE IN PROD / K8S / DOCKER
+// -----------------------------------------------------------------------------
+const isKubernetes = Boolean(process.env.KUBERNETES_SERVICE_HOST);
+const isExplicitlyEnabled = process.env.USE_KAFKA === 'true';
+const isExplicitlyDisabled = process.env.USE_KAFKA === 'false';
+const hasExplicitBrokers = Boolean(process.env.KAFKA_BROKERS);
+
+/**
+ * Aturan aktivasi Kafka:
+ * 1. Di klaster Kubernetes atau Production: Otomatis AKTIF (kecuali diset USE_KAFKA=false)
+ * 2. Di Local Development: HANYA aktif jika KAFKA_BROKERS atau USE_KAFKA=true didefinisikan secara eksplisit.
+ *    Ini mencegah error koneksi / timeout ke 127.0.0.1:9092 jika Kafka lokal tidak dinyalakan.
+ */
+export const isKafkaEnabled = !isExplicitlyDisabled && (
+  isExplicitlyEnabled ||
+  hasExplicitBrokers ||
+  isKubernetes
+);
+
 const rawBrokers = process.env.KAFKA_BROKERS || 
-  (process.env.KUBERNETES_SERVICE_HOST ? 'masdika-kafka.masdika.svc.cluster.local:9092' : '127.0.0.1:9092');
+  (isKubernetes ? 'masdika-kafka.masdika.svc.cluster.local:9092' : '127.0.0.1:9092');
 
 const brokers = rawBrokers.split(',').map(b => b.trim()).filter(Boolean);
 const clientId = process.env.KAFKA_CLIENT_ID || 'masdika-backend';
-const enabled = process.env.USE_KAFKA !== 'false';
+
+// Cooldown period (30 detik): Jika koneksi gagal, jangan ulangi setiap request agar tidak ada latency hang
+const CONNECTION_COOLDOWN_MS = 30000;
 
 /**
  * Mendapatkan instance singleton Kafka Client
  */
 export function getKafkaClient(): Kafka | null {
-  if (!enabled || brokers.length === 0) return null;
+  if (!isKafkaEnabled || brokers.length === 0) return null;
 
   if (!globalForKafka.kafkaClient) {
     globalForKafka.kafkaClient = new Kafka({
       clientId,
       brokers,
       logLevel: logLevel.WARN,
-      connectionTimeout: 4000,
-      requestTimeout: 10000,
+      connectionTimeout: 3000,
+      requestTimeout: 8000,
       retry: {
-        initialRetryTime: 300,
-        retries: 3,
+        initialRetryTime: 250,
+        retries: 2,
       },
     });
   }
@@ -63,6 +86,8 @@ export function getKafkaClient(): Kafka | null {
  * Mendapatkan instance singleton Kafka Producer yang sudah terkoneksi
  */
 export async function getKafkaProducer(): Promise<Producer | null> {
+  if (!isKafkaEnabled) return null;
+
   const client = getKafkaClient();
   if (!client) return null;
 
@@ -70,9 +95,15 @@ export async function getKafkaProducer(): Promise<Producer | null> {
     return globalForKafka.kafkaProducer;
   }
 
+  // Circuit breaker: jika koneksi baru saja gagal dalam 30s terakhir, fallback langsung tanpa delay
+  const now = Date.now();
+  if (globalForKafka.lastConnectionAttemptFailed && (now - globalForKafka.lastConnectionAttemptFailed < CONNECTION_COOLDOWN_MS)) {
+    return null;
+  }
+
   if (globalForKafka.isConnectingProducer) {
-    // Tunggu koneksi in-flight
-    await new Promise(r => setTimeout(r, 200));
+    // Tunggu koneksi in-flight singkat
+    await new Promise(r => setTimeout(r, 150));
     return globalForKafka.kafkaProducer;
   }
 
@@ -81,15 +112,18 @@ export async function getKafkaProducer(): Promise<Producer | null> {
     const producer = client.producer({
       createPartitioner: Partitioners.DefaultPartitioner,
       allowAutoTopicCreation: true,
-      transactionTimeout: 30000,
+      transactionTimeout: 15000,
     });
 
     await producer.connect();
     globalForKafka.kafkaProducer = producer;
+    globalForKafka.lastConnectionAttemptFailed = 0;
     console.log(`🚀 [Kafka Producer] Connected successfully to brokers: ${brokers.join(', ')}`);
     return producer;
   } catch (error: any) {
-    console.warn(`⚠️ [Kafka Producer] Connection notice: ${error?.message || error}`);
+    globalForKafka.lastConnectionAttemptFailed = Date.now();
+    // Hanya log peringatan sekali saat gagal, tidak crash
+    console.warn(`⚠️ [Kafka Producer] Unavailable (${error?.message || error}). Entering ${CONNECTION_COOLDOWN_MS / 1000}s cooldown.`);
     return null;
   } finally {
     globalForKafka.isConnectingProducer = false;
@@ -97,17 +131,22 @@ export async function getKafkaProducer(): Promise<Producer | null> {
 }
 
 /**
- * Mempublikasikan event ke topik Kafka secara andal dan non-blocking
+ * Mempublikasikan event ke topik Kafka secara andal, aman, dan non-blocking
  */
 export async function publishKafkaEvent<T = any>(
   topic: KafkaTopicName | string,
   event: KafkaEventPayload<T>,
   partitionKey?: string
 ): Promise<boolean> {
+  if (!isKafkaEnabled) {
+    // Di development tanpa Kafka, langsung return true tanpa delay
+    return true;
+  }
+
   try {
     const producer = await getKafkaProducer();
     if (!producer) {
-      // Fallback graceful jika Kafka offline
+      // Fallback graceful jika Kafka sedang offline / cooldown
       return false;
     }
 

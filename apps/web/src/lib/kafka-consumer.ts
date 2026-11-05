@@ -124,3 +124,4 @@ export async function stopKafkaConsumer(): Promise<void> {
     }
   }
 }
+
