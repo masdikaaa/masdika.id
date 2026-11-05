@@ -21,6 +21,7 @@
     <img src="https://img.shields.io/badge/SRE-SLO_99.9%25_%26_Error_Budget-4CAF50?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Google SRE" />
     <img src="https://img.shields.io/badge/Resilience-Circuit_Breaker-FFB300?style=for-the-badge&logo=circuitverse&logoColor=white" alt="Circuit Breaker" />
     <img src="https://img.shields.io/badge/Chaos-Chaos_Monkey_Drills-8E24AA?style=for-the-badge&logo=linux&logoColor=white" alt="Chaos Engineering" />
+    <img src="https://img.shields.io/badge/Storage_Guard-Auto_GC_60%25-green?style=for-the-badge&logo=linux&logoColor=white" alt="Storage Guard" />
     <img src="https://img.shields.io/badge/Access-Private%20%2F%20Proprietary-e11d48?style=for-the-badge&logo=lock&logoColor=white" alt="Private Repo" />
   </p>
 </div>
@@ -46,6 +47,7 @@ Platform ini mengadopsi standar **Tier-1 Tech Engineering (Gojek / Tokopedia / G
 * **Enterprise SRE Cockpit & SLO 99.9%**: Pengukuran kuantitatif ketersediaan *Three-Nines*, pelacakan *Monthly Error Budget*, multi-window burn-rate alerts, dan *Release Gate Policy* di Grafana.
 * **Full-Stack Elastic Observability**: Elastic Stack 8.11 (Elasticsearch, Kibana, APM, Filebeat, Metricbeat, Heartbeat Synthetics) dengan indeks teroptimasi metadata host fisik dan **Index Lifecycle Management (ILM)** retensi otomatis 14 hari.
 * **Automated Disaster Recovery**: Backup terjadwal terenkripsi simetris GPG AES-256 yang disinkronkan offsite ke RustFS Cloud Storage S3 dengan retensi rotasi 14 hari.
+* **Host Storage Safeguard & Kubelet Image GC**: Proteksi 3-lapis anti-kehabisan disk di host produksi (`192.168.79.4`); Kubelet auto-pruning terpicu saat disk mencapai 60% dan membersihkan hingga 45%, hard-cap log Linux `systemd-journald` 500 MB, serta cron maintenance harian.
 
 ---
 
@@ -67,6 +69,7 @@ Seluruh arsitektur sistem diklasifikasikan ke dalam 6 lapisan (*tier*) modular d
 | | **Redis 7**<br>• In-Memory Cache & Key-Value<br>• PVC: `masdika-redis-pvc` (10 GB) | Internal `6379`<br>ClusterIP | In-Memory Engine<br>AOF Data Persistence | • **NetworkPolicy: `masdika-redis-isolation`**<br>  Port 6379 diblokir total dari luar pod resmi<br>• Password Authentication & Protected Mode | `Active` |
 | | **RustFS Cloud Object Storage**<br>• S3 Compatible Bucket Storage<br>• Endpoint: `192.168.79.10:9000` | Port `9000`<br>S3 REST API | Distributed Bucket Engine<br>• `masdika-database` (Backup DB)<br>• `masdika-media` (Upload User)<br>• `masdika-cdn` (Static Assets)<br>• `masdika-ticket` (Attachments) | • Access Key & Secret Key terenkripsi<br>• Isolasi data offsite independen dari host K3s | `Active` |
 | | **Automated Disaster Recovery (DR)**<br>• CronJob: `masdika-postgres-backup`<br>• PVC: `masdika-backup-pvc` (15 GB) | Batch Task<br>Jadwal: `0 2 * * *`<br>(09:00 WIB) | Concurrency: `Forbid`<br>BackoffLimit: `3`<br>Multi-tier Cloud Sync | • **GPG Enkripsi Simetris AES-256** (`.sql.gz.gpg`)<br>• Sinkronisasi otomatis ke RustFS S3 `masdika-database`<br>• **Retensi 14 Hari**: Auto-pruning lokal PVC & offsite RustFS | `Active` |
+| | **Host Storage Guard & Kubelet Image GC**<br>• Node: `192.168.79.4`<br>• K3s Image Garbage Collection | Host Root `/`<br>290 GB SSD | Auto-GC Trigger: 60%<br>Auto-GC Target: 45%<br>Systemd Journal Cap: 500M | • **Anti-Disk Full SRE**: Kubelet otomatis menghapus image tak terpakai saat disk mencapai 60%<br>• **Container Log Cap**: Maksimal 10Mi (rotasi 3 file)<br>• **Daily Prune Cron**: Pembersihan berkala otomatis containerd, docker, & journal | `Active` |
 | **📊 Layer 4: SRE Observability & SOC** | **Enterprise SRE Cockpit**<br>• Dashboard: `masdika-sre-cockpit`<br>• Standar Google SRE / Gojek | Host Ingress:<br>`grafana.masdika.id`<br>Port `3001` | Multiwindow Multi-burn-rate Alerting<br>Auto Health Gating | • **SLO Ketersediaan 99.9% (Three-Nines)**<br>• **Monthly Error Budget Tracking** (Toleransi max 43.2 min/bulan)<br>• **1h Error Budget Burn Rate**<br>• **SRE Release Gate Policy**: `PERMITTED` vs `CODE FREEZE`<br>• **Latency SLI**: % request < 300ms (Target: 95%) | `Active` |
 | | **Vector.dev Ultra-Lightweight Pipeline**<br>• Engine: Rust Native Log Pipeline<br>• Service: `vector:5044` & `logstash:5044` | Ingest: `5044`<br>Metrics: `9090`<br>Health API: `8686` | Dual-Sink Parallel Delivery<br>Zero GC Pause<br>Memory Request: 64Mi (Hemat 1.2 GB) | • **ECS Normalization via VRL**: Pemetaan otomatis log Next.js ke Elastic Common Schema & trace ID<br>• **Dual-Sink**: Mengirim log simultan ke Elasticsearch (`logs-masdika.app-default`) & Loki (`masdika-loki:3100`)<br>• **Backward Compatibility**: Alias service `logstash:5044` aktif | `Active` |
 | | **Elastic Observability Suite**<br>• Kibana (`kibana.masdika.id`)<br>• APM, Filebeat, Metricbeat, Heartbeat | Ingress `kibana.masdika.id`<br>Port `5601`<br>ClusterIP Services | Full-Stack Enterprise Observability<br>• Logs rate & explorer<br>• Host inventory & metrics<br>• APM waterfall traces<br>• Synthetic uptime & SSL check | • **ECS Log Streaming (`logs-masdika.app-default`)**: Terpetakan ke Elastic Common Schema dengan trace ID<br>• **Filebeat 8.15**: DaemonSet log harvester container K8s<br>• **Metricbeat 8.15**: Memantau Host Physical OS metadata (Ubuntu 26.04), CPU, Memory, Network TX/RX<br>• **ILM Retention Policy**: 14 hari retensi otomatis indeks Elasticsearch | `Active` |
@@ -406,6 +409,138 @@ Penyelamatan data database PostgreSQL menggunakan arsitektur *Disaster Recovery*
 
 ---
 
+## 🧹 Arsitektur & Otomasi Proteksi Storage (Anti-Disk Full SRE Standard)
+
+Untuk menjamin ketersediaan sistem (*High Availability*) dan mencegah kegagalan fatal akibat *Disk Full (Out of Disk Space)* pada node host produksi (`192.168.79.4`), Masdika mengimplementasikan arsitektur proteksi penyimpanan berlapis (*Multi-Tier Automated Storage Safeguard*).
+
+### ⚠️ Latar Belakang Masalah (Root Cause Disk Penuh di Kubernetes / K3s)
+Pada klaster Kubernetes atau K3s standar tanpa kustomisasi, server produksi sangat rentan mengalami kehabisan ruang penyimpanan (*disk exhaustion*):
+1. **Ambang Batas Default Kubelet Image GC adalah 85%**:
+   Secara default, parameter `imageGCHighThresholdPercent` pada Kubernetes Kubelet disetel pada **85%**. Artinya, Kubelet secara sengaja **TIDAK AKAN** menghapus layer image lama sebelum kapasitas disk mencapai 85%. Pada drive 290 GB, sistem membiarkan image menumpuk hingga ~246 GB sebelum memulai proses *pruning*.
+2. **Akumulasi Image CI/CD GitOps**:
+   Setiap commit Git memicu pipeline CI/CD yang membangun container image baru dengan tag commit SHA unik (`ghcr.io/masdika/masdika-app:<sha>`). Image lama yang sudah tidak aktif tetap tersimpan sebagai cache di containerd (`/var/lib/rancher/k3s/agent/containerd`).
+3. **Log Sistem Linux (`systemd-journald`) Tanpa Batas Kuota**:
+   Layanan `journald` bawaan mengizinkan file log bertambah hingga 10% dari kapasitas disk (hingga ~29 GB).
+4. **Cache Docker Standalone & Anonymous Volumes**:
+   Sisa image atau layer build Docker standalone di luar containerd K3s tetap mengonsumsi ruang di `/var/lib/docker`.
+
+---
+
+### 🛡️ 3 Lapis Proteksi Penyimpanan Terotomatisasi (Active Safeguard)
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│             MULTI-TIER STORAGE PROTECTION ARCHITECTURE (SRE)                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Layer 1: K3s Kubelet Image GC & Log Limits (/etc/rancher/k3s/config.yaml)  │
+│  • image-gc-high-threshold: 60% (Auto-trigger cleanup saat disk capai 60%)  │
+│  • image-gc-low-threshold: 45% (Hapus unused images hingga disk turun 45%) │
+│  • container-log-max-size: 10Mi & container-log-max-files: 3 (Max 30MB/pod) │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Layer 2: Systemd Journald Hard-Cap (/etc/systemd/journald.conf.d/00-limits) │
+│  • SystemMaxUse: 500M (Batas absolut kuota log Linux di disk)               │
+│  • RuntimeMaxUse: 100M (Batas kuota log di RAM /run)                        │
+│  • MaxRetentionSec: 7day (Auto-purge log lebih dari 7 hari)                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Layer 3: Daily Automated Maintenance Daemon (/etc/cron.daily/masdika-clean)│
+│  • k3s crictl rmi --prune (Bersihkan dangling containerd images)            │
+│  • docker system prune -af (Bersihkan unused docker cache & volumes)        │
+│  • journalctl --vacuum-time=7d (Vacuum arsip journal sistem)               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Lapis 1: K3s Kubelet Image Garbage Collection & Container Log Cap
+Dikonfigurasi langsung pada file konfigurasi K3s di `/etc/rancher/k3s/config.yaml`:
+```yaml
+# /etc/rancher/k3s/config.yaml
+kubelet-arg:
+  - image-gc-high-threshold=60
+  - image-gc-low-threshold=45
+  - container-log-max-size=10Mi
+  - container-log-max-files=3
+```
+* **Fungsi Parameter**:
+  * `image-gc-high-threshold=60`: Begitu kapasitas disk image mencapai 60%, Kubelet seketika mengaktifkan penghapusan image kontainer lama (*Least Recently Used*) yang tidak terpasang pada pod aktif.
+  * `image-gc-low-threshold=45`: Pembersihan dilakukan sampai penggunaan disk turun ke 45%.
+  * `container-log-max-size=10Mi` & `container-log-max-files=3`: Membatasi ukuran log kontainer maksimum 10 MB dengan rotasi 3 file per pod (maksimal 30 MB), mencegah pod dengan output verbose menghabiskan storage.
+* **Cara Penerapan Manual**:
+  ```bash
+  cat << 'EOF' > /etc/rancher/k3s/config.yaml
+  kubelet-arg:
+    - image-gc-high-threshold=60
+    - image-gc-low-threshold=45
+    - container-log-max-size=10Mi
+    - container-log-max-files=3
+  EOF
+  systemctl restart k3s
+  ```
+* **Verifikasi Runtime**:
+  ```bash
+  journalctl -u k3s -b --no-pager | grep -i "image-gc"
+  ```
+  *Output verifikasi:*
+  `Running kubelet ... --image-gc-high-threshold=60 --image-gc-low-threshold=45 --container-log-max-size=10Mi --container-log-max-files=3`
+
+#### Lapis 2: Hard-Cap Kuota Systemd Journald Logs
+Mencegah log sistem Linux membengkak tanpa batas melalui drop-in konfigurasi di `/etc/systemd/journald.conf.d/00-limits.conf`:
+```ini
+[Journal]
+SystemMaxUse=500M
+RuntimeMaxUse=100M
+MaxRetentionSec=7day
+```
+* **Fungsi**:
+  * `SystemMaxUse=500M`: Membatasi total penyimpanan log persisten di disk fisik maksimal 500 MB.
+  * `RuntimeMaxUse=100M`: Membatasi log runtime di memori `/run` maksimal 100 MB.
+  * `MaxRetentionSec=7day`: Menghapus otomatis file log yang berusia lebih dari 7 hari.
+* **Cara Penerapan Manual**:
+  ```bash
+  mkdir -p /etc/systemd/journald.conf.d
+  cat << 'EOF' > /etc/systemd/journald.conf.d/00-limits.conf
+  [Journal]
+  SystemMaxUse=500M
+  RuntimeMaxUse=100M
+  MaxRetentionSec=7day
+  EOF
+  systemctl restart systemd-journald
+  ```
+* **Verifikasi**:
+  ```bash
+  systemd-analyze cat-config systemd/journald.conf | grep -E '^(SystemMaxUse|RuntimeMaxUse|MaxRetentionSec)'
+  ```
+
+#### Lapis 3: Daily Automated Maintenance Daemon (Cron Harian)
+Daemon terotomatisasi di `/etc/cron.daily/masdika-cleanup` (izin eksekusi `755`) yang dieksekusi secara terjadwal setiap hari oleh sistem:
+```bash
+#!/bin/bash
+# 1. Bersihkan unused K3s containerd images bekas deployment GitOps
+if command -v k3s >/dev/null 2>&1; then
+    k3s crictl rmi --prune >/dev/null 2>&1 || true
+fi
+
+# 2. Bersihkan unused Docker standalone images & build layers
+if command -v docker >/dev/null 2>&1; then
+    docker system prune -af >/dev/null 2>&1 || true
+fi
+
+# 3. Vacuum log journald lebih tua dari 7 hari
+if command -v journalctl >/dev/null 2>&1; then
+    journalctl --vacuum-time=7d >/dev/null 2>&1 || true
+fi
+```
+* **Pemberian Izin Eksekusi**:
+  ```bash
+  chmod 755 /etc/cron.daily/masdika-cleanup
+  ```
+
+#### 🚀 Otomasi Satu Perintah (One-Click Setup Script)
+Seluruh konfigurasi proteksi storage di atas dapat diterapkan secara otomatis menggunakan skrip yang telah disediakan di repositori:
+```bash
+sudo ./scripts/setup-storage-guard.sh
+```
+
+---
+
 ## 🧪 Pengujian Otomatis (Automated Testing Suite)
 
 Sistem dilengkapi dengan **47 unit test otomatis** menggunakan **Vitest**:
@@ -529,7 +664,8 @@ masdika.id/
 ├── scripts/
 │   ├── chaos-experiment.sh       # SRE Chaos Interactive CLI Tool (pod-kill, cpu-burn, full-drill)
 │   ├── pre-commit-secret-scan.js # GitLeaks Pre-Commit Validation Hook
-│   └── seal-secret.js            # Generator Bitnami Sealed Secrets
+│   ├── seal-secret.js            # Generator Bitnami Sealed Secrets
+│   └── setup-storage-guard.sh    # Otomasi Proteksi Storage (K3s GC 60%, Journald Cap, Cron)
 ├── Dockerfile                    # Multi-stage production container build
 ├── package.json                  # Workspace monorepo root & script runners
 └── README.md                     # Dokumentasi teknis sistem
@@ -667,6 +803,29 @@ curl -s -u elastic:PASSWORD http://10.43.100.120:9200/_cat/allocation?v
 
 # Memantau log aplikasi web (Next.js)
 sudo kubectl logs -n masdika deployment/masdika-app -c app --tail 100 -f
+```
+
+### 9. Manajemen & Pembersihan Storage Server (Anti-Disk Full)
+```bash
+# Memeriksa kapasitas storage disk root
+df -h /
+
+# Memeriksa folder konsumen storage terbesar di sistem
+sudo du -sh /var/lib/rancher /var/lib/docker /var/lib/kubelet /var/log/journal
+
+# Menjalankan pembersihan manual darurat (instant emergency prune)
+sudo k3s crictl rmi --prune
+sudo docker system prune -af --volumes
+sudo journalctl --vacuum-time=3d
+
+# Memeriksa konfigurasi batas Image GC K3s
+cat /etc/rancher/k3s/config.yaml
+
+# Menjalankan skrip setup storage guard mandiri
+sudo ./scripts/setup-storage-guard.sh
+
+# Memeriksa status kesehatan seluruh pod aplikasi pasca pembersihan
+sudo kubectl get pods -n masdika
 ```
 
 ---
