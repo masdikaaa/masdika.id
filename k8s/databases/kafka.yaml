@@ -1,0 +1,155 @@
+# PVC untuk Kafka Data Persistence (KRaft Mode)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: masdika-kafka-pvc
+  namespace: masdika
+  labels:
+    app: masdika-kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 15Gi
+---
+# ==============================================================================
+# 5.2 DISTRIBUTED EVENT STREAMING (Apache Kafka 3.8.0 - KRaft Mode)
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masdika-kafka
+  namespace: masdika
+  labels:
+    app: masdika-kafka
+    tier: message-broker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: masdika-kafka
+  template:
+    metadata:
+      labels:
+        app: masdika-kafka
+        tier: message-broker
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "chown -R 1000:1000 /var/lib/kafka/data"]
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+          securityContext:
+            runAsUser: 0
+      containers:
+        - name: kafka
+          image: apache/kafka:3.8.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Asia/Jakarta"
+            - name: KAFKA_NODE_ID
+              value: "1"
+            - name: KAFKA_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_LISTENERS
+              value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://masdika-kafka.masdika.svc.cluster.local:9092"
+            - name: KAFKA_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+            - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+              value: "1@127.0.0.1:9093"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "1"
+            - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+              value: "0"
+            - name: KAFKA_NUM_PARTITIONS
+              value: "3"
+            - name: KAFKA_LOG_DIRS
+              value: "/var/lib/kafka/data"
+            - name: CLUSTER_ID
+              value: "HyDVsfCYQ6GhXyYYZV5Vfg"
+            - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+              value: "true"
+            - name: KAFKA_LOG_RETENTION_HOURS
+              value: "168"
+            - name: KAFKA_LOG_SEGMENT_BYTES
+              value: "1073741824"
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xms512m -Xmx768m"
+            - name: KAFKA_JMX_HOSTNAME
+              value: "127.0.0.1"
+          ports:
+            - containerPort: 9092
+              name: client
+            - containerPort: 9093
+              name: controller
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+          startupProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            periodSeconds: 15
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1.5Gi"
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: masdika-kafka-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masdika-kafka
+  namespace: masdika
+  labels:
+    app: masdika-kafka
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: true
+  selector:
+    app: masdika-kafka
+  ports:
+    - name: client
+      port: 9092
+      targetPort: 9092
+      protocol: TCP
+    - name: controller
+      port: 9093
+      targetPort: 9093
+      protocol: TCP

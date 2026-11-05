@@ -67,6 +67,7 @@ Seluruh arsitektur sistem diklasifikasikan ke dalam 6 lapisan (*tier*) modular d
 | **🛡️ Layer 3: Zero-Trust Data Tier** | **PostgreSQL 18 & CNPG HA**<br>• Database Relasional Utama<br>• CloudNativePG (CNPG) Ready | Internal `5432`<br>ClusterIP | Shared Buffers: 512 MB<br>Streaming Replication (Standby)<br>Sub-second Failover | • **NetworkPolicy: `masdika-db-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `backup`, `pgbouncer`, `masdika-pg-pooler`<br>• Running User: UID `70` (postgres) | `Active` |
 | | **PgBouncer & CNPG Pooler**<br>• Enterprise Connection Pooling<br>• Service: `masdika-pg-pooler` & `masdika-pgbouncer` | Internal `5432`<br>ClusterIP | • **Transaction Pooling Mode** (`poolMode: transaction`)<br>• 2 Replicas High Availability<br>• Scaling 1000 Klien $\rightarrow$ 25 DB Koneksi | • **Zero Connection Starvation**: Mencegah lonjakan proses server PostgreSQL & OOM saat lonjakan request Next.js/BullMQ<br>• **NetworkPolicy**: `masdika-pooler-isolation` & `masdika-cnpg-pooler-isolation` mengunci akses hanya dari pod resmi aplikasi<br>• **Prisma Client Ready**: Kompatibel dengan `@prisma/adapter-pg` & parameter `?pgbouncer=true` | `Active` |
 | | **Redis 7**<br>• In-Memory Cache & Key-Value<br>• PVC: `masdika-redis-pvc` (10 GB) | Internal `6379`<br>ClusterIP | In-Memory Engine<br>AOF Data Persistence | • **NetworkPolicy: `masdika-redis-isolation`**<br>  Port 6379 diblokir total dari luar pod resmi<br>• Password Authentication & Protected Mode | `Active` |
+| | **Apache Kafka 3.8.0 (KRaft Mode)**<br>• Distributed Event Streaming & Log Bus<br>• PVC: `masdika-kafka-pvc` (15 GB) | Internal `9092`<br>ClusterIP<br>Port `9093` (KRaft) | Event-Driven Bus<br>Zero-ZooKeeper Architecture<br>Single-Node KRaft | • **NetworkPolicy: `masdika-kafka-isolation`**<br>  Hanya bisa diakses pod `app`, `worker`, `vnc-proxy`, `vector`, `heartbeat`<br>• Running User: UID `1000` (`appuser`)<br>• **Persistent Storage**: `/var/lib/kafka/data` via local-path PVC (15 GB)<br>• **Service DNS**: `masdika-kafka.masdika.svc.cluster.local:9092` | `Active` |
 | | **RustFS Cloud Object Storage**<br>• S3 Compatible Bucket Storage<br>• Endpoint: `192.168.79.10:9000` | Port `9000`<br>S3 REST API | Distributed Bucket Engine<br>• `masdika-database` (Backup DB)<br>• `masdika-media` (Upload User)<br>• `masdika-cdn` (Static Assets)<br>• `masdika-ticket` (Attachments) | • Access Key & Secret Key terenkripsi<br>• Isolasi data offsite independen dari host K3s | `Active` |
 | | **Automated Disaster Recovery (DR)**<br>• CronJob: `masdika-postgres-backup`<br>• PVC: `masdika-backup-pvc` (15 GB) | Batch Task<br>Jadwal: `0 2 * * *`<br>(09:00 WIB) | Concurrency: `Forbid`<br>BackoffLimit: `3`<br>Multi-tier Cloud Sync | • **GPG Enkripsi Simetris AES-256** (`.sql.gz.gpg`)<br>• Sinkronisasi otomatis ke RustFS S3 `masdika-database`<br>• **Retensi 14 Hari**: Auto-pruning lokal PVC & offsite RustFS | `Active` |
 | | **Host Storage Guard & Kubelet Image GC**<br>• Node: `192.168.79.4`<br>• K3s Image Garbage Collection | Host Root `/`<br>290 GB SSD | Auto-GC Trigger: 60%<br>Auto-GC Target: 45%<br>Systemd Journal Cap: 500M | • **Anti-Disk Full SRE**: Kubelet otomatis menghapus image tak terpakai saat disk mencapai 60%<br>• **Container Log Cap**: Maksimal 10Mi (rotasi 3 file)<br>• **Daily Prune Cron**: Pembersihan berkala otomatis containerd, docker, & journal | `Active` |
@@ -640,6 +641,7 @@ masdika.id/
 │   │   ├── postgres.yaml         # PostgreSQL 18 Production Engine
 │   │   ├── pgbouncer.yaml        # Standalone PgBouncer Deployment (2 Replicas, Transaction Mode)
 │   │   ├── redis.yaml            # Redis 7 In-Memory Cache
+│   │   ├── kafka.yaml            # Apache Kafka 3.8 (KRaft Mode Event Streaming Bus)
 │   │   ├── elasticsearch.yaml    # Elasticsearch 8.11 Data Node
 │   │   └── backup-cronjob.yaml   # Disaster Recovery (GPG AES-256 + RustFS S3 Sync)
 │   ├── monitoring/
@@ -1052,6 +1054,33 @@ sudo ./scripts/setup-storage-guard.sh
 
 # Memeriksa status kesehatan seluruh pod aplikasi pasca pembersihan
 sudo kubectl get pods -n masdika
+```
+
+### 10. Manajemen & Operasional Apache Kafka (KRaft Mode)
+```bash
+# Memeriksa status pod Kafka dan PVC
+kubectl get pods -n masdika -l app=masdika-kafka
+kubectl get pvc -n masdika -l app=masdika-kafka
+
+# Memeriksa daftar topik yang tersedia
+kubectl exec -n masdika deployment/masdika-kafka -c kafka -- \
+  /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+
+# Membuat topik baru
+kubectl exec -n masdika deployment/masdika-kafka -c kafka -- \
+  /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic events-audit --partitions 3 --replication-factor 1
+
+# Memeriksa deskripsi detail topik
+kubectl exec -n masdika deployment/masdika-kafka -c kafka -- \
+  /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic events-audit
+
+# Menghasilkan pesan uji (Produce)
+echo "test message" | kubectl exec -i -n masdika deployment/masdika-kafka -c kafka -- \
+  /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic events-audit
+
+# Membaca pesan uji (Consume)
+kubectl exec -n masdika deployment/masdika-kafka -c kafka -- \
+  /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic events-audit --from-beginning --max-messages 1
 ```
 
 ---
