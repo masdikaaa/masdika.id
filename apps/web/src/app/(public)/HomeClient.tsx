@@ -526,7 +526,7 @@ export function HomeClient({
               <div className="group relative w-full h-full rounded-2xl p-6 sm:p-7 flex flex-col justify-between border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 transition-all duration-300 overflow-hidden">
                 <div className="flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                     Track Record
                   </span>
                   <span className="text-[11px] font-mono font-semibold text-[var(--text-muted)]">
@@ -534,15 +534,15 @@ export function HomeClient({
                   </span>
                 </div>
 
-                <div className="my-5 flex items-baseline gap-3">
-                  <p className="text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none">
+                <div className="my-5 flex items-center gap-4">
+                  <p className="inline-flex items-center text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none shrink-0">
                     4<span className={iconAccent}>+</span>
                   </p>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
+                  <div className="flex flex-col justify-center">
+                    <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] leading-tight">
                       Years of Experience
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <p className="text-xs text-[var(--text-muted)] mt-1 leading-tight">
                       Cloud &amp; DevOps Engineering
                     </p>
                   </div>
