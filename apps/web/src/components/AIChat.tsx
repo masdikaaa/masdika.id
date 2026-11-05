@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Bot, X, Send, User, Loader2, Trash2, AlertTriangle, LogOut, Mail, Phone, UserCircle, CheckCircle, Mic, MicOff, Headset } from 'lucide-react';
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
@@ -107,6 +107,7 @@ export function AIChat() {
   const pathname = usePathname();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const reduceMotion = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -853,7 +854,7 @@ export function AIChat() {
                     </h3>
                   </div>
                   <p className={cn("text-[11px] font-medium flex items-center gap-1.5 mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
                     {isRegistered ? `${sessionInfo?.name}` : 'Online • Cloud & Support'}
                   </p>
                 </div>
@@ -1289,30 +1290,117 @@ export function AIChat() {
       </AnimatePresence>
 
       {/* Floating Toggle Button */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
-        <button
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2.5">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.span
+              key="close-label"
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 8 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono font-semibold cursor-pointer select-none",
+                isDark
+                  ? "bg-[#0c0c0e] border-white/10 text-zinc-300"
+                  : "bg-white border-slate-200 text-slate-600 shadow-sm"
+              )}
+            >
+              Close
+              <kbd className={cn(
+                "px-1 rounded text-[10px] border",
+                isDark ? "border-white/10 text-zinc-500" : "border-slate-200 text-slate-400"
+              )}>Esc</kbd>
+            </motion.span>
+          )}
+        </AnimatePresence>
+        <motion.button
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Close AI chat" : "Open AI chat"}
           aria-expanded={isOpen}
+          initial={reduceMotion ? false : { scale: 0, opacity: 0, rotate: -20 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.4 }}
+          whileHover={reduceMotion ? undefined : { y: -3 }}
+          whileTap={{ scale: 0.9 }}
           className={cn(
-            "group relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95",
+            "group relative w-12 h-12 sm:w-[52px] sm:h-[52px] rounded-2xl p-[1.5px] overflow-hidden cursor-pointer",
             isDark
-              ? "bg-[#0a0a0c]/95 border-cyan-500/40 text-cyan-400 shadow-[0_8px_30px_rgba(6,182,212,0.22)] hover:border-cyan-400 hover:bg-[#111827]"
-              : "bg-white border-cyan-500/40 text-cyan-600 shadow-lg shadow-cyan-500/15 hover:border-cyan-500 hover:bg-cyan-50/50"
+              ? "bg-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.55)]"
+              : "bg-slate-200 shadow-lg shadow-slate-900/10"
           )}
         >
-          {!isOpen && (
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-[#0a0a0c]"></span>
-            </span>
+          {/* Rotating cyan light sweep around the border */}
+          {!reduceMotion && (
+            <motion.span
+              aria-hidden="true"
+              className="absolute inset-[-60%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_240deg,rgba(34,211,238,0.15)_280deg,#22d3ee_330deg,#a5f3fc_350deg,transparent_360deg)]"
+              animate={{ rotate: 360 }}
+              transition={{ duration: isOpen ? 1.6 : 3.2, repeat: Infinity, ease: "linear" }}
+            />
           )}
-          {isOpen ? (
-            <X className="w-5 h-5 sm:w-5 sm:h-5 stroke-[2.2]" aria-hidden="true" />
-          ) : (
-            <Bot className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" aria-hidden="true" />
-          )}
-        </button>
+
+          {/* Inner face */}
+          <span
+            className={cn(
+              "relative z-10 w-full h-full rounded-[14px] flex items-center justify-center transition-colors duration-200",
+              isDark
+                ? "bg-[#0c0c0e] text-zinc-200 group-hover:text-cyan-400"
+                : "bg-white text-slate-700 group-hover:text-cyan-600"
+            )}
+          >
+            {/* Soft cyan glow on hover */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[14px] bg-[radial-gradient(circle_at_50%_40%,rgba(34,211,238,0.18),transparent_65%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            />
+
+            <AnimatePresence mode="wait" initial={false}>
+              {isOpen ? (
+                <motion.span
+                  key="close"
+                  className="relative flex"
+                  initial={{ rotate: -90, scale: 0.4, opacity: 0 }}
+                  animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                  exit={{ rotate: 90, scale: 0.4, opacity: 0, transition: { duration: 0.15 } }}
+                  transition={{ type: "spring", stiffness: 320, damping: 18 }}
+                >
+                  <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.4] text-cyan-500 dark:text-cyan-400" aria-hidden="true" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="bot"
+                  className="relative flex"
+                  initial={{ rotate: 90, scale: 0.4, opacity: 0 }}
+                  animate={
+                    reduceMotion
+                      ? { rotate: 0, scale: 1, opacity: 1 }
+                      : {
+                          rotate: [0, 0, -12, 10, -6, 0],
+                          y: [0, -3, -3, -1, 0, 0],
+                          scale: 1,
+                          opacity: 1,
+                        }
+                  }
+                  exit={{ rotate: -90, scale: 0.4, opacity: 0, y: 0, transition: { duration: 0.15 } }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0.18 }
+                      : {
+                          rotate: { duration: 1.1, repeat: Infinity, repeatDelay: 3.5, ease: "easeInOut" },
+                          y: { duration: 1.1, repeat: Infinity, repeatDelay: 3.5, ease: "easeInOut" },
+                          scale: { duration: 0.18 },
+                          opacity: { duration: 0.18 },
+                        }
+                  }
+                >
+                  <Bot className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" aria-hidden="true" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </span>
+        </motion.button>
       </div>
     </div>
   );

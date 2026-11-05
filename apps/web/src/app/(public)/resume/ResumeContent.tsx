@@ -277,15 +277,15 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                   </span>
                 </div>
 
-                <div className="my-6 flex items-baseline gap-3.5">
-                  <div className="text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none">
+                <div className="my-6 flex items-center gap-4">
+                  <div className="inline-flex items-center text-5xl sm:text-6xl font-black tracking-tight text-[var(--text-primary)] leading-none shrink-0">
                     4<span className="text-cyan-500 dark:text-cyan-400">+</span>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
+                  <div className="flex flex-col justify-center">
+                    <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] leading-tight">
                       Years of Experience
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <p className="text-xs text-[var(--text-muted)] mt-1 leading-tight">
                       Cloud, Network &amp; SysAdmin
                     </p>
                   </div>
@@ -383,7 +383,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
                         <comp.icon className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" />
                       </div>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                         {comp.badge}
                       </span>
@@ -452,11 +452,11 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
             {/* Experience Column */}
             <div>
               <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-primary)]">
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-3.5 min-w-0">
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
                     <Briefcase className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
                       My Experience
                     </h3>
@@ -465,7 +465,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                     </p>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
+                <span className="inline-flex items-center whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
                   {experiences.length} {experiences.length === 1 ? "Role" : "Roles"}
                 </span>
               </div>
@@ -553,11 +553,11 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
             {/* Education Column */}
             <div>
               <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-primary)]">
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-3.5 min-w-0">
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
                     <GraduationCap className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
                       My Education
                     </h3>
@@ -566,7 +566,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
                     </p>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
+                <span className="inline-flex items-center whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)]">
                   {educations.length} {educations.length === 1 ? "Record" : "Records"}
                 </span>
               </div>

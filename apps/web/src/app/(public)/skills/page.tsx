@@ -589,10 +589,10 @@ export default function SkillsPage() {
               <div>
                 <div className="flex items-center justify-between gap-2 mb-5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-cyan-600 dark:text-cyan-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                     Milestones &amp; Accreditations
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                  <span className="inline-flex items-center whitespace-nowrap shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                     {certifications.length} Total
                   </span>
                 </div>
