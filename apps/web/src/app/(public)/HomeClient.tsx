@@ -1387,7 +1387,7 @@ export function HomeClient({
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1374}
-                className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]"
+                className="w-[280px] lg:w-[330px] xl:w-[370px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
@@ -1399,7 +1399,7 @@ export function HomeClient({
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1145}
                 height={1374}
-                className="w-48 sm:w-56 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]"
+                className="w-48 sm:w-56 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
