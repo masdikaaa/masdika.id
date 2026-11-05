@@ -1337,45 +1337,71 @@ export function HomeClient({
       </section>
 
       {/* ── 9. CTA ──────────────────────────────────────────────────── */}
-      <section className="py-20 lg:py-28 relative z-10 overflow-hidden">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden px-6 py-14 sm:p-14 md:p-20 text-center border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm">
+          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-8 sm:p-10 md:p-12 lg:p-14 shadow-sm transition-all duration-300">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
-            <div className="mb-8 inline-block">
-              <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
-                LET&apos;S BUILD TOGETHER
-              </Badge>
+
+            {/* Left Content */}
+            <div className="max-w-xl text-left relative z-10">
+              <div className="mb-4 inline-block">
+                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
+                  LET&apos;S BUILD TOGETHER
+                </Badge>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-[var(--text-primary)] mb-3 sm:mb-4 leading-[1.15] tracking-tight">
+                Ready to Scale Your<br />Infrastructure?
+              </h2>
+
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] mb-8 max-w-lg leading-relaxed">
+                Elevate your digital presence with enterprise-grade cloud architectures, zero-downtime migrations, and bulletproof security.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/contact"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Let&apos;s Talk
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/services"
+                  rightIcon={<ArrowRight className={cn("w-4 h-4", iconAccent)} />}
+                >
+                  View Pricing
+                </Button>
+              </div>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[var(--text-primary)] mb-5 leading-[1.1]">
-              Ready to Scale Your<br />Infrastructure?
-            </h2>
+            {/* Right Hero Image (Desktop: Absolute grounded to bottom-right, keeping card sleek) */}
+            <div className="hidden md:block absolute right-4 lg:right-10 bottom-0 pointer-events-none select-none z-10">
+              <Image
+                src="/hero-card.webp"
+                alt="Ready to Scale Infrastructure - Masdika"
+                width={1145}
+                height={1374}
+                className="w-[280px] lg:w-[320px] xl:w-[340px] h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]"
+                priority={false}
+              />
+            </div>
 
-            <p className="text-base md:text-lg text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed">
-              Elevate your digital presence with enterprise-grade cloud architectures, zero-downtime migrations, and bulletproof security.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                variant="primary"
-                size="lg"
-                href="/contact"
-                rightIcon={<ArrowRight className="w-4 h-4" />}
-                className="w-full sm:w-auto"
-              >
-                Let's Talk
-              </Button>
-
-              <Button
-                variant="secondary"
-                size="lg"
-                href="/services"
-                rightIcon={<ArrowRight className={cn("w-4 h-4", iconAccent)} />}
-                className="w-full sm:w-auto"
-              >
-                View Pricing
-              </Button>
+            {/* Mobile Hero (Centered at bottom) */}
+            <div className="block md:hidden mt-6 -mb-8 flex justify-center pointer-events-none select-none">
+              <Image
+                src="/hero-card.webp"
+                alt="Ready to Scale Infrastructure - Masdika"
+                width={1145}
+                height={1374}
+                className="w-48 sm:w-56 h-auto object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]"
+                priority={false}
+              />
             </div>
           </FadeIn>
         </div>
