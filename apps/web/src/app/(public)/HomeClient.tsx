@@ -1383,7 +1383,7 @@ export function HomeClient({
             {/* Right Hero Image (Desktop: Sitting cleanly at bottom of card with full jacket visible and zero pants) */}
             <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 bottom-0 pointer-events-none select-none z-10">
               <Image
-                src="/hero-card-1.webp"
+                src="/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1215}
                 height={1295}
@@ -1395,7 +1395,7 @@ export function HomeClient({
             {/* Mobile Hero (Centered at bottom, sitting on card border with full jacket visible and zero pants) */}
             <div className="block md:hidden mt-6 -mb-6 sm:-mb-8 flex justify-center pointer-events-none select-none">
               <Image
-                src="/hero-card-1.webp"
+                src="/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1215}
                 height={1295}
