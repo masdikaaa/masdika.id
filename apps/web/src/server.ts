@@ -2,6 +2,7 @@ import "./load-env";
 import path from "path";
 
 const apm = require("elastic-apm-node");
+(globalThis as any).elasticApm = apm;
 if (process.env.APM_SERVER_URL) {
   apm.start({
     serviceName: 'masdika-web',

@@ -29,8 +29,8 @@ export const logger = {
       let traceId: string | undefined;
       let transactionId: string | undefined;
       try {
-        const apm = (global as any).elasticApm || (typeof require !== 'undefined' ? require('elastic-apm-node') : null);
-        if (apm && apm.isStarted && apm.isStarted()) {
+        const apm = (globalThis as any).elasticApm;
+        if (apm && typeof apm.isStarted === 'function' && apm.isStarted()) {
           const ids = apm.currentTraceIds;
           if (ids) {
             traceId = ids['trace.id'];
