@@ -26,6 +26,7 @@ import {
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import {
   SiKubernetes,
@@ -246,6 +247,19 @@ export function HomeClient({
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeftPos, setScrollLeftPos] = useState(0);
+  const [expandedTestimonials, setExpandedTestimonials] = useState<Set<number>>(new Set());
+
+  const toggleTestimonial = (index: number) => {
+    setExpandedTestimonials((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -1179,6 +1193,9 @@ export function HomeClient({
             >
               {[...testimonials, ...testimonials].map((testi, idx) => {
                 const ratingVal = Number(testi.rating || 5).toFixed(1);
+                const isLongText = (testi.text || "").length > 130;
+                const isExpanded = expandedTestimonials.has(idx);
+
                 return (
                   <div
                     key={idx}
@@ -1203,9 +1220,34 @@ export function HomeClient({
                     </div>
 
                     {/* Review Body */}
-                    <p className="text-sm sm:text-[15px] text-[var(--text-secondary)] mb-6 leading-relaxed flex-1">
-                      &ldquo;{testi.text}&rdquo;
-                    </p>
+                    <div className="mb-6 flex-1 flex flex-col justify-start">
+                      <p className={cn(
+                        "text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed transition-all duration-200",
+                        !isExpanded && isLongText && "line-clamp-4"
+                      )}>
+                        &ldquo;{testi.text}&rdquo;
+                      </p>
+
+                      {isLongText && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isDragging) return;
+                            toggleTestimonial(idx);
+                          }}
+                          className="mt-2 text-xs font-semibold text-cyan-500 hover:text-cyan-400 dark:text-cyan-400 inline-flex items-center gap-1 transition-colors self-start cursor-pointer select-none group/btn"
+                        >
+                          <span>{isExpanded ? "Sembunyikan" : "Selengkapnya"}</span>
+                          <ChevronDown
+                            className={cn(
+                              "w-3.5 h-3.5 transition-transform duration-200 text-cyan-500 group-hover/btn:translate-y-0.5",
+                              isExpanded && "rotate-180 group-hover/btn:-translate-y-0.5"
+                            )}
+                          />
+                        </button>
+                      )}
+                    </div>
 
                     {/* Client Identity Footer */}
                     <div className="flex items-center justify-between gap-3 pt-4 mt-auto border-t border-[var(--border-primary)]">
@@ -1381,7 +1423,7 @@ export function HomeClient({
             </div>
 
             {/* Right Hero Image (Desktop: Attached directly to bottom card border) */}
-            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-1 lg:-bottom-1.5 pointer-events-none select-none z-10">
+            <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-3 lg:-bottom-4 xl:-bottom-5 pointer-events-none select-none z-10">
               <Image
                 src="/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
@@ -1399,7 +1441,7 @@ export function HomeClient({
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1178}
                 height={1265}
-                className="w-52 sm:w-60 h-auto object-contain object-bottom translate-y-1 sm:translate-y-1.5 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
+                className="w-52 sm:w-60 h-auto object-contain object-bottom translate-y-3 sm:translate-y-4 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_12px_24px_rgba(0,0,0,0.4)]"
                 priority={false}
               />
             </div>
