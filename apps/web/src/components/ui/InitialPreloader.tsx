@@ -9,33 +9,43 @@ import { cn } from "@/lib/utils";
  */
 export function InitialPreloader() {
   const [fading, setFading] = useState(false);
-  const [hidden, setHidden] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        return sessionStorage.getItem("masdika-initial-loaded") === "true";
-      } catch {}
-    }
-    return false;
-  });
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    // 1. Safety watchdog: hard fallback to ensure loader is ALWAYS removed within 1s
+    const hardTimeout = setTimeout(() => {
+      setFading(true);
+      setHidden(true);
+      const el = document.getElementById("initial-preloader");
+      if (el) el.style.display = "none";
+    }, 1000);
+
+    // 2. Fast-path: if user already loaded this site in current tab/session (e.g. refreshed or navigated), dismiss immediately
     try {
       if (sessionStorage.getItem("masdika-initial-loaded") === "true") {
-        setHidden(true);
-        return;
+        setFading(true);
+        const fastTimer = setTimeout(() => {
+          setHidden(true);
+        }, 50);
+        return () => {
+          clearTimeout(hardTimeout);
+          clearTimeout(fastTimer);
+        };
       }
       sessionStorage.setItem("masdika-initial-loaded", "true");
     } catch {}
 
+    // 3. First visit in session: snappy branded intro with smooth fade
     let hideTimer: ReturnType<typeof setTimeout>;
     const fadeTimer = setTimeout(() => {
       setFading(true);
       hideTimer = setTimeout(() => {
         setHidden(true);
       }, 200);
-    }, 200);
+    }, 300);
 
     return () => {
+      clearTimeout(hardTimeout);
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
     };

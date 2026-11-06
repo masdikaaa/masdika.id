@@ -269,6 +269,23 @@ export default async function RootLayout({
             }),
           }}
         />
+        {/* Prevent stuck initial preloader on page refresh */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  if (sessionStorage.getItem('masdika-initial-loaded') === 'true') {
+                    var s = document.createElement('style');
+                    s.id = 'skip-preloader-style';
+                    s.innerHTML = '#initial-preloader, .premium-fullscreen-loader { display: none !important; }';
+                    document.head.appendChild(s);
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
