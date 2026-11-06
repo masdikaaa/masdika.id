@@ -6,7 +6,9 @@ import { getCachedData } from "@/lib/cache";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Cloud VPS - High Performance Compute & Enterprise SSD | Masdika",
+  title: {
+    absolute: "Cloud VPS - High Performance Compute & Enterprise SSD",
+  },
   description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
   keywords: [
     "Cloud VPS",
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/vps",
   },
   openGraph: {
-    title: "Cloud VPS - High Performance Compute & Enterprise SSD | Masdika",
+    title: "Cloud VPS - High Performance Compute & Enterprise SSD",
     description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
     url: "https://www.masdika.id/vps",
     siteName: "Masdika",
@@ -42,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cloud VPS - High Performance Compute & Enterprise SSD | Masdika",
+    title: "Cloud VPS - High Performance Compute & Enterprise SSD",
     description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
     images: ["/og-image.webp"],
   },
