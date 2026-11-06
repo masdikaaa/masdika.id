@@ -33,25 +33,23 @@ describe('PAYG VPS Hourly Rate Calculation - vps-billing-rate.ts', () => {
     expect(getComputeRate(vps, mockPricing)).toBe(400);
   });
 
-  it('should compute stopped rate with storage ceiling (prevent overcharging stopped VPS)', () => {
+  it('should compute stopped rate matching full hourly reservation rate', () => {
     const vps: VpsRateInput = {
       status: 'STOPPED',
-      hourlyRate: 500, // Total = 400 compute + 100 disk
-      stoppedRate: 150, // Drifted or misconfigured
+      hourlyRate: 500,
+      stoppedRate: 500,
       cpuCores: 2,
       ramGb: 4,
     };
 
-    // Storage ceiling = max(0, 500 - 400) = 100
-    // stoppedRate should be min(150, 100) = 100
-    expect(getStoppedRate(vps, mockPricing)).toBe(100);
+    expect(getStoppedRate(vps, mockPricing)).toBe(500);
   });
 
   it('should return full hourlyRate when VPS is RUNNING', () => {
     const vps: VpsRateInput = {
       status: 'RUNNING',
       hourlyRate: 500,
-      stoppedRate: 100,
+      stoppedRate: 500,
       cpuCores: 2,
       ramGb: 4,
     };
@@ -59,16 +57,16 @@ describe('PAYG VPS Hourly Rate Calculation - vps-billing-rate.ts', () => {
     expect(getEffectiveHourlyRate(vps, mockPricing)).toBe(500);
   });
 
-  it('should return stopped rate when VPS is STOPPED', () => {
+  it('should return full hourlyRate when VPS is STOPPED (continuous resource reservation)', () => {
     const vps: VpsRateInput = {
       status: 'STOPPED',
       hourlyRate: 500,
-      stoppedRate: 100,
+      stoppedRate: 500,
       cpuCores: 2,
       ramGb: 4,
     };
 
-    expect(getEffectiveHourlyRate(vps, mockPricing)).toBe(100);
+    expect(getEffectiveHourlyRate(vps, mockPricing)).toBe(500);
   });
 
   it('should return 0 when VPS status is TERMINATED or SUSPENDED', () => {

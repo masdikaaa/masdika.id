@@ -230,13 +230,11 @@ export async function POST(req: NextRequest) {
       const currentDiskPrice = diskType === "SSD" ? (pricing.diskSsd || pricing.disk || 0) : (pricing.disk || 0);
       const diskCost = safeDisk * currentDiskPrice;
 
-      // stoppedRate: costs that accrue even when VM is powered off (disk, backup, IPs, bandwidth rate)
-      const stoppedRate = diskCost + backupCost + ipCost + bandwidthCost;
-
-      // hourlyRate: full cost when VM is running (adds CPU + RAM on top)
+      // Continuous Resource Billing: All physical hypervisor resources (CPU, RAM, Disk, Backup, IPs, Bandwidth) remain dedicated and billed even when STOPPED.
       const cpuCost = safeCpu * (pricing.vcpu || 0);
       const ramCost = safeRam * (pricing.ram || 0);
-      const hourlyRate = stoppedRate + cpuCost + ramCost;
+      const hourlyRate = diskCost + backupCost + ipCost + bandwidthCost + cpuCost + ramCost;
+      const stoppedRate = hourlyRate;
 
       // Security: Prevent abuse by requiring 1 month equivalent balance upfront for PAYG
       const requiredBalance = hourlyRate * 730;

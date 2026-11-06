@@ -98,7 +98,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
         <div className="space-y-1 flex-1 min-w-0">
           <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Auto Scheduler Policy:</p>
           <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
-            The Auto Scheduler automatically starts and stops your VPS according to your set schedule. You will not be charged for CPU and RAM while your VPS is stopped. Storage costs still apply.
+            The Auto Scheduler automatically starts and stops your VPS according to your set schedule. Dedicated instance resources remain reserved on the hypervisor and continue to be billed hourly.
           </p>
         </div>
       </div>

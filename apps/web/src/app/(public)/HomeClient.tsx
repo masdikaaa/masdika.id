@@ -1226,7 +1226,7 @@ export function HomeClient({
                         <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 transition-colors", iconBoxStyle)}>
                           <Quote className={cn("w-4 h-4", iconAccent)} role="presentation" aria-hidden="true" aria-label="Quote icon" />
                         </div>
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-slate-700 dark:text-zinc-300">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                           Verified Client
                         </span>
@@ -1241,7 +1241,7 @@ export function HomeClient({
                     {/* Review Body */}
                     <div className="mb-6 flex-1 flex flex-col justify-start">
                       <p className={cn(
-                        "text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed transition-all duration-200",
+                        "text-sm sm:text-[15px] text-slate-700 dark:text-zinc-300 leading-relaxed transition-all duration-200",
                         !isExpanded && isLongText && "line-clamp-3"
                       )}>
                         &ldquo;{testi.text}&rdquo;

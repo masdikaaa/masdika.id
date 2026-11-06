@@ -706,6 +706,13 @@ export class VpsProvisioningService {
         searchdomain: "masdika.id",
       };
 
+      if (server.primaryDns || server.secondaryDns) {
+        const dnsServers = [server.primaryDns, server.secondaryDns].filter(Boolean).join(" ");
+        if (dnsServers) {
+          config.nameserver = dnsServers;
+        }
+      }
+
       let netIndex = 0;
 
       if (!vps.assignedIps || vps.assignedIps.length === 0) {
@@ -822,9 +829,28 @@ export class VpsProvisioningService {
         console.error(`Failed to resize disk for VMID ${vps.vmid}:`, err);
       }
 
-      // 4. Start VM
+      // Wait until VM lock is completely released after disk resize
+      await proxmox.waitForVmUnlock(vps.node, vps.vmid, 60000);
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // 4. Start VM (Robust Retry Loop)
       console.log(`Starting VMID ${vps.vmid} after reinstall...`);
-      await proxmox.startVm(vps.node, vps.vmid);
+      let started = false;
+      let startAttempts = 0;
+      while (!started && startAttempts < 10) {
+        try {
+          await proxmox.startVm(vps.node, vps.vmid);
+          started = true;
+        } catch (err: any) {
+          startAttempts++;
+          console.log(`Failed to start VMID ${vps.vmid} after reinstall, retrying... (Attempt ${startAttempts}/10):`, err.message || err);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
+
+      if (!started) {
+        console.warn(`Warning: Could not start VMID ${vps.vmid} automatically after reinstall. VM will remain stopped for manual start.`);
+      }
 
       // Update DB
       const dbUpdateData: any = { status: vps.kubernetesClusterId ? "INSTALLING_K3S" : "RUNNING" };

@@ -68,7 +68,7 @@ export async function POST(
       // Adjust billing (reducing their future hourly rate)
       if (ipPricePerHour > 0) {
         const newHourlyRate = Math.max(0, vps.hourlyRate - ipPricePerHour);
-        const newStoppedRate = Math.max(0, (vps.stoppedRate || 0) - ipPricePerHour);
+        const newStoppedRate = newHourlyRate;
         
         await tx.vpsService.update({
           where: { id: vps.id },

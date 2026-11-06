@@ -122,7 +122,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const newHourlyRate = vps.hourlyRate + additionalHourlyRate;
-    const newStoppedRate = (vps.stoppedRate || 0) + additionalStorageRate;
+    const newStoppedRate = newHourlyRate;
     
     // Security: Prevent abuse by requiring 1 month equivalent balance of the new rate
     const requiredBalance = newHourlyRate * 730;

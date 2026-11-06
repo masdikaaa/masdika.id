@@ -96,7 +96,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       // Deduct the cost of the removed IP from VPS billing
       if (hourlyDeduction > 0) {
         const newHourlyRate = Math.max(0, vps.hourlyRate - hourlyDeduction);
-        const newStoppedRate = Math.max(0, (vps.stoppedRate || 0) - hourlyDeduction);
+        const newStoppedRate = newHourlyRate;
 
         await tx.vpsService.update({
           where: { id: vps.id },

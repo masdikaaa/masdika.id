@@ -1,38 +1,36 @@
 /**
- * Shared PAYG VPS rate helpers.
+ * Shared PAYG VPS & K3s rate helpers.
  *
- * A STOPPED VPS must only be billed for resources that still occupy capacity
- * while powered off (disk, backup, and any non-reserved IP). CPU and RAM are
- * never billed while stopped.
+ * Dedicated Cloud VPS and Managed K3s nodes maintain full physical resource reservations
+ * on the hypervisor (CPU cores, RAM slices, NVMe disks, network interfaces, and public IPs)
+ * even when powered off (STOPPED). Therefore, the full hourlyRate continues
+ * to be charged while STOPPED to cover operational infrastructure costs without loopholes.
  *
- * `stoppedRate` is stored on the VPS, but it can drift (e.g. a reserved IP is
- * attached and billed separately, yet still counted in `stoppedRate`). To make
- * sure a stopped VPS is never overcharged, we cap it at
- * `hourlyRate - (cpu + ram cost)`, which is the storage-only part of the rate.
+ * Only TERMINATED or SUSPENDED instances cease hourly billing.
  */
 
 export type VpsRateInput = {
   status: string;
   hourlyRate: number;
-  stoppedRate: number | null;
-  cpuCores: number;
-  ramGb: number;
+  stoppedRate?: number | null;
+  cpuCores?: number;
+  ramGb?: number;
 };
 
-export function getComputeRate(vps: Pick<VpsRateInput, "cpuCores" | "ramGb">, pricing: Record<string, number>): number {
+export function getComputeRate(vps: Pick<VpsRateInput, "cpuCores" | "ramGb">, pricing?: Record<string, number>): number {
+  if (!pricing) return 0;
   return (vps.cpuCores || 0) * (pricing.vcpu || 0) + (vps.ramGb || 0) * (pricing.ram || 0);
 }
 
-/** Storage-only hourly cost for a powered-off VPS (never above the storage part of hourlyRate). */
-export function getStoppedRate(vps: VpsRateInput, pricing: Record<string, number>): number {
-  const storageCeiling = Math.max(0, vps.hourlyRate - getComputeRate(vps, pricing));
-  const locked = Math.max(0, vps.stoppedRate || 0);
-  return Math.min(locked, storageCeiling);
+/** Rate charged when an instance is STOPPED (full reservation rate matching hourlyRate). */
+export function getStoppedRate(vps: VpsRateInput, pricing?: Record<string, number>): number {
+  return Math.max(0, vps.hourlyRate);
 }
 
 /** The hourly cost that applies right now, based on the power state. */
-export function getEffectiveHourlyRate(vps: VpsRateInput, pricing: Record<string, number>): number {
-  if (vps.status === "RUNNING") return vps.hourlyRate;
-  if (vps.status === "STOPPED") return getStoppedRate(vps, pricing);
+export function getEffectiveHourlyRate(vps: VpsRateInput, pricing?: Record<string, number>): number {
+  if (vps.status === "RUNNING" || vps.status === "STOPPED") {
+    return Math.max(0, vps.hourlyRate);
+  }
   return 0;
 }

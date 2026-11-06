@@ -68,7 +68,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
       if (deductedCost > 0) {
           const newRate = Math.max(0, vps.hourlyRate - deductedCost);
-          const newStoppedRate = Math.max(0, (vps.stoppedRate || 0) - deductedCost);
+          const newStoppedRate = newRate;
           await prisma.vpsService.update({
             where: { id: vps.id },
             data: { hourlyRate: newRate, stoppedRate: newStoppedRate }

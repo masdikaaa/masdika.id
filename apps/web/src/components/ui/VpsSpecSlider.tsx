@@ -405,7 +405,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
                   <span className="font-bold text-cyan-600 dark:text-cyan-400">Free VPC:</span> Virtual Private Cloud (VPC) feature is available for free with no additional charges.
                 </p>
                 <p>
-                  <span className="font-bold text-cyan-600 dark:text-cyan-400">Billing Policy:</span> Similar to global cloud providers, Storage, Backup Storage, and Reserved IPs are billed per hour even when your instance is Shutdown/Stopped or the IP is unused, as the resources are still allocated to your account.
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400">Billing Policy:</span> Dedicated compute, storage, and networking resources remain fully allocated on the hypervisor and continue to be billed hourly while the instance is Stopped/Shutdown until terminated.
                 </p>
               </div>
             </div>

@@ -102,7 +102,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
       if (hourlyCost > 0) {
         updateData.hourlyRate = vps.hourlyRate + hourlyCost;
-        updateData.stoppedRate = (vps.stoppedRate || 0) + hourlyCost;
+        updateData.stoppedRate = updateData.hourlyRate;
       }
       
       await prisma.vpsService.update({
