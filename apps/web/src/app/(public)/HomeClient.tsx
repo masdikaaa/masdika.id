@@ -425,9 +425,9 @@ export function HomeClient({
   // Unified cyan accent matching high-tech cloud & DevOps platform aesthetic (Image 2)
   const iconBoxStyle = isDark
     ? "bg-cyan-950/30 border-cyan-500/30 text-cyan-400 group-hover:border-cyan-500/60 group-hover:bg-cyan-500/10 group-hover:text-cyan-300"
-    : "bg-cyan-50 border-cyan-200/80 text-cyan-600 group-hover:bg-cyan-100/60 group-hover:border-cyan-300";
+    : "bg-cyan-50 border-cyan-200/80 text-cyan-700 group-hover:bg-cyan-100/60 group-hover:border-cyan-300";
 
-  const iconAccent = isDark ? "text-cyan-400" : "text-cyan-600";
+  const iconAccent = isDark ? "text-cyan-400" : "text-cyan-700";
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
@@ -601,12 +601,12 @@ export function HomeClient({
               <div className="group relative w-full h-full rounded-2xl p-6 sm:p-7 flex flex-col justify-between border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 transition-all duration-300 overflow-hidden">
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-cyan-600 dark:text-cyan-400">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-cyan-700 dark:text-cyan-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                       About Me
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[var(--text-muted)]">
-                      <Terminal className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
+                      <Terminal className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400" />
                       Cloud &amp; DevOps Specialist
                     </span>
                   </div>
@@ -633,7 +633,7 @@ export function HomeClient({
                   </div>
                   <Link
                     href="/resume"
-                    className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-700 dark:text-cyan-400 hover:underline"
                   >
                     View Resume <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
@@ -767,7 +767,7 @@ export function HomeClient({
                             }
                           </div>
                           <div className="min-w-0">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 block truncate">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 block truncate">
                               {prod.subtitle}
                             </span>
                             <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
@@ -980,7 +980,7 @@ export function HomeClient({
                             <srv.icon className="w-5 h-5" strokeWidth={1.75} role="presentation" aria-hidden="true" aria-label={srv.title} />
                           </div>
                           <div className="min-w-0">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 block">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 block">
                               {srv.domain} • {srv.code}
                             </span>
                             <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
@@ -1090,7 +1090,7 @@ export function HomeClient({
                           </div>
 
                           {/* Category Badge */}
-                          <span className="shrink-0 px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
+                          <span className="shrink-0 px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 dark:text-cyan-400 whitespace-nowrap">
                             {project.category?.name || project.category || "Case Study"}
                           </span>
                         </div>
@@ -1147,7 +1147,7 @@ export function HomeClient({
                           </div>
                           <Link
                             href={project.slug ? `/portfolio/${project.slug}` : "#"}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-400 group-hover:text-slate-950 group-hover:border-cyan-400 transition-all shrink-0"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 dark:text-cyan-400 group-hover:bg-cyan-400 group-hover:text-slate-950 group-hover:border-cyan-400 transition-all shrink-0"
                           >
                             <span>View Case Study</span>
                             <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
@@ -1255,14 +1255,16 @@ export function HomeClient({
                             if (isDragging) return;
                             toggleTestimonial(idx);
                           }}
-                          className="mt-2 text-xs font-semibold text-cyan-500 hover:text-cyan-400 dark:text-cyan-400 inline-flex items-center gap-1 transition-colors self-start cursor-pointer select-none group/btn"
+                          className="mt-2 text-xs font-bold text-cyan-800 hover:text-cyan-900 dark:text-cyan-400 dark:hover:text-cyan-300 inline-flex items-center gap-1 transition-colors self-start cursor-pointer select-none group/btn"
                         >
                           <span>{isExpanded ? "Show less" : "Read more"}</span>
                           <ChevronDown
                             className={cn(
-                              "w-3.5 h-3.5 transition-transform duration-200 text-cyan-500 group-hover/btn:translate-y-0.5",
+                              "w-3.5 h-3.5 transition-transform duration-200 text-cyan-800 dark:text-cyan-400 group-hover/btn:translate-y-0.5",
                               isExpanded && "rotate-180 group-hover/btn:-translate-y-0.5"
                             )}
+                            role="presentation"
+                            aria-hidden="true"
                           />
                         </button>
                       )}
