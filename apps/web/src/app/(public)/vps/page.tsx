@@ -6,19 +6,16 @@ import { getCachedData } from "@/lib/cache";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Cloud VPS Murah Indonesia - High-Performance Compute & Enterprise SSD | Masdika",
-  description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, High-Speed Enterprise SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
+  title: "Cloud VPS - High Performance Compute & Enterprise SSD | Masdika",
+  description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
   keywords: [
-    "VPS Murah",
-    "VPS Murah Indonesia",
-    "Sewa VPS Murah",
-    "Cloud VPS Murah",
-    "Cloud VPS Murah Indonesia",
-    "Beli VPS Murah",
-    "VPS Pay As You Go",
+    "Cloud VPS",
     "Cloud VPS Indonesia",
+    "VPS Murah",
+    "VPS Pay As You Go",
     "High Performance Compute",
     "SSD VPS",
+    "Enterprise SSD",
     "KVM VPS Indonesia",
     "Masdika VPS",
     "Cloud Server Indonesia",
@@ -28,8 +25,8 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/vps",
   },
   openGraph: {
-    title: "Cloud VPS Murah Indonesia - High-Performance Compute & Enterprise SSD | Masdika",
-    description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, High-Speed Enterprise SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
+    title: "Cloud VPS - High Performance Compute & Enterprise SSD | Masdika",
+    description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
     url: "https://www.masdika.id/vps",
     siteName: "Masdika",
     images: [
@@ -37,16 +34,16 @@ export const metadata: Metadata = {
         url: "/og-image.webp",
         width: 1200,
         height: 630,
-        alt: "Masdika Cloud VPS Murah Indonesia",
+        alt: "Masdika Cloud VPS - High Performance Compute",
       },
     ],
-    locale: "id_ID",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cloud VPS Murah Indonesia - High-Performance Compute & Enterprise SSD | Masdika",
-    description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, High-Speed Enterprise SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
+    title: "Cloud VPS - High Performance Compute & Enterprise SSD | Masdika",
+    description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
     images: ["/og-image.webp"],
   },
 };
@@ -82,16 +79,9 @@ export default async function VpsLandingPage() {
       {
         "@type": "Product",
         "@id": "https://www.masdika.id/vps#product",
-        "name": "Cloud VPS Murah Indonesia - Masdika",
-        "alternateName": [
-          "VPS Murah Indonesia",
-          "Cloud VPS Murah",
-          "Sewa VPS Murah",
-          "Masdika Cloud VPS",
-          "KVM VPS Murah"
-        ],
-        "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, penyimpanan Enterprise SSD, virtualisasi KVM terisolasi, dan sistem hemat Pay-As-You-Go per jam.",
-        "category": "Cloud Computing > Virtual Private Server > VPS Murah",
+        "name": "Cloud VPS - High Performance Compute",
+        "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, isolated KVM virtualization, and flexible hourly Pay-As-You-Go billing.",
+        "category": "Cloud Computing > Virtual Private Server",
         "image": "https://www.masdika.id/og-image.webp",
         "brand": {
           "@type": "Brand",
@@ -120,34 +110,42 @@ export default async function VpsLandingPage() {
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "Apakah Masdika menyediakan Cloud VPS murah di Indonesia?",
+            "name": "Why is the Sidoarjo datacenter important?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Ya, Masdika menyediakan layanan Cloud VPS murah Indonesia berkualitas enterprise dengan sistem pembayaran hemat Pay-As-You-Go per jam, penyimpanan cepat Enterprise SSD, dan routing lokal IIX latensi di bawah 20ms."
+              "text": "Having our servers locally in Sidoarjo, East Java guarantees ultra-low latency (under 20ms) across Indonesia, ensuring much faster response times compared to routing traffic to Singapore or the US."
             }
           },
           {
             "@type": "Question",
-            "name": "Berapa harga sewa Cloud VPS murah di Masdika?",
+            "name": "Should I choose Enterprise SSD or SAS HDD?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Sewa VPS di Masdika dihitung transparan secara per jam (pay-as-you-go) mulai dari Rp 100/jam untuk vCPU, Rp 50/jam untuk RAM, dan Rp 15/jam untuk Enterprise SSD. Anda hanya membayar apa yang Anda gunakan tanpa biaya kontrak bulanan yang mahal."
+              "text": "Select Enterprise SSD if you are running databases, high-traffic websites, or applications requiring fast I/O. Opt for SAS HDD if you need massive storage space for backups, file hosting, or archives at a lower cost."
             }
           },
           {
             "@type": "Question",
-            "name": "Apakah ada minimal deposit saldo untuk sewa VPS murah?",
+            "name": "What kind of applications can I run?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Tidak ada komitmen besar. Anda bisa mulai membuat instance VPS hanya dengan mengisi saldo deposit minimal mulai Rp 10.000 melalui QRIS atau transfer bank instan."
+              "text": "Yes! You can run almost anything. Our high-core count Intel Xeon processors make these servers excellent for hosting websites, databases, VPNs, or custom backend applications. You have full root access to install whatever you need."
             }
           },
           {
             "@type": "Question",
-            "name": "Apa keunggulan VPS murah Masdika dibanding provider lain?",
+            "name": "Do I get full root access and VNC?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Meskipun harganya murah dan terjangkau, VPS Masdika menggunakan virtualisasi KVM murni tanpa overselling, prosesor enterprise Intel Xeon, proteksi Anti-DDoS otomatis, akses full root SSH, dan web console VNC."
+              "text": "Absolutely. You get full root access via SSH, plus an out-of-band VNC Console directly in your dashboard, giving you total control to configure the OS exactly to your requirements."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I expose my applications online with VPS NAT?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Since the VPS NAT does not come with a dedicated public IP by default, you can easily use Cloudflare Tunnel (cloudflared) to securely expose your web services and applications to the internet without needing port forwarding."
             }
           }
         ]

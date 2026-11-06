@@ -77,24 +77,12 @@ const REPEATED_OPERATING_SYSTEMS = [
 
 const VPS_FAQS = [
   {
-    q: "Apakah Masdika menyediakan Cloud VPS murah di Indonesia?",
-    a: "Ya! Masdika menyediakan layanan Cloud VPS murah Indonesia berkualitas enterprise dengan sistem pembayaran hemat Pay-As-You-Go per jam, penyimpanan cepat Enterprise SSD, dan routing lokal IIX latensi di bawah 20ms."
-  },
-  {
-    q: "Berapa harga sewa Cloud VPS murah di Masdika?",
-    a: "Sewa VPS di Masdika dihitung transparan secara per jam (pay-as-you-go) mulai dari Rp 100/jam untuk vCPU, Rp 50/jam untuk RAM, dan Rp 15/jam untuk Enterprise SSD. Anda hanya membayar apa yang Anda gunakan tanpa biaya kontrak bulanan yang mahal."
-  },
-  {
-    q: "Apakah ada minimal deposit saldo untuk mulai sewa VPS murah?",
-    a: "Tidak ada komitmen besar. Anda bisa mulai membuat instance VPS hanya dengan mengisi saldo deposit minimal mulai Rp 10.000 melalui QRIS atau transfer bank instan otomatis."
-  },
-  {
     q: "Why is the Sidoarjo datacenter important?",
     a: "Having our servers locally in Sidoarjo, East Java guarantees ultra-low latency (under 20ms) across Indonesia, ensuring much faster response times compared to routing traffic to Singapore or the US."
   },
   {
-    q: "Should I choose SSD or HDD?",
-    a: "Select SSD if you are running databases, high-traffic websites, or applications requiring fast I/O. Opt for HDD if you need massive storage space for backups, file hosting, or archives at a lower cost."
+    q: "Should I choose Enterprise SSD or SAS HDD?",
+    a: "Select Enterprise SSD if you are running databases, high-traffic websites, or applications requiring fast I/O. Opt for SAS HDD if you need massive storage space for backups, file hosting, or archives at a lower cost."
   },
   {
     q: "What kind of applications can I run?",
@@ -285,8 +273,8 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
-                  CLOUD VPS MURAH INDONESIA • HIGH-PERFORMANCE KVM
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
+                  HIGH-PERFORMANCE KVM COMPUTE
                 </Badge>
               </div>
 
@@ -300,7 +288,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
 
               {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy scalable, lightning-fast Cloud VPS murah Indonesia berbasis KVM dalam hitungan detik. Menggunakan Enterprise SSD &amp; SAS HDD, sistem fleksibel hourly pay-as-you-go, dan latensi lokal di bawah 20ms.
+                Deploy scalable, lightning-fast KVM cloud instances in seconds. Powered by Enterprise SSD &amp; SAS HDD storage, flexible hourly pay-as-you-go billing, and under 20ms latency across Indonesia.
               </p>
 
               {/* Action Buttons (size="lg" sama persis Home Page) */}
