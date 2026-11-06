@@ -1007,7 +1007,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </div>
                     </div>
 
-                    {/* Note: Alokasi IP publik harus open tiket setelah VPS aktif */}
+                    {/* Note: Public IP allocation requires opening a support ticket after VPS activation */}
                     <div className={cn(
                       "p-2.5 rounded-lg border flex items-start gap-2 text-[11px] leading-relaxed transition-colors",
                       isDark 
@@ -1016,7 +1016,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     )}>
                       <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" role="presentation" aria-hidden="true" />
                       <span>
-                        <strong className="font-semibold text-amber-700 dark:text-amber-300">Catatan:</strong> Setelah VPS aktif, untuk alokasi IP publik harus melakukan <strong className="font-semibold text-amber-700 dark:text-amber-300">open tiket</strong> bantuan ke tim support.
+                        <strong className="font-semibold text-amber-700 dark:text-amber-300">Note:</strong> Once your VPS is active, please <strong className="font-semibold text-amber-700 dark:text-amber-300">open a support ticket</strong> to request public IP allocation.
                       </span>
                     </div>
                   </div>
