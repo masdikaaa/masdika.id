@@ -1006,6 +1006,19 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         +{formatRupiah(ipv4Count * (pricing.ipv4 || 0))}/hr <span className={cn("font-normal font-sans block sm:inline", isDark ? "text-zinc-500" : "text-slate-500")}>(~{formatRupiah(ipv4Count * (pricing.ipv4 || 0) * 720)}/mo)</span>
                       </div>
                     </div>
+
+                    {/* Note: Alokasi IP publik harus open tiket setelah VPS aktif */}
+                    <div className={cn(
+                      "p-2.5 rounded-lg border flex items-start gap-2 text-[11px] leading-relaxed transition-colors",
+                      isDark 
+                        ? "bg-amber-500/[0.08] border-amber-500/25 text-amber-200/90" 
+                        : "bg-amber-50/90 border-amber-200 text-amber-950 font-medium"
+                    )}>
+                      <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" role="presentation" aria-hidden="true" />
+                      <span>
+                        <strong className="font-semibold text-amber-700 dark:text-amber-300">Catatan:</strong> Setelah VPS aktif, untuk alokasi IP publik harus melakukan <strong className="font-semibold text-amber-700 dark:text-amber-300">open tiket</strong> bantuan ke tim support.
+                      </span>
+                    </div>
                   </div>
                 )}
 
