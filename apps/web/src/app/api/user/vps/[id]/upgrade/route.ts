@@ -113,8 +113,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       additionalStorageRate += addedBandwidthHourly;
     }
     if (safeAddIpv4 > 0) {
-      additionalHourlyRate += safeAddIpv4 * (pricing.ipv4 || 0);
-      additionalStorageRate += safeAddIpv4 * (pricing.ipv4 || 0);
+      if (safeAddIpv4 > 8) {
+        return NextResponse.json({ error: "Maksimal penambahan 8 IP publik dalam satu kali upgrade." }, { status: 400 });
+      }
+      const existingIpsCount = await prisma.vpsIpAssignment.count({ where: { vpsId: vps.id } });
+      if (existingIpsCount + safeAddIpv4 > 10) {
+        return NextResponse.json({ error: "Total alamat IP pada satu VPS tidak boleh melebihi 10." }, { status: 400 });
+      }
+      const ipv4Pool = await prisma.ipPool.findFirst({ where: { version: 4, type: 'PUBLIC' } });
+      if (!ipv4Pool) {
+        return NextResponse.json({ error: "Pool IP Publik IPv4 belum tersedia di datacenter." }, { status: 400 });
+      }
+
+      // Active VPS IPv4 upgrade pricing: Rp 50.000 / IP / month (konsisten dengan upgrade CPU Rp 50.000 / Core / month)
+      const addedIpv4Monthly = safeAddIpv4 * 50000;
+      const addedIpv4Hourly = Math.ceil(addedIpv4Monthly / 730);
+      additionalHourlyRate += addedIpv4Hourly;
+      additionalStorageRate += addedIpv4Hourly;
     }
     if (safeAddIpv6 > 0) {
       additionalHourlyRate += safeAddIpv6 * (pricing.ipv6 || 0);

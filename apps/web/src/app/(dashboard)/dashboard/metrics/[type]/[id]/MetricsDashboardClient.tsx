@@ -53,17 +53,20 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
     if (!Array.isArray(rawData)) return [];
 
     return rawData.map(point => {
-      const date = new Date(point.time * 1000);
+      const timeMs = point.time < 1e11 ? point.time * 1000 : point.time;
+      const date = new Date(timeMs);
+      const cpuVal = point.cpu !== undefined ? (point.cpu <= 1 && point.cpu > 0 ? (point.cpu * 100).toFixed(2) : Number(point.cpu).toFixed(2)) : "0";
+      const memVal = point.memory !== undefined ? Number(point.memory).toFixed(2) : (point.maxmem && point.mem ? ((point.mem / point.maxmem) * 100).toFixed(2) : "0");
       return {
         time: timeframe === "hour" ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit' }),
-        cpu: point.cpu ? (point.cpu * 100).toFixed(2) : 0,
-        memory: point.maxmem && point.mem ? ((point.mem / point.maxmem) * 100).toFixed(2) : 0,
+        cpu: cpuVal,
+        memory: memVal,
         netin: point.netin ? (point.netin / (1024 * 1024)).toFixed(2) : 0, // MB
         netout: point.netout ? (point.netout / (1024 * 1024)).toFixed(2) : 0, // MB
         diskread: point.diskread ? (point.diskread / (1024 * 1024)).toFixed(2) : 0, // MB
         diskwrite: point.diskwrite ? (point.diskwrite / (1024 * 1024)).toFixed(2) : 0, // MB
       };
-    }).filter(p => p.cpu !== 0 || p.memory !== 0); // Filter out empty initial points
+    }).filter(p => Number(p.cpu) > 0 || Number(p.memory) > 0 || Number(p.netin) > 0 || Number(p.netout) > 0);
   };
 
   useEffect(() => {

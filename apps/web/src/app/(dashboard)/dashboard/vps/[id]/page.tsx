@@ -361,18 +361,32 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         
         let processedData = Array.isArray(data) ? data : (data.data || []);
         
-        // Extract timestamp array and actual data arrays
-        if (!Array.isArray(processedData) && processedData.time) {
-           const times = processedData.time;
-           processedData = times.map((t: any, idx: number) => ({
-             time: t * 1000,
-             cpu: processedData.cpu?.[idx] || 0,
-             mem: processedData.mem?.[idx] || 0,
-             netin: processedData.netin?.[idx] || 0,
-             netout: processedData.netout?.[idx] || 0,
-             diskread: processedData.diskread?.[idx] || 0,
-             diskwrite: processedData.diskwrite?.[idx] || 0,
-           }));
+        if (Array.isArray(processedData)) {
+          processedData = processedData.map((pt: any) => {
+            const timeMs = pt.time < 1e11 ? pt.time * 1000 : Number(pt.time);
+            const cpuVal = pt.cpu !== undefined ? (pt.cpu <= 1 && pt.cpu > 0 ? Number((pt.cpu * 100).toFixed(2)) : Number(pt.cpu)) : 0;
+            const memVal = pt.memory !== undefined ? Number(pt.memory) : (pt.mem !== undefined ? Number(pt.mem) : 0);
+            const netInVal = pt.netin !== undefined ? Number(pt.netin) : (pt.netIn !== undefined ? Number(pt.netIn) : 0);
+            const netOutVal = pt.netout !== undefined ? Number(pt.netout) : (pt.netOut !== undefined ? Number(pt.netOut) : 0);
+            const diskReadVal = pt.diskread !== undefined ? Number(pt.diskread) : (pt.diskRead !== undefined ? Number(pt.diskRead) : 0);
+            const diskWriteVal = pt.diskwrite !== undefined ? Number(pt.diskwrite) : (pt.diskWrite !== undefined ? Number(pt.diskWrite) : 0);
+
+            return {
+              ...pt,
+              time: timeMs,
+              cpu: cpuVal,
+              mem: memVal,
+              memory: memVal,
+              netin: netInVal,
+              netout: netOutVal,
+              netIn: netInVal,
+              netOut: netOutVal,
+              diskread: diskReadVal,
+              diskwrite: diskWriteVal,
+              diskRead: diskReadVal,
+              diskWrite: diskWriteVal,
+            };
+          });
         }
         
         setMetrics(processedData);
@@ -780,13 +794,17 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     const backupMonthlyAdded = additionalBackup * bMonthlyRate;
     const backupHourlyAdded = additionalBackup * bRatePerHour;
 
+    // Active VPS IPv4 upgrade pricing: Rp 50.000 / IP / month (konsisten dengan upgrade CPU Rp 50.000 / Core / month)
+    const ipv4MonthlyAdded = addIpv4Count * 50000;
+    const ipv4HourlyAdded = Math.ceil(ipv4MonthlyAdded / 730);
+
     let addRate = 0;
     addRate += cpuHourlyAdded;
     addRate += ramHourlyAdded;
     addRate += diskHourlyAdded;
     addRate += bandwidthHourlyAdded;
     addRate += backupHourlyAdded;
-    addRate += addIpv4Count * (pricing.ipv4 || 0);
+    addRate += ipv4HourlyAdded;
     addRate += addIpv6Count * (pricing.ipv6 || 0);
 
     const currentTime = nowTime || 1700000000000;
@@ -808,6 +826,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       additionalCpuHourly: cpuHourlyAdded,
       additionalRamMonthly: ramMonthlyAdded,
       additionalRamHourly: ramHourlyAdded,
+      additionalIpv4Monthly: ipv4MonthlyAdded,
+      additionalIpv4Hourly: ipv4HourlyAdded,
       additionalBandwidthMonthly: bandwidthMonthlyAdded,
       additionalBandwidthHourly: bandwidthHourlyAdded,
       additionalBackupMonthly: backupMonthlyAdded,
@@ -1358,17 +1378,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
   // Format for Recharts Tooltip
   const formatTime = (tickItem: any) => {
-    const d = new Date(tickItem);
+    if (!tickItem) return '';
+    const ts = typeof tickItem === 'number' && tickItem < 1e11 ? tickItem * 1000 : Number(tickItem);
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
     return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
   };
 
   const formatBytesPerSecond = (bytes: number) => {
-    if (bytes === 0) return '0 B/s';
-    if (bytes < 0) return '0 B/s';
+    if (!bytes || bytes <= 0) return '0 B/s';
     const k = 1024;
     const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (i < 0) return '0 B/s';
+    const safeIdx = Math.min(i, sizes.length - 1);
+    return parseFloat((bytes / Math.pow(k, safeIdx)).toFixed(1)) + ' ' + sizes[safeIdx];
   };
 
   return (
@@ -1716,13 +1740,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               stroke="#334155"
                               tick={{ fill: '#64748b', fontSize: 11 }}
                               domain={[0, 100]}
+                              tickFormatter={(v) => `${v}%`}
                             />
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <Tooltip
                               contentStyle={{ backgroundColor: '#0a0a0c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                               labelFormatter={formatTime}
+                              formatter={(value: any) => [`${Number(value || 0).toFixed(1)}%`, 'CPU Usage']}
                             />
-                            <Area type="monotone" dataKey="cpu" stroke="#22d3ee" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" />
+                            <Area type="monotone" dataKey="cpu" stroke="#22d3ee" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" name="CPU Usage" />
                           </AreaChart>
                         </ResponsiveContainer>
                       ) : null}
@@ -1777,10 +1803,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <Tooltip
                               contentStyle={{ backgroundColor: '#0a0a0c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                               labelFormatter={formatTime}
-                              formatter={(value: any, name: any) => [formatBytesPerSecond(value), name === 'netIn' ? 'Download' : 'Upload']}
+                              formatter={(value: any, name: any) => [formatBytesPerSecond(Number(value) || 0), name === 'netin' || name === 'netIn' || name === 'Download' ? 'Download' : 'Upload']}
                             />
-                            <Area type="monotone" dataKey="netIn" stroke="#34d399" strokeWidth={2} fillOpacity={1} fill="url(#colorNetIn)" />
-                            <Area type="monotone" dataKey="netOut" stroke="#818cf8" strokeWidth={2} fillOpacity={1} fill="url(#colorNetOut)" />
+                            <Area type="monotone" dataKey="netin" stroke="#34d399" strokeWidth={2} fillOpacity={1} fill="url(#colorNetIn)" name="Download" />
+                            <Area type="monotone" dataKey="netout" stroke="#818cf8" strokeWidth={2} fillOpacity={1} fill="url(#colorNetOut)" name="Upload" />
                           </AreaChart>
                         </ResponsiveContainer>
                       ) : null}
@@ -1845,7 +1871,19 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   <div className={cn("border rounded-2xl p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <h3 className={cn("font-bold mb-6", isDark ? "text-white" : "text-slate-950")}>System Statistics</h3>
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>System Statistics</h3>
+                      <div className="flex gap-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400"></div>
+                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>CPU Usage (%)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>RAM Usage (%)</span>
+                        </div>
+                      </div>
+                    </div>
                     <div className="h-[250px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
                         <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
@@ -1853,16 +1891,25 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
                           <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
                             <defs>
-                              <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient id="colorSysCpu" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
                                 <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
                               </linearGradient>
+                              <linearGradient id="colorSysMem" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                              </linearGradient>
                             </defs>
                             <XAxis dataKey="time" tickFormatter={formatTime} stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} minTickGap={30} />
-                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} domain={[0, 100]} />
+                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0a0a0c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '12px' }} labelFormatter={formatTime} />
-                            <Area type="monotone" dataKey="cpu" stroke="#22d3ee" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" />
+                            <Tooltip
+                              contentStyle={{ backgroundColor: '#0a0a0c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                              labelFormatter={formatTime}
+                              formatter={(value: any, name: any) => [`${Number(value || 0).toFixed(1)}%`, name === 'cpu' || name === 'CPU Usage' ? 'CPU Usage' : 'RAM Usage']}
+                            />
+                            <Area type="monotone" dataKey="cpu" stroke="#22d3ee" strokeWidth={2} fillOpacity={1} fill="url(#colorSysCpu)" name="CPU Usage" />
+                            <Area type="monotone" dataKey="memory" stroke="#a855f7" strokeWidth={2} fillOpacity={1} fill="url(#colorSysMem)" name="RAM Usage" />
                           </AreaChart>
                         </ResponsiveContainer>
                       )}
@@ -2574,9 +2621,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           <div>
                             <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Add IPv4 Address</p>
                             <p className={cn("text-xs mt-0.5 font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
-                              {pricing.ipv4
-                                ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(pricing.ipv4 * 730) + " / mo"
-                                : "Contact support"}
+                              {formatRupiah(50000)} / mo
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
@@ -2691,7 +2736,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-800")}>IPv4 (+{addIpv4Count} IP):</span>
                                 <span className={cn("font-mono font-bold shrink-0", isDark ? "text-white" : "text-slate-950")}>
-                                  +{formatRupiah(addIpv4Count * (pricing.ipv4 || 0) * 730)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(addIpv4Count * (pricing.ipv4 || 0))}/hr)</span>
+                                  +{formatRupiah(addIpv4Count * 50000)}/mo <span className={cn("text-[11px] font-normal", isDark ? "text-zinc-400" : "text-slate-600")}>(+{formatRupiah(addIpv4Count * Math.ceil(50000 / 730))}/hr)</span>
                                 </span>
                               </div>
                             )}
