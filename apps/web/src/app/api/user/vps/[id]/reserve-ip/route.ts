@@ -162,7 +162,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             : vps.networkBridge;
 
           const configToSet: any = {};
-          configToSet[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1`;
+          configToSet[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse}`;
           configToSet[`ipconfig${netIndex}`] = `ip=${ipAddress}/${cidrSuffix},gw=${pool?.gateway}`;
 
           console.log(`Attaching net${netIndex} to VMID ${vps.vmid}`);

@@ -354,7 +354,7 @@ export class VpsProvisioningService {
         const speedMbps = vps.bandwidthMbps || 100;
         const rateLimit = speedMbps;
 
-        config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1,rate=${rateLimit}`;
+        config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},rate=${rateLimit}`;
         if (vps.cpuCores > 1) {
           config[`net${netIndex}`] += `,queues=${vps.cpuCores}`;
         }
@@ -368,7 +368,7 @@ export class VpsProvisioningService {
       const speedMbps = vps.bandwidthMbps || 100;
       const rateLimit = speedMbps;
       // VPC ALWAYS uses net1
-      config[`net1`] = `model=virtio,bridge=${vpcConfig.router.proxmoxBridge},tag=${vpcConfig.vlanId},firewall=1,rate=${rateLimit}`;
+      config[`net1`] = `model=virtio,bridge=${vpcConfig.router.proxmoxBridge},tag=${vpcConfig.vlanId},rate=${rateLimit}`;
       if (vps.cpuCores > 1) {
         config[`net1`] += `,queues=${vps.cpuCores}`;
       }
@@ -727,7 +727,7 @@ export class VpsProvisioningService {
             : vps.networkBridge;
 
           const speedMbps = vps.bandwidthMbps || 100;
-          config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1,rate=${speedMbps}`;
+          config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},rate=${speedMbps}`;
           if (vps.cpuCores > 1) {
             config[`net${netIndex}`] += `,queues=${vps.cpuCores}`;
           }
@@ -739,7 +739,7 @@ export class VpsProvisioningService {
       if (vps.vpc) {
         const cidrSuffix = vps.vpc.cidr.split('/')[1] || '24';
         const speedMbps = vps.bandwidthMbps || 100;
-        config[`net1`] = `model=virtio,bridge=${vps.vpc.router.proxmoxBridge},tag=${vps.vpc.vlanId},firewall=1,rate=${speedMbps}`;
+        config[`net1`] = `model=virtio,bridge=${vps.vpc.router.proxmoxBridge},tag=${vps.vpc.vlanId},rate=${speedMbps}`;
         if (vps.cpuCores > 1) {
           config[`net1`] += `,queues=${vps.cpuCores}`;
         }

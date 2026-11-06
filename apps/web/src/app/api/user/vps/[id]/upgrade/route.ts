@@ -244,7 +244,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
                 const nextNetIndex = getNextAvailableNetIndex();
                 const bridgeToUse = pool.type === 'PUBLIC' && server.publicNetworkBridge ? server.publicNetworkBridge : vps.networkBridge;
                 const rateMBs = bandwidthToProxmoxRate(safeBandwidth);
-                networkConfigUpdate[`net${nextNetIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1,rate=${rateMBs}`;
+                networkConfigUpdate[`net${nextNetIndex}`] = `model=virtio,bridge=${bridgeToUse},rate=${rateMBs}`;
                 networkConfigUpdate[`ipconfig${nextNetIndex}`] = `${ipKey}=${ipAddress}/${cidrSuffix}`;
             } catch (e) {
                 console.error(`Failed to provision IP version ${ipVersion} for VPS ${vps.id}`, e);

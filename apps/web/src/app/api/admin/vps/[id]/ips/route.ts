@@ -269,7 +269,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         if (netIndex > 0) {
           // Add a new virtual NIC on the same bridge
           const vmConfig: any = {};
-          vmConfig[`net${netIndex}`] = `virtio,bridge=${bridge},firewall=1`;
+          vmConfig[`net${netIndex}`] = `virtio,bridge=${bridge}`;
           
           // Set Cloud-Init ipconfig for this new interface
           // Secondary IPs don't need a gateway (traffic routes via primary)
@@ -425,7 +425,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
             : bridge;
 
           const vmConfig: any = {};
-          vmConfig[`net${i}`] = `virtio,bridge=${targetBridge},firewall=1`;
+          vmConfig[`net${i}`] = `virtio,bridge=${targetBridge}`;
           if (isIpv6) {
             vmConfig[`ipconfig${i}`] = `ip6=${ra.ipAddress}/${prefix}`;
           } else {

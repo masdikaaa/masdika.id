@@ -151,7 +151,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         ? server.publicNetworkBridge
         : vps.networkBridge;
 
-      config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},firewall=1`;
+      config[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse}`;
       config[`ipconfig${netIndex}`] = `${ipKey}=${assignment.ipAddress}/${cidrSuffix},${gwKey}=${assignment.ipPool.gateway}`;
       netIndex++;
     }

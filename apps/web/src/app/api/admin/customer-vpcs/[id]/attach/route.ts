@@ -108,7 +108,7 @@ export async function POST(
           const cidrSuffix = vpc.cidr.split("/")[1] || "24";
           const speedMbps = vps.bandwidthMbps || 100;
           const config: any = {};
-          config[`net${netIndex}`] = `model=virtio,bridge=${vpc.router.proxmoxBridge},tag=${vpc.vlanId},firewall=1,rate=${speedMbps}`;
+          config[`net${netIndex}`] = `model=virtio,bridge=${vpc.router.proxmoxBridge},tag=${vpc.vlanId},rate=${speedMbps}`;
 
           if (!vps.assignedIps || vps.assignedIps.length === 0) {
             config[`ipconfig${netIndex}`] = `ip=${allocatedVpcIp}/${cidrSuffix},gw=${vpc.gateway}`;
