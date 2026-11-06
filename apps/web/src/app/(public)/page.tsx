@@ -10,13 +10,13 @@ export const fetchCache = 'force-no-store';
 
 export const metadata: Metadata = {
   title: "Masdika | Cloud & DevOps Engineer",
-  description: "Deploy scalable, lightning-fast Cloud VPS & Managed Kubernetes with Enterprise SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+  description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
   alternates: {
     canonical: "https://www.masdika.id",
   },
   openGraph: {
     title: "Masdika | Cloud & DevOps Engineer",
-    description: "Deploy scalable, lightning-fast Cloud VPS & Managed Kubernetes with Enterprise SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+    description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
     url: "https://www.masdika.id",
     siteName: "Masdika",
     images: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Masdika | Cloud & DevOps Engineer",
-    description: "Deploy scalable, lightning-fast Cloud VPS & Managed Kubernetes with Enterprise SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+    description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
     images: ["/og-image.webp"],
   },
 };
