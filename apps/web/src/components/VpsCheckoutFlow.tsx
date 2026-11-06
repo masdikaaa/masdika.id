@@ -1009,15 +1009,15 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
                     {/* Note: Public IP allocation requires opening a support ticket after VPS activation */}
                     <div className={cn(
-                      "p-2.5 rounded-lg border flex items-start gap-2 text-[11px] leading-relaxed transition-colors",
+                      "p-3 rounded-xl border flex items-start gap-2.5 text-[11px] sm:text-xs leading-relaxed transition-all",
                       isDark 
-                        ? "bg-amber-500/[0.08] border-amber-500/25 text-amber-200/90" 
-                        : "bg-amber-50/90 border-amber-200 text-amber-950 font-medium"
+                        ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" 
+                        : "bg-cyan-50 border-cyan-200 text-cyan-900 shadow-2xs"
                     )}>
-                      <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" role="presentation" aria-hidden="true" />
-                      <span>
-                        <strong className="font-semibold text-amber-700 dark:text-amber-300">Note:</strong> Once your VPS is active, please <strong className="font-semibold text-amber-700 dark:text-amber-300">open a support ticket</strong> to request public IP allocation.
-                      </span>
+                      <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} role="presentation" aria-hidden="true" />
+                      <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-700")}>
+                        <strong className={cn("font-semibold mr-1.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Note:</strong> After your VPS is active, please open a support ticket to request a Public IP allocation.
+                      </p>
                     </div>
                   </div>
                 )}
